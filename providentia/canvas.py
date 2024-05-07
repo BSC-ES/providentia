@@ -16,6 +16,7 @@ from matplotlib.offsetbox import AnchoredOffsetbox
 from matplotlib.path import Path
 import matplotlib.style as mplstyle
 import numpy as np
+from packaging.version import Version
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtWidgets 
@@ -638,7 +639,7 @@ class MPLCanvas(FigureCanvas):
             for collection in self.plot_axes['map'].collections:
                 if isinstance(collection, matplotlib.collections.PathCollection):
                     
-                    if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.4:
+                    if Version(matplotlib.__version__) < Version("3.4"):
                         opacities = collection.get_facecolor()
                         # set alpha of all stations (initally assuming zero stations are selected)
                         opacities[:, -1] = self.plot_characteristics['map']['marker_zero_stations_selected']['alpha']
@@ -2084,12 +2085,15 @@ class MPLCanvas(FigureCanvas):
         self.timeseries_smooth_linewidth_sl.setMaximum(int(self.plot_characteristics['timeseries']['smooth']['format']['linewidth']*100))
         self.timeseries_smooth_linewidth_sl.setValue(int(self.plot_characteristics['timeseries']['smooth']['format']['linewidth']*10))
         self.timeseries_smooth_window_sl = self.timeseries_menu.sliders['smooth_window_sl']
+        self.timeseries_smooth_min_points_sl = self.timeseries_menu.sliders['smooth_min_points_sl']
+        self.timeseries_smooth_min_points_sl.setValue(int(self.plot_characteristics['timeseries']['smooth']['min_points_percentage']))
 
         # get timeseries interactive dictionary
         self.interactive_elements['timeseries'] = {'hidden': True,
                                                    'markersize_sl': [self.timeseries_markersize_sl],
                                                    'linewidth_sl': [self.timeseries_smooth_linewidth_sl],
-                                                   'smooth_window_sl': [self.timeseries_smooth_window_sl]
+                                                   'smooth_window_sl': [self.timeseries_smooth_window_sl],
+                                                   'smooth_min_points_sl': [self.timeseries_smooth_min_points_sl]
                                                    }
         
         # PERIODIC PLOT SETTINGS MENU #
@@ -2352,11 +2356,23 @@ class MPLCanvas(FigureCanvas):
             smooth_window = element.value()
             break
 
-        self.update_smooth_window(self.plot_axes[plot_type], plot_type, smooth_window, 
-                                  self.current_plot_options[plot_type])
+        self.update_smooth_window(plot_type, smooth_window)
 
         return None
 
+    def update_smooth_min_points_func(self):
+        
+        # get source
+        event_source = self.sender()
+        plot_type = event_source.objectName().split('_smooth')[0]
+        for element in self.interactive_elements[plot_type]['smooth_min_points_sl']:
+            smooth_min_points = element.value()
+            break
+
+        self.update_smooth_min_points(plot_type, smooth_min_points)
+
+        return None
+    
     def update_plot_option(self):
         """ Function to handle the update of the plot options. """
 
@@ -2982,7 +2998,7 @@ class MPLCanvas(FigureCanvas):
                 if len(self.absolute_selected_station_inds) == 0:
                     for collection in self.plot_axes['map'].collections:
                         if isinstance(collection, matplotlib.collections.PathCollection):
-                            if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.4:
+                            if Version(matplotlib.__version__) < Version("3.4"):
                                 opacities = collection.get_facecolor()
                                 opacities[:, -1] = opacity
                                 collection.set_facecolor(opacities)
@@ -2996,7 +3012,7 @@ class MPLCanvas(FigureCanvas):
                 elif (len(self.absolute_non_selected_station_inds) > 0) & (len(self.absolute_selected_station_inds) > 0):
                     for collection in self.plot_axes['map'].collections:
                         if isinstance(collection, matplotlib.collections.PathCollection):
-                            if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.4:
+                            if Version(matplotlib.__version__) < Version("3.4"):
                                 opacities = collection.get_facecolor()
                                 opacities[self.absolute_non_selected_station_inds, -1] = opacity
                                 collection.set_facecolor(opacities)
@@ -3019,7 +3035,7 @@ class MPLCanvas(FigureCanvas):
                 if len(self.absolute_selected_station_inds) > 0:
                     for collection in self.plot_axes['map'].collections:
                         if isinstance(collection, matplotlib.collections.PathCollection):
-                            if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.4:
+                            if Version(matplotlib.__version__) < Version("3.4"):
                                 opacities = collection.get_facecolor()
                                 opacities[self.absolute_selected_station_inds, -1] = opacity
                                 collection.set_facecolor(opacities)
@@ -3071,7 +3087,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
-    def update_smooth_window(self, ax, plot_type, smooth_window, plot_options):
+    def update_smooth_window(self, plot_type, smooth_window):
 
         # update characteristics per plot type
         self.plot_characteristics[plot_type]['smooth']['window'] = smooth_window
@@ -3094,6 +3110,31 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    def update_smooth_min_points(self, plot_type, smooth_min_points):
+
+        # update characteristics per plot type
+        self.plot_characteristics[plot_type]['smooth']['min_points_percentage'] = smooth_min_points
+
+        # get window to check if we need to redraw
+        window = self.timeseries_smooth_window_sl.value()
+
+        # get index of smooth in plot options
+        all_plot_options = self.plot_characteristics[plot_type]['plot_options']
+        index = all_plot_options.index('smooth')
+
+        # remove smooth plot option
+        self.timeseries_options.model().item(index).setCheckState(QtCore.Qt.Unchecked)
+
+        if window > 0:
+
+            # add smooth plot option
+            self.timeseries_options.model().item(index).setCheckState(QtCore.Qt.Checked)
+
+            # draw changes
+            self.figure.canvas.draw_idle()
+        
+        return None
+    
     def update_violin_widths(self, ax, plot_type, width):
         """ Update violin widths for violin plots. """
         

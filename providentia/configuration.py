@@ -12,6 +12,7 @@ import sys
 import yaml
 
 import numpy as np
+from packaging.version import Version
 import pandas as pd
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
@@ -615,7 +616,7 @@ class ProvConfiguration:
             self.read_instance.active_dashboard_plots = default
         # TODO: For Taylor diagrams, remove this piece of code when we stop using Matplotlib 3.3
         else:
-            if float(".".join(matplotlib. __version__.split(".")[:2])) < 3.8:
+            if Version(matplotlib.__version__) < Version("3.8"):
                 if 'taylor' in self.read_instance.active_dashboard_plots:
                     error = 'It is not possible to create Taylor diagrams yet, please remove.'
                     sys.exit(error)
@@ -813,7 +814,7 @@ def read_conf(fpath=None):
                     all_sections.append(line.strip())
 
     # get repeated elements
-    repetition_counts = {section:subsections.count(section) for section in subsections}
+    repetition_counts = {section:subsections_modified.count(section) for section in subsections_modified}
     for section, counts in repetition_counts.items():
         if counts > 1:
             repeated_subsections.append(section)
@@ -877,8 +878,10 @@ def read_conf(fpath=None):
                             key = line_strip.split('=', 1)[0].strip()
                             value = line_strip.split('=', 1)[1].strip()
                             config[section_modified][key] = value
-                        # lines after adding line breaks
-                        else:
+                        
+                        # lines after adding line breaks for long values
+                        # make sure it is not a section name
+                        elif ('=' not in line_strip) and (line_strip not in all_sections):
                             # get last key and add current value to values from last key
                             last_key = list(config[section_modified].keys())[-1]
                             value = config[section_modified][last_key] + line_strip.strip()
