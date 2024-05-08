@@ -92,6 +92,12 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--experiments",
                                      dest="experiments",
                                      help="experiments to read")
+            self.parser.add_argument("--ensemble_options",
+                                     dest="ensemble_options",
+                                     help="ensemble options of the experiment")
+            self.parser.add_argument("--domain",
+                                     dest="domain",
+                                     help="domain of the experiment")
             self.parser.add_argument("--temporal_colocation",
                                      dest="temporal_colocation",
                                      help="activate temporal colocation betwen observations and experiments")
