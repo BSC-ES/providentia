@@ -229,7 +229,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
         
         elif $interpolation; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
-            outputString=$(eval "srun ${account_option} ${queue_option} ${python_command}")
+            outputString=$(eval "srun -J ${jobname} ${account_option} ${queue_option} ${python_command}")
             jobid=$(eval "sbatch ${account_option} ${queue_option} ${script_dir}/providentia/interpolation/experiment_interpolation_submit_mn5.sh $outputString | awk '{print \$4}'")
             echo "Check submission info in 'providentia/interpolation/management_logs/$jobid.out'"
 
@@ -274,7 +274,7 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
     elif $interpolation; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
         eval "${load_command}"
-        outputString=$(eval "srun ${python_command}")
+        outputString=$(eval "srun -J ${jobname} ${python_command}")
         jobid=$(eval "sbatch ${script_dir}/providentia/interpolation/experiment_interpolation_submit.sh $outputString | awk '{print \$4}'")
         echo "Check submission info in 'providentia/interpolation/management_logs/$jobid.out'"
 
