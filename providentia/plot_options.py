@@ -175,10 +175,10 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
 
         # make smooth line
         min_points_percentage = plot_characteristics['smooth']['min_points_percentage'] / 100
-        min_periods = int(round(plot_characteristics['smooth']['window'] * min_points_percentage))
+        min_periods = int(round(plot_characteristics['smooth']['window'] * (min_points_percentage / 2)))
         smooth_line_data = ts.rolling(plot_characteristics['smooth']['window'], 
                                       min_periods=min_periods, 
-                                      center=True).mean()
+                                      center=True, closed="both").mean()
         
         smooth_line = relevant_axis.plot(smooth_line_data,
                                          color=read_instance.plotting_params[data_label]['colour'],
