@@ -33,6 +33,8 @@
     "end_date": null,
     "observations_data_label": "observations",
     "experiments": {},
+    "domain" = null,
+    "ensemble_options" = null,
     "qa": null,
     "flags": null,
     "temporal_colocation": false,
