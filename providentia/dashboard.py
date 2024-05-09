@@ -98,16 +98,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     
                     if len(all_sections) == 1:
                         okpressed = False
-                        selected_section = list(all_sections)[0]
+                        self.section = list(all_sections)[0]
                     else:
                         title = 'Sections'
                         msg = 'Select section to load'
                         dialog = InputDialog(self, title, msg, all_sections)
-                        selected_section, okpressed = dialog.selected_option, dialog.okpressed
+                        self.section, okpressed = dialog.selected_option, dialog.okpressed
 
                     if okpressed or (len(all_sections) == 1):
                         self.from_conf = True
-                        self.current_config = self.sub_opts[selected_section]
+                        self.current_config = self.sub_opts[self.section]
             
             else:
                 # have config, but path does not exist
@@ -539,7 +539,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # initialise multispecies tab
         self.multispecies_initialisation = True
 
-        # launch with configuriton file?
+        # launch with configuration file?
         if self.from_conf: 
             
             # read
