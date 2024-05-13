@@ -10,7 +10,6 @@ import yaml
 import matplotlib
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.gridspec as gridspec
-from matplotlib.projections import PolarAxes
 import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
@@ -1449,27 +1448,6 @@ class ProvidentiaOffline:
                 else:
                     axis_title = relevant_axis.get_title()
 
-                # axis title is empty?
-                if axis_title == '':
-                    if plotting_paradigm == 'summary':
-                        if self.n_stations == 1:
-                            axis_title_label = '{} ({} station)'.format(self.subsection, self.n_stations)
-                        else:
-                            axis_title_label = '{} ({} stations)'.format(self.subsection, self.n_stations)
-                    elif plotting_paradigm == 'station':
-                        if base_plot_type == 'metadata':
-                            axis_title_label = ''
-                        else:
-                            axis_title_label = '{}, {} ({:.{}f}, {:.{}f})'.format(self.current_station_reference,
-                                                                                  self.current_station_name, 
-                                                                                  self.current_lon,
-                                                                                  self.plot_characteristics[plot_type]['round_decimal_places']['title'],
-                                                                                  self.current_lat,
-                                                                                  self.plot_characteristics[plot_type]['round_decimal_places']['title'])
-                            
-                    # set title
-                    set_axis_title(self, relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
-
                 # set xlabel and ylabel (only if not previously set)
                 if isinstance(relevant_axis, dict):
                     for relevant_temporal_resolution, sub_ax in relevant_axis.items():
@@ -1537,7 +1515,30 @@ class ProvidentiaOffline:
                 else:
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
                          plot_options) 
-                
+
+                # axis title is empty?
+                # moved after plots have been created because in the case of the Taylor diagram 
+                # the axis ghelper needs to be updated to be able to add the axis title
+                if axis_title == '':
+                    if plotting_paradigm == 'summary':
+                        if self.n_stations == 1:
+                            axis_title_label = '{} ({} station)'.format(self.subsection, self.n_stations)
+                        else:
+                            axis_title_label = '{} ({} stations)'.format(self.subsection, self.n_stations)
+                    elif plotting_paradigm == 'station':
+                        if base_plot_type == 'metadata':
+                            axis_title_label = ''
+                        else:
+                            axis_title_label = '{}, {} ({:.{}f}, {:.{}f})'.format(self.current_station_reference,
+                                                                                  self.current_station_name, 
+                                                                                  self.current_lon,
+                                                                                  self.plot_characteristics[plot_type]['round_decimal_places']['title'],
+                                                                                  self.current_lat,
+                                                                                  self.plot_characteristics[plot_type]['round_decimal_places']['title'])
+                            
+                    # set title
+                    set_axis_title(self, relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
+
                 # save plot information for later formatting
                 self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].extend(data_labels)
                 plot_index = [relevant_page, page_ind]
