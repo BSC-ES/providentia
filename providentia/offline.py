@@ -135,7 +135,7 @@ class ProvidentiaOffline:
             provconf = ProvConfiguration(self, **self.commandline_arguments)
 
             # update self with section variables
-            for k, val in self.section_opts.items():
+            for k, val in sorted(self.section_opts.items()):
                 setattr(self, k, provconf.parse_parameter(k, val))
 
             # check for self defined plot characteristics file
