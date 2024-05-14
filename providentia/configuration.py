@@ -272,6 +272,23 @@ class ProvConfiguration:
             else:
                 return []
 
+        elif key == "domain":
+            # parse ensemble_options
+
+            if value != None:
+                # split list, if only one domain, then creates list of one element
+                domains = [dom.strip() for dom in value.split(",")]      
+                return domains
+
+        elif key == "ensemble_options":
+            # parse ensemble_options
+
+            if value != None:
+                # split list, if only one ensemble_option, then creates list of one element
+                # if it is a number, then make it 3 digits, if not it stays as it is
+                ensemble_opts = [opt.strip().zfill(3) for opt in str(value).split(",")]  
+                return ensemble_opts
+            
         elif key == 'experiments':
             # parse experiments
 
@@ -289,7 +306,48 @@ class ProvConfiguration:
                     else: 
                         exps = [exp.strip() for exp in value.split(",")]
                         exps_legend = copy.deepcopy(exps)
-                    return {exp:exp_legend for exp,exp_legend in zip(exps,exps_legend)}
+                # list of experiments with a dash 
+                dash_list = ["-" in exp for exp in exps]
+                
+                # providentia way
+                if all(dash_list):
+                    # if user also tries to pass domain or ensemble_options when providentia way is set, error
+                    if self.read_instance.domain or self.read_instance.ensemble_options:
+                        msg = "It is not possible to define the experiment with '-' while defining domain or ensemble_options."
+                        sys.exit(msg)
+                
+                # providentia and interpolation way mixed, raise error
+                elif any(dash_list):
+                    msg = "It is not possible to define different experiments with and without the '-'."
+                    sys.exit(msg)
+
+                # interpolation way
+                else:
+                    ending = []
+
+                    # if domain and ensemble_options passed in config file, then create possible combinations
+                    if self.read_instance.domain != None and self.read_instance.ensemble_options != None:
+                        for dom in self.read_instance.domain:
+                            for opt in self.read_instance.ensemble_options:
+                                ending.append(f"{dom}-{opt}")
+                    # if only domain or only ensemble_options, then the combination list is the current field list
+                    elif self.read_instance.domain != None or self.read_instance.ensemble_options != None:
+                        ending = self.read_instance.domain if self.read_instance.domain else self.read_instance.ensemble_options
+
+                    # get experiment combinations, if possible
+                    combinations = [f"{exp}-{end}" for exp in exps for end in ending]
+                    exps = combinations if combinations else exps
+                    
+                    # if only one possible combination then you can get the alias
+                    if len(exps):
+                        pass
+
+
+                # print(self.read_instance.domain,self.read_instance.ensemble_options)
+                # print(exps)
+                # print({exp:exp_legend for exp,exp_legend in zip(exps,exps_legend)})
+                # 0/0 
+                return {exp:exp_legend for exp,exp_legend in zip(exps,exps_legend)}
 
         elif key == 'map_extent':
             # parse map extent

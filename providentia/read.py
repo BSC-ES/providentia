@@ -665,7 +665,7 @@ class DataReader:
                 elif 'station_name' in ncdf_root.variables:
                     station_reference_var = 'station_name'
                 else: 
-                    error = 'Error: {} cannot be read because it has no station_name.'.format(relevant_file)
+                    error = 'Error: {} cannot be read because it has no station_name.'.format(relevant_files[0])
                     sys.exit(error)
                 self.read_instance.nonghost_metadata_vars_to_read.append('station_reference') 
 
