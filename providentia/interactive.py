@@ -958,7 +958,7 @@ class Interactive:
 
         # update self with section variables (if not overwritten by kwargs)
         self.section_opts = self.sub_opts[self.section]
-        for k, val in self.section_opts.items():
+        for k, val in sorted(self.section_opts.items()):
             if k not in kwargs:
                 setattr(self, k, provconf.parse_parameter(k, val))
 
