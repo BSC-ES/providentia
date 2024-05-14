@@ -10,7 +10,6 @@ import yaml
 import matplotlib
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.gridspec as gridspec
-from matplotlib.projections import PolarAxes
 import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
@@ -103,12 +102,28 @@ class ProvidentiaOffline:
         # initialise DataReader class
         self.datareader = DataReader(self)
 
+        # if some filename has not been provided through the configuration file use default names
+        if len(self.filenames) != len(self.parent_section_names):
+            msg = 'Report filename/s (report_filename) has not been defined in '
+            msg += 'configuration file for one or more sections.'
+            print(msg)
+            if len(self.parent_section_names) == 1:
+                self.filenames.append(self.report_filename)
+            else:
+                self.filenames = []
+                for i, parent_section in enumerate(self.parent_section_names):
+                    print(parent_section, self.sub_opts[parent_section].keys())
+                    if 'report_filename' in self.sub_opts[parent_section].keys():
+                        self.filenames.append(self.sub_opts[parent_section]['report_filename'])
+                    else:
+                        # add a number next to the filename to avoid overwriting
+                        self.filenames.append(f'{self.report_filename}_{i}')
+
         # iterate through configuration sections
         for section_ind, (filename, section) in enumerate(zip(self.filenames, self.parent_section_names)):
             print('Starting to create PDF for {} section'.format(section))
 
             # update for new section parameters
-            self.report_filename = filename
             self.section = section
             self.section_opts = self.sub_opts[self.section]
 
@@ -222,7 +237,7 @@ class ProvidentiaOffline:
             self.plot_dictionary = {}
 
             # start making PDF
-            self.start_pdf()
+            self.start_pdf(filename)
 
             # remove section variables from memory 
             for k in self.section_opts:
@@ -231,20 +246,20 @@ class ProvidentiaOffline:
                 except:
                     pass
 
-    def start_pdf(self):
+    def start_pdf(self, filename):
         """ Create PDF document where plots will be stored. """
-
+        
         # get path where reports will be saved
-        if '/' in self.report_filename:
-            if os.path.isdir(os.path.dirname(self.report_filename)):
-                reports_path = self.report_filename
+        if '/' in filename:
+            if os.path.isdir(os.path.dirname(filename)):
+                reports_path = filename
         else:
-            reports_path = (os.path.join(PROVIDENTIA_ROOT, 'reports/')) + self.report_filename
+            reports_path = (os.path.join(PROVIDENTIA_ROOT, 'reports/')) + filename
 
         # create reports folder
         if not os.path.exists(os.path.dirname(reports_path)):
-            if '/' in self.report_filename:
-                print('Path {0} does not exist and it will be created.'.format(os.path.dirname(self.report_filename)))
+            if '/' in reports_path:
+                print('Path {0} does not exist and it will be created.'.format(os.path.dirname(reports_path)))
             os.makedirs(os.path.dirname(reports_path))
 
         # add termination .pdf to filenames
@@ -1449,27 +1464,6 @@ class ProvidentiaOffline:
                 else:
                     axis_title = relevant_axis.get_title()
 
-                # axis title is empty?
-                if axis_title == '':
-                    if plotting_paradigm == 'summary':
-                        if self.n_stations == 1:
-                            axis_title_label = '{} ({} station)'.format(self.subsection, self.n_stations)
-                        else:
-                            axis_title_label = '{} ({} stations)'.format(self.subsection, self.n_stations)
-                    elif plotting_paradigm == 'station':
-                        if base_plot_type == 'metadata':
-                            axis_title_label = ''
-                        else:
-                            axis_title_label = '{}, {} ({:.{}f}, {:.{}f})'.format(self.current_station_reference,
-                                                                                  self.current_station_name, 
-                                                                                  self.current_lon,
-                                                                                  self.plot_characteristics[plot_type]['round_decimal_places']['title'],
-                                                                                  self.current_lat,
-                                                                                  self.plot_characteristics[plot_type]['round_decimal_places']['title'])
-                            
-                    # set title
-                    set_axis_title(self, relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
-
                 # set xlabel and ylabel (only if not previously set)
                 if isinstance(relevant_axis, dict):
                     for relevant_temporal_resolution, sub_ax in relevant_axis.items():
@@ -1537,7 +1531,30 @@ class ProvidentiaOffline:
                 else:
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
                          plot_options) 
-                
+
+                # axis title is empty?
+                # moved after plots have been created because in the case of the Taylor diagram 
+                # the axis ghelper needs to be updated to be able to add the axis title
+                if axis_title == '':
+                    if plotting_paradigm == 'summary':
+                        if self.n_stations == 1:
+                            axis_title_label = '{} ({} station)'.format(self.subsection, self.n_stations)
+                        else:
+                            axis_title_label = '{} ({} stations)'.format(self.subsection, self.n_stations)
+                    elif plotting_paradigm == 'station':
+                        if base_plot_type == 'metadata':
+                            axis_title_label = ''
+                        else:
+                            axis_title_label = '{}, {} ({:.{}f}, {:.{}f})'.format(self.current_station_reference,
+                                                                                  self.current_station_name, 
+                                                                                  self.current_lon,
+                                                                                  self.plot_characteristics[plot_type]['round_decimal_places']['title'],
+                                                                                  self.current_lat,
+                                                                                  self.plot_characteristics[plot_type]['round_decimal_places']['title'])
+                            
+                    # set title
+                    set_axis_title(self, relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
+
                 # save plot information for later formatting
                 self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'].extend(data_labels)
                 plot_index = [relevant_page, page_ind]
