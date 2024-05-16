@@ -63,7 +63,8 @@ class ProvConfiguration:
     def parse_parameter(self, key, value):
 
         # import show_mesage from warnings
-        from .warnings import show_message
+        sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia'))
+        from warnings_prv import show_message
 
         """ Parse a parameter. """
 
@@ -573,7 +574,7 @@ class ProvConfiguration:
         from .read_aux import check_for_ghost, get_default_qa
 
         # import show_mesage from warnings
-        from .warnings import show_message
+        from .warnings_prv import show_message
         
         # get non-default fields on config file if launching from a config file
         if hasattr(self.read_instance, "sub_opts"):
@@ -1110,7 +1111,7 @@ def split_options(read_instance, conf_string, separator="||"):
         options. Returns the values in two lists, the keeps and removes.
     """
     # import show_mesage from warnings
-    from .warnings import show_message
+    from .warnings_prv import show_message
     
     keeps, removes = [], []
 
