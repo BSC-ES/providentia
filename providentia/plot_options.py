@@ -5,7 +5,7 @@ import numpy as np
 
 from .read_aux import drop_nans
 from .statistics import calculate_statistic, get_z_statistic_info, exceedance_lim
-from .warnings import show_message
+from .warnings_prv import show_message
 from .plot_aux import create_chunked_timeseries
 
 

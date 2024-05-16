@@ -11,7 +11,7 @@ import pandas as pd
 from .calculate import Stats, ExpBias
 from .configuration import split_options
 from .statistics import get_z_statistic_info, exceedance_lim
-from .warnings import show_message
+from .warnings_prv import show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
