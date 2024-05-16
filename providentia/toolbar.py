@@ -15,7 +15,7 @@ from .configuration import load_conf
 from .dashboard_elements import InputDialog
 from .dashboard_interactivity import LassoSelector
 from .fields_menus import metadata_conf, multispecies_conf, period_conf, representativity_conf
-from .warnings import show_message
+from .warnings_prv import show_message
 from .writing import export_configuration, export_data_npz, export_netcdf
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
