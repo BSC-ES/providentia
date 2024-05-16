@@ -14,6 +14,7 @@ import yaml
 import numpy as np
 from packaging.version import Version
 import pandas as pd
+from itertools import compress
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
 
@@ -60,6 +61,10 @@ class ProvConfiguration:
             setattr(self.read_instance, k, self.parse_parameter(k, val))
 
     def parse_parameter(self, key, value):
+
+        # import show_mesage from warnings
+        from .warnings import show_message
+
         """ Parse a parameter. """
 
         # parse config file name
@@ -115,7 +120,7 @@ class ProvConfiguration:
                 return '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
             # set directory in MN5 to avoid network issues
             elif MACHINE == 'mn5':
-                return '/gpfs/tapes/MN4/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
+                return '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
             # on all other machines pull from internet
 
         elif key == 'n_cpus':
@@ -273,7 +278,7 @@ class ProvConfiguration:
                 return []
 
         elif key == "domain":
-            # parse ensemble_options
+            # parse domain
 
             if value != None:
                 # split list, if only one domain, then creates list of one element
@@ -305,49 +310,72 @@ class ProvConfiguration:
                     # otherwise set legend names as given experiment names in full
                     else: 
                         exps = [exp.strip() for exp in value.split(",")]
-                        exps_legend = copy.deepcopy(exps)
-                # list of experiments with a dash 
-                dash_list = ["-" in exp for exp in exps]
+                        exps_legend = []
+
+                    # flag which signals if alias is possible
+                    self.alias = False
                 
-                # providentia way
-                if all(dash_list):
-                    # if user also tries to pass domain or ensemble_options when providentia way is set, error
-                    if self.read_instance.domain or self.read_instance.ensemble_options:
-                        msg = "It is not possible to define the experiment with '-' while defining domain or ensemble_options."
-                        sys.exit(msg)
-                
-                # providentia and interpolation way mixed, raise error
-                elif any(dash_list):
-                    msg = "It is not possible to define different experiments with and without the '-'."
-                    sys.exit(msg)
-
-                # interpolation way
-                else:
-                    ending = []
-
-                    # if domain and ensemble_options passed in config file, then create possible combinations
-                    if self.read_instance.domain != None and self.read_instance.ensemble_options != None:
-                        for dom in self.read_instance.domain:
-                            for opt in self.read_instance.ensemble_options:
-                                ending.append(f"{dom}-{opt}")
-                    # if only domain or only ensemble_options, then the combination list is the current field list
-                    elif self.read_instance.domain != None or self.read_instance.ensemble_options != None:
-                        ending = self.read_instance.domain if self.read_instance.domain else self.read_instance.ensemble_options
-
-                    # get experiment combinations, if possible
-                    combinations = [f"{exp}-{end}" for exp in exps for end in ending]
-                    exps = combinations if combinations else exps
+                    # list of experiments with a dash 
+                    dash_list = ["-" in exp for exp in exps]
                     
-                    # if only one possible combination then you can get the alias
-                    if len(exps):
-                        pass
+                    # providentia way
+                    if all(dash_list):
+                        # if user also tries to pass domain or ensemble_options when providentia way is set, warning, preference for providentia way
+                        if self.read_instance.domain or self.read_instance.ensemble_options:
+                            exps = list(compress(exps,dash_list))
+                            msg = f"It is not possible to define the experiment with '-' while defining domain or ensemble_options, getting only: {', '.join(exps)}"
+                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
 
+                        # if all experiments are full length, then they can be set as alias        
+                        if exps_legend and len(exps)==len(exps_legend):            
+                            full_exps = [len(exp.split("-"))==3 for exp in exps]
+                            self.alias = all(full_exps)
+                            
+                    # providentia and interpolation way mixed, warning, preference for providentia way
+                    elif any(dash_list):
+                        exps = list(compress(exps,dash_list))
+                        msg = f"It is not possible to define different experiments with and without the '-', getting only: {', '.join(exps)}"
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
 
-                # print(self.read_instance.domain,self.read_instance.ensemble_options)
-                # print(exps)
-                # print({exp:exp_legend for exp,exp_legend in zip(exps,exps_legend)})
-                # 0/0 
-                return {exp:exp_legend for exp,exp_legend in zip(exps,exps_legend)}
+                    # interpolation way
+                    else:
+                        # allmembers or default in ensemble_options means all possible ensemble_options, so None
+                        self.read_instance.ensemble_options = None if self.read_instance.ensemble_options in [["allmembers"],["default"]] else self.read_instance.ensemble_options
+
+                        # default in domain means all possible domains
+                        self.read_instance.domain = None if self.read_instance.domain == ["default"] else self.read_instance.domain
+
+                        # list to hold ensemble_options and/or domains
+                        ending = []
+
+                        # if domain and ensemble_options passed in config file, then create possible combinations
+                        if self.read_instance.domain != None and self.read_instance.ensemble_options != None:
+                            for dom in self.read_instance.domain:
+                                for opt in self.read_instance.ensemble_options:
+                                    ending.append(f"{dom}-{opt}")
+                        
+                        # if only domain or only ensemble_options, then the combination list is the current field list
+                        elif self.read_instance.domain != None or self.read_instance.ensemble_options != None:
+                            ending = self.read_instance.domain if self.read_instance.domain else self.read_instance.ensemble_options
+
+                        # get experiment combinations, if possible
+                        combinations = [f"{exp}-{end}" for exp in exps for end in ending]
+                        exps = combinations if combinations else exps
+
+                        # if interpolation mode and only one possible full experiment, then the alias can be set
+                        if exps_legend and len(exps) == 1 and len(exps[0].split("-")) == 3 and len(exps)==len(exps_legend):
+                            self.alias = True
+
+                    # show warning if alias passed but not possible to set
+                    if not self.alias:
+                        msg = "Alias could not be set."
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+
+                    # alias is set as the experiment
+                    if not exps_legend or not self.alias:
+                        exps_legend = copy.deepcopy(exps)
+                    
+                    return {exp:exp_legend for exp,exp_legend in zip(exps,exps_legend)}
 
         elif key == 'map_extent':
             # parse map extent
@@ -514,6 +542,27 @@ class ProvConfiguration:
         # if no special parsing treatment for variable, simply return value
         return value
 
+    def check_experiment(self, exp):
+        """ Check individual experiment and get list of options."""
+        possible_domains = ['ip', 'd03', 'd01', 'regional', 'eu', 'reg', 'ex', 'bcn', 'cat', 'd02', 'global','regional_i01', 'regional_i02', 'regional_i03']
+        split_experiment = exp.split("-")
+
+        if len(split_experiment) > 3 or len(split_experiment) == 0:
+            error = 'Invalid format, experiments have to consist of three elements maximum'
+            sys.exit(error)
+
+        # [expID] or [expID]-[domain]
+        if len(split_experiment) == 1 or (len(split_experiment) == 2 and split_experiment[-1] in possible_domains):
+            exp_found = list(filter(lambda x:x.startswith(exp), self.possible_experiments))
+        # [expID]-[domain]-[ensembleNum]
+        elif len(split_experiment) == 3:
+            exp_found = list(filter(lambda x:x == exp, self.possible_experiments))
+        # [expID]-[ensembleNum]        
+        else:
+            exp_found = list(filter(lambda x:x.startswith(split_experiment[0]) and x.endswith(split_experiment[1]), self.possible_experiments))
+        
+        return exp_found, bool(exp_found)
+    
     def check_validity(self):
         """ Check validity of set variables after parsing. """
        
@@ -587,6 +636,33 @@ class ProvConfiguration:
                     error = 'Error: "network" must be all GHOST or non-GHOST'
                     sys.exit(error)
                 previous_is_ghost = is_ghost
+
+        # get all possible experiments
+        exp_path = os.path.join(self.read_instance.exp_root,self.read_instance.ghost_version)
+        for (root, directories, files) in os.walk(exp_path):
+            break
+        self.possible_experiments = directories
+
+        # check experiments and get list
+        final_experiments = {}
+        for exp, alias in self.read_instance.experiments.items():
+            valid_experiments, valid = self.check_experiment(exp)
+            if valid:
+                for valid_exp in valid_experiments:
+                    alias = valid_exp if not self.alias else alias
+                    final_experiments[alias] = valid_exp
+        
+        # if experiments were passed and there's no valid experiment, show warning
+        if self.read_instance.experiments != {} and final_experiments == {}:
+            msg = 'No experiments found with the current configuration.'
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+
+        # replace experiments by new ones found
+        self.read_instance.experiments = final_experiments
+
+        # print which experiments got
+        if self.read_instance.experiments:
+            print("\nResulting experiments:\n"+'\n'.join(self.read_instance.experiments.values())+"\n")
 
         # check have resolution information, 
         # if offline, throw message, stating are using default instead
