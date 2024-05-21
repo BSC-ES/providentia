@@ -503,7 +503,7 @@ class ProvidentiaOffline:
             if not hasattr(self, 'paradigm_break_page'):
                 pdf_file = PdfReader(open(reports_path, "rb"))
                 self.paradigm_break_page = len(pdf_file.pages)
-            reorder_pdf_pages(reports_path, 'reports/ordered.pdf', self.summary_multispecies_pages, 
+            reorder_pdf_pages(reports_path, reports_path, self.summary_multispecies_pages, 
                               self.station_multispecies_pages, self.paradigm_break_page)
 
     def setup_plot_geometry(self, plotting_paradigm, networkspeci, have_setup_multispecies):
