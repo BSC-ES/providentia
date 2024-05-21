@@ -15,6 +15,7 @@ import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 from packaging.version import Version
 import pandas as pd
+from PyPDF2 import PdfReader
 
 from .configuration import load_conf
 from .configuration import ProvConfiguration
@@ -23,7 +24,7 @@ from .fields_menus import (init_metadata, init_period, init_representativity, me
                            period_conf, representativity_conf)
 from .filter import DataFilter
 from .plot import Plot
-from .plot_aux import get_taylor_diagram_ghelper, set_map_extent
+from .plot_aux import get_taylor_diagram_ghelper, set_map_extent, reorder_pdf_pages
 from .plot_formatting import format_plot_options, format_axis, harmonise_xy_lims_paradigm, set_axis_label, set_axis_title
 from .read import DataReader
 from .read_aux import (get_ghost_observational_tree, get_lower_resolutions, get_nonghost_observational_tree, 
@@ -449,8 +450,13 @@ class ProvidentiaOffline:
                 if did_formatting:
                     formatted_networkspeci_plots = True
 
+            # initialise arrays with pages that include multispecies plots
+            self.summary_multispecies_pages = []
+            self.station_multispecies_pages = []
+
             # save page figures
             valid_page = False
+            real_page = 1
             for page in self.plot_dictionary:
                 # if page has no active data plotted, do not plot it
                 n_page_plotted_labels = 0
@@ -460,9 +466,25 @@ class ProvidentiaOffline:
                     if not valid_page:
                         print(f'\nWriting PDF in {reports_path}')
                         valid_page = True
+                    else:
+                        # the following variables will be used to set the order of multispecies plot
+                        # in the report if there are
+                        # get pages in PDF that contain multispecies plots
+                        if 'multispecies' in self.plot_dictionary[page]['plot_type']:
+                            if self.plot_dictionary[page]['paradigm'] == 'summary':
+                                self.summary_multispecies_pages.append(real_page)
+                            elif self.plot_dictionary[page]['paradigm'] == 'station':
+                                self.station_multispecies_pages.append(real_page)
+
+                        # save page where station plots start to be created
+                        if ((self.plot_dictionary[page]['paradigm'] == 'station') and 
+                            (not hasattr(self, 'paradigm_break_page'))):
+                            self.paradigm_break_page = real_page
+
                     fig = self.plot_dictionary[page]['fig']
                     self.pdf.savefig(fig, dpi=self.dpi)
                     plt.close(fig)
+                    real_page += 1
             if not valid_page:
                 print('\n0 plots remain to write to PDF')
 
@@ -473,7 +495,16 @@ class ProvidentiaOffline:
             os.system("rm {}".format(reports_path_temp))
         else:
             os.system("mv {} {}".format(reports_path_temp, reports_path))
-                
+
+        # reorder pages
+        if (len(self.summary_multispecies_pages) > 0) or (len(self.station_multispecies_pages) > 0):
+            print('\nReordering pages')
+            # if only summary plots have been made, set paradigm break page to last page
+            if not hasattr(self, 'paradigm_break_page'):
+                pdf_file = PdfReader(open(reports_path, "rb"))
+                self.paradigm_break_page = len(pdf_file.pages)
+            reorder_pdf_pages(reports_path, 'reports/ordered.pdf', self.summary_multispecies_pages, 
+                              self.station_multispecies_pages, self.paradigm_break_page)
 
     def setup_plot_geometry(self, plotting_paradigm, networkspeci, have_setup_multispecies):
         """ Setup plotting geometry for summary or station specific plots, per network/species. """
@@ -604,7 +635,8 @@ class ProvidentiaOffline:
                 # each page is handled as 1 figure
                 # intialise page if not yet done
                 if page_n not in self.plot_dictionary:
-                    self.plot_dictionary[page_n] = {'fig': fig, 'plot_type': plot_type, 'axs': []}
+                    self.plot_dictionary[page_n] = {'fig': fig, 'plot_type': plot_type, 'axs': [], 
+                                                    'paradigm': plotting_paradigm}
 
                 # make page title?
                 if 'page_title' in plot_characteristics_vars:
