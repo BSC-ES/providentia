@@ -1007,7 +1007,8 @@ def read_conf(fpath=None):
                 
                 # set section attributes
                 if copy:
-                    if line_strip != '':
+                    # if lines are not empty and not commented
+                    if (line_strip != '') and ('#' not in line_strip):
                         # initial definition of parameter - value
                         if '=' in line_strip:
                             key = line_strip.split('=', 1)[0].strip()
