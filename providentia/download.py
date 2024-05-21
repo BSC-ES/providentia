@@ -5,8 +5,8 @@ import requests, zipfile
 from io import BytesIO
 
 # urlparse
-#from tqdm import tqdm
-# from remotezip import RemoteZip
+from tqdm import tqdm
+from remotezip import RemoteZip
 
 
 from .configuration import ProvConfiguration, load_conf
@@ -51,12 +51,12 @@ class ProvidentiaDownload(object):
 
             # network
             for network in self.network:
-                    # ghost
-                    if check_for_ghost(network):
-                        self.download_ghost_network(network)
-                    # non-ghost
-                    else:
-                        self.download_nonghost_network(network)
+                # ghost
+                if check_for_ghost(network):
+                    self.download_ghost_network(network)
+                # non-ghost
+                else:
+                    self.download_nonghost_network(network)
 
             # print(self.nonghost_root,self.network,self.resolution,self.species)
 
