@@ -43,7 +43,8 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
         OpenMPI/4.0.5-GCC-8.3.0-nord3-v2 \
         pyproj/3.2.1-foss-2019b-Python-3.7.4 \
         kdepy/1.1.1-foss-2019b-Python-3.7.4 \
-        jupyterlab/3.0.9-foss-2019b-Python-3.7.4
+        jupyterlab/3.0.9-foss-2019b-Python-3.7.4 \
+        pypdf2/3.0.1-foss-2019b-Python-3.7.4
 
 # Hub
 elif [ "${ip}" == "84.88.185.48" ]; then
