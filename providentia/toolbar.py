@@ -81,7 +81,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         if 'pan' in self._actions:
             self._actions['pan'].setChecked(self.mode == 'pan/zoom')
         if 'zoom' in self._actions:
-            self._actions['zoom'].setChecked(self.mode == 'zoom/rect')
+            self._actions['zoom'].setChecked(self.mode == 'zoom rect')
         if 'connect_lasso' in self._actions:
             self._actions['connect_lasso'].setChecked(self.mode == 'lasso')
 
