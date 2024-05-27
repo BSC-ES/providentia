@@ -69,7 +69,8 @@
                      "plot": {"ha": "left", "va": "top", "fontsize": 11, "wrap": true, "linespacing": 1.5},
                      "plot_options": []},
        
-       "map": {"map_coastline_resolution": "medium",
+       "map": {"background": "providentia",
+               "map_coastline_resolution": "medium",
                "orientation": "landscape",
                "figure": {"ncols": 2, "nrows": 2}, 
                "land_polygon": {"facecolor": "0.85"},
