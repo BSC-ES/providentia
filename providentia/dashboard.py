@@ -1446,7 +1446,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.mpl_canvas.handle_resampling_update()
             
             # update timeseries chunk statistic and resolution comboboxes
-            self.mpl_canvas.handle_timeseries_chunk_resolution_update()
             self.mpl_canvas.handle_timeseries_chunk_statistic_update()
 
             # update periodic statistic combobox
