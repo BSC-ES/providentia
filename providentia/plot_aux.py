@@ -1,5 +1,6 @@
 """ Auxiliar functions to create plots """
 
+import copy
 import sys
 import os
 import math
@@ -12,6 +13,7 @@ import mpl_toolkits.axisartist.floating_axes as fa
 import mpl_toolkits.axisartist.grid_finder as gf
 import numpy as np
 import pandas as pd
+from PyPDF2 import PdfReader, PdfWriter
 from scipy.signal import convolve, gaussian
 from scipy.sparse import coo_matrix
 import seaborn as sns
@@ -585,3 +587,58 @@ def create_chunked_timeseries(read_instance, canvas_instance, chunk_stat, chunk_
             timeseries_data.loc[chunk_date, data_label] = stats_calc[chunk_date_idx][label_idx]
     
     return timeseries_data
+
+
+def reorder_pdf_pages(input_pdf, output_pdf, summary_multispecies_pages, 
+                      station_multispecies_pages, paradigm_break_page):
+    """ Reorder PDF pages so that multispecies plots appear before other plots.
+
+    :param input_pdf: Path to original PDF
+    :type input_pdf: string
+    :param output_pdf: Path to ordered PDF
+    :type output_pdf: string
+    :param summary_multispecies_pages: Pages that contain summary multispecies plots
+    :type summary_multispecies_pages: list
+    :param station_multispecies_pages: Pages that contain station multispecies plots
+    :type station_multispecies_pages: list
+    :param paradigm_break_page: Page where station plot start
+    :type paradigm_break_page: int
+    """
+
+    # Get pages
+    summary_multispecies_pages = np.array(summary_multispecies_pages)
+    station_multispecies_pages = np.array(station_multispecies_pages)
+
+    # Get original order
+    input_pdf_file = PdfReader(open(input_pdf, "rb"))
+    all_pages = np.arange(len(input_pdf_file.pages))
+
+    # Initialise page order
+    page_order = copy.deepcopy(all_pages)
+
+    # Move summary pages after page 0 (cover)
+    if len(summary_multispecies_pages) > 0:
+        summary_multispecies_pages = np.concatenate((np.array([0]), summary_multispecies_pages))
+        summary_other_plots_pages = all_pages[~np.isin(all_pages, summary_multispecies_pages)]
+        page_order = np.concatenate((
+            summary_multispecies_pages, 
+            summary_other_plots_pages)).tolist()
+    
+    # Move station pages after paradigm break page (when we start to see station plots)
+    if len(station_multispecies_pages) > 0:
+        station_pages = all_pages[paradigm_break_page:]
+        station_other_plots_pages = station_pages[~np.isin(station_pages, station_multispecies_pages)]
+        page_order = np.concatenate((
+            page_order[:paradigm_break_page], 
+            station_multispecies_pages, 
+            station_other_plots_pages)).tolist()
+
+    # Reorder pages
+    output_pdf_file = PdfWriter()
+    for page_number in page_order:
+        output_pdf_file.add_page(input_pdf_file.pages[page_number])
+
+    # Write the rearranged pages to a new PDF file
+    print(f'Writing {output_pdf}')
+    with open(output_pdf, "wb") as outputStream:
+        output_pdf_file.write(outputStream)
