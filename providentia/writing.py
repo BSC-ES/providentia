@@ -132,7 +132,8 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
         apply_filters = True
 
     # set up some structural variables
-    from GHOST_standards import standard_parameters, get_standard_data, get_standard_metadata
+    from GHOST_standards import (standard_parameters, get_standard_data, get_standard_metadata,
+                                 standard_QA_name_to_QA_code, standard_data_flag_name_to_data_flag_code)
     parameter_dictionary = {}
     for _, param_dict in standard_parameters.items():
         parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
@@ -159,7 +160,10 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
     fout.createDimension('station', None)
     fout.createDimension('time', len(prv.time_array))
     fout.createDimension('month', len(prv.yearmonths))
-    
+    if prv.reading_ghost:
+        fout.createDimension('qa', len(list(standard_QA_name_to_QA_code.keys())))
+        fout.createDimension('flag', len(list(standard_data_flag_name_to_data_flag_code.keys())))
+
     # create dimensions only for GHOST case
     if prv.reading_ghost:
         fout.createDimension('ghost_data_variable', len(prv.ghost_data_vars_to_read))
@@ -262,16 +266,17 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
         if prv.reading_ghost:
             var.ghost_version = str(prv.ghost_version)
         if apply_filters:
-            test = np.take(prv.data_in_memory_filtered[networkspeci], valid_station_inds, axis=1)
             var[:] = np.take(prv.data_in_memory_filtered[networkspeci], valid_station_inds, axis=1)
         else:
             var[:] = prv.data_in_memory[networkspeci]
 
         # GHOST data
         if prv.reading_ghost:
+
+            # set GHOST data variable (e.g. representativity)
             var = fout.createVariable('{}_ghost_data'.format(networkspeci), 'f4', 
                                       ('ghost_data_variable', 'station', 'time',))
-            # set attributes 
+            # set attributes and data
             var.standard_name = '{}_ghost_data'.format(networkspeci) 
             var.long_name = '{}_ghost_data'.format(networkspeci)
             var.description = 'GHOST data variables used for additional filtering.'
@@ -279,6 +284,26 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
                 var[:] = np.take(prv.ghost_data_in_memory[networkspeci], valid_station_inds, axis=1)
             else:
                 var[:] = prv.ghost_data_in_memory[networkspeci]
+
+            # set qa variable
+            var = fout.createVariable('{}_qa'.format(networkspeci), 'u1', ('qa',), fill_value=255)
+            # set attributes and data
+            var.standard_name = '{}_qa'.format(networkspeci)
+            var.long_name = '{}_qa'.format(networkspeci)
+            var.description = 'GHOST QA flag codes applied to filter data.'
+            unique_qa = [list(sorted(set(current_list))) for current_list in prv.qa_per_species[speci]]
+            padded_unique_qa = np.array([i + [pad_value]*(fout.dimensions['qa'].size - len(i)) for i in unique_sorted_array], dtype=np.uint8)
+            var[:] = padded_unique_qa
+
+            # set flags variable
+            var = fout.createVariable('{}_flags'.format(networkspeci), 'u1', ('flag',), fill_value=255)
+            # set attributes and data
+            var.standard_name = '{}_flags'.format(networkspeci)
+            var.long_name = '{}_flags'.format(networkspeci)
+            var.description = 'GHOST standardised data reporter flag codes applied to filter data.'
+            unique_flag = [list(sorted(set(current_list))) for current_list in prv.qa_per_species[speci]]
+            padded_unique_flag = np.array([i + [pad_value]*(fout.dimensions['flag'].size - len(i)) for i in unique_sorted_array], dtype=np.uint8)
+            var[:] = padded_unique_flag
 
         # save metadata (as individual variables)
         if apply_filters:
