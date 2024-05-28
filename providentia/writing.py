@@ -52,6 +52,9 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
     # save data / ghost data / metadata
     for networkspeci in prv.networkspecies:
 
+        # get species
+        speci = networkspeci.split('|')[1]
+
         # get valid station indices (from observations because valid stations for the experiment is a 
         # subset of the observations)
         if prv.temporal_colocation:
@@ -72,6 +75,11 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
                 save_data_dict['{}_ghost_data'.format(networkspeci)] = prv.ghost_data_in_memory[networkspeci]
             save_data_dict['{}_data'.format(networkspeci)] = prv.data_in_memory_filtered[networkspeci]
             save_data_dict['{}_metadata'.format(networkspeci)] = prv.metadata_in_memory[networkspeci]
+
+        # qa /flags
+        if prv.reading_ghost:
+            save_data_dict['{}_qa'.format(networkspeci)] = np.unique(prv.qa_per_species[speci])
+            save_data_dict['{}_flags'.format(networkspeci)] = np.unique(prv.flags)
 
     # save out miscellaneous variables 
     save_data_dict['time'] = prv.time_array
@@ -291,8 +299,8 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
             var.standard_name = '{}_qa'.format(networkspeci)
             var.long_name = '{}_qa'.format(networkspeci)
             var.description = 'GHOST QA flag codes applied to filter data.'
-            unique_qa = [list(sorted(set(current_list))) for current_list in prv.qa_per_species[speci]]
-            padded_unique_qa = np.array([i + [pad_value]*(fout.dimensions['qa'].size - len(i)) for i in unique_sorted_array], dtype=np.uint8)
+            unique_qa = list(np.unique(prv.qa_per_species[speci]))
+            padded_unique_qa = np.array([unique_qa + [255]*(fout.dimensions['qa'].size - len(unique_qa))], dtype=np.uint8)
             var[:] = padded_unique_qa
 
             # set flags variable
@@ -301,8 +309,8 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
             var.standard_name = '{}_flags'.format(networkspeci)
             var.long_name = '{}_flags'.format(networkspeci)
             var.description = 'GHOST standardised data reporter flag codes applied to filter data.'
-            unique_flag = [list(sorted(set(current_list))) for current_list in prv.qa_per_species[speci]]
-            padded_unique_flag = np.array([i + [pad_value]*(fout.dimensions['flag'].size - len(i)) for i in unique_sorted_array], dtype=np.uint8)
+            unique_flag = list(np.unique(prv.flags))
+            padded_unique_flag = np.array([unique_flag + [255]*(fout.dimensions['flag'].size - len(unique_flag))], dtype=np.uint8)
             var[:] = padded_unique_flag
 
         # save metadata (as individual variables)
