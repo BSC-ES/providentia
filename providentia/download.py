@@ -3,10 +3,11 @@ import os
 
 import requests
 from io import BytesIO
-from pexpect import pxssh
 import subprocess
 import yaml
-from dotenv import load_dotenv
+from dotenv import dotenv_values
+import paramiko 
+from base64 import decodebytes
 
 # urlparse
 from tqdm import tqdm
@@ -27,37 +28,27 @@ data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_p
 
 class ProvidentiaDownload(object):
     def __init__(self,**kwargs):
+        # TODO move some of these variables to default
         # initialise zenodo url
         self.ghost_url = 'https://zenodo.org/records/10637450'
 
-        # initialize dictionary to store zenodo's ghost zips
+        # initialize dictionaries to store possible networks
         self.ghost_zip_files = {}
+        self.nonghost_observation_data = {}
 
-        # TODO CHANGE TO DEFAULTS
-        # This is an atribute which is used in case there's no networks, if no networks then all the networks from this
-        self.download_source = "ghost"
-
-        # initialise remote hostname
+        # initialise remote hostname and esarchive path in storage5
+        # TODO MAYBE MOVE TO DATAPATHS
         self.remote_hostname = "transfer1.bsc.es"
+        self.nonghost_remote_obs_path = "/gpfs/archive/bsc32/esarchive/obs"
 
         # get home user
         self.home_user = os.getlogin()
-        
-        # flag to indicate if user wants their user and password saved 
-        remind = False
 
-        # TODO: Put if exp or nonghost network only
-        # get user and password if they are in .env
-        load_dotenv()
-        user = os.getenv("PRV_USER")
-        password = os.getenv("PRV_PWD")
-
-        # if couldn't get variables from .env, ask user for them
-        if not user or not password:
-            user = input("Introduce BSC user: ")
-            password = input("Introduce password: ")
-            remind_txt = input("Remember password (y/n)? ")
-            remind = remind_txt.lower() == 'y'
+        # get ssh user and password if they are in .env
+        env = dotenv_values(os.path.join(PROVIDENTIA_ROOT, ".env"))
+  
+        self.prv_user = env.get("PRV_USER")
+        self.prv_password = env.get("PRV_PWD")
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
@@ -82,17 +73,14 @@ class ProvidentiaDownload(object):
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
             sys.exit(error)
 
-        # initialise data_paths for local
-        # TODO CHANGE THIS IN CONFIGURATION
-
-        self.nonghost_root = os.path.join('/home',self.home_user,data_paths[MACHINE]['nonghost_root'])
-        self.ghost_root = os.path.join('/home',self.home_user,data_paths[MACHINE]['ghost_root']) 
-        self.exp_root = os.path.join('/home',self.home_user,data_paths[MACHINE]['exp_root']) 
-
         # create empty directories for all the paths if they don't exist
         for path in [self.nonghost_root,self.ghost_root,self.exp_root]:
             if not os.path.exists(path):
-                os.makedirs(path)
+                try:
+                    os.makedirs(path)
+                except PermissionError as error:
+                    os.system(f"sudo mkdir -p {path}")
+                    os.system(f"chmod o+w {path}")
 
         for section_ind, section in enumerate(self.parent_section_names):
             # update for new section parameters
@@ -103,6 +91,7 @@ class ProvidentiaDownload(object):
             for k, val in self.section_opts.items():
                 setattr(self, k, provconf.parse_parameter(k, val))
 
+            # if networks is none, then get all possible networks 
             if not self.network:
                 self.get_all_networks()
 
@@ -115,43 +104,103 @@ class ProvidentiaDownload(object):
                 else:
                     self.download_nonghost_network(network)
 
-            # print(self.nonghost_root,self.network,self.resolution,self.species)
-
             # experiment
             for experiment in self.experiments:
                 pass
 
-            # print(self.nonghost_root,self.network,self.resolution,self.species)
-        
-        # print(self.exp_root)
-
     def download_nonghost_network(self,network):
+        # if first time reading a nonghost network, get current networks from yaml
+        if not self.nonghost_observation_data: 
+            self.nonghost_observation_data = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_networks.yaml')))
+
+        # If not valid network, next
+        if network not in self.nonghost_observation_data:
+            return
+
+        # flag to indicate if user wants their user and password saved 
+        remind = False
+
+        # if couldn't get credentials, ask user for them
+        if not self.prv_user  or not self.prv_password:
+            self.prv_user  = input("Introduce BSC user: ")
+            self.prv_password  = input("Introduce password: ")
+            remind_txt = input("Remember password (y/n)? ")
+            remind = remind_txt.lower() == 'y'
+
+        # get public remote machine public key and add it to ssh object
+        _, output = subprocess.getstatusoutput("ssh-keyscan -t ed25519 transfer1.bsc.es")
+        ed25519_key = output.split()[-1].encode()
+        key = paramiko.Ed25519Key(data=decodebytes(ed25519_key))
+
+        ssh = paramiko.SSHClient()
+        hostkeys = ssh.get_host_keys().add(self.remote_hostname, 'ed25519', key)
+        
+        # connect to machine
+        ssh.connect(self.remote_hostname, username=self.prv_user, password=self.prv_password)
+
+        # create .env with the input user and password
+        if remind:
+            with open(os.path.join(PROVIDENTIA_ROOT, ".env"),"w") as f:
+                f.write(f"PRV_USER={self.prv_user}\n")
+                f.write(f"PRV_PWD={self.prv_password}")
+
+        # get resolution and/or species combinations
+        res_spec_combinations = []
         # network
         if not self.resolution and not self.species:
-            wanted_directories = ['']
+            for res, specie_list in self.nonghost_observation_data[network].items():
+                for spec in specie_list:
+                    res_spec_combinations.append(os.path.join(network,res,spec))
+            
         # network + resolution 
         elif not self.species:
-            wanted_directories = [self.resolution]
+            for res in self.resolution:
+                for spec in self.nonghost_observation_data[network].get(res,[]):
+                    res_spec_combinations.append(os.path.join(network,res,spec))
         # network + species 
         elif not self.resolution:
-            wanted_directories = self.species
+            for spec in self.species:
+                for res, specie_list in self.nonghost_observation_data[network].items():
+                    if spec in specie_list:
+                        res_spec_combinations.append(os.path.join(network,res,spec))
         # network + resolution + species 
         else:
-            wanted_directories = [os.path.join(self.resolution,specie) for specie in self.species]
+            for spec in self.species:
+                for res in self.resolution:
+                    if spec in self.nonghost_observation_data[network].get(res,[]):
+                        res_spec_combinations.append(os.path.join(network,res,spec))
         
-        # print(wanted_directories)
+        # create Secure File Transfer Protocol object
+        sftp = ssh.open_sftp()
 
-        # list_subfolders_with_paths = [f.path for f in os.scandir(self.nonghost_root) if f.is_dir()]
-        # print(list_subfolders_with_paths)
-        for wanted_directory in wanted_directories:
-            # print("\npaula",os.path.join(self.nonghost_root,network,wanted_directory))
-            directory = os.path.join(self.nonghost_root,network)
-            # print(wanted_directories,"\n")
-            for (root, directories, files) in os.walk(directory):
-                if wanted_directory in root:
-                    print("root",root)#,"\n")
+        # print the specie, resolution and network combinations that are going to be downloaded
+        if res_spec_combinations:
+            print(f"{network} observations to download:")
+            for combi_print in res_spec_combinations:
+                print(f"  - {self.nonghost_root}/{combi_print}")
 
-       # dirs_to_get = [directory for directory in  if directory[-7:] == '.tar.xz' and wanted_directories in directory]
+            # get all the nc files in the date range
+            for combi in tqdm(res_spec_combinations,desc="Downloading Observations"):
+                remote_dir = os.path.join(self.nonghost_remote_obs_path,combi)
+                local_dir = os.path.join(self.nonghost_root,combi)
+
+                valid_nc_files = self.get_valid_dates(sftp.listdir(remote_dir))
+
+                if valid_nc_files:
+
+                    # create directories if they don't exist
+                    if not os.path.exists(local_dir):
+                        os.makedirs(local_dir) 
+
+                    # download each individual nc file using sftp protocol
+                    for nc_file in valid_nc_files:
+                        remote_path = os.path.join(remote_dir,nc_file)
+                        local_path = os.path.join(local_dir,nc_file)
+                        sftp.get(remote_path,local_path)
+
+        # close conections
+        sftp.close()
+        ssh.close()
 
     def download_ghost_network(self,network):
         # if first time reading a ghost network, get current zips urls in zenodo page
@@ -172,6 +221,7 @@ class ProvidentiaDownload(object):
         else:
             res_spec_combinations = [f"/{resolution}/{specie}" for specie in self.species for resolution in self.resolution]
 
+       
         # get all the possible networks from network e.g. EBAS gets EBAS-ACTRIS_oyktp, EBAS-AMAP_hcxwm, EBAS-CAMP_daczg, etc
         current_networks = list(filter(lambda x: network in x, self.ghost_zip_files))
 
@@ -179,22 +229,23 @@ class ProvidentiaDownload(object):
             # get url to download the zip file for the current network
             zip_url = self.ghost_zip_files[curr_net]
 
-            #TODO: Add comprovation in case is already downloaded
-
             # get all the species tar files which fulfill the combination condition
-            species_to_download = []
+            res_spec_final_combinations = []
             with RemoteZip(zip_url) as zip:
                 for combi in res_spec_combinations:
-                    species_to_download += list(filter(lambda x: combi in x, zip.namelist()))
-                species_to_download = list(filter(lambda x: x[-7:] == '.tar.xz', species_to_download))
+                    res_spec_final_combinations += list(filter(lambda x: combi in x, zip.namelist()))
+                res_spec_final_combinations = list(filter(lambda x: x[-7:] == '.tar.xz', res_spec_final_combinations))
+
+                # TODO Deberia printear cuanto va a ocupar pero no se sabe porque para cada uno no se va a descargar todas las fechas
+                # SE PUEDE PONER DESPUES
 
                 # Print the specie, resolution and network combinations that are going to be downloaded
-                print("Observations to download:")
-                for specie in species_to_download:
-                    print(f"  - {specie}")
+                print(f"{network} observations to download:")
+                for specie in res_spec_final_combinations:
+                    print(f"  - {self.nonghost_root}{specie[:-7]}")
 
                 # extract species from zip files
-                for specie_to_get in tqdm(species_to_download,unit="specie",desc="Downloading species"):
+                for specie_to_get in tqdm(res_spec_final_combinations,desc="Downloading Observations:"):
                     zip.extract(specie_to_get,self.ghost_root)
                     
                     # get path and the name of the directory of the tar file
@@ -205,7 +256,6 @@ class ProvidentiaDownload(object):
                     with tarfile.open(tar_path) as tar_file:
                         tar_names = tar_file.getnames()
 
-                        # TODO Maybe valid dates is gonna change to the month generator, see what is said on providentia meeting
                         # get the nc files that are between the start and end date
                         valid_nc_file_names = self.get_valid_dates(tar_names)
                         valid_nc_files = [tar_member for tar_member in tar_file.getmembers() if tar_member.name in valid_nc_file_names]
@@ -221,7 +271,7 @@ class ProvidentiaDownload(object):
     def get_ghost_zip_files(self):
         # Get urls from zenodo to get ghost zip files url
         # Send an HTTP GET request to the URL
-        # TODO CHANGE NAME
+        # TODO CHANGE METHOD'S NAME
         response = requests.get(self.ghost_url)
 
         # Check if the request was successful (status code 200)
@@ -236,22 +286,27 @@ class ProvidentiaDownload(object):
                 self.ghost_zip_files[zip_network] = zip_url
 
     def get_all_networks(self):
+        # TODO maybe change this prints to warnings
         # if not network passed, then get all networks
+        print(f"Not networks found, downloading all {self.download_source.lower()} networks.")
 
         if self.download_source.lower() == "ghost":
             if not self.ghost_zip_files: 
                 self.get_ghost_zip_files()
             
-            self.networks = list(self.ghost_zip_files.keys())
+            self.network = list(self.ghost_zip_files.keys())
 
         elif self.download_source.lower() == "nonghost":
-            pass
+            self.nonghost_observation_data = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_networks.yaml')))
+            self.network = list(self.nonghost_observation_data.keys())
 
         else:
+            #TODO PONER ERROR DE VERDAD
             print(f"Error download source type {self.download_source} not valid")
 
     def generate_months(start_date, end_date):
         # TODO en proceso maybe quitar
+        # DEPRECATED DEPRECATED DEPRECATED
         start = datetime.strptime(start_date, "%Y%m%d")
         end = datetime.strptime(end_date, "%Y%m%d")
         
@@ -263,11 +318,13 @@ class ProvidentiaDownload(object):
             current_month += timedelta(days=31)
             month_list.append(current_month)
         
-        formatted_end_month = end.strftime("%Y%m") # si no quiere que incluya el ultimo borrar esta linea
+        formatted_end_month = end.strftime("%Y%m") 
         month_list.append(formatted_end_month)
         return month_list
     
     def get_valid_dates(self, tar_names):
+        # get valid nc files inside the date range
+        # TODO CAMBIAR NOMBRE Y COMENTAR 
         nc_files = []
 
         for nc_file in tar_names:
