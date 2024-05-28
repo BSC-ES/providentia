@@ -10,3 +10,4 @@ reports/*
 saved_data/*
 notebooks/.ipynb_checkpoints
 interactive.out
+.env
