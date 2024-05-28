@@ -68,6 +68,7 @@ class ProvConfiguration:
             'generate_file_tree': False,
             'offline': False,
             'interactive': False,
+            'download':False,
             'available_resolutions': ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
                                       '3hourly_instantaneous', '6hourly_instantaneous',
                                       'daily', 'monthly'],
@@ -268,9 +269,18 @@ class ProvConfiguration:
 
         elif key == 'resolution':
             # parse resolution
-
+            
             if isinstance(value, str):
-                return value.strip()
+                # resolution is a list in download mode
+                if self.read_instance.download:
+                    # parse multiple resolutions
+                    if ',' in value:
+                        return [speci.strip() for speci in value.split(',')]
+                    else:
+                        return [value.strip()]
+                else:
+                    # parse one single resolution
+                    return value.strip()
 
         elif key == 'start_date':
             # parse start_date
