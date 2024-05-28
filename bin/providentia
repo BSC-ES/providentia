@@ -35,7 +35,7 @@ IFS=$'\n\t'
 # An option followed by double colons '::' means that its argument is optional.
 # See `man getopt'.
 SHORT=uc:t:J:q:m:V
-LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,interactive,conf:,config:,config_dir:,section:,ghost_version:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,generate_file_tree,file_tree,gft,offline,interactive,download,network:,species:,resolution:,start_date:,end_date:,experiments:,temporal_colocation:,spatial_colocation:,filter_species:,lower_bound:,upper_bound:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,map_extent:,active_dashboard_plots:,plot_characteristics_filename:
+LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,interactive,conf:,config:,config_dir:,section:,ghost_version:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,generate_file_tree,file_tree,gft,offline,interactive,download,network:,species:,resolution:,download_source:,start_date:,end_date:,experiments:,temporal_colocation:,spatial_colocation:,filter_species:,lower_bound:,upper_bound:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,map_extent:,active_dashboard_plots:,plot_characteristics_filename:
 
 # parse arguments
 PARSED=$(getopt --options ${SHORT} \
@@ -180,6 +180,9 @@ if [ "${BSC_MACHINE}" == "power" ]; then
         eval "${load_command}"
         eval "${salloc_command} ${queue_option} ${memory_option}"
 
+    elif $download; then
+        echo "Mode download only available in local."
+
     else
         if $debugexec; then
             eval "srun ${python_command}"
@@ -231,6 +234,9 @@ elif [ "${BSC_MACHINE}" == "mn5" ]; then
             else
                 eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option}"
             fi
+
+        elif $download; then
+            echo "Mode download only available in local."
 
         else
             if $debugexec; then
@@ -312,6 +318,9 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
             eval "${salloc_command} ${constraint_option} ${queue_option}"
         fi
 
+    elif $download; then
+        echo "Mode download only available in local."
+
     else
         if $debugexec; then
             eval "srun ${python_command}"
@@ -334,6 +343,10 @@ elif [ "${ip}" == "84.88.185.48" ]; then
         echo "Starting interactive jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}
         jupyter-lab
+
+    elif $download; then
+        echo "Mode download only available in local."
+    
     else
         eval "${python_command}"
     fi

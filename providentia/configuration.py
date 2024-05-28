@@ -85,6 +85,7 @@ class ProvConfiguration:
             'resolution': None,
             'start_date': None,
             'end_date': None,
+            'download_source': 'ghost',
             'observations_data_label': 'observations',
             'experiments': {},
             'qa': None,
@@ -200,7 +201,8 @@ class ProvConfiguration:
 
             # set default if left undefined
             if value == '':
-                return data_paths[MACHINE]["ghost_root"]
+                ghost_root = data_paths[MACHINE]["ghost_root"]
+                return os.path.expanduser(ghost_root[0])+ghost_root[1:]
 
         elif key == 'nonghost_root':
             # define non-GHOST observational root data directory (if undefined it is
@@ -208,14 +210,16 @@ class ProvConfiguration:
 
             # set default if left undefined
             if value == '':
-                return data_paths[MACHINE]["nonghost_root"]
+                nonghost_root = data_paths[MACHINE]["nonghost_root"]
+                return os.path.expanduser(nonghost_root[0])+nonghost_root[1:]
 
         elif key == 'exp_root':
             # define experiment root data directory
             # set experiment root data directory if left undefined
             if value == '':
-                return data_paths[MACHINE]["exp_root"]
-
+                exp_root = data_paths[MACHINE]["exp_root"]
+                return os.path.expanduser(exp_root[0])+exp_root[1:]
+            
         elif key == 'ghost_version':
             # parse GHOST version
 
