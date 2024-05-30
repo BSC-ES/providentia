@@ -15,7 +15,7 @@ mv * ../source/
 
 # Removing wiki
 cd ..
-rm -rf P
+rm -rf Providentia.wiki
 
 # Removing unused files
 cd source
