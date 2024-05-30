@@ -3,8 +3,10 @@ Contents
 ========
 
 .. toctree::
+   :maxdepth: 2
 
-   introduction.rst
+   home.md
    setup.rst
    user-guide.rst
    other-topics.rst
+   reference.rst
