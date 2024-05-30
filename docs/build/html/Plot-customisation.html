@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plot customisation &mdash; Providentia 2.3.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=c3c8ae58"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Statistics" href="Statistics.html" />
+    <link rel="prev" title="Plot types and options" href="Plot-types-and-options.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Tool setup</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="user-guide.html">User guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Offline-reports.html">Offline reports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Interactive-mode.html">Interactive mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Configuration-files.html">Configuration files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Plot-types-and-options.html">Plot types and options</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Plot customisation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#editing-the-plot-style-from-the-configuration-files">Editing the plot style from the configuration files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#setting-the-map-coastline-resolution">Setting the map coastline resolution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#setting-the-map-background">Setting the map background</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#setting-custom-bounds-and-cmap-per-species">Setting custom bounds and cmap per species</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#remove-extreme-stations-by-their-statistical-values">Remove extreme stations by their statistical values</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#calculating-exceedances">Calculating exceedances</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#editing-the-plot-style-in-the-dashboard">Editing the plot style in the dashboard</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#changing-the-plot-style">Changing the plot style</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#legend-picking">Legend picking</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#changing-the-statistics">Changing the statistics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#information-on-hover">Information on hover</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#smoothing">Smoothing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="user-guide.html">User guide</a></li>
+      <li class="breadcrumb-item active">Plot customisation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Plot-customisation.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="plot-customisation">
+<h1>Plot customisation<a class="headerlink" href="#plot-customisation" title="Link to this heading"></a></h1>
+<section id="editing-the-plot-style-from-the-configuration-files">
+<h2>Editing the plot style from the configuration files<a class="headerlink" href="#editing-the-plot-style-from-the-configuration-files" title="Link to this heading"></a></h2>
+<p>If you want to edit the style of your plots, you will need to <strong>edit it in one of the following files</strong> and launch the tool again:</p>
+<ul class="simple">
+<li><p>Plots in the dashboard: <code class="docutils literal notranslate"><span class="pre">/providentia/settings/plot_characteristics_dashboard.yaml</span></code></p></li>
+<li><p>Plots in the offline reports: <code class="docutils literal notranslate"><span class="pre">/providentia/settings/plot_characteristics_offline.yaml</span></code></p></li>
+<li><p>Plots in the interactive mode: <code class="docutils literal notranslate"><span class="pre">/providentia/settings/plot_characteristics_interactive.yaml</span></code></p></li>
+</ul>
+<section id="setting-the-map-coastline-resolution">
+<h3>Setting the map coastline resolution<a class="headerlink" href="#setting-the-map-coastline-resolution" title="Link to this heading"></a></h3>
+<p>It is possible to customise the map coastline resolution by changing the <code class="docutils literal notranslate"><span class="pre">map_coastline_resolution</span></code> variable under the <code class="docutils literal notranslate"><span class="pre">map</span></code> section in the appropriate plot characteristics file.</p>
+<p>There are 3 options as present:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">low</span></code>: 110m in resolution</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">medium</span></code>: 50m in resolution</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">high</span></code>: 10m in resolution</p></li>
+</ul>
+</section>
+<section id="setting-the-map-background">
+<h3>Setting the map background<a class="headerlink" href="#setting-the-map-background" title="Link to this heading"></a></h3>
+<p>Users can define the type of background that is plotted on the map. This can be set by changing the background variable under the <code class="docutils literal notranslate"><span class="pre">map</span></code> section in the appropriate plot characteristics file.</p>
+<p>There are 3 available standard options:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">providentia</span></code>: The standard white and grey combination that has been historically available. *Default</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">blue_marble</span></code>: NASA’s blue marble product</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">shaded_relief</span></code>: imagery showing changes in elevation</p></li>
+</ul>
+<p>Users can easily add any type of background by putting an image file in the <code class="docutils literal notranslate"><span class="pre">providentia/dependencies/resources</span></code> folder, with the filename named in the same way as in the plot characteristics file, e.g. <code class="docutils literal notranslate"><span class="pre">blue_marble.png</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;background&quot;:</span> <span class="pre">&quot;blue_marble&quot;</span></code>.</p>
+</section>
+<section id="setting-custom-bounds-and-cmap-per-species">
+<h3>Setting custom bounds and cmap per species<a class="headerlink" href="#setting-custom-bounds-and-cmap-per-species" title="Link to this heading"></a></h3>
+<p>Users can define the color and bounds of the colorbar (cmap, vmin and vmax) per species using a dictionary, with the keys being the names of the species inside <code class="docutils literal notranslate"><span class="pre">basic_stats.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">experiment_bias_stats.yaml</span></code>. An example can be seen in the code below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;Mean&quot;</span><span class="p">:</span>        <span class="p">{</span><span class="s2">&quot;function&quot;</span><span class="p">:</span> <span class="s2">&quot;calculate_mean&quot;</span><span class="p">,</span> 
+                <span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> 
+                <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Mean&quot;</span><span class="p">,</span> 
+                <span class="s2">&quot;arguments&quot;</span><span class="p">:</span> <span class="p">{},</span> 
+                <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;[measurement_units]&quot;</span><span class="p">,</span> 
+                <span class="s2">&quot;minimum_bias&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+                <span class="s2">&quot;vmin_absolute&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sconco3&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;sconcno2&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+                <span class="s2">&quot;vmax_absolute&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sconco3&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s2">&quot;sconcno2&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span> 
+                <span class="s2">&quot;vmin_bias&quot;</span><span class="p">:</span> <span class="p">{},</span> 
+                <span class="s2">&quot;vmax_bias&quot;</span><span class="p">:</span> <span class="p">{},</span>
+                <span class="s2">&quot;cmap_absolute&quot;</span><span class="p">:</span> <span class="s2">&quot;viridis&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;cmap_bias&quot;</span><span class="p">:</span> <span class="s2">&quot;RdYlBu_r&quot;</span><span class="p">},</span>
+</pre></div>
+</div>
+<p>If they define the cmap, they will need to give a complete list of cmap options for each of the species that they load or otherwise a warning will appear. For vmin and vmax, they can define the bounds for some species and the rest will take the data minimum and maximum values.</p>
+</section>
+<section id="remove-extreme-stations-by-their-statistical-values">
+<h3>Remove extreme stations by their statistical values<a class="headerlink" href="#remove-extreme-stations-by-their-statistical-values" title="Link to this heading"></a></h3>
+<p>If you want to automatically remove stations that have certain statistical values, you will need to add your criteria in the file <code class="docutils literal notranslate"><span class="pre">settings/remove_extreme_stations.yaml</span></code>. An example of this exists for <code class="docutils literal notranslate"><span class="pre">CAMS</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;CAMS&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;0.3&quot;</span><span class="p">],</span>
+         <span class="s2">&quot;NMB&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;-100.0&quot;</span><span class="p">,</span> <span class="s2">&quot;&gt;100.0&quot;</span><span class="p">],</span>
+         <span class="s2">&quot;NRMSE&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&gt;100.0&quot;</span><span class="p">]}</span>
+</pre></div>
+</div>
+<p>The statistics can be general, across all components, or they can be specific per component, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;CAMS&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;r&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sconco3&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;0.3&quot;</span><span class="p">],</span> 
+               <span class="s2">&quot;sconcno2&quot;</span><span class="p">:[</span><span class="o">&lt;</span><span class="mf">0.55</span><span class="p">]},</span>
+        <span class="s2">&quot;NMB&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sconco3&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;-100.0&quot;</span><span class="p">,</span> <span class="s2">&quot;&gt;100.0&quot;</span><span class="p">],</span> 
+                <span class="s2">&quot;sconcno2&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;-20.0&quot;</span><span class="p">,</span> <span class="s2">&quot;&gt;20.0&quot;</span><span class="p">]},</span>
+        <span class="s2">&quot;NRMSE&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;sconco3&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&gt;100.0&quot;</span><span class="p">],</span> 
+                  <span class="s2">&quot;sconcno2&quot;</span><span class="p">:[</span><span class="s2">&quot;&gt;200.0&quot;</span><span class="p">]}}</span>
+</pre></div>
+</div>
+<p>Any absolute statistic can be set to be a bias statistic by adding <code class="docutils literal notranslate"><span class="pre">_bias</span></code> e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;p95_bias&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;10&quot;</span><span class="p">,</span><span class="s2">&quot;&gt;20&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>You will also need to add the variable <code class="docutils literal notranslate"><span class="pre">remove_extreme_stations</span></code> in your configuration file, referencing the group of statistics to filter by that you defined, e.g. <code class="docutils literal notranslate"><span class="pre">CAMS</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">remove_extreme_stations</span><span class="o">=</span><span class="n">CAMS</span>
+</pre></div>
+</div>
+</section>
+<section id="calculating-exceedances">
+<h3>Calculating exceedances<a class="headerlink" href="#calculating-exceedances" title="Link to this heading"></a></h3>
+<p>In Providentia the <code class="docutils literal notranslate"><span class="pre">exceedances</span></code> statistic is available in the list of available statistics. How it is currently implemented is simplistic, but users can simply state a threshold/limit value per component or network-component pair, and each instance where values exceed this limit will be counted. Therefore the <code class="docutils literal notranslate"><span class="pre">exceedances</span></code> statistic simply gives the number of instances above the threshold. The threshold values can be set in the file <code class="docutils literal notranslate"><span class="pre">settings/exceedances.yaml</span></code> per component, or network-component pair, as so:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;sconco3&quot;</span><span class="p">:</span> <span class="mf">90.21</span><span class="p">,</span> 
+ <span class="s2">&quot;sconcno2&quot;</span><span class="p">:</span> <span class="mf">106.38</span><span class="p">,</span>
+ <span class="s2">&quot;EBAS|sconco3&quot;</span><span class="p">:</span> <span class="mf">109.77</span><span class="p">,</span>
+ <span class="s2">&quot;EBAS|sconcno2&quot;</span><span class="p">:</span> <span class="mf">88.88</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>In the case a threshold is set for a specific component, and per network-component, then the threshold for network-component is taken preferentially.</p>
+</section>
+</section>
+<section id="editing-the-plot-style-in-the-dashboard">
+<h2>Editing the plot style in the dashboard<a class="headerlink" href="#editing-the-plot-style-in-the-dashboard" title="Link to this heading"></a></h2>
+<section id="changing-the-plot-style">
+<h3>Changing the plot style<a class="headerlink" href="#changing-the-plot-style" title="Link to this heading"></a></h3>
+<p>The style of the plots can be edited by clicking on the burger menus and changing the settings.</p>
+<p><img alt="menu" src="_images/menu.png" /></p>
+</section>
+<section id="legend-picking">
+<h3>Legend picking<a class="headerlink" href="#legend-picking" title="Link to this heading"></a></h3>
+<p>Clicking on the legend labels will remove or add data to each of the plots. If the label appears in bold, the data will be visible. If not, it will disappear.</p>
+<p><img alt="legend-picking" src="_images/legend-picking.png" /></p>
+</section>
+<section id="changing-the-statistics">
+<h3>Changing the statistics<a class="headerlink" href="#changing-the-statistics" title="Link to this heading"></a></h3>
+<p>The statistics in the <code class="docutils literal notranslate"><span class="pre">statsummary</span></code> can be updated from the burger menu.</p>
+<p><img alt="statsummary" src="_images/statsummary.png" /></p>
+</section>
+<section id="information-on-hover">
+<h3>Information on hover<a class="headerlink" href="#information-on-hover" title="Link to this heading"></a></h3>
+<p>Most plots show information when hovering over them. Take a look for instance at the distribution plot:</p>
+<p><img alt="distribution" src="_images/distribution.png" /></p>
+</section>
+<section id="smoothing">
+<h3>Smoothing<a class="headerlink" href="#smoothing" title="Link to this heading"></a></h3>
+<p>It is possible to add a smoothing line to the timeseries plot and make the points disappear. In order to achieve this, you will need to increase the smooth window, which by default is 0 and bring the marker size down to 0. You can also use the plot option <code class="docutils literal notranslate"><span class="pre">hidedata</span></code> to hide the points.</p>
+<p><img alt="timeseries" src="_images/timeseries.png" /></p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Plot-types-and-options.html" class="btn btn-neutral float-left" title="Plot types and options" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Statistics.html" class="btn btn-neutral float-right" title="Statistics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2024, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

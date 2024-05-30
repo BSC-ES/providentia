@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuration files &mdash; Providentia 2.3.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=c3c8ae58"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Plot types and options" href="Plot-types-and-options.html" />
+    <link rel="prev" title="Interactive mode" href="Interactive-mode.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Tool setup</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="user-guide.html">User guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Offline-reports.html">Offline reports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Interactive-mode.html">Interactive mode</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Configuration files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sections">Sections</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#subsections">Subsections</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#advanced-options">Advanced options</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Plot-types-and-options.html">Plot types and options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Plot-customisation.html">Plot customisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="user-guide.html">User guide</a></li>
+      <li class="breadcrumb-item active">Configuration files</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Configuration-files.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="configuration-files">
+<h1>Configuration files<a class="headerlink" href="#configuration-files" title="Link to this heading"></a></h1>
+<p>Configuration files are needed to get reports and useful to launch the dashboard since that way you can have all your preferred options in one file and load them.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>A basic configuration file looks like the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">PRV_sconco3_a365</span><span class="p">]</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">EBAS</span>
+<span class="n">species</span> <span class="o">=</span> <span class="n">sconco3</span>
+<span class="n">resolution</span> <span class="o">=</span> <span class="n">hourly</span>
+<span class="n">start_date</span> <span class="o">=</span> <span class="mi">20180101</span>
+<span class="n">end_date</span> <span class="o">=</span> <span class="mi">20180601</span>
+<span class="n">experiments</span> <span class="o">=</span> <span class="n">cams61_chimere_ph2</span><span class="o">-</span><span class="n">eu</span><span class="o">-</span><span class="mi">000</span><span class="p">,</span> <span class="n">cams61_monarch_ph2</span><span class="o">-</span><span class="n">eu</span><span class="o">-</span><span class="mi">000</span>
+<span class="n">temporal_colocation</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">spatial_colocation</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">report_type</span> <span class="o">=</span> <span class="n">standard</span>
+<span class="n">report_summary</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">report_stations</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">report_title</span> <span class="o">=</span> <span class="n">Report</span>
+<span class="n">report_filename</span> <span class="o">=</span> <span class="n">PROVIDENTIA_Report</span>
+</pre></div>
+</div>
+<p>This configuration can also have subsections, as in:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">PRV_sconco3_a365</span><span class="p">]</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">EBAS</span>
+<span class="n">species</span> <span class="o">=</span> <span class="n">sconco3</span>
+<span class="n">resolution</span> <span class="o">=</span> <span class="n">hourly</span>
+<span class="n">start_date</span> <span class="o">=</span> <span class="mi">20180101</span>
+<span class="n">end_date</span> <span class="o">=</span> <span class="mi">20180601</span>
+<span class="n">experiments</span> <span class="o">=</span> <span class="n">cams61_chimere_ph2</span><span class="o">-</span><span class="n">eu</span><span class="o">-</span><span class="mi">000</span><span class="p">,</span> <span class="n">cams61_monarch_ph2</span><span class="o">-</span><span class="n">eu</span><span class="o">-</span><span class="mi">000</span>
+<span class="n">temporal_colocation</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">spatial_colocation</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">report_type</span> <span class="o">=</span> <span class="n">standard</span>
+<span class="n">report_summary</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">report_stations</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">report_filename</span> <span class="o">=</span> <span class="n">PROVIDENTIA_Report</span>
+<span class="n">report_title</span> <span class="o">=</span> <span class="n">Report</span>
+
+    <span class="p">[[</span><span class="n">Barcelona</span><span class="p">]]</span>
+    <span class="n">latitude</span> <span class="o">=</span> <span class="mf">39.8</span><span class="p">,</span> <span class="mf">41.8</span>
+    <span class="n">longitude</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.5</span>
+    <span class="n">period</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Spring</span><span class="p">,</span> <span class="n">Daytime</span>
+
+    <span class="p">[[</span><span class="n">Madrid</span><span class="p">]]</span>
+    <span class="n">latitude</span> <span class="o">=</span> <span class="mf">39.57</span><span class="p">,</span> <span class="mf">42.2</span>
+    <span class="n">longitude</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.57</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.42</span>
+    <span class="n">standardised_network_provided_area_classification</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">rural</span> <span class="o">||</span> <span class="n">remove</span><span class="p">:</span> <span class="n">urban</span><span class="o">-</span><span class="n">suburban</span>
+</pre></div>
+</div>
+<section id="sections">
+<h3>Sections<a class="headerlink" href="#sections" title="Link to this heading"></a></h3>
+<p>It is <strong>mandatory</strong> to define sections to launch Providentia. Their names must be wrapped in brackets (<code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">]</span></code>) and cannot include interpuncts (<code class="docutils literal notranslate"><span class="pre">·</span></code>). Sections should contain the following fields:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Mandatory</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>network</p></td>
+<td><p>✓</p></td>
+<td><p>Network you want to load observations from. Can be multiple (e.g. <code class="docutils literal notranslate"><span class="pre">CAPMoN,</span> <span class="pre">EBAS</span></code>). Adding a wild card (*) is going to expand to certain variables (vconc* → vconc1, vconc2, etc.).</p></td>
+</tr>
+<tr class="row-odd"><td><p>species</p></td>
+<td><p>✓</p></td>
+<td><p>Species to load. Can be multiple (e.g. <code class="docutils literal notranslate"><span class="pre">sconco3,</span> <span class="pre">sconcno2</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p>resolution</p></td>
+<td><p>✓</p></td>
+<td><p>Temporal resolution of the observations you want to load (e.g. <code class="docutils literal notranslate"><span class="pre">3hourly</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p>start_date</p></td>
+<td><p>✓</p></td>
+<td><p>Comparison start date in YYYYMMDD format (e.g. <code class="docutils literal notranslate"><span class="pre">20170101</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p>end_date</p></td>
+<td><p>✓</p></td>
+<td><p>Comparison end date in YYYYMMDD format (e.g. <code class="docutils literal notranslate"><span class="pre">20180601</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p>experiments</p></td>
+<td><p>✗</p></td>
+<td><p>ID of interpolated experiment using providentia-interpolation. The experiment IDs can be mapped to different names by adding a list of alternative names after the experiment IDs (e.g. <code class="docutils literal notranslate"><span class="pre">exp1,</span> <span class="pre">exp2</span> <span class="pre">(altexp1,</span> <span class="pre">altexp2)</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p>temporal_colocation</p></td>
+<td><p>✗</p></td>
+<td><p>Boolean variable to set if you want to temporally colocate the observation and experiment data.</p></td>
+</tr>
+<tr class="row-odd"><td><p>spatial_colocation</p></td>
+<td><p>✗</p></td>
+<td><p>Boolean variable to set if you want to spatially colocate the observation and experiment data across multiple species.</p></td>
+</tr>
+<tr class="row-even"><td><p>statistic_mode</p></td>
+<td><p>✗</p></td>
+<td><p>Statistic mode: Temporal|Spatial (default), Spatial|Temporal or Flattened.</p></td>
+</tr>
+<tr class="row-odd"><td><p>statistic_aggregation</p></td>
+<td><p>✗</p></td>
+<td><p>Aggregation statistic, e.g. Median.</p></td>
+</tr>
+<tr class="row-even"><td><p>timeseries_statistic_aggregation</p></td>
+<td><p>✗</p></td>
+<td><p>Timeseries aggregation statistic, e.g. Median.</p></td>
+</tr>
+<tr class="row-odd"><td><p>periodic_statistic_mode</p></td>
+<td><p>✗</p></td>
+<td><p>Periodic statistic mode: Independent (default), Cycle.</p></td>
+</tr>
+<tr class="row-even"><td><p>periodic_statistic_aggregation</p></td>
+<td><p>✗</p></td>
+<td><p>Periodic aggregation statistic, e.g. Mean (default).</p></td>
+</tr>
+<tr class="row-odd"><td><p>filter_species</p></td>
+<td><p>✗</p></td>
+<td><p>Filter read species by other species data within a data range (can be multiple) (e.g. <code class="docutils literal notranslate"><span class="pre">network1:species1</span> <span class="pre">(lowerlim,</span> <span class="pre">upperlim),</span> <span class="pre">network2:species2</span> <span class="pre">(lowerlim,</span> <span class="pre">upperlim)</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p>lower_bound</p></td>
+<td><p>✗</p></td>
+<td><p>Filter out data lower than this set limit. If multiple species are being read then this can either be one value, setting the same limit across species, or multiple values per species (e.g. <code class="docutils literal notranslate"><span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p>upper_bound</p></td>
+<td><p>✗</p></td>
+<td><p>Filter out data above this set limit. If multiple species are being read then this can either be one value, setting the same limit across species, or multiple values per species (e.g. <code class="docutils literal notranslate"><span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p>report_type</p></td>
+<td><p>✗</p></td>
+<td><p>Type of report to generate that defines which plots the report will contain, from the options given in <code class="docutils literal notranslate"><span class="pre">report_plots.json</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>report_summary</p></td>
+<td><p>✗</p></td>
+<td><p>Boolean variable to set if you wish to make specific plots for each station in subsection.</p></td>
+</tr>
+<tr class="row-even"><td><p>report_stations</p></td>
+<td><p>✗</p></td>
+<td><p>Boolean variable to set if you wish to make summary plots across station subsection.</p></td>
+</tr>
+<tr class="row-odd"><td><p>report_title</p></td>
+<td><p>✗</p></td>
+<td><p>The header in the first page of the report (as in the PDF).</p></td>
+</tr>
+<tr class="row-even"><td><p>report_filename</p></td>
+<td><p>✗</p></td>
+<td><p>The filename of the report or the path to create the report (as in the PDF).</p></td>
+</tr>
+<tr class="row-odd"><td><p>map_extent</p></td>
+<td><p>✗</p></td>
+<td><p>Set the map plot extents with the syntax: minimum longitude, maximum longitude, minimum latitude, maximum latitude.</p></td>
+</tr>
+<tr class="row-even"><td><p>plot_characteristics_filename</p></td>
+<td><p>✗</p></td>
+<td><p>The path to the file containing the plot characteristics.</p></td>
+</tr>
+<tr class="row-odd"><td><p>active_dashboard_plots</p></td>
+<td><p>✗</p></td>
+<td><p>Plots that will be active in the dashboard once it is launched (e.g. <code class="docutils literal notranslate"><span class="pre">timeseries,</span> <span class="pre">periodic-violin,</span> <span class="pre">scatter,</span> <span class="pre">distribution</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p>harmonise_stations</p></td>
+<td><p>✗</p></td>
+<td><p>Boolean variable to set if you wish to harmonise axes limits across stations for stations report.</p></td>
+</tr>
+<tr class="row-odd"><td><p>harmonise_summary</p></td>
+<td><p>✗</p></td>
+<td><p>Boolean variable to set if you wish to harmonise axes limits across subsections for summary report.</p></td>
+</tr>
+<tr class="row-even"><td><p>observations_data_label</p></td>
+<td><p>✗</p></td>
+<td><p>Alternative name for observations.</p></td>
+</tr>
+<tr class="row-odd"><td><p>remove_extreme_stations</p></td>
+<td><p>✗</p></td>
+<td><p>Type of extreme stations removal, from the options given in <code class="docutils literal notranslate"><span class="pre">remove_extreme_stations.json</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p>resampling_resolution</p></td>
+<td><p>✗</p></td>
+<td><p>Resolution you want to resample your data to. Options: <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">monthly</span></code>, <code class="docutils literal notranslate"><span class="pre">annual</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Defining a list of experiments is optional since the user might only want to check the observations data.</p>
+<p>In the offline version, there will be a report per section. In the dashboard, you will only be able to load one section or subsection at a time.</p>
+<section id="use-of-non-ghost-networks">
+<h4>Use of non-GHOST networks<a class="headerlink" href="#use-of-non-ghost-networks" title="Link to this heading"></a></h4>
+<p>Providentia can be used both with GHOST and non-GHOST netCDF files. Users should add the path to their network in <code class="docutils literal notranslate"><span class="pre">settings/nonghost_files.json</span></code>. In the configuration file, you can refer to non-GHOST files like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">port_barcelona</span><span class="o">/</span><span class="n">port</span><span class="o">-</span><span class="n">barcelona</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="subsections">
+<h3>Subsections<a class="headerlink" href="#subsections" title="Link to this heading"></a></h3>
+<p>After defining the sections, the user can optionally create subsections and set specific information for each one. In order to do this, it is important to wrap the subsection names in double brackets (<code class="docutils literal notranslate"><span class="pre">[[</span> <span class="pre">]]</span></code>).</p>
+<p>These subsections must be located under the sections, including the details of the data subsections that you want the evaluation to be focused on. Above are included as examples two areas that we want to analyse, Barcelona and Madrid. For these separate sections, it is necessary to define the latitude and longitude which describe the area in order to delimit the analysis to the desired area. In the example, we used the following parameters for Madrid:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[[</span><span class="n">Madrid</span><span class="p">]]</span>
+<span class="n">latitude</span> <span class="o">=</span> <span class="mf">39.57</span><span class="p">,</span> <span class="mf">42.2</span>
+<span class="n">longitude</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.57</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.42</span>
+</pre></div>
+</div>
+<p>We can also get the data for all the stations in a country, in this case Spain, by writing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[[</span><span class="n">Spain</span><span class="p">]]</span>
+<span class="n">country</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Spain</span>
+</pre></div>
+</div>
+<p>Additionally, we can apply metadata filters. In the subsection for Madrid, we constrained the stations according to the <code class="docutils literal notranslate"><span class="pre">standardised_network_provided_area_classification</span></code> criteria:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">standardised_network_provided_area_classification</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">rural</span> <span class="o">||</span> <span class="n">remove</span><span class="p">:</span> <span class="n">urban</span><span class="o">-</span><span class="n">suburban</span>
+</pre></div>
+</div>
+<p>If you do not know which names can be used to filter the metadata, you should use the dashboard to select the fields, export the configuration <a class="reference external" href="https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Dashboard#exporting-data-or-configuration">exporting feature</a> and copy the fields that you want from there.</p>
+<p><code class="docutils literal notranslate"><span class="pre">NOTE:</span> <span class="pre">The</span> <span class="pre">field</span> <span class="pre">names</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">configuration</span> <span class="pre">files</span> <span class="pre">are</span> <span class="pre">case-insensitive,</span> <span class="pre">meaning</span> <span class="pre">that</span> <span class="pre">if</span> <span class="pre">you</span> <span class="pre">use</span> <span class="pre">capitals</span> <span class="pre">or</span> <span class="pre">small-cases</span> <span class="pre">(providing</span> <span class="pre">that</span> <span class="pre">the</span> <span class="pre">spelling</span> <span class="pre">is</span> <span class="pre">correct),</span> <span class="pre">then</span> <span class="pre">the</span> <span class="pre">field</span> <span class="pre">will</span> <span class="pre">be</span> <span class="pre">read</span> <span class="pre">properly.</span></code></p>
+</section>
+<section id="advanced-options">
+<h3>Advanced options<a class="headerlink" href="#advanced-options" title="Link to this heading"></a></h3>
+<p>In the basic overview, we include the minimum necessary fields that every configuration files should have, and how they should be written. Here, we will have a look to the fields that are included under the other options (QA, filters, META, etc.)</p>
+<p>All the QA and flags have an associated name and number to them. Their number can be found in the wiki page <a class="reference internal" href="Data-flags-and-QA-names-and-codes.html"><span class="doc std std-doc">Data flags and QA names and codes</span></a>.</p>
+<section id="qa">
+<h4>QA<a class="headerlink" href="#qa" title="Link to this heading"></a></h4>
+<p><img alt="qa" src="_images/qa.png" /></p>
+<p>The QA window contains contains a menu where you can select the quality assurance flags that you want to filter by. Providentia has a default set of these flags selected according to the species you select to load. However, users can select more filters, remove them all, or define their own. Following we summarize how you can perform these actions using your configuration file.</p>
+<section id="select-a-new-set-of-qa-flags">
+<h5>Select a new set of QA flags<a class="headerlink" href="#select-a-new-set-of-qa-flags" title="Link to this heading"></a></h5>
+<p>The field’s name is simply QA. Then, you can assign to that field the new set of flags you want to select. You can define the flags either by their codes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">QA</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span>
+</pre></div>
+</div>
+<p>or by using their full names:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">QA</span> <span class="o">=</span> <span class="n">Missing</span> <span class="n">Measurement</span><span class="p">,</span> <span class="n">Infinite</span> <span class="n">Value</span><span class="p">,</span> <span class="n">Negative</span> <span class="n">Measurement</span><span class="p">,</span> <span class="n">Zero</span> <span class="n">Measurement</span>
+</pre></div>
+</div>
+</section>
+<section id="remove-them-all">
+<h5>Remove them all<a class="headerlink" href="#remove-them-all" title="Link to this heading"></a></h5>
+<p>If you do not want to apply any QA filter, then you should define the field and leave it empty. Not defining it does not mean that there will be no QA selected. Therefore, if you want zero QA flags, then you should write the field as in the example below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">QA</span> <span class="o">=</span> 
+</pre></div>
+</div>
+<p>All the options to set the QA flags can be found in <a class="reference internal" href="Data-flags-and-QA-names-and-codes.html"><span class="doc std std-doc">Data flags and QA names and codes</span></a>.</p>
+</section>
+</section>
+<section id="flags">
+<h4>Flags<a class="headerlink" href="#flags" title="Link to this heading"></a></h4>
+<p><img alt="flags" src="_images/flags.png" /></p>
+<p>Exactly the same principles apply in the case of flags. The only difference is that there is no default set of flags selected. Actually, the default set is empty. For example, for the following flags, if you want to select Preliminary Data.</p>
+<p>Then you would have to define in your configuration:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">flags</span> <span class="o">=</span> <span class="n">Preliminary</span> <span class="n">Data</span>
+</pre></div>
+</div>
+<p>or:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">flags</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>All the options to set the data flags can be found in <a class="reference internal" href="Data-flags-and-QA-names-and-codes.html"><span class="doc std std-doc">Data flags and QA names and codes</span></a>.</p>
+</section>
+<section id="representativity-bounds">
+<h4>Representativity bounds<a class="headerlink" href="#representativity-bounds" title="Link to this heading"></a></h4>
+<p><img alt="representativity" src="_images/representativity.png" /></p>
+<p>For the case of the representativity fields, the way to define them is to write the name of the field in the same way as it appears in Providentia and assign to it the value you want. For example, if you want the hourly native representativity percent to be 20%, then you would define it as in the example below. In the same way you can define all of the filters of the representativity menu.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hourly_native_representativity_percent</span> <span class="o">=</span> <span class="mi">20</span>
+</pre></div>
+</div>
+<p>All the fields of representativity, with their default values can be found in <a class="reference internal" href="Representativity-filters.html"><span class="doc std std-doc">Representativity filters</span></a>.</p>
+</section>
+<section id="period">
+<h4>Period<a class="headerlink" href="#period" title="Link to this heading"></a></h4>
+<p><img alt="period" src="_images/period.png" /></p>
+<p>The period filters give the option to Keep (K) or Remove (R) specific observations according to period criteria.</p>
+<p>In the configuration files we define a simple syntax to define the options you want to keep or remove. We explain this syntax with an example. Let’s assume that we want to keep observations in Winter, during Daytime, and exclude data from weekends:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">period</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Winter</span><span class="p">,</span> <span class="n">Daytime</span> <span class="o">||</span> <span class="n">remove</span><span class="p">:</span> <span class="n">Weekend</span>
+</pre></div>
+</div>
+<p>In detail, the syntax works as following: The fields you want to keep you should write it after “<strong>keep:</strong>”, separate the fields you include with a comma. Exactly the same applies for the fields that you want to remove, you just start with “<strong>remove:</strong>”. Finally, add a <strong>double pipe “||”</strong> between the keep and remove definitions to distinguish between them.</p>
+<p>It is not necessary to have both <strong>keep</strong> and <strong>remove</strong> set. You can define only one of the two:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">period</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Daytime</span>
+</pre></div>
+</div>
+</section>
+<section id="metadata">
+<h4>Metadata<a class="headerlink" href="#metadata" title="Link to this heading"></a></h4>
+<p><img alt="meta" src="_images/meta.png" /></p>
+<p>The metadata filters that we find below the META menu can be classified into two categories:</p>
+<ul class="simple">
+<li><p>Fields that accept a range of values, with a lower bound and an upper bound</p></li>
+<li><p>Fields that have a list of options that we can keep or remove</p></li>
+</ul>
+<section id="fields-with-lower-upper-bound">
+<h5>Fields with lower/upper bound<a class="headerlink" href="#fields-with-lower-upper-bound" title="Link to this heading"></a></h5>
+<p>The sub-menu of Station Position is a good example of fields that have lower/upper bounds:</p>
+<p><img alt="image" src="_images/image.png" /></p>
+<p>For defining a field that accepts a range of value in this format, then you should write the name of the variable and then write the values of lower bound and upper bound separated by a comma: <strong>variable = lower, upper</strong>. In the example below we define the variables latitude and longitude:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">latitude</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">72</span>
+<span class="n">longitude</span> <span class="o">=</span> <span class="o">-</span><span class="mi">12</span><span class="p">,</span> <span class="mi">35</span>
+</pre></div>
+</div>
+<p>The same principle applies for all the fields under the META window that have a lower/upper bound field. For example, under the sub-menu of Globally Gridded Classification there are a number of options that can take a range (screenshot below). If you want to define for example the variable Joly-Peuch_classification_code, then you need to define in the same way as in the example above:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Joly</span><span class="o">-</span><span class="n">Peuch_classification_code</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="mi">6</span>
+</pre></div>
+</div>
+<p><img alt="image" src="_images/image1.png" /></p>
+</section>
+<section id="fields-with-keep-remove-options">
+<h5>Fields with keep/remove options<a class="headerlink" href="#fields-with-keep-remove-options" title="Link to this heading"></a></h5>
+<p>For the defining this type of fields, the principle is exactly the same with the one we described in the case of <strong>Period</strong>. In the configuration file, you will need to write the variable name (for example: <em>period, country, WMO_region, measuring_instrument_name</em>) and then follow the syntax <strong>keep: x, y || remove: w,z</strong></p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">period</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Daytime</span>
+<span class="n">standardised_network_provided_area_classification</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">rural</span> <span class="o">||</span> <span class="n">remove</span><span class="p">:</span> <span class="n">urban</span><span class="o">-</span><span class="n">suburban</span>
+<span class="n">standardised_network_provided_station_classification</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">background</span>
+<span class="n">country</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Spain</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="bounds">
+<h4>Bounds<a class="headerlink" href="#bounds" title="Link to this heading"></a></h4>
+<p>For setting the values bounds, then you define them as following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lower_bound</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">upper_bound</span> <span class="o">=</span> <span class="mi">1000</span>
+</pre></div>
+</div>
+<p>Additionally in the case of multiple species, then multiple bounds can be given for the number of species that exist, e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lower_bound</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span>
+<span class="n">upper_bound</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">,</span> <span class="mi">3000</span>
+</pre></div>
+</div>
+</section>
+<section id="calibration-factor">
+<h4>Calibration factor<a class="headerlink" href="#calibration-factor" title="Link to this heading"></a></h4>
+<p>The calibration factor can be used to modify the data of your experiments. To use it, users need to set the <code class="docutils literal notranslate"><span class="pre">calibration_factor</span></code> in the configuration file, as in:</p>
+<ul class="simple">
+<li><p>To add:</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">calibration_factor</span> <span class="o">=</span> <span class="o">+</span><span class="mi">10</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>To subtract:</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">calibration_factor</span> <span class="o">=</span> <span class="o">-</span><span class="mi">10</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>To multiply:</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">calibration_factor</span> <span class="o">=</span> <span class="o">*</span><span class="mi">10</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>To divide:</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">calibration_factor</span> <span class="o">=</span> <span class="o">/</span><span class="mi">10</span>
+</pre></div>
+</div>
+<p>The calibration factor could also be defined for diferent experiments in this way:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">calibration_factor</span> <span class="o">=</span> <span class="n">a54s</span><span class="o">-</span><span class="n">regional</span><span class="o">-</span><span class="mi">000</span> <span class="p">(</span><span class="o">*</span><span class="mf">0.62</span><span class="p">),</span> <span class="n">a4xf</span><span class="o">-</span><span class="n">regional</span><span class="o">-</span><span class="mi">000</span> <span class="p">(</span><span class="o">*</span><span class="mf">0.51</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Using diferent species, we would need to add the factors to the list of each experiment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">EEA_AQ_eReporting</span>
+<span class="n">species</span> <span class="o">=</span> <span class="n">pm2p5</span><span class="p">,</span> <span class="n">pm10</span>
+<span class="n">calibration_factor</span> <span class="o">=</span> <span class="n">a54s</span><span class="o">-</span><span class="n">regional</span><span class="o">-</span><span class="mi">000</span> <span class="p">(</span><span class="o">*</span><span class="mf">0.62</span><span class="p">,</span> <span class="o">*</span><span class="mf">0.4</span><span class="p">),</span> <span class="n">a4xf</span><span class="o">-</span><span class="n">regional</span><span class="o">-</span><span class="mi">000</span> <span class="p">(</span><span class="o">*</span><span class="mf">0.52</span><span class="p">,</span> <span class="o">*</span><span class="mf">0.9</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Where 0.62 would be applied to pm2p5 and 0.4 to pm10 for a54s-regional-000 data and 0.52 to pm2p5 and 0.9 to pm10 for a4xf-regional-000.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Interactive-mode.html" class="btn btn-neutral float-left" title="Interactive mode" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Plot-types-and-options.html" class="btn btn-neutral float-right" title="Plot types and options" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2024, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
