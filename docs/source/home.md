@@ -4,14 +4,13 @@
 
 ## Description
 
-Providentia currently has 3 different modes:
+Providentia currently has 3 different modes to visualise the data:
 
-* Dashboard, designed to allow on-the-fly analysis of BSC experiment output.
-* Offline reports, designed to obtain complete reports and carry out in-depth analysis of BSC experiment output.
-* Interactive mode, allowing use of the Providentia backend functions, and use within Jupyter notebooks.
+* [Dashboard](Dashboard), designed to allow on-the-fly analysis of BSC experiment output.
+* [Offline reports](Offline-reports), designed to obtain complete reports and carry out in-depth analysis of BSC experiment output.
+* [Interactive mode](Interactive-mode), allowing use of the Providentia backend functions, and use within Jupyter notebooks.
 
-This wiki has been written to help users develop their analysis using Providentia. If you want to use your own experiments in Providentia, you will need to interpolate their output to the observations network of your interest using
-[Providentia Interpolation](https://earth.bsc.es/gitlab/ac/providentia-interpolation) in advance. 
+This wiki has been written to help users develop their analysis using Providentia. If you want to use your own experiments in Providentia, you will need to interpolate their output to the observations network of your interest using the [interpolation mode](Interpolation). 
 
 ### Training sessions
 
