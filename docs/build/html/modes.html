@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>User guide &mdash; Providentia 2.3.0 documentation</title>
+  <title>Modes &mdash; Providentia 2.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -22,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Dashboard" href="Dashboard.html" />
+    <link rel="next" title="Interpolation" href="Interpolation.html" />
     <link rel="prev" title="Run the tool" href="Run-the-tool.html" /> 
 </head>
 
@@ -48,16 +48,15 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup.html">Tool setup</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">User guide</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Modes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Interpolation.html">Interpolation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Offline-reports.html">Offline reports</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Interactive-mode.html">Interactive mode</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Configuration-files.html">Configuration files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Plot-types-and-options.html">Plot types and options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Plot-customisation.html">Plot customisation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Download.html">Download</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a></li>
 <li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
 </ul>
@@ -76,9 +75,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">User guide</li>
+      <li class="breadcrumb-item active">Modes</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/user-guide.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/modes.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -86,10 +85,11 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="user-guide">
-<h1>User guide<a class="headerlink" href="#user-guide" title="Link to this heading"></a></h1>
+  <section id="modes">
+<h1>Modes<a class="headerlink" href="#modes" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="Interpolation.html">Interpolation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Dashboard.html">Dashboard</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="Dashboard.html#interface">Interface</a></li>
 </ul>
@@ -105,25 +105,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Interactive-mode.html#features">Features</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Configuration-files.html">Configuration files</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Configuration-files.html#overview">Overview</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="Plot-types-and-options.html">Plot types and options</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Plot-types-and-options.html#plot-types">Plot types</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Plot-types-and-options.html#plot-options">Plot options</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="Plot-customisation.html">Plot customisation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Plot-customisation.html#editing-the-plot-style-from-the-configuration-files">Editing the plot style from the configuration files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Plot-customisation.html#editing-the-plot-style-in-the-dashboard">Editing the plot style in the dashboard</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Statistics.html#statistical-modes">Statistical modes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Statistics.html#periodic-statistics">Periodic statistics</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="Download.html">Download</a></li>
 </ul>
 </div>
 </section>
@@ -133,7 +115,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Run-the-tool.html" class="btn btn-neutral float-left" title="Run the tool" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Dashboard.html" class="btn btn-neutral float-right" title="Dashboard" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Interpolation.html" class="btn btn-neutral float-right" title="Interpolation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -22,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="User guide" href="user-guide.html" />
+    <link rel="next" title="Modes" href="modes.html" />
     <link rel="prev" title="Clone the project" href="Clone-the-project.html" /> 
 </head>
 
@@ -66,7 +66,8 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="user-guide.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modes.html">Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a></li>
 <li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
 </ul>
@@ -100,7 +101,7 @@
 <h1>Run the tool<a class="headerlink" href="#run-the-tool" title="Link to this heading"></a></h1>
 <section id="running-the-tool-on-a-bsc-machine">
 <h2>Running the tool on a BSC machine<a class="headerlink" href="#running-the-tool-on-a-bsc-machine" title="Link to this heading"></a></h2>
-<p>If you are on Nord3v2 or Marenostrum4, you should request an interactive session:</p>
+<p>If you are on Nord3v2 or Marenostrum 5, you should request an interactive session:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span>
 </pre></div>
 </div>
@@ -109,7 +110,6 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">-</span><span class="n">u</span>
 </pre></div>
 </div>
-<p>In order to run the tool, it is necessary to load the modules. These have already been loaded using the first command.</p>
 <section id="launch-the-dashboard">
 <h3>Launch the dashboard<a class="headerlink" href="#launch-the-dashboard" title="Link to this heading"></a></h3>
 <p>As explained, you can launch the dashboard by simply running:</p>
@@ -139,7 +139,7 @@
 </section>
 <section id="running-the-tool-on-a-personal-machine">
 <h2>Running the tool on a personal machine<a class="headerlink" href="#running-the-tool-on-a-personal-machine" title="Link to this heading"></a></h2>
-<p>If you do not have access to the BSC machines, you will need to define the directories where your data is stored. You can do this by editing the file <code class="docutils literal notranslate"><span class="pre">/providentia/settings/data_paths.json</span></code> and defining <code class="docutils literal notranslate"><span class="pre">ghost_root</span></code>, <code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code> and <code class="docutils literal notranslate"><span class="pre">exp_root</span></code> under <code class="docutils literal notranslate"><span class="pre">local</span></code>. For instance:</p>
+<p>If you do not have access to the BSC machines, you will need to define the directories where your data is stored. You can do this by editing the file <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code> and defining <code class="docutils literal notranslate"><span class="pre">ghost_root</span></code>, <code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code> and <code class="docutils literal notranslate"><span class="pre">exp_root</span></code> under <code class="docutils literal notranslate"><span class="pre">local</span></code>. For instance:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;ghost_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/obs/ghost/&#39;</span>
 <span class="s1">&#39;nonghost_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/obs/nonghost/&#39;</span>
 <span class="s1">&#39;exp_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/exp/&#39;</span>
@@ -171,7 +171,7 @@
 </section>
 <section id="mounting-esarchive">
 <h2>Mounting esarchive<a class="headerlink" href="#mounting-esarchive" title="Link to this heading"></a></h2>
-<p>It is possible to mount the esarchive on your personal computer. This can then be used to load observations/experiments that are stored remotely on the esarchive while using Providentia on your local machine. How this is done varies by operating system, as detailed below. The Providentia data paths should be updated to point to the local mounted directory in <code class="docutils literal notranslate"><span class="pre">/providentia/settings/data_paths.json</span></code></p>
+<p>It is possible to mount the esarchive on your personal computer. This can then be used to load observations/experiments that are stored remotely on the esarchive while using Providentia on your local machine. How this is done varies by operating system, as detailed below. The Providentia data paths should be updated to point to the local mounted directory in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code></p>
 <section id="linux">
 <h3>Linux<a class="headerlink" href="#linux" title="Link to this heading"></a></h3>
 <p>On the Linux the esarchive can be setup permanently.</p>
@@ -204,7 +204,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Clone-the-project.html" class="btn btn-neutral float-left" title="Clone the project" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="user-guide.html" class="btn btn-neutral float-right" title="User guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="modes.html" class="btn btn-neutral float-right" title="Modes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

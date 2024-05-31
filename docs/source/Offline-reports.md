@@ -33,7 +33,7 @@ The offline report has access to a larger variety of plot types than the standar
 The meaning of each of these additional words (`_obs`, `_individual`, `_annotate`, etc.) can be found in [Plot types and options](Plot-types-and-options).
 
 ## Plot selection
-You should edit the file `providentia/settings/plots_per_report_type.json` and add a new dictionary key with the names of the plots you want to have. For instance, if you want to include timeseries and scatter plots with and without annotations in your report, you should add:
+You should edit the file `settings/plots_per_report_type.yaml` and add a new dictionary key with the names of the plots you want to have. For instance, if you want to include timeseries and scatter plots with and without annotations in your report, you should add:
 
 ```
 "new_plots": ["timeseries", "timeseries_annotate", 

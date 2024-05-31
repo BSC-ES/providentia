@@ -22,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Configuration files" href="Configuration-files.html" />
+    <link rel="next" title="Download" href="Download.html" />
     <link rel="prev" title="Offline reports" href="Offline-reports.html" /> 
 </head>
 
@@ -48,7 +48,8 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup.html">Tool setup</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="user-guide.html">User guide</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modes.html">Modes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Interpolation.html">Interpolation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Offline-reports.html">Offline reports</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Interactive mode</a><ul>
@@ -69,12 +70,10 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="Configuration-files.html">Configuration files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Plot-types-and-options.html">Plot types and options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Plot-customisation.html">Plot customisation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Download.html">Download</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a></li>
 <li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
 </ul>
@@ -93,7 +92,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="user-guide.html">User guide</a></li>
+          <li class="breadcrumb-item"><a href="modes.html">Modes</a></li>
       <li class="breadcrumb-item active">Interactive mode</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/Interactive-mode.md.txt" rel="nofollow"> View page source</a>
@@ -287,7 +286,7 @@ In order to let Providentia know what data is wanted to be read, and what filter
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">plot_type</span></code> is the plot type wished to be made (all types stated later in this section).</p>
 <p>All plots have been tailored to appear nice in Jupyter notebooks, but any plot settings can be modified by the user, per plot type, in:<br />
-<code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics_interactive.json</span></code></p>
+<code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics_interactive.yaml</span></code></p>
 <section id="plot-customisation">
 <h4>Plot customisation<a class="headerlink" href="#plot-customisation" title="Link to this heading"></a></h4>
 <p>There are numerous arguments to the plot method that can be used to customise the plots, each of which are subsequently detailed.</p>
@@ -328,7 +327,7 @@ In order to let Providentia know what data is wanted to be read, and what filter
 </section>
 <section id="custom-formatting">
 <h5>Custom formatting<a class="headerlink" href="#custom-formatting" title="Link to this heading"></a></h5>
-<p>To have more granular control of the plot formatting, and overwrite specific variables set in <code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics_interactive.json</span></code>, the <code class="docutils literal notranslate"><span class="pre">format</span></code> argument can be used to pass a dictionary which sets specific plot type format variables to overwrite, e.g.:</p>
+<p>To have more granular control of the plot formatting, and overwrite specific variables set in <code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics_interactive.yaml</span></code>, the <code class="docutils literal notranslate"><span class="pre">format</span></code> argument can be used to pass a dictionary which sets specific plot type format variables to overwrite, e.g.:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">format</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;figsize&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">14</span><span class="p">,</span><span class="mi">7</span><span class="p">],</span> <span class="s2">&quot;xtick_params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;labelsize&quot;</span><span class="p">:</span> <span class="mi">22</span><span class="p">}}</span>
 </pre></div>
 </div>
@@ -492,7 +491,7 @@ In order to let Providentia know what data is wanted to be read, and what filter
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Offline-reports.html" class="btn btn-neutral float-left" title="Offline reports" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Configuration-files.html" class="btn btn-neutral float-right" title="Configuration files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Download.html" class="btn btn-neutral float-right" title="Download" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Plot types and options" href="Plot-types-and-options.html" />
-    <link rel="prev" title="Interactive mode" href="Interactive-mode.html" /> 
+    <link rel="prev" title="Topics in depth" href="topics-in-depth.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,10 +48,8 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup.html">Tool setup</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="user-guide.html">User guide</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Offline-reports.html">Offline reports</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Interactive-mode.html">Interactive mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modes.html">Modes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Configuration files</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#sections">Sections</a></li>
@@ -84,7 +82,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="user-guide.html">User guide</a></li>
+          <li class="breadcrumb-item"><a href="topics-in-depth.html">Topics in depth</a></li>
       <li class="breadcrumb-item active">Configuration files</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/Configuration-files.md.txt" rel="nofollow"> View page source</a>
@@ -221,7 +219,7 @@
 </tr>
 <tr class="row-even"><td><p>report_type</p></td>
 <td><p>✗</p></td>
-<td><p>Type of report to generate that defines which plots the report will contain, from the options given in <code class="docutils literal notranslate"><span class="pre">report_plots.json</span></code>.</p></td>
+<td><p>Type of report to generate that defines which plots the report will contain, from the options given in <code class="docutils literal notranslate"><span class="pre">report_plots.yaml</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p>report_summary</p></td>
 <td><p>✗</p></td>
@@ -265,7 +263,7 @@
 </tr>
 <tr class="row-odd"><td><p>remove_extreme_stations</p></td>
 <td><p>✗</p></td>
-<td><p>Type of extreme stations removal, from the options given in <code class="docutils literal notranslate"><span class="pre">remove_extreme_stations.json</span></code>.</p></td>
+<td><p>Type of extreme stations removal, from the options given in <code class="docutils literal notranslate"><span class="pre">remove_extreme_stations.yaml</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p>resampling_resolution</p></td>
 <td><p>✗</p></td>
@@ -277,7 +275,7 @@
 <p>In the offline version, there will be a report per section. In the dashboard, you will only be able to load one section or subsection at a time.</p>
 <section id="use-of-non-ghost-networks">
 <h4>Use of non-GHOST networks<a class="headerlink" href="#use-of-non-ghost-networks" title="Link to this heading"></a></h4>
-<p>Providentia can be used both with GHOST and non-GHOST netCDF files. Users should add the path to their network in <code class="docutils literal notranslate"><span class="pre">settings/nonghost_files.json</span></code>. In the configuration file, you can refer to non-GHOST files like:</p>
+<p>Providentia can be used both with GHOST and non-GHOST netCDF files. Users should add the path to their network in <code class="docutils literal notranslate"><span class="pre">settings/nonghost_files.yaml</span></code>. In the configuration file, you can refer to non-GHOST files like:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">port_barcelona</span><span class="o">/</span><span class="n">port</span><span class="o">-</span><span class="n">barcelona</span>
 </pre></div>
 </div>
@@ -464,7 +462,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Interactive-mode.html" class="btn btn-neutral float-left" title="Interactive mode" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="topics-in-depth.html" class="btn btn-neutral float-left" title="Topics in depth" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Plot-types-and-options.html" class="btn btn-neutral float-right" title="Plot types and options" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
