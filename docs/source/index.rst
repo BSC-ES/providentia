@@ -7,6 +7,7 @@ Contents
 
    home.md
    setup.rst
-   user-guide.rst
+   modes.rst
+   topics-in-depth.rst
    other-topics.rst
    reference.rst
