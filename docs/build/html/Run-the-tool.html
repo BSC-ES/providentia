@@ -56,12 +56,6 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#running-the-tool-on-a-personal-machine">Running the tool on a personal machine</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mounting-esarchive">Mounting esarchive</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#linux">Linux</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mac">Mac</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#windows">Windows</a></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -145,15 +139,8 @@
 <span class="s1">&#39;exp_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/exp/&#39;</span>
 </pre></div>
 </div>
-<p>You should download the data that you need from the BSC systems to the local machine. The tool has set locations where it grabs the observational/experiment data on the <strong>esarchive</strong>:</p>
-<ul class="simple">
-<li><p>GHOST observational data: <code class="docutils literal notranslate"><span class="pre">/esarchive/obs/ghost</span></code></p></li>
-<li><p>Non-GHOST observational data: <code class="docutils literal notranslate"><span class="pre">/esarchive/obs/</span></code></p></li>
-<li><p>Interpolated experiment data: <code class="docutils literal notranslate"><span class="pre">/esarchive/recon/exp_interp</span></code></p></li>
-</ul>
-<p>The entire data collection comprises <strong>several terabytes</strong>, therefore it is not recommended to download the entire archive.</p>
-<p>If it is the first time that you launch Providentia, an environment called <code class="docutils literal notranslate"><span class="pre">providentia-env</span></code> will be created with all the necessary dependencies.</p>
-<p>If you want to create the environment from scratch, you can use:</p>
+<p>You should download the data that you need from the BSC systems to the local machine. To do this, you can use the <a class="reference internal" href="Download.html"><span class="doc std std-doc">download mode</span></a>.</p>
+<p>If it is the first time that you launch Providentia, an environment called <code class="docutils literal notranslate"><span class="pre">providentia-env</span></code> will be created with all the necessary dependencies. If for some reason you want to create the environment from scratch, you can use:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">environment</span><span class="o">.</span><span class="n">yaml</span>
 </pre></div>
 </div>
@@ -168,34 +155,6 @@
 </div>
 <p>Check what the latest versions of <a class="reference external" href="https://github.com/conda/conda/releases">conda</a> and <a class="reference external" href="https://github.com/conda/conda-build/releases">conda-build</a> are.</p>
 <p>Enjoy!</p>
-</section>
-<section id="mounting-esarchive">
-<h2>Mounting esarchive<a class="headerlink" href="#mounting-esarchive" title="Link to this heading"></a></h2>
-<p>It is possible to mount the esarchive on your personal computer. This can then be used to load observations/experiments that are stored remotely on the esarchive while using Providentia on your local machine. How this is done varies by operating system, as detailed below. The Providentia data paths should be updated to point to the local mounted directory in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code></p>
-<section id="linux">
-<h3>Linux<a class="headerlink" href="#linux" title="Link to this heading"></a></h3>
-<p>On the Linux the esarchive can be setup permanently.</p>
-<p>Firstly, create a local directory where you want the esarchive to be mounted, e.g. <code class="docutils literal notranslate"><span class="pre">/localdir/tomount/esarchive</span></code></p>
-<p>Next, add the following line to the <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> file (changing your BSC username and local directory):</p>
-<p><code class="docutils literal notranslate"><span class="pre">sshfs#bscXXXXXX&#64;dt01.bsc.es:/gpfs/archive/bsc32/esarchive</span> <span class="pre">/localdir/tomount/esarchive</span> <span class="pre">fuse</span> <span class="pre">defaults,allow_other,reconnect,ro</span> <span class="pre">0</span> <span class="pre">0</span></code></p>
-<p>The esarchive can finally be mounted by:</p>
-<p><code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">mount</span> <span class="pre">-av</span> </code></p>
-<p>To unmount the esarchive, the following command can be used:</p>
-<p><code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">umount</span> <span class="pre">/localdir/tomount/esarchive</span></code></p>
-</section>
-<section id="mac">
-<h3>Mac<a class="headerlink" href="#mac" title="Link to this heading"></a></h3>
-<p>On Mac, the mounting cannot be setup permanently, but will stay open while the terminal session is active. Before trying to setup the connection you must install FUSE and SSHFS, please follow the instructions here: https://earth.bsc.es/wiki/doku.php?id=computing:addesarchive&amp;s[]=sshfs</p>
-<p>After that is done, create a local directory where you want the esarchive to be mounted, e.g. <code class="docutils literal notranslate"><span class="pre">/localdir/tomount/esarchive</span></code></p>
-<p>Then run the following command (changing your BSC username and local directory):</p>
-<p><code class="docutils literal notranslate"><span class="pre">sshfs</span> <span class="pre">bscXXXXXX&#64;dt01.bsc.es:/gpfs/archive/bsc32/esarchive</span> <span class="pre">/localdir/tomount/esarchive</span> <span class="pre">-o</span> <span class="pre">volname=esarchive,defer_permissions,allow_other,IdentityFile=$HOME/.ssh/id_rsa,reconnect,ro</span></code></p>
-<p>To unmount the esarchive, the following command can be used:</p>
-<p><code class="docutils literal notranslate"><span class="pre">diskutil</span> <span class="pre">umount</span> <span class="pre">force</span> <span class="pre">/localdir/tomount/esarchive</span></code></p>
-</section>
-<section id="windows">
-<h3>Windows<a class="headerlink" href="#windows" title="Link to this heading"></a></h3>
-<p>As present, the esarchive cannot be mounted on Windows machines.</p>
-</section>
 </section>
 </section>
 
