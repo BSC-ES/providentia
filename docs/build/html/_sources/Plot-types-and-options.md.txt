@@ -6,10 +6,10 @@ This page is only useful to those who want to create their own reports with the 
 
 The standard plot types consist of: maps (`map`), metadata summary (`metadata`), timeseries (`timeseries`), periodic plots (`periodic`), periodic violin plots (`periodic-violin`), box plots (`boxplot`), distribution plots (`distribution`), scatter plots (`scatter`), heat maps (`heatmap`), tables that give one stat per subsection per experiment (`table`) and tables that give multiple stats per experiment (`statsummary`).
 
-Some of these plots involve calculating a specific statistic, namely: `map`, `periodic`, `heatmap` and `table`. This statistic is defined by aggregating the `-[stat]` field to the plot type will make a plot of the required type for the specific type of statistic set. `[stat]` should be replaced with any of the base statistic names (e.g. p5, Mean), or experiment bias names. For example to show the median values spatially, `map-p50` would be set as the plot name, or `map-r2` to show the coefficient of determination. The available statistic names are documented in `providentia/settings/basic_stats_dict.json` and `providentia/settings/experiment_bias_stats_dict.json` for reference.
+Some of these plots involve calculating a specific statistic, namely: `map`, `periodic`, `heatmap` and `table`. This statistic is defined by aggregating the `-[stat]` field to the plot type will make a plot of the required type for the specific type of statistic set. `[stat]` should be replaced with any of the base statistic names (e.g. p5, Mean), or experiment bias names. For example to show the median values spatially, `map-p50` would be set as the plot name, or `map-r2` to show the coefficient of determination. The available statistic names are documented in `settings/basic_stats_dict.yaml` and `settings/experiment_bias_stats_dict.yaml` for reference.
 
 For the `metadata` plot the metadata displayed is set to a default list of metadata fields. For the `statsummary` plot the statistics displayed are set to a default list of absolute and bias statistics. These default options can be changed in either the
-`providentia/settings/plot_characteristics_dashboard.json` and `providentia/settings/plot_characteristics_offline.json` files, depending on which mode Providentia is being ran in.
+`settings/plot_characteristics_dashboard.yaml` and `settings/plot_characteristics_offline.yaml` files, depending on which mode Providentia is being ran in.
 
 ### Map (`map`)
 

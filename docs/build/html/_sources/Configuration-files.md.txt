@@ -73,7 +73,7 @@ It is **mandatory** to define sections to launch Providentia. Their names must b
 | filter_species | ✗ | Filter read species by other species data within a data range (can be multiple) (e.g. `network1:species1 (lowerlim, upperlim), network2:species2 (lowerlim, upperlim)`). |
 | lower_bound | ✗ | Filter out data lower than this set limit. If multiple species are being read then this can either be one value, setting the same limit across species, or multiple values per species (e.g. `3, 4, 5`). |
 | upper_bound | ✗ | Filter out data above this set limit. If multiple species are being read then this can either be one value, setting the same limit across species, or multiple values per species (e.g. `3, 4, 5`). |
-| report_type | ✗ | Type of report to generate that defines which plots the report will contain, from the options given in `report_plots.json`. |
+| report_type | ✗ | Type of report to generate that defines which plots the report will contain, from the options given in `report_plots.yaml`. |
 | report_summary | ✗ | Boolean variable to set if you wish to make specific plots for each station in subsection. |
 | report_stations | ✗ | Boolean variable to set if you wish to make summary plots across station subsection. |
 | report_title | ✗ | The header in the first page of the report (as in the PDF). |
@@ -84,7 +84,7 @@ It is **mandatory** to define sections to launch Providentia. Their names must b
 | harmonise_stations | ✗ | Boolean variable to set if you wish to harmonise axes limits across stations for stations report. |
 | harmonise_summary | ✗ | Boolean variable to set if you wish to harmonise axes limits across subsections for summary report. |
 | observations_data_label | ✗ | Alternative name for observations. |
-| remove_extreme_stations | ✗ | Type of extreme stations removal, from the options given in `remove_extreme_stations.json`. |
+| remove_extreme_stations | ✗ | Type of extreme stations removal, from the options given in `remove_extreme_stations.yaml`. |
 | resampling_resolution | ✗ | Resolution you want to resample your data to. Options: `hourly`, `daily`, `monthly`, `annual`.|
   
 Defining a list of experiments is optional since the user might only want to check the observations data.
@@ -93,7 +93,7 @@ In the offline version, there will be a report per section. In the dashboard, yo
 
 #### Use of non-GHOST networks
 
-Providentia can be used both with GHOST and non-GHOST netCDF files. Users should add the path to their network in `settings/nonghost_files.json`. In the configuration file, you can refer to non-GHOST files like:
+Providentia can be used both with GHOST and non-GHOST netCDF files. Users should add the path to their network in `settings/nonghost_files.yaml`. In the configuration file, you can refer to non-GHOST files like:
 
 ```
 network = port_barcelona/port-barcelona
