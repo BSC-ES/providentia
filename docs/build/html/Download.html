@@ -88,13 +88,13 @@
              
   <section id="download">
 <h1>Download<a class="headerlink" href="#download" title="Link to this heading"></a></h1>
-<p>The tool has set locations where it grabs the observational/experiment data on the <strong>esarchive</strong>:</p>
-<ul class="simple">
-<li><p>GHOST observational data: <code class="docutils literal notranslate"><span class="pre">/esarchive/obs/ghost</span></code></p></li>
-<li><p>Non-GHOST observational data: <code class="docutils literal notranslate"><span class="pre">/esarchive/obs/</span></code></p></li>
-<li><p>Interpolated experiment data: <code class="docutils literal notranslate"><span class="pre">/esarchive/recon/exp_interp</span></code></p></li>
-</ul>
-<p>The entire data collection comprises <strong>several terabytes</strong>, therefore it is not recommended to download the entire archive.</p>
+<p>Now it is possible to download data directly into your machine outside HPC via the download mode. With this, you won’t need to spend time waiting for a job to be allocated for you and the tool interactive features will run smoothly as there will be no x11 forwarding.</p>
+<p>To download data you just need to add <code class="docutils literal notranslate"><span class="pre">--download</span></code> to your command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">download</span>
+</pre></div>
+</div>
+<p>This will get the data that needs to be downloaded from your configuration file and save it into the directories specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths</span></code> for <code class="docutils literal notranslate"><span class="pre">local</span></code>.</p>
+<p>If the data is GHOST, it will be grabbed from <a class="reference external" href="https://zenodo.org/records/10637450">Zenodo</a> and for non-GHOST data, this will come from the <code class="docutils literal notranslate"><span class="pre">esarchive</span></code>.</p>
 </section>
 
 

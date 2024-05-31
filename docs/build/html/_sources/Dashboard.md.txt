@@ -9,7 +9,7 @@ There are several available options to perform the analysis. The header of the w
 - Data Selection
 - Filters
 - Statistics
-- Colocaiton
+- Colocation
 - Resampling
 - Site Selection
 
@@ -18,10 +18,11 @@ There are several available options to perform the analysis. The header of the w
 ### Data Selection
 Under this section, there are four drop-down menus. The first option that the user should fill is the data provider (e.g., EIONET, EBAS, etc.). Then, the further three menus will show the available options that correspond to the selected provider and refer to specific variables and data frequency (hourly, daily, monthly, etc.).
 
-Next, there are three fields with pop-up menus: **QA, Flags, and Exps**.
+Next, there are four pop-up menus:
 * **QA** contains the quality assurance flags to filter by.
-* **Flags** contain standardised data reporter provided flags to filter by.
-* **Exps** contains a list of experiments that exist and are related to the variable selected.
+* **FLAGS** contain standardised data reporter provided flags to filter by.
+* **EXPS** contains a list of experiments that exist and are related to the variable selected.
+* **MULTI** can be used to [filter your current network-species by the values of other network-species](Multispecies-filtering).
 
 `NOTE: If under the **QA** menu, the checkboxes ‘*Invalid Data Provider Flags – GHOST Decreed*’ or ‘*Invalid Data Provider Flags – Network Decreed*’ are selected, all checkboxes under the Flags menu should be unticked (the default setting). This is because ticking one of these checkboxes sets a pre-selected subset of Flags checkboxes automatically. For this reason also, only one of these QA checkboxes should be ticked at the same time.`
 
