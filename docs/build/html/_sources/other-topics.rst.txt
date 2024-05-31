@@ -10,4 +10,5 @@ Other topics
    Representativity-filters.md
    Saved-file-formats.md
    Create-your-own-data-network.md
+   Mounting-esarchive.md
    Evolution.md
