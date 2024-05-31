@@ -1,9 +1,13 @@
 # Download
 
-The tool has set locations where it grabs the observational/experiment data on the **esarchive**:
+Now it is possible to download data directly into your machine outside HPC via the download mode. With this, you won't need to spend time waiting for a job to be allocated for you and the tool interactive features will run smoothly as there will be no x11 forwarding.
 
-* GHOST observational data: `/esarchive/obs/ghost`
-* Non-GHOST observational data: `/esarchive/obs/`
-* Interpolated experiment data: `/esarchive/recon/exp_interp`
+To download data you just need to add `--download` to your command:
 
-The entire data collection comprises **several terabytes**, therefore it is not recommended to download the entire archive.
+```
+./bin/providentia --config='/path/to/file/example.conf' --download
+```
+
+This will get the data that needs to be downloaded from your configuration file and save it into the directories specified in `settings/data_paths` for `local`.
+
+If the data is GHOST, it will be grabbed from [Zenodo](https://zenodo.org/records/10637450) and for non-GHOST data, this will come from the `esarchive`.
