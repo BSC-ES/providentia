@@ -32,7 +32,7 @@ Namely, these are:
 | temporal_colocation | Boolean variable to set if you want to temporally colocate the observation and experiment data. | False |
 | spatial_colocation | Boolean variable to set if you want to spatially colocate the observation and experiment data across multiple species. | True |
 | filter_species | Filter read species by other species data within a data range (can be multiple) (e.g. `network1:species1 (lowerlim, upperlim), network2:species2 (lowerlim, upperlim)`). | |
-| report_type | Type of report to generate that defines which plots the report will contain, from the options given in `report_plots.json`. | standard |
+| report_type | Type of report to generate that defines which plots the report will contain, from the options given in `report_plots.yaml`. | standard |
 | report_summary | Boolean variable to set if you wish to make specific plots for each station in subsection.  | True |
 | report_stations | Boolean variable to set if you wish to make summary plots across station subsection. | False |
 | report_title | The header in the first page of the report (as in the PDF). | Providentia Offline Report |

@@ -2,7 +2,7 @@
 
 ## Running the tool on a BSC machine
 
-If you are on Nord3v2 or Marenostrum4, you should request an interactive session:
+If you are on Nord3v2 or Marenostrum 5, you should request an interactive session:
 
 ```
 ./bin/providentia
@@ -15,8 +15,6 @@ By default, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total 
 ```
 ./bin/providentia -u
 ``` 
-
-In order to run the tool, it is necessary to load the modules. These have already been loaded using the first command. 
 
 ### Launch the dashboard
 
@@ -53,7 +51,7 @@ The reports will be saved under the folder `reports`. You can add a path in the 
 
 ## Running the tool on a personal machine
 
-If you do not have access to the BSC machines, you will need to define the directories where your data is stored. You can do this by editing the file `/providentia/settings/data_paths.json` and defining `ghost_root`, `nonghost_root` and `exp_root` under `local`. For instance:
+If you do not have access to the BSC machines, you will need to define the directories where your data is stored. You can do this by editing the file `settings/data_paths.yaml` and defining `ghost_root`, `nonghost_root` and `exp_root` under `local`. For instance:
 
 ```
 'ghost_root': '/data/providentia/obs/ghost/'
@@ -97,7 +95,7 @@ Enjoy!
 
 ## Mounting esarchive
 
-It is possible to mount the esarchive on your personal computer. This can then be used to load observations/experiments that are stored remotely on the esarchive while using Providentia on your local machine. How this is done varies by operating system, as detailed below. The Providentia data paths should be updated to point to the local mounted directory in `/providentia/settings/data_paths.json` 
+It is possible to mount the esarchive on your personal computer. This can then be used to load observations/experiments that are stored remotely on the esarchive while using Providentia on your local machine. How this is done varies by operating system, as detailed below. The Providentia data paths should be updated to point to the local mounted directory in `settings/data_paths.yaml` 
 
 ### Linux
 
