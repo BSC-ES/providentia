@@ -48,7 +48,8 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup.html">Tool setup</a></li>
-<li class="toctree-l1"><a class="reference internal" href="user-guide.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modes.html">Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="other-topics.html">Other topics</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Command-line-configuration.html">Command line configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Data-flags-and-QA-names-and-codes.html">Data flags and QA names and codes</a></li>
@@ -103,7 +104,7 @@
 <li><p>Create monthly datasets from CSIC:
 https://earth.bsc.es/gitlab/es/NES/-/blob/master/tutorials/2.Creation/2.5.Create_Points_CSIC.ipynb</p></li>
 </ul>
-<p>Providentia will be able to find these datasets if they are saved in the directory <code class="docutils literal notranslate"><span class="pre">/esarchive/obs/</span></code>. The data path must be included in <a class="reference external" href="https://earth.bsc.es/gitlab/ac/Providentia/-/blob/master/providentia/settings/nonghost_files.json">providentia/settings/nonghost_files.json</a>. As an example, the path to the data from CSIC (<code class="docutils literal notranslate"><span class="pre">/esarchive/obs/csic/csic/monthly/sconcnh3/</span></code>) correspond in this dictionary to:</p>
+<p>Providentia will be able to find these datasets if they are saved in the directory <code class="docutils literal notranslate"><span class="pre">/esarchive/obs/</span></code>. The data path must be included in <code class="docutils literal notranslate"><span class="pre">settings/nonghost_files.yaml</span></code>. As an example, the path to the data from CSIC (<code class="docutils literal notranslate"><span class="pre">/esarchive/obs/csic/csic/monthly/sconcnh3/</span></code>) correspond in this dictionary to:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;csic/csic&quot;</span><span class="p">:</span> <span class="p">{</span>
     <span class="s2">&quot;monthly&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;sconcnh3&quot;</span><span class="p">:</span> <span class="p">[]</span>

@@ -36,7 +36,7 @@ Finally, the Data Selection section contains the option **Colocate**. When selec
 
 The drop-down menu of the available networks shows the names of the networks that have available data for the selected date range.
 
-`NOTE: The networks' data that are stored in /esarchive are **not** accessible from MareNostrum4. If you want to use these data, then you should run Providentia from **Nord3**.`
+`NOTE: The networks' data that are stored in /esarchive are **not** accessible from MareNostrum 5. If you want to use these data, then you should run Providentia from **Nord3**.`
 
 #### Example
 
