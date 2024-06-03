@@ -91,12 +91,32 @@ class ProvidentiaDownload(object):
             for k, val in self.section_opts.items():
                 setattr(self, k, provconf.parse_parameter(k, val))
 
+            # now all variables have been parsed, check validity of those, throwing errors where necessary
+            provconf.check_validity()
+
             # if networks is none, then get all possible networks 
             if not self.network:
+                # TODO: Maybe change this to default none, if ghost or nonghost passed then all, so there's the option of not downloading networks
                 self.get_all_networks()
 
             # network
             for network in self.network:
+                # ghost
+                if check_for_ghost(network):
+                    self.download_ghost_network(network)
+                # non-ghost
+                else:
+                    self.download_nonghost_network(network)
+
+            # filter species networks
+            for i,network_specie in enumerate(self.filter_species):
+                # get network and specie from filter_species
+                network, specie = network_specie.split('|')
+
+                # restart the instance variables
+                self.species = [specie]
+                self.resolution = []
+
                 # ghost
                 if check_for_ghost(network):
                     self.download_ghost_network(network)
@@ -216,10 +236,10 @@ class ProvidentiaDownload(object):
             res_spec_combinations = [f"/{resolution}/" for resolution in self.resolution]
         # network + species 
         elif not self.resolution:
-            res_spec_combinations = self.species    
+            res_spec_combinations = [f"/{specie}.tar.xz"  for specie in self.species]   
         # network + resolution + species 
         else:
-            res_spec_combinations = [f"/{resolution}/{specie}" for specie in self.species for resolution in self.resolution]
+            res_spec_combinations = [f"/{resolution}/{specie}.tar.xz" for specie in self.species for resolution in self.resolution]
 
        
         # get all the possible networks from network e.g. EBAS gets EBAS-ACTRIS_oyktp, EBAS-AMAP_hcxwm, EBAS-CAMP_daczg, etc
@@ -239,31 +259,33 @@ class ProvidentiaDownload(object):
                 # TODO Deberia printear cuanto va a ocupar pero no se sabe porque para cada uno no se va a descargar todas las fechas
                 # SE PUEDE PONER DESPUES
 
-                # Print the specie, resolution and network combinations that are going to be downloaded
-                print(f"{network} observations to download:")
-                for specie in res_spec_final_combinations:
-                    print(f"  - {self.nonghost_root}{specie[:-7]}")
+                # check if there's any possible combination with user's network, resolution and specie
+                if res_spec_final_combinations:
+                    # Print the specie, resolution and network combinations that are going to be downloaded
+                    print(f"{network} observations to download:")
+                    for specie in res_spec_final_combinations:
+                        print(f"  - {self.nonghost_root}/{specie[:-7]}")
 
-                # extract species from zip files
-                for specie_to_get in tqdm(res_spec_final_combinations,desc="Downloading Observations:"):
-                    zip.extract(specie_to_get,self.ghost_root)
-                    
-                    # get path and the name of the directory of the tar file
-                    tar_path = os.path.join(self.ghost_root, specie_to_get)
-                    tar_dir = os.path.dirname(tar_path)
+                    # extract species from zip files
+                    for specie_to_get in tqdm(res_spec_final_combinations,desc="Downloading Observations"):
+                        zip.extract(specie_to_get,self.ghost_root)
+                        
+                        # get path and the name of the directory of the tar file
+                        tar_path = os.path.join(self.ghost_root, specie_to_get)
+                        tar_dir = os.path.dirname(tar_path)
 
-                    # extract nc file from tar file
-                    with tarfile.open(tar_path) as tar_file:
-                        tar_names = tar_file.getnames()
+                        # extract nc file from tar file
+                        with tarfile.open(tar_path) as tar_file:
+                            tar_names = tar_file.getnames()
 
-                        # get the nc files that are between the start and end date
-                        valid_nc_file_names = self.get_valid_dates(tar_names)
-                        valid_nc_files = [tar_member for tar_member in tar_file.getmembers() if tar_member.name in valid_nc_file_names]
+                            # get the nc files that are between the start and end date
+                            valid_nc_file_names = self.get_valid_dates(tar_names)
+                            valid_nc_files = [tar_member for tar_member in tar_file.getmembers() if tar_member.name in valid_nc_file_names]
 
-                        tar_file.extractall(path = tar_dir, members = valid_nc_files)
-                    
-                    # remove the tar file
-                    os.remove(tar_path)
+                            tar_file.extractall(path = tar_dir, members = valid_nc_files)
+                        
+                        # remove the tar file
+                        os.remove(tar_path)
 
     def download_exp(self):
         pass    
