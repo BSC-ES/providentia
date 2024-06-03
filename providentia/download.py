@@ -264,7 +264,7 @@ class ProvidentiaDownload(object):
                     # Print the specie, resolution and network combinations that are going to be downloaded
                     print(f"{network} observations to download:")
                     for specie in res_spec_final_combinations:
-                        print(f"  - {self.nonghost_root}/{specie[:-7]}")
+                        print(f"  - {self.ghost_root}/{specie[:-7]}")
 
                     # extract species from zip files
                     for specie_to_get in tqdm(res_spec_final_combinations,desc="Downloading Observations"):
