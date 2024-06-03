@@ -8,6 +8,8 @@ The standard plot types consist of: maps (`map`), metadata summary (`metadata`),
 
 Some of these plots involve calculating a specific statistic, namely: `map`, `periodic`, `heatmap` and `table`. This statistic is defined by aggregating the `-[stat]` field to the plot type will make a plot of the required type for the specific type of statistic set. `[stat]` should be replaced with any of the base statistic names (e.g. p5, Mean), or experiment bias names. For example to show the median values spatially, `map-p50` would be set as the plot name, or `map-r2` to show the coefficient of determination. The available statistic names are documented in `settings/basic_stats_dict.yaml` and `settings/experiment_bias_stats_dict.yaml` for reference.
 
+The timeseries can also be used to show how statistics vary in time. In order to do this, we need to add `-[stat]` and the temporal resolution after the plot type name (e.g. `timeseries-Mean_daily`, `timeseries-r2_monthly`, `timeseries-r_annual`).
+
 For the `metadata` plot the metadata displayed is set to a default list of metadata fields. For the `statsummary` plot the statistics displayed are set to a default list of absolute and bias statistics. These default options can be changed in either the
 `settings/plot_characteristics_dashboard.yaml` and `settings/plot_characteristics_offline.yaml` files, depending on which mode Providentia is being ran in.
 
