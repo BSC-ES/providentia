@@ -55,6 +55,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#data-selection">Data Selection</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#filters">Filters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#statistics">Statistics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#colocation">Colocation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#resampling">Resampling</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#site-selection">Site Selection</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#toolbox">Toolbox</a></li>
 </ul>
@@ -175,6 +177,17 @@ After reading the data, the map appears showing the available stations that corr
 <h3>Statistics<a class="headerlink" href="#statistics" title="Link to this heading"></a></h3>
 <p>This section provides ways to spatially visualise specific statistical information across all loaded stations. You can read more details about how the statistics are calculated in <a class="reference external" href="https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Statistics">Statistics</a>.</p>
 </section>
+<section id="colocation">
+<h3>Colocation<a class="headerlink" href="#colocation" title="Link to this heading"></a></h3>
+<p>It is possible to activate and deactivate the temporal colocation from the dashboard by using this checkbox. More details can be found in <a class="reference external" href="https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Colocation">Colocation</a>.</p>
+</section>
+<section id="resampling">
+<h3>Resampling<a class="headerlink" href="#resampling" title="Link to this heading"></a></h3>
+<p>It it possible to reduce the number of points by resampling our data to a specific temporal resolution. wWhat this does a simple average using the <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.resample.html">xarray function resample</a> followed by the mean:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">resampled_data</span> <span class="o">=</span> <span class="n">original_data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">temporal_resolution</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
 <section id="site-selection">
 <h3>Site Selection<a class="headerlink" href="#site-selection" title="Link to this heading"></a></h3>
 <p>Under this section there are three options:</p>
@@ -213,7 +226,7 @@ After reading the data, the map appears showing the available stations that corr
 <p>Providentia has the option to load a configuration file that you have either written from scratch, or that you had exported during a past evaluation.</p>
 <p>Loading a configuration file means that the tool will reset the options you have at that moment, and use the configuration with the new variables and filters.</p>
 <p>If there is more than one section or subsection, users will be asked to choose which one they want to load.</p>
-<p><img alt="image__1_" src="_images/image__1_.jpg" /></p>
+<p><img alt="image__1_" src="_images/image__1_.jpg" />a</p>
 </section>
 </section>
 </section>
