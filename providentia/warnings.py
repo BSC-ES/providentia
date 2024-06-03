@@ -3,7 +3,7 @@
 
 def show_message(read_instance, msg, msg_offline=None, from_conf=None):
 
-    if (read_instance.offline) or (read_instance.interactive):
+    if (read_instance.offline) or (read_instance.interactive) or (read_instance.download):
         if msg_offline is not None:
             print('Warning: ' + msg_offline)
         else:
