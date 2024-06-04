@@ -110,20 +110,20 @@ Clicking on the legend labels will remove or add data to each of the plots. If t
 
 The statistics in the `statsummary` can be updated from the burger menu.
 
-![statsummary](uploads/d4b7ca3c7f534524e6c81c421cedc33b/statsummary.png)
+![statsummary-stats](uploads/9d8e2ffed938715b6214140d43396e03/statsummary-stats.png)
 
 This can also be applied in the `timeseries` plot by selecting the chunk statistic and temporal resolution.
 
-![statistical-timeseries](uploads/05b53ed7d421d30c1949ffd465c211da/statistical-timeseries.jpg)
+![timeseries-stats](uploads/d47bf10f90f072bb6ae5c5173296f94e/timeseries-stats.jpg)
 
 ### Information on hover
 
 Most plots show information when hovering over them. Take a look for instance at the distribution plot:
 
-![distribution](uploads/20ee1b006049b5f355569255eb0ecd62/distribution.png)
+![distribution-hover](uploads/6dba75dae832578194f9f412bb8f27a7/distribution-hover.png)
 
 ### Smoothing
 
 It is possible to add a smoothing line to the timeseries plot and make the points disappear. In order to achieve this, you will need to increase the smooth window, which by default is 0 and bring the marker size down to 0. You can also use the plot option `hidedata` to hide the points. 
 
-![timeseries](uploads/fbda7a9c02ada699b3f5b24113f859ac/timeseries.png)
+![timeseries-smooth](uploads/aaeed1a0fa2bdc9d957c28f59df5db09/timeseries-smooth.png)
