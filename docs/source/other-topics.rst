@@ -11,5 +11,6 @@ Other topics
    Saved-file-formats.md
    Create-your-own-data-network.md
    Mounting-esarchive.md
+   Colocation.md
    Multispecies-filtering.md
    Evolution.md
