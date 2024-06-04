@@ -112,6 +112,10 @@ The statistics in the `statsummary` can be updated from the burger menu.
 
 ![statsummary](uploads/d4b7ca3c7f534524e6c81c421cedc33b/statsummary.png)
 
+This can also be applied in the `timeseries` plot by selecting the chunk statistic and temporal resolution.
+
+![statistical-timeseries](uploads/05b53ed7d421d30c1949ffd465c211da/statistical-timeseries.jpg)
+
 ### Information on hover
 
 Most plots show information when hovering over them. Take a look for instance at the distribution plot:

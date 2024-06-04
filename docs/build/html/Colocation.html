@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mounting esarchive &mdash; Providentia 2.3.0 documentation</title>
+  <title>Colocation &mdash; Providentia 2.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -22,8 +22,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Colocation" href="Colocation.html" />
-    <link rel="prev" title="Create your own data network" href="Create-your-own-data-network.html" /> 
+    <link rel="next" title="Multispecies filtering" href="Multispecies-filtering.html" />
+    <link rel="prev" title="Mounting esarchive" href="Mounting-esarchive.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -56,13 +56,12 @@
 <li class="toctree-l2"><a class="reference internal" href="Representativity-filters.html">Representativity filters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Saved-file-formats.html">Saved file formats</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Create-your-own-data-network.html">Create your own data network</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Mounting esarchive</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#linux">Linux</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mac">Mac</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#windows">Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Mounting-esarchive.html">Mounting esarchive</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Colocation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#temporal-colocation">Temporal colocation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spatial-colocation">Spatial colocation</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Multispecies-filtering.html">Multispecies filtering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evolution.html">Evolution</a></li>
 </ul>
@@ -85,9 +84,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="other-topics.html">Other topics</a></li>
-      <li class="breadcrumb-item active">Mounting esarchive</li>
+      <li class="breadcrumb-item active">Colocation</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/Mounting-esarchive.md.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/Colocation.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -95,32 +94,30 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="mounting-esarchive">
-<h1>Mounting esarchive<a class="headerlink" href="#mounting-esarchive" title="Link to this heading"></a></h1>
-<p>It is possible to mount the esarchive on your personal computer. This can then be used to load observations/experiments that are stored remotely on the esarchive while using Providentia on your local machine. How this is done varies by operating system, as detailed below. The Providentia data paths should be updated to point to the local mounted directory in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code></p>
-<section id="linux">
-<h2>Linux<a class="headerlink" href="#linux" title="Link to this heading"></a></h2>
-<p>On the Linux the esarchive can be setup permanently.</p>
-<p>Firstly, create a local directory where you want the esarchive to be mounted, e.g. <code class="docutils literal notranslate"><span class="pre">/localdir/tomount/esarchive</span></code></p>
-<p>Next, add the following line to the <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> file (changing your BSC username and local directory):</p>
-<p><code class="docutils literal notranslate"><span class="pre">sshfs#bscXXXXXX&#64;dt01.bsc.es:/gpfs/archive/bsc32/esarchive</span> <span class="pre">/localdir/tomount/esarchive</span> <span class="pre">fuse</span> <span class="pre">defaults,allow_other,reconnect,ro</span> <span class="pre">0</span> <span class="pre">0</span></code></p>
-<p>The esarchive can finally be mounted by:</p>
-<p><code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">mount</span> <span class="pre">-av</span> </code></p>
-<p>To unmount the esarchive, the following command can be used:</p>
-<p><code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">umount</span> <span class="pre">/localdir/tomount/esarchive</span></code></p>
+  <section id="colocation">
+<h1>Colocation<a class="headerlink" href="#colocation" title="Link to this heading"></a></h1>
+<p>There are two types of colocations that can be used in Providentia:</p>
+<ul class="simple">
+<li><p>Temporal colocation</p></li>
+<li><p>Spatial colocations</p></li>
+</ul>
+<section id="temporal-colocation">
+<h2>Temporal colocation<a class="headerlink" href="#temporal-colocation" title="Link to this heading"></a></h2>
+<p>The temporal colocation can be used to remove the gaps where the data of the observations or experiments are missing. Once the colocation is turned on, the user has access to more plot types (i.e. scatter plot and Taylor diagram).</p>
+<p><strong>Without temporal colocation:</strong></p>
+<p><img alt="Screenshot_from_2024-06-03_15-16-50" src="_images/Screenshot_from_2024-06-03_15-16-50.png" /></p>
+<p><strong>With temporal colocation:</strong></p>
+<p><img alt="Screenshot_from_2024-06-03_15-16-55" src="_images/Screenshot_from_2024-06-03_15-16-55.png" /></p>
 </section>
-<section id="mac">
-<h2>Mac<a class="headerlink" href="#mac" title="Link to this heading"></a></h2>
-<p>On Mac, the mounting cannot be setup permanently, but will stay open while the terminal session is active. Before trying to setup the connection you must install FUSE and SSHFS, please follow the instructions here: https://earth.bsc.es/wiki/doku.php?id=computing:addesarchive&amp;s[]=sshfs</p>
-<p>After that is done, create a local directory where you want the esarchive to be mounted, e.g. <code class="docutils literal notranslate"><span class="pre">/localdir/tomount/esarchive</span></code></p>
-<p>Then run the following command (changing your BSC username and local directory):</p>
-<p><code class="docutils literal notranslate"><span class="pre">sshfs</span> <span class="pre">bscXXXXXX&#64;dt01.bsc.es:/gpfs/archive/bsc32/esarchive</span> <span class="pre">/localdir/tomount/esarchive</span> <span class="pre">-o</span> <span class="pre">volname=esarchive,defer_permissions,allow_other,IdentityFile=$HOME/.ssh/id_rsa,reconnect,ro</span></code></p>
-<p>To unmount the esarchive, the following command can be used:</p>
-<p><code class="docutils literal notranslate"><span class="pre">diskutil</span> <span class="pre">umount</span> <span class="pre">force</span> <span class="pre">/localdir/tomount/esarchive</span></code></p>
-</section>
-<section id="windows">
-<h2>Windows<a class="headerlink" href="#windows" title="Link to this heading"></a></h2>
-<p>As present, the esarchive cannot be mounted on Windows machines.</p>
+<section id="spatial-colocation">
+<h2>Spatial colocation<a class="headerlink" href="#spatial-colocation" title="Link to this heading"></a></h2>
+<p>When loading more than one species we may want to ensure that the stations that we have in our network/s measure all the species that we have selected. To do this, we need to activate the spatial colocation.</p>
+<p><strong>Without spatial colocation:</strong></p>
+<p><img alt="no_spatial_colocation" src="_images/no_spatial_colocation.png" /></p>
+<p><strong>With spatial colocation:</strong></p>
+<p><img alt="spatial_colocation" src="_images/spatial_colocation.png" /></p>
+<p>If you see that the number of stations is not equal, but has been reduced, it might be that the missing stations have NaN values for the current period.</p>
+<p>In the dashboard, the spatial colocation is always on by default since we do not load multiple species at the same time, except when we use the multispecies filtering.</p>
 </section>
 </section>
 
@@ -128,8 +125,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Create-your-own-data-network.html" class="btn btn-neutral float-left" title="Create your own data network" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Colocation.html" class="btn btn-neutral float-right" title="Colocation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Mounting-esarchive.html" class="btn btn-neutral float-left" title="Mounting esarchive" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Multispecies-filtering.html" class="btn btn-neutral float-right" title="Multispecies filtering" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
