@@ -89,6 +89,18 @@ The *FILTER* button will set all the selected fields under the *Filters* section
 
 This section provides ways to spatially visualise specific statistical information across all loaded stations. You can read more details about how the statistics are calculated in [Statistics](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Statistics).
 
+### Colocation
+
+It is possible to activate and deactivate the temporal colocation from the dashboard by using this checkbox. More details can be found in [Colocation](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Colocation).
+
+### Resampling
+
+It it possible to reduce the number of points by resampling our data to a specific temporal resolution. wWhat this does a simple average using the [xarray function resample](https://docs.xarray.dev/en/stable/generated/xarray.Dataset.resample.html) followed by the mean:
+
+```
+resampled_data = original_data.resample(temporal_resolution, axis=0).mean()
+```
+
 ### Site Selection
 
 Under this section there are three options: 
@@ -131,4 +143,4 @@ Loading a configuration file means that the tool will reset the options you have
 
 If there is more than one section or subsection, users will be asked to choose which one they want to load.
 
-![image__1_](uploads/f247999d3083d5daa62157f67f5a6568/image__1_.jpg)
+![image__1_](uploads/f247999d3083d5daa62157f67f5a6568/image__1_.jpg)a
