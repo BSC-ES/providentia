@@ -196,16 +196,9 @@ class DataReader:
             # metadata 
             # non-GHOST
             if not self.read_instance.reading_ghost:
-                
                 self.read_instance.metadata_dtype = [(nonghost_var, self.read_instance.standard_metadata[nonghost_var]['data_type'])
                                                       for nonghost_var in self.read_instance.nonghost_metadata_vars_to_read]
                 self.read_instance.metadata_vars_to_read = self.read_instance.nonghost_metadata_vars_to_read
-                #self.read_instance.metadata_dtype = [('station_reference', object), ('latitude', np.float32),
-                #                                     ('longitude', np.float32), ('altitude', np.float32),
-                #                                     ('station_name', object), ('station_classification', object),
-                #                                     ('area_classification', object), ('country', object)]
-                #self.read_instance.metadata_vars_to_read = [meta_dtype[0] for meta_dtype in self.read_instance.metadata_dtype]
-
             # GHOST
             else:
                 self.read_instance.metadata_dtype = self.read_instance.ghost_metadata_dtype
