@@ -401,6 +401,10 @@ class Plot:
             # check var str name exists in ghost var dict, if not move to next var
             if var_str_name not in ghost_var_dict:
                 continue
+            
+            # check if var is in metadata
+            if ghost_var not in self.read_instance.metadata_vars_to_read:
+                continue
 
             # if are on limit of vars allowed per line then break to new line
             if current_n_vars_per_line == plot_characteristics['max_vars_per_row']:
@@ -635,8 +639,10 @@ class Plot:
 
             # update maximum smooth value
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
-                if self.canvas_instance.timeseries_smooth_window_sl.value() != (len(ts)*2 - 1):
-                    self.canvas_instance.timeseries_smooth_window_sl.setMaximum(int(len(ts)*2 - 1))
+                self.canvas_instance.timeseries_smooth_window_sl.setMaximum(len(ts))
+                # To get straight line
+                # if self.canvas_instance.timeseries_smooth_window_sl.value() != (len(ts)*2 - 1):
+                #     self.canvas_instance.timeseries_smooth_window_sl.setMaximum(int(len(ts)*2 - 1))
 
             # track plot elements if using dashboard 
             if (not self.read_instance.offline) and (not self.read_instance.interactive):

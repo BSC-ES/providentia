@@ -757,56 +757,70 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
         label_units = read_instance.measurement_units[speci]
     
     # generate z colourbar label
-    # first check if have defined label (in this order: 1. specific for z statistic 2. configuration file)
+    # first check if have defined label (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
     set_label = False
-
-    #1. check configuration file
-    if 'cb_label' in plot_characteristics:
-        if plot_characteristics['cb_label']['label'] != '':
-            z_label = plot_characteristics['cb_label']['label']
+    #1. get label specific for z statistic
+    if 'label' in stats_dict:
+        if (stats_dict['label'] != '') and (stats_dict['label'] != {}):
             set_label = True
-    #2. get label specific for z statistic
+            # 2. get label specific for species
+            if isinstance(stats_dict['label'], dict):
+                if speci in stats_dict['label'].keys():
+                    z_label = stats_dict['label'][speci]
+                else:
+                    set_label = False
+            else:
+                z_label = stats_dict['label']
+            # adjust label to include units (if set)
+            if set_label:
+                if z_statistic_sign == 'absolute':
+                    if label_units != '':
+                        z_label = '{} [{}]'.format(z_label, label_units)
+                    else:
+                        z_label = copy.deepcopy(z_label)
+                else:
+                    if z_statistic_type == 'basic':
+                        if label_units != '':
+                            z_label = '{} bias [{}]'.format(z_label, label_units)
+                        else:
+                            z_label = '{} bias'.format(z_label)
+                    else:
+                        if label_units != '':
+                            z_label = '{} [{}]'.format(z_label, label_units)
+                        else:
+                            z_label = copy.deepcopy(z_label)  
+    # 3. check configuration file
     if not set_label:
-        if z_statistic_sign == 'absolute':
-            if label_units != '':
-                z_label = '{} [{}]'.format(stats_dict['label'], label_units)
-            else:
-                z_label = copy.deepcopy(stats_dict['label'])
-        else:
-            if z_statistic_type == 'basic':
-                if label_units != '':
-                    z_label = '{} bias [{}]'.format(stats_dict['label'], label_units)
-                else:
-                    z_label = '{} bias'.format(stats_dict['label'])
-            else:
-                if label_units != '':
-                    z_label = '{} [{}]'.format(stats_dict['label'], label_units)
-                else:
-                    z_label = copy.deepcopy(stats_dict['label'])     
+        if 'cb_label' in plot_characteristics:
+            if plot_characteristics['cb_label']['label'] != '':
+                z_label = plot_characteristics['cb_label']['label']
+                set_label = True
     # return label if only that is wanted
     if only_label:
         return z_label
 
     # set cmap for z statistic
-    # first check if have defined cmap (in this order: 1. specific for z statistic 2. configuration file)
+    # first check if have defined cmap (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
     set_cmap = False
     if z_statistic_sign == 'absolute':
         cmap_var_name = 'cmap_absolute'
     else:
         cmap_var_name = 'cmap_bias'
     #1. get cmap specific for z statistic
-    if isinstance(stats_dict[cmap_var_name], dict):
-        if speci in stats_dict[cmap_var_name].keys():
-            z_colourmap = stats_dict[cmap_var_name][speci]
+    if cmap_var_name in stats_dict:
+        if (stats_dict[cmap_var_name] != '') and (stats_dict[cmap_var_name] != {}):
             set_cmap = True
-        else:
-            error = "Error: Colormap needs to be defined for all species, using a dictionary with the "
-            error += f"cmap for each speci or a string for all. Colormap for {speci} has not been defined."
-            sys.exit(error)
-    else:
-        z_colourmap = stats_dict[cmap_var_name]
-        set_cmap = True
-    #2. check configuration file
+            if isinstance(stats_dict[cmap_var_name], dict):
+                if speci in stats_dict[cmap_var_name].keys():
+                    z_colourmap = stats_dict[cmap_var_name][speci]
+                    
+                else:
+                    error = f"Error: colourmap ({cmap_var_name}) is not defined for {speci}. "
+                    error += f"{cmap_var_name} can be set as a string per statistic (for all species), or as a dict (per species)."
+                    sys.exit(error)
+            else:
+                z_colourmap = stats_dict[cmap_var_name]
+    #3. check configuration file
     if not set_cmap:
         if cmap_var_name in plot_characteristics['cb']:
             if (plot_characteristics['cb'][cmap_var_name] != '') and(plot_characteristics['cb'][cmap_var_name]):
@@ -814,11 +828,11 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
                 set_cmap = True
     # if have no defined cmap, raise error
     if not set_cmap:
-        error = f'Error: The color ({cmap_var_name}) in the colorbar need to be defined, either in the '
-        error += 'configuration files for the map or per statistic.'
+        error = f"Error: colourmap ({cmap_var_name}) for the colourbar needs to be defined, either in the "
+        error += "configuration files for the map, or per statistic in 'basic_stats.yaml' or 'experiment_bias_stats.yaml'."
         sys.exit(error)
 
-    # check if have defined vmin (in this order: 1. specific for z statistic 2. configuration file)
+    # check if have defined vmin (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
     # if have no defined vmin, then take vmin as minimum range value of calculated statistic
     set_vmin = False
     if z_statistic_sign == 'absolute':
@@ -827,8 +841,8 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
         vmin_var_name = 'vmin_bias'
     #1. get vmin specific for z statistic
     if vmin_var_name in stats_dict:
-        if (stats_dict[vmin_var_name] != '') and (stats_dict[vmin_var_name]):
-            # 3. get vmin specific for species
+        if (stats_dict[vmin_var_name] != '') and (stats_dict[vmin_var_name] != {}):
+            # 2. get vmin specific for species
             set_vmin = True
             if isinstance(stats_dict[vmin_var_name], dict):
                 if speci in stats_dict[vmin_var_name].keys():
@@ -837,18 +851,17 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
                     set_vmin = False
             else:
                 z_vmin = stats_dict[vmin_var_name]
-    #2. check configuration file
+    #3. check configuration file
     if not set_vmin:
         if vmin_var_name in plot_characteristics['cb']:
-            if (plot_characteristics['cb'][vmin_var_name] != '') and (plot_characteristics['cb'][vmin_var_name]):
+            if (plot_characteristics['cb'][vmin_var_name] != '') and (plot_characteristics['cb'][vmin_var_name] != {}):
                 z_vmin = plot_characteristics['cb'][vmin_var_name]
                 set_vmin = True
     # if have no defined vmin, take vmin as minimum range value of calculated statistic
     if not set_vmin:
         z_vmin = plotted_min
-        set_vmin = True
 
-    # check if have defined vmax (in this order: 1. specific for z statistic 2. configuration file)
+    # check if have defined vmax (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
     # if have no defined vmax, then take vmax as maximum range value of calculated statistic
     set_vmax = False
     if z_statistic_sign == 'absolute':
@@ -857,9 +870,9 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
         vmax_var_name = 'vmax_bias'
     #1. get vmax specific for z statistic
     if vmax_var_name in stats_dict:   
-        if (stats_dict[vmax_var_name] != '') and (stats_dict[vmax_var_name]):
+        if (stats_dict[vmax_var_name] != '') and (stats_dict[vmax_var_name] != {}):
             set_vmax = True
-            # 3. get vmax specific for species
+            # 2. get vmax specific for species
             if isinstance(stats_dict[vmax_var_name], dict):
                 if speci in stats_dict[vmax_var_name].keys():
                     z_vmax = stats_dict[vmax_var_name][speci]
@@ -867,16 +880,15 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
                     set_vmax = False
             else:
                 z_vmax = stats_dict[vmax_var_name]
-    #2. check configuration file
+    #3. check configuration file
     if not set_vmax:
         if vmax_var_name in plot_characteristics['cb']:
-            if (plot_characteristics['cb'][vmax_var_name] != '') and (plot_characteristics['cb'][vmax_var_name]):
+            if (plot_characteristics['cb'][vmax_var_name] != '') and (plot_characteristics['cb'][vmax_var_name] != {}):
                 z_vmax = plot_characteristics['cb'][vmax_var_name]
                 set_vmax = True
     # if have no defined vmax, take vmax as maximum range value of calculated statistic
     if not set_vmax:
         z_vmax = plotted_max
-        set_vmax = True
 
     # if z statistic is a bias stat, and one of vmin/vmax were not configured,
     # force vmin/vmax to be symmetrical across 0
@@ -885,14 +897,14 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
         z_vmin = -limit_stat
         z_vmax = limit_stat
 
-    # check if have defined n_discrete (in this order: 1. specific for z statistic 2. configuration file)
+    # check if have defined n_discrete (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
     # if have no defined n_discrete, then take None
     set_n_discrete = False
     #1. get n_discrete specific for z statistic
     if 'n_discrete' in stats_dict:
-        if (stats_dict['n_discrete'] != '') and (stats_dict['n_discrete']):
+        if (stats_dict['n_discrete'] != '') and (stats_dict['n_discrete'] != {}):
             set_n_discrete = True
-            # 3. get n_discrete specific for species
+            # 2. get n_discrete specific for species
             if isinstance(stats_dict['n_discrete'], dict):
                 if speci in stats_dict['n_discrete'].keys():
                     n_discrete = stats_dict['n_discrete'][speci]
@@ -900,25 +912,24 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
                     set_n_discrete = False
             else:
                 n_discrete = stats_dict['n_discrete']    
-    #2. check configuration file
+    #3. check configuration file
     if not set_n_discrete:
         if 'n_discrete' in plot_characteristics['cb']:
-            if (plot_characteristics['cb']['n_discrete'] != '') and (plot_characteristics['cb']['n_discrete']):
+            if (plot_characteristics['cb']['n_discrete'] != '') and (plot_characteristics['cb']['n_discrete'] != {}):
                 n_discrete = plot_characteristics['cb']['n_discrete']
                 set_n_discrete = True
     # if have no defined n_discrete, take None
     if not set_n_discrete:
         n_discrete = None
-        set_n_discrete = True
     
-    # check if have defined n_ticks (in this order: 1. specific for z statistic 2. configuration file)
+    # check if have defined n_ticks (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
     # if have no defined n_ticks, then raise error
     set_n_ticks = False
     #1. get n_ticks specific for z statistic
     if 'n_ticks' in stats_dict:
-        if (stats_dict['n_ticks'] != '') and (stats_dict['n_ticks']):
+        if (stats_dict['n_ticks'] != '') and (stats_dict['n_ticks'] != {}):
             set_n_ticks = True
-            # 3. get n_ticks specific for species
+            # 2. get n_ticks specific for species
             if isinstance(stats_dict['n_ticks'], dict):
                 if speci in stats_dict['n_ticks'].keys():
                     n_ticks = stats_dict['n_ticks'][speci]
@@ -926,10 +937,10 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
                     set_n_ticks = False
             else:
                 n_ticks = stats_dict['n_ticks']
-    #2. check configuration file
+    #3. check configuration file
     if not set_n_ticks:
         if 'n_ticks' in plot_characteristics['cb']:
-            if (plot_characteristics['cb']['n_ticks'] != '') and (plot_characteristics['cb']['n_ticks']):
+            if (plot_characteristics['cb']['n_ticks'] != '') and (plot_characteristics['cb']['n_ticks'] != {}):
                 n_ticks = plot_characteristics['cb']['n_ticks']
                 set_n_ticks = True
     # if have no defined n_ticks, raise error
