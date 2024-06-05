@@ -231,5 +231,19 @@
                     "vmin_bias": {}, 
                     "vmax_bias": {},
                     "cmap_absolute": "viridis", 
-                    "cmap_bias": "RdYlBu_r"}
+                    "cmap_bias": "RdYlBu_r"},
+
+    "MDA8" :       {"function": "calculate_mda8", 
+                    "order": 15, 
+                    "label": "MDA8", 
+                    "arguments": {}, 
+                    "units": "[measurement_units]", 
+                    "minimum_bias": [0.0], 
+                    "vmin_absolute": {}, 
+                    "vmax_absolute": {}, 
+                    "vmin_bias": {}, 
+                    "vmax_bias": {},
+                    "cmap_absolute": "viridis", 
+                    "cmap_bias": "RdYlBu_r"},
+    
 }
