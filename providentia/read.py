@@ -206,13 +206,20 @@ class DataReader:
 
             # show warning when there is a non-defined field if launching from a config file
             if hasattr(self.read_instance, "non_default_fields_per_section"):
-                invalid_args = {field_name:fields-set(self.read_instance.metadata_vars_to_read) 
-                                for field_name, fields in self.read_instance.non_default_fields_per_section.items()}
+                period_set = {'period'} if self.read_instance.reading_ghost else set()
+                invalid_args = {field_name:fields-set(self.read_instance.metadata_vars_to_read)-set(self.read_instance.ghost_data_vars_to_read)-period_set
+                                for field_name, fields in self.read_instance.non_default_fields_per_section.items() 
+                                if field_name==self.read_instance.section or field_name.startswith(self.read_instance.section+"·")}
                 invalid_var = [f"""{i} ('{"', '".join(j)}')""" for i,j in invalid_args.items() if j]
                 if invalid_var:
                     msg = f"Invalid field(s) in configuration file {self.read_instance.config.split('/')[-1]}. "
                     msg += f"Section(s) and Field(s): {', '.join(invalid_var)}."
                     show_message(self.read_instance, msg)
+
+                    # delete from instance all invalid fields from the configuration file
+                    for section,section_invalid_args in invalid_args.items():
+                        for k in section_invalid_args:
+                            delattr(self.read_instance, k)                 
 
             self.read_instance.metadata_in_memory = {networkspeci: 
                                                      np.full((len(self.read_instance.station_references['{}'.format(networkspeci)]),
