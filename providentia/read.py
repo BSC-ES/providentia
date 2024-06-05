@@ -216,6 +216,11 @@ class DataReader:
                     msg += f"Section(s) and Field(s): {', '.join(invalid_var)}."
                     show_message(self.read_instance, msg)
 
+                    # delete from instance all invalid fields from the configuration file
+                    for section,section_invalid_args in invalid_args.items():
+                        for k in section_invalid_args:
+                            delattr(self.read_instance, k)                 
+
             self.read_instance.metadata_in_memory = {networkspeci: 
                                                      np.full((len(self.read_instance.station_references['{}'.format(networkspeci)]),
                                                               len(self.read_instance.yearmonths)),
