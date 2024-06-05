@@ -178,11 +178,8 @@ class ProvConfiguration:
         elif key == 'cartopy_data_dir':
             # set cartopy data directory (needed on CTE-POWER/MN4/Nord3v2 as has no external
             # internet connection)
-            if MACHINE in ['power', 'mn4', 'nord3v2']:
+            if MACHINE in ['power', 'mn4', 'nord3v2', 'mn5']:
                 return '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
-            # set directory in MN5 to avoid network issues
-            elif MACHINE == 'mn5':
-                return '/gpfs/tapes/MN4/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
             # on all other machines pull from internet
 
         elif key == 'n_cpus':
@@ -950,7 +947,8 @@ def read_conf(fpath=None):
                 
                 # set section attributes
                 if copy:
-                    if line_strip != '':
+                    # if lines are not empty and not commented
+                    if (line_strip != '') and ('#' not in line_strip):
                         # initial definition of parameter - value
                         if '=' in line_strip:
                             key = line_strip.split('=', 1)[0].strip()

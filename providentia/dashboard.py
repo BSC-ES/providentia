@@ -1427,6 +1427,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # run function to update filter
             self.mpl_canvas.handle_data_filter_update()
 
+            # for non-GHOST, we call update_metadata_fields again to remove the stations that have
+            # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained 
+            # after filtering
+            if not self.reading_ghost:
+                update_metadata_fields(self)
+                self.mpl_canvas.handle_data_filter_update()
+
             # generate list of sorted z1/z2 data arrays names in memory, putting observations
             # before experiments, and empty string item as first element in z2 array list
             # (for changing from 'difference' statistics to 'absolute')
@@ -1446,7 +1453,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.mpl_canvas.handle_resampling_update()
             
             # update timeseries chunk statistic and resolution comboboxes
-            self.mpl_canvas.handle_timeseries_chunk_resolution_update()
             self.mpl_canvas.handle_timeseries_chunk_statistic_update()
 
             # update periodic statistic combobox
@@ -1512,6 +1518,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # unfilter data
         self.mpl_canvas.handle_data_filter_update()
         
+        # for non-GHOST, we call update_metadata_fields again to remove the stations that have
+        # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained 
+        # after filtering
+        if not self.reading_ghost:
+            update_metadata_fields(self)
+            self.mpl_canvas.handle_data_filter_update()
+
         # Restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
 
