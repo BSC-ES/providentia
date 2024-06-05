@@ -49,7 +49,7 @@ report_title = Report
     [[Madrid]]
     latitude = 39.57, 42.2
     longitude = -4.57, -2.42
-    standardised_network_provided_area_classification = keep: rural || remove: urban-suburban
+    area_classification = keep: rural || remove: urban-suburban
 ```
 ### Sections
 
@@ -116,9 +116,9 @@ We can also get the data for all the stations in a country, in this case Spain, 
 country = keep: Spain
 ```
 
-Additionally, we can apply metadata filters. In the subsection for Madrid, we constrained the stations according to the `standardised_network_provided_area_classification` criteria:
+Additionally, we can apply metadata filters. In the subsection for Madrid, we constrained the stations according to the `area_classification` criteria:
 ```
-standardised_network_provided_area_classification = keep: rural || remove: urban-suburban
+area_classification = keep: rural || remove: urban-suburban
 ```
 
 If you do not know which names can be used to filter the metadata, you should use the dashboard to select the fields, export the configuration [exporting feature](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Dashboard#exporting-data-or-configuration) and copy the fields that you want from there.
@@ -249,8 +249,8 @@ Example:
 
 ```
 period = keep: Daytime
-standardised_network_provided_area_classification = keep: rural || remove: urban-suburban
-standardised_network_provided_station_classification = keep: background
+area_classification = keep: rural || remove: urban-suburban
+station_classification = keep: background
 country = keep: Spain
 ```
 
