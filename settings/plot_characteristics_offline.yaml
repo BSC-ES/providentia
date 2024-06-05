@@ -69,7 +69,8 @@
                      "plot": {"ha": "left", "va": "top", "fontsize": 11, "wrap": true, "linespacing": 1.5},
                      "plot_options": []},
        
-       "map": {"map_coastline_resolution": "medium",
+       "map": {"background": "providentia",
+               "map_coastline_resolution": "medium",
                "orientation": "landscape",
                "figure": {"ncols": 2, "nrows": 2}, 
                "land_polygon": {"facecolor": "0.85"},
@@ -367,7 +368,7 @@
                   "figure": {"ncols": 2, "nrows": 3},
                   "page_title": {"t": "Taylor diagram", "fontsize": 13, "ha": "left", "x": 0.05, "y": 0.98},
                   "grid": {"axis": "both", "color": "lightgrey", "alpha": 0.8},
-                  "axis_title": {"label": "", "fontsize": 8},
+                  "axis_title": {"label": "", "fontsize": 8, "pad": 10},
                   "xylabel": {"fontsize": 8},
                   "rlabel": {"fontsize": 8},
                   "xytick_params": {"fontsize": 7},
