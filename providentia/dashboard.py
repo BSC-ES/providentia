@@ -1432,7 +1432,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # after filtering
             if not self.reading_ghost:
                 update_metadata_fields(self)
-                self.mpl_canvas.handle_data_filter_update()
 
             # generate list of sorted z1/z2 data arrays names in memory, putting observations
             # before experiments, and empty string item as first element in z2 array list
@@ -1523,7 +1522,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # after filtering
         if not self.reading_ghost:
             update_metadata_fields(self)
-            self.mpl_canvas.handle_data_filter_update()
 
         # Restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
