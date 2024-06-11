@@ -538,11 +538,11 @@ class ProvConfiguration:
 
     def check_validity(self):
         """ Check validity of set variables after parsing. """
-        # check if specie is valid
+        # check if species is valid
         if self.read_instance.species:
             for speci in self.read_instance.species:
                 if '*' not in speci and speci not in self.read_instance.parameter_dictionary:
-                    error = f'Error: specie "{speci}" not valid.'
+                    error = f'Error: species "{speci}" not valid.'
                     sys.exit(error)
 
         # get non-default fields on config file if launching from a config file
@@ -869,7 +869,7 @@ class ProvConfiguration:
                             'vconcaerobin20','vconcaerobin21','vconcaerobin22']}
         
         if species not in multi_species_map:
-            error = f'Error: not able to map specie "{species}".'
+            error = f'Error: not able to map species "{species}".'
             sys.exit(error)
 
         return multi_species_map[species]
