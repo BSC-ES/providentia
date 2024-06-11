@@ -80,12 +80,11 @@ class ProvConfiguration:
                                    'EEA_AIRBASE','EEA_AQ_eReporting','JAPAN_NIES','MEXICO_CDMX','MITECO',
                                    'NOAA_ISD','NOAA_ISD_EU','NOAA_ISD_IP','NOAA_ISD_NA','SEARCH','UK_AIR',
                                    'US_EPA_AirNow_DOS','US_EPA_AQS','US_EPA_CASTNET','US_NADP_AMNet','US_NADP_AMoN','WMO_WDCGG'], 
-            'network': None,
+            'network': [],
             'species': None,
             'resolution': None,
             'start_date': None,
             'end_date': None,
-            'download_source': 'ghost',
             'observations_data_label': 'observations',
             'experiments': {},
             'qa': None,
@@ -539,6 +538,12 @@ class ProvConfiguration:
 
     def check_validity(self):
         """ Check validity of set variables after parsing. """
+        # check if specie is valid
+        if self.read_instance.species:
+            for speci in self.read_instance.species:
+                if '*' not in speci and speci not in self.read_instance.parameter_dictionary:
+                    error = f'Error: specie "{speci}" not valid.'
+                    sys.exit(error)
 
         # get non-default fields on config file if launching from a config file
         if hasattr(self.read_instance, "sub_opts"):
@@ -862,6 +867,10 @@ class ProvConfiguration:
                             'vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14',
                             'vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19',
                             'vconcaerobin20','vconcaerobin21','vconcaerobin22']}
+        
+        if species not in multi_species_map:
+            error = f'Error: not able to map specie "{species}".'
+            sys.exit(error)
 
         return multi_species_map[species]
 
