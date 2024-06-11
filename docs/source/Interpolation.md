@@ -11,3 +11,9 @@ Now that you know these points, you can run the interpolation by doing:
 ```
 ./bin/providentia --config='/path/to/file/example.conf' --interpolate
 ```
+
+This will generate logs in different folders:
+
+- Submission logs: To give information on the slurm and Greasy submissions to the HPC machines.
+- Management logs: To inform about the interpolation overall. Most errors will appear here.
+- Interpolation logs: To get information about individual interpolations and know how long it took to do them.
