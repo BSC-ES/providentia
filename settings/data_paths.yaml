@@ -11,6 +11,12 @@
         "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp"
     },
     
+    "storage5": {
+        "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
+        "nonghost_root": "/gpfs/archive/bsc32/esarchive/obs",
+        "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp"
+    },
+
     "mn4": {
         "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
         "nonghost_root": "/gpfs/projects/bsc32/AC_cache/obs/nonghost",
