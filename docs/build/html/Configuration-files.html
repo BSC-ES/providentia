@@ -139,7 +139,7 @@
     <span class="p">[[</span><span class="n">Madrid</span><span class="p">]]</span>
     <span class="n">latitude</span> <span class="o">=</span> <span class="mf">39.57</span><span class="p">,</span> <span class="mf">42.2</span>
     <span class="n">longitude</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.57</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.42</span>
-    <span class="n">standardised_network_provided_area_classification</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">rural</span> <span class="o">||</span> <span class="n">remove</span><span class="p">:</span> <span class="n">urban</span><span class="o">-</span><span class="n">suburban</span>
+    <span class="n">area_classification</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">rural</span> <span class="o">||</span> <span class="n">remove</span><span class="p">:</span> <span class="n">urban</span><span class="o">-</span><span class="n">suburban</span>
 </pre></div>
 </div>
 <section id="sections">
@@ -295,8 +295,8 @@
 <span class="n">country</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Spain</span>
 </pre></div>
 </div>
-<p>Additionally, we can apply metadata filters. In the subsection for Madrid, we constrained the stations according to the <code class="docutils literal notranslate"><span class="pre">standardised_network_provided_area_classification</span></code> criteria:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">standardised_network_provided_area_classification</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">rural</span> <span class="o">||</span> <span class="n">remove</span><span class="p">:</span> <span class="n">urban</span><span class="o">-</span><span class="n">suburban</span>
+<p>Additionally, we can apply metadata filters. In the subsection for Madrid, we constrained the stations according to the <code class="docutils literal notranslate"><span class="pre">area_classification</span></code> criteria:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">area_classification</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">rural</span> <span class="o">||</span> <span class="n">remove</span><span class="p">:</span> <span class="n">urban</span><span class="o">-</span><span class="n">suburban</span>
 </pre></div>
 </div>
 <p>If you do not know which names can be used to filter the metadata, you should use the dashboard to select the fields, export the configuration <a class="reference external" href="https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Dashboard#exporting-data-or-configuration">exporting feature</a> and copy the fields that you want from there.</p>
@@ -395,8 +395,8 @@
 <p>For the defining this type of fields, the principle is exactly the same with the one we described in the case of <strong>Period</strong>. In the configuration file, you will need to write the variable name (for example: <em>period, country, WMO_region, measuring_instrument_name</em>) and then follow the syntax <strong>keep: x, y || remove: w,z</strong></p>
 <p>Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">period</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Daytime</span>
-<span class="n">standardised_network_provided_area_classification</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">rural</span> <span class="o">||</span> <span class="n">remove</span><span class="p">:</span> <span class="n">urban</span><span class="o">-</span><span class="n">suburban</span>
-<span class="n">standardised_network_provided_station_classification</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">background</span>
+<span class="n">area_classification</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">rural</span> <span class="o">||</span> <span class="n">remove</span><span class="p">:</span> <span class="n">urban</span><span class="o">-</span><span class="n">suburban</span>
+<span class="n">station_classification</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">background</span>
 <span class="n">country</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Spain</span>
 </pre></div>
 </div>

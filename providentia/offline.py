@@ -228,6 +228,21 @@ class ProvidentiaOffline:
                         error = 'It is not possible to create Taylor diagrams yet, please remove.'
                         sys.exit(error)
 
+            # check if there are multispecies plots
+            multispecies = False
+            for plot_type in self.summary_plots_to_make:
+                if 'multispecies' in plot_type:
+                    multispecies = True
+                    break
+            for plot_type in self.station_plots_to_make:
+                if 'multispecies' in plot_type:
+                    multispecies = True
+                    break
+            if (multispecies) and (len(np.unique(list(self.measurement_units.values()))) > 1):
+                msg = 'Warning: Be aware that the units across species are not the same and there are multispecies plots. '
+                msg += f'Units: {self.measurement_units}'
+                print(msg)
+
             # set plot characteristics for all plot types (summary, station)
             self.plots_to_make = list(self.summary_plots_to_make)
             self.plots_to_make.extend(x for x in self.station_plots_to_make
@@ -313,7 +328,7 @@ class ProvidentiaOffline:
                                            do_plot_geometry_setup=True)
 
             # make all plots per subsection
-            # for distribution/taylor plot types --> done so to calclulate data ranges 
+            # for distribution/taylor plot types --> done so to calculate data ranges 
             # across subsections first
             summary_plots_to_make = [plot_type for plot_type in self.summary_plots_to_make 
                                      if ('distribution' in plot_type) or ('taylor' in plot_type)]

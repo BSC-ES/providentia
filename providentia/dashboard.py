@@ -98,16 +98,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     
                     if len(all_sections) == 1:
                         okpressed = False
-                        selected_section = list(all_sections)[0]
+                        self.section = list(all_sections)[0]
                     else:
                         title = 'Sections'
                         msg = 'Select section to load'
                         dialog = InputDialog(self, title, msg, all_sections)
-                        selected_section, okpressed = dialog.selected_option, dialog.okpressed
+                        self.section, okpressed = dialog.selected_option, dialog.okpressed
 
                     if okpressed or (len(all_sections) == 1):
                         self.from_conf = True
-                        self.current_config = self.sub_opts[selected_section]
+                        self.current_config = self.sub_opts[self.section]
             
             else:
                 # have config, but path does not exist
@@ -539,7 +539,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # initialise multispecies tab
         self.multispecies_initialisation = True
 
-        # launch with configuriton file?
+        # launch with configuration file?
         if self.from_conf: 
             
             # read
@@ -1427,6 +1427,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # run function to update filter
             self.mpl_canvas.handle_data_filter_update()
 
+            # for non-GHOST, we call update_metadata_fields again to remove the stations that have
+            # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained 
+            # after filtering
+            if not self.reading_ghost:
+                update_metadata_fields(self)
+
             # generate list of sorted z1/z2 data arrays names in memory, putting observations
             # before experiments, and empty string item as first element in z2 array list
             # (for changing from 'difference' statistics to 'absolute')
@@ -1511,6 +1517,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # unfilter data
         self.mpl_canvas.handle_data_filter_update()
         
+        # for non-GHOST, we call update_metadata_fields again to remove the stations that have
+        # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained 
+        # after filtering
+        if not self.reading_ghost:
+            update_metadata_fields(self)
+
         # Restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
 

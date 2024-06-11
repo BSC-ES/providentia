@@ -497,28 +497,35 @@ class ProvConfiguration:
 
         elif key == 'calibration_factor':
             # parse calibration factor
-            
-            if isinstance(value, str):
+
+            if isinstance(value, (str, int, float)):
+
+                # convert to string if not
+                if np.issubdtype(type(value), np.number):
+                    value = str(value)
 
                 # strip all whitespace
                 value_strip = "".join(value.split())
 
+                # detect if calibration factor is passed by experiment
                 calibration_by_experiment = False
                 for experiment in self.read_instance.experiments.keys():
                     if experiment in value_strip:
                         calibration_by_experiment = True
                         break
                 
+                # create dictionary per experiment
+                calibration_factor_dict = {}
                 if calibration_by_experiment:
-                    calibration_factor_dict = {}
                     for i, experiment in enumerate(self.read_instance.experiments.keys()):
                         calibration_factor_exp = value_strip.split('(')[i+1].split(')')[0]
                         calibration_factor_dict[experiment] = calibration_factor_exp
-                    return calibration_factor_dict
                 else:
-                    if np.issubdtype(type(value), np.number):
-                        return str(value)
+                    for i, experiment in enumerate(self.read_instance.experiments.keys()):
+                        calibration_factor_dict[experiment] = value
 
+                return calibration_factor_dict
+            
         # if no special parsing treatment for variable, simply return value
         return value
 
