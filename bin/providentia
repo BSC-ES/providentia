@@ -338,16 +338,16 @@ else
     # load modules from conda environment
     active_env=false
     eval "$(conda shell.bash hook)"
-    if { conda env list | grep 'providentia-env'; } >/dev/null 2>&1; then 
+    if { conda env list | grep 'providentia-env_2.4.0'; } >/dev/null 2>&1; then 
         echo "Activating environment..."
-        conda activate providentia-env
+        conda activate providentia-env_2.4.0
         active_env=true
     else
         # create environment if it does not exist
-        echo "Environment providentia-env does not exist."; 
+        echo "Environment providentia-env_2.4.0 does not exist."; 
         echo "Creating environment..."
-        conda create -n providentia-env -y python=3.9.16
-        conda activate providentia-env
+        conda create -n providentia-env_2.4.0 -y python=3.11.5
+        conda activate providentia-env_2.4.0
         conda install -c conda-forge cartopy -y
         conda install -c conda-forge jupyterlab -y
         pip install -r requirements.txt
