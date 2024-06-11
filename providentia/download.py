@@ -113,9 +113,9 @@ class ProvidentiaDownload(object):
 
             # filter species networks
             for i,network_specie in enumerate(self.filter_species):
-                # get network and specie from filter_species
-                network, specie = network_specie.split('|')
-                self.species = [specie]
+                # get network and species from filter_species
+                network, species = network_specie.split('|')
+                self.species = [species]
 
                 # ghost
                 if check_for_ghost(network):
@@ -202,14 +202,14 @@ class ProvidentiaDownload(object):
         # create Secure File Transfer Protocol object
         sftp = ssh.open_sftp()
         
-        # warning if network + specie + resolution combination is gets no matching results
+        # warning if network + species + resolution combination is gets no matching results
         if not res_spec_combinations:
             print_spec = f'{",".join(self.species)} species' if self.species else ""
             print_res = f'at {",".join(self.resolution)} resolutions' if self.resolution else ""
             print(f"There is no data available for {network} network {print_spec} {print_res}")
             return
 
-        # print the specie, resolution and network combinations that are going to be downloaded
+        # print the species, resolution and network combinations that are going to be downloaded
         else:
             print(f"{network} observations to download:")
             for combi_print in res_spec_combinations:
@@ -222,7 +222,7 @@ class ProvidentiaDownload(object):
 
                 valid_nc_files = self.get_valid_dates(sftp.listdir(remote_dir))
 
-                # warning if network + specie + resolution + date range combination gets no matching results       
+                # warning if network + species + resolution + date range combination gets no matching results       
                 if not valid_nc_files:                 
                     print_spec = f'{",".join(self.species)} species' if self.species else ""
                     print_res = f'at {",".join(self.resolution)} resolutions' if self.resolution else ""
@@ -305,14 +305,14 @@ class ProvidentiaDownload(object):
         # create Secure File Transfer Protocol object
         sftp = ssh.open_sftp()
         
-        # warning if network + specie + resolution combination is gets no matching results
+        # warning if network + species + resolution combination is gets no matching results
         if not res_spec_combinations:
             print_spec = f'{",".join(self.species)} species' if self.species else ""
             print_res = f'at {",".join(self.resolution)} resolutions' if self.resolution else ""
             print(f"There is no data available for {network} network {print_spec} {print_res}")
             return
 
-        # print the specie, resolution and network combinations that are going to be downloaded
+        # print the species, resolution and network combinations that are going to be downloaded
         else:
             print(f"{network} observations to download:")
             for combi_print in res_spec_combinations:
@@ -325,7 +325,7 @@ class ProvidentiaDownload(object):
 
                 valid_nc_files = self.get_valid_dates(sftp.listdir(remote_dir))
 
-                # warning if network + specie + resolution + date range combination gets no matching results       
+                # warning if network + species + resolution + date range combination gets no matching results       
                 if not valid_nc_files:                 
                     print_spec = f'{",".join(self.species)} species' if self.species else ""
                     print_res = f'at {",".join(self.resolution)} resolutions' if self.resolution else ""
@@ -363,10 +363,10 @@ class ProvidentiaDownload(object):
             res_spec_combinations = [f"/{resolution}/" for resolution in self.resolution]
         # network + species 
         elif not self.resolution:
-            res_spec_combinations = [f"/{specie}.tar.xz"  for specie in self.species]   
+            res_spec_combinations = [f"/{species}.tar.xz"  for species in self.species]   
         # network + resolution + species 
         else:
-            res_spec_combinations = [f"/{resolution}/{specie}.tar.xz" for specie in self.species for resolution in self.resolution]
+            res_spec_combinations = [f"/{resolution}/{species}.tar.xz" for species in self.species for resolution in self.resolution]
 
        
         # get all the possible networks from network e.g. EBAS gets EBAS-ACTRIS_oyktp, EBAS-AMAP_hcxwm, EBAS-CAMP_daczg, etc
@@ -396,7 +396,7 @@ class ProvidentiaDownload(object):
                     res_spec_final_combinations += list(filter(lambda x: combi in x, zip.namelist()))
                 res_spec_final_combinations = list(filter(lambda x: x[-7:] == '.tar.xz', res_spec_final_combinations))
                 
-                # warning if network + specie + resolution combination is gets no matching results
+                # warning if network + species + resolution combination is gets no matching results
                 if not res_spec_final_combinations:
                     print_spec = f'{",".join(self.species)} species' if self.species else ""
                     print_res = f'at {",".join(self.resolution)} resolutions' if self.resolution else ""
@@ -406,13 +406,13 @@ class ProvidentiaDownload(object):
                 # TODO Deberia printear cuanto va a ocupar pero no se sabe porque para cada uno no se va a descargar todas las fechas
                 # SE PUEDE PONER DESPUES
 
-                # check if there's any possible combination with user's network, resolution and specie
+                # check if there's any possible combination with user's network, resolution and species
                 if res_spec_final_combinations:
-                    # Print the specie, resolution and network combinations that are going to be downloaded
+                    # Print the species, resolution and network combinations that are going to be downloaded
                     print(f"{network} observations to download:")
                     last_ghost_version = 1.5
-                    for specie in res_spec_final_combinations:
-                        hourly_specie_print = "/".join(specie.split("/")[1:])
+                    for species in res_spec_final_combinations:
+                        hourly_specie_print = "/".join(species.split("/")[1:])
                         print(f"  - {self.ghost_root}/{network}/{last_ghost_version}/{hourly_specie_print[:-7]}")
 
                     # extract species from zip files
@@ -448,7 +448,7 @@ class ProvidentiaDownload(object):
                         # remove the tar file
                         os.remove(tar_path)
 
-                        # warning if network + specie + resolution + date range combination gets no matching results                        
+                        # warning if network + species + resolution + date range combination gets no matching results                        
                         if not valid_nc_files:
                             print_spec = f'{",".join(self.species)} species' if self.species else ""
                             print_res = f'at {",".join(self.resolution)} resolutions' if self.resolution else ""
