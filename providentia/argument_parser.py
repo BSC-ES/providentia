@@ -65,7 +65,7 @@ class ProvArgumentParser(object):
                                      default=False,
                                      action='store_true',
                                      help="run Providentia offline mode")
-            self.parser.add_argument("--download",
+            self.parser.add_argument("--download", "--dl",
                                      dest="download",
                                      default=False,
                                      action='store_true',
@@ -79,9 +79,6 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--resolution",
                                      dest="resolution",
                                      help="define data resolution (e.g. 'hourly', '3hourly', 'daily'")
-            self.parser.add_argument("--download_source",
-                                     dest="download_source",
-                                     help="in download mode, defines whether ghost or nonghost networks will be downloaded")
             self.parser.add_argument("--start_date",
                                      dest="start_date",
                                      help="define start date in format as 20160101")
