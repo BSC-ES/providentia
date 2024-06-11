@@ -401,6 +401,10 @@ class Plot:
             # check var str name exists in ghost var dict, if not move to next var
             if var_str_name not in ghost_var_dict:
                 continue
+            
+            # check if var is in metadata
+            if ghost_var not in self.read_instance.metadata_vars_to_read:
+                continue
 
             # if are on limit of vars allowed per line then break to new line
             if current_n_vars_per_line == plot_characteristics['max_vars_per_row']:
