@@ -529,7 +529,7 @@ class ProvConfiguration:
         # if no special parsing treatment for variable, simply return value
         return value
 
-    def check_validity(self):
+    def check_validity(self, deactivate_warning=False):
         """ Check validity of set variables after parsing. """
         
         # get non-default fields on config file if launching from a config file
@@ -552,7 +552,7 @@ class ProvConfiguration:
             #default = ['GHOST']
             default = ['EBAS']
             msg = "Network (network) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.network = default
 
         # check have species information, 
@@ -560,7 +560,7 @@ class ProvConfiguration:
         if not self.read_instance.species:
             default = ['sconco3']
             msg = "Species (species) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.species = default
 
         # if number of networks and species is not the same,
@@ -600,7 +600,7 @@ class ProvConfiguration:
             #default = 'monthly'
             default = 'hourly'
             msg = "Resolution (resolution) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.resolution = default
 
         # check have start_date information, 
@@ -608,7 +608,7 @@ class ProvConfiguration:
         if not self.read_instance.start_date:
             default = '20180101'
             msg = "Start date (start_date) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.start_date = default
 
         # check have end_date information, 
@@ -616,7 +616,7 @@ class ProvConfiguration:
         if not self.read_instance.end_date:
             default = '20190101'
             msg = "End date (end_date) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.end_date = default
 
         # check have statistic_mode information,
@@ -624,7 +624,7 @@ class ProvConfiguration:
         if not self.read_instance.statistic_mode:
             default = 'Temporal|Spatial'
             msg = "Statistic mode (statistic_mode) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.statistic_mode = default
 
         # check have statistic_aggregation information,
@@ -635,18 +635,18 @@ class ProvConfiguration:
             else:    
                 default = 'Median'
                 msg = "Statistic aggregation (statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.statistic_aggregation = default
         # if statistic_aggregation is defined ensure that it matches with the statistic_mode
         else:
             if (self.read_instance.statistic_mode == 'Flattened') & (self.read_instance.statistic_aggregation != ''):
                 msg = "statistic_mode is set to be 'Flattened', therefore statistic_aggregation must be empty, not '{}'. Setting to be empty.".format(self.read_instance.statistic_aggregation)                
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                 self.read_instance.statistic_aggregation = ''
             elif (self.read_instance.statistic_mode != 'Flattened') & (self.read_instance.statistic_aggregation == ''):
                 default = 'Median'
                 msg = "statistic_mode is set to be '{}', therefore statistic_aggregation must not be empty. Setting to be '{}'.".format(self.read_instance.statistic_mode, default)                
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                 self.read_instance.statistic_aggregation = default
 
         # check have periodic_statistic_mode information,
@@ -655,7 +655,7 @@ class ProvConfiguration:
             #default = 'Cycle'
             default = 'Independent'
             msg = "Periodic statistic mode (periodic_statistic_mode) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.periodic_statistic_mode = default
 
         # check have periodic_statistic_aggregation information,
@@ -663,7 +663,7 @@ class ProvConfiguration:
         if not self.read_instance.periodic_statistic_aggregation:
             default = 'Median'
             msg = "Periodic statistic aggregation (periodic_statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.periodic_statistic_aggregation = default
 
         # check have timeseries_statistic_aggregation information,
@@ -672,14 +672,14 @@ class ProvConfiguration:
             default = 'Median'
             msg = "Timeseries statistic aggregation (timeseries_statistic_aggregation) was not "
             msg += "defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.timeseries_statistic_aggregation = default
         else:
             if ((self.read_instance.statistic_mode == 'Spatial|Temporal')
                 and (self.read_instance.timeseries_statistic_aggregation != self.read_instance.statistic_aggregation)):
                 msg = "Aggregation statistic and timeseries aggregation statistic are not "
                 msg += "the same and Spatial|Temporal mode is active."
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
         # check have correct active_dashboard_plots information, 
         # should have 4 plots if non-empty, throw error if using dashboard if not
@@ -702,7 +702,7 @@ class ProvConfiguration:
         if (self.read_instance.filter_species) and (not self.read_instance.spatial_colocation):
             self.read_instance.filter_species = {}
             msg = 'Spatial colocation (spatial_colocation) must be set to True if wanting to filter by species.'
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
         # map to multiple species if have * wildcard
         # also duplicate out associated network
@@ -796,7 +796,7 @@ class ProvConfiguration:
             (not self.read_instance.offline) and (not self.read_instance.interactive)):
              
             msg = 'Multiple networks/species are not supported in the dashboard. First ones will be taken.'
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
             self.read_instance.network = [self.read_instance.network[0]]
             self.read_instance.species = [self.read_instance.species[0]]
@@ -816,24 +816,24 @@ class ProvConfiguration:
                         msg = 'Lower bound ({}) for {} cannot contain < or <=. '.format(lower_limit, networkspeci)
                         lower_limit = '>=' + lower_limit.replace('<', '').replace('=', '')
                         msg += 'Setting it to be {}.'.format(lower_limit)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     elif (':' not in lower_limit) and ('>' not in lower_limit):
                         msg = 'Lower bound ({}) for {} should contain > or >=. '.format(lower_limit, networkspeci)
                         lower_limit = '>=' + lower_limit
                         msg += 'Setting it to be {}.'.format(lower_limit)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
                     # modify upper bound to be :, or contain < or <=
                     if ('>' in upper_limit):
                         msg = 'Upper bound ({}) for {} cannot contain > or >=. '.format(upper_limit, networkspeci)
                         upper_limit = '<=' + upper_limit.replace('>', '').replace('=', '')
                         msg += 'Setting it to be {}.'.format(upper_limit)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     elif (':' not in upper_limit) and ('<' not in upper_limit):
                         msg = 'Upper bound ({}) for {} should contain < or <=. '.format(upper_limit, networkspeci)
                         upper_limit = '<=' + upper_limit
                         msg += 'Setting it to be {}.'.format(upper_limit)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     
                     # update symbols next to values
                     self.read_instance.filter_species[networkspeci][networkspeci_limit_ii] = [lower_limit, upper_limit, 
