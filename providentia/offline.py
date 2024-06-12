@@ -804,7 +804,7 @@ class ProvidentiaOffline:
                     setattr(self, k, provconf.parse_parameter(k, val))
 
                 # now all variables have been parsed, check validity of those, throwing errors where necessary
-                provconf.check_validity()
+                provconf.check_validity(deactivate_warning=True)
 
             # if have no experiments, force temporal colocation to be False
             if len(self.experiments) == 0:
