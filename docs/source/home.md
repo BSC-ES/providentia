@@ -4,7 +4,7 @@
 
 ## Description
 
-Providentia currently has 5 different modes to visualise the data:
+Providentia currently has 5 different modes:
 
 * [Interpolation](Interpolation), to interpolate the experiments to the observations networks of your interest. 
 * [Dashboard](Dashboard), designed to allow on-the-fly analysis of BSC experiment output.

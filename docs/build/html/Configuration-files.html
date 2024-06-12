@@ -144,7 +144,7 @@
 </div>
 <section id="sections">
 <h3>Sections<a class="headerlink" href="#sections" title="Link to this heading"></a></h3>
-<p>It is <strong>mandatory</strong> to define sections to launch Providentia. Their names must be wrapped in brackets (<code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">]</span></code>) and cannot include interpuncts (<code class="docutils literal notranslate"><span class="pre">·</span></code>). Sections should contain the following fields:</p>
+<p>It is <strong>mandatory</strong> to define sections to launch Providentia. Their names must be wrapped in brackets (<code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">]</span></code>) and cannot include interpuncts (<code class="docutils literal notranslate"><span class="pre">·</span></code>). The following fields can only be defined in a section:</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Parameter</p></th>
@@ -207,7 +207,7 @@
 </tr>
 <tr class="row-odd"><td><p>filter_species</p></td>
 <td><p>✗</p></td>
-<td><p>Filter read species by other species data within a data range (can be multiple) (e.g. <code class="docutils literal notranslate"><span class="pre">network1:species1</span> <span class="pre">(lowerlim,</span> <span class="pre">upperlim),</span> <span class="pre">network2:species2</span> <span class="pre">(lowerlim,</span> <span class="pre">upperlim)</span></code>).</p></td>
+<td><p>Filter read species by other species data within a data range. The first value set is the lower bound to filter by, and the second value the upper bound. Place a sign before each bound value to inform if the filter should be inclusive or exclusive of the bound, e.g. <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;=</span></code>. If not wishing to set either the lower or upper bounds, a <code class="docutils literal notranslate"><span class="pre">:</span></code> can be used. Optionally, a fill value can also be given as a third value to impose what the filtered data is set to, by default this is <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. Multiple filters can be  set together separated by a comma (e.g. <code class="docutils literal notranslate"><span class="pre">network1:species1</span> <span class="pre">(&gt;lowerlim,</span> <span class="pre">&lt;=upperlim,</span> <span class="pre">fillvalue),</span> <span class="pre">network2:species2</span> <span class="pre">(:,</span> <span class="pre">&lt;upperlim)</span></code>).</p></td>
 </tr>
 <tr class="row-even"><td><p>lower_bound</p></td>
 <td><p>✗</p></td>
@@ -259,7 +259,7 @@
 </tr>
 <tr class="row-even"><td><p>observations_data_label</p></td>
 <td><p>✗</p></td>
-<td><p>Alternative name for observations.</p></td>
+<td><p>Alias for observational data</p></td>
 </tr>
 <tr class="row-odd"><td><p>remove_extreme_stations</p></td>
 <td><p>✗</p></td>
