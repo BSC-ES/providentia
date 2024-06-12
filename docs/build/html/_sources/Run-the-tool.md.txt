@@ -8,12 +8,17 @@ If you are on Nord3v2 or Marenostrum 5, you should request an interactive sessio
 ./bin/providentia
 ``` 
 
-After some seconds you will have entered onto an allocated node and the dashboard will be launched. 
+After some seconds you will have entered onto an allocated node and the dashboard will be launched. If you want to launch it multiple times and avoid waiting in the queue you can use the debug mode. To do this, you will need to run the tool using the `--debug` flag and then rerun it:
+
+```
+./bin/providentia --debug
+./bin/providentia
+```
 
 By default, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total memory. This can be modified as desired using the bash options. You can check the available options with:
 
 ```
-./bin/providentia -u
+./bin/providentia --usage
 ``` 
 
 ### Launch the dashboard
@@ -48,6 +53,13 @@ The mandatory commands are:
 You can also launch the dashboard or get a report for only one section by using the option  `--section`. In order to indicate subsections, you will need to write the section name, followed by a hyphen (-) and the subsection name.
 
 The reports will be saved under the folder `reports`. You can add a path in the `report_filename` of the configuration file to change the default directory.
+
+### Using interactive mode
+
+A Jupyter notebook can be launched with the following command:
+```
+./bin/providentia --interactive
+```        
 
 ## Running the tool on a personal machine
 
