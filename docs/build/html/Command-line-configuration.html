@@ -107,21 +107,37 @@
 <td><p>Number of cores.</p></td>
 <td><p>12</p></td>
 </tr>
-<tr class="row-odd"><td><p>jobname</p></td>
+<tr class="row-odd"><td><p>time</p></td>
+<td><p>Requested time.</p></td>
+<td><p>02:00:00</p></td>
+</tr>
+<tr class="row-even"><td><p>jobname</p></td>
 <td><p>Job name.</p></td>
 <td><p>PRV</p></td>
 </tr>
-<tr class="row-even"><td><p>queue</p></td>
+<tr class="row-odd"><td><p>queue</p></td>
 <td><p>Job queue.</p></td>
 <td><p>debug</p></td>
 </tr>
-<tr class="row-odd"><td><p>mem</p></td>
+<tr class="row-even"><td><p>mem</p></td>
 <td><p>Memory.</p></td>
 <td><p>20Gb</p></td>
 </tr>
-<tr class="row-even"><td><p>constraint</p></td>
+<tr class="row-odd"><td><p>constraint</p></td>
 <td><p>Memory constraint.</p></td>
 <td><p>medmem (to use nodes with 64GB of memory)</p></td>
+</tr>
+<tr class="row-even"><td><p>version</p></td>
+<td><p>Print version of Providentia.</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>debug</p></td>
+<td><p>Start <a class="reference external" href="https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Interactive-mode#starting-a-jupyter-notebook">debug mode</a>.</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>interactive</p></td>
+<td><p>Start <a class="reference external" href="https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Run-the-tool#running-the-tool-on-a-bsc-machine">interactive mode</a>.</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p>conf</p></td>
 <td><p>Configuration file path.</p></td>
@@ -145,23 +161,23 @@
 </tr>
 <tr class="row-even"><td><p>cartopy_data_dir</p></td>
 <td><p>Cartopy data directory.</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data</span></code></p></td>
+<td><p>In MN5: <code class="docutils literal notranslate"><span class="pre">/gpfs/projects/bsc32/software/rhel/9.2/software/Cartopy/0.23.0-foss-2023b-Python-3.11.5/lib/python3.11/site-packages/cartopy/data</span></code>. In other HPC: <code class="docutils literal notranslate"><span class="pre">/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data</span></code>. Locally: Downloaded from the internet on the fly.</p></td>
 </tr>
-<tr class="row-odd"><td><p>ghost_root</p></td>
-<td><p>Path where GHOST files are saved.</p></td>
+<tr class="row-odd"><td><p>generate_file_tree</p></td>
+<td><p>Generate file tree to update data directories</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p>nonghost_root</p></td>
-<td><p>Path where non-GHOST files are saved.</p></td>
+<tr class="row-even"><td><p>file_tree</p></td>
+<td><p>Generate file tree to update data directories</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p>exp_root</p></td>
-<td><p>Path where experiments are saved.</p></td>
+<tr class="row-odd"><td><p>gft</p></td>
+<td><p>Generate file tree to update data directories</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p>offline</p></td>
-<td><p>Boolean to create or not offline reports.</p></td>
-<td><p>False</p></td>
+<td><p>Start <a class="reference external" href="https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Run-the-tool#generate-an-offline-report">offline reports</a>.</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p>network</p></td>
 <td><p>Network you want to load observations from. Can be multiple (e.g. <code class="docutils literal notranslate"><span class="pre">CAPMoN,</span> <span class="pre">EBAS</span></code>). Adding a wild card (*) is going to expand to certain variables (vconc* → vconc1, vconc2, etc.).</p></td>
@@ -197,6 +213,14 @@
 </tr>
 <tr class="row-odd"><td><p>filter_species</p></td>
 <td><p>Filter read species by other species data within a data range (can be multiple) (e.g. <code class="docutils literal notranslate"><span class="pre">network1:species1</span> <span class="pre">(lowerlim,</span> <span class="pre">upperlim),</span> <span class="pre">network2:species2</span> <span class="pre">(lowerlim,</span> <span class="pre">upperlim)</span></code>).</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>lower_bound</p></td>
+<td><p>Data lower limit</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>upper_bound</p></td>
+<td><p>Data upper limit</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p>report_type</p></td>
