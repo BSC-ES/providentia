@@ -9,20 +9,24 @@ Namely, these are:
 | Parameter | Description | Default |
 | ------ | ------ | ------ |
 | cores | Number of cores. | 12 |
+| time | Requested time. | 02:00:00 |
 | jobname | Job name. | PRV |
 | queue | Job queue. | debug |
 | mem | Memory. | 20Gb |
 | constraint | Memory constraint. | medmem (to use nodes with 64GB of memory) |
+| version | Print version of Providentia. | |
+| debug | Start [debug mode](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Interactive-mode#starting-a-jupyter-notebook). | |
+| interactive | Start [interactive mode](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Run-the-tool#running-the-tool-on-a-bsc-machine). | |
 | conf | Configuration file path. | |
 | config | Configuration file path. | |
 | config_dir | Path to all configuration files. | |
 | section | Section within configuration file. | |
 | ghost_version | GHOST version. | 1.5 |
-| cartopy_data_dir | Cartopy data directory. | `/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data` |
-| ghost_root | Path where GHOST files are saved. | |
-| nonghost_root | Path where non-GHOST files are saved. | |
-| exp_root | Path where experiments are saved. | |
-| offline | Boolean to create or not offline reports. | False |
+| cartopy_data_dir | Cartopy data directory. | In MN5: `/gpfs/projects/bsc32/software/rhel/9.2/software/Cartopy/0.23.0-foss-2023b-Python-3.11.5/lib/python3.11/site-packages/cartopy/data`. In other HPC: `/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data`. Locally: Downloaded from the internet on the fly. |
+| generate_file_tree | Generate file tree to update data directories | |
+| file_tree | Generate file tree to update data directories | |
+| gft | Generate file tree to update data directories | |
+| offline | Start [offline reports](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Run-the-tool#generate-an-offline-report). | |
 | network | Network you want to load observations from. Can be multiple (e.g. `CAPMoN, EBAS`). Adding a wild card (\*) is going to expand to certain variables (vconc* → vconc1, vconc2, etc.). | EBAS |
 | species | Species to load. Can be multiple (e.g. `sconco3, sconcno2`). | sconco3 |
 | resolution | Temporal resolution of the observations you want to load (e.g. `3hourly`). | hourly |
@@ -32,6 +36,8 @@ Namely, these are:
 | temporal_colocation | Boolean variable to set if you want to temporally colocate the observation and experiment data. | False |
 | spatial_colocation | Boolean variable to set if you want to spatially colocate the observation and experiment data across multiple species. | True |
 | filter_species | Filter read species by other species data within a data range (can be multiple) (e.g. `network1:species1 (lowerlim, upperlim), network2:species2 (lowerlim, upperlim)`). | |
+| lower_bound | Data lower limit | |
+| upper_bound | Data upper limit | |
 | report_type | Type of report to generate that defines which plots the report will contain, from the options given in `report_plots.yaml`. | standard |
 | report_summary | Boolean variable to set if you wish to make specific plots for each station in subsection.  | True |
 | report_stations | Boolean variable to set if you wish to make summary plots across station subsection. | False |
