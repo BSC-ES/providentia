@@ -53,6 +53,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#running-the-tool-on-a-bsc-machine">Running the tool on a BSC machine</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#launch-the-dashboard">Launch the dashboard</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#generate-an-offline-report">Generate an offline report</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#using-interactive-mode">Using interactive mode</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#running-the-tool-on-a-personal-machine">Running the tool on a personal machine</a></li>
@@ -99,9 +100,13 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span>
 </pre></div>
 </div>
-<p>After some seconds you will have entered onto an allocated node and the dashboard will be launched.</p>
+<p>After some seconds you will have entered onto an allocated node and the dashboard will be launched. If you want to launch it multiple times and avoid waiting in the queue you can use the debug mode. To do this, you will need to run the tool using the <code class="docutils literal notranslate"><span class="pre">--debug</span></code> flag and then rerun it:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">debug</span>
+<span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span>
+</pre></div>
+</div>
 <p>By default, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total memory. This can be modified as desired using the bash options. You can check the available options with:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">-</span><span class="n">u</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">usage</span>
 </pre></div>
 </div>
 <section id="launch-the-dashboard">
@@ -129,6 +134,13 @@
 </ul>
 <p>You can also launch the dashboard or get a report for only one section by using the option  <code class="docutils literal notranslate"><span class="pre">--section</span></code>. In order to indicate subsections, you will need to write the section name, followed by a hyphen (-) and the subsection name.</p>
 <p>The reports will be saved under the folder <code class="docutils literal notranslate"><span class="pre">reports</span></code>. You can add a path in the <code class="docutils literal notranslate"><span class="pre">report_filename</span></code> of the configuration file to change the default directory.</p>
+</section>
+<section id="using-interactive-mode">
+<h3>Using interactive mode<a class="headerlink" href="#using-interactive-mode" title="Link to this heading"></a></h3>
+<p>A Jupyter notebook can be launched with the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">interactive</span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="running-the-tool-on-a-personal-machine">
