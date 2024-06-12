@@ -1,9 +1,11 @@
 """ Warning functions """
 
 
-def show_message(read_instance, msg, msg_offline=None, from_conf=None):
+def show_message(read_instance, msg, msg_offline=None, from_conf=None, deactivate=False):
+    if deactivate:
+        return
 
-    if (read_instance.offline) or (read_instance.interactive):
+    elif (read_instance.offline) or (read_instance.interactive):
         if msg_offline is not None:
             print('Warning: ' + msg_offline)
         else:
