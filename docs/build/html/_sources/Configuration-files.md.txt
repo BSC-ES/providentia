@@ -53,7 +53,7 @@ report_title = Report
 ```
 ### Sections
 
-It is **mandatory** to define sections to launch Providentia. Their names must be wrapped in brackets (`[ ]`) and cannot include interpuncts (`·`). Sections should contain the following fields:
+It is **mandatory** to define sections to launch Providentia. Their names must be wrapped in brackets (`[ ]`) and cannot include interpuncts (`·`). The following fields can only be defined in a section:
 
 | Parameter | Mandatory | Description |
 | ------ | ------ | ------ |
@@ -70,7 +70,7 @@ It is **mandatory** to define sections to launch Providentia. Their names must b
 | timeseries_statistic_aggregation | ✗ | Timeseries aggregation statistic, e.g. Median. |
 | periodic_statistic_mode | ✗ | Periodic statistic mode: Independent (default), Cycle. |
 | periodic_statistic_aggregation | ✗ | Periodic aggregation statistic, e.g. Mean (default). |
-| filter_species | ✗ | Filter read species by other species data within a data range (can be multiple) (e.g. `network1:species1 (lowerlim, upperlim), network2:species2 (lowerlim, upperlim)`). |
+| filter_species | ✗ | Filter read species by other species data within a data range. The first value set is the lower bound to filter by, and the second value the upper bound. Place a sign before each bound value to inform if the filter should be inclusive or exclusive of the bound, e.g. `<` or `<=`. If not wishing to set either the lower or upper bounds, a `:` can be used. Optionally, a fill value can also be given as a third value to impose what the filtered data is set to, by default this is `NaN`. Multiple filters can be  set together separated by a comma (e.g. `network1:species1 (>lowerlim, <=upperlim, fillvalue), network2:species2 (:, <upperlim)`). |
 | lower_bound | ✗ | Filter out data lower than this set limit. If multiple species are being read then this can either be one value, setting the same limit across species, or multiple values per species (e.g. `3, 4, 5`). |
 | upper_bound | ✗ | Filter out data above this set limit. If multiple species are being read then this can either be one value, setting the same limit across species, or multiple values per species (e.g. `3, 4, 5`). |
 | report_type | ✗ | Type of report to generate that defines which plots the report will contain, from the options given in `report_plots.yaml`. |
@@ -83,7 +83,7 @@ It is **mandatory** to define sections to launch Providentia. Their names must b
 | active_dashboard_plots | ✗ | Plots that will be active in the dashboard once it is launched (e.g. `timeseries, periodic-violin, scatter, distribution`). |
 | harmonise_stations | ✗ | Boolean variable to set if you wish to harmonise axes limits across stations for stations report. |
 | harmonise_summary | ✗ | Boolean variable to set if you wish to harmonise axes limits across subsections for summary report. |
-| observations_data_label | ✗ | Alternative name for observations. |
+| observations_data_label | ✗ | Alias for observational data |
 | remove_extreme_stations | ✗ | Type of extreme stations removal, from the options given in `remove_extreme_stations.yaml`. |
 | resampling_resolution | ✗ | Resolution you want to resample your data to. Options: `hourly`, `daily`, `monthly`, `annual`.|
   
