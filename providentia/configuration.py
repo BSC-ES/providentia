@@ -66,19 +66,26 @@ class ProvConfiguration:
             'nonghost_root': '',
             'exp_root': '',
             'generate_file_tree': False,
+            'disable_file_tree': False,
             'offline': False,
             'interactive': False,
             'available_resolutions': ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
                                       '3hourly_instantaneous', '6hourly_instantaneous',
                                       'daily', 'monthly'],
-            'available_networks': ['GHOST','AERONET_v3_lev1.5','AERONET_v3_lev2.0','BJMEMC','CANADA_NAPS','CAPMoN',
-                                   'CHILE_SINCA','CNEMC','EANET','EBAS','EBAS-ACTRIS','EBAS-AMAP','EBAS-CAMP', 
-                                   'EBAS_COLOSSAL','EBAS-EMEP','EBAS-EUCAARI','EBAS-EUSAAR','EBAS-GUAN','EBAS-HELCOM','EBAS-HTAP',
-                                   'EBAS-IMPACTS','EBAS-IMPROVE','EBAS-Independent','EBAS-MOE','EBAS-NILU',
-                                   'EBAS-NOAA_ESRL','EBAS-NOAA_GGGRN','EBAS-OECD','EBAS-UK_DECC','EBAS-WMO_WDCA', 'EBAS-WMO_WDCRG',
-                                   'EEA_AIRBASE','EEA_AQ_eReporting','JAPAN_NIES','MEXICO_CDMX','MITECO',
-                                   'NOAA_ISD','NOAA_ISD_EU','NOAA_ISD_IP','NOAA_ISD_NA','SEARCH','UK_AIR',
-                                   'US_EPA_AirNow_DOS','US_EPA_AQS','US_EPA_CASTNET','US_NADP_AMNet','US_NADP_AMoN','WMO_WDCGG'], 
+            'ghost_available_networks': ['GHOST','AERONET_v3_lev1.5','AERONET_v3_lev2.0','BJMEMC','CANADA_NAPS','CAPMoN',
+                                         'CHILE_SINCA','CNEMC','EANET','EBAS','EBAS-ACTRIS','EBAS-AMAP','EBAS-CAMP', 
+                                         'EBAS_COLOSSAL','EBAS-EMEP','EBAS-EUCAARI','EBAS-EUSAAR','EBAS-GUAN','EBAS-HELCOM','EBAS-HTAP',
+                                         'EBAS-IMPACTS','EBAS-IMPROVE','EBAS-Independent','EBAS-MOE','EBAS-NILU',
+                                         'EBAS-NOAA_ESRL','EBAS-NOAA_GGGRN','EBAS-OECD','EBAS-UK_DECC','EBAS-WMO_WDCA', 'EBAS-WMO_WDCRG',
+                                         'EEA_AIRBASE','EEA_AQ_eReporting','JAPAN_NIES','MEXICO_CDMX','MITECO',
+                                         'NOAA_ISD','NOAA_ISD_EU','NOAA_ISD_IP','NOAA_ISD_NA','SEARCH','UK_AIR',
+                                         'US_EPA_AirNow_DOS','US_EPA_AQS','US_EPA_CASTNET','US_NADP_AMNet','US_NADP_AMoN','WMO_WDCGG'], 
+            'nonghost_available_networks': ['nasa-aeronet/directsun_v3-lev15','nasa-aeronet/directsun_v3-lev20',
+                                            'nasa-aeronet/oneill_v3-lev15', 'nasa-aeronet/oneill_v3-lev20',
+                                            'eea/eionet', 'eea/eionet-valid', 'cnrs-lisa/indaaf', 'port_barcelona/port-barcelona',
+                                            'csic/csic', 'miteco_voc/miteco_voc', 'meteofrance/eionet-cams2_40', 
+                                            'ineris/eionet-cams2_40-vra', 'ineris/eionet-cams2_40-ira, xvpca/xvpca',
+                                            'ehu_valderejo/ehu_valderejo', 'csic_montseny/csic_montseny'],
             'network': None,
             'species': None,
             'resolution': None,
@@ -88,6 +95,10 @@ class ProvConfiguration:
             'experiments': {},
             'qa': None,
             'flags': None,
+            'add_qa': None,
+            'subtract_qa': None,
+            'add_flags': None,
+            'subtract_flags': None,
             'temporal_colocation': False,
             'spatial_colocation': True,
             'map_extent': None, 
@@ -159,6 +170,11 @@ class ProvConfiguration:
             return operating_system
         
         elif key == 'machine':
+            # set filetree type
+            if MACHINE in ['power', 'mn4', 'nord3v2', 'mn5']:
+                self.read_instance.filetree_type = 'remote'
+            else:
+                self.read_instance.filetree_type = 'local'
             return MACHINE
 
         elif key == 'available_cpus':
@@ -176,7 +192,7 @@ class ProvConfiguration:
                     return os.cpu_count()
 
         elif key == 'cartopy_data_dir':
-            # set cartopy data directory (needed on CTE-POWER/MN4/Nord3v2 as has no external
+            # set cartopy data directory (needed on CTE-POWER/MN4/Nord3v2/MN5 as has no external
             # internet connection)
             if MACHINE in ['power', 'mn4', 'nord3v2', 'mn5']:
                 return '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
@@ -288,8 +304,9 @@ class ProvConfiguration:
         elif key == 'qa':
             # parse qa
 
-            # set default qa codes (can differ per GHOST version)
             from GHOST_standards import providentia_defaults
+
+            # set default qa codes (can differ per GHOST version)
             self.read_instance.default_qa_standard = [self.read_instance.standard_QA_name_to_QA_code[qa_name] 
                                                       for qa_name in providentia_defaults['qa_standard']]
             self.read_instance.default_qa_non_negative = [self.read_instance.standard_QA_name_to_QA_code[qa_name] 
@@ -317,6 +334,8 @@ class ProvConfiguration:
         elif key == 'flags':
             # parse flags
 
+            from GHOST_standards import providentia_defaults
+
             # if not None then set flags by that given
             if value is not None:
                 # if conf has only one flag
@@ -327,12 +346,53 @@ class ProvConfiguration:
                     return []
                 # if the flags are written with their names
                 elif isinstance(value, str):
-                    return [self.read_instance.standard_data_flag_name_to_data_flag_code[f.strip()]
-                            for f in value.split(",")]
+                    return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[f.strip()] for f in value.split(",")])
                 # list of integer codes
                 else:
                     return sorted(list(value))
-            # otherwise, set default (empty list)
+            # otherwise, set default flags
+            else:
+                return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[flag_name] for flag_name in providentia_defaults['flag']])
+
+        elif key in ['add_qa','subtract_qa']:
+            # parse add/subtract qa
+
+            # if not None then set QA by that given
+            if value is not None:
+                # if conf has only one QA
+                if isinstance(value, int):
+                    return [value]
+                # empty string
+                elif value == "":
+                    return []
+                # if the QAs are written with their names
+                elif isinstance(value, str):
+                    return sorted([self.read_instance.standard_QA_name_to_QA_code[q.strip()] for q in value.split(",")])
+                # list of integer codes
+                else:
+                    return sorted(list(value))
+            # otherwise, return empty list
+            else:
+                return []
+
+        elif key in ['add_flags','subtract_flags']:
+            # parse add/subtract flags
+
+            # if not None then set flags by that given
+            if value is not None:
+                # if conf has only one flag
+                if isinstance(value, int):
+                    return [value]
+                # empty string
+                elif value == "":
+                    return []
+                # if the flags are written with their names
+                elif isinstance(value, str):
+                    return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[f.strip()] for f in value.split(",")])
+                # list of integer codes
+                else:
+                    return sorted(list(value))
+            # otherwise, return empty list
             else:
                 return []
 
@@ -780,7 +840,7 @@ class ProvConfiguration:
                         upper_bound_dict[speci] = np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit'])
             self.read_instance.upper_bound = upper_bound_dict
 
-        # create a variable to set qa per species (including filter species)
+        # create a variable to set qa per species (including filter species), setting defaults in the process
         if isinstance(self.read_instance.qa, dict):
             self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) 
                                                  for speci in species_plus_filter_species}
@@ -788,6 +848,48 @@ class ProvConfiguration:
             self.read_instance.qa = self.read_instance.qa_per_species[list(self.read_instance.qa_per_species.keys())[0]]
         else:
             self.read_instance.qa_per_species = {speci:self.read_instance.qa for speci in species_plus_filter_species}
+
+        # add to qa
+        if self.read_instance.add_qa:
+            for qa_flag_to_add in self.read_instance.add_qa:
+                if qa_flag_to_add not in self.read_instance.qa:
+                    self.read_instance.qa.append(qa_flag_to_add)
+                for speci in self.read_instance.qa_per_species:
+                    if qa_flag_to_add not in self.read_instance.qa_per_species[speci]:
+                        self.read_instance.qa_per_species[speci].append(qa_flag_to_add)
+
+            self.read_instance.qa = sorted(self.read_instance.qa) 
+            for speci in self.read_instance.qa_per_species:
+                self.read_instance.qa_per_species[speci] = sorted(self.read_instance.qa_per_species[speci])
+
+        # subtract from qa
+        if self.read_instance.subtract_qa:
+            for qa_flag_to_remove in self.read_instance.subtract_qa:
+                if qa_flag_to_remove in self.read_instance.qa:
+                    self.read_instance.qa.remove(qa_flag_to_remove)
+                for speci in self.read_instance.qa_per_species:
+                    if qa_flag_to_remove in self.read_instance.qa_per_species[speci]:
+                        self.read_instance.qa_per_species[speci].remove(qa_flag_to_remove)
+
+            self.read_instance.qa = sorted(self.read_instance.qa) 
+            for speci in self.read_instance.qa_per_species:
+                self.read_instance.qa_per_species[speci] = sorted(self.read_instance.qa_per_species[speci])
+
+        # add to flags
+        if self.read_instance.add_flags:
+            for flag_to_add in self.read_instance.add_flags:
+                if flag_to_add not in self.read_instance.flags:
+                    self.read_instance.flags.append(flag_to_add)
+
+            self.read_instance.flags = sorted(self.read_instance.flags) 
+
+        # subtract from flags
+        if self.read_instance.subtract_flags:
+            for flag_to_remove in self.read_instance.subtract_flags:
+                if flag_to_remove in self.read_instance.flags:
+                    self.read_instance.flags.remove(flag_to_remove)
+
+            self.read_instance.flags = sorted(self.read_instance.flags) 
 
         # if are using dashboard then just take first network/species pair, as multivar not supported yet
         if ((len(self.read_instance.network) > 1) and (len(self.read_instance.species) > 1) and 
