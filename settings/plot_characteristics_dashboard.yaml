@@ -266,7 +266,7 @@
                    "group_widths": {"singlespecies":0.7, "multispecies":0.9}, 
                    "threshold_line": {"linestyle": "--", "linewidth": 1.0, "color": "red", "zorder": 0},
                    "plot": {"patch_artist": true, "manage_ticks": false, "showfliers": false},
-                   "plot_options": ["annotate", "logy", "threshold"]},
+                   "plot_options": ["annotate", "logy", "threshold", "normmedian", "normmean", "normmin", "normmax", "normsum"]},
 
        "heatmap": {"axis_title": {"label": "", "fontsize": 8.5, "loc": "left"}, 
                   "xtick_params": {"labelsize": 7, "which": "both", "bottom": true, "top": false, "right": false, 

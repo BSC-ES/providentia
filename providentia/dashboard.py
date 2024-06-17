@@ -7,6 +7,7 @@ from functools import partial
 import json
 import os
 import sys
+import time
 from weakref import WeakKeyDictionary
 import yaml
 
@@ -155,17 +156,30 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.full_window_geometry = None
 
         # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
-        # generate file trees
+        # if have filetree flags, then these overwrite any defaults
+        gft = False
         if self.generate_file_tree:
+            gft = True
+        elif self.disable_file_tree:
+            gft = False
+        # by default generate filetree on MN5
+        elif self.machine in ['mn5']:
+            gft = True
+        # by default generate filetree locally
+        elif self.filetree_type == 'local':
+            gft = True
+
+        # generate file trees
+        if gft:
             self.all_observation_data = get_ghost_observational_tree(self)
             if self.nonghost_root is not None:
                 nonghost_observation_data = get_nonghost_observational_tree(self)
         # load file trees
         else:
             try:
-                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.json'))) 
+                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree_{}.json'.format(self.ghost_version)))) 
             except FileNotFoundError as file_error:
-                msg = "Error: Trying to load 'settings/ghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                msg = "Error: Trying to load 'settings/ghost_filetree_{}.json' but file does not exist. Run with the flag '--gft' to generate this file.".format(self.ghost_version)
                 sys.exit(msg)
             if self.nonghost_root is not None:
                 try:
@@ -620,7 +634,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         elif self.operating_system == 'Windows':
             self.show()
             self.showMaximized()
-        
+
     def generate_pop_up_window(self, menu_root):
         """ Generate pop up window. """
         
@@ -1552,6 +1566,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 def main(**kwargs):
     """ Main function. """
     
+    # pause briefly to allow QT modules time to correctly initilise
+    time.sleep(0.1)
     q_app = QtWidgets.QApplication(sys.argv)
     q_app.setStyle("Fusion")
     ProvidentiaMainWindow(**kwargs)

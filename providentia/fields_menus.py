@@ -426,7 +426,7 @@ def update_metadata_fields(instance):
             # remove data for stations with 0 measurements
             # this is done only for non-GHOST because the data files are forced to contain data for all possible stations
             if hasattr(instance, 'valid_station_inds') and (not instance.reading_ghost):
-                if (instance.temporal_colocation) and (len(instance.data_labels) > 1):
+                if instance.temporal_colocation:
                     valid_station_inds = instance.valid_station_inds_temporal_colocation[networkspeci][instance.observations_data_label]
                 else:
                     valid_station_inds = instance.valid_station_inds[networkspeci][instance.observations_data_label]
