@@ -109,14 +109,14 @@ https://earth.bsc.es/gitlab/es/NES/-/blob/master/tutorials/2.Creation/2.5.Create
 </ul>
 <p>Providentia will be able to find these datasets if they are saved in the directory <code class="docutils literal notranslate"><span class="pre">/esarchive/obs/</span></code>. The data path must be included in <code class="docutils literal notranslate"><span class="pre">settings/nonghost_files.yaml</span></code>. As an example, the path to the data from CSIC (<code class="docutils literal notranslate"><span class="pre">/esarchive/obs/csic/csic/monthly/sconcnh3/</span></code>) correspond in this dictionary to:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;csic/csic&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;monthly&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;sconcnh3&quot;</span><span class="p">:</span> <span class="p">[]</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
+    <span class="s2">&quot;monthly&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;sconcnh3&quot;</span><span class="p">]</span>
+ <span class="p">}</span>
 </pre></div>
 </div>
-<p>If you launch the dashboard and select any period in 2019, you will see that you can select CSIC as a network. If you want to use a configuration file to launch it or create offline reports, then you will need to write:</p>
+<p>The next time you use Providentia you must use the argument <code class="docutils literal notranslate"><span class="pre">--gft</span></code>, to regenerate the internal file tree to account for the new network.</p>
+<p>If you then launch the dashboard and select any period in 2019, you will see that you can select CSIC as a network. If you want to use a configuration file to launch it or create offline reports, then you will need to write:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">csic</span><span class="o">/</span><span class="n">csic</span>
+
 </pre></div>
 </div>
 </section>
