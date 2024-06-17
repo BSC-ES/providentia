@@ -35,7 +35,7 @@ IFS=$'\n\t'
 # An option followed by double colons '::' means that its argument is optional.
 # See `man getopt'.
 SHORT=uc:t:J:q:m:V
-LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,interactive,conf:,config:,config_dir:,section:,ghost_version:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,generate_file_tree,file_tree,gft,offline,interactive,network:,species:,resolution:,start_date:,end_date:,experiments:,temporal_colocation:,spatial_colocation:,filter_species:,lower_bound:,upper_bound:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,map_extent:,active_dashboard_plots:,plot_characteristics_filename:
+LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,interactive,conf:,config:,config_dir:,section:,ghost_version:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,generate_file_tree,gft,disable_file_tree,dft,offline,interactive,network:,species:,resolution:,start_date:,end_date:,experiments:,temporal_colocation:,spatial_colocation:,filter_species:,lower_bound:,upper_bound:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,map_extent:,active_dashboard_plots:,plot_characteristics_filename:
 
 # parse arguments
 PARSED=$(getopt --options ${SHORT} \
