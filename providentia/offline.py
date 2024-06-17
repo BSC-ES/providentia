@@ -817,7 +817,7 @@ class ProvidentiaOffline:
                     setattr(self, k, provconf.parse_parameter(k, val))
 
                 # now all variables have been parsed, check validity of those, throwing errors where necessary
-                provconf.check_validity()
+                provconf.check_validity(deactivate_warning=True)
 
             # determine if need to re-read data (qa, flags, filter_species or calibration factor have changed)
             if (np.array_equal(self.qa, self.previous_qa) == False) or (
