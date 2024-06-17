@@ -874,7 +874,7 @@ class MPLCanvas(FigureCanvas):
                     # if temporal colocation is turned off or there are no experiments, skip scatter plot
                     if plot_type in ['scatter', 'taylor']:
                         if ((not self.read_instance.temporal_colocation) 
-                            or ((self.read_instance.temporal_colocation) and (len(self.read_instance.experiments) == 0))):
+                            or ((self.read_instance.temporal_colocation) and (len(self.read_instance.data_labels) == 1))):
                             if (not self.read_instance.temporal_colocation):
                                 msg = f'It is not possible to make {plot_type} plots without activating the temporal colocation.'
                             else:
@@ -956,7 +956,7 @@ class MPLCanvas(FigureCanvas):
 
             # update z statistic field to all basic stats if colocation not-active OR z2
             # array not selected, else select basic+bias stats
-            if (not self.read_instance.temporal_colocation) or (selected_z2_array == ''):
+            if (not self.read_instance.temporal_colocation) or (selected_z2_array == '') or (len(self.read_instance.data_labels) == 1):
                 z_stat_items = copy.deepcopy(self.read_instance.basic_z_stats)
             else:
                 z_stat_items = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
@@ -1109,7 +1109,7 @@ class MPLCanvas(FigureCanvas):
 
             # update periodic statistics, to all basic stats
             # if colocation not-active, and basic+bias stats if colocation active
-            if not self.read_instance.temporal_colocation:
+            if (not self.read_instance.temporal_colocation) or (len(self.read_instance.data_labels) == 1):
                 available_periodic_stats = copy.deepcopy(self.read_instance.basic_z_stats)
             else:
                 available_periodic_stats = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
@@ -3242,7 +3242,7 @@ class MPLCanvas(FigureCanvas):
         chunk_resolution = self.timeseries_chunk_resolution.currentText()
             
         # update timeseries chunk statistics
-        if not self.read_instance.temporal_colocation:
+        if (not self.read_instance.temporal_colocation) or (len(self.read_instance.data_labels) == 1):
             available_timeseries_chunk_stats = ["None",] + list(copy.deepcopy(self.read_instance.basic_z_stats))
         else:
             available_timeseries_chunk_stats = ["None",] + list(copy.deepcopy(self.read_instance.basic_and_bias_z_stats))

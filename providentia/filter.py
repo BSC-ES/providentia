@@ -484,7 +484,7 @@ class DataFilter:
 
                 # if have only observations data then cannot calculate bias statistic, so continue to next stat
                 if z_statistic_sign == 'bias':
-                    if len(self.read_instance.data_labels) < 2:
+                    if len(self.read_instance.data_labels) == 1:
                         msg = "Cannot remove extreme stations via calculation of '{}' as no experiment data has been read.".format(zstat)
                         show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
                         continue
@@ -561,68 +561,71 @@ class DataFilter:
 
     def temporally_colocate_data(self):
         """ Define function which temporally colocates observational and experiment data.
-            This is done across all networks / species if spatial colocation is active,
-            otherwise it is done independently per network / species
+            If spatial colocation is active, then data is also temporally colocated across all network / species,
+            otherwise it is done independently per network / species.
             This in reality means storing the indices for the temporal colocation.
         """
 
         # if do not have any experiment data loaded, no colocation is possible.
-        if len(self.read_instance.data_labels) == 1:
-            return
-        else:
+        #if not self.read_instance.temporal_colocation:
+        #    # iterate through network / species setting all data as being available
+        #    for ii, networkspeci in enumerate(self.read_instance.networkspecies):
+        #        self.read_instance.temporal_colocation_nans[networkspeci] = np.full(self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:].shape, False)
+        #    return
+        #else:
             # colocate observational data array to every different experiment array in memory, 
             # and all experiment arrays to observations.
             # wherever there is a NaN at one time in one of the observations/experiment arrays 
             # the other array value is also made NaN.
             # this is done across all networks / species if spatial colocation is active,
-            # otherwise it is done inderpendently per network / species
+            # otherwise it is done independently per network / species
             
-            # iterate through network / species  
-            for ii, networkspeci in enumerate(self.read_instance.networkspecies):
+        # iterate through network / species  
+        for ii, networkspeci in enumerate(self.read_instance.networkspecies):
 
-                # initialise arrays to determine where have NaNs
-                if (ii == 0) or (not self.read_instance.spatial_colocation):
-                    # create array for finding instances where have 0 valid values across all observations
-                    # initialise as being all False (i.e. non-NaN), set as True on the occasion there is a NaN in the observations
-                    obs_all_nan = np.full(self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:].shape, False)
+            # initialise arrays to determine where have NaNs
+            if (ii == 0) or (not self.read_instance.spatial_colocation):
+                # create array for finding instances where have 0 valid values across all observations
+                # initialise as being all False (i.e. non-NaN), set as True on the occasion there is a NaN in the observations
+                obs_all_nan = np.full(self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:].shape, False)
 
-                    # create array for finding instances where have 0 valid values across all experiments
-                    # initialise as being all False (i.e. non-NaN), set as True on the occasion there is a NaN in an experiment
-                    exps_all_nan = np.full(obs_all_nan.shape, False)
+                # create array for finding instances where have 0 valid values across all experiments
+                # initialise as being all False (i.e. non-NaN), set as True on the occasion there is a NaN in an experiment
+                exps_all_nan = np.full(obs_all_nan.shape, False)
 
-                # get all instances observations is NaN
-                nan_obs = np.isnan(self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:])             
+            # get all instances observations is NaN
+            nan_obs = np.isnan(self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:])             
 
-                # update obs_all_nan array, making True all instances where have NaNs
-                # if all observations are nan then do not update
-                if not np.all(nan_obs):
-                    obs_all_nan = np.any([obs_all_nan, nan_obs], axis=0)
+            # update obs_all_nan array, making True all instances where have NaNs
+            # if all observations are nan then do not update
+            if not np.all(nan_obs):
+                obs_all_nan = np.any([obs_all_nan, nan_obs], axis=0)
 
-                # iterate through experiment data arrays in data in memory dictionary
-                # save indices for colocation with observations
-                for experiment in self.read_instance.experiments.values():
-                    
-                    #get expid data label index
-                    exp_data_index = self.read_instance.data_labels.index(experiment)
-                    
-                    # get all instances experiment is NaN
-                    nan_exp = np.isnan(self.read_instance.data_in_memory_filtered[networkspeci][exp_data_index,:,:])
+            # iterate through experiment data arrays in data in memory dictionary
+            # save indices for colocation with observations
+            for experiment in self.read_instance.experiments.values():
+                
+                #get expid data label index
+                exp_data_index = self.read_instance.data_labels.index(experiment)
+                
+                # get all instances experiment is NaN
+                nan_exp = np.isnan(self.read_instance.data_in_memory_filtered[networkspeci][exp_data_index,:,:])
 
-                    # update exps_all_nan array, making True all instances where have NaNs
-                    # if all experiment values are nan then do not update for that experiment
-                    if not np.all(nan_exp):
-                        exps_all_nan = np.any([exps_all_nan, nan_exp], axis=0)
+                # update exps_all_nan array, making True all instances where have NaNs
+                # if all experiment values are nan then do not update for that experiment
+                if not np.all(nan_exp):
+                    exps_all_nan = np.any([exps_all_nan, nan_exp], axis=0)
 
-                # if spatial colocation is not active,
-                # get indices where one of observations and experiments per network /species is NaN
-                if not self.read_instance.spatial_colocation:
-                    self.read_instance.temporal_colocation_nans[networkspeci] = np.any([obs_all_nan, exps_all_nan], axis=0)
+            # if spatial colocation is not active,
+            # get indices where one of observations and experiments per network /species is NaN
+            if not self.read_instance.spatial_colocation:
+                self.read_instance.temporal_colocation_nans[networkspeci] = np.any([obs_all_nan, exps_all_nan], axis=0)
 
-            # if spatial colocation is active, 
-            # get indices where one of observations and experiments across networks / species is NaN
-            if self.read_instance.spatial_colocation:
-                for networkspeci in self.read_instance.networkspecies:
-                    self.read_instance.temporal_colocation_nans[networkspeci] = np.any([obs_all_nan, exps_all_nan], axis=0)
+        # if spatial colocation is active, 
+        # get indices where one of observations and experiments across networks / species is NaN
+        if self.read_instance.spatial_colocation:
+            for networkspeci in self.read_instance.networkspecies:
+                self.read_instance.temporal_colocation_nans[networkspeci] = np.any([obs_all_nan, exps_all_nan], axis=0)
 
     def get_valid_stations_after_filtering(self):
         """ Get valid station indices after all filtering has been performed.
@@ -655,20 +658,18 @@ class DataFilter:
                     self.read_instance.valid_station_inds[networkspeci][data_label] = \
                         np.arange(len(station_data_availability_number), dtype=np.int64)[station_data_availability_number > 1]
 
-                    if len(self.read_instance.data_labels) > 1:
+                    # get colocated obs data array if have temporal colocation is active
+                    obs_data[self.read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
 
-                        # get colocated obs data array (if have experiments)
-                        obs_data[self.read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
-
-                        # get absolute data availability number per station in observational data array
-                        if obs_data.size == 0:
-                            station_data_availability_number = np.array([])
-                        else:
-                            station_data_availability_number = Stats.calculate_data_avail_number(obs_data)
-                        
-                        # get indices of stations with > 1 available measurements
-                        self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = \
-                            np.arange(len(station_data_availability_number), dtype=np.int64)[station_data_availability_number > 1]
+                    # get absolute data availability number per station in observational data array
+                    if obs_data.size == 0:
+                        station_data_availability_number = np.array([])
+                    else:
+                        station_data_availability_number = Stats.calculate_data_avail_number(obs_data)
+                    
+                    # get indices of stations with > 1 available measurements
+                    self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = \
+                        np.arange(len(station_data_availability_number), dtype=np.int64)[station_data_availability_number > 1]
 
             # get equivalent valid station indices for experimental arrays
             # subset observational valid station indices, with experimental array stations with > 1 valid measurements

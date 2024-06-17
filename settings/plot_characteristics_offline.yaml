@@ -285,7 +285,7 @@
                    "group_widths": {"singlespecies":0.7, "multispecies":0.9}, 
                    "threshold_line": {"linestyle": "--", "linewidth": 1.0, "color": "red", "zorder": 0},
                    "plot": {"patch_artist": true, "manage_ticks": false, "showfliers": false},
-                   "plot_options": ["obs", "individual", "annotate", "logy", "multispecies", "threshold"]},
+                   "plot_options": ["obs", "individual", "annotate", "logy", "multispecies", "threshold", "normmedian", "normmean", "normmin", "normmax", "normsum"]},
 
        "heatmap": {"orientation": "portrait",
                    "figure": {"ncols": 1, "nrows": 1},
