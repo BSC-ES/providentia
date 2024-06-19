@@ -4,9 +4,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - 8888:8888
+    container_name: providentia
     volumes:
       - /data:/data
       - /home/avilanov/software/Providentia:/tmp/Providentia
+      - /home/avilanov/software/providentia-interpolation:/tmp/providentia-interpolation
       - /tmp/.X11-unix/:/tmp/.X11-unix
     stdin_open: true
     tty: true
