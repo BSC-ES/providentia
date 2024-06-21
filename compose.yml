@@ -1,3 +1,4 @@
+name: providentia
 services:
   providentia:
     build:
