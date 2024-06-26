@@ -23,6 +23,8 @@ MACHINE = os.environ.get('BSC_MACHINE', '')
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
+default_values = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_defaults.yaml')))
+multispecies_map = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 
 # set MACHINE to be the hub, workstation or local machine
 if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
@@ -50,88 +52,11 @@ class ProvConfiguration:
     def __init__(self, read_instance, **kwargs):
         
         self.read_instance = read_instance 
-
+        
         # set variable defaults
-        self.var_defaults = {
-            'ghost_version': '1.5',
-            'conf': '',
-            'config': '',
-            'config_dir': os.path.join(PROVIDENTIA_ROOT, 'configurations/'),
-            'operating_system': '',
-            'machine': '',
-            'cartopy_data_dir': '',
-            'available_cpus': '',
-            'n_cpus': '',
-            'ghost_root': '',
-            'nonghost_root': '',
-            'exp_root': '',
-            'generate_file_tree': False,
-            'disable_file_tree': False,
-            'offline': False,
-            'interactive': False,
-            'available_resolutions': ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
-                                      '3hourly_instantaneous', '6hourly_instantaneous',
-                                      'daily', 'monthly'],
-            'ghost_available_networks': ['GHOST','AERONET_v3_lev1.5','AERONET_v3_lev2.0','BJMEMC','CANADA_NAPS','CAPMoN',
-                                         'CHILE_SINCA','CNEMC','EANET','EBAS','EBAS-ACTRIS','EBAS-AMAP','EBAS-CAMP', 
-                                         'EBAS_COLOSSAL','EBAS-EMEP','EBAS-EUCAARI','EBAS-EUSAAR','EBAS-GUAN','EBAS-HELCOM','EBAS-HTAP',
-                                         'EBAS-IMPACTS','EBAS-IMPROVE','EBAS-Independent','EBAS-MOE','EBAS-NILU',
-                                         'EBAS-NOAA_ESRL','EBAS-NOAA_GGGRN','EBAS-OECD','EBAS-UK_DECC','EBAS-WMO_WDCA', 'EBAS-WMO_WDCRG',
-                                         'EEA_AIRBASE','EEA_AQ_eReporting','JAPAN_NIES','MEXICO_CDMX','MITECO',
-                                         'NOAA_ISD','NOAA_ISD_EU','NOAA_ISD_IP','NOAA_ISD_NA','SEARCH','UK_AIR',
-                                         'US_EPA_AirNow_DOS','US_EPA_AQS','US_EPA_CASTNET','US_NADP_AMNet','US_NADP_AMoN','WMO_WDCGG'], 
-            'nonghost_available_networks': ['nasa-aeronet/directsun_v3-lev15','nasa-aeronet/directsun_v3-lev20',
-                                            'nasa-aeronet/oneill_v3-lev15', 'nasa-aeronet/oneill_v3-lev20',
-                                            'eea/eionet', 'eea/eionet-valid', 'cnrs-lisa/indaaf', 'port_barcelona/port-barcelona',
-                                            'csic/csic', 'miteco_voc/miteco_voc', 'meteofrance/eionet-cams2_40', 
-                                            'ineris/eionet-cams2_40-vra', 'ineris/eionet-cams2_40-ira, xvpca/xvpca',
-                                            'ehu_valderejo/ehu_valderejo', 'csic_montseny/csic_montseny'],
-            'network': None,
-            'species': None,
-            'resolution': None,
-            'start_date': None,
-            'end_date': None,
-            'observations_data_label': 'observations',
-            'experiments': {},
-            'qa': None,
-            'flags': None,
-            'add_qa': None,
-            'subtract_qa': None,
-            'add_flags': None,
-            'subtract_flags': None,
-            'temporal_colocation': False,
-            'spatial_colocation': True,
-            'map_extent': None, 
-            'filter_species': {},
-            'calibration_factor': {},
-            'lower_bound': None,
-            'upper_bound': None,
-            'report_type': 'standard',
-            'report_summary': True,
-            'report_stations': False,
-            'report_title': 'Providentia Offline Report',
-            'report_filename': 'PROVIDENTIA_Report',
-            'active_dashboard_plots': None,
-            'resampling_resolution': None,
-            'statistic_mode': None,
-            'statistic_aggregation': None,
-            'periodic_statistic_mode': None,
-            'periodic_statistic_aggregation': None,
-            'timeseries_statistic_aggregation': None,
-            'plot_characteristics_filename': '',
-            'harmonise_summary': True,
-            'harmonise_stations': True,
-            'remove_extreme_stations': None,
-            'fixed_section_vars':  ['ghost_version', 'config_dir', 'operating_system', 'cartopy_data_dir', 'available_cpus', 
-                                    'n_cpus', 'ghost_root', 'nonghost_root', 'exp_root', 'offline', 'interactive',
-                                    'available_resolutions', 'available_networks',
-                                    'network', 'species', 'resolution', 'start_date', 'end_date', 
-                                    'observations_data_label', 'experiments', 'temporal_colocation', 'spatial_colocation', 
-                                    'report_type', 'report_summary', 'report_stations', 'report_title', 
-                                    'report_filename', 'plot_characteristics_filename', 
-                                    'harmonise_summary', 'harmonise_stations']
-        }
-
+        self.var_defaults = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'init_prov_dev.yaml')))
+        self.var_defaults['config_dir'] = os.path.join(PROVIDENTIA_ROOT, self.var_defaults['config_dir'])
+        
         # if variable is given by command line, set that value, otherwise set as default value 
         for k, val in self.var_defaults.items():
             val = kwargs.get(k, val)
@@ -610,7 +535,7 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         if not self.read_instance.network:
             #default = ['GHOST']
-            default = ['EBAS']
+            default = default_values['network']
             msg = "Network (network) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.network = default
@@ -618,7 +543,7 @@ class ProvConfiguration:
         # check have species information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.species:
-            default = ['sconco3']
+            default = default_values['species']
             msg = "Species (species) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.species = default
@@ -658,7 +583,7 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         if not self.read_instance.resolution:
             #default = 'monthly'
-            default = 'hourly'
+            default = default_values['resolution']
             msg = "Resolution (resolution) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.resolution = default
@@ -666,7 +591,7 @@ class ProvConfiguration:
         # check have start_date information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.start_date:
-            default = '20180101'
+            default = default_values['start_date']
             msg = "Start date (start_date) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.start_date = default
@@ -674,7 +599,7 @@ class ProvConfiguration:
         # check have end_date information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.end_date:
-            default = '20190101'
+            default = default_values['end_date']
             msg = "End date (end_date) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.end_date = default
@@ -682,38 +607,30 @@ class ProvConfiguration:
         # check have statistic_mode information,
         # if offline, throw message, stating are using default instead
         if not self.read_instance.statistic_mode:
-            default = 'Temporal|Spatial'
+            default = default_values['statistic_mode']
             msg = "Statistic mode (statistic_mode) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.statistic_mode = default
 
         # check have statistic_aggregation information,
         # if offline, throw message, stating are using default instead
-        if not self.read_instance.statistic_aggregation:
-            if self.read_instance.statistic_mode == 'Flattened':
-                default = ''
-            else:    
-                default = 'Median'
+        default = default_values['statistic_aggregation'][self.read_instance.statistic_mode]
+        if not self.read_instance.statistic_aggregation:  
+            if self.read_instance.statistic_mode != 'Flattened':
                 msg = "Statistic aggregation (statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.statistic_aggregation = default
         # if statistic_aggregation is defined ensure that it matches with the statistic_mode
-        else:
-            if (self.read_instance.statistic_mode == 'Flattened') & (self.read_instance.statistic_aggregation != ''):
+        elif (self.read_instance.statistic_mode == 'Flattened'):
                 msg = "statistic_mode is set to be 'Flattened', therefore statistic_aggregation must be empty, not '{}'. Setting to be empty.".format(self.read_instance.statistic_aggregation)                
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                self.read_instance.statistic_aggregation = ''
-            elif (self.read_instance.statistic_mode != 'Flattened') & (self.read_instance.statistic_aggregation == ''):
-                default = 'Median'
-                msg = "statistic_mode is set to be '{}', therefore statistic_aggregation must not be empty. Setting to be '{}'.".format(self.read_instance.statistic_mode, default)                
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
                 self.read_instance.statistic_aggregation = default
 
         # check have periodic_statistic_mode information,
         # if offline, throw message, stating are using default instead
         if not self.read_instance.periodic_statistic_mode:
             #default = 'Cycle'
-            default = 'Independent'
+            default = default_values['periodic_statistic_mode']
             msg = "Periodic statistic mode (periodic_statistic_mode) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.periodic_statistic_mode = default
@@ -721,7 +638,7 @@ class ProvConfiguration:
         # check have periodic_statistic_aggregation information,
         # if offline, throw message, stating are using default instead
         if not self.read_instance.periodic_statistic_aggregation:
-            default = 'Median'
+            default = default_values['periodic_statistic_aggregation']
             msg = "Periodic statistic aggregation (periodic_statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.periodic_statistic_aggregation = default
@@ -729,7 +646,7 @@ class ProvConfiguration:
         # check have timeseries_statistic_aggregation information,
         # if offline, throw message, stating are using default instead
         if not self.read_instance.timeseries_statistic_aggregation:
-            default = 'Median'
+            default = default_values['timeseries_statistic_aggregation']
             msg = "Timeseries statistic aggregation (timeseries_statistic_aggregation) was not "
             msg += "defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
@@ -744,7 +661,7 @@ class ProvConfiguration:
         # check have correct active_dashboard_plots information, 
         # should have 4 plots if non-empty, throw error if using dashboard if not
         if not self.read_instance.active_dashboard_plots:
-            default = ['timeseries', 'statsummary', 'distribution', 'periodic']
+            default = default_values['active_dashboard_plots']
             self.read_instance.active_dashboard_plots = default
         # TODO: For Taylor diagrams, remove this piece of code when we stop using Matplotlib 3.3
         else:
@@ -770,7 +687,7 @@ class ProvConfiguration:
         new_species = copy.deepcopy(self.read_instance.species)
         for speci_ii, speci in enumerate(self.read_instance.species): 
             if '*' in speci:
-                mapped_species = self.multispecies_mapping(speci)
+                mapped_species = multispecies_map[speci]
                 del new_species[speci_ii]
                 new_species[speci_ii:speci_ii] = mapped_species
                 network_to_duplicate = self.read_instance.network[speci_ii]
@@ -940,18 +857,6 @@ class ProvConfiguration:
                     # update symbols next to values
                     self.read_instance.filter_species[networkspeci][networkspeci_limit_ii] = [lower_limit, upper_limit, 
                                                                                               filter_species_fill_value]
-
-    def multispecies_mapping(self, species):
-        """ Map species special case str to multiple species names. """
-
-        multi_species_map = {'vconcaerobin*':['vconcaerobin1','vconcaerobin2','vconcaerobin3','vconcaerobin4',
-                            'vconcaerobin5','vconcaerobin6','vconcaerobin7','vconcaerobin8','vconcaerobin9',
-                            'vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14',
-                            'vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19',
-                            'vconcaerobin20','vconcaerobin21','vconcaerobin22']}
-
-        return multi_species_map[species]
-
 
 def read_conf(fpath=None):
     """ Read configuration files. """
