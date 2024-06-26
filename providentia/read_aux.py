@@ -469,7 +469,7 @@ def get_ghost_observational_tree(instance):
         ghost_observation_data[network] = {}
 
         # iterate through available resolutions
-        for resolution in instance.available_resolutions:
+        for resolution in instance.ghost_available_resolutions:
 
             # check if directory for resolution exists
             # if not, continue
@@ -539,7 +539,7 @@ def get_nonghost_observational_tree(instance):
         nonghost_observation_data[network] = {}
 
         # iterate through available resolutions
-        for resolution in instance.available_resolutions:
+        for resolution in instance.nonghost_available_resolutions:
 
             # check if directory for resolution exists
             # if not, continue

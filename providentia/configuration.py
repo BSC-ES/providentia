@@ -56,7 +56,9 @@ class ProvConfiguration:
         # set variable defaults
         self.var_defaults = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'init_prov_dev.yaml')))
         self.var_defaults['config_dir'] = os.path.join(PROVIDENTIA_ROOT, self.var_defaults['config_dir'])
-        
+        modifiable_var_defaults = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'init_prov.yaml')))
+        self.var_defaults.update(modifiable_var_defaults)
+
         # if variable is given by command line, set that value, otherwise set as default value 
         for k, val in self.var_defaults.items():
             val = kwargs.get(k, val)
@@ -167,6 +169,14 @@ class ProvConfiguration:
             from GHOST_standards import get_standard_metadata
             from GHOST_standards import standard_data_flag_name_to_data_flag_code
             from GHOST_standards import standard_QA_name_to_QA_code
+            from GHOST_standards import standard_networks
+            from GHOST_standards import standard_temporal_resolutions
+            
+            # get GHOST networks
+            self.read_instance.ghost_available_networks = list(standard_networks.keys())
+
+            # get GHOST resolutions
+            self.read_instance.ghost_available_resolutions = [resolution_dict['temporal_resolution_path'] for resolution_dict in standard_temporal_resolutions.values()]
 
             # modify standard parameter dictionary to have BSC standard parameter names as keys (rather than GHOST)
             self.read_instance.parameter_dictionary = dict()
