@@ -1,7 +1,9 @@
 """ Warning functions """
 
 
-def show_message(read_instance, msg, msg_offline=None, from_conf=None):
+def show_message(read_instance, msg, msg_offline=None, from_conf=None, deactivate=False):
+    if deactivate:
+        return
 
     if (read_instance.offline) or (read_instance.interactive) or (read_instance.download):
         if msg_offline is not None:

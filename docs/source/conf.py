@@ -7,15 +7,14 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Providentia'
-copyright = '2019-2024, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Francesco Benincasa'
-author = 'Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Francesco Benincasa'
+copyright = '2019-2024, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa'
+author = 'Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa'
 release = '2.3.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc", "sphinx_rtd_theme"]
-
+extensions = ["myst_parser", "sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc", "sphinx_rtd_theme"]
 templates_path = ['_templates']
 exclude_patterns = []
 

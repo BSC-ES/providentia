@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard &mdash; Providentia 2.3.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=c3c8ae58"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Offline reports" href="Offline-reports.html" />
+    <link rel="prev" title="Interpolation" href="Interpolation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Tool setup</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modes.html">Modes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Interpolation.html">Interpolation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Dashboard</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#interface">Interface</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#data-selection">Data Selection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#filters">Filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#statistics">Statistics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#colocation">Colocation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#resampling">Resampling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#site-selection">Site Selection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#toolbox">Toolbox</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Offline-reports.html">Offline reports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Interactive-mode.html">Interactive mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Download.html">Download</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modes.html">Modes</a></li>
+      <li class="breadcrumb-item active">Dashboard</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Dashboard.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dashboard">
+<h1>Dashboard<a class="headerlink" href="#dashboard" title="Link to this heading"></a></h1>
+<p>Providentia’s dashboard was designed to allow on-the-fly analysis of BSC experiment output, with respect to GHOST processed observational data.</p>
+<section id="interface">
+<h2>Interface<a class="headerlink" href="#interface" title="Link to this heading"></a></h2>
+<p>There are several available options to perform the analysis. The header of the window contains the fields that the user can fill, which is separated into 6 sections:</p>
+<ul class="simple">
+<li><p>Data Selection</p></li>
+<li><p>Filters</p></li>
+<li><p>Statistics</p></li>
+<li><p>Colocation</p></li>
+<li><p>Resampling</p></li>
+<li><p>Site Selection</p></li>
+</ul>
+<p><img alt="providentia" src="_images/providentia.png" /></p>
+<section id="data-selection">
+<h3>Data Selection<a class="headerlink" href="#data-selection" title="Link to this heading"></a></h3>
+<p>Under this section, there are four drop-down menus. The first option that the user should fill is the data provider (e.g., EIONET, EBAS, etc.). Then, the further three menus will show the available options that correspond to the selected provider and refer to specific variables and data frequency (hourly, daily, monthly, etc.).</p>
+<p>Next, there are four pop-up menus:</p>
+<ul class="simple">
+<li><p><strong>QA</strong> contains the quality assurance flags to filter by.</p></li>
+<li><p><strong>FLAGS</strong> contain standardised data reporter provided flags to filter by.</p></li>
+<li><p><strong>EXPS</strong> contains a list of experiments that exist and are related to the variable selected.</p></li>
+<li><p><strong>MULTI</strong> can be used to <a class="reference internal" href="Multispecies-filtering.html"><span class="doc std std-doc">filter your current network-species by the values of other network-species</span></a>.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">NOTE:</span> <span class="pre">If</span> <span class="pre">under</span> <span class="pre">the</span> <span class="pre">**QA**</span> <span class="pre">menu,</span> <span class="pre">the</span> <span class="pre">checkboxes</span> <span class="pre">‘*Invalid</span> <span class="pre">Data</span> <span class="pre">Provider</span> <span class="pre">Flags</span> <span class="pre">–</span> <span class="pre">GHOST</span> <span class="pre">Decreed*’</span> <span class="pre">or</span> <span class="pre">‘*Invalid</span> <span class="pre">Data</span> <span class="pre">Provider</span> <span class="pre">Flags</span> <span class="pre">–</span> <span class="pre">Network</span> <span class="pre">Decreed*’</span> <span class="pre">are</span> <span class="pre">selected,</span> <span class="pre">all</span> <span class="pre">checkboxes</span> <span class="pre">under</span> <span class="pre">the</span> <span class="pre">Flags</span> <span class="pre">menu</span> <span class="pre">should</span> <span class="pre">be</span> <span class="pre">unticked</span> <span class="pre">(the</span> <span class="pre">default</span> <span class="pre">setting).</span> <span class="pre">This</span> <span class="pre">is</span> <span class="pre">because</span> <span class="pre">ticking</span> <span class="pre">one</span> <span class="pre">of</span> <span class="pre">these</span> <span class="pre">checkboxes</span> <span class="pre">sets</span> <span class="pre">a</span> <span class="pre">pre-selected</span> <span class="pre">subset</span> <span class="pre">of</span> <span class="pre">Flags</span> <span class="pre">checkboxes</span> <span class="pre">automatically.</span> <span class="pre">For</span> <span class="pre">this</span> <span class="pre">reason</span> <span class="pre">also,</span> <span class="pre">only</span> <span class="pre">one</span> <span class="pre">of</span> <span class="pre">these</span> <span class="pre">QA</span> <span class="pre">checkboxes</span> <span class="pre">should</span> <span class="pre">be</span> <span class="pre">ticked</span> <span class="pre">at</span> <span class="pre">the</span> <span class="pre">same</span> <span class="pre">time.</span></code></p>
+<p>Additionally, here the user can fill the date range. In the case of there being no available data for the requested dates, there will be no data loaded.</p>
+<p>After having filled all the fields that the user is interested in, then the last step is to click <strong>Read</strong>. If the user makes changes to any of the fields, it is needed to click on <strong>Read</strong> again in order to apply the changes.
+After reading the data, the map appears showing the available stations that correspond to the data selection. The user can select either one station individually (by clicking on it) or multiple ones by drawing a circle around them.</p>
+<p>Finally, the Data Selection section contains the option <strong>Colocate</strong>. When selected this means that all observations and experiment data are forced to temporally intersect, and if not (i.e. there exists observations but no experiment data, or vice versa), then these time periods will be set as NaN. After having loaded the data and selected the desired stations, if the user chooses to colocate, there is no need to <strong>Read</strong> again, the changes apply immediately.</p>
+<section id="available-networks">
+<h4>Available networks<a class="headerlink" href="#available-networks" title="Link to this heading"></a></h4>
+<p>The drop-down menu of the available networks shows the names of the networks that have available data for the selected date range.</p>
+<p><code class="docutils literal notranslate"><span class="pre">NOTE:</span> <span class="pre">The</span> <span class="pre">networks'</span> <span class="pre">data</span> <span class="pre">that</span> <span class="pre">are</span> <span class="pre">stored</span> <span class="pre">in</span> <span class="pre">/esarchive</span> <span class="pre">are</span> <span class="pre">**not**</span> <span class="pre">accessible</span> <span class="pre">from</span> <span class="pre">MareNostrum</span> <span class="pre">5.</span> <span class="pre">If</span> <span class="pre">you</span> <span class="pre">want</span> <span class="pre">to</span> <span class="pre">use</span> <span class="pre">these</span> <span class="pre">data,</span> <span class="pre">then</span> <span class="pre">you</span> <span class="pre">should</span> <span class="pre">run</span> <span class="pre">Providentia</span> <span class="pre">from</span> <span class="pre">**Nord3**.</span></code></p>
+</section>
+<section id="example">
+<h4>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h4>
+<p>In the following image, we can see the output for Providentia where we compare the experiment cams61_camsra_ph2-eu-000 with actual observations for ozone. We load the observations and experiment data over 2018 and we select <em>Intersect</em>, so that the stations within the experiment’s domain are automatically selected.</p>
+<p><img alt="Screenshot_from_2024-01-10_12-59-23" src="_images/Screenshot_from_2024-01-10_12-59-23.png" /></p>
+<p>In the figure above we see that the data were loaded and plotted. However, there might some data gaps in the observations or in the experiments. This might result in an inaccurate analysis. By selecting <strong>Colocate</strong>, Providentia will apply the temporal intersection of data points that exist in both the network and experiment datasets. The result of the previous example would be:</p>
+<p><img alt="Screenshot_from_2024-01-10_12-59-37" src="_images/Screenshot_from_2024-01-10_12-59-37.png" /></p>
+</section>
+</section>
+<section id="filters">
+<h3>Filters<a class="headerlink" href="#filters" title="Link to this heading"></a></h3>
+<section id="bounds">
+<h4>Bounds<a class="headerlink" href="#bounds" title="Link to this heading"></a></h4>
+<p>Any data that is above/below these limits will be set as NaN. These are automatically assigned per variable. However, the user can modify them if needed.</p>
+<p><code class="docutils literal notranslate"><span class="pre">NOTE:</span> <span class="pre">In</span> <span class="pre">Data</span> <span class="pre">Selection</span> <span class="pre">→</span> <span class="pre">QA</span> <span class="pre">if</span> <span class="pre">the</span> <span class="pre">user</span> <span class="pre">selects</span> <span class="pre">the</span> <span class="pre">option</span> <span class="pre">of</span> <span class="pre">*Extreme</span> <span class="pre">Data*,</span> <span class="pre">then</span> <span class="pre">the</span> <span class="pre">extremes</span> <span class="pre">values</span> <span class="pre">will</span> <span class="pre">be</span> <span class="pre">filtered</span> <span class="pre">out</span> <span class="pre">either</span> <span class="pre">way.</span></code></p>
+<section id="rep">
+<h5>% REP<a class="headerlink" href="#rep" title="Link to this heading"></a></h5>
+<p><img alt="representativity" src="_images/representativity1.png" /></p>
+<p>This option refers to the minimum acceptable percentages of data across the data that is not NaN. All stations which do not meet this minimum requirement will be screened out.</p>
+</section>
+<section id="period">
+<h5>PERIOD<a class="headerlink" href="#period" title="Link to this heading"></a></h5>
+<p><img alt="period" src="_images/period1.png" /></p>
+<p>The pop-up menu of <strong>Period</strong> allows the user to select data periods by either using the options <em>keep</em> (<strong>K</strong>) or <em>remove</em> (<strong>R</strong>). If a user wishes, for example, to keep only the data that correspond to Daytime, then he/she can select to keep option under the <em>K</em> column, close the window and click <strong>FILTER</strong>.</p>
+</section>
+<section id="meta">
+<h5>META<a class="headerlink" href="#meta" title="Link to this heading"></a></h5>
+<p><img alt="meta" src="_images/meta1.png" /></p>
+<p>The pop-up menu of <strong>Meta</strong> contains a number of metadata types for the user to filter by. As there are many options, there have been separated into five categories.</p>
+<p>Each category provides a plethora of options. The user can filter by latitude, longitude, altitude. Or filter by area classification (rural, urban, etc), land use, emission source, etc. The options are numerous, explore!</p>
+</section>
+<section id="reset">
+<h5>RESET<a class="headerlink" href="#reset" title="Link to this heading"></a></h5>
+<p>The <em>RESET</em> button will set all the fields under the <em>Filters</em> section back to their initial values and it will unfilter the loaded data.</p>
+</section>
+<section id="filter">
+<h5>FILTER<a class="headerlink" href="#filter" title="Link to this heading"></a></h5>
+<p>The <em>FILTER</em> button will set all the selected fields under the <em>Filters</em> section and the loaded data will be filtered.</p>
+</section>
+</section>
+</section>
+<section id="statistics">
+<h3>Statistics<a class="headerlink" href="#statistics" title="Link to this heading"></a></h3>
+<p>This section provides ways to spatially visualise specific statistical information across all loaded stations. You can read more details about how the statistics are calculated in <a class="reference external" href="https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Statistics">Statistics</a>.</p>
+</section>
+<section id="colocation">
+<h3>Colocation<a class="headerlink" href="#colocation" title="Link to this heading"></a></h3>
+<p>It is possible to activate and deactivate the temporal colocation from the dashboard by using this checkbox. More details can be found in <a class="reference external" href="https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Colocation">Colocation</a>.</p>
+</section>
+<section id="resampling">
+<h3>Resampling<a class="headerlink" href="#resampling" title="Link to this heading"></a></h3>
+<p>It it possible to reduce the number of points by resampling our data to a specific temporal resolution. wWhat this does a simple average using the <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.resample.html">xarray function resample</a> followed by the mean:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">resampled_data</span> <span class="o">=</span> <span class="n">original_data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">temporal_resolution</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="site-selection">
+<h3>Site Selection<a class="headerlink" href="#site-selection" title="Link to this heading"></a></h3>
+<p>Under this section there are three options:</p>
+<ul class="simple">
+<li><p><strong>All</strong>: It selects data from all the stations that appear on the map.</p></li>
+<li><p><strong>Intersect</strong>: It selects data from stations that spatially intersect with the experiments grid edges.</p></li>
+<li><p><strong>Extent</strong>: It select the data on the current map view.</p></li>
+</ul>
+</section>
+<section id="toolbox">
+<h3>Toolbox<a class="headerlink" href="#toolbox" title="Link to this heading"></a></h3>
+<p>Under the main option fields, there is a toolbox that gives users several options.</p>
+<p><img alt="toolbox" src="_images/toolbox.png" /></p>
+<p>In order from left to right, these are:</p>
+<ul class="simple">
+<li><p><strong>Export button</strong>: To export the data that users used for their evaluation (observations and experiments) in NetCDF or Numpy files and the corresponding configuration file.</p></li>
+<li><p><strong>Load button</strong>: To load the configuration file from previous evaluation sessions. For instance, those saved using the export button.</p></li>
+<li><p><strong>World button</strong>: To return to the initial state of the map and the plots before applying any option.</p></li>
+<li><p><strong>Backward arrow button</strong>: To move to one state back from the current dashboard state.</p></li>
+<li><p><strong>Forward arrow button</strong>: To move to one state forward from the current dashboard state.</p></li>
+<li><p><strong>Zoom to rectangle button</strong>: To zoom in an area in the map or the plots. Users can also scroll with the mouse wheel to do this progressively in the map.</p></li>
+<li><p><strong>Pan button</strong>: To move around the map and the plots.</p></li>
+<li><p><strong>Figure button</strong>: To save a screenshot of the current map view and plots.</p></li>
+</ul>
+<section id="exporting-configuration-files-and-data">
+<h4>Exporting configuration files and data<a class="headerlink" href="#exporting-configuration-files-and-data" title="Link to this heading"></a></h4>
+<p>If you click on the export button, a pop-up window will appear to ask you where you want to store your output. From this window you can select what export format you want to use.</p>
+<ul class="simple">
+<li><p>In the case that you want to export data, then you can export them either in a <strong>NetCDF</strong> (.*nc) file format, or as a <strong>Numpy file</strong> (.*npz). For more information around the exported data, go to the wiki page <a class="reference internal" href="Saved-file-formats.html"><span class="doc std std-doc">Saved file formats</span></a></p></li>
+<li><p>In the case that you want to export only the configuration, then you need to select <strong>Configuration</strong>.</p></li>
+</ul>
+<p><img alt="image__2_" src="_images/image__2_.jpg" /></p>
+</section>
+<section id="loading-a-configuration-file">
+<h4>Loading a configuration file<a class="headerlink" href="#loading-a-configuration-file" title="Link to this heading"></a></h4>
+<p>Providentia has the option to load a configuration file that you have either written from scratch, or that you had exported during a past evaluation.</p>
+<p>Loading a configuration file means that the tool will reset the options you have at that moment, and use the configuration with the new variables and filters.</p>
+<p>If there is more than one section or subsection, users will be asked to choose which one they want to load.</p>
+<p><img alt="image__1_" src="_images/image__1_.jpg" />a</p>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Interpolation.html" class="btn btn-neutral float-left" title="Interpolation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Offline-reports.html" class="btn btn-neutral float-right" title="Offline reports" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2024, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
