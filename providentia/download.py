@@ -9,12 +9,14 @@ import json
 from dotenv import dotenv_values
 import paramiko 
 from base64 import decodebytes
+import signal
 
 # urlparse
 from tqdm import tqdm
 from remotezip import RemoteZip
 import tarfile
 from datetime import datetime, timedelta
+from getpass import getpass
 
 from .configuration import ProvConfiguration, load_conf
 from .read_aux import check_for_ghost
@@ -23,6 +25,14 @@ CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
 data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
+
+global stop
+stop = False
+
+def sighandler(*unused):
+    global stop
+    print('\nWaiting to download current network...')
+    stop = True
 
 class ProvidentiaDownload(object):
     def __init__(self,**kwargs):
@@ -44,11 +54,15 @@ class ProvidentiaDownload(object):
         self.nonghost_remote_obs_path = data_paths[REMOTE_MACHINE]["nonghost_root"]
         self.exp_remote_path = data_paths[REMOTE_MACHINE]["exp_root"]
 
-        # get ssh user and password if they are in .env
+        # get ssh user and password 
         env = dotenv_values(os.path.join(PROVIDENTIA_ROOT, ".env"))
-  
+
+        # get ssh user and password 
         self.prv_user = env.get("PRV_USER")
         self.prv_password = env.get("PRV_PWD")
+
+        # get ssh user and password 
+        self.sftp_option = env.get("SFTP_OPTION")
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
@@ -82,6 +96,10 @@ class ProvidentiaDownload(object):
                     os.system(f"sudo mkdir -p {path}")
                     os.system(f"chmod o+w {path}")
 
+        # initialise type of download
+        if not self.sftp_option:
+            self.sftp_download_check()
+
         for section_ind, section in enumerate(self.parent_section_names):
             # update for new section parameters
             self.section = section
@@ -103,40 +121,69 @@ class ProvidentiaDownload(object):
             if self.network == ["*"] or self.network == ["default"]:
                 self.get_all_networks()
             
+            # from here not able to stop until a network is finished TODO descomentar
+            # signal.signal(signal.SIGINT, sighandler)
+
             for network in self.network:
-                # ghost
+                # ghost TODO MERGE FILTER SPECIES AND NETWORK PROCEDURE
                 if check_for_ghost(network):
-                    self.download_ghost_network(network)
+                    if self.sftp_option == 'y':
+                        self.download_ghost_network_sftp(network)
+                    elif self.sftp_option == 'n':
+                        self.download_ghost_network(network)
+                    else:
+                        error = "Download option not valid, check your .env file."
+                        sys.exit(error)
                 # non-ghost
                 else:
                     self.download_nonghost_network(network)
+
+                print(stop)
+  
+                if stop:
+                    sys.exit()
 
             # filter species networks
             for i,network_specie in enumerate(self.filter_species):
                 # get network and species from filter_species
                 network, species = network_specie.split('|')
+                print(network)
+                
                 self.species = [species]
 
                 # ghost
                 if check_for_ghost(network):
-                    self.download_ghost_network(network)
+                    if self.sftp_option == 'y':
+                        self.download_ghost_network_sftp(network)
+                    elif self.sftp_option == 'n':
+                        self.download_ghost_network(network)
+                    else:
+                        error = "Download option not valid, check your .env file."
+                        sys.exit(error)
                 # non-ghost
                 else:
                     self.download_nonghost_network(network)
 
-                # TODO experiment
-                for experiment in self.experiments:
-                    pass
+                if stop:
+                    sys.exit()
+
+            # TODO experiment
+            for experiment in self.experiments:
+                self.download_exp()
 
     def connect(self):
         # flag to indicate if user wants their user and password saved 
         remind = False
 
         # if couldn't get credentials, ask user for them
-        if not self.prv_user or not self.prv_password:
-            self.prv_user  = input("Introduce BSC user: ")
-            self.prv_password  = input("Introduce password: ")
+        if self.sftp_option and (not self.prv_user or not self.prv_password):
+            self.prv_user  = input("Insert BSC storage5 user: ")
+            self.prv_password  = getpass("Insert password: ")
+            
             remind_txt = input("Remember password (y/n)? ")
+            while remind_txt.lower() not in ['y','n']:
+                remind_txt = input("Remember password (y/n)? ")
+
             remind = remind_txt.lower() == 'y'
 
         # get public remote machine public key and add it to ssh object
@@ -152,11 +199,35 @@ class ProvidentiaDownload(object):
 
         # create .env with the input user and password
         if remind:
-            with open(os.path.join(PROVIDENTIA_ROOT, ".env"),"w") as f:
+            mode = 'a' if os.path.exists(os.path.join(PROVIDENTIA_ROOT, ".env")) else 'w'
+
+            with open(os.path.join(PROVIDENTIA_ROOT, ".env"),"a") as f:
                 f.write(f"PRV_USER={self.prv_user}\n")
-                f.write(f"PRV_PWD={self.prv_password}")
+                f.write(f"PRV_PWD={self.prv_password}\n")
+
+            print(f"Remote machine credentials saved on {os.path.join(PROVIDENTIA_ROOT, '.env')}")
         
         return ssh
+
+    def sftp_download_check(self):
+        # TODO: Maybe change name
+        sftp_download = input("Do you want to download from BSC remote machine (y/n)? ")
+        
+        self.sftp_option = sftp_download.lower()
+        while self.sftp_option not in ['y','n']:
+            self.sftp_option = input("Remember password (y/n)? ")
+
+        remind_txt = input("Remember decision (y/n)? ")
+        while remind_txt.lower() not in ['y','n']:
+                remind_txt = input("Remember password (y/n)? ")
+        remind = remind_txt.lower() == 'y'
+        
+        if remind:
+            with open(os.path.join(PROVIDENTIA_ROOT, ".env"),"a") as f:
+                f.write(f"SFTP_OPTION={self.sftp_option}\n")
+            
+            print(f"Sftp download option saved on {os.path.join(PROVIDENTIA_ROOT, '.env')}")
+                    
 
     def download_nonghost_network(self,network):
         # print current_network
@@ -202,12 +273,11 @@ class ProvidentiaDownload(object):
         # create Secure File Transfer Protocol object
         sftp = ssh.open_sftp()
         
-        # warning if network + species + resolution combination is gets no matching results
+        # warning if network + species + resolution combination gets no matching results
         if not res_spec_combinations:
             print_spec = f'{",".join(self.species)} species' if self.species else ""
             print_res = f'at {",".join(self.resolution)} resolutions' if self.resolution else ""
             print(f"There is no data available for {network} network {print_spec} {print_res}")
-            return
 
         # print the species, resolution and network combinations that are going to be downloaded
         else:
@@ -243,34 +313,12 @@ class ProvidentiaDownload(object):
         sftp.close()
         ssh.close()
         
-    def download_ghost_network(self,network):
+    def download_ghost_network_sftp(self,network):
         # print current_network
-        print(f"\nDownloading GHOST network: {network}...")
+        print(f"\nDownloading GHOST network: {network} from storage5...")
 
-        # if first time reading a ghost network, get current networks from yaml
-        if not self.ghost_observation_data: 
-            temp_ghost_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.json'))) 
-
-            self.ghost_observation_data = {}
-            for flt_network, resolution_dict in temp_ghost_dict.items():
-                self.ghost_observation_data[flt_network] = {}
-                for flt_resolution, FAKE_species_dict in resolution_dict.items():
-                    for flt_FAKE_specie, species_dict in FAKE_species_dict.items():
-                        self.ghost_observation_data[flt_network][flt_resolution] = list(species_dict.keys())
-            
-        # # TODO PREGUNTAR QUE SON LOS VALORES INTERMEDIOS
-        # for flt_network, resolution_dict in self.ghost_observation_data.items():
-        #     print(resolution_dict.keys())
-        #     for flt_resolution, species_dict in resolution_dict.items():
-        #         print(species_dict.keys())
-        #         for nose,species2_dict in species_dict.items():
-        #             print(species2_dict.keys())
-        #             break
-        #         break
-        #     break
-   
         # If not valid network, next
-        if network not in self.ghost_observation_data:
+        if network not in self.nonghost_observation_data:
             print(f"There is no data available for {network} network.")
             return
 
@@ -281,47 +329,46 @@ class ProvidentiaDownload(object):
         
         # network
         if not self.resolution and not self.species:
-            for res, specie_list in self.ghost_observation_data[network].items():
+            for res, specie_list in self.nonghost_observation_data[network].items():
                 for spec in specie_list:
-                    res_spec_combinations.append(os.path.join(network,self.ghost_version,res,spec))    
+                    res_spec_combinations.append(os.path.join(network,res,spec))    
         # network + resolution 
         elif not self.species:
             for res in self.resolution:
-                for spec in self.ghost_observation_data[network].get(res,[]):
-                    res_spec_combinations.append(os.path.join(network,self.ghost_version,res,spec))
+                for spec in self.nonghost_observation_data[network].get(res,[]):
+                    res_spec_combinations.append(os.path.join(network,res,spec))
         # network + species 
         elif not self.resolution:
             for spec in self.species:
-                for res, specie_list in self.ghost_observation_data[network].items():
+                for res, specie_list in self.nonghost_observation_data[network].items():
                     if spec in specie_list:
-                        res_spec_combinations.append(os.path.join(network,self.ghost_version,res,spec))
+                        res_spec_combinations.append(os.path.join(network,res,spec))
         # network + resolution + species 
         else:
             for spec in self.species:
                 for res in self.resolution:
-                    if spec in self.ghost_observation_data[network].get(res,[]):
-                        res_spec_combinations.append(os.path.join(network,self.ghost_version,res,spec))
+                    if spec in self.nonghost_observation_data[network].get(res,[]):
+                        res_spec_combinations.append(os.path.join(network,res,spec))
         
         # create Secure File Transfer Protocol object
         sftp = ssh.open_sftp()
         
-        # warning if network + species + resolution combination is gets no matching results
+        # warning if network + species + resolution combination gets no matching results
         if not res_spec_combinations:
             print_spec = f'{",".join(self.species)} species' if self.species else ""
             print_res = f'at {",".join(self.resolution)} resolutions' if self.resolution else ""
             print(f"There is no data available for {network} network {print_spec} {print_res}")
-            return
 
         # print the species, resolution and network combinations that are going to be downloaded
         else:
             print(f"{network} observations to download:")
             for combi_print in res_spec_combinations:
-                print(f"  - {self.ghost_root}/{combi_print}")
-
+                print(f"  - {self.nonghost_root}/{combi_print}")
+            
             # get all the nc files in the date range
             for combi in tqdm(res_spec_combinations,desc="Downloading Observations"):
-                remote_dir = os.path.join(self.ghost_remote_obs_path,combi)
-                local_dir = os.path.join(self.ghost_root,combi)
+                remote_dir = os.path.join(self.nonghost_remote_obs_path,combi)
+                local_dir = os.path.join(self.nonghost_root,combi)
 
                 valid_nc_files = self.get_valid_dates(sftp.listdir(remote_dir))
 
@@ -346,9 +393,115 @@ class ProvidentiaDownload(object):
         sftp.close()
         ssh.close()
 
-    def download_ghost_network_zenodo(self,network):
+        # # if first time reading a ghost network, get current networks from yaml
+        # if not self.ghost_observation_data: 
+        #     temp_ghost_dict = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.json'))) 
+
+        #     self.ghost_observation_data = {}
+        #     for flt_network, resolution_dict in temp_ghost_dict.items():
+        #         self.ghost_observation_data[flt_network] = {}
+        #         for flt_resolution, FAKE_species_dict in resolution_dict.items():
+        #             for flt_FAKE_specie, species_dict in FAKE_species_dict.items():
+        #                 self.ghost_observation_data[flt_network][flt_resolution] = list(species_dict.keys())
+
+        #     # print(self.ghost_observation_data)
+            
+        # # # TODO PREGUNTAR QUE SON LOS VALORES INTERMEDIOS
+        # # for flt_network, resolution_dict in self.ghost_observation_data.items():
+        # #     print(resolution_dict.keys())
+        # #     for flt_resolution, species_dict in resolution_dict.items():
+        # #         print(species_dict.keys())
+        # #         for nose,species2_dict in species_dict.items():
+        # #             print(species2_dict.keys())
+        # #             break
+        # #         break
+        # #     break
+   
+        # # If not valid network, next
+        # if network not in self.ghost_observation_data:
+        #     print(f"There is no data available for {network} network.")
+        #     return
+
+        # ssh = self.connect()
+
+        # # get resolution and/or species combinations
+        # res_spec_combinations = []
+        
+        # # network
+        # if not self.resolution and not self.species:
+        #     for res, specie_list in self.ghost_observation_data[network].items():
+        #         for spec in specie_list:
+        #             res_spec_combinations.append(os.path.join(network,self.ghost_version,res,spec))    
+        # # network + resolution 
+        # elif not self.species:
+        #     for res in self.resolution:
+        #         for spec in self.ghost_observation_data[network].get(res,[]):
+        #             res_spec_combinations.append(os.path.join(network,self.ghost_version,res,spec))
+        # # network + species 
+        # elif not self.resolution:
+        #     for spec in self.species:
+        #         for res, specie_list in self.ghost_observation_data[network].items():
+        #             if spec in specie_list:
+        #                 res_spec_combinations.append(os.path.join(network,self.ghost_version,res,spec))
+        # # network + resolution + species 
+        # else:
+        #     print(self.ghost_observation_data)
+        #     print("entra aki")
+        #     for spec in self.species:
+        #         for res in self.resolution:
+        #             print(self.resolution)
+        #             print(self.ghost_observation_data[network])
+        #             if spec in self.ghost_observation_data[network].get(res,[]):
+        #                 print("ola")
+        #                 res_spec_combinations.append(os.path.join(network,self.ghost_version,res,spec))
+        
+        # # create Secure File Transfer Protocol object
+        # sftp = ssh.open_sftp()
+        
+        # # warning if network + species + resolution combination is gets no matching results
+        # if not res_spec_combinations:
+        #     print_spec = f'{",".join(self.species)} species' if self.species else ""
+        #     print_res = f'at {",".join(self.resolution)} resolutions' if self.resolution else ""
+        #     print(f"There is no data available for {network} network {print_spec} {print_res}")
+        #     return
+
+        # # print the species, resolution and network combinations that are going to be downloaded
+        # else:
+        #     print(f"{network} observations to download:")
+        #     for combi_print in res_spec_combinations:
+        #         print(f"  - {self.ghost_root}/{combi_print}")
+
+        #     # get all the nc files in the date range
+        #     for combi in tqdm(res_spec_combinations,desc="Downloading Observations"):
+        #         remote_dir = os.path.join(self.ghost_remote_obs_path,combi)
+        #         local_dir = os.path.join(self.ghost_root,combi)
+
+        #         valid_nc_files = self.get_valid_dates(sftp.listdir(remote_dir))
+
+        #         # warning if network + species + resolution + date range combination gets no matching results       
+        #         if not valid_nc_files:                 
+        #             print_spec = f'{",".join(self.species)} species' if self.species else ""
+        #             print_res = f'at {",".join(self.resolution)} resolutions' if self.resolution else ""
+        #             print(f"There is no data available from {self.start_date} to {self.end_date} for {network} network {print_spec} {print_res}")
+
+        #         else:
+        #             # create directories if they don't exist
+        #             if not os.path.exists(local_dir):
+        #                 os.makedirs(local_dir) 
+
+        #             # download each individual nc file using sftp protocol
+        #             for nc_file in valid_nc_files:
+        #                 remote_path = os.path.join(remote_dir,nc_file)
+        #                 local_path = os.path.join(local_dir,nc_file)
+        #                 sftp.get(remote_path,local_path)
+
+        # # close conections
+        # sftp.close()
+        # ssh.close()
+
+    def download_ghost_network(self,network):
         # print current_network
-        print(f"\nDownloading {network}...")
+        print(f"\nDownloading GHOST network: {network} from Zenodo...")
 
         # if first time reading a ghost network, get current zips urls in zenodo page
         if not self.ghost_zip_files: 
@@ -400,8 +553,8 @@ class ProvidentiaDownload(object):
                 if not res_spec_final_combinations:
                     print_spec = f'{",".join(self.species)} species' if self.species else ""
                     print_res = f'at {",".join(self.resolution)} resolutions' if self.resolution else ""
-                    print(f"There is no data available for {network} network {print_spec} {print_res}")
-                    return
+                    print(f"There is no data available for {curr_net} network {print_spec} {print_res}")
+                    continue
                 
                 # TODO Deberia printear cuanto va a ocupar pero no se sabe porque para cada uno no se va a descargar todas las fechas
                 # SE PUEDE PONER DESPUES
@@ -409,34 +562,37 @@ class ProvidentiaDownload(object):
                 # check if there's any possible combination with user's network, resolution and species
                 if res_spec_final_combinations:
                     # Print the species, resolution and network combinations that are going to be downloaded
-                    print(f"{network} observations to download:")
-                    last_ghost_version = 1.5
+                    print(f"{curr_net} observations to download:")
+                    last_ghost_version = 1.5 #TODO In the future there will be various versions in zenodo
                     for species in res_spec_final_combinations:
                         hourly_specie_print = "/".join(species.split("/")[1:])
                         print(f"  - {self.ghost_root}/{network}/{last_ghost_version}/{hourly_specie_print[:-7]}")
+                    
+                    # create temporal dir to store the middle tar file with its directories
+                    temp_dir = os.path.join(self.ghost_root,'.temp')
+                    if not os.path.exists(temp_dir):
+                        os.mkdir(temp_dir)
 
                     # extract species from zip files
                     for specie_to_get in tqdm(res_spec_final_combinations,desc="Downloading Observations"):
-                        zip.extract(specie_to_get,self.ghost_root)
+                        zip.extract(specie_to_get,temp_dir)
                         
                         # get path and the name of the directory of the tar file
                         tar_path = os.path.join(self.ghost_root, network, str(last_ghost_version), "/".join(specie_to_get.split("/")[1:]))
                         # tar_path = os.path.join(self.ghost_root, specie_to_get)
+
+                        temp_path = os.path.join(temp_dir,specie_to_get)
                         
-                        # TODO ESTOY AKI POR ALGUNA RAZON NO EXISTE PERO DESPUES SI, VER XQ
-                        # NO SE PUEDE PEDIR A DENE QUE PONGA EL 1.5 EN LA RUTA
-                        # A VER SE PUEDE PERO TENDIRAMOS QUE CREAR Y BORARR LA CARPETA
                         tar_dir = os.path.dirname(tar_path) 
-                        print(os.path.exists(tar_path))
-                        print(list(tar_dir))
 
                         if not os.path.exists(tar_dir):
                             os.makedirs(tar_dir)
+                            # os.system(f"chmod 777 {dir}")
 
-                        print(tar_path)
+                        # print(tar_path,specie_to_get)
 
                         # extract nc file from tar file
-                        with tarfile.open(tar_path) as tar_file:
+                        with tarfile.open(temp_path) as tar_file:
                             tar_names = tar_file.getnames()
 
                             # get the nc files that are between the start and end date
@@ -446,7 +602,7 @@ class ProvidentiaDownload(object):
                             tar_file.extractall(path = tar_dir, members = valid_nc_files)
                         
                         # remove the tar file
-                        os.remove(tar_path)
+                        os.remove(temp_path)
 
                         # warning if network + species + resolution + date range combination gets no matching results                        
                         if not valid_nc_files:
@@ -491,24 +647,6 @@ class ProvidentiaDownload(object):
         if download_source in ["N","A"]:
             self.nonghost_observation_data = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_networks.yaml')))
             self.network = list(self.nonghost_observation_data.keys())
-
-    def generate_months(start_date, end_date):
-        # TODO en proceso maybe quitar
-        # DEPRECATED DEPRECATED DEPRECATED
-        start = datetime.strptime(start_date, "%Y%m%d")
-        end = datetime.strptime(end_date, "%Y%m%d")
-        
-        month_list = []
-        
-        current_month = start
-        while current_month < end:
-            formatted_month = current_month.strftime("%Y%m")
-            current_month += timedelta(days=31)
-            month_list.append(current_month)
-        
-        formatted_end_month = end.strftime("%Y%m") 
-        month_list.append(formatted_end_month)
-        return month_list
     
     def get_valid_dates(self, tar_names):
         # get valid nc files inside the date range
@@ -525,5 +663,5 @@ class ProvidentiaDownload(object):
 
 def main(**kwargs):
     """ Main function when running download function. """
-   
+    # initialise break blocker  
     ProvidentiaDownload(**kwargs)
