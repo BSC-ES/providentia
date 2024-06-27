@@ -78,23 +78,36 @@ class ProvidentiaOffline:
         self.report_plots = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/report_plots.yaml')))
 
         # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
-        # generate file trees
+        # if have filetree flags, then these overwrite any defaults
+        gft = False
         if self.generate_file_tree:
+            gft = True
+        elif self.disable_file_tree:
+            gft = False
+        # by default generate filetree on MN5
+        elif self.machine in ['mn5']:
+            gft = True
+        # by default generate filetree locally
+        elif self.filetree_type == 'local':
+            gft = True
+
+        # generate file trees
+        if gft:
             self.all_observation_data = get_ghost_observational_tree(self)
             if self.nonghost_root is not None:
                 nonghost_observation_data = get_nonghost_observational_tree(self)
         # load file trees
         else:
             try:
-                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree.json'))) 
+                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(self.ghost_version)))) 
             except FileNotFoundError as file_error:
-                msg = "Error: Trying to load 'settings/ghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                msg = "Error: Trying to load 'settings/internal/ghost_filetree_{}.json' but file does not exist. Run with the flag '--gft' to generate this file.".format(self.ghost_version)
                 sys.exit(msg)
             if self.nonghost_root is not None:
                 try:
-                    nonghost_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_filetree.json')))
+                    nonghost_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json')))
                 except FileNotFoundError as file_error:
-                    msg = "Error: Trying to load 'settings/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                    msg = "Error: Trying to load 'settings/internal/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
                     sys.exit(msg)
         # merge GHOST and non-GHOST filetrees
         if self.nonghost_root is not None:
@@ -228,6 +241,21 @@ class ProvidentiaOffline:
                         error = 'It is not possible to create Taylor diagrams yet, please remove.'
                         sys.exit(error)
 
+            # check if there are multispecies plots
+            multispecies = False
+            for plot_type in self.summary_plots_to_make:
+                if 'multispecies' in plot_type:
+                    multispecies = True
+                    break
+            for plot_type in self.station_plots_to_make:
+                if 'multispecies' in plot_type:
+                    multispecies = True
+                    break
+            if (multispecies) and (len(np.unique(list(self.measurement_units.values()))) > 1):
+                msg = 'Warning: Be aware that the units across species are not the same and there are multispecies plots. '
+                msg += f'Units: {self.measurement_units}'
+                print(msg)
+
             # set plot characteristics for all plot types (summary, station)
             self.plots_to_make = list(self.summary_plots_to_make)
             self.plots_to_make.extend(x for x in self.station_plots_to_make
@@ -313,7 +341,7 @@ class ProvidentiaOffline:
                                            do_plot_geometry_setup=True)
 
             # make all plots per subsection
-            # for distribution/taylor plot types --> done so to calclulate data ranges 
+            # for distribution/taylor plot types --> done so to calculate data ranges 
             # across subsections first
             summary_plots_to_make = [plot_type for plot_type in self.summary_plots_to_make 
                                      if ('distribution' in plot_type) or ('taylor' in plot_type)]
@@ -789,11 +817,7 @@ class ProvidentiaOffline:
                     setattr(self, k, provconf.parse_parameter(k, val))
 
                 # now all variables have been parsed, check validity of those, throwing errors where necessary
-                provconf.check_validity()
-
-            # if have no experiments, force temporal colocation to be False
-            if len(self.experiments) == 0:
-                self.temporal_colocation = False    
+                provconf.check_validity(deactivate_warning=True)
 
             # determine if need to re-read data (qa, flags, filter_species or calibration factor have changed)
             if (np.array_equal(self.qa, self.previous_qa) == False) or (
@@ -869,7 +893,7 @@ class ProvidentiaOffline:
         """ Function which makes all of summary plots for a specific subsection/networkspeci. """
 
         # get valid station inds for networkspeci 
-        if self.temporal_colocation and len(self.data_labels) > 1:
+        if self.temporal_colocation:
             self.relevant_station_inds = self.valid_station_inds_temporal_colocation[networkspeci][self.observations_data_label]
         else:
             self.relevant_station_inds = self.valid_station_inds[networkspeci][self.observations_data_label]  
@@ -996,7 +1020,7 @@ class ProvidentiaOffline:
         """ Function which makes all of station plots for a specific subsection/networkspeci. """
 
         # get valid station inds for networkspeci 
-        if self.temporal_colocation and len(self.data_labels) > 1:
+        if self.temporal_colocation:
             self.relevant_station_inds = self.valid_station_inds_temporal_colocation[networkspeci][self.observations_data_label]
         else:
             self.relevant_station_inds = self.valid_station_inds[networkspeci][self.observations_data_label]  
@@ -1216,7 +1240,7 @@ class ProvidentiaOffline:
                 # get stat for current data label
                 if data_label in self.selected_station_data_labels[networkspeci]:
                     # if relevant stat is expbias stat, then ensure temporal colocation is active
-                    if (base_plot_type == 'statsummary') and (stat in self.expbias_stats) and (not self.temporal_colocation):
+                    if (base_plot_type == 'statsummary') and (stat in self.expbias_stats) and ((not self.temporal_colocation) or (len(self.data_labels) == 1)):
                         data_to_add = np.NaN
                     # otherwise calculate statistic
                     else:
