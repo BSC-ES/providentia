@@ -23,6 +23,8 @@ MACHINE = os.environ.get('BSC_MACHINE', '')
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
+default_values = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_defaults.yaml')))
+multispecies_map = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 
 # set MACHINE to be the hub, workstation or local machine
 if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
@@ -50,77 +52,12 @@ class ProvConfiguration:
     def __init__(self, read_instance, **kwargs):
         
         self.read_instance = read_instance 
-
+        
         # set variable defaults
-        self.var_defaults = {
-            'ghost_version': '1.5',
-            'conf': '',
-            'config': '',
-            'config_dir': os.path.join(PROVIDENTIA_ROOT, 'configurations/'),
-            'operating_system': '',
-            'machine': '',
-            'cartopy_data_dir': '',
-            'available_cpus': '',
-            'n_cpus': '',
-            'ghost_root': '',
-            'nonghost_root': '',
-            'exp_root': '',
-            'generate_file_tree': False,
-            'offline': False,
-            'interactive': False,
-            'download':False,
-            'available_resolutions': ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
-                                      '3hourly_instantaneous', '6hourly_instantaneous',
-                                      'daily', 'monthly'],
-            'available_networks': ['GHOST','AERONET_v3_lev1.5','AERONET_v3_lev2.0','BJMEMC','CANADA_NAPS','CAPMoN',
-                                   'CHILE_SINCA','CNEMC','EANET','EBAS','EBAS-ACTRIS','EBAS-AMAP','EBAS-CAMP', 
-                                   'EBAS_COLOSSAL','EBAS-EMEP','EBAS-EUCAARI','EBAS-EUSAAR','EBAS-GUAN','EBAS-HELCOM','EBAS-HTAP',
-                                   'EBAS-IMPACTS','EBAS-IMPROVE','EBAS-Independent','EBAS-MOE','EBAS-NILU',
-                                   'EBAS-NOAA_ESRL','EBAS-NOAA_GGGRN','EBAS-OECD','EBAS-UK_DECC','EBAS-WMO_WDCA', 'EBAS-WMO_WDCRG',
-                                   'EEA_AIRBASE','EEA_AQ_eReporting','JAPAN_NIES','MEXICO_CDMX','MITECO',
-                                   'NOAA_ISD','NOAA_ISD_EU','NOAA_ISD_IP','NOAA_ISD_NA','SEARCH','UK_AIR',
-                                   'US_EPA_AirNow_DOS','US_EPA_AQS','US_EPA_CASTNET','US_NADP_AMNet','US_NADP_AMoN','WMO_WDCGG'], 
-            'network': [],
-            'species': None,
-            'resolution': None,
-            'start_date': None,
-            'end_date': None,
-            'observations_data_label': 'observations',
-            'experiments': {},
-            'qa': None,
-            'flags': None,
-            'temporal_colocation': False,
-            'spatial_colocation': True,
-            'map_extent': None, 
-            'filter_species': {},
-            'calibration_factor': {},
-            'lower_bound': None,
-            'upper_bound': None,
-            'report_type': 'standard',
-            'report_summary': True,
-            'report_stations': False,
-            'report_title': 'Providentia Offline Report',
-            'report_filename': 'PROVIDENTIA_Report',
-            'active_dashboard_plots': None,
-            'resampling_resolution': None,
-            'statistic_mode': None,
-            'statistic_aggregation': None,
-            'periodic_statistic_mode': None,
-            'periodic_statistic_aggregation': None,
-            'timeseries_statistic_aggregation': None,
-            'plot_characteristics_filename': '',
-            'harmonise_summary': True,
-            'harmonise_stations': True,
-            'remove_extreme_stations': None,
-            'fixed_section_vars':  ['ghost_version', 'config_dir', 'operating_system', 'cartopy_data_dir', 'available_cpus', 
-                                    'n_cpus', 'ghost_root', 'nonghost_root', 'exp_root', 'offline', 'interactive',
-                                    'available_resolutions', 'available_networks',
-                                    'network', 'species', 'resolution', 'start_date', 'end_date', 
-                                    'observations_data_label', 'experiments', 'temporal_colocation', 'spatial_colocation', 
-                                    'report_type', 'report_summary', 'report_stations', 'report_title', 
-                                    'report_filename', 'plot_characteristics_filename', 
-                                    'harmonise_summary', 'harmonise_stations']
-        }
+        self.var_defaults = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'init_prov_dev.yaml')))
+        self.var_defaults['config_dir'] = os.path.join(PROVIDENTIA_ROOT, self.var_defaults['config_dir'])
+        modifiable_var_defaults = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'init_prov.yaml')))
+        self.var_defaults.update(modifiable_var_defaults)
 
         # if variable is given by command line, set that value, otherwise set as default value 
         for k, val in self.var_defaults.items():
@@ -160,6 +97,11 @@ class ProvConfiguration:
             return operating_system
         
         elif key == 'machine':
+            # set filetree type
+            if MACHINE in ['power', 'mn4', 'nord3v2', 'mn5']:
+                self.read_instance.filetree_type = 'remote'
+            else:
+                self.read_instance.filetree_type = 'local'
             return MACHINE
 
         elif key == 'available_cpus':
@@ -177,13 +119,12 @@ class ProvConfiguration:
                     return os.cpu_count()
 
         elif key == 'cartopy_data_dir':
-            # set cartopy data directory (needed on CTE-POWER/MN4/Nord3v2 as has no external
+            # set cartopy data directory (needed on CTE-POWER/MN4/Nord3v2/MN5 as has no external
             # internet connection)
             if MACHINE in ['power', 'mn4', 'nord3v2']:
                 return '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
-            # set directory in MN5 to avoid network issues
-            elif MACHINE == 'mn5':
-                return '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
+            elif MACHINE in ['mn5']:
+                return '/gpfs/projects/bsc32/software/rhel/9.2/software/Cartopy/0.23.0-foss-2023b-Python-3.11.5/lib/python3.11/site-packages/cartopy/data'
             # on all other machines pull from internet
 
         elif key == 'n_cpus':
@@ -231,6 +172,14 @@ class ProvConfiguration:
             from GHOST_standards import get_standard_metadata
             from GHOST_standards import standard_data_flag_name_to_data_flag_code
             from GHOST_standards import standard_QA_name_to_QA_code
+            from GHOST_standards import standard_networks
+            from GHOST_standards import standard_temporal_resolutions
+            
+            # get GHOST networks
+            self.read_instance.ghost_available_networks = list(standard_networks.keys())
+
+            # get GHOST resolutions
+            self.read_instance.ghost_available_resolutions = [resolution_dict['temporal_resolution_path'] for resolution_dict in standard_temporal_resolutions.values()]
 
             # modify standard parameter dictionary to have BSC standard parameter names as keys (rather than GHOST)
             self.read_instance.parameter_dictionary = dict()
@@ -304,8 +253,9 @@ class ProvConfiguration:
         elif key == 'qa':
             # parse qa
 
-            # set default qa codes (can differ per GHOST version)
             from GHOST_standards import providentia_defaults
+
+            # set default qa codes (can differ per GHOST version)
             self.read_instance.default_qa_standard = [self.read_instance.standard_QA_name_to_QA_code[qa_name] 
                                                       for qa_name in providentia_defaults['qa_standard']]
             self.read_instance.default_qa_non_negative = [self.read_instance.standard_QA_name_to_QA_code[qa_name] 
@@ -333,6 +283,8 @@ class ProvConfiguration:
         elif key == 'flags':
             # parse flags
 
+            from GHOST_standards import providentia_defaults
+
             # if not None then set flags by that given
             if value is not None:
                 # if conf has only one flag
@@ -343,12 +295,53 @@ class ProvConfiguration:
                     return []
                 # if the flags are written with their names
                 elif isinstance(value, str):
-                    return [self.read_instance.standard_data_flag_name_to_data_flag_code[f.strip()]
-                            for f in value.split(",")]
+                    return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[f.strip()] for f in value.split(",")])
                 # list of integer codes
                 else:
                     return sorted(list(value))
-            # otherwise, set default (empty list)
+            # otherwise, set default flags
+            else:
+                return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[flag_name] for flag_name in providentia_defaults['flag']])
+
+        elif key in ['add_qa','subtract_qa']:
+            # parse add/subtract qa
+
+            # if not None then set QA by that given
+            if value is not None:
+                # if conf has only one QA
+                if isinstance(value, int):
+                    return [value]
+                # empty string
+                elif value == "":
+                    return []
+                # if the QAs are written with their names
+                elif isinstance(value, str):
+                    return sorted([self.read_instance.standard_QA_name_to_QA_code[q.strip()] for q in value.split(",")])
+                # list of integer codes
+                else:
+                    return sorted(list(value))
+            # otherwise, return empty list
+            else:
+                return []
+
+        elif key in ['add_flags','subtract_flags']:
+            # parse add/subtract flags
+
+            # if not None then set flags by that given
+            if value is not None:
+                # if conf has only one flag
+                if isinstance(value, int):
+                    return [value]
+                # empty string
+                elif value == "":
+                    return []
+                # if the flags are written with their names
+                elif isinstance(value, str):
+                    return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[f.strip()] for f in value.split(",")])
+                # list of integer codes
+                else:
+                    return sorted(list(value))
+            # otherwise, return empty list
             else:
                 return []
 
@@ -511,32 +504,39 @@ class ProvConfiguration:
 
         elif key == 'calibration_factor':
             # parse calibration factor
-            
-            if isinstance(value, str):
+
+            if isinstance(value, (str, int, float)):
+
+                # convert to string if not
+                if np.issubdtype(type(value), np.number):
+                    value = str(value)
 
                 # strip all whitespace
                 value_strip = "".join(value.split())
 
+                # detect if calibration factor is passed by experiment
                 calibration_by_experiment = False
                 for experiment in self.read_instance.experiments.keys():
                     if experiment in value_strip:
                         calibration_by_experiment = True
                         break
                 
+                # create dictionary per experiment
+                calibration_factor_dict = {}
                 if calibration_by_experiment:
-                    calibration_factor_dict = {}
                     for i, experiment in enumerate(self.read_instance.experiments.keys()):
                         calibration_factor_exp = value_strip.split('(')[i+1].split(')')[0]
                         calibration_factor_dict[experiment] = calibration_factor_exp
-                    return calibration_factor_dict
                 else:
-                    if np.issubdtype(type(value), np.number):
-                        return str(value)
+                    for i, experiment in enumerate(self.read_instance.experiments.keys()):
+                        calibration_factor_dict[experiment] = value
 
+                return calibration_factor_dict
+            
         # if no special parsing treatment for variable, simply return value
         return value
 
-    def check_validity(self):
+    def check_validity(self, deactivate_warning=False):
         """ Check validity of set variables after parsing. """
         # check if species is valid
         if self.read_instance.species:
@@ -564,18 +564,18 @@ class ProvConfiguration:
         # in download mode is allowed to not have download, so continue
         if not self.read_instance.network and not self.read_instance.download:
             #default = ['GHOST']
-            default = ['EBAS']
+            default = default_values['network']
             msg = "Network (network) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.network = default
 
         # check have species information, 
         # if offline, throw message, stating are using default instead
         # in download mode is allowed to not pass any species, so continue
         if not self.read_instance.species and not self.read_instance.download:
-            default = ['sconco3']
+            default = default_values['species']
             msg = "Species (species) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.species = default
 
         # if number of networks and species is not the same,
@@ -616,54 +616,46 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         if not self.read_instance.resolution and not self.read_instance.download:
             #default = 'monthly'
-            default = 'hourly'
+            default = default_values['resolution']
             msg = "Resolution (resolution) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.resolution = default
 
         # check have start_date information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.start_date:
-            default = '20180101'
+            default = default_values['start_date']
             msg = "Start date (start_date) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.start_date = default
 
         # check have end_date information, 
         # if offline, throw message, stating are using default instead
         if not self.read_instance.end_date:
-            default = '20190101'
+            default = default_values['end_date']
             msg = "End date (end_date) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.end_date = default
 
         # check have statistic_mode information,
         # if offline, throw message, stating are using default instead
         if not self.read_instance.statistic_mode:
-            default = 'Temporal|Spatial'
+            default = default_values['statistic_mode']
             msg = "Statistic mode (statistic_mode) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.statistic_mode = default
 
         # check have statistic_aggregation information,
         # if offline, throw message, stating are using default instead
-        if not self.read_instance.statistic_aggregation:
-            if self.read_instance.statistic_mode == 'Flattened':
-                default = ''
-            else:    
-                default = 'Median'
+        default = default_values['statistic_aggregation'][self.read_instance.statistic_mode]
+        if not self.read_instance.statistic_aggregation:  
+            if self.read_instance.statistic_mode != 'Flattened':
                 msg = "Statistic aggregation (statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.statistic_aggregation = default
         # if statistic_aggregation is defined ensure that it matches with the statistic_mode
-        else:
-            if (self.read_instance.statistic_mode == 'Flattened') & (self.read_instance.statistic_aggregation != ''):
+        elif (self.read_instance.statistic_mode == 'Flattened'):
                 msg = "statistic_mode is set to be 'Flattened', therefore statistic_aggregation must be empty, not '{}'. Setting to be empty.".format(self.read_instance.statistic_aggregation)                
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
-                self.read_instance.statistic_aggregation = ''
-            elif (self.read_instance.statistic_mode != 'Flattened') & (self.read_instance.statistic_aggregation == ''):
-                default = 'Median'
-                msg = "statistic_mode is set to be '{}', therefore statistic_aggregation must not be empty. Setting to be '{}'.".format(self.read_instance.statistic_mode, default)                
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
                 self.read_instance.statistic_aggregation = default
 
@@ -671,38 +663,38 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         if not self.read_instance.periodic_statistic_mode:
             #default = 'Cycle'
-            default = 'Independent'
+            default = default_values['periodic_statistic_mode']
             msg = "Periodic statistic mode (periodic_statistic_mode) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.periodic_statistic_mode = default
 
         # check have periodic_statistic_aggregation information,
         # if offline, throw message, stating are using default instead
         if not self.read_instance.periodic_statistic_aggregation:
-            default = 'Median'
+            default = default_values['periodic_statistic_aggregation']
             msg = "Periodic statistic aggregation (periodic_statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.periodic_statistic_aggregation = default
 
         # check have timeseries_statistic_aggregation information,
         # if offline, throw message, stating are using default instead
         if not self.read_instance.timeseries_statistic_aggregation:
-            default = 'Median'
+            default = default_values['timeseries_statistic_aggregation']
             msg = "Timeseries statistic aggregation (timeseries_statistic_aggregation) was not "
             msg += "defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.timeseries_statistic_aggregation = default
         else:
             if ((self.read_instance.statistic_mode == 'Spatial|Temporal')
                 and (self.read_instance.timeseries_statistic_aggregation != self.read_instance.statistic_aggregation)):
                 msg = "Aggregation statistic and timeseries aggregation statistic are not "
                 msg += "the same and Spatial|Temporal mode is active."
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
         # check have correct active_dashboard_plots information, 
         # should have 4 plots if non-empty, throw error if using dashboard if not
         if not self.read_instance.active_dashboard_plots:
-            default = ['timeseries', 'statsummary', 'distribution', 'periodic']
+            default = default_values['active_dashboard_plots']
             self.read_instance.active_dashboard_plots = default
         # TODO: For Taylor diagrams, remove this piece of code when we stop using Matplotlib 3.3
         else:
@@ -720,7 +712,7 @@ class ProvConfiguration:
         if (self.read_instance.filter_species) and (not self.read_instance.spatial_colocation):
             self.read_instance.filter_species = {}
             msg = 'Spatial colocation (spatial_colocation) must be set to True if wanting to filter by species.'
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
         # map to multiple species if have * wildcard
         # also duplicate out associated network
@@ -728,7 +720,12 @@ class ProvConfiguration:
         new_species = copy.deepcopy(self.read_instance.species)
         for speci_ii, speci in enumerate(self.read_instance.species): 
             if '*' in speci:
-                mapped_species = self.multispecies_mapping(speci)
+                # throw mapping error if species not ablet to be mapped
+                if speci not in multispecies_map:
+                    error = f'Error: not able to map species "{speci}".'
+                    sys.exit(error)
+                
+                mapped_species = multispecies_map[speci]
                 del new_species[speci_ii]
                 new_species[speci_ii:speci_ii] = mapped_species
                 # in download mode is not necessary to duplicate the networks
@@ -802,7 +799,7 @@ class ProvConfiguration:
                         upper_bound_dict[speci] = np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit'])
             self.read_instance.upper_bound = upper_bound_dict
 
-        # create a variable to set qa per species (including filter species)
+        # create a variable to set qa per species (including filter species), setting defaults in the process
         if isinstance(self.read_instance.qa, dict):
             self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) 
                                                  for speci in species_plus_filter_species}
@@ -811,12 +808,54 @@ class ProvConfiguration:
         else:
             self.read_instance.qa_per_species = {speci:self.read_instance.qa for speci in species_plus_filter_species}
 
+        # add to qa
+        if self.read_instance.add_qa:
+            for qa_flag_to_add in self.read_instance.add_qa:
+                if qa_flag_to_add not in self.read_instance.qa:
+                    self.read_instance.qa.append(qa_flag_to_add)
+                for speci in self.read_instance.qa_per_species:
+                    if qa_flag_to_add not in self.read_instance.qa_per_species[speci]:
+                        self.read_instance.qa_per_species[speci].append(qa_flag_to_add)
+
+            self.read_instance.qa = sorted(self.read_instance.qa) 
+            for speci in self.read_instance.qa_per_species:
+                self.read_instance.qa_per_species[speci] = sorted(self.read_instance.qa_per_species[speci])
+
+        # subtract from qa
+        if self.read_instance.subtract_qa:
+            for qa_flag_to_remove in self.read_instance.subtract_qa:
+                if qa_flag_to_remove in self.read_instance.qa:
+                    self.read_instance.qa.remove(qa_flag_to_remove)
+                for speci in self.read_instance.qa_per_species:
+                    if qa_flag_to_remove in self.read_instance.qa_per_species[speci]:
+                        self.read_instance.qa_per_species[speci].remove(qa_flag_to_remove)
+
+            self.read_instance.qa = sorted(self.read_instance.qa) 
+            for speci in self.read_instance.qa_per_species:
+                self.read_instance.qa_per_species[speci] = sorted(self.read_instance.qa_per_species[speci])
+
+        # add to flags
+        if self.read_instance.add_flags:
+            for flag_to_add in self.read_instance.add_flags:
+                if flag_to_add not in self.read_instance.flags:
+                    self.read_instance.flags.append(flag_to_add)
+
+            self.read_instance.flags = sorted(self.read_instance.flags) 
+
+        # subtract from flags
+        if self.read_instance.subtract_flags:
+            for flag_to_remove in self.read_instance.subtract_flags:
+                if flag_to_remove in self.read_instance.flags:
+                    self.read_instance.flags.remove(flag_to_remove)
+
+            self.read_instance.flags = sorted(self.read_instance.flags) 
+
         # if are using dashboard then just take first network/species pair, as multivar not supported yet
         if ((len(self.read_instance.network) > 1) and (len(self.read_instance.species) > 1) and 
             (not self.read_instance.offline) and (not self.read_instance.interactive) and (not self.read_instance.download)):
              
             msg = 'Multiple networks/species are not supported in the dashboard. First ones will be taken.'
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
             self.read_instance.network = [self.read_instance.network[0]]
             self.read_instance.species = [self.read_instance.species[0]]
@@ -836,44 +875,28 @@ class ProvConfiguration:
                         msg = 'Lower bound ({}) for {} cannot contain < or <=. '.format(lower_limit, networkspeci)
                         lower_limit = '>=' + lower_limit.replace('<', '').replace('=', '')
                         msg += 'Setting it to be {}.'.format(lower_limit)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     elif (':' not in lower_limit) and ('>' not in lower_limit):
                         msg = 'Lower bound ({}) for {} should contain > or >=. '.format(lower_limit, networkspeci)
                         lower_limit = '>=' + lower_limit
                         msg += 'Setting it to be {}.'.format(lower_limit)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
                     # modify upper bound to be :, or contain < or <=
                     if ('>' in upper_limit):
                         msg = 'Upper bound ({}) for {} cannot contain > or >=. '.format(upper_limit, networkspeci)
                         upper_limit = '<=' + upper_limit.replace('>', '').replace('=', '')
                         msg += 'Setting it to be {}.'.format(upper_limit)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     elif (':' not in upper_limit) and ('<' not in upper_limit):
                         msg = 'Upper bound ({}) for {} should contain < or <=. '.format(upper_limit, networkspeci)
                         upper_limit = '<=' + upper_limit
                         msg += 'Setting it to be {}.'.format(upper_limit)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     
                     # update symbols next to values
                     self.read_instance.filter_species[networkspeci][networkspeci_limit_ii] = [lower_limit, upper_limit, 
                                                                                               filter_species_fill_value]
-
-    def multispecies_mapping(self, species):
-        """ Map species special case str to multiple species names. """
-
-        multi_species_map = {'vconcaerobin*':['vconcaerobin1','vconcaerobin2','vconcaerobin3','vconcaerobin4',
-                            'vconcaerobin5','vconcaerobin6','vconcaerobin7','vconcaerobin8','vconcaerobin9',
-                            'vconcaerobin10','vconcaerobin11','vconcaerobin12','vconcaerobin13','vconcaerobin14',
-                            'vconcaerobin15','vconcaerobin16','vconcaerobin17','vconcaerobin18','vconcaerobin19',
-                            'vconcaerobin20','vconcaerobin21','vconcaerobin22']}
-        
-        if species not in multi_species_map:
-            error = f'Error: not able to map species "{species}".'
-            sys.exit(error)
-
-        return multi_species_map[species]
-
 
 def read_conf(fpath=None):
     """ Read configuration files. """
