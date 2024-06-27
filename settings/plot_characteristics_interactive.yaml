@@ -74,6 +74,7 @@
        "map": {"figsize": [14,7],
                "subplots_adjust": {"left": 0.00, "right": 1.0, "top": 1.0, "bottom": 0.07, "hspace": 0.0, 
                                    "wspace": 0.00},
+               "background": "providentia",
                "map_coastline_resolution": "medium",
                "land_polygon": {"facecolor": "0.85", "edgecolor": null},
                "projection": "Robinson",
@@ -264,7 +265,7 @@
                             "medianprops": {"linewidth": 2},
                             "whiskerprops": {"linewidth": 2},
                             "capprops": {"linewidth": 2}},
-                   "plot_options": ["annotate", "logy", "multispecies", "threshold"]},
+                   "plot_options": ["annotate", "logy", "multispecies", "threshold", "normmedian", "normmean", "normmin", "normmax", "normsum"]},
 
        "heatmap": {"figsize": [13, 7],
                    "subplots_adjust": {"left": 0.0, "right": 1.0, "top": 1.0, "bottom": 0.12, "hspace": 0.0, 

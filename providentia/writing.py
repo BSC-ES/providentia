@@ -36,7 +36,7 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
         title = 'Export data'
         msg = 'Select option'
         options = ['Apply metadata filters and temporal colocation (if active) to exported data', 
-                'Do not apply metadata filters and temporal colocation to exported data']
+                   'Do not apply metadata filters and temporal colocation to exported data']
         dialog = InputDialog(prv, title, msg, options)
         selected_option, okpressed = dialog.selected_option, dialog.okpressed
         if selected_option == options[0]:
@@ -52,26 +52,43 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
     # save data / ghost data / metadata
     for networkspeci in prv.networkspecies:
 
-        # get valid station indices (from observations because valid stations for the experiment is a 
-        # subset of the observations)
-        if prv.temporal_colocation:
-            valid_station_inds = prv.valid_station_inds_temporal_colocation[networkspeci][prv.observations_data_label]
-        else:
-            valid_station_inds = prv.valid_station_inds[networkspeci][prv.observations_data_label]
+        # get species
+        speci = networkspeci.split('|')[1]
 
+        # get data array
+        data_array = copy.deepcopy(prv.data_in_memory_filtered[networkspeci][:,:,:])
+
+        # save data
+
+        # filtered data
         if apply_filters:
+
+            # get valid station indices (from observations because valid stations for the experiment is a 
+            # subset of the observations), and temporally colocate data array (if required)
+            if prv.temporal_colocation:
+                valid_station_inds = prv.valid_station_inds_temporal_colocation[networkspeci][prv.observations_data_label]
+                data_array[:, prv.temporal_colocation_nans[networkspeci]] = np.NaN
+            else:
+                valid_station_inds = prv.valid_station_inds[networkspeci][prv.observations_data_label]
+
             if prv.reading_ghost:
                 save_data_dict['{}_ghost_data'.format(networkspeci)] = np.take(prv.ghost_data_in_memory[networkspeci], 
                     valid_station_inds, axis=1)
-            save_data_dict['{}_data'.format(networkspeci)] = np.take(prv.data_in_memory_filtered[networkspeci], 
-                valid_station_inds, axis=1)
+            save_data_dict['{}_data'.format(networkspeci)] = np.take(data_array, valid_station_inds, axis=1)
             save_data_dict['{}_metadata'.format(networkspeci)] = np.take(prv.metadata_in_memory[networkspeci], 
                 valid_station_inds, axis=0)
+        
+        # non-filtered data
         else:
             if prv.reading_ghost:
                 save_data_dict['{}_ghost_data'.format(networkspeci)] = prv.ghost_data_in_memory[networkspeci]
-            save_data_dict['{}_data'.format(networkspeci)] = prv.data_in_memory_filtered[networkspeci]
+            save_data_dict['{}_data'.format(networkspeci)] = data_array
             save_data_dict['{}_metadata'.format(networkspeci)] = prv.metadata_in_memory[networkspeci]
+
+        # qa /flags
+        if prv.reading_ghost:
+            save_data_dict['{}_qa'.format(networkspeci)] = np.unique(prv.qa_per_species[speci])
+            save_data_dict['{}_flags'.format(networkspeci)] = np.unique(prv.flags)
 
     # save out miscellaneous variables 
     save_data_dict['time'] = prv.time_array
@@ -132,7 +149,8 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
         apply_filters = True
 
     # set up some structural variables
-    from GHOST_standards import standard_parameters, get_standard_data, get_standard_metadata
+    from GHOST_standards import (standard_parameters, get_standard_data, get_standard_metadata,
+                                 standard_QA_name_to_QA_code, standard_data_flag_name_to_data_flag_code)
     parameter_dictionary = {}
     for _, param_dict in standard_parameters.items():
         parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
@@ -156,10 +174,12 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
 
     # netcdf dimensions
     fout.createDimension('data_label', len(prv.data_labels))
-    fout.createDimension('station', None)
     fout.createDimension('time', len(prv.time_array))
     fout.createDimension('month', len(prv.yearmonths))
-    
+    if prv.reading_ghost:
+        fout.createDimension('qa', len(list(standard_QA_name_to_QA_code.keys())))
+        fout.createDimension('flag', len(list(standard_data_flag_name_to_data_flag_code.keys())))
+
     # create dimensions only for GHOST case
     if prv.reading_ghost:
         fout.createDimension('ghost_data_variable', len(prv.ghost_data_vars_to_read))
@@ -235,18 +255,27 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
                 var.long_name = 'ghost_data_variables'
                 var.description = 'The names of the GHOST data variables used for additional filtering.'
                 var[:] = np.array(prv.ghost_data_vars_to_read)
-         
-        # data
-        current_data_type = type_map[data_format_dict[speci]['data_type']]
-        var = fout.createVariable('{}_data'.format(var_prefix), current_data_type, 
-                                  ('data_label', 'station', 'time',))
-        
+                 
+        # get data array
+        data_array = copy.deepcopy(prv.data_in_memory_filtered[networkspeci][:,:,:])
+
         # get valid station indices (from observations because valid stations for the experiment is a 
-        # subset of the observations)
+        # subset of the observations), and temporally colocate data array (if required)
         if prv.temporal_colocation:
             valid_station_inds = prv.valid_station_inds_temporal_colocation[networkspeci][prv.observations_data_label]
+            if apply_filters:
+                data_array[:, prv.temporal_colocation_nans[networkspeci]] = np.NaN
         else:
             valid_station_inds = prv.valid_station_inds[networkspeci][prv.observations_data_label]
+
+        # set networkspeci station dimension
+        station_dimension_var = 'station_{}'.format(var_prefix)
+        fout.createDimension(station_dimension_var, len(valid_station_inds))
+
+        # set data variable
+        current_data_type = type_map[data_format_dict[speci]['data_type']]
+        var = fout.createVariable('{}_data'.format(var_prefix), current_data_type, 
+                                  ('data_label', station_dimension_var, 'time',))
 
         # set attributes
         var.standard_name = data_format_dict[speci]['standard_name']
@@ -262,16 +291,17 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
         if prv.reading_ghost:
             var.ghost_version = str(prv.ghost_version)
         if apply_filters:
-            test = np.take(prv.data_in_memory_filtered[networkspeci], valid_station_inds, axis=1)
-            var[:] = np.take(prv.data_in_memory_filtered[networkspeci], valid_station_inds, axis=1)
+            var[:] = np.take(data_array, valid_station_inds, axis=1)
         else:
             var[:] = prv.data_in_memory[networkspeci]
 
         # GHOST data
         if prv.reading_ghost:
+
+            # set GHOST data variable (e.g. representativity)
             var = fout.createVariable('{}_ghost_data'.format(networkspeci), 'f4', 
-                                      ('ghost_data_variable', 'station', 'time',))
-            # set attributes 
+                                      ('ghost_data_variable', station_dimension_var, 'time',))
+            # set attributes and data
             var.standard_name = '{}_ghost_data'.format(networkspeci) 
             var.long_name = '{}_ghost_data'.format(networkspeci)
             var.description = 'GHOST data variables used for additional filtering.'
@@ -279,6 +309,26 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
                 var[:] = np.take(prv.ghost_data_in_memory[networkspeci], valid_station_inds, axis=1)
             else:
                 var[:] = prv.ghost_data_in_memory[networkspeci]
+
+            # set qa variable
+            var = fout.createVariable('{}_qa'.format(networkspeci), 'u1', ('qa',), fill_value=255)
+            # set attributes and data
+            var.standard_name = '{}_qa'.format(networkspeci)
+            var.long_name = '{}_qa'.format(networkspeci)
+            var.description = 'GHOST QA flag codes applied to filter data.'
+            unique_qa = list(np.unique(prv.qa_per_species[speci]))
+            padded_unique_qa = np.array([unique_qa + [255]*(fout.dimensions['qa'].size - len(unique_qa))], dtype=np.uint8)
+            var[:] = padded_unique_qa
+
+            # set flags variable
+            var = fout.createVariable('{}_flags'.format(networkspeci), 'u1', ('flag',), fill_value=255)
+            # set attributes and data
+            var.standard_name = '{}_flags'.format(networkspeci)
+            var.long_name = '{}_flags'.format(networkspeci)
+            var.description = 'GHOST standardised data reporter flag codes applied to filter data.'
+            unique_flag = list(np.unique(prv.flags))
+            padded_unique_flag = np.array([unique_flag + [255]*(fout.dimensions['flag'].size - len(unique_flag))], dtype=np.uint8)
+            var[:] = padded_unique_flag
 
         # save metadata (as individual variables)
         if apply_filters:
@@ -290,7 +340,7 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
             
             current_data_type = type_map[metadata_format_dict[metadata_var]['data_type']] 
             var = fout.createVariable('{}_{}'.format(var_prefix, metadata_var), 
-                                      current_data_type, ('station', 'month',))
+                                      current_data_type, (station_dimension_var, 'month',))
 
             # set attributes
             var.standard_name = metadata_format_dict[metadata_var]['standard_name']

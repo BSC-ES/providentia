@@ -87,22 +87,22 @@ class Plot:
             # get zstat information from plot_type
             zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type)
             
-            # remove plots where setting 'obs' and 'bias' options together
-            if ('obs' in plot_options) & ('bias' in plot_options): 
-                if (self.read_instance.offline) or (self.read_instance.interactive):
+            # check if plot type is correct for offline and interactive modes
+            if (self.read_instance.offline) or (self.read_instance.interactive):
+
+                # remove plots where setting 'obs' and 'bias' options together
+                if ('obs' in plot_options) & ('bias' in plot_options): 
                     print(f"Warning: {plot_type} cannot not be created as 'obs' and 'bias' options set together.")
                     valid_plot_type = False
 
-            # if no experiments are defined, remove all bias plots 
-            if ('bias' in plot_options) or (z_statistic_sign == 'bias'):
-                if len(data_labels) == 1:
-                    if (self.read_instance.offline) or (self.read_instance.interactive):
+                # if no experiments are defined, remove all bias plots 
+                elif ('bias' in plot_options) or (z_statistic_sign == 'bias'):
+                    if len(data_labels) == 1:
                         print(f'Warning: No experiments defined, so {plot_type} bias plot cannot be created.')
                         valid_plot_type = False
 
-            # if are making an experiment bias plot, and temporal_colocation is off, then remove plot
-            if (z_statistic_type == 'expbias') & (not self.read_instance.temporal_colocation):
-                if (self.read_instance.offline) or (self.read_instance.interactive):
+                # if are making an experiment bias plot, and temporal_colocation is off, then remove plot
+                elif (z_statistic_type == 'expbias') & (not self.read_instance.temporal_colocation):
                     print(f'Warning: To calculate the experiment bias stat {zstat}, temporal_colocation must be set to True, so {plot_type} plot cannot be created.')
                     valid_plot_type = False
 
@@ -114,20 +114,22 @@ class Plot:
                 # combine basic and expbias stats dicts together
                 stats_dict = {**self.read_instance.basic_stats, **self.read_instance.expbias_stats}
                 
-                # check all defined plot options are allowed for current plot type
-                invalid_plot_options = [plot_option for plot_option in plot_options if plot_option not in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options']]
-                if len(invalid_plot_options) > 0:
-                    if (self.read_instance.offline) or (self.read_instance.interactive):
+                # check if plot type is correct for offline and interactive modes
+                if (self.read_instance.offline) or (self.read_instance.interactive):
+
+                    # check all defined plot options are allowed for current plot type
+                    invalid_plot_options = [plot_option for plot_option in plot_options if plot_option not in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options']]
+                    if len(invalid_plot_options) > 0:
                         print(f'Warning: {plot_type} cannot be created as {invalid_plot_options} plot options are not valid.')
                         valid_plot_type = False
-                # check desired statistic is defined in stats dict
-                if base_zstat not in stats_dict:
-                    if (self.read_instance.offline) or (self.read_instance.interactive):
+                    
+                    # check desired statistic is defined in stats dict
+                    elif base_zstat not in stats_dict:
                         print(f"Warning: {plot_type} cannot be created as {base_zstat} not defined in Providentia's statistical library.")
                         valid_plot_type = False
-                # remove plots where setting 'obs', but z_statistic_sign is 'bias'
-                elif ('obs' in plot_options) & (z_statistic_sign == 'bias'):
-                    if (self.read_instance.offline) or (self.read_instance.interactive):
+                    
+                    # remove plots where setting 'obs', but z_statistic_sign is 'bias'
+                    elif ('obs' in plot_options) & (z_statistic_sign == 'bias'):
                         print(f"Warning: {plot_type} cannot be created as are plotting a bias statistic but 'obs' option is set.")
                         valid_plot_type = False
 
@@ -167,21 +169,33 @@ class Plot:
                 # get base plot type (without options)
                 base_plot_type = plot_type.split('_')[0] 
 
-                # check all defined plot options are allowed for current plot type
-                invalid_plot_options = [plot_option for plot_option in plot_options if plot_option not in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options']]
-                if len(invalid_plot_options) > 0:
-                    if (self.read_instance.offline) or (self.read_instance.interactive):
+                # check if plot type is correct for offline and interactive modes
+                if (self.read_instance.offline) or (self.read_instance.interactive):
+
+                    # check all defined plot options are allowed for current plot type
+                    invalid_plot_options = [plot_option for plot_option in plot_options if plot_option not in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options']]
+                    if len(invalid_plot_options) > 0:
                         print(f'Warning: {plot_type} cannot be created as {invalid_plot_options} plot options are not valid.')
                         valid_plot_type = False
-                # warning for scatter plot if the temporal colocation is not active
-                elif ('scatter' == base_plot_type) & (not self.read_instance.temporal_colocation):
-                    if (self.read_instance.offline) or (self.read_instance.interactive):
+
+                    # warning for scatter plot if the temporal colocation is not active 
+                    elif ('scatter' == base_plot_type) & (not self.read_instance.temporal_colocation):
                         print(f'Warning: {plot_type} cannot be created as temporal colocation is not active.')
                         valid_plot_type = False
-                # warning for timeseries bias plot if the temporal colocation is not active
-                elif ('timeseries' == base_plot_type) & ('bias' in plot_options) & (not self.read_instance.temporal_colocation):
-                    if (self.read_instance.offline) or (self.read_instance.interactive):
+
+                    # warning for scatter plot if have no experiments
+                    elif ('scatter' == base_plot_type) & (len(data_labels) == 1):
+                        print(f'Warning: No experiments defined, so {plot_type} cannot be created.')
+                        valid_plot_type = False
+
+                    # warning for timeseries bias plot if the temporal colocation is not active
+                    elif ('timeseries' == base_plot_type) & ('bias' in plot_options) & (not self.read_instance.temporal_colocation):
                         print(f'Warning: {plot_type} cannot be created as temporal colocation is not active.')
+                        valid_plot_type = False
+
+                    # warning for timeseries bias plot if have no experiments
+                    elif ('timeseries' == base_plot_type) & ('bias' in plot_options) & (len(data_labels) == 1):
+                        print(f'Warning: No experiments defined, so {plot_type} cannot be created.')
                         valid_plot_type = False
 
                 # break loop if the plot type is not valid and remove plot type from lists
@@ -400,6 +414,10 @@ class Plot:
 
             # check var str name exists in ghost var dict, if not move to next var
             if var_str_name not in ghost_var_dict:
+                continue
+            
+            # check if var is in metadata
+            if ghost_var not in self.read_instance.metadata_vars_to_read:
                 continue
 
             # if are on limit of vars allowed per line then break to new line
@@ -1174,6 +1192,45 @@ class Plot:
         else:
             networkspecies = [networkspeci]
 
+        # if norm in plot options, then get factor for normalisation (per observations and experiment)
+        if ('normmedian' in plot_options) or ('normmean' in plot_options) or ('normmin' in plot_options) or ('normmax' in plot_options) or ('normsum' in plot_options):
+
+            norm_factor = {}
+
+            # iterate through networkspecies
+            for ns in networkspecies:
+            
+                # get valid data labels for networkspeci
+                valid_data_labels = self.canvas_instance.selected_station_data_labels[ns]
+                
+                # cut data_labels for those in valid data labels
+                cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+
+                # iterate through cut data labels making plot
+                for data_label_ii, data_label in enumerate(cut_data_labels):
+
+                    if data_label not in norm_factor:
+                        norm_factor[data_label] = []
+
+                    # get data (flattened and drop NaNs)
+                    data_array = drop_nans(self.canvas_instance.selected_station_data[ns]['flat'][valid_data_labels.index(data_label),0,:])
+
+                    #calculate values for normalisation
+                    if 'normmedian' in plot_options:
+                        norm_factor[data_label].append(np.nanmedian(data_array))
+                    elif 'normmean' in plot_options:
+                        norm_factor[data_label].append(np.nanmean(data_array))
+                    elif 'normmin' in plot_options:
+                        norm_factor[data_label].append(np.nanmin(data_array))    
+                    elif 'normmax' in plot_options:
+                        norm_factor[data_label].append(np.nanmax(data_array)) 
+                    elif 'normsum' in plot_options:
+                        norm_factor[data_label].append(np.nansum(data_array)) 
+
+            # get ultimate factor per observations / experiments for normalisation
+            for data_label in norm_factor:
+                norm_factor[data_label] = sum(np.diff(bins)*norm_factor[data_label])
+            
         # iterate through networkspecies
         ns_current = 0
         for ns in networkspecies:
@@ -1215,6 +1272,10 @@ class Plot:
 
                     # get data (flattened and drop NaNs)
                     data_array = drop_nans(self.canvas_instance.selected_station_data[ns]['flat'][valid_data_labels.index(data_label),0,:])
+
+                    # normalise data array
+                    if ('normmedian' in plot_options) or ('normmean' in plot_options) or ('normmin' in plot_options) or ('normmax' in plot_options) or ('normsum' in plot_options):
+                        data_array = data_array * norm_factor[data_label]
 
                     # make boxplot
                     boxplot = relevant_axis.boxplot(x=data_array, positions=[positions[data_label_ii]], widths=widths, 
