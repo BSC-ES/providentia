@@ -69,7 +69,8 @@
                      "plot": {"ha": "left", "va": "top", "fontsize": 11, "wrap": true, "linespacing": 1.5},
                      "plot_options": []},
        
-       "map": {"map_coastline_resolution": "medium",
+       "map": {"background": "providentia",
+               "map_coastline_resolution": "medium",
                "orientation": "landscape",
                "figure": {"ncols": 2, "nrows": 2}, 
                "land_polygon": {"facecolor": "0.85"},
@@ -284,7 +285,7 @@
                    "group_widths": {"singlespecies":0.7, "multispecies":0.9}, 
                    "threshold_line": {"linestyle": "--", "linewidth": 1.0, "color": "red", "zorder": 0},
                    "plot": {"patch_artist": true, "manage_ticks": false, "showfliers": false},
-                   "plot_options": ["obs", "individual", "annotate", "logy", "multispecies", "threshold"]},
+                   "plot_options": ["obs", "individual", "annotate", "logy", "multispecies", "threshold", "normmedian", "normmean", "normmin", "normmax", "normsum"]},
 
        "heatmap": {"orientation": "portrait",
                    "figure": {"ncols": 1, "nrows": 1},

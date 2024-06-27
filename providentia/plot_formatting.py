@@ -1,9 +1,12 @@
 """ Functions to format the axes """
 
 import copy
+import os
+from PIL import Image
 
 import cartopy.feature as cfeature
 import matplotlib as mpl 
+import matplotlib.pyplot as plt
 from matplotlib.dates import num2date
 import numpy as np
 import pandas as pd
@@ -11,6 +14,8 @@ import pandas as pd
 from .plot_aux import get_land_polygon_resolution, set_map_extent
 from .plot_options import annotation, experiment_domain, linear_regression, log_axes, smooth, threshold
 from .statistics import get_z_statistic_info
+
+Image.MAX_IMAGE_PIXELS = None
 
 def set_equal_axes(ax, plot_options):
     """ Set equal aspect and limits (useful for scatter plots). 
@@ -667,11 +672,31 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
         # map specific formatting
         elif base_plot_type == 'map':
 
-            # add land polygons
-            feature = cfeature.NaturalEarthFeature(category='physical', name='land',
-                                                   scale=get_land_polygon_resolution(canvas_instance.plot_characteristics_templates['map']['map_coastline_resolution']), 
-                                                   **canvas_instance.plot_characteristics_templates['map']['land_polygon'])
-            ax_to_format.add_feature(feature)
+            CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+
+            # set map background
+
+            # providentia default background
+            if plot_characteristics['background'] == 'providentia':
+                feature = cfeature.NaturalEarthFeature(category='physical', name='land',
+                                                       scale=get_land_polygon_resolution(canvas_instance.plot_characteristics_templates['map']['map_coastline_resolution']), 
+                                                       **canvas_instance.plot_characteristics_templates['map']['land_polygon'])
+                ax_to_format.add_feature(feature)
+
+            # shaded relief (cartopy default)
+            elif plot_characteristics['background'] == 'shaded_relief':
+                ax_to_format.stock_img()
+
+            # other type of map background
+            else:
+                # check file for background exists
+                background_fname = os.path.join(CURRENT_PATH, "resources/{}.png".format(plot_characteristics['background']))
+                if os.path.isfile(background_fname):
+                    img = plt.imread(background_fname)
+                    img_extent = (-180, 180, -90, 90)
+                    ax_to_format.imshow(img, origin='upper', extent=img_extent, transform=canvas_instance.datacrs)
+                else:
+                    print("Warning: Specified map background file cannot be found.")
 
             # add gridlines ?
             if 'gridlines' in plot_characteristics_vars:

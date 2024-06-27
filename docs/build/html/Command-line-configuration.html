@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Command line configuration &mdash; Providentia 2.3.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=c3c8ae58"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Data flags and QA names and codes" href="Data-flags-and-QA-names-and-codes.html" />
+    <link rel="prev" title="Other topics" href="other-topics.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Tool setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modes.html">Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="other-topics.html">Other topics</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Command line configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Data-flags-and-QA-names-and-codes.html">Data flags and QA names and codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Representativity-filters.html">Representativity filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Saved-file-formats.html">Saved file formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Create-your-own-data-network.html">Create your own data network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Mounting-esarchive.html">Mounting esarchive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Colocation.html">Colocation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Multispecies-filtering.html">Multispecies filtering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Evolution.html">Evolution</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="other-topics.html">Other topics</a></li>
+      <li class="breadcrumb-item active">Command line configuration</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Command-line-configuration.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="command-line-configuration">
+<h1>Command line configuration<a class="headerlink" href="#command-line-configuration" title="Link to this heading"></a></h1>
+<p>There are some parameters that may be configured by command line when executing Providentia, although none are mandatory.</p>
+<p>These parameters can be modified when running the bash script to launch Providentia. You can see all the available options by typing <code class="docutils literal notranslate"><span class="pre">./bin/providentia</span> <span class="pre">--usage</span></code> and <code class="docutils literal notranslate"><span class="pre">./bin/providentia</span> <span class="pre">--help</span></code>.</p>
+<p>Namely, these are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>cores</p></td>
+<td><p>Number of cores.</p></td>
+<td><p>12</p></td>
+</tr>
+<tr class="row-odd"><td><p>time</p></td>
+<td><p>Requested time.</p></td>
+<td><p>02:00:00</p></td>
+</tr>
+<tr class="row-even"><td><p>jobname</p></td>
+<td><p>Job name.</p></td>
+<td><p>PRV</p></td>
+</tr>
+<tr class="row-odd"><td><p>queue</p></td>
+<td><p>Job queue.</p></td>
+<td><p>debug</p></td>
+</tr>
+<tr class="row-even"><td><p>mem</p></td>
+<td><p>Memory.</p></td>
+<td><p>20Gb</p></td>
+</tr>
+<tr class="row-odd"><td><p>constraint</p></td>
+<td><p>Memory constraint.</p></td>
+<td><p>medmem (to use nodes with 64GB of memory)</p></td>
+</tr>
+<tr class="row-even"><td><p>version</p></td>
+<td><p>Print version of Providentia.</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>debug</p></td>
+<td><p>Start <a class="reference external" href="https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Interactive-mode#starting-a-jupyter-notebook">debug mode</a>.</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>interactive</p></td>
+<td><p>Start <a class="reference external" href="https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Run-the-tool#running-the-tool-on-a-bsc-machine">interactive mode</a>.</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>conf</p></td>
+<td><p>Configuration file path.</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>config</p></td>
+<td><p>Configuration file path.</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>config_dir</p></td>
+<td><p>Path to all configuration files.</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>section</p></td>
+<td><p>Section within configuration file.</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>ghost_version</p></td>
+<td><p>GHOST version.</p></td>
+<td><p>1.5</p></td>
+</tr>
+<tr class="row-even"><td><p>cartopy_data_dir</p></td>
+<td><p>Cartopy data directory.</p></td>
+<td><p>In MN5: <code class="docutils literal notranslate"><span class="pre">/gpfs/projects/bsc32/software/rhel/9.2/software/Cartopy/0.23.0-foss-2023b-Python-3.11.5/lib/python3.11/site-packages/cartopy/data</span></code>. In other HPC: <code class="docutils literal notranslate"><span class="pre">/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data</span></code>. Locally: Downloaded from the internet on the fly.</p></td>
+</tr>
+<tr class="row-odd"><td><p>generate_file_tree</p></td>
+<td><p>Generate file tree to update data directories</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>file_tree</p></td>
+<td><p>Generate file tree to update data directories</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>gft</p></td>
+<td><p>Generate file tree to update data directories</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>offline</p></td>
+<td><p>Start <a class="reference external" href="https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Run-the-tool#generate-an-offline-report">offline reports</a>.</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>network</p></td>
+<td><p>Network you want to load observations from. Can be multiple (e.g. <code class="docutils literal notranslate"><span class="pre">CAPMoN,</span> <span class="pre">EBAS</span></code>). Adding a wild card (*) is going to expand to certain variables (vconc* → vconc1, vconc2, etc.).</p></td>
+<td><p>EBAS</p></td>
+</tr>
+<tr class="row-even"><td><p>species</p></td>
+<td><p>Species to load. Can be multiple (e.g. <code class="docutils literal notranslate"><span class="pre">sconco3,</span> <span class="pre">sconcno2</span></code>).</p></td>
+<td><p>sconco3</p></td>
+</tr>
+<tr class="row-odd"><td><p>resolution</p></td>
+<td><p>Temporal resolution of the observations you want to load (e.g. <code class="docutils literal notranslate"><span class="pre">3hourly</span></code>).</p></td>
+<td><p>hourly</p></td>
+</tr>
+<tr class="row-even"><td><p>start_date</p></td>
+<td><p>Comparison start date in YYYYMMDD format (e.g. <code class="docutils literal notranslate"><span class="pre">20170101</span></code>).</p></td>
+<td><p>20180101</p></td>
+</tr>
+<tr class="row-odd"><td><p>end_date</p></td>
+<td><p>Comparison end date in YYYYMMDD format (e.g. <code class="docutils literal notranslate"><span class="pre">20180601</span></code>).</p></td>
+<td><p>20190101</p></td>
+</tr>
+<tr class="row-even"><td><p>experiments</p></td>
+<td><p>ID of interpolated experiment using providentia-interpolation. The experiment IDs can be mapped to different names by adding a list of alternative names after the experiment IDs (e.g. <code class="docutils literal notranslate"><span class="pre">exp1,</span> <span class="pre">exp2</span> <span class="pre">(altexp1,</span> <span class="pre">altexp2)</span></code>).</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>temporal_colocation</p></td>
+<td><p>Boolean variable to set if you want to temporally colocate the observation and experiment data.</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>spatial_colocation</p></td>
+<td><p>Boolean variable to set if you want to spatially colocate the observation and experiment data across multiple species.</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-odd"><td><p>filter_species</p></td>
+<td><p>Filter read species by other species data within a data range (can be multiple) (e.g. <code class="docutils literal notranslate"><span class="pre">network1:species1</span> <span class="pre">(lowerlim,</span> <span class="pre">upperlim),</span> <span class="pre">network2:species2</span> <span class="pre">(lowerlim,</span> <span class="pre">upperlim)</span></code>).</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>lower_bound</p></td>
+<td><p>Data lower limit</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>upper_bound</p></td>
+<td><p>Data upper limit</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>report_type</p></td>
+<td><p>Type of report to generate that defines which plots the report will contain, from the options given in <code class="docutils literal notranslate"><span class="pre">report_plots.yaml</span></code>.</p></td>
+<td><p>standard</p></td>
+</tr>
+<tr class="row-odd"><td><p>report_summary</p></td>
+<td><p>Boolean variable to set if you wish to make specific plots for each station in subsection.</p></td>
+<td><p>True</p></td>
+</tr>
+<tr class="row-even"><td><p>report_stations</p></td>
+<td><p>Boolean variable to set if you wish to make summary plots across station subsection.</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>report_title</p></td>
+<td><p>The header in the first page of the report (as in the PDF).</p></td>
+<td><p>Providentia Offline Report</p></td>
+</tr>
+<tr class="row-even"><td><p>report_filename</p></td>
+<td><p>The filename of the report or the path to create the report (as in the PDF).</p></td>
+<td><p>PROVIDENTIA_Report</p></td>
+</tr>
+<tr class="row-odd"><td><p>map_extent</p></td>
+<td><p>Set the map plot extents with the syntax: minimum longitude, maximum longitude, minimum latitude, maximum latitude.</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>active_dashboard_plots</p></td>
+<td><p>Plots that will be active in the dashboard once it is launched (e.g. <code class="docutils literal notranslate"><span class="pre">timeseries,</span> <span class="pre">periodic-violin,</span> <span class="pre">scatter,</span> <span class="pre">distribution</span></code>).</p></td>
+<td><p>timeseries, statsummary, distribution, periodic</p></td>
+</tr>
+<tr class="row-odd"><td><p>plot_characteristics_filename</p></td>
+<td><p>The path to the file containing the plot characteristics.</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p>If you want to use the parameter <code class="docutils literal notranslate"><span class="pre">active_dashboard_plots</span></code>, it is important that you leave no spaces between the plot types as in:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">active_dashboard_plots</span><span class="o">=</span><span class="n">timeseries</span><span class="p">,</span><span class="n">metadata</span><span class="p">,</span><span class="n">periodic</span><span class="o">-</span><span class="n">violin</span><span class="p">,</span><span class="n">boxplot</span>
+</pre></div>
+</div>
+<p>To specify a subsection, add the name of the parent section followed by an interpunct (·) before the subsection name, like in:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">conf</span><span class="o">=</span><span class="n">configurations</span><span class="o">/</span><span class="n">test</span><span class="o">.</span><span class="n">conf</span> <span class="o">--</span><span class="n">section</span><span class="o">=</span><span class="n">SECTIONA·Spain</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="other-topics.html" class="btn btn-neutral float-left" title="Other topics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Data-flags-and-QA-names-and-codes.html" class="btn btn-neutral float-right" title="Data flags and QA names and codes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2024, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

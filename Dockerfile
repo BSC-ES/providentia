@@ -19,7 +19,6 @@ RUN conda update --all -y
 RUN conda install -c conda-forge cartopy -y \
 && conda install -c conda-forge jupyterlab -y
 
-COPY requirements.txt /tmp/
-RUN pip install -r /tmp/requirements.txt
+RUN pip install -r /tmp/Providentia/requirements.txt
 
-WORKDIR /tmp/Providentia
+WORKDIR /tmp/

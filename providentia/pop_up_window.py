@@ -19,11 +19,11 @@ PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 # get operating system specific formatting
 operating_system = platform.system()
 if operating_system == 'Darwin':
-    formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_mac.yaml')))
+    formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_mac.yaml')))
 elif operating_system == 'Linux':
-    formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_linux.yaml')))
+    formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_linux.yaml')))
 elif operating_system in ['Windows','MINGW32_NT','MINGW64_NT']:
-    formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/stylesheet_windows.yaml')))
+    formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_windows.yaml')))
 
 
 class PopUpWindow(QtWidgets.QWidget):
@@ -945,7 +945,7 @@ class PopUpWindow(QtWidgets.QWidget):
                                   for val in list(copy.deepcopy(self.read_instance.filter_species).keys())]
                 qa_species = species + filter_species
                 
-                # add
+                # add qa per species
                 qa_species.append(speci)
                 self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) 
                                                      for speci in qa_species}
