@@ -1,0 +1,18 @@
+{
+    "network": ["EBAS"],
+    "species": ["sconco3"],
+    "resolution": "hourly",
+    "start_date": "20180101",
+    "end_date": "20190101",
+    "statistic_mode": "Temporal|Spatial",
+    "statistic_aggregation": {
+                                "Temporal|Spatial": "Median", 
+                                "Spatial|Temporal": "Median",
+                                "Flattened": ""
+                            },
+    "periodic_statistic_mode": "Independent",
+    "periodic_statistic_aggregation": "Median",
+    "timeseries_statistic_aggregation": "Median",
+    "active_dashboard_plots": ["timeseries", "statsummary", "distribution", "periodic"]
+}
+
