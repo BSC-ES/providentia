@@ -39,7 +39,6 @@ if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
     else:
         MACHINE = "local"
 
-
 def parse_path(dir, f):
     if os.path.isabs(f):
         return f
