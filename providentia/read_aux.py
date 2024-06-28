@@ -469,7 +469,7 @@ def get_ghost_observational_tree(instance):
         ghost_observation_data[network] = {}
 
         # iterate through available resolutions
-        for resolution in instance.available_resolutions:
+        for resolution in instance.ghost_available_resolutions:
 
             # check if directory for resolution exists
             # if not, continue
@@ -507,7 +507,7 @@ def get_ghost_observational_tree(instance):
                     ghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
 
     # save file tree out to yaml
-    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/ghost_filetree_{}.json'.format(instance.ghost_version)), 'w') as json_file:
+    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(instance.ghost_version)), 'w') as json_file:
         json.dump(ghost_observation_data, json_file, indent=4)
 
     return ghost_observation_data
@@ -527,9 +527,6 @@ def get_nonghost_observational_tree(instance):
     # create dictionary for storing filetree
     nonghost_observation_data = {}
 
-    # load which non-GHOST networks to read
-    #nonghost_networks = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_networks.yaml')))
-
     # iterate through networks
     for network in instance.nonghost_available_networks:
 
@@ -542,7 +539,7 @@ def get_nonghost_observational_tree(instance):
         nonghost_observation_data[network] = {}
 
         # iterate through available resolutions
-        for resolution in instance.available_resolutions:
+        for resolution in instance.nonghost_available_resolutions:
 
             # check if directory for resolution exists
             # if not, continue
@@ -579,7 +576,7 @@ def get_nonghost_observational_tree(instance):
                     nonghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
         
     # save file tree out to yaml
-    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_filetree.json'), 'w') as json_file:
+    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json'), 'w') as json_file:
         json.dump(nonghost_observation_data, json_file, indent=4)
 
     return nonghost_observation_data
