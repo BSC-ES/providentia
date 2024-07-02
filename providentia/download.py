@@ -22,19 +22,19 @@ from getpass import getpass
 from .configuration import ProvConfiguration, load_conf
 from .read_aux import check_for_ghost
 from .warnings import show_message
+from .read_aux import get_ghost_observational_tree, get_nonghost_observational_tree
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
 data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
 
-global stop
-stop = False
-
 def sighandler(*unused):
-    global stop
-    print('\nWaiting to download current network...')
-    stop = True
+    print('Keyboard Interrupt. Stopping execution.')
+    download.update_filetrees()
+    print("\nExiting...")
+    sys.exit()
+    
 
 class ProvidentiaDownload(object):
     def __init__(self,**kwargs):
@@ -67,7 +67,7 @@ class ProvidentiaDownload(object):
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
-        provconf = ProvConfiguration(self, **kwargs)
+        self.provconf = ProvConfiguration(self, **kwargs)
 
         # update variables from config file
         if self.config != '':  
@@ -101,6 +101,7 @@ class ProvidentiaDownload(object):
         if not self.sftp_option:
             self.sftp_download_check()
 
+    def run(self):
         for section_ind, section in enumerate(self.parent_section_names):
             # update for new section parameters
             self.section = section
@@ -108,10 +109,10 @@ class ProvidentiaDownload(object):
 
             # update self with section variables
             for k, val in self.section_opts.items():
-                setattr(self, k, provconf.parse_parameter(k, val))
+                setattr(self, k, self.provconf.parse_parameter(k, val))
 
             # now all variables have been parsed, check validity of those, throwing errors where necessary
-            provconf.check_validity(deactivate_warning=True)
+            self.provconf.check_validity(deactivate_warning=True)
 
             # if networks is none, raise error
             if not self.network:
@@ -122,8 +123,8 @@ class ProvidentiaDownload(object):
             if self.network == ["*"] or self.network == ["default"]:
                 self.get_all_networks()
 
-            # from here not able to stop until a network is finished TODO descomentar
-            # signal.signal(signal.SIGINT, sighandler)
+            # from here generate filetree if user stopped execution
+            signal.signal(signal.SIGINT, sighandler)
 
             for network in self.network:
                 # ghost TODO MERGE FILTER SPECIES AND NETWORK PROCEDURE
@@ -138,11 +139,6 @@ class ProvidentiaDownload(object):
                 # non-ghost
                 else:
                     self.download_nonghost_network(network)
-
-                # print(stop) TODO APLICAR EL STOP DE NUEVO
-  
-                if stop:
-                    sys.exit()
 
             # filter species networks
             for i,network_specie in enumerate(self.filter_species):
@@ -162,9 +158,6 @@ class ProvidentiaDownload(object):
                 # non-ghost
                 else:
                     self.download_nonghost_network(network)
-
-                if stop:
-                    sys.exit()
             
             # when one of those symbols is passed, get all experiments
             if self.experiments == {'*': '*'} or self.experiments == {'default': 'default'}:
@@ -173,6 +166,9 @@ class ProvidentiaDownload(object):
             # experiment
             for experiment in self.experiments.keys():
                 self.download_exp(experiment)
+
+            # update filetrees
+            self.update_filetrees()
 
     def connect(self):
         # flag to indicate if user wants their user and password saved 
@@ -536,7 +532,7 @@ class ProvidentiaDownload(object):
             print()
 
             # get all the nc files in the date range
-            for i,remote_dir in tqdm(res_spec_dir,desc="Downloading Observations"):
+            for remote_dir in tqdm(res_spec_dir,desc="Downloading Observations"):
                 local_dir = os.path.join(self.exp_root,remote_dir.split('/',7)[-1])
                 network = remote_dir.split('/')[-1]
                 species = remote_dir.split('/')[-2]
@@ -635,7 +631,14 @@ class ProvidentiaDownload(object):
                     
         return nc_files        
 
+    def update_filetrees(self):
+        print('\nUpdating filetrees...')
+        get_ghost_observational_tree(download)
+        get_nonghost_observational_tree(download)
+        
 def main(**kwargs):
     """ Main function when running download function. """
-    # initialise break blocker  
-    ProvidentiaDownload(**kwargs)
+    # initialise break blocker
+    global download  
+    download = ProvidentiaDownload(**kwargs)
+    download.run()
