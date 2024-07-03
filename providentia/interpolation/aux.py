@@ -1,12 +1,13 @@
-""" Auxiliar functions. """
-
+""" Auxiliary functions. """
 
 def get_aeronet_bin_radius_from_bin_variable(binvar):
-    """ Return AERONET bin radius instance from bin variable AERONET bins are not bins in the classical sense in that 
+    """ Return AERONET bin radius instance from bin variable. AERONET bins are not bins in the classical sense in that 
         they have a radius min/max, rather they represent an instance on the distribution curve across all sizes.      
         
         :param binvar: bin variable
         :type binvar: str
+        :return: AERONET bin radius
+        :rtype: float
     """
     
     aeronet_bin_variable_to_bin_radius = {'vconcaerobin1': 0.05,       'vconcaerobin2': 0.065604, 
@@ -23,6 +24,67 @@ def get_aeronet_bin_radius_from_bin_variable(binvar):
 
     return aeronet_bin_variable_to_bin_radius[binvar]
 
+def get_model_bin_radii(model_name):
+    """ Return model bin edges radii, and bin relative humidity
+        
+        :param model_name: name of model
+        :type model_name: str
+        :return: model bin radii, model bin rh 
+        :rtype: list, list
+    """ 
+
+    if model_name == 'monarch':
+        r_edges =[0.1, 0.18, 0.3, 0.6, 1.0, 1.8, 3.0, 6.0, 10.0]
+        rho_bins = [2500.0, 2500.0, 2500.0, 2500.0, 2650.0, 2650.0, 2650.0, 2650.0]
+        return r_edges, rho_bins
+    else:
+        return None, None
+
+def get_aeronet_model_bin(model_name, aeronet_bin_radius):
+    """ Return details of model bin which contains AERONET bin radius instance, and 
+        
+        :param model_name: name of model
+        :type model_name: str
+        :param aeronet_bin_radius: bin radius
+        :type aeronet_bin_radius: float
+        :return: model bin index, bin radius minimum, bin radius maximum, bin relative humidity
+        :rtype: int, float, float, float
+    """ 
+
+    import numpy as np
+
+    # get model bin raddi and bin rh
+    r_edges, rho_bins = get_model_bin_radii(model_name)
+
+    # get model bin index which contains AERONET bin radius instance
+    if aeronet_bin_radius == r_edges[-1]:
+        bin_index = len(r_edges)-1
+    else:
+        bin_index = np.searchsorted(r_edges, aeronet_bin_radius, side='right') - 1
+
+    return bin_index, r_edges[bin_index], r_edges[bin_index+1], rho_bins[bin_index]
+
+def get_model_to_aeronet_bin_transform_factor(model_name, rmin, rmax):
+    """ Return factor which transforms aerosol size distribution data from model bins 
+        to AERONET's 22 bins format, assuming a constant function.
+
+        :param model_name: name of model
+        :type model_name: str
+        :param rmin: minimum bin radius
+        :type rmin: float
+        :param rmax: maximum bin radius
+        :type rmax: float
+        :return: transform factor
+        :rtype: np.float32
+    """
+
+    import numpy as np
+
+    # get bin integral (per model)
+    if model_name == 'monarch':
+        bin_transform_factor = 1.0/(np.log(rmax) - np.log(rmin))
+
+    return bin_transform_factor
 
 def check_for_ghost(network_name):
     """ Check whether the selected network comes from GHOST or not.
@@ -30,6 +92,8 @@ def check_for_ghost(network_name):
 
         :param network_name: network name
         :type network_name: str
+        :return: True or False if network is from GHOST 
+        :rtype: boolean
     """
 
     if '/' in network_name:
@@ -37,7 +101,6 @@ def check_for_ghost(network_name):
     else:
         return True
         
-
 def check_directory_existence(directory_tree_str, directories_not_to_test=None):
     """ Iterate through provided directory tree string.
         First, check if directory exists, if not create it.
@@ -122,6 +185,8 @@ def findMiddle(input_len):
 
         :param input_len: list of coordinates
         :type input_len: list
+        :return: middle index of list 
+        :rtype: int
     """
 
     middle = float(input_len)/2
@@ -129,4 +194,3 @@ def findMiddle(input_len):
         return int(middle - .5)
     else:
         return [int(middle-1), int(middle)]
-        
