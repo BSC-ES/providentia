@@ -16,12 +16,17 @@ import datetime
 import dateutil.relativedelta as relativedelta
 from netCDF4 import Dataset, num2date, date2num, chartostring
 import numpy as np
+from packaging.version import Version
 import pandas as pd
 import pyproj
 from scipy import spatial
 from shapely.geometry import Polygon, Point
 import xarray as xr
 from experiment_interpolation_submission import data_paths, MACHINE
+
+from aux import (check_for_ghost, findMiddle, check_directory_existence, set_file_permissions_ownership,
+                 get_aeronet_bin_radius_from_bin_variable, get_aeronet_model_bin, 
+                 get_model_to_aeronet_bin_transform_factor)
 
 # change current working directory from submit directory 
 # to import global configuration file
@@ -42,9 +47,6 @@ bin_vars = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal',
 # load the defined experiments paths and agrupations jsons
 experiment_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_paths.yaml')))
 experiment_names = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_names.yaml')))
-
-# auxiliar functions
-import aux
 
 # add unit-converter submodule to python load path
 sys.path.append(os.path.join(PROVIDENTIA_ROOT,'providentia','dependencies','unit-converter'))
@@ -127,7 +129,7 @@ class ExperimentInterpolation(object):
         exp_dir += f"{self.experiment_to_process}/" 
 
         # define if network is in GHOST format
-        self.reading_ghost = aux.check_for_ghost(self.network_to_interpolate_against)
+        self.reading_ghost = check_for_ghost(self.network_to_interpolate_against)
         
         # get relevant observational file
         # GHOST
@@ -356,8 +358,8 @@ class ExperimentInterpolation(object):
                 # add workaround to fix interpolation in the southern hemisphere
                 # if the centre gridbox value (average of 2, if even number) of the geographic latitude variable is <0:
                 # then add 'central_rotated_longitude = 180.0'
-                lat_centre_i = aux.findMiddle(self.mod_lats_centre.shape[0])
-                lon_centre_i = aux.findMiddle(self.mod_lats_centre.shape[1])
+                lat_centre_i = findMiddle(self.mod_lats_centre.shape[0])
+                lon_centre_i = findMiddle(self.mod_lats_centre.shape[1])
                 centre_lat = np.average(self.mod_lats_centre[lat_centre_i,lon_centre_i])
                 if centre_lat < 0.0:
                     central_rotated_longitude = 180.0
@@ -597,9 +599,9 @@ class ExperimentInterpolation(object):
         end_month_dt = start_month_dt + relativedelta.relativedelta(months=1)
         if self.temporal_resolution_to_output in ['hourly', 'hourly_instantaneous']:
             self.yearmonth_time = np.arange(0,days_in_month*24.0)
-            if float(".".join(pd.__version__.split(".")[:2])) >= 2.2:
+            if Version(pd.__version__) >= Version("2.2"):
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='h', inclusive='left')
-            elif float(".".join(pd.__version__.split(".")[:2])) >= 1.4:
+            elif Version(pd.__version__) >= Version("1.4"):
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='H', inclusive='left')
             else:
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='H', closed='left')
@@ -607,9 +609,9 @@ class ExperimentInterpolation(object):
             self.temporal_resolution_to_output_code = 'H'
         elif self.temporal_resolution_to_output in ['3hourly', '3hourly_instantaneous']:
             self.yearmonth_time = np.arange(0,days_in_month*24.0,3.0)
-            if float(".".join(pd.__version__.split(".")[:2])) >= 2.2:
+            if Version(pd.__version__) >= Version("2.2"):
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='3h', inclusive='left')
-            elif float(".".join(pd.__version__.split(".")[:2])) >= 1.4:
+            elif Version(pd.__version__) >= Version("1.4"):
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='3H', inclusive='left')
             else:
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='3H', closed='left')
@@ -617,9 +619,9 @@ class ExperimentInterpolation(object):
             self.temporal_resolution_to_output_code = '3H'
         elif self.temporal_resolution_to_output in ['6hourly', '6hourly_instantaneous']:
             self.yearmonth_time = np.arange(0,days_in_month*24.0,6.0)
-            if float(".".join(pd.__version__.split(".")[:2])) >= 2.2:
+            if Version(pd.__version__) >= Version("2.2"):
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='6h', inclusive='left')
-            elif float(".".join(pd.__version__.split(".")[:2])) >= 1.4:
+            elif Version(pd.__version__) >= Version("1.4"):
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='6H', inclusive='left')
             else:
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='6H', closed='left')
@@ -627,7 +629,7 @@ class ExperimentInterpolation(object):
             self.temporal_resolution_to_output_code = '6H'
         elif self.temporal_resolution_to_output == 'daily':
             self.yearmonth_time = np.arange(0,days_in_month)
-            if float(".".join(pd.__version__.split(".")[:2])) >= 1.4:
+            if Version(pd.__version__) >= Version("1.4"):
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='D', inclusive='left')
             else:
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='D', closed='left')
@@ -637,7 +639,7 @@ class ExperimentInterpolation(object):
         elif self.temporal_resolution_to_output == 'monthly':
             # self.yearmonth_time = np.arange(0,days_in_month*24.0)
             self.yearmonth_time = np.arange(0,1)
-            if float(".".join(pd.__version__.split(".")[:2])) >= 1.4:
+            if Version(pd.__version__) >= Version("1.4"):
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='MS', inclusive='left')
             else:
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='MS', closed='left')
@@ -652,9 +654,9 @@ class ExperimentInterpolation(object):
         # -- get index of model bin to use for transformation of bin types (and rmin/rmax)
         # -- get transform factor to go between model bin and aeronet bin
         if self.have_bin_dimension:
-            aeronet_bin_radius = aux.get_aeronet_bin_radius_from_bin_variable(self.original_speci_to_process)
-            bin_index, rmin, rmax, rho_bin = self.get_aeronet_model_bin_index(aeronet_bin_radius)
-            bin_transform_factor = self.get_monarch_to_aeronet_bin_transform_factor(rmin, rmax)
+            aeronet_bin_radius = get_aeronet_bin_radius_from_bin_variable(self.original_speci_to_process)
+            bin_index, rmin, rmax, rho_bin = get_aeronet_model_bin(self.model_name, aeronet_bin_radius)
+            bin_transform_factor = get_model_to_aeronet_bin_transform_factor(self.model_name, rmin, rmax)
                 
         # iterate and read chunked model files
         for model_ii, model_file in enumerate(self.model_files):
@@ -697,7 +699,7 @@ class ExperimentInterpolation(object):
                     file_time_dt = num2date(file_time, units=time_units, calendar=time_calendar)
 
                     # convert to pandas datetime
-                    if float(".".join(cftime. __version__.split(".")[:2])) == 1.0:
+                    if Version(cftime.__version__) <= Version("1.0.3.4"):
                         # remove microseconds
                         file_time_dt = pd.to_datetime([t.replace(microsecond=0) for t in file_time_dt])
                     else:
@@ -794,11 +796,20 @@ class ExperimentInterpolation(object):
         # Defining the distance between two points on the earth's surface as simply the euclidean distance 
         # between the two lat/lon pairs could lead to inaccurate results depending on the distance 
         # between two points (i.e. 1 deg. of longitude varies with latitude).
-        lla = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84')
-        ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
-        obs_x, obs_y, obs_z = pyproj.transform(lla, ecef, self.obs_lons, self.obs_lats, obs_alts, radians=False)
-        mod_x, mod_y, mod_z = pyproj.transform(lla, ecef, flat_mod_lons_centre, flat_mod_lats_centre, flat_mod_alts, 
-                                               radians=False)
+        if Version(pyproj.__version__) >= Version("2.6.1"):
+            lla = {"proj": "latlong", "ellps": "WGS84", "datum": "WGS84"}
+            ecef = {"proj": "geocent", "ellps": "WGS84", "datum": "WGS84"}
+            transformer = pyproj.Transformer.from_crs(lla, ecef)
+            obs_x, obs_y, obs_z = transformer.transform(self.obs_lons, self.obs_lats, obs_alts, radians=False)
+            mod_x, mod_y, mod_z = transformer.transform(flat_mod_lons_centre, flat_mod_lats_centre, flat_mod_alts, 
+                                                        radians=False)
+        else:
+            lla = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84')
+            ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
+            obs_x, obs_y, obs_z = pyproj.transform(lla, ecef, self.obs_lons, self.obs_lats, obs_alts, radians=False)
+            mod_x, mod_y, mod_z = pyproj.transform(lla, ecef, flat_mod_lons_centre, flat_mod_lats_centre, flat_mod_alts, 
+                                                radians=False)
+
 
         # stack converted cartesian coordinates for preparation of calculation of nearest neighbour distances 
         # using Scipy cKDTree
@@ -844,8 +855,7 @@ class ExperimentInterpolation(object):
                 self.original_speci_to_process, network_name)
 
         # check if need to create any directories in path 
-        aux.check_directory_existence(output_dir,'/gpfs/projects/bsc32/AC_cache/recon/exp_interp/{}'.format(
-            self.ghost_version))
+        check_directory_existence(output_dir,'/gpfs/projects/bsc32/AC_cache/recon/exp_interp')
 
         # create netCDF dataset
         netCDF_fname = '{}/{}_{}.nc'.format(output_dir, self.original_speci_to_process, self.yearmonth)
@@ -1019,7 +1029,7 @@ class ExperimentInterpolation(object):
         compress_return_code = compress_process.returncode
     
         # give 770 permissions for file and make owner bsc32
-        aux.set_file_permissions_ownership(netCDF_fname)
+        set_file_permissions_ownership(netCDF_fname)
 
         # copy file to esarchive (if have access)
         if MACHINE in ('power', 'nord3v2'):
@@ -1028,7 +1038,7 @@ class ExperimentInterpolation(object):
             esarchive_output_dir = '/esarchive/recon/prov_interp/{}'.format('/'.join(netCDF_fname.split('/exp_interp/')[1].split('/')[:-1]))
 
             # check if need to create any directories in path
-            aux.check_directory_existence(esarchive_output_dir, '/esarchive/recon/prov_interp')
+            check_directory_existence(esarchive_output_dir, '/esarchive/recon/prov_interp')
 
             # set esarchive fname
             esarchive_netCDF_fname = '{}/{}'.format(esarchive_output_dir, netCDF_fname.split('/')[-1])
@@ -1037,42 +1047,7 @@ class ExperimentInterpolation(object):
             shutil.copyfile(netCDF_fname, esarchive_netCDF_fname)
 
             # give 770 permissions for file and make owner bsc32
-            aux.set_file_permissions_ownership(esarchive_netCDF_fname)
-
-    def get_aeronet_model_bin_index(self, aeronet_bin_radius):
-        """ Return index of model bin which contains AERONET bin radius instance (and rmin/rmax). 
-            
-            :param aeronet_bin_radius: bin radius
-            :type aeronet_bin_radius: float
-        """ 
-
-        if self.experiment_type == 'monarch':
-            # MONARCH bin radius edges (um)
-            r_edges =[0.2, 0.36, 0.6, 1.2, 2.0, 3.6, 6.0, 12.0, 20.0]
-            # assume bin rh
-            rho_bins = [2500.0, 2500.0, 2500.0, 2500.0, 2650.0, 2650.0, 2650.0, 2650.0]
-
-        if aeronet_bin_radius == r_edges[-1]:
-            bin_index = len(r_edges)-1
-        else:
-            bin_index = np.searchsorted(r_edges, aeronet_bin_radius, side='right') - 1
-
-        return bin_index, r_edges[bin_index], r_edges[bin_index+1], rho_bins[bin_index]
-
-    def get_monarch_to_aeronet_bin_transform_factor(self, rmin, rmax):
-        """ Return factor which transforms aerosol size distribution data from MONARCH's 8 bins, 
-            to AERONET's 22 bins format, assuming a constant function.
-
-            :param rmin: minimum bin radius
-            :type rmin: float
-            :param rmax: maximum bin radius
-            :type rmax: float
-        """
-
-        # get bin integral
-        bin_transform_factor = 1.0/(np.log(rmax) - np.log(rmin))
-
-        return bin_transform_factor
+            set_file_permissions_ownership(esarchive_netCDF_fname)
 
 def create_output_logfile(process_code):
     """ Create a logfile for stating outcome of interpolation job'
