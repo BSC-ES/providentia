@@ -48,7 +48,7 @@ def sighandler(*unused):
 
 class ProvidentiaDownload(object):
     def __init__(self,**kwargs):
-        # TODO move some of these variables to default
+        # TODO move some of these variables to configuration.py
         # initialise zenodo url
         self.ghost_url = 'https://zenodo.org/records/10637450'
 
@@ -59,6 +59,9 @@ class ProvidentiaDownload(object):
 
         # initialise remote hostname
         self.remote_hostname = "transfer1.bsc.es"
+
+        # get ghost_version list
+        self.possible_ghost_versions = os.listdir(os.path.join(CURRENT_PATH,'dependencies', 'GHOST_standards'))
 
         # in case transfer broke
         # global REMOTE_MACHINE
@@ -360,9 +363,22 @@ class ProvidentiaDownload(object):
         print(f"\nDownloading GHOST network: {network} from {REMOTE_MACHINE}...")
 
         # If not valid network, next
-        # TODO the if is for the SEARCH network which doesn't have any version
-        if network not in self.ghost_available_networks or self.ghost_version not in self.sftp.listdir(os.path.join(self.ghost_remote_obs_path,network)):
+        if network not in self.sftp.listdir(self.ghost_remote_obs_path):
             msg = f"There is no data available for {network} network."
+            show_message(self, msg)
+            return 
+        
+        # If not valid combination of ghost version and network, next 
+        elif self.ghost_version not in self.sftp.listdir(os.path.join(self.ghost_remote_obs_path,network)):
+            msg = f"There is no data available for {network} network for the current ghost version ({self.ghost_version})."
+            
+            available_ghost_versions = set(self.sftp.listdir(os.path.join(self.ghost_remote_obs_path,network))).intersection(self.possible_ghost_versions)
+
+            if available_ghost_versions:
+                msg += f" Please check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
+            else:
+                msg += f" There are no other versions available at the moment."
+            
             show_message(self, msg)
             return
 
@@ -382,7 +398,7 @@ class ProvidentiaDownload(object):
             for species in sftp_species: 
                 res_spec_dir.append(os.path.join(remote_dir,resolution,species))
         
-        # print the species, resolution and network combinations that are going to be downloaded TODO CAMBIAR PRINTS POR WARNINGS
+        # print the species, resolution and network combinations that are going to be downloaded
         if res_spec_dir:
             print(f"\n{network} observations to download:")
             for combi_print in res_spec_dir:
@@ -527,10 +543,18 @@ class ProvidentiaDownload(object):
 
         # TODO, should check if experiment is checked
         if experiment not in self.sftp.listdir(os.path.join(self.exp_remote_path,self.ghost_version)):
-            msg = f"There is no data available for {experiment} experiment"
+            msg = f"There is no data available for {experiment} experiment for the current ghost version ({self.ghost_version})."
+            
+            possible_ghost_versions = set(self.sftp.listdir(self.exp_remote_path)).intersection(set(self.possible_ghost_versions))
+            available_ghost_versions = list(filter(lambda x:experiment in self.sftp.listdir(os.path.join(self.exp_remote_path,x)),possible_ghost_versions))
+            
+            if available_ghost_versions:
+                msg += f" Please check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
+            else:
+                msg += f" There are no other versions available at the moment."
             show_message(self, msg)
             return
-        
+
         sftp_resolutions = self.resolution if self.resolution else self.sftp.listdir(remote_dir)
         for resolution in sftp_resolutions:
             try:
