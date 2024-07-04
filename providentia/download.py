@@ -11,6 +11,7 @@ from dotenv import dotenv_values
 import paramiko 
 from base64 import decodebytes
 import signal
+import copy
 
 # urlparse
 from tqdm import tqdm
@@ -409,16 +410,17 @@ class ProvidentiaDownload(object):
         
         # print the species, resolution and network combinations that are going to be downloaded
         if res_spec_dir:
-            print(f"\n{network} observations to download:")
+            print(f"\n{network} observations to download: ({len(res_spec_dir)})")
             for combi_print in res_spec_dir:
                 print(f"  - {os.path.join(self.ghost_root,combi_print.split('/',7)[-1])}")
-            print()
 
-            # get all the nc files in the date range
-            for remote_dir in tqdm(res_spec_dir,desc="Downloading Observations"):
+            valid_res_spec_dir_nc_files = []
+            # get all the nc files in the date range within the specie and resolution combination
+            for remote_dir in res_spec_dir:
                 local_dir = os.path.join(self.ghost_root,remote_dir.split('/',7)[-1])
                 species = remote_dir.split('/')[-1]
                 resolution = remote_dir.split('/')[-2]
+
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
                 except FileNotFoundError:
@@ -432,7 +434,15 @@ class ProvidentiaDownload(object):
                 if not valid_nc_files:                 
                     msg = f"There is no data available from {self.start_date} to {self.end_date} for {network} network {species} species at {resolution} resolution."
                     show_message(self, msg)
-                else:
+                    continue
+                
+                unique_valid_nc_files = copy.deepcopy(valid_nc_files)
+                valid_res_spec_dir_nc_files.append((remote_dir,local_dir,unique_valid_nc_files))
+            
+            # download the valid resolution specie date combinations
+            if valid_res_spec_dir_nc_files:
+                print()
+                for remote_dir,local_dir,valid_nc_files in tqdm(valid_res_spec_dir_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"Downloading Valid Observations ({len(valid_res_spec_dir_nc_files)})"):
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
                         os.makedirs(local_dir) 
@@ -442,6 +452,10 @@ class ProvidentiaDownload(object):
                         remote_path = os.path.join(remote_dir,nc_file)
                         local_path = os.path.join(local_dir,nc_file)
                         self.sftp.get(remote_path,local_path)
+
+                print(f"\n{network} observations downloaded: ({len(valid_res_spec_dir_nc_files)})")
+                for _,local_dir,_ in valid_res_spec_dir_nc_files:
+                    print(f"  - {os.path.join(local_dir)}")
 
     def download_ghost_network(self,network):
         # print current_network
