@@ -39,6 +39,15 @@ def sighandler(*unused):
         print("\nClosing ssh connection...")
         download.ssh.close()
         download.sftp.close()
+
+    # delete temp dir if necessary
+    temp_dir = os.path.join(download.ghost_root,'.temp')
+    if os.path.exists(temp_dir):
+        dot_temp_contents = os.listdir(temp_dir)
+        if dot_temp_contents:
+            print(f"\nDeleting {temp_dir} contents...")
+            for path in dot_temp_contents:
+                shutil.rmtree(os.path.join(temp_dir,path))
     
     # TODO delete when sure
     # download.update_filetrees()
@@ -142,7 +151,7 @@ class ProvidentiaDownload(object):
             if self.network == ["*"] or self.network == ["default"]:
                 self.get_all_networks()
 
-            # from here generate filetree if user stopped execution
+            # from here generate control if user stopped execution
             signal.signal(signal.SIGINT, sighandler)
 
             # combine all networks and species combinations to download (for network and filter species)
@@ -518,7 +527,7 @@ class ProvidentiaDownload(object):
                         tar_file.extractall(path = tar_dir, members = valid_nc_files)
                     
                     # remove the temp directory
-                    shutil.rmtree("/".join(temp_path.split("/")[:-2]))
+                    shutil.rmtree(os.path.dirname(os.path.dirname(temp_path)))
 
                     # warning if network + species + resolution + date range combination gets no matching results                        
                     if not valid_nc_files:
@@ -587,7 +596,7 @@ class ProvidentiaDownload(object):
                 network = remote_dir.split('/',11)[-1]
                 species = remote_dir.split('/',11)[-2]
                 resolution = remote_dir.split('/',11)[-3]
-               
+
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
                 except FileNotFoundError:
