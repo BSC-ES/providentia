@@ -618,13 +618,13 @@ class ProvidentiaDownload(object):
         
         # print the species, resolution and experiment combinations that are going to be downloaded
         if res_spec_dir:
-            print(f"\n{experiment} experiments to download:")
+            print(f"\n{experiment} experiments to download: ({len(res_spec_dir)})")
             for combi_print in res_spec_dir:
                 print(f"  - {os.path.join(self.exp_root,combi_print.split('/',7)[-1])}")
-            print()
 
+            valid_res_spec_dir_nc_files = []
             # get all the nc files in the date range
-            for remote_dir in tqdm(res_spec_dir,desc="Downloading Experiments"):
+            for remote_dir in res_spec_dir:
                 local_dir = os.path.join(self.exp_root,remote_dir.split('/',7)[-1])
 
                 network = remote_dir.split('/',11)[-1]
@@ -646,15 +646,35 @@ class ProvidentiaDownload(object):
                     show_message(self, msg)
                     continue
 
-                # create directories if they don't exist
-                if not os.path.exists(local_dir):
-                    os.makedirs(local_dir) 
+                unique_valid_nc_files = copy.deepcopy(valid_nc_files)
+                valid_res_spec_dir_nc_files.append((remote_dir,local_dir,unique_valid_nc_files))
+            
+            print()
 
-                # download each individual nc file using sftp protocol
-                for nc_file in valid_nc_files:
-                    remote_path = os.path.join(remote_dir,nc_file)
-                    local_path = os.path.join(local_dir,nc_file)
-                    self.sftp.get(remote_path,local_path)
+            # download the valid resolution specie date combinations
+            if valid_res_spec_dir_nc_files:
+                for remote_dir,local_dir,valid_nc_files in tqdm(valid_res_spec_dir_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"Downloading valid experiments ({len(valid_res_spec_dir_nc_files)})"):
+                    # create directories if they don't exist
+                    if not os.path.exists(local_dir):
+                        os.makedirs(local_dir) 
+
+                    # download each individual nc file using sftp protocol
+                    for nc_file in valid_nc_files:
+                        remote_path = os.path.join(remote_dir,nc_file)
+                        local_path = os.path.join(local_dir,nc_file)
+                        self.sftp.get(remote_path,local_path)
+
+                print(f"\n{network} experiments downloaded: ({len(valid_res_spec_dir_nc_files)})")
+                for _,local_dir,_ in valid_res_spec_dir_nc_files:
+                    print(f"  - {os.path.join(local_dir)}")
+
+            # tell the user if not valid resolution specie date combinations
+            else:
+                print("There are no valid experiments to be downloaded.")
+
+        # tell the user if not valid resolution specie date combinations
+        else:
+            print("There are no valid experiments to be downloaded.")
 
     def get_ghost_zip_files(self):
         # Get urls from zenodo to get ghost zip files url
