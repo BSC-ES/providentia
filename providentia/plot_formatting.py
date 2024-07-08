@@ -17,7 +17,7 @@ from .statistics import get_z_statistic_info
 
 Image.MAX_IMAGE_PIXELS = None
 
-def set_equal_axes(ax, plot_options):
+def set_equal_axes(ax, plot_options, plot_characteristics):
     """ Set equal aspect and limits (useful for scatter plots). 
 
         :param ax: axis to set equal axes
@@ -26,34 +26,36 @@ def set_equal_axes(ax, plot_options):
         :type plot_options: list
     """
 
-    # set equal aspect if no axis is in log scale
-    if ('logx' in plot_options) or ('logy' in plot_options):
-        log_active = True
-        ax.set_aspect(aspect='auto')
-    else:
-        log_active = False
-        ax.set_aspect(aspect='equal', adjustable='box')
+    # set equal aspect
+    ax.set_aspect(aspect='equal', adjustable='box')
 
     if len(ax.lines) == 0:
         return None
 
-    # get min and max values for axes from plotted data
-    xmin, xmax = get_data_lims(ax, 'xlim', plot_options)
-    ymin, ymax = get_data_lims(ax, 'ylim', plot_options)
+    if ("xlim" not in plot_characteristics) and ("ylim" not in plot_characteristics):
+        # get min and max values for axes from plotted data
+        xmin, xmax = get_data_lims(ax, 'xlim', plot_options)
+        ymin, ymax = get_data_lims(ax, 'ylim', plot_options)
 
-    # compare min and max lims across axes
-    if xmin < ymin:
-        axmin = xmin
-    else:
-        axmin = ymin
-    if xmax > ymax:
-        axmax = xmax
-    else:
-        axmax = ymax
-
-    # set equal lims
-    ax.set_xlim(axmin, axmax)
-    ax.set_ylim(axmin, axmax)
+        # compare min and max lims across axes
+        if xmin < ymin:
+            axmin = xmin
+        else:
+            axmin = ymin
+        if xmax > ymax:
+            axmax = xmax
+        else:
+            axmax = ymax
+        
+        # set equal lims
+        ax.set_xlim(axmin, axmax)
+        ax.set_ylim(axmin, axmax)
+    elif ("xlim" not in plot_characteristics) and ("ylim" in plot_characteristics):
+        # set xlim as ylim if ylim is passed
+        ax.set_xlim(plot_characteristics["ylim"])
+    elif ("xlim" in plot_characteristics) and ("ylim" not in plot_characteristics):
+        # set ylim as ylim if xlim is passed
+        ax.set_ylim(plot_characteristics["xlim"])
 
     return None
 
@@ -138,7 +140,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
     for ax in relevant_axs_active:
 
         if 'equal_aspect' in plot_characteristics:
-            set_equal_axes(ax, plot_options)
+            set_equal_axes(ax, plot_options, plot_characteristics)
         else:
             ax.set_aspect('auto')
 
@@ -618,11 +620,11 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
 
         # set xlim?
         if 'xlim' in plot_characteristics_vars:
-            ax_to_format.set_xlim(**plot_characteristics['xlim'])
+            ax_to_format.set_xlim(plot_characteristics['xlim'])
 
         # set ylim? 
         if 'ylim' in plot_characteristics_vars:
-            ax_to_format.set_ylim(**plot_characteristics['ylim'])
+            ax_to_format.set_ylim(plot_characteristics['ylim'])
 
         # add gridlines (x and y)?
         if 'grid' in plot_characteristics_vars:
