@@ -283,11 +283,11 @@ class ProvidentiaDownload(object):
 
         # print current_network
         print('\n'+'-'*40)
-        print(f"\nDownloading non-GHOST network: {network}...")
+        print(f"\nDownloading non-GHOST {network} network data from {REMOTE_MACHINE}...")
 
         # if not valid network, check if user put the network on init_prov 
         if network not in self.nonghost_available_networks:
-            msg = f"The network {network} could not be found on {os.path.join(PROVIDENTIA_ROOT,'settings','init_prov.yaml')} nonghost_available_networks list."
+            msg = f"The {network} network could not be found on {os.path.join(PROVIDENTIA_ROOT,'settings','init_prov.yaml')} nonghost_available_networks list."
             msg += "\nPlease, add the network to the list and execute again."
             show_message(self, msg)
             return 
@@ -359,7 +359,7 @@ class ProvidentiaDownload(object):
 
             # download the valid resolution specie date combinations
             if valid_res_spec_dir_nc_files:
-                for remote_dir,local_dir,valid_nc_files in tqdm(valid_res_spec_dir_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"Downloading valid observations ({len(valid_res_spec_dir_nc_files)})"):
+                for remote_dir,local_dir,valid_nc_files in tqdm(valid_res_spec_dir_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"Available observations ({len(valid_res_spec_dir_nc_files)})"):
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
                         os.makedirs(local_dir) 
@@ -376,7 +376,7 @@ class ProvidentiaDownload(object):
             
             # tell the user if not valid resolution specie date combinations
             else:
-                print("There are no valid observations to be downloaded.")
+                print("There are no available observations to be downloaded.")
         
     def download_ghost_network_sftp(self,network):
         # check if ssh exists and check if still active, connect if not
@@ -385,7 +385,7 @@ class ProvidentiaDownload(object):
 
         # print current_network
         print('\n'+'-'*40)
-        print(f"\nDownloading GHOST network: {network} from {REMOTE_MACHINE}...")
+        print(f"\nDownloading GHOST {network} network data from {REMOTE_MACHINE}...")
 
         # If not valid network, next
         if network not in self.sftp.listdir(self.ghost_remote_obs_path):
@@ -458,7 +458,7 @@ class ProvidentiaDownload(object):
 
             # download the valid resolution specie date combinations
             if valid_res_spec_dir_nc_files:
-                for remote_dir,local_dir,valid_nc_files in tqdm(valid_res_spec_dir_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"Downloading valid observations ({len(valid_res_spec_dir_nc_files)})"):
+                for remote_dir,local_dir,valid_nc_files in tqdm(valid_res_spec_dir_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"Available observations ({len(valid_res_spec_dir_nc_files)})"):
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
                         os.makedirs(local_dir) 
@@ -475,12 +475,12 @@ class ProvidentiaDownload(object):
 
             # tell the user if not valid resolution specie date combinations
             else:
-                print("There are no valid observations to be downloaded.")
+                print("There are no available observations to be downloaded.")
 
     def download_ghost_network(self,network):
         # print current_network
         print('\n'+'-'*40)
-        print(f"\nDownloading GHOST network: {network} from Zenodo...")
+        print(f"\nDownloading GHOST {network} network data from Zenodo...")
 
         # if first time reading a ghost network, get current zips urls in zenodo page
         if not self.ghost_zip_files: 
@@ -577,7 +577,7 @@ class ProvidentiaDownload(object):
 
         # print current experiment
         print('\n'+'-'*40)
-        print(f"\nDownloading Experiment: {experiment} from {REMOTE_MACHINE}...")
+        print(f"\nDownloading {experiment} experiment data from {REMOTE_MACHINE}...")
         
         # get resolution and species combinations
         res_spec_dir = []
@@ -618,7 +618,7 @@ class ProvidentiaDownload(object):
         
         # print the species, resolution and experiment combinations that are going to be downloaded
         if res_spec_dir:
-            print(f"\n{experiment} experiments to download: ({len(res_spec_dir)})")
+            print(f"\n{experiment} experiment data to download: ({len(res_spec_dir)})")
             for combi_print in res_spec_dir:
                 print(f"  - {os.path.join(self.exp_root,combi_print.split('/',7)[-1])}")
 
@@ -653,7 +653,7 @@ class ProvidentiaDownload(object):
 
             # download the valid resolution specie date combinations
             if valid_res_spec_dir_nc_files:
-                for remote_dir,local_dir,valid_nc_files in tqdm(valid_res_spec_dir_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"Downloading valid experiments ({len(valid_res_spec_dir_nc_files)})"):
+                for remote_dir,local_dir,valid_nc_files in tqdm(valid_res_spec_dir_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"Available experiments ({len(valid_res_spec_dir_nc_files)})"):
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
                         os.makedirs(local_dir) 
@@ -670,11 +670,11 @@ class ProvidentiaDownload(object):
 
             # tell the user if not valid resolution specie date combinations
             else:
-                print("There are no valid experiments to be downloaded.")
+                print("There are no available experiments to be downloaded.")
 
         # tell the user if not valid resolution specie date combinations
         else:
-            print("There are no valid experiments to be downloaded.")
+            print("There are no available experiments to be downloaded.")
 
     def get_ghost_zip_files(self):
         # Get urls from zenodo to get ghost zip files url
