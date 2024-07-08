@@ -355,10 +355,11 @@ class ProvidentiaDownload(object):
                 unique_valid_nc_files = copy.deepcopy(valid_nc_files)
                 valid_res_spec_dir_nc_files.append((remote_dir,local_dir,unique_valid_nc_files))
             
+            print()
+
             # download the valid resolution specie date combinations
             if valid_res_spec_dir_nc_files:
-                print()
-                for remote_dir,local_dir,valid_nc_files in tqdm(valid_res_spec_dir_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"Downloading Valid Observations ({len(valid_res_spec_dir_nc_files)})"):
+                for remote_dir,local_dir,valid_nc_files in tqdm(valid_res_spec_dir_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"Downloading valid observations ({len(valid_res_spec_dir_nc_files)})"):
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
                         os.makedirs(local_dir) 
@@ -372,7 +373,10 @@ class ProvidentiaDownload(object):
                 print(f"\n{network} observations downloaded: ({len(valid_res_spec_dir_nc_files)})")
                 for _,local_dir,_ in valid_res_spec_dir_nc_files:
                     print(f"  - {os.path.join(local_dir)}")
-        
+            
+            # tell the user if not valid resolution specie date combinations
+            else:
+                print("There are no valid observations to be downloaded.")
         
     def download_ghost_network_sftp(self,network):
         # check if ssh exists and check if still active, connect if not
@@ -450,10 +454,11 @@ class ProvidentiaDownload(object):
                 unique_valid_nc_files = copy.deepcopy(valid_nc_files)
                 valid_res_spec_dir_nc_files.append((remote_dir,local_dir,unique_valid_nc_files))
             
+            print()
+
             # download the valid resolution specie date combinations
             if valid_res_spec_dir_nc_files:
-                print()
-                for remote_dir,local_dir,valid_nc_files in tqdm(valid_res_spec_dir_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"Downloading Valid Observations ({len(valid_res_spec_dir_nc_files)})"):
+                for remote_dir,local_dir,valid_nc_files in tqdm(valid_res_spec_dir_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"Downloading valid observations ({len(valid_res_spec_dir_nc_files)})"):
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
                         os.makedirs(local_dir) 
@@ -467,6 +472,10 @@ class ProvidentiaDownload(object):
                 print(f"\n{network} observations downloaded: ({len(valid_res_spec_dir_nc_files)})")
                 for _,local_dir,_ in valid_res_spec_dir_nc_files:
                     print(f"  - {os.path.join(local_dir)}")
+
+            # tell the user if not valid resolution specie date combinations
+            else:
+                print("There are no valid observations to be downloaded.")
 
     def download_ghost_network(self,network):
         # print current_network
@@ -669,10 +678,10 @@ class ProvidentiaDownload(object):
         # get user input to know which kind of network wants
         download_source = None
         while not download_source:
-            download_source = input("\nDo you want to download GHOST, non-GHOST or all networks? G/N/A ").upper()
-            download_source = download_source if download_source in ["G","N","A"] else None
+            download_source = input("\nDo you want to download GHOST, non-GHOST or all networks? (g/n/a) ").lower()
+            download_source = download_source if download_source in ["g","n","a"] else None
 
-        if download_source in ["G","A"]:
+        if download_source in ["g","a"]:
             if self.bsc_download_choice == 'y':
                 self.network = self.ghost_available_networks
             elif self.bsc_download_choice == 'n':
@@ -683,9 +692,8 @@ class ProvidentiaDownload(object):
                 error = "Download option not valid, check your .env file."
                 sys.exit(error)
 
-        if download_source in ["N","A"]:
-            self.nonghost_observation_data = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_networks.yaml')))
-            self.network = list(self.nonghost_observation_data.keys())
+        if download_source in ["n","a"]:
+            self.network = self.nonghost_available_networks
     
     def get_all_experiments(self):
         # check if ssh exists and check if still active, connect if not
