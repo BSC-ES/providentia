@@ -187,10 +187,10 @@ class ProvidentiaDownload(object):
             # update filetrees
             # self.update_filetrees()
 
-            # close connection, if it exists
-            if self.ssh != None:
-                self.ssh.close() 
-                self.sftp.close()
+        # close connection, if it exists
+        if self.ssh != None:
+            self.ssh.close() 
+            self.sftp.close()
 
     def connect(self):
         # get public remote machine public key and add it to ssh object
@@ -664,7 +664,7 @@ class ProvidentiaDownload(object):
                         local_path = os.path.join(local_dir,nc_file)
                         self.sftp.get(remote_path,local_path)
 
-                print(f"\n{network} experiments downloaded: ({len(valid_res_spec_dir_nc_files)})")
+                print(f"\n{experiment} experiments downloaded: ({len(valid_res_spec_dir_nc_files)})")
                 for _,local_dir,_ in valid_res_spec_dir_nc_files:
                     print(f"  - {os.path.join(local_dir)}")
 
