@@ -526,26 +526,6 @@ class ProvConfiguration:
 
     def check_validity(self, deactivate_warning=False):
         """ Check validity of set variables after parsing. """
-        # get species and filter species which are not on the current ghost version
-        invalid_species = set(self.read_instance.species) - set(self.read_instance.parameter_dictionary.keys())
-        invalid_filter_species = set(map(lambda x:x.split('|')[1], self.read_instance.filter_species)) - set(self.read_instance.parameter_dictionary.keys())                          
-        
-        # check species, remove the ones that are not on the ghost version       
-        if invalid_species:                                                            
-            msg = f'Removing invalid species {", ".join(invalid_species)} for the current ghost version ({self.read_instance.ghost_version})'
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            for inv_species in invalid_species:
-                self.read_instance.species.remove(inv_species)
-
-        # check filter species, remove the ones that are not on the ghost version     
-        if invalid_filter_species:
-            msg = f'Removing invalid filter species {", ".join(invalid_species)} for the current ghost version ({self.read_instance.ghost_version})'
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            filter_species_keys = list(self.read_instance.filter_species.keys())
-            for filter_species in filter_species_keys:
-                if filter_species.split('|')[1] in invalid_filter_species:
-                    del self.read_instance.filter_species[filter_species]
-
         # get non-default fields on config file if launching from a config file
         if hasattr(self.read_instance, "sub_opts"):
             self.read_instance.fields_per_section = {}
@@ -723,6 +703,30 @@ class ProvConfiguration:
                 del self.read_instance.network[speci_ii]
                 self.read_instance.network[speci_ii:speci_ii] = [network_to_duplicate]*len(mapped_species)
         self.read_instance.species = copy.deepcopy(new_species)
+
+        # get species and filter species which are not on the current ghost version
+        invalid_species = set(self.read_instance.species) - set(self.read_instance.parameter_dictionary.keys())
+        invalid_filter_species = set(map(lambda x:x.split('|')[1], self.read_instance.filter_species)) - set(self.read_instance.parameter_dictionary.keys())                          
+        
+        # check species, remove the ones that are not on the ghost version       
+        if invalid_species:                                                            
+            msg = f'Removing invalid species {", ".join(invalid_species)} for the current GHOST version ({self.read_instance.ghost_version})'
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            for inv_species in invalid_species:
+                self.read_instance.species.remove(inv_species)
+            # exit if there are no valid species left
+            if not self.read_instance.species:
+                error = f"Error: No valid species for the current GHOST version ({self.read_instance.ghost_version})"
+                sys.exit(error)
+
+        # check filter species, remove the ones that are not on the ghost version     
+        if invalid_filter_species:
+            msg = f'Removing invalid filter species {", ".join(invalid_filter_species)} for the current GHOST version ({self.read_instance.ghost_version})'
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            filter_species_keys = list(self.read_instance.filter_species.keys())
+            for filter_species in filter_species_keys:
+                if filter_species.split('|')[1] in invalid_filter_species:
+                    del self.read_instance.filter_species[filter_species]
 
         # create variable for all unique species (plus filter species)
         filter_species = []
