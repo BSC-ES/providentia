@@ -69,17 +69,30 @@ class Interactive:
             return
 
         # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
-        # generate file trees
+        # if have filetree flags, then these overwrite any defaults
+        gft = False
         if self.generate_file_tree:
+            gft = True
+        elif self.disable_file_tree:
+            gft = False
+        # by default generate filetree on MN5
+        elif self.machine in ['mn5']:
+            gft = True
+        # by default generate filetree locally
+        elif self.filetree_type == 'local':
+            gft = True
+
+        # generate file trees
+        if gft:
             self.all_observation_data = get_ghost_observational_tree(self)
             if self.nonghost_root is not None:
                 nonghost_observation_data = get_nonghost_observational_tree(self)
         # load file trees
         else:
             try:
-                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree.json'))) 
+                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(self.ghost_version)))) 
             except FileNotFoundError as file_error:
-                msg = "Error: Trying to load 'settings/internal/ghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                msg = "Error: Trying to load 'settings/internal/ghost_filetree_{}.json' but file does not exist. Run with the flag '--gft' to generate this file.".format(self.ghost_version)
                 sys.exit(msg)
             if self.nonghost_root is not None:
                 try:
@@ -120,10 +133,6 @@ class Interactive:
         # update available experiments for selected fields
         get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
                                 self.network, self.species)
-
-        # if have no experiments, force temporal colocation to be False
-        if len(self.experiments) == 0:
-            self.temporal_colocation = False  
 
         # read data
         self.read()  
@@ -546,7 +555,7 @@ class Interactive:
                             # calculate statistic
                             if dl in self.selected_station_data_labels[ns]:
                                 # if relevant stat is expbias stat, then ensure temporal colocation is active
-                                if (base_plot_type == 'statsummary') and (stp in self.expbias_stats) and (not self.temporal_colocation):
+                                if (base_plot_type == 'statsummary') and (stp in self.expbias_stats) and ((not self.temporal_colocation) or (len(self.data_labels) == 1)):
                                     stats_per_data_label.append(np.NaN)
                                 # otherwise calculate statistic
                                 else:
@@ -647,7 +656,7 @@ class Interactive:
                  plot_options)
 
         # get number of total available stations, and individual station information if just have 1 station
-        if (self.temporal_colocation) and (len(data_labels) > 1):
+        if self.temporal_colocation:
             station_inds = self.valid_station_inds_temporal_colocation[networkspeci][self.observations_data_label]
         else:
             station_inds = self.valid_station_inds[networkspeci][self.observations_data_label]  
