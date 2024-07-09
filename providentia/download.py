@@ -377,6 +377,10 @@ class ProvidentiaDownload(object):
             # tell the user if not valid resolution specie date combinations
             else:
                 print("There are no available observations to be downloaded.")
+       
+        # tell the user if not valid resolution specie date combinations
+        else:
+            print("There are no available observations to be downloaded.")
         
     def download_ghost_network_sftp(self,network):
         # check if ssh exists and check if still active, connect if not
@@ -476,6 +480,10 @@ class ProvidentiaDownload(object):
             # tell the user if not valid resolution specie date combinations
             else:
                 print("There are no available observations to be downloaded.")
+
+        # tell the user if not valid resolution specie date combinations
+        else:
+            print("There are no available observations to be downloaded.")
 
     def download_ghost_network(self,network):
         # print current_network
