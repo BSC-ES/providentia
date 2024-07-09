@@ -320,12 +320,11 @@ class MPLCanvas(FigureCanvas):
             chunk_resolution = self.timeseries_chunk_resolution.currentText()
             chunk_stat = self.timeseries_chunk_stat.currentText()
             if (chunk_stat != 'None') and (chunk_resolution != 'None'):
-                non_available_chunk_resolutions = get_lower_resolutions(self.read_instance.resampling_resolution)
-                if ((chunk_resolution in non_available_chunk_resolutions) 
-                    or (chunk_resolution == self.read_instance.resampling_resolution)):
-                    msg = 'Timeseries chunk resolution and statistic will be removed '
-                    msg += f'because resampling resolution ({self.read_instance.resampling_resolution}) '
-                    msg += f'is higher or equal than chunk resolution ({chunk_resolution}).'
+                available_chunk_resolutions = get_lower_resolutions(self.read_instance.resampling_resolution)
+                if chunk_resolution not in available_chunk_resolutions:
+                    msg = "Timeseries chunk resolution and statistic will be set to 'None' "
+                    msg += f"because resampling resolution ({self.read_instance.resampling_resolution}) "
+                    msg += f"is coarser or equal to the set chunk resolution ({chunk_resolution})."
                     show_message(self.read_instance, msg)
                     self.timeseries_chunk_stat.setCurrentText("None")
                     self.timeseries_chunk_resolution.setCurrentText("None")
@@ -341,7 +340,7 @@ class MPLCanvas(FigureCanvas):
                     self.update_associated_active_dashboard_plots()
 
                     # update timeseries chunk resolution
-                    self.handle_timeseries_chunk_resolution_update()
+                    self.handle_timeseries_chunk_statistic_update()
 
                     # draw changes
                     self.figure.canvas.draw_idle()
@@ -390,10 +389,11 @@ class MPLCanvas(FigureCanvas):
             # update aggregation statistics (timeseries and general)
             self.update_aggregation_statistics()
 
-            if (self.read_instance.statistic_mode in ['Spatial|Temporal', 'Flattened']):
-                chunk_stat = self.timeseries_chunk_stat.currentText()
-                chunk_resolution = self.timeseries_chunk_resolution.currentText()
+            # handle special cases for some chunk statistics
+            chunk_stat = self.timeseries_chunk_stat.currentText()
+            chunk_resolution = self.timeseries_chunk_resolution.currentText()
 
+            if (self.read_instance.statistic_mode in ['Spatial|Temporal', 'Flattened']):
                 if (chunk_stat == 'NStations') and (chunk_resolution != 'None'):
                     msg = 'It is not possible to get the number of stations when the '
                     msg += f'statistic mode {self.read_instance.statistic_mode} is active. '
@@ -402,6 +402,13 @@ class MPLCanvas(FigureCanvas):
                     self.timeseries_chunk_stat.setCurrentText("None")
                     self.timeseries_chunk_resolution.setCurrentText("None")
 
+            elif (chunk_stat == 'MDA8') & (chunk_resolution != 'daily'):
+                    msg = 'MDA8 can only be calculated when a daily chunking resolution is set. '
+                    msg += 'Chunking will be deactivated.'
+                    show_message(self.read_instance, msg)
+                    self.timeseries_chunk_stat.setCurrentText("None")
+                    self.timeseries_chunk_resolution.setCurrentText("None")
+                
             # update chunk statistic
             self.update_timeseries_chunk_statistics()
 
@@ -488,7 +495,6 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.block_MPL_canvas_updates = True
             self.handle_map_z_statistic_update()
             self.handle_timeseries_statistic_update()
-            self.handle_timeseries_chunk_resolution_update()
             self.handle_timeseries_chunk_statistic_update()
             self.handle_periodic_statistic_update()
             self.handle_statsummary_statistics_update()
@@ -868,7 +874,7 @@ class MPLCanvas(FigureCanvas):
                     # if temporal colocation is turned off or there are no experiments, skip scatter plot
                     if plot_type in ['scatter', 'taylor']:
                         if ((not self.read_instance.temporal_colocation) 
-                            or ((self.read_instance.temporal_colocation) and (len(self.read_instance.experiments) == 0))):
+                            or ((self.read_instance.temporal_colocation) and (len(self.read_instance.data_labels) == 1))):
                             if (not self.read_instance.temporal_colocation):
                                 msg = f'It is not possible to make {plot_type} plots without activating the temporal colocation.'
                             else:
@@ -950,14 +956,16 @@ class MPLCanvas(FigureCanvas):
 
             # update z statistic field to all basic stats if colocation not-active OR z2
             # array not selected, else select basic+bias stats
-            if (not self.read_instance.temporal_colocation) or (selected_z2_array == ''):
+            if (not self.read_instance.temporal_colocation) or (selected_z2_array == '') or (len(self.read_instance.data_labels) == 1):
                 z_stat_items = copy.deepcopy(self.read_instance.basic_z_stats)
             else:
                 z_stat_items = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
 
-            # remove NStations from list of available stats because it makes no sense to map it 
-            if "NStations" in z_stat_items:
-               z_stat_items = z_stat_items[z_stat_items != 'NStations']
+            # remove nonsensical available map stats 
+            nonsensical_map_stats = ['NStations','MDA8'] 
+            for nonsensical_map_stat in nonsensical_map_stats:
+                if nonsensical_map_stat in z_stat_items:
+                    z_stat_items = z_stat_items[z_stat_items != nonsensical_map_stat]
 
             # remove selected z1/z2 items from opposite z2/z1 comboboxes (if have value
             # selected, i.e. z2 array not empty string)
@@ -1046,7 +1054,7 @@ class MPLCanvas(FigureCanvas):
 
     def handle_timeseries_chunk_statistic_update(self):
         """ Function that handles update of plotted timeseries chunk statistic
-            upon interaction with timeseries chunk statistic combobox.
+            upon interaction with timeseries chunk statistic/resolution comboboxes.
         """
         
         if not self.read_instance.block_config_bar_handling_updates:
@@ -1058,7 +1066,7 @@ class MPLCanvas(FigureCanvas):
             # to the timeseries chunk statistic combobox are made
             self.read_instance.block_config_bar_handling_updates = True
 
-            # update chunk statistic
+            # update chunk statistic / resolution
             self.update_timeseries_chunk_statistics()
 
             # allow handling updates to the configuration bar again
@@ -1074,58 +1082,6 @@ class MPLCanvas(FigureCanvas):
                 # update plot                                                                         
                 self.update_associated_active_dashboard_plot("timeseries")
   
-            # draw changes
-            self.figure.canvas.draw_idle()
-
-            # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
-
-        return None
-    
-    def handle_timeseries_chunk_resolution_update(self):
-        """ Function that handles update of plotted timeseries chunk resolution
-            upon interaction with timeseries chunk resolution combobox.
-        """
-
-        if not self.read_instance.block_config_bar_handling_updates:
-            
-            # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-            
-            # set variable that blocks configuration bar handling updates until all changes
-            # to the timeseries chunk resolution combobox are made
-            self.read_instance.block_config_bar_handling_updates = True
-
-            # get currently selected resolution
-            chunk_resolution = self.timeseries_chunk_resolution.currentText()
-            
-            # update timeseries chunk resolution, to all higher resolutions
-            if self.read_instance.selected_resampling_resolution == "None":
-                available_timeseries_chunk_resolutions = ["None",] + \
-                    list(get_lower_resolutions(self.read_instance.selected_resolution))
-            else:
-                available_timeseries_chunk_resolutions = ["None",] + \
-                    list(get_lower_resolutions(self.read_instance.selected_resampling_resolution))
-                
-            # if resolution is empty string, it is because fields are being initialised for the first time
-            if chunk_resolution == "":
-                # set timeseries resolution to be None
-                chunk_resolution = available_timeseries_chunk_resolutions[0]
-                
-            # update timeseries chunk resolution combobox (clear, then add items)
-            self.timeseries_chunk_resolution.clear()
-            self.timeseries_chunk_resolution.addItems(available_timeseries_chunk_resolutions)
-
-            # maintain currently selected timeseries resolution (if exists in new item list)
-            if chunk_resolution in available_timeseries_chunk_resolutions:
-                self.timeseries_chunk_resolution.setCurrentText(chunk_resolution)
-
-            # allow handling updates to the configuration bar again
-            self.read_instance.block_config_bar_handling_updates = False
-
-            # update timeseries plot
-            self.handle_timeseries_chunk_statistic_update()
-        
             # draw changes
             self.figure.canvas.draw_idle()
 
@@ -1153,7 +1109,7 @@ class MPLCanvas(FigureCanvas):
 
             # update periodic statistics, to all basic stats
             # if colocation not-active, and basic+bias stats if colocation active
-            if not self.read_instance.temporal_colocation:
+            if (not self.read_instance.temporal_colocation) or (len(self.read_instance.data_labels) == 1):
                 available_periodic_stats = copy.deepcopy(self.read_instance.basic_z_stats)
             else:
                 available_periodic_stats = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
@@ -3282,28 +3238,65 @@ class MPLCanvas(FigureCanvas):
         # get currently selected statistic
         chunk_stat = self.timeseries_chunk_stat.currentText()
 
+        # get currently selected resolution
+        chunk_resolution = self.timeseries_chunk_resolution.currentText()
+            
         # update timeseries chunk statistics
-        if not self.read_instance.temporal_colocation:
+        if (not self.read_instance.temporal_colocation) or (len(self.read_instance.data_labels) == 1):
             available_timeseries_chunk_stats = ["None",] + list(copy.deepcopy(self.read_instance.basic_z_stats))
         else:
             available_timeseries_chunk_stats = ["None",] + list(copy.deepcopy(self.read_instance.basic_and_bias_z_stats))
 
+        # update timeseries chunk resolution, to all higher resolutions
+        if self.read_instance.selected_resampling_resolution == "None":
+            available_timeseries_chunk_resolutions = ["None",] + \
+                list(get_lower_resolutions(self.read_instance.selected_resolution))
+        else:
+            available_timeseries_chunk_resolutions = ["None",] + \
+                list(get_lower_resolutions(self.read_instance.selected_resampling_resolution))
+                
         # the statistic number of stations only make sense when Temporal|Spatial mode is active
         if self.read_instance.statistic_mode != 'Temporal|Spatial':
             available_timeseries_chunk_stats.remove('NStations')
+
+        # if chunk resolution has no daily resolution, then MDA8 cannot be available as stat
+        if 'daily' not in available_timeseries_chunk_resolutions:
+            available_timeseries_chunk_stats.remove('MDA8')
+            if chunk_stat == 'MDA8':
+                chunk_stat = 'None'
+                chunk_resolution = 'None'  
+            
+        # if chunk stat is MDA8, the chunk resolution has to be None or daily (if available)
+        if chunk_stat == 'MDA8':
+            available_timeseries_chunk_resolutions = ['None','daily']
+            if chunk_resolution not in available_timeseries_chunk_resolutions:
+                chunk_resolution = 'None'
 
         # if zstat is empty string, it is because fields are being initialised for the first time
         if chunk_stat == "":
             # set timeseries chunk statistic to be None
             chunk_stat = available_timeseries_chunk_stats[0]
-            
+
+        # if resolution is empty string, it is because fields are being initialised for the first time
+        if chunk_resolution == "":
+            # set timeseries resolution to be None
+            chunk_resolution = available_timeseries_chunk_resolutions[0]
+
         # update timeseries chunk statistic combobox (clear, then add items)
         self.timeseries_chunk_stat.clear()
         self.timeseries_chunk_stat.addItems(available_timeseries_chunk_stats)
 
+        # update timeseries chunk resolution combobox (clear, then add items)
+        self.timeseries_chunk_resolution.clear()
+        self.timeseries_chunk_resolution.addItems(available_timeseries_chunk_resolutions)
+
         # maintain currently selected timeseries chunk statistic (if exists in new item list)
         if chunk_stat in available_timeseries_chunk_stats:
             self.timeseries_chunk_stat.setCurrentText(chunk_stat)
+
+        # maintain currently selected timeseries resolution (if exists in new item list)
+        if chunk_resolution in available_timeseries_chunk_resolutions:
+            self.timeseries_chunk_resolution.setCurrentText(chunk_resolution)
 
         # disable spatial aggregation statistic
         chunk_resolution = self.timeseries_chunk_resolution.currentText()

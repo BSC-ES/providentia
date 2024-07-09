@@ -1,9 +1,12 @@
 """ Functions to format the axes """
 
 import copy
+import os
+from PIL import Image
 
 import cartopy.feature as cfeature
 import matplotlib as mpl 
+import matplotlib.pyplot as plt
 from matplotlib.dates import num2date
 import numpy as np
 import pandas as pd
@@ -12,7 +15,9 @@ from .plot_aux import get_land_polygon_resolution, set_map_extent
 from .plot_options import annotation, experiment_domain, linear_regression, log_axes, smooth, threshold
 from .statistics import get_z_statistic_info
 
-def set_equal_axes(ax, plot_options):
+Image.MAX_IMAGE_PIXELS = None
+
+def set_equal_axes(ax, plot_options, plot_characteristics):
     """ Set equal aspect and limits (useful for scatter plots). 
 
         :param ax: axis to set equal axes
@@ -21,34 +26,36 @@ def set_equal_axes(ax, plot_options):
         :type plot_options: list
     """
 
-    # set equal aspect if no axis is in log scale
-    if ('logx' in plot_options) or ('logy' in plot_options):
-        log_active = True
-        ax.set_aspect(aspect='auto')
-    else:
-        log_active = False
-        ax.set_aspect(aspect='equal', adjustable='box')
+    # set equal aspect
+    ax.set_aspect(aspect='equal', adjustable='box')
 
     if len(ax.lines) == 0:
         return None
 
-    # get min and max values for axes from plotted data
-    xmin, xmax = get_data_lims(ax, 'xlim', plot_options)
-    ymin, ymax = get_data_lims(ax, 'ylim', plot_options)
+    if ("xlim" not in plot_characteristics) and ("ylim" not in plot_characteristics):
+        # get min and max values for axes from plotted data
+        xmin, xmax = get_data_lims(ax, 'xlim', plot_options)
+        ymin, ymax = get_data_lims(ax, 'ylim', plot_options)
 
-    # compare min and max lims across axes
-    if xmin < ymin:
-        axmin = xmin
-    else:
-        axmin = ymin
-    if xmax > ymax:
-        axmax = xmax
-    else:
-        axmax = ymax
-
-    # set equal lims
-    ax.set_xlim(axmin, axmax)
-    ax.set_ylim(axmin, axmax)
+        # compare min and max lims across axes
+        if xmin < ymin:
+            axmin = xmin
+        else:
+            axmin = ymin
+        if xmax > ymax:
+            axmax = xmax
+        else:
+            axmax = ymax
+        
+        # set equal lims
+        ax.set_xlim(axmin, axmax)
+        ax.set_ylim(axmin, axmax)
+    elif ("xlim" not in plot_characteristics) and ("ylim" in plot_characteristics):
+        # set xlim as ylim if ylim is passed
+        ax.set_xlim(plot_characteristics["ylim"])
+    elif ("xlim" in plot_characteristics) and ("ylim" not in plot_characteristics):
+        # set ylim as ylim if xlim is passed
+        ax.set_ylim(plot_characteristics["xlim"])
 
     return None
 
@@ -133,7 +140,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
     for ax in relevant_axs_active:
 
         if 'equal_aspect' in plot_characteristics:
-            set_equal_axes(ax, plot_options)
+            set_equal_axes(ax, plot_options, plot_characteristics)
         else:
             ax.set_aspect('auto')
 
@@ -613,11 +620,11 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
 
         # set xlim?
         if 'xlim' in plot_characteristics_vars:
-            ax_to_format.set_xlim(**plot_characteristics['xlim'])
+            ax_to_format.set_xlim(plot_characteristics['xlim'])
 
         # set ylim? 
         if 'ylim' in plot_characteristics_vars:
-            ax_to_format.set_ylim(**plot_characteristics['ylim'])
+            ax_to_format.set_ylim(plot_characteristics['ylim'])
 
         # add gridlines (x and y)?
         if 'grid' in plot_characteristics_vars:
@@ -667,11 +674,31 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
         # map specific formatting
         elif base_plot_type == 'map':
 
-            # add land polygons
-            feature = cfeature.NaturalEarthFeature(category='physical', name='land',
-                                                   scale=get_land_polygon_resolution(canvas_instance.plot_characteristics_templates['map']['map_coastline_resolution']), 
-                                                   **canvas_instance.plot_characteristics_templates['map']['land_polygon'])
-            ax_to_format.add_feature(feature)
+            CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+
+            # set map background
+
+            # providentia default background
+            if plot_characteristics['background'] == 'providentia':
+                feature = cfeature.NaturalEarthFeature(category='physical', name='land',
+                                                       scale=get_land_polygon_resolution(canvas_instance.plot_characteristics_templates['map']['map_coastline_resolution']), 
+                                                       **canvas_instance.plot_characteristics_templates['map']['land_polygon'])
+                ax_to_format.add_feature(feature)
+
+            # shaded relief (cartopy default)
+            elif plot_characteristics['background'] == 'shaded_relief':
+                ax_to_format.stock_img()
+
+            # other type of map background
+            else:
+                # check file for background exists
+                background_fname = os.path.join(CURRENT_PATH, "resources/{}.png".format(plot_characteristics['background']))
+                if os.path.isfile(background_fname):
+                    img = plt.imread(background_fname)
+                    img_extent = (-180, 180, -90, 90)
+                    ax_to_format.imshow(img, origin='upper', extent=img_extent, transform=canvas_instance.datacrs)
+                else:
+                    print("Warning: Specified map background file cannot be found.")
 
             # add gridlines ?
             if 'gridlines' in plot_characteristics_vars:

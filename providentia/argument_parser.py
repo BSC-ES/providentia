@@ -61,11 +61,16 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--exp_root",
                                      dest="exp_root",
                                      help="set experiment root data directory")
-            self.parser.add_argument("--generate_file_tree", '--file_tree', '--gft',
+            self.parser.add_argument("--generate_file_tree", '--gft',
                                      dest="generate_file_tree",
                                      default=False,
                                      action='store_true',
-                                     help="boolean switch whether to dynamically create observational filetrees")
+                                     help="Whether to dynamically create observational filetrees")
+            self.parser.add_argument("--disable_file_tree", '--dft',
+                                     dest="disable_file_tree",
+                                     default=False,
+                                     action='store_true',
+                                     help="Whether to disable dynamically creating observational filetrees")
             self.parser.add_argument("--offline",
                                      dest="offline",
                                      default=False,
