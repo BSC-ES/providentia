@@ -399,7 +399,7 @@ def get_yearmonths_to_read(available_yearmonths, start_date_to_read, end_date_to
 
 
 def get_default_qa(instance, speci):
-    """ Return the default values according to GHOST standards. 
+    """ Return the default qa flags according to GHOST standards. 
 
         :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
         :type instance: object
@@ -458,7 +458,7 @@ def get_ghost_observational_tree(instance):
     ghost_observation_data = {}
 
     # iterate through available networks
-    for network in instance.available_networks:
+    for network in instance.ghost_available_networks:
 
         # check if directory for network exists
         # if not, continue
@@ -469,7 +469,7 @@ def get_ghost_observational_tree(instance):
         ghost_observation_data[network] = {}
 
         # iterate through available resolutions
-        for resolution in instance.available_resolutions:
+        for resolution in instance.ghost_available_resolutions:
 
             # check if directory for resolution exists
             # if not, continue
@@ -507,7 +507,7 @@ def get_ghost_observational_tree(instance):
                     ghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
 
     # save file tree out to yaml
-    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree.json'), 'w') as json_file:
+    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(instance.ghost_version)), 'w') as json_file:
         json.dump(ghost_observation_data, json_file, indent=4)
 
     return ghost_observation_data
@@ -527,11 +527,8 @@ def get_nonghost_observational_tree(instance):
     # create dictionary for storing filetree
     nonghost_observation_data = {}
 
-    # load which non-GHOST networks to read
-    nonghost_networks = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/nonghost_networks.yaml')))
-
     # iterate through networks
-    for network in nonghost_networks:
+    for network in instance.nonghost_available_networks:
 
         # check if directory for network exists
         # if not, continue
@@ -541,8 +538,8 @@ def get_nonghost_observational_tree(instance):
         # write empty dictionary for network
         nonghost_observation_data[network] = {}
 
-        # iterate through resolutions
-        for resolution in nonghost_networks[network]:
+        # iterate through available resolutions
+        for resolution in instance.nonghost_available_resolutions:
 
             # check if directory for resolution exists
             # if not, continue
@@ -552,8 +549,11 @@ def get_nonghost_observational_tree(instance):
             # write nested empty dictionary for resolution
             nonghost_observation_data[network][resolution] = {}
 
-            # iterate through species
-            for speci in nonghost_networks[network][resolution]:
+            # get available species for network/resolution
+            available_species = os.listdir('%s/%s/%s' % (instance.nonghost_root, network, resolution))
+
+            # iterate through available files per species
+            for speci in available_species:
 
                 # get all available netCDF files 
                 available_files = glob('%s/%s/%s/%s/%s_??????.nc' % (instance.nonghost_root, network, resolution, speci, speci))
@@ -580,66 +580,6 @@ def get_nonghost_observational_tree(instance):
         json.dump(nonghost_observation_data, json_file, indent=4)
 
     return nonghost_observation_data
-
-
-def get_experiment_tree(instance):
-    """ Fill experiment data tree,
-        storing a list of start YYYYMM yearmonths per:
-        network / resolution / matrix / speci
-
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
-        :type instance: object
-        :return: experiment tree dictionary
-        :rtype: dict
-    """
-
-    experiment_data = {}
-
-    # get all different experiment names (from providentia-interpolation output dir)
-    available_experiments = os.listdir('%s/%s' % (instance.exp_root, instance.ghost_version))
-
-    # iterate through all observation data dict, and attempt to get recriprocal experiment files
-    for network in instance.all_observation_data:
-        for resolution in instance.all_observation_data[network]:
-            for matrix in instance.all_observation_data[network][resolution]:
-                for species in instance.all_observation_data[network][resolution][matrix]:
-                    # iterate through available experiments
-                    for experiment in available_experiments:
-                        
-                        # get folder where interpolated experiments are saved
-                        if '/' not in network:
-                            files_directory = '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
-                                                                     experiment, resolution, species, network)
-                        else:
-                            files_directory = '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
-                                                                      experiment, resolution, species,
-                                                                      network.replace('/', '-'))
-                        
-                        # test if interpolated directory exists for experiment
-                        # if it does not exit, continue
-                        if not os.path.exists(files_directory):
-                            continue
-                        else:
-                            # get all available netCDF files
-                            available_files = os.listdir(files_directory)
-
-                            # get monthly start date (YYYYMM) of all files
-                            file_yearmonths = sorted([f.split('_')[-1][:6] for f in available_files])
-
-                            # write nested dictionary for experiment, with associated file yearmonths
-                            if len(file_yearmonths) > 0:
-                                # if network/resolution/matrix/species/experiment not in dictionary yet, add it
-                                if network not in experiment_data:
-                                    experiment_data[network] = {}
-                                if resolution not in experiment_data[network]:
-                                    experiment_data[network][resolution] = {}
-                                if matrix not in experiment_data[network][resolution]:
-                                    experiment_data[network][resolution][matrix] = {}
-                                if species not in experiment_data[network][resolution][matrix]:
-                                    experiment_data[network][resolution][matrix][species] = {}
-                                experiment_data[network][resolution][matrix][species][experiment] = file_yearmonths
-
-    return experiment_data
 
 
 def get_valid_obs_files_in_date_range(instance, start_date, end_date):
@@ -684,7 +624,7 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
             for matrix in instance.all_observation_data[network][resolution]:
                 for speci in instance.all_observation_data[network][resolution][matrix]:
                     
-                    # get file yearmonths
+                    # get available files
                     file_yearmonths = instance.all_observation_data[network][resolution][matrix][speci]
 
                     # get file yearmonths within date range

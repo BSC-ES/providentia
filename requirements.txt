@@ -1,9 +1,9 @@
-# Tested using a conda environment with Python=3.9.16
+# Tested using a conda environment with Python=3.11.5
 # Before using pip install -r requirements.txt, we need to install cartopy and jupyterlab usind conda:
 # conda install -c conda-forge cartopy
 # conda install -c conda-forge jupyterlab
 
-matplotlib==3.8.3
+matplotlib==3.8.4
 netCDF4==1.6.5
 numpy==1.26.4
 pandas==2.2.1
@@ -23,3 +23,4 @@ pypdf2==3.0.1
 bottleneck==1.3.8
 tqdm==4.66.4
 remotezip==0.12.3
+myst-parser==3.0.1
