@@ -368,11 +368,11 @@ class ProvConfiguration:
                             self.alias = True
 
                     # show warning if alias passed but not possible to set
-                    if not self.alias:
+                    if exps_legend and not self.alias:
                         msg = "Alias could not be set."
                         show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
 
-                    # alias is set as the experiment
+                    # experiment is set as the alias
                     if not exps_legend or not self.alias:
                         exps_legend = copy.deepcopy(exps)
                     
@@ -571,10 +571,10 @@ class ProvConfiguration:
         import matplotlib
 
         # import check_for_ghost and get_default_qa
-        from .read_aux import check_for_ghost, get_default_qa
+        from read_aux import check_for_ghost, get_default_qa
 
         # import show_mesage from warnings
-        from .warnings_prv import show_message
+        from warnings_prv import show_message
         
         # get non-default fields on config file if launching from a config file
         if hasattr(self.read_instance, "sub_opts"):
@@ -652,7 +652,7 @@ class ProvConfiguration:
                 for valid_exp in valid_experiments:
                     alias = valid_exp if not self.alias else alias
                     final_experiments[alias] = valid_exp
-        
+
         # if experiments were passed and there's no valid experiment, show warning
         if self.read_instance.experiments != {} and final_experiments == {}:
             msg = 'No experiments found with the current configuration.'
