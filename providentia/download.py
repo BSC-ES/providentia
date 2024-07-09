@@ -63,7 +63,7 @@ class ProvidentiaDownload(object):
         self.ghost_url = 'https://zenodo.org/records/10637450'
 
         # initialize dictionaries to store possible networks
-        self.ghost_zip_files = {} # TODO: Maybe juntar este con el del zenodo
+        self.ghost_zip_files = {} # TODO: Maybe this variable could work with the zenodo one
 
         # initialise remote hostname
         self.remote_hostname = "transfer1.bsc.es"
@@ -632,20 +632,23 @@ class ProvidentiaDownload(object):
 
             valid_res_spec_dir_nc_files = []
             # get all the nc files in the date range
-            for remote_dir in res_spec_dir:
-                local_dir = os.path.join(self.exp_root,remote_dir.split('/',7)[-1])
-
-                network = remote_dir.split('/',11)[-1]
-                species = remote_dir.split('/',11)[-2]
-                resolution = remote_dir.split('/',11)[-3]
+            for remote_path in res_spec_dir:
+                network = remote_path.split('/',11)[-1]
+                species = remote_path.split('/',11)[-2]
+                resolution = remote_path.split('/',11)[-3]
 
                 try:
-                    nc_files = self.sftp.listdir(remote_dir)
+                    nc_files = self.sftp.listdir(remote_path)
                 except FileNotFoundError:
-                    msg = f"There is no data available for {experiment} experiment {species} species {network} network at {resolution} resolution"
-                    show_message(self, msg)
-                    continue
-
+                    # convert nonghost networks in experiments from being separated with slashes to dashes
+                    try:
+                        remote_path = os.path.join(remote_dir,resolution,species,network.replace('/','-'))
+                        nc_files = self.sftp.listdir(remote_path)
+                    except FileNotFoundError:
+                        msg = f"There is no data available for {experiment} experiment {species} species {network} network at {resolution} resolution"
+                        show_message(self, msg)
+                        continue
+                        
                 valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
 
                 # warning if experiment + species + resolution + network + date range combination gets no matching results       
@@ -653,9 +656,12 @@ class ProvidentiaDownload(object):
                     msg = f"There is no data available from {self.start_date} to {self.end_date} for {experiment} experiment {species} species {network} network at {resolution} resolution"
                     show_message(self, msg)
                     continue
+                
+                # create directory local just as the remote one (imitates remote network (with dashes or without dashes)) #TODO CHECK IF THEY LIKE THAT
+                local_dir = os.path.join(self.exp_root,remote_path.split('/',7)[-1])
 
                 unique_valid_nc_files = copy.deepcopy(valid_nc_files)
-                valid_res_spec_dir_nc_files.append((remote_dir,local_dir,unique_valid_nc_files))
+                valid_res_spec_dir_nc_files.append((remote_path,local_dir,unique_valid_nc_files))
             
             print()
 
@@ -670,6 +676,8 @@ class ProvidentiaDownload(object):
                     for nc_file in valid_nc_files:
                         remote_path = os.path.join(remote_dir,nc_file)
                         local_path = os.path.join(local_dir,nc_file)
+                        print(remote_path)
+                        print(local_path)
                         self.sftp.get(remote_path,local_path)
 
                 print(f"\n{experiment} experiments downloaded: ({len(valid_res_spec_dir_nc_files)})")
