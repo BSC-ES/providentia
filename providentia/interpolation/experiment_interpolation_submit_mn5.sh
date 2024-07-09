@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=PRVI                                         
 #SBATCH --ntasks=1                                                
-#SBATCH --output=submission_logs/%J.out
+#SBATCH --output=providentia/interpolation/submission_logs/%J.out
 #SBATCH --error=/dev/null
 #SBATCH --account=bsc32
 #SBATCH --qos=gp_bsces
@@ -23,7 +23,6 @@ fi
 
 # load greasy
 echo "Loading dependencies..."
-module load greasy/2.2.4.1
-module load libexpat udunits hdf5 pnetcdf/1.12.3 netcdf nco/5.2.2
+source load_modules.sh
 
-srun --output=management_logs/$SLURM_JOB_ID.out python -u experiment_interpolation_submission.py $SLURM_JOB_ID
+srun --output=providentia/interpolation/management_logs/$SLURM_JOB_ID.out python -u providentia/interpolation/experiment_interpolation_submission.py $SLURM_JOB_ID $*
