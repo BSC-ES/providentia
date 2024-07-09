@@ -20,7 +20,7 @@ PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
 sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia', 'interpolation'))
 sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia'))
 
-from aux import get_aeronet_bin_radius_from_bin_variable, check_for_ghost
+from aux import get_aeronet_bin_radius_from_bin_variable, get_model_bin_radii, check_for_ghost
 from mapping_species import mapping_species
 from configuration import ProvConfiguration, load_conf
 
@@ -113,6 +113,9 @@ class SubmitInterpolation(object):
         # put configuration variables into self, assigning defaults where neccessary 
         self.set_configuration_defaults(vars_to_set=['ghost_version'])
         self.set_configuration_defaults(vars_not_to_set=['ghost_version'])
+
+        # now all variables have been parsed, check validity of those, throwing errors where necessary
+        provconf.check_validity()
 
         # print variables used, if all species are used print "All Species"        
         print("\nVariables used for the interpolation:\n")
@@ -273,7 +276,13 @@ class SubmitInterpolation(object):
                 exp_dir = exp_dict['esarchive']
 
             # add file to directory path
-            exp_dir += f"{experiment_to_process}/" 
+            exp_dir += f"{experiment_to_process}/"
+
+            # get model name
+            self.model_name = exp_dir.split('/')[-3]
+
+            # get model bin edges
+            r_edges, rho_bins = get_model_bin_radii(self.model_name)
 
             # get all grid type subdirectories for current experiment
             available_grid_types = [name for name in os.listdir(exp_dir) if os.path.isdir("{}/{}".format(
@@ -355,15 +364,17 @@ class SubmitInterpolation(object):
                                         if speci_to_map in experiment_species_ensemblestat:
                                             # if have a binned size distribution variable to map, first check if bin radius is within model's bin extents
                                             # if not, do not process species
-                                            if 'vconcaerobin' in speci_to_map:
-                                                # model is MONARCH?
-                                                if self.experiment_type == 'monarch':
-                                                    # check if bin radius is within MONARCH's bin extents (0.2-20.0 um)
-                                                    bin_radius = get_aeronet_bin_radius_from_bin_variable(speci_to_map)
-                                                    if (bin_radius >= 0.2) & (bin_radius <= 20.0):
-                                                        speci_to_process = copy.deepcopy(speci_to_map)
-                                                        have_valid_resolution = True
-                                                        break
+                                            if ('vconcaerobin' in speci_to_process) or ('vconcaerobin' in speci_to_map):
+                                                # check if bin radius is within model's bin extents
+                                                if 'vconcaerobin' in speci_to_process:
+                                                    speci_to_check = copy.deepcopy(speci_to_process)
+                                                elif 'vconcaerobin' in speci_to_map:
+                                                    speci_to_check = copy.deepcopy(speci_to_map)
+                                                bin_radius = get_aeronet_bin_radius_from_bin_variable(speci_to_check)
+                                                if (bin_radius >= r_edges[0]) & (bin_radius <= r_edges[-1]):
+                                                    speci_to_process = copy.deepcopy(speci_to_map)
+                                                    have_valid_resolution = True
+                                                    break
                                             else:
                                                 speci_to_process = copy.deepcopy(speci_to_map)
                                                 have_valid_resolution = True
@@ -391,15 +402,17 @@ class SubmitInterpolation(object):
 
                                             # if have a binned size distribution variable to map, first check if bin radius is within model's bin extents
                                             # if not, do not process species
-                                            if 'vconcaerobin' in speci_to_map:
-                                                # model is MONARCH?
-                                                if self.experiment_type == 'monarch':
-                                                    # check if bin radius is within MONARCH's bin extents (0.2-20.0 um)
-                                                    bin_radius = get_aeronet_bin_radius_from_bin_variable(speci_to_map)
-                                                    if (bin_radius >= 0.2) & (bin_radius <= 20.0):
-                                                        speci_to_process = copy.deepcopy(speci_to_map)
-                                                        have_valid_resolution = True
-                                                        break
+                                            if ('vconcaerobin' in speci_to_process) or ('vconcaerobin' in speci_to_map):
+                                                # check if bin radius is within model's bin extents
+                                                if 'vconcaerobin' in speci_to_process:
+                                                    speci_to_check = copy.deepcopy(speci_to_process)
+                                                elif 'vconcaerobin' in speci_to_map:
+                                                    speci_to_check = copy.deepcopy(speci_to_map)
+                                                bin_radius = get_aeronet_bin_radius_from_bin_variable(speci_to_check)
+                                                if (bin_radius >= r_edges[0]) & (bin_radius <= r_edges[-1]):
+                                                    speci_to_process = copy.deepcopy(speci_to_map)
+                                                    have_valid_resolution = True
+                                                    break
                                             else:
                                                 speci_to_process = copy.deepcopy(speci_to_map)
                                                 have_valid_resolution = True
@@ -598,23 +611,23 @@ class SubmitInterpolation(object):
             # if have no arguments after iteration, return message stating that
             exp_arguments = copy.deepcopy(self.arguments)
             if len(exp_arguments) == 0:
-                msg = 'NO INTERSECTING OBSERVATIONS/EXPERIMENT DATA FOR INTERPOLATION. \n' 
+                msg = 'NO INTERSECTING OBSERVATIONAL AND EXPERIMENT DATA FOR INTERPOLATION. \n' 
                 if self.start_date == self.end_date:
                     msg += 'If you want to interpolate data for one month, '
                     msg += 'you need to set the end date to be the next one. \n'
                     msg += 'e.g. For November 2018, this is 201811 to 201812.'
                 else:
-                    msg += 'TRYING TO MATCH DATA FROM:\n'
                     if len(obs_files) == 0:
-                        msg += f'Observations data between {self.start_date} and {self.end_date} cannot be found.'
+                        msg += f'Observational data between {self.start_date} and {self.end_date} cannot be found.'
                     else:
-                        msg += f'Observation files: {obs_files}\n'
-                        msg += f'Observation dates: {obs_files_dates}\n'
-                    if len(exp_files) == 0:
-                        msg += f'Experiment data between {self.start_date} and {self.end_date} cannot be found.'
-                    else:
-                        msg += f'Experiment files: {exp_files}\n'
-                        msg += f'Experiment dates: {exp_files_dates}'
+                        msg += f'Observational files: {obs_files}\n'
+                        msg += f'Observational dates: {obs_files_dates}'
+                    
+                        if len(exp_files) == 0:
+                            msg += f'Experiment data between {self.start_date} and {self.end_date} cannot be found.'
+                        else:
+                            msg += f'Experiment files: {exp_files}\n'
+                            msg += f'Experiment dates: {exp_files_dates}'
                 print(msg)
                 continue
         
@@ -628,7 +641,6 @@ class SubmitInterpolation(object):
 
         # randomise the order of the arguments list
         random.shuffle(self.arguments)     
-
 
     def create_greasy_arguments_file(self):
         ''' Create greasy arguments text file storing all different tasks to run by greasy. '''
@@ -729,7 +741,6 @@ class SubmitInterpolation(object):
                 
         # close current arguments file
         arguments_file.close()
-
 
     def create_slurm_submission_script(self):
         ''' Write a slurm submission shell script that submits a greasy job. '''

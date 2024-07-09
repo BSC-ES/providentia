@@ -1,7 +1,7 @@
 {
     "network": ["EBAS"],
     "species": ["sconco3"],
-    "resolution": "hourly",
+    "resolution": "hourly", #TODO in interpolation is ["hourly", "hourly_instantaneous", "daily", "monthly"]
     "start_date": "20180101",
     "end_date": "20190101",
     "statistic_mode": "Temporal|Spatial",
@@ -13,6 +13,9 @@
     "periodic_statistic_mode": "Independent",
     "periodic_statistic_aggregation": "Median",
     "timeseries_statistic_aggregation": "Median",
-    "active_dashboard_plots": ["timeseries", "statsummary", "distribution", "periodic"]
+    "active_dashboard_plots": ["timeseries", "statsummary", "distribution", "periodic"],
+    "n_neighbours" : "4", #interpolation
+    "domain" : ["ip", "d03", "d01", "regional", "eu", "reg", "ex", "bcn", "cat", "d02", "global","regional_i01", "regional_i02", "regional_i03"], #interpolation
+    "ensemble_options" : ["allmembers"], #interpolation
 }
 
