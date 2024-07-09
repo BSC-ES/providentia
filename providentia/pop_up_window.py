@@ -945,7 +945,7 @@ class PopUpWindow(QtWidgets.QWidget):
                                   for val in list(copy.deepcopy(self.read_instance.filter_species).keys())]
                 qa_species = species + filter_species
                 
-                # add
+                # add qa per species
                 qa_species.append(speci)
                 self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) 
                                                      for speci in qa_species}

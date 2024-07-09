@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plot types and options &mdash; Providentia 2.3.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=c3c8ae58"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Plot customisation" href="Plot-customisation.html" />
+    <link rel="prev" title="Configuration files" href="Configuration-files.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Tool setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modes.html">Modes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Configuration-files.html">Configuration files</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Plot types and options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#plot-types">Plot types</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#map-map">Map (<code class="docutils literal notranslate"><span class="pre">map</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metadata-metadata">Metadata (<code class="docutils literal notranslate"><span class="pre">metadata</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#timeseries-timeseries">Timeseries (<code class="docutils literal notranslate"><span class="pre">timeseries</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#periodic-periodic">Periodic (<code class="docutils literal notranslate"><span class="pre">periodic</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#periodic-violin-periodic-violin">Periodic violin (<code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#boxplot-boxplot">Boxplot (<code class="docutils literal notranslate"><span class="pre">boxplot</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#distribution-distribution">Distribution (<code class="docutils literal notranslate"><span class="pre">distribution</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scatter-plot-scatter">Scatter plot (<code class="docutils literal notranslate"><span class="pre">scatter</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#heatmap-heatmap">Heatmap (<code class="docutils literal notranslate"><span class="pre">heatmap</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#table-table">Table (<code class="docutils literal notranslate"><span class="pre">table</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#statistics-summary-statsummary">Statistics summary (<code class="docutils literal notranslate"><span class="pre">statsummary</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#plot-options">Plot options</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#only-show-observations-obs">Only show observations (<code class="docutils literal notranslate"><span class="pre">_obs</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#split-the-plots-by-label-individual">Split the plots by label (<code class="docutils literal notranslate"><span class="pre">_individual</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#add-annotations-annotate">Add annotations (<code class="docutils literal notranslate"><span class="pre">_annotate</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#get-the-bias-of-the-data-bias">Get the bias of the data (<code class="docutils literal notranslate"><span class="pre">_bias</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#add-a-smooth-line-to-the-timeseries-smooth">Add a smooth line to the timeseries (<code class="docutils literal notranslate"><span class="pre">_smooth</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#add-a-regression-line-to-the-scatter-plot-regression">Add a regression line to the scatter plot (<code class="docutils literal notranslate"><span class="pre">_regression</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#make-the-scale-logarithmic-logx-logy">Make the scale logarithmic (<code class="docutils literal notranslate"><span class="pre">_logx</span></code> / <code class="docutils literal notranslate"><span class="pre">_logy</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#get-plot-by-more-than-one-network-species-multispecies">Get plot by more than one network species (<code class="docutils literal notranslate"><span class="pre">_multispecies</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hide-points-and-only-show-regression-smooth-lines-hidedata">Hide points and only show regression / smooth lines (<code class="docutils literal notranslate"><span class="pre">_hidedata</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#show-the-model-grid-in-the-maps-domain">Show the model grid in the maps (<code class="docutils literal notranslate"><span class="pre">_domain</span></code>)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Plot-customisation.html">Plot customisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="topics-in-depth.html">Topics in depth</a></li>
+      <li class="breadcrumb-item active">Plot types and options</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Plot-types-and-options.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="plot-types-and-options">
+<h1>Plot types and options<a class="headerlink" href="#plot-types-and-options" title="Link to this heading"></a></h1>
+<p>This page is only useful to those who want to create their own reports with the offline version. Users can choose which plots these reports will have, as you will see below.</p>
+<section id="plot-types">
+<h2>Plot types<a class="headerlink" href="#plot-types" title="Link to this heading"></a></h2>
+<p>The standard plot types consist of: maps (<code class="docutils literal notranslate"><span class="pre">map</span></code>), metadata summary (<code class="docutils literal notranslate"><span class="pre">metadata</span></code>), timeseries (<code class="docutils literal notranslate"><span class="pre">timeseries</span></code>), periodic plots (<code class="docutils literal notranslate"><span class="pre">periodic</span></code>), periodic violin plots (<code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>), box plots (<code class="docutils literal notranslate"><span class="pre">boxplot</span></code>), distribution plots (<code class="docutils literal notranslate"><span class="pre">distribution</span></code>), scatter plots (<code class="docutils literal notranslate"><span class="pre">scatter</span></code>), heat maps (<code class="docutils literal notranslate"><span class="pre">heatmap</span></code>), tables that give one stat per subsection per experiment (<code class="docutils literal notranslate"><span class="pre">table</span></code>) and tables that give multiple stats per experiment (<code class="docutils literal notranslate"><span class="pre">statsummary</span></code>).</p>
+<p>Some of these plots involve calculating a specific statistic, namely: <code class="docutils literal notranslate"><span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">heatmap</span></code> and <code class="docutils literal notranslate"><span class="pre">table</span></code>. This statistic is defined by aggregating the <code class="docutils literal notranslate"><span class="pre">-[stat]</span></code> field to the plot type will make a plot of the required type for the specific type of statistic set. <code class="docutils literal notranslate"><span class="pre">[stat]</span></code> should be replaced with any of the base statistic names (e.g. p5, Mean), or experiment bias names. For example to show the median values spatially, <code class="docutils literal notranslate"><span class="pre">map-p50</span></code> would be set as the plot name, or <code class="docutils literal notranslate"><span class="pre">map-r2</span></code> to show the coefficient of determination. The available statistic names are documented in <code class="docutils literal notranslate"><span class="pre">settings/basic_stats_dict.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">settings/experiment_bias_stats_dict.yaml</span></code> for reference.</p>
+<p>The timeseries can also be used to show how statistics vary in time. In order to do this, we need to add <code class="docutils literal notranslate"><span class="pre">-[stat]</span></code> and the temporal resolution after the plot type name (e.g. <code class="docutils literal notranslate"><span class="pre">timeseries-Mean_daily</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries-r2_monthly</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries-r_annual</span></code>).</p>
+<p>For the <code class="docutils literal notranslate"><span class="pre">metadata</span></code> plot the metadata displayed is set to a default list of metadata fields. For the <code class="docutils literal notranslate"><span class="pre">statsummary</span></code> plot the statistics displayed are set to a default list of absolute and bias statistics. These default options can be changed in either the
+<code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics_dashboard.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics_offline.yaml</span></code> files, depending on which mode Providentia is being ran in.</p>
+<section id="map-map">
+<h3>Map (<code class="docutils literal notranslate"><span class="pre">map</span></code>)<a class="headerlink" href="#map-map" title="Link to this heading"></a></h3>
+<p><img alt="Map" src="_images/Map.png" /></p>
+</section>
+<section id="metadata-metadata">
+<h3>Metadata (<code class="docutils literal notranslate"><span class="pre">metadata</span></code>)<a class="headerlink" href="#metadata-metadata" title="Link to this heading"></a></h3>
+<p><img alt="Metadata" src="_images/Metadata.png" /></p>
+</section>
+<section id="timeseries-timeseries">
+<h3>Timeseries (<code class="docutils literal notranslate"><span class="pre">timeseries</span></code>)<a class="headerlink" href="#timeseries-timeseries" title="Link to this heading"></a></h3>
+<p><img alt="Timeseries" src="_images/Timeseries.png" /></p>
+</section>
+<section id="periodic-periodic">
+<h3>Periodic (<code class="docutils literal notranslate"><span class="pre">periodic</span></code>)<a class="headerlink" href="#periodic-periodic" title="Link to this heading"></a></h3>
+<p><img alt="Periodic" src="_images/Periodic.png" /></p>
+</section>
+<section id="periodic-violin-periodic-violin">
+<h3>Periodic violin (<code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>)<a class="headerlink" href="#periodic-violin-periodic-violin" title="Link to this heading"></a></h3>
+<p><img alt="Periodic_violin" src="_images/Periodic_violin.png" /></p>
+</section>
+<section id="boxplot-boxplot">
+<h3>Boxplot (<code class="docutils literal notranslate"><span class="pre">boxplot</span></code>)<a class="headerlink" href="#boxplot-boxplot" title="Link to this heading"></a></h3>
+<p><img alt="Boxplot" src="_images/Boxplot.png" /></p>
+</section>
+<section id="distribution-distribution">
+<h3>Distribution (<code class="docutils literal notranslate"><span class="pre">distribution</span></code>)<a class="headerlink" href="#distribution-distribution" title="Link to this heading"></a></h3>
+<p><img alt="Distribution" src="_images/Distribution.png" /></p>
+</section>
+<section id="scatter-plot-scatter">
+<h3>Scatter plot (<code class="docutils literal notranslate"><span class="pre">scatter</span></code>)<a class="headerlink" href="#scatter-plot-scatter" title="Link to this heading"></a></h3>
+<p><img alt="Scatter" src="_images/Scatter.png" /></p>
+</section>
+<section id="heatmap-heatmap">
+<h3>Heatmap (<code class="docutils literal notranslate"><span class="pre">heatmap</span></code>)<a class="headerlink" href="#heatmap-heatmap" title="Link to this heading"></a></h3>
+<p><img alt="Heatmap" src="_images/Heatmap.png" /></p>
+</section>
+<section id="table-table">
+<h3>Table (<code class="docutils literal notranslate"><span class="pre">table</span></code>)<a class="headerlink" href="#table-table" title="Link to this heading"></a></h3>
+<p><img alt="Table" src="_images/Table.png" /></p>
+</section>
+<section id="statistics-summary-statsummary">
+<h3>Statistics summary (<code class="docutils literal notranslate"><span class="pre">statsummary</span></code>)<a class="headerlink" href="#statistics-summary-statsummary" title="Link to this heading"></a></h3>
+<p><img alt="Statsummary" src="_images/Statsummary.png" /></p>
+</section>
+</section>
+<section id="plot-options">
+<h2>Plot options<a class="headerlink" href="#plot-options" title="Link to this heading"></a></h2>
+<p>It is possible to create advanced plots by adding one or more of the following words to each basic plot type or choosing the options in the dashboard:</p>
+<section id="only-show-observations-obs">
+<h3>Only show observations (<code class="docutils literal notranslate"><span class="pre">_obs</span></code>)<a class="headerlink" href="#only-show-observations-obs" title="Link to this heading"></a></h3>
+<p>The extension <code class="docutils literal notranslate"><span class="pre">_obs</span></code> allows users to only show observations in their plots.</p>
+<p><img alt="Screenshot_from_2022-10-04_16-13-50" src="_images/Screenshot_from_2022-10-04_16-13-50.jpg" /></p>
+</section>
+<section id="split-the-plots-by-label-individual">
+<h3>Split the plots by label (<code class="docutils literal notranslate"><span class="pre">_individual</span></code>)<a class="headerlink" href="#split-the-plots-by-label-individual" title="Link to this heading"></a></h3>
+<p>The extension <code class="docutils literal notranslate"><span class="pre">_individual</span></code> allows users to disaggregate the plots and see the plots by experiments, individually. This can help to visualise the results in a clear way when multiple experiments have been selected.</p>
+<p><img alt="Screenshot_from_2022-10-04_16-13-53" src="_images/Screenshot_from_2022-10-04_16-13-53.jpg" /></p>
+</section>
+<section id="add-annotations-annotate">
+<h3>Add annotations (<code class="docutils literal notranslate"><span class="pre">_annotate</span></code>)<a class="headerlink" href="#add-annotations-annotate" title="Link to this heading"></a></h3>
+<p>If the configuration option <code class="docutils literal notranslate"><span class="pre">_annotate</span></code> is added, a box will be created on the plots to show several statistical data. The style and position of this box, as well as the statistics, can be defined by the user in plot characteristics under <code class="docutils literal notranslate"><span class="pre">settings</span></code> by changing the parameter <code class="docutils literal notranslate"><span class="pre">annotate_stats</span></code>.</p>
+<p><img alt="Screenshot_from_2022-10-04_16-17-04" src="_images/Screenshot_from_2022-10-04_16-17-04.jpg" /></p>
+</section>
+<section id="get-the-bias-of-the-data-bias">
+<h3>Get the bias of the data (<code class="docutils literal notranslate"><span class="pre">_bias</span></code>)<a class="headerlink" href="#get-the-bias-of-the-data-bias" title="Link to this heading"></a></h3>
+<p>Alternatively the plots can be modified to show, rather than the absolute observational vs experiment values, the bias between these pairings. This is done by adding <code class="docutils literal notranslate"><span class="pre">_bias</span></code> to the base plot names, for example: <code class="docutils literal notranslate"><span class="pre">distribution_bias</span></code> or <code class="docutils literal notranslate"><span class="pre">periodic-Max_bias</span></code>.</p>
+<p><img alt="Screenshot_from_2022-10-04_16-10-41" src="_images/Screenshot_from_2022-10-04_16-10-41.jpg" /></p>
+</section>
+<section id="add-a-smooth-line-to-the-timeseries-smooth">
+<h3>Add a smooth line to the timeseries (<code class="docutils literal notranslate"><span class="pre">_smooth</span></code>)<a class="headerlink" href="#add-a-smooth-line-to-the-timeseries-smooth" title="Link to this heading"></a></h3>
+<p>Adding the option <code class="docutils literal notranslate"><span class="pre">_smooth</span></code> to the <code class="docutils literal notranslate"><span class="pre">timeseries</span></code> plot will plot a smooth line over the timeseries.</p>
+<p><img alt="Screenshot_from_2022-10-04_16-17-13" src="_images/Screenshot_from_2022-10-04_16-17-13.jpg" /></p>
+</section>
+<section id="add-a-regression-line-to-the-scatter-plot-regression">
+<h3>Add a regression line to the scatter plot (<code class="docutils literal notranslate"><span class="pre">_regression</span></code>)<a class="headerlink" href="#add-a-regression-line-to-the-scatter-plot-regression" title="Link to this heading"></a></h3>
+<p>Adding the option <code class="docutils literal notranslate"><span class="pre">_regression</span></code> will plot the linear regression between observations and experiment.</p>
+<p><img alt="Screenshot_from_2022-10-04_16-17-08" src="_images/Screenshot_from_2022-10-04_16-17-08.jpg" /></p>
+</section>
+<section id="make-the-scale-logarithmic-logx-logy">
+<h3>Make the scale logarithmic (<code class="docutils literal notranslate"><span class="pre">_logx</span></code> / <code class="docutils literal notranslate"><span class="pre">_logy</span></code>)<a class="headerlink" href="#make-the-scale-logarithmic-logx-logy" title="Link to this heading"></a></h3>
+<p>Adding the options <code class="docutils literal notranslate"><span class="pre">_logx</span></code> or <code class="docutils literal notranslate"><span class="pre">_logy</span></code> will set the desired axis to be logarithmically scaled.</p>
+<p><img alt="Screenshot_from_2022-10-04_16-17-10" src="_images/Screenshot_from_2022-10-04_16-17-10.jpg" /></p>
+</section>
+<section id="get-plot-by-more-than-one-network-species-multispecies">
+<h3>Get plot by more than one network species (<code class="docutils literal notranslate"><span class="pre">_multispecies</span></code>)<a class="headerlink" href="#get-plot-by-more-than-one-network-species-multispecies" title="Link to this heading"></a></h3>
+<p>Incorporate all read species in the plot type.</p>
+<p><img alt="Screenshot_from_2022-10-04_16-14-01" src="_images/Screenshot_from_2022-10-04_16-14-01.jpg" /></p>
+</section>
+<section id="hide-points-and-only-show-regression-smooth-lines-hidedata">
+<h3>Hide points and only show regression / smooth lines (<code class="docutils literal notranslate"><span class="pre">_hidedata</span></code>)<a class="headerlink" href="#hide-points-and-only-show-regression-smooth-lines-hidedata" title="Link to this heading"></a></h3>
+<p>The option <code class="docutils literal notranslate"><span class="pre">_hidedata</span></code> needs to be accompanied by <code class="docutils literal notranslate"><span class="pre">_smooth</span></code> in the <code class="docutils literal notranslate"><span class="pre">timeseries</span></code> plot and by <code class="docutils literal notranslate"><span class="pre">_regression</span></code> in the <code class="docutils literal notranslate"><span class="pre">scatter</span></code> plot.</p>
+<p><img alt="hidedata" src="_images/hidedata.png" /></p>
+</section>
+<section id="show-the-model-grid-in-the-maps-domain">
+<h3>Show the model grid in the maps (<code class="docutils literal notranslate"><span class="pre">_domain</span></code>)<a class="headerlink" href="#show-the-model-grid-in-the-maps-domain" title="Link to this heading"></a></h3>
+<p>Adding <code class="docutils literal notranslate"><span class="pre">_domain</span></code> will add the model grid on top of the map.</p>
+<p><img alt="domain" src="_images/domain.png" /></p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Configuration-files.html" class="btn btn-neutral float-left" title="Configuration files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Plot-customisation.html" class="btn btn-neutral float-right" title="Plot customisation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2024, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

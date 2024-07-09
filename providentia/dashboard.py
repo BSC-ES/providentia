@@ -7,6 +7,7 @@ from functools import partial
 import json
 import os
 import sys
+import time
 from weakref import WeakKeyDictionary
 import yaml
 
@@ -98,16 +99,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     
                     if len(all_sections) == 1:
                         okpressed = False
-                        selected_section = list(all_sections)[0]
+                        self.section = list(all_sections)[0]
                     else:
                         title = 'Sections'
                         msg = 'Select section to load'
                         dialog = InputDialog(self, title, msg, all_sections)
-                        selected_section, okpressed = dialog.selected_option, dialog.okpressed
+                        self.section, okpressed = dialog.selected_option, dialog.okpressed
 
                     if okpressed or (len(all_sections) == 1):
                         self.from_conf = True
-                        self.current_config = self.sub_opts[selected_section]
+                        self.current_config = self.sub_opts[self.section]
             
             else:
                 # have config, but path does not exist
@@ -155,17 +156,30 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.full_window_geometry = None
 
         # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
-        # generate file trees
+        # if have filetree flags, then these overwrite any defaults
+        gft = False
         if self.generate_file_tree:
+            gft = True
+        elif self.disable_file_tree:
+            gft = False
+        # by default generate filetree on MN5
+        elif self.machine in ['mn5']:
+            gft = True
+        # by default generate filetree locally
+        elif self.filetree_type == 'local':
+            gft = True
+
+        # generate file trees
+        if gft:
             self.all_observation_data = get_ghost_observational_tree(self)
             if self.nonghost_root is not None:
                 nonghost_observation_data = get_nonghost_observational_tree(self)
         # load file trees
         else:
             try:
-                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree.json'))) 
+                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(self.ghost_version)))) 
             except FileNotFoundError as file_error:
-                msg = "Error: Trying to load 'settings/internal/ghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                msg = "Error: Trying to load 'settings/internal/ghost_filetree_{}.json' but file does not exist. Run with the flag '--gft' to generate this file.".format(self.ghost_version)
                 sys.exit(msg)
             if self.nonghost_root is not None:
                 try:
@@ -539,7 +553,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # initialise multispecies tab
         self.multispecies_initialisation = True
 
-        # launch with configuriton file?
+        # launch with configuration file?
         if self.from_conf: 
             
             # read
@@ -620,7 +634,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         elif self.operating_system == 'Windows':
             self.show()
             self.showMaximized()
-        
+
     def generate_pop_up_window(self, menu_root):
         """ Generate pop up window. """
         
@@ -1427,6 +1441,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # run function to update filter
             self.mpl_canvas.handle_data_filter_update()
 
+            # for non-GHOST, we call update_metadata_fields again to remove the stations that have
+            # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained 
+            # after filtering
+            if not self.reading_ghost:
+                update_metadata_fields(self)
+
             # generate list of sorted z1/z2 data arrays names in memory, putting observations
             # before experiments, and empty string item as first element in z2 array list
             # (for changing from 'difference' statistics to 'absolute')
@@ -1446,7 +1466,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.mpl_canvas.handle_resampling_update()
             
             # update timeseries chunk statistic and resolution comboboxes
-            self.mpl_canvas.handle_timeseries_chunk_resolution_update()
             self.mpl_canvas.handle_timeseries_chunk_statistic_update()
 
             # update periodic statistic combobox
@@ -1512,6 +1531,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # unfilter data
         self.mpl_canvas.handle_data_filter_update()
         
+        # for non-GHOST, we call update_metadata_fields again to remove the stations that have
+        # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained 
+        # after filtering
+        if not self.reading_ghost:
+            update_metadata_fields(self)
+
         # Restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
 
@@ -1541,6 +1566,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 def main(**kwargs):
     """ Main function. """
     
+    # pause briefly to allow QT modules time to correctly initilise
+    time.sleep(0.1)
     q_app = QtWidgets.QApplication(sys.argv)
     q_app.setStyle("Fusion")
     ProvidentiaMainWindow(**kwargs)
