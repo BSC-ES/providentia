@@ -1319,7 +1319,7 @@ class ProvidentiaOffline:
                 if data_label in self.selected_station_data_labels[networkspeci]:
                     plot_validity = True
         if not plot_validity:
-            print(f'Warning: {plot_type} cannot be created because we have no available data.')
+            print(f'Warning: {plot_type} cannot be created because there is no available data.')
             return plot_indices
 
         # get data ranges for plotting paradigm
@@ -1363,7 +1363,7 @@ class ProvidentiaOffline:
                         unavailable_label = '{}'.format(z1_label)
                     else:
                         unavailable_label = '{} - {}'.format(z2_label, z1_label)
-                    msg = f'Warning: {plot_type} cannot be created because we have no available data of {unavailable_label}.'
+                    msg = f'Warning: {plot_type} cannot be created because there is no available data of {unavailable_label}.'
                     print(msg)
                     return plot_indices
                     
@@ -1460,7 +1460,7 @@ class ProvidentiaOffline:
                 # skip individual plots if we have no data for a specific label
                 if 'individual' in plot_options:
                     if data_labels not in self.selected_station_data_labels[networkspeci]:
-                        print(f'Warning: {plot_type} cannot be created because we have no available data.')
+                        print(f'Warning: {plot_type} cannot be created because there is no available data.')
                         return plot_indices
 
                 # get relevant axis to plot on
