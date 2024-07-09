@@ -3,7 +3,8 @@ module purge
 
 # Marenostrum5
 if [ "${BSC_MACHINE}" == "mn5" ]; then
-    module load anaconda/2023.07
+    module load greasy/2.2.4.1
+    module load libexpat udunits hdf5 pnetcdf/1.12.3 netcdf nco/5.2.2
 
 # Nord3v2
 elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then 
