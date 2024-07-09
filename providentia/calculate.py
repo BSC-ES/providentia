@@ -154,16 +154,15 @@ class Stats(object):
 
     @staticmethod
     def calculate_stations_number(data, statistic_aggregation):
-        """ Calculate number of stations.
-        """
-
+        """ Calculate number of stations."""
         if data.size == 0:
             return np.NaN
         else:
-            # get number of stations that do not have missing values per hour
+
+            # get number of stations that do not have missing values per original timestep
             original_stations_number = np.count_nonzero(~np.isnan(data), axis=-2).astype('float32')
 
-            # aggregation the number of stations per hour
+            # aggregate the number of valid stations per new time step
             from .statistics import aggregation
             stations_number = aggregation(original_stations_number, statistic_aggregation, axis=-1)
 
@@ -196,6 +195,21 @@ class Stats(object):
         else:
             n_exceed = nansumwrapper(data > threshold, axis=-1).astype('float32')
             return n_exceed
+
+    @staticmethod
+    def calculate_mda8(data):
+        """ Calculate MDA8 (daily maximum 8 hour average) 
+        """
+        if data.size == 0:
+            return np.NaN
+        else:
+            start_inds = np.arange(0,17)
+            end_inds = np.arange(8,25)
+            mda8_arr = np.full((data.shape[0], data.shape[1], 17), np.NaN, dtype=np.float32)
+            for window_ind, (start_ind, end_ind) in enumerate(zip(start_inds, end_inds)):
+                mda8_arr[:,:,window_ind] = np.nanmean(data[:,:,start_ind:end_ind], axis=-1)
+            mda8 = np.nanmax(mda8_arr, axis=-1)
+            return mda8
 
 class ExpBias(object):
 

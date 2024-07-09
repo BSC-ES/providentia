@@ -5,5 +5,5 @@ Tool setup
 .. toctree::
    :maxdepth: 2
 
-   setup/clone.rst
-   setup/run.rst
+   Clone-the-project.md
+   Run-the-tool.md

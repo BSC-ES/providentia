@@ -423,16 +423,27 @@ def update_metadata_fields(instance):
             instance.species = [instance.species]
 
         for networkspeci in instance.networkspecies:
-            meta_var_field.extend(instance.metadata_in_memory[networkspeci][meta_var].flatten())
-        meta_var_field = np.array(meta_var_field)
-        meta_var_field[np.where(meta_var_field == 'nan')[0]] = np.NaN
+            # remove data for stations with 0 measurements
+            # this is done only for non-GHOST because the data files are forced to contain data for all possible stations
+            if hasattr(instance, 'valid_station_inds') and (not instance.reading_ghost):
+                if instance.temporal_colocation:
+                    valid_station_inds = instance.valid_station_inds_temporal_colocation[networkspeci][instance.observations_data_label]
+                else:
+                    valid_station_inds = instance.valid_station_inds[networkspeci][instance.observations_data_label]
+                valid_meta_var_field = instance.metadata_in_memory[networkspeci][meta_var][valid_station_inds, :]
+                meta_var_field.extend(valid_meta_var_field.flatten())
+            # for non-ghost just flatten
+            else:
+                meta_var_field.extend(instance.metadata_in_memory[networkspeci][meta_var].flatten())
 
+        meta_var_field = np.array(meta_var_field)
+        
         # get metadata variable type/data type
         metadata_type = instance.standard_metadata[meta_var]['metadata_type']
         metadata_data_type = instance.standard_metadata[meta_var]['data_type']
 
         # remove NaNs from metadata values
-        meta_var_field_nan_removed = meta_var_field[~pd.isnull(meta_var_field)]
+        meta_var_field_nan_removed = meta_var_field[(meta_var_field != 'nan') & (~pd.isna(meta_var_field))]
 
         # update pop-up metadata menu object with read metadata values
         # for non-numeric metadata gets all the unique fields per metadata variable
