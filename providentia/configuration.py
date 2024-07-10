@@ -39,7 +39,6 @@ if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
     else:
         MACHINE = "local"
 
-
 def parse_path(dir, f):
     if os.path.isabs(f):
         return f
@@ -141,7 +140,8 @@ class ProvConfiguration:
 
             # set default if left undefined
             if value == '':
-                return data_paths[MACHINE]["ghost_root"]
+                ghost_root = data_paths[MACHINE]["ghost_root"]
+                return os.path.expanduser(ghost_root[0])+ghost_root[1:]
 
         elif key == 'nonghost_root':
             # define non-GHOST observational root data directory (if undefined it is
@@ -149,14 +149,16 @@ class ProvConfiguration:
 
             # set default if left undefined
             if value == '':
-                return data_paths[MACHINE]["nonghost_root"]
+                nonghost_root = data_paths[MACHINE]["nonghost_root"]
+                return os.path.expanduser(nonghost_root[0])+nonghost_root[1:]
 
         elif key == 'exp_root':
             # define experiment root data directory
             # set experiment root data directory if left undefined
             if value == '':
-                return data_paths[MACHINE]["exp_root"]
-
+                exp_root = data_paths[MACHINE]["exp_root"]
+                return os.path.expanduser(exp_root[0])+exp_root[1:]
+            
         elif key == 'ghost_version':
             # parse GHOST version
 
@@ -218,9 +220,18 @@ class ProvConfiguration:
 
         elif key == 'resolution':
             # parse resolution
-
+            
             if isinstance(value, str):
-                return value.strip()
+                # resolution is a list in download mode
+                if self.read_instance.download:
+                    # parse multiple resolutions
+                    if ',' in value:
+                        return [speci.strip() for speci in value.split(',')]
+                    else:
+                        return [value.strip()]
+                else:
+                    # parse one single resolution
+                    return value.strip()
 
         elif key == 'start_date':
             # parse start_date
@@ -526,6 +537,13 @@ class ProvConfiguration:
 
     def check_validity(self, deactivate_warning=False):
         """ Check validity of set variables after parsing. """
+        # check if species is valid
+        if self.read_instance.species:
+            for speci in self.read_instance.species:
+                if '*' not in speci and speci not in self.read_instance.parameter_dictionary:
+                    error = f'Error: species "{speci}" not valid.'
+                    sys.exit(error)
+
         # get non-default fields on config file if launching from a config file
         if hasattr(self.read_instance, "sub_opts"):
             self.read_instance.fields_per_section = {}
@@ -539,10 +557,11 @@ class ProvConfiguration:
             self.read_instance.non_default_fields_per_section = {
                 field_name:fields-set(self.var_defaults) 
                 for field_name, fields in self.read_instance.fields_per_section.items()}
-       
+        
         # check have network information, 
         # if offline, throw message, stating are using default instead
-        if not self.read_instance.network:
+        # in download mode is allowed to not have download, so continue
+        if not self.read_instance.network and not self.read_instance.download:
             #default = ['GHOST']
             default = default_values['network']
             msg = "Network (network) was not defined in the configuration file. Using '{}' as default.".format(default)
@@ -551,7 +570,8 @@ class ProvConfiguration:
 
         # check have species information, 
         # if offline, throw message, stating are using default instead
-        if not self.read_instance.species:
+        # in download mode is allowed to not pass any species, so continue
+        if not self.read_instance.species and not self.read_instance.download:
             default = default_values['species']
             msg = "Species (species) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
@@ -560,7 +580,8 @@ class ProvConfiguration:
         # if number of networks and species is not the same,
         # and len of one of network or species == 1,
         # then duplicate respestive network/species
-        if len(self.read_instance.network) != len(self.read_instance.species):
+        # in download mode is allowed to not have a different number, so continue
+        if len(self.read_instance.network) != len(self.read_instance.species) and not self.read_instance.download:
 
             # 1 network?
             if len(self.read_instance.network) == 1:
@@ -578,19 +599,21 @@ class ProvConfiguration:
                 sys.exit(error)
 
         # throw error if one of networks are non all GHOST or non-GHOST
-        for network_ii, network in enumerate(self.read_instance.network):
-            if network_ii == 0:
-                previous_is_ghost = check_for_ghost(network)
-            else:
-                is_ghost = check_for_ghost(network)
-                if is_ghost != previous_is_ghost:
-                    error = 'Error: "network" must be all GHOST or non-GHOST'
-                    sys.exit(error)
-                previous_is_ghost = is_ghost
+        # in download mode it is allowed to have mixed networks
+        if not self.read_instance.download:
+            for network_ii, network in enumerate(self.read_instance.network):
+                if network_ii == 0:
+                    previous_is_ghost = check_for_ghost(network)
+                else:
+                    is_ghost = check_for_ghost(network)
+                    if is_ghost != previous_is_ghost:
+                        error = 'Error: "network" must be all GHOST or non-GHOST'
+                        sys.exit(error)
+                    previous_is_ghost = is_ghost
 
         # check have resolution information, 
         # if offline, throw message, stating are using default instead
-        if not self.read_instance.resolution:
+        if not self.read_instance.resolution and not self.read_instance.download:
             #default = 'monthly'
             default = default_values['resolution']
             msg = "Resolution (resolution) was not defined in the configuration file. Using '{}' as default.".format(default)
@@ -696,12 +719,19 @@ class ProvConfiguration:
         new_species = copy.deepcopy(self.read_instance.species)
         for speci_ii, speci in enumerate(self.read_instance.species): 
             if '*' in speci:
+                # throw mapping error if species not ablet to be mapped
+                if speci not in multispecies_map:
+                    error = f'Error: not able to map species "{speci}".'
+                    sys.exit(error)
+                
                 mapped_species = multispecies_map[speci]
                 del new_species[speci_ii]
                 new_species[speci_ii:speci_ii] = mapped_species
-                network_to_duplicate = self.read_instance.network[speci_ii]
-                del self.read_instance.network[speci_ii]
-                self.read_instance.network[speci_ii:speci_ii] = [network_to_duplicate]*len(mapped_species)
+                # in download mode is not necessary to duplicate the networks
+                if not self.read_instance.download:
+                    network_to_duplicate = self.read_instance.network[speci_ii]
+                    del self.read_instance.network[speci_ii]
+                    self.read_instance.network[speci_ii:speci_ii] = [network_to_duplicate]*len(mapped_species)
         self.read_instance.species = copy.deepcopy(new_species)
 
         # get species and filter species which are not on the current ghost version
@@ -845,7 +875,7 @@ class ProvConfiguration:
 
         # if are using dashboard then just take first network/species pair, as multivar not supported yet
         if ((len(self.read_instance.network) > 1) and (len(self.read_instance.species) > 1) and 
-            (not self.read_instance.offline) and (not self.read_instance.interactive)):
+            (not self.read_instance.offline) and (not self.read_instance.interactive) and (not self.read_instance.download)):
              
             msg = 'Multiple networks/species are not supported in the dashboard. First ones will be taken.'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)

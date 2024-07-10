@@ -57,6 +57,9 @@ class Providentia(object):
                 offline.main(**res)
             elif args.interactive:
                 return res
+            elif args.download:
+                from . import download as download
+                download.main(**res)
             else:
                 from . import dashboard as dashboard
                 dashboard.main(**res)
