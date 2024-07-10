@@ -676,8 +676,6 @@ class ProvidentiaDownload(object):
                     for nc_file in valid_nc_files:
                         remote_path = os.path.join(remote_dir,nc_file)
                         local_path = os.path.join(local_dir,nc_file)
-                        print(remote_path)
-                        print(local_path)
                         self.sftp.get(remote_path,local_path)
 
                 print(f"\n{experiment} experiments downloaded: ({len(valid_res_spec_dir_nc_files)})")
