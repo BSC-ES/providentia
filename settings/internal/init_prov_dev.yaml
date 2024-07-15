@@ -15,6 +15,7 @@
             'disable_file_tree': False,
             'offline': False,
             'interactive': False,
+            'interpolation': False,
             'network': null,
             'species': null,
             'resolution': null,
@@ -22,6 +23,9 @@
             'end_date': null,
             'observations_data_label': 'observations',
             'experiments': {},
+            "n_neighbours" : null, #interpolation
+            "domain" : null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
+            "ensemble_options" : null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
             'qa': null,
             'flags': null,
             'add_qa': null,
