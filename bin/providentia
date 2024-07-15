@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # init
-cores=12
 jobname="PRV"
 time="02:00:00"
 mem="20Gb"
@@ -44,12 +43,20 @@ fi
 
 # set qos depending on the mode and machine
 if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" ]]; then
+    # define core as one when it is interpolation
+    cores="1"
+    
+    # define qos in interpolation
     if [ "${BSC_MACHINE}" == "mn5" ]; then
         queue="gp_bsces"
     else
         queue="bsc_es"
     fi
 else
+    # define core as twelve if it is not an interpolation
+        cores="12"
+    
+    # define qos in every mode but interpolation
     if [ "${BSC_MACHINE}" == "mn5" ]; then
         queue="gp_debug"
     else
