@@ -5,7 +5,7 @@ def show_message(read_instance, msg, msg_offline=None, from_conf=None, deactivat
     if deactivate:
         return
 
-    elif (read_instance.offline) or (read_instance.interactive):
+    elif (read_instance.offline) or (read_instance.interactive) or (read_instance.interpolation):
         if msg_offline is not None:
             print('Warning: ' + msg_offline)
         else:
