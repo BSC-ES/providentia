@@ -21,7 +21,7 @@ MACHINE = os.environ.get('BSC_MACHINE', '')
 # get current path and providentia root path
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
+data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'data_paths.yaml')))
 default_values = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_defaults.yaml')))
 multispecies_map = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 
@@ -37,7 +37,6 @@ if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
         MACHINE = "hub"
     else:
         MACHINE = "local"
-
 
 def parse_path(dir, f):
     if os.path.isabs(f):
@@ -224,7 +223,10 @@ class ProvConfiguration:
             # parse resolution
 
             if isinstance(value, str):
-                return value.strip()
+                if self.read_instance.interpolation or self.read_instance.download:
+                    return [res.strip() for res in value.split(',')]
+                else:        
+                    return value.strip()
 
         elif key == 'start_date':
             # parse start_date
@@ -337,15 +339,17 @@ class ProvConfiguration:
             else:
                 return []
 
-        elif key == "domain":
+        elif key == "domain": # TODO maybe there's no need of domain because it is included on experiments
             # parse domain
 
             if value != None:
                 # split list, if only one domain, then creates list of one element
                 domains = [dom.strip() for dom in value.split(",")]      
                 return domains
+            else:
+                return []
 
-        elif key == "ensemble_options":
+        elif key == "ensemble_options": # TODO maybe there's no need of ensemble num because it is included on experiments
             # parse ensemble_options
 
             if value != None:
@@ -353,6 +357,8 @@ class ProvConfiguration:
                 # if it is a number, then make it 3 digits, if not it stays as it is
                 ensemble_opts = [opt.strip().zfill(3) for opt in str(value).split(",")]  
                 return ensemble_opts
+            else:
+                return []
             
         elif key == 'experiments':
             # parse experiments
@@ -630,7 +636,7 @@ class ProvConfiguration:
         
         return exp_found, bool(exp_found)
     
-    def check_validity(self):
+    def check_validity(self, deactivate_warning=False):
         """ Check validity of set variables after parsing. """
        
         # import matplotlib for Taylor Diagrams
@@ -658,17 +664,23 @@ class ProvConfiguration:
        
         # check have network information, 
         # if offline, throw message, stating are using default instead
-        if not self.read_instance.network:
+        if not self.read_instance.network or self.read_instance.network == "default":
             #default = ['GHOST']
-            default = default_values['network']
+            if self.read_instance.interpolation:
+                default = self.read_instance.ghost_available_networks
+            else:
+                default = default_values['network']
             msg = "Network (network) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.network = default
 
-        # check have species information, 
+        # check have species information, TODO REFACTOR INTERPOLATION STUFF
         # if offline, throw message, stating are using default instead
-        if not self.read_instance.species:
-            default = default_values['species']
+        if not self.read_instance.species or self.read_instance.species == "default":
+            if self.read_instance.interpolation:
+                default = [self.standard_parameters[param]['bsc_parameter_name'] for param in self.standard_parameters.keys()] 
+            else:
+                default = default_values['species']
             msg = "Species (species) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.species = default
@@ -723,6 +735,10 @@ class ProvConfiguration:
         if self.read_instance.experiments != {} and final_experiments == {}:
             msg = 'No experiments found with the current configuration.'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+        
+            if self.read_instance.interpolation:
+                error = "Error: Interpolation cannot be done without experiments."
+                sys.exit(error)
 
         # replace experiments by new ones found
         self.read_instance.experiments = final_experiments
@@ -731,16 +747,19 @@ class ProvConfiguration:
         if self.read_instance.experiments:
             print("\nResulting experiments:\n"+'\n'.join(self.read_instance.experiments.values())+"\n")
 
-        # check have resolution information, 
+        # check have resolution information, TODO when refactoring init change this way of checking defaults
         # if offline, throw message, stating are using default instead
-        if not self.read_instance.resolution:
-            #default = 'monthly'
-            default = default_values['resolution']
+        if not self.read_instance.resolution or self.read_instance.resolution == "default":
+            if self.read_instance.interpolation:
+                default = ["hourly", "hourly_instantaneous", "daily", "monthly"]
+            else:
+                #default = 'monthly'
+                default = default_values['resolution']
             msg = "Resolution (resolution) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.resolution = default
 
-        # check have start_date information, 
+        # check have start_date information, TODO START DATE IS DIFFERENT IN INTERPOLATION
         # if offline, throw message, stating are using default instead
         if not self.read_instance.start_date:
             default = default_values['start_date']
@@ -748,13 +767,39 @@ class ProvConfiguration:
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.start_date = default
 
-        # check have end_date information, 
+        # check have end_date information, TODO START DATE IS DIFFERENT IN INTERPOLATION
         # if offline, throw message, stating are using default instead
         if not self.read_instance.end_date:
             default = default_values['end_date']
             msg = "End date (end_date) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.end_date = default
+
+        # check have n_neighbours information, TODO ONLY FOR INTERPOLATION
+        # if offline, throw message, stating are using default instead
+        if not self.read_instance.n_neighbours or self.read_instance.n_neighbour == "default":
+            default = default_values['n_neighbours']
+            msg = "Number of neighbours (n_neighbours) was not defined in the configuration file. Using '{}' as default.".format(default)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            self.read_instance.n_neighbours = default
+
+        # check have domain information, TODO ONLY FOR INTERPOLATION
+        # TODO think if we need one separated variable for this one because it is already included on experiments
+        # if offline, throw message, stating are using default instead
+        if not self.read_instance.domain or self.read_instance.domain == "default":
+            default = default_values['domain']
+            msg = "Domain (domain) was not defined in the configuration file. Using '{}' as default.".format(default)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            self.read_instance.domain = default
+
+        # check have ensemble_options information, TODO ONLY FOR INTERPOLATION
+        # TODO think if we need one separated variable for this one because it is already included on experiments
+        # if offline, throw message, stating are using default instead
+        if not self.read_instance.ensemble_options or self.read_instance.ensemble_options == "default":
+            default = default_values['ensemble_options']
+            msg = "Ensemble options (ensemble_options) was not defined in the configuration file. Using '{}' as default.".format(default)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            self.read_instance.ensemble_options = default
 
         # check have statistic_mode information,
         # if offline, throw message, stating are using default instead
@@ -1176,7 +1221,6 @@ def read_conf(fpath=None):
         res_sub = {}
 
     return res, all_sections_modified, parent_sections, subsections_modified, filenames
-   
 
 def write_conf(section, subsection, fpath, opts):
     """ Write configurations on file. """
@@ -1195,7 +1239,6 @@ def write_conf(section, subsection, fpath, opts):
     with open(fpath, 'w') as configfile:
         config.write(configfile)
 
-
 def load_conf(self, fpath=None):
     """ Load existing configurations from file
         for running offline Providentia.
@@ -1213,7 +1256,6 @@ def load_conf(self, fpath=None):
         return
 
     self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names, self.filenames = read_conf(fpath)
-
 
 def split_options(read_instance, conf_string, separator="||"):
     """ For the options in the configuration that define the keep and remove
