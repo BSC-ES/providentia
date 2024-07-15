@@ -1,7 +1,7 @@
 {
-    "network": ["EBAS"],
-    "species": ["sconco3"],
-    "resolution": "hourly", #TODO in interpolation is ["hourly", "hourly_instantaneous", "daily", "monthly"]
+    "network": ["EBAS"], # TODO different in interpolation (change done in validation)
+    "species": ["sconco3"], # TODO different in interpolation (change done in validation)
+    "resolution": "hourly", # TODO different in interpolation (change done in validation)
     "start_date": "20180101",
     "end_date": "20190101",
     "statistic_mode": "Temporal|Spatial",
