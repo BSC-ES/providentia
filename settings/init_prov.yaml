@@ -7,5 +7,5 @@
                                   'ehu_valderejo/ehu_valderejo', 'csic_montseny/csic_montseny'],
   'nonghost_available_resolutions': ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
                                     '3hourly_instantaneous', '6hourly_instantaneous',
-                                    'daily', 'monthly'],
+                                    'daily', 'monthly']
 }
