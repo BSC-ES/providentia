@@ -759,21 +759,67 @@ class ProvConfiguration:
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.resolution = default
 
-        # check have start_date information, TODO START DATE IS DIFFERENT IN INTERPOLATION
+        # check start_date format, TODO START DATE IS DIFFERENT IN INTERPOLATION (check in the refactoring)
         # if offline, throw message, stating are using default instead
         if not self.read_instance.start_date:
-            default = default_values['start_date']
+            if self.read_instance.interpolation:
+                default = '201801'
+            else:
+                default = default_values['start_date']
             msg = "Start date (start_date) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.start_date = default
+        else:
+            len_start_date = len(self.read_instance.start_date)
+            if self.read_instance.interpolation:
+                if len_start_date != 6:
+                    if len_start_date == 8:
+                        self.read_instance.start_date = self.read_instance.start_date[:-2]
+                        msg = "Start date (start_date) was defined as YYYYMMDD, changing it to YYYYMM. Using '{}'.".format(self.read_instance.start_date)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                    else:
+                        error = "Format of Start date (start_date) not correct, please change it to YYYYMM."
+                        sys.exit(error)
+                else:
+                    if len_start_date != 8:
+                        if len_start_date == 6:
+                            self.read_instance.start_date = self.read_instance.start_date + "01"
+                            msg = "Start date (start_date) was defined as YYYYMM, changing it to YYYYMMDD. Using '{}'.".format(self.read_instance.start_date)
+                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                        else:
+                            error = "The format of Start date (start_date) is not correct, please change it to YYYYMMDD."
+                            sys.exit(error)
 
-        # check have end_date information, TODO START DATE IS DIFFERENT IN INTERPOLATION
+        # check end_date  format, TODO START DATE IS DIFFERENT IN INTERPOLATION (check in the refactoring)
         # if offline, throw message, stating are using default instead
         if not self.read_instance.end_date:
-            default = default_values['end_date']
+            if self.read_instance.interpolation:
+                default = '201901'
+            else:
+                default = default_values['end_date']
             msg = "End date (end_date) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.end_date = default
+        else:
+            len_end_date = len(self.read_instance.end_date)
+            if self.read_instance.interpolation:
+                if len_end_date != 6:
+                    if len_end_date == 8:
+                        self.read_instance.end_date = self.read_instance.end_date[:-2]
+                        msg = "End Date (end_date) was defined as YYYYMMDD, changing it to YYYYMM. Using '{}'.".format(self.read_instance.end_date)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                    else:
+                        error = "Format of End Date (end_date) not correct, please change it to YYYYMM."
+                        sys.exit(error)
+                else:
+                    if len_end_date != 8:
+                        if len_end_date == 6:
+                            self.read_instance.end_date = self.read_instance.end_date + "01"
+                            msg = "End Date (end_date) was defined as YYYYMM, changing it to YYYYMMDD. Using '{}'.".format(self.read_instance.end_date)
+                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                        else:
+                            error = "The format of End Date (end_date) is not correct, please change it to YYYYMMDD."
+                            sys.exit(error)
 
         # check have n_neighbours information, TODO ONLY FOR INTERPOLATION
         # if offline, throw message, stating are using default instead
