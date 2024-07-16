@@ -17,7 +17,7 @@ import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 from packaging.version import Version
 import pandas as pd
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 
 from .canvas import MPLCanvas
 from .configuration import load_conf
@@ -39,6 +39,10 @@ from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_
 from .toolbar import NavigationToolbar
 from .warnings_prv import show_message
 
+# set proper scaling
+os.environ["QT_ENABLE_HIGHDPI_SCALING"]   = "1"
+os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+os.environ["QT_SCALE_FACTOR"]             = "1"
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
@@ -1568,7 +1572,38 @@ def main(**kwargs):
     
     # pause briefly to allow QT modules time to correctly initilise
     time.sleep(0.1)
+
+    # create application
     q_app = QtWidgets.QApplication(sys.argv)
+
+    # set Fusion style
     q_app.setStyle("Fusion")
+
+    # explicitely set colour palette to avoid issues with dark modes (e.g. on Mac)
+    p = q_app.palette()
+    dcp = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/dashboard_colour_palette.yaml')))
+    p.setColor(QtGui.QPalette.Dark, QtGui.QColor(*dcp['Dark']))
+    p.setColor(QtGui.QPalette.Light, QtGui.QColor(*dcp['Light']))
+    p.setColor(QtGui.QPalette.Window, QtGui.QColor(*dcp['Window']))
+    p.setColor(QtGui.QPalette.WindowText, QtGui.QColor(*dcp['WindowText']))
+    p.setColor(QtGui.QPalette.Base, QtGui.QColor(*dcp['Base']))
+    p.setColor(QtGui.QPalette.AlternateBase, QtGui.QColor(*dcp['AlternateBase']))
+    p.setColor(QtGui.QPalette.ToolTipBase, QtGui.QColor(*dcp['ToolTipBase']))
+    p.setColor(QtGui.QPalette.ToolTipText, QtGui.QColor(*dcp['ToolTipText']))
+    p.setColor(QtGui.QPalette.Button, QtGui.QColor(*dcp['Button']))
+    p.setColor(QtGui.QPalette.ButtonText, QtGui.QColor(*dcp['ButtonText']))
+    p.setColor(QtGui.QPalette.BrightText, QtGui.QColor(*dcp['BrightText']))
+    p.setColor(QtGui.QPalette.Highlight, QtGui.QColor(*dcp['Highlight']))
+    p.setColor(QtGui.QPalette.HighlightedText, QtGui.QColor(*dcp['HighlightedText']))
+    p.setColor(QtGui.QPalette.Link, QtGui.QColor(*dcp['Link']))
+    p.setColor(QtGui.QPalette.LinkVisited, QtGui.QColor(*dcp['LinkVisited']))
+    p.setColor(QtGui.QPalette.Mid, QtGui.QColor(*dcp['Mid']))
+    p.setColor(QtGui.QPalette.Midlight, QtGui.QColor(*dcp['Midlight']))
+    p.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor(*dcp['PlaceholderText']))
+    p.setColor(QtGui.QPalette.Shadow, QtGui.QColor(*dcp['Shadow']))
+    p.setColor(QtGui.QPalette.Text, QtGui.QColor(*dcp['Text']))
+    q_app.setPalette(p)
+
+    # open Providentia
     ProvidentiaMainWindow(**kwargs)
     sys.exit(q_app.exec_())
