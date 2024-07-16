@@ -76,6 +76,11 @@ class ProvArgumentParser(object):
                                      default=False,
                                      action='store_true',
                                      help="run Providentia offline mode")
+            self.parser.add_argument("--download", "--dl",
+                                     dest="download",
+                                     default=False,
+                                     action='store_true',
+                                     help="run Providentia download mode")
             self.parser.add_argument("--network",
                                      dest="network",
                                      help="define network to load (e.g. 'EBAS', 'EEA_AQ_eReporting'")
