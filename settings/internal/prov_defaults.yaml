@@ -2,8 +2,8 @@
     "network": ["EBAS"], # TODO different in interpolation (change done in validation)
     "species": ["sconco3"], # TODO different in interpolation (change done in validation)
     "resolution": "hourly", # TODO different in interpolation (change done in validation)
-    "start_date": "20180101",
-    "end_date": "20190101",
+    "start_date": "20180101", # TODO different in interpolation (change done in validation) #dont know if the number in interpolation is the default
+    "end_date": "20190101", # TODO different in interpolation (change done in validation) #dont know if the number in interpolation is the default
     "statistic_mode": "Temporal|Spatial",
     "statistic_aggregation": {
                                 "Temporal|Spatial": "Median", 
