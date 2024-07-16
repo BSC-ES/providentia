@@ -589,16 +589,41 @@ class ProvidentiaDownload(object):
         
         # get resolution and species combinations
         res_spec_dir = []
+        
+        # domain and ensemble option are part of the experiment name, all united by dash (-)
+        experiment_new = experiment
 
+        # domain and ensemble option are directories
+        experiment_old = experiment.replace("-","/")
+        
+        # get remote directory format depending on the ghost version
+        experiment = experiment_old if self.ghost_version in ["1.2", "1.3", "1.3.1"] else experiment_new
+
+        # get remote directory
         remote_dir = os.path.join(self.exp_remote_path,self.ghost_version,experiment)
 
-        # TODO, should check if experiment is checked
-        if experiment not in self.sftp.listdir(os.path.join(self.exp_remote_path,self.ghost_version)):
-            msg = f"There is no data available for {experiment} experiment for the current ghost version ({self.ghost_version})."
+        # TODO, should check if experiment is checked in when merged to interpolation branch
+        # check if experiment exists
+        try:
+            self.sftp.stat(remote_dir)
+        except FileNotFoundError:
+            msg = f"There is no data available for {experiment_new} experiment for the current ghost version ({self.ghost_version})."
             
+            # get possible ghost versions from the combination of GHOST_standards and the real avaibles in the experiment remote machine path
             possible_ghost_versions = set(self.sftp.listdir(self.exp_remote_path)).intersection(set(self.possible_ghost_versions))
-            available_ghost_versions = list(filter(lambda x:experiment in self.sftp.listdir(os.path.join(self.exp_remote_path,x)),possible_ghost_versions))
             
+            # get available experiments available in other ghost versions (considering different formats)
+            available_ghost_versions = []
+            for possible_ghost_version in possible_ghost_versions:
+                try:
+                    if possible_ghost_version in ["1.2", "1.3", "1.3.1"]:
+                        self.sftp.stat(os.path.join(self.exp_remote_path,possible_ghost_version,experiment_old))
+                    else:
+                        self.sftp.stat(os.path.join(self.exp_remote_path,possible_ghost_version,experiment_new))
+                    available_ghost_versions.append(possible_ghost_version)
+                except FileNotFoundError:
+                    pass
+
             if available_ghost_versions:
                 msg += f" Please check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
             else:
@@ -611,14 +636,14 @@ class ProvidentiaDownload(object):
             try:
                 sftp_species  = self.species if self.species else self.sftp.listdir(os.path.join(remote_dir,resolution))
             except FileNotFoundError:
-                msg = f"There is no data available for {experiment} experiment at {resolution} resolution"
+                msg = f"There is no data available for {experiment_new} experiment at {resolution} resolution"
                 show_message(self, msg)
                 continue
             for species in sftp_species: 
                 try:
                     sftp_network = self.network if self.network else self.sftp.listdir(os.path.join(remote_dir,resolution,species))
                 except FileNotFoundError:
-                    msg = f"There is no data available for {experiment} experiment {species} species at {resolution} resolution"
+                    msg = f"There is no data available for {experiment_new} experiment {species} species at {resolution} resolution"
                     show_message(self, msg)
                     continue
                 for network in sftp_network:
@@ -626,39 +651,39 @@ class ProvidentiaDownload(object):
         
         # print the species, resolution and experiment combinations that are going to be downloaded
         if res_spec_dir:
-            print(f"\n{experiment} experiment data to download: ({len(res_spec_dir)})")
+            print(f"\n{experiment_new} experiment data to download: ({len(res_spec_dir)})")
             for combi_print in res_spec_dir:
-                print(f"  - {os.path.join(self.exp_root,combi_print.split('/',7)[-1])}")
+                local_path = combi_print.split('/',7)[-1]
+                if self.ghost_version in ["1.2", "1.3", "1.3.1"]:
+                    print(f"  - {os.path.join(self.exp_root,self.ghost_version,'-'.join(local_path.split('/')[1:4]),*local_path.split('/')[4:])}")
+                else:
+                    print(f"  - {os.path.join(self.exp_root,local_path)}")
 
             valid_res_spec_dir_nc_files = []
             # get all the nc files in the date range
             for remote_path in res_spec_dir:
-                network = remote_path.split('/',11)[-1]
-                species = remote_path.split('/',11)[-2]
-                resolution = remote_path.split('/',11)[-3]
-
+                network = remote_path.split('/')[-1]
+                species = remote_path.split('/')[-2]
+                resolution = remote_path.split('/')[-3]
+                
+                # get nc files if directory is found
                 try:
                     nc_files = self.sftp.listdir(remote_path)
                 except FileNotFoundError:
-                    # convert nonghost networks in experiments from being separated with slashes to dashes
-                    try:
-                        remote_path = os.path.join(remote_dir,resolution,species,network.replace('/','-'))
-                        nc_files = self.sftp.listdir(remote_path)
-                    except FileNotFoundError:
-                        msg = f"There is no data available for {experiment} experiment {species} species {network} network at {resolution} resolution"
-                        show_message(self, msg)
-                        continue
+                    msg = f"There is no data available for {experiment_new} experiment {species} species {network} network at {resolution} resolution"
+                    show_message(self, msg)
+                    continue
                         
                 valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
 
                 # warning if experiment + species + resolution + network + date range combination gets no matching results       
                 if not valid_nc_files:                 
-                    msg = f"There is no data available from {self.start_date} to {self.end_date} for {experiment} experiment {species} species {network} network at {resolution} resolution"
+                    msg = f"There is no data available from {self.start_date} to {self.end_date} for {experiment_new} experiment {species} species {network} network at {resolution} resolution"
                     show_message(self, msg)
                     continue
                 
-                # create directory local just as the remote one (imitates remote network (with dashes or without dashes)) #TODO CHECK IF THEY LIKE THAT
-                local_dir = os.path.join(self.exp_root,remote_path.split('/',7)[-1])
+                # create local directory (always with experiments on the new format)
+                local_dir = os.path.join(self.exp_root,self.ghost_version,experiment_new,resolution,species,network)
 
                 unique_valid_nc_files = copy.deepcopy(valid_nc_files)
                 valid_res_spec_dir_nc_files.append((remote_path,local_dir,unique_valid_nc_files))
@@ -678,7 +703,7 @@ class ProvidentiaDownload(object):
                         local_path = os.path.join(local_dir,nc_file)
                         self.sftp.get(remote_path,local_path)
 
-                print(f"\n{experiment} experiments downloaded: ({len(valid_res_spec_dir_nc_files)})")
+                print(f"\n{experiment_new} experiments downloaded: ({len(valid_res_spec_dir_nc_files)})")
                 for _,local_dir,_ in valid_res_spec_dir_nc_files:
                     print(f"  - {os.path.join(local_dir)}")
 
