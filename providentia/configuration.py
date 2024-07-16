@@ -15,6 +15,7 @@ import numpy as np
 from packaging.version import Version
 import pandas as pd
 from itertools import compress
+import ast
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
 
@@ -1285,10 +1286,12 @@ def read_conf(fpath=None):
                 # if first character of key is comment character (#), do not parse this attribute
                 if par_k[0] == '#':
                     continue
+                # transform str booleans, ints, floats etc. to their real type if possible
                 try:
-                    res_sub[par_k] = eval(par_val)
+                    par_val = ast.literal_eval(par_val)
                 except:
-                    res_sub[par_k] = par_val
+                    pass
+                res_sub[par_k] = par_val
         else:
             is_subsection = False
 
@@ -1303,10 +1306,12 @@ def read_conf(fpath=None):
             if k[0] == '#':
                 continue
             # overwrite attributes from current subsection
+            # transform str booleans, ints, floats etc. to their real type if possible
             try:
-                res_sub[k] = eval(val)
+                val = ast.literal_eval(val)
             except:
-                res_sub[k] = val
+                pass
+            res_sub[k] = val
 
         # store pairs into res variable
         res[section_modified] = res_sub
