@@ -124,7 +124,6 @@ class SubmitInterpolation(object):
         sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia', 'dependencies','unit-converter'))
         import unit_converter
 
- 
     def gather_arguments(self):
         ''' Gather list of arguments for all unique tasks to process, as defined in the configuration file. '''
 
@@ -376,7 +375,7 @@ class SubmitInterpolation(object):
                                     # if have defined ensemble members to process, then continue as no files in this 
                                     # directory have ensemble member number
                                     if ensemble_option != 'allmembers':
-                                        print("TODO ERROR AKI MIRAR COMO HACERLO")
+                                        print("TODO ERROR AKI MIRAR COMO HACERLO, POR CULPA DE QUE ENTRA A ESTE CONTINUE NO PUEDE HACERSE obs_files_dates POR LO QUE NO SE COMPLETA")
                                         continue
                                     # otherwise, proceed (tag files as ensemble member '000' for sake of operation)
                                     else:
