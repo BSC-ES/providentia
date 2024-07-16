@@ -795,15 +795,15 @@ class ProvConfiguration:
                     else:
                         error = "Format of Start date (start_date) not correct, please change it to YYYYMM."
                         sys.exit(error)
-                else:
-                    if len_start_date != 8:
-                        if len_start_date == 6:
-                            self.read_instance.start_date = self.read_instance.start_date + "01"
-                            msg = "Start date (start_date) was defined as YYYYMM, changing it to YYYYMMDD. Using '{}'.".format(self.read_instance.start_date)
-                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                        else:
-                            error = "The format of Start date (start_date) is not correct, please change it to YYYYMMDD."
-                            sys.exit(error)
+            else:
+                if len_start_date != 8:
+                    if len_start_date == 6:
+                        self.read_instance.start_date = self.read_instance.start_date + "01"
+                        msg = "Start date (start_date) was defined as YYYYMM, changing it to YYYYMMDD. Using '{}'.".format(self.read_instance.start_date)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                    else:
+                        error = "The format of Start date (start_date) is not correct, please change it to YYYYMMDD."
+                        sys.exit(error)
 
         # check end_date  format, TODO START DATE IS DIFFERENT IN INTERPOLATION (check in the refactoring)
         # if offline, throw message, stating are using default instead
@@ -826,19 +826,20 @@ class ProvConfiguration:
                     else:
                         error = "Format of End Date (end_date) not correct, please change it to YYYYMM."
                         sys.exit(error)
-                else:
-                    if len_end_date != 8:
-                        if len_end_date == 6:
-                            self.read_instance.end_date = self.read_instance.end_date + "01"
-                            msg = "End Date (end_date) was defined as YYYYMM, changing it to YYYYMMDD. Using '{}'.".format(self.read_instance.end_date)
-                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                        else:
-                            error = "The format of End Date (end_date) is not correct, please change it to YYYYMMDD."
-                            sys.exit(error)
+            else:
+                if len_end_date != 8:
+                    if len_end_date == 6:
+                        self.read_instance.end_date = self.read_instance.end_date + "01"
+                        msg = "End Date (end_date) was defined as YYYYMM, changing it to YYYYMMDD. Using '{}'.".format(self.read_instance.end_date)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                    else:
+                        error = "The format of End Date (end_date) is not correct, please change it to YYYYMMDD."
+                        sys.exit(error)
 
         # check have n_neighbours information, TODO ONLY FOR INTERPOLATION
         # if offline, throw message, stating are using default instead
-        if not self.read_instance.n_neighbours or self.read_instance.n_neighbour == "default":
+        # TODO CHANGE THE MESSAGE WHEN ITS DEFAULT AND WHEN ITS BECAUSE I DIDNT PUT THE NAME
+        if self.read_instance.interpolation and (not self.read_instance.n_neighbours or self.read_instance.n_neighbour == "default"):
             default = default_values['n_neighbours']
             msg = "Number of neighbours (n_neighbours) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
@@ -856,6 +857,7 @@ class ProvConfiguration:
         # check have ensemble_options information, TODO ONLY FOR INTERPOLATION
         # TODO think if we need one separated variable for this one because it is already included on experiments
         # if offline, throw message, stating are using default instead
+        # TODO maybe think this a bit better, if i dont pass it it should check better if i already passed it in experiments and so
         if not self.read_instance.ensemble_options or self.read_instance.ensemble_options == "default":
             default = default_values['ensemble_options']
             msg = "Ensemble options (ensemble_options) was not defined in the configuration file. Using '{}' as default.".format(default)
