@@ -162,6 +162,14 @@ elif [ "${OS}" == "Windows" ]; then
     ip=${LOCAL_IP:-`ipconfig.exe | grep -im1 'IPv4 Address' | cut -d ':' -f2`}
 fi
 
+# if download mode is executed from the remote machines, exit
+if $download; then
+    if [[ "${BSC_MACHINE}" == "mn5" || "${BSC_MACHINE}" == "nord3v2" || "${BSC_MACHINE}" == "84.88.185.48" ]]; then
+        echo "Download mode only available in local. Exiting..."
+        exit 1
+    fi
+fi
+
 # execution
 # CTE POWER 9
 if [ "${BSC_MACHINE}" == "power" ]; then
@@ -197,11 +205,6 @@ if [ "${BSC_MACHINE}" == "power" ]; then
 elif [ "${BSC_MACHINE}" == "mn5" ]; then
 
     echo "INFO: Running on MN5..."
-
-    if $download; then
-        echo "Download mode only available in local. Exiting..."
-        exit 1
-    fi
 
     # load modules from conda environment
     active_env=false
@@ -320,10 +323,6 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
             eval "${salloc_command} ${constraint_option} ${queue_option}"
         fi
 
-    elif $download; then
-        echo "Download mode only available in local. Exiting..."
-        exit 1
-
     else
         if $debugexec; then
             eval "srun ${python_command}"
@@ -346,10 +345,6 @@ elif [ "${ip}" == "84.88.185.48" ]; then
         echo "Starting interactive jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}
         jupyter-lab
-
-    elif $download; then
-        echo "Download mode only available in local. Exiting..."
-        exit 1
 
     else
         eval "${python_command}"
