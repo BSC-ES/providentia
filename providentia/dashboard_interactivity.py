@@ -401,7 +401,7 @@ class HoverAnnotation(object):
 
                 # update location
                 self.annotation.xy = (time, concentration)
-                self.vline.set_xdata(time)
+                self.vline.set_xdata([time])
 
                 # update bbox position
                 if time > np.datetime64(self.x_middle['timeseries']):
@@ -498,7 +498,7 @@ class HoverAnnotation(object):
 
                 # update location
                 self.annotation.xy = (concentration, density)
-                self.vline.set_xdata(concentration)
+                self.vline.set_xdata([concentration])
 
                 # update bbox position
                 if concentration > self.x_middle['distribution']:
@@ -652,7 +652,7 @@ class HoverAnnotation(object):
 
                 # update location
                 self.canvas_instance.annotations['periodic'][resolution].xy = (time, concentration)
-                self.canvas_instance.annotations_vline['periodic'][resolution].set_xdata(time)
+                self.canvas_instance.annotations_vline['periodic'][resolution].set_xdata([time])
 
                 # update bbox position
                 if time > self.x_middle['periodic'][resolution]:
@@ -721,7 +721,7 @@ class HoverAnnotation(object):
 
                 # update location
                 self.canvas_instance.annotations['periodic-violin'][resolution].xy = (time, concentration)
-                self.canvas_instance.annotations_vline['periodic-violin'][resolution].set_xdata(time)
+                self.canvas_instance.annotations_vline['periodic-violin'][resolution].set_xdata([time])
 
                 # update bbox position
                 if time > self.x_middle['periodic-violin'][resolution]:
