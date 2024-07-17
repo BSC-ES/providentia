@@ -3,7 +3,7 @@
 # conda install -c conda-forge cartopy
 # conda install -c conda-forge jupyterlab
 
-matplotlib==3.8.4
+matplotlib==3.9.1
 netCDF4==1.6.5
 numpy==1.26.4
 pandas==2.2.1
