@@ -801,9 +801,11 @@ class Interactive:
                         relevant_ax.legend(**legend_handles)
 
         # make colourbar (embedded on plot axis)
-        if cb:
-            if 'cb' in self.plot_characteristics[plot_type]:
-                self.make_colourbar(fig, relevant_ax, zstat, speci, plot_type)
+        if 'cb' in self.plot_characteristics[plot_type]:
+            cb_ax = self.make_colourbar(fig, relevant_ax, zstat, speci, plot_type)
+            # hide colourbar if requested, we still need to create it to get the correct cmap / bounds in the maps
+            if not cb:
+                cb_ax.set_visible(False)
 
         # if save is passed then save plot and return
         if save:
@@ -845,7 +847,7 @@ class Interactive:
         # generate colourbar
         generate_colourbar(self, [plot_ax], [cb_ax], stat, self.plot_characteristics[plot_type], speci)
 
-        return None
+        return cb_ax
     
     def make_legend(self, plot_type, data_labels=None, set_obs=True):
         """ Wrapper method to make legend.
