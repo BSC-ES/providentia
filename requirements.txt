@@ -6,7 +6,7 @@
 matplotlib==3.9.1
 netCDF4==1.6.5
 numpy==1.26.4
-pandas==2.2.1
+pandas==2.2.2
 pyproj==3.6.1
 PyQt5==5.15.10
 seaborn==0.13.2
@@ -14,7 +14,7 @@ scipy==1.12.0
 ConfigArgParse==1.7
 cftime==1.6.3
 KDEpy==1.1.9
-xarray==2024.2.0
+xarray==2024.6.0
 Sphinx==7.2.6
 Sphinx-rtd-theme==2.0.0
 coverage==7.4.3
