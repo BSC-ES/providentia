@@ -422,7 +422,7 @@ def get_frequency_code(resolution):
     """ Get frequency code. """
     
     if resolution in ['hourly', 'hourly_instantaneous']:
-        active_frequency_code = 'H'
+        active_frequency_code = 'h'
     elif resolution in ['3hourly', '3hourly_instantaneous']:
         active_frequency_code = '3H'
     elif resolution in ['6hourly', '6hourly_instantaneous']:
