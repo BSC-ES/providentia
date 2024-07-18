@@ -309,7 +309,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
 
             # get months that are complete
             months_start = pd.date_range(xlim['left'], xlim['right'], freq='MS')
-            months_end = pd.date_range(xlim['left'], xlim['right'], freq='M')
+            months_end = pd.date_range(xlim['left'], xlim['right'], freq='ME')
             if months_start.size > 1:
                 if (xlim['right'] - months_end[-1]).days >= 1:
                     months = months_start[:-1]
