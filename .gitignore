@@ -11,4 +11,3 @@ saved_data/*
 notebooks/.ipynb_checkpoints
 interactive.out
 .env
-settings/internal
