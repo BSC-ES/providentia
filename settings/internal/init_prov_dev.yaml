@@ -27,6 +27,7 @@
             "n_neighbours" : null, #interpolation
             "domain" : null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
             "ensemble_options" : null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
+            'exp_id' : [], # TODO NEW PAULA'S IDEA FEELING CUTE I MIGHT DELETE IT LATER
             'qa': null,
             'flags': null,
             'add_qa': null,
