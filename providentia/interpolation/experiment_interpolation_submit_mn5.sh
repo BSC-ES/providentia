@@ -23,6 +23,7 @@ fi
 
 # load greasy
 echo "Loading dependencies..."
-source load_modules.sh
+# source load_modules.sh
+# TODO try to initialize in the providentia bin file
 
 srun --output=providentia/interpolation/management_logs/$SLURM_JOB_ID.out python -u providentia/interpolation/experiment_interpolation_submission.py $SLURM_JOB_ID $*

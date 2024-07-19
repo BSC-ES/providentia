@@ -134,9 +134,10 @@ class SubmitInterpolation(object):
         self.output_log_roots = []
 
         # iterate through desired experiment IDs
-        for alias, exp_dom_ens in self.experiments.items(): 
-            experiment_to_process, grid_type, ensemble_option = exp_dom_ens.split("-") #mirar bien el domain
-            
+        for experiment_to_process, grid_type, ensemble_option in zip(self.exp_id,self.domain,self.ensemble_options):
+            # TODO delete this when sure
+            # experiment_to_process, grid_type, ensemble_option = exp_dom_ens.split("-") # TODO mirar bien el domain
+
             print('\nEXPERIMENT: {0}'.format(experiment_to_process))
 
             # create arguments list
@@ -375,7 +376,6 @@ class SubmitInterpolation(object):
                                     # if have defined ensemble members to process, then continue as no files in this 
                                     # directory have ensemble member number
                                     if ensemble_option != 'allmembers':
-                                        print("TODO ERROR AKI MIRAR COMO HACERLO, POR CULPA DE QUE ENTRA A ESTE CONTINUE NO PUEDE HACERSE obs_files_dates POR LO QUE NO SE COMPLETA")
                                         continue
                                     # otherwise, proceed (tag files as ensemble member '000' for sake of operation)
                                     else:
@@ -661,7 +661,7 @@ class SubmitInterpolation(object):
         submit_file.write("#SBATCH --qos={}\n".format(self.qos))
         submit_file.write("##SBATCH --output=/dev/null\n")
         submit_file.write("##SBATCH --error=/dev/null\n")
-        if self.machine == 'mn5':
+        if self.machine == 'mn5': # TODO when checking if debug works check this
             submit_file.write("#SBATCH --account=bsc32\n")  
             submit_file.write("#SBATCH --ntasks-per-node={}\n".format(n_simultaneous_tasks))
             submit_file.write("#SBATCH --cpus-per-task=1\n")

@@ -3,6 +3,8 @@ module purge
 
 # Marenostrum5
 if [ "${BSC_MACHINE}" == "mn5" ]; then
+    # TODO Check if needed in second step of interpolation
+    module load bsc/1.0 oneapi/2023.2.0 # TODO i mean this part is from denes code
     module load greasy/2.2.4.1
     module load libexpat udunits hdf5 pnetcdf/1.12.3 netcdf nco/5.2.2
 
