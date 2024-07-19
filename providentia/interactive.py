@@ -1212,21 +1212,27 @@ class Interactive:
         :rtype: numpy.ndarray
         """
 
-        # set temporary fname for writing
-        temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp_{}'.format(self.networkspecies[0]))
+        # for non-ghost, remove first part of networkspecies name (e.g. ghost_btx/ghost_btx|sconcc6h6 -> ghost_btx|sconcc6h6)
+        # this will avoid permission denied errors
+        networkspeci = self.networkspecies[0]
+        if '/' in networkspeci:
+            networkspeci = networkspeci.split('/')[1]
 
+        # set temporary fname for writing
+        temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp_{}'.format(networkspeci))
+        
         # check if temporary fname already exists 
         if os.path.isfile(temporary_fname):
             # if so, keep iterating until find fname is new
             invalid_fname = True
             dup_count = 2
             while invalid_fname:
-                temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp_{}_{}'.format(self.networkspecies[0], dup_count))
+                temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp_{}_{}'.format(networkspeci, dup_count))
                 if os.path.isfile(temporary_fname):
                     dup_count += 1
                 else:
                     invalid_fname = False
-
+        
         if format in ['netCDF', 'netcdf', 'netCDF4', 'netcdf4', 'nc', '.nc']:
             data = export_netcdf(self, temporary_fname, set_in_memory=True)
 
