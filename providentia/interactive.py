@@ -638,7 +638,23 @@ class Interactive:
                 self.reset_filter(initialise=True)
             else:
                 self.reset_filter()
-        
+
+        # get number of total available stations, and individual station information if just have 1 station
+        if self.temporal_colocation:
+            station_inds = self.valid_station_inds_temporal_colocation[networkspeci][self.observations_data_label]
+        else:
+            station_inds = self.valid_station_inds[networkspeci][self.observations_data_label]  
+        n_stations = len(station_inds)
+        if n_stations == 1:
+            station_ind = station_inds[0]
+            current_lon = round(self.station_longitudes[networkspeci][station_ind], 2)
+            current_lat = round(self.station_latitudes[networkspeci][station_ind], 2)
+            current_station_name = self.station_names[networkspeci][station_ind]
+            current_station_reference = self.station_references[networkspeci][station_ind]
+        elif n_stations == 0:
+            print('No valid stations for {} in {} subsection. Not making {} plot'.format(networkspeci, self.subsection, plot_type))
+            return
+
         # make timeseries plot
         elif base_plot_type == 'timeseries':
             func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
@@ -654,19 +670,6 @@ class Interactive:
         else: 
             func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
                  plot_options)
-
-        # get number of total available stations, and individual station information if just have 1 station
-        if self.temporal_colocation:
-            station_inds = self.valid_station_inds_temporal_colocation[networkspeci][self.observations_data_label]
-        else:
-            station_inds = self.valid_station_inds[networkspeci][self.observations_data_label]  
-        n_stations = len(station_inds)
-        if n_stations == 1:
-            station_ind = station_inds[0]
-            current_lon = round(self.station_longitudes[networkspeci][station_ind], 2)
-            current_lat = round(self.station_latitudes[networkspeci][station_ind], 2)
-            current_station_name = self.station_names[networkspeci][station_ind]
-            current_station_reference = self.station_references[networkspeci][station_ind]
 
         # set title, xlabel and ylabel for plots
 
