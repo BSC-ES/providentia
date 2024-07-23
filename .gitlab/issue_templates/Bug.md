@@ -8,7 +8,7 @@
 
 ## Configuration file
 
-(If you are using the dashboard, please download the configuration file from there)
+(If you are using the dashboard, please download the configuration file from there. Do not write the path to your configuration file, only copy and paste its content)
 
 ## Machine
 
