@@ -12,6 +12,7 @@ import paramiko
 from base64 import decodebytes
 import signal
 import copy
+import time
 
 # urlparse
 from tqdm import tqdm
@@ -62,6 +63,9 @@ class ProvidentiaDownload(object):
         # initialise zenodo url
         self.ghost_url = 'https://zenodo.org/records/10637450'
 
+        # get providentia start time
+        self.prov_start_time = time.time()
+
         # initialize dictionaries to store possible networks
         self.ghost_zip_files = {} # TODO: Maybe this variable could work with the zenodo one
 
@@ -86,8 +90,9 @@ class ProvidentiaDownload(object):
         self.prv_user = env.get("PRV_USER")
         self.prv_password = env.get("PRV_PWD")
 
-        # get ssh user and password 
+        # get user preference over ghost download and overwrite
         self.bsc_download_choice = env.get("BSC_DL_CHOICE")
+        self.overwrite_choice = env.get("OVERWRITE")
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
@@ -173,8 +178,12 @@ class ProvidentiaDownload(object):
                         sys.exit(error)
                 # non-ghost
                 else:
-                    self.download_nonghost_network(network)
-            
+                    # get the files that need to be downloaded, check if they already are and download or not
+                    initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
+                    files_to_download = self.select_files_to_download(initial_check_nc_files)
+                    if files_to_download:
+                        self.download_nonghost_network(network, initial_check=False, files_to_download=files_to_download)
+
             # when one of those symbols is passed, get all experiments
             if self.experiments == {'*': '*'} or self.experiments == {'default': 'default'}:
                 self.get_all_experiments()
@@ -276,21 +285,53 @@ class ProvidentiaDownload(object):
             
             print(f"\nBSC download choice saved on {os.path.join(PROVIDENTIA_ROOT, '.env')}")
                     
-    def download_nonghost_network(self,network):
+    def select_files_to_download(self, nc_files_to_download):
+        """ Returns the files that are not already downloaded. """
+        # get the downloaded and not downloaded files
+        not_downloaded_files = list(filter(lambda x:not os.path.exists(x), nc_files_to_download))
+        downloaded_files = list(filter(lambda x:os.path.exists(x), nc_files_to_download))
+        
+        # get the files that were downloaded before the execution
+        downloaded_before_execution_files = list(filter(lambda x:self.prov_start_time > os.path.getctime(x), downloaded_files))
+
+        # if there was any file downloaded before the execution    
+        if downloaded_before_execution_files:
+            # make the user choose between overwriting or not overwriting
+            if self.overwrite_choice not in ['y','n']:
+                # ask if user wants to overwrite
+                while self.overwrite_choice not in ['y','n']:
+                    self.overwrite_choice = input("\nThere are some files that were already downloaded in a previous download, do you want to overwrite them (y/n)? ").lower() 
+                # ask if user wants to remember the decision
+                remind_txt = None
+                while remind_txt not in ['y','n']:
+                    remind_txt = input("\nDo you want to remember your decision for future downloads (y/n)? ").lower() 
+                # save the decision
+                if remind_txt == 'y':
+                    with open(os.path.join(PROVIDENTIA_ROOT, ".env"),"a") as f:
+                        f.write(f"OVERWRITE={self.overwrite_choice}\n")
+            # if user wants to overwrite then add the the files that were 
+            # downloaded before the execution as if they were never download
+            if self.overwrite_choice == 'y':
+                not_downloaded_files += downloaded_before_execution_files
+
+        return not_downloaded_files
+
+    def download_nonghost_network(self,network,initial_check,files_to_download=None):
         # check if ssh exists and check if still active, connect if not
         if self.ssh == None or self.ssh.get_transport().is_active():
             self.connect() 
-
-        # print current_network
-        print('\n'+'-'*40)
-        print(f"\nDownloading non-GHOST {network} network data from {REMOTE_MACHINE}...")
+        
+        if not initial_check:
+            # print current_network
+            print('\n'+'-'*40)
+            print(f"\nDownloading non-GHOST {network} network data from {REMOTE_MACHINE}...")
 
         # if not valid network, check if user put the network on init_prov 
         if network not in self.nonghost_available_networks:
             msg = f"The {network} network could not be found on {os.path.join(PROVIDENTIA_ROOT,'settings','init_prov.yaml')} nonghost_available_networks list."
             msg += "\nPlease, add the network to the list and execute again."
-            show_message(self, msg)
-            return 
+            show_message(self, msg, deactivate=initial_check)
+            return None
         
         # check if nonghost network exists in directory
         # TODO: Change this to somewhere in configuration, the one up too
@@ -298,8 +339,8 @@ class ProvidentiaDownload(object):
             self.sftp.stat(os.path.join(self.nonghost_remote_obs_path,network))
         except FileNotFoundError:
             msg = f"There is no data available for {network} network."
-            show_message(self, msg)
-            return 
+            show_message(self, msg, deactivate=initial_check)
+            return None
 
         # check if all resolutions are in init_prov, if not warning and delete the not correct ones
         not_available_resolutions = set(self.resolution) - set(self.nonghost_available_resolutions)
@@ -307,8 +348,8 @@ class ProvidentiaDownload(object):
             available_resolutions = set(self.resolution) - not_available_resolutions
             msg = f"The resolution/s {', '.join(not_available_resolutions)} could not be found on {os.path.join(PROVIDENTIA_ROOT,'settings','init_prov.yaml')} nonghost_available_resolutions list."
             msg += "\nPlease, add the necessary resolutions to the list and execute again."
-            show_message(self, msg)
-            return 
+            show_message(self, msg, deactivate=initial_check)
+            return None
 
         # get resolution and species combinations
         res_spec_dir = []
@@ -319,20 +360,26 @@ class ProvidentiaDownload(object):
                 sftp_species  = self.species if self.species else self.sftp.listdir(os.path.join(self.nonghost_remote_obs_path,network,resolution))
             except FileNotFoundError:
                 msg = f"There is no data available for {network} network at {resolution} resolution"
-                show_message(self, msg)
+                show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species: 
                 res_spec_dir.append(os.path.join(self.nonghost_remote_obs_path,network,resolution,species))
         
-        # print the species, resolution and network combinations that are going to be downloaded
         if res_spec_dir:
-            print(f"\n{network} observations to download: ({len(res_spec_dir)})")
-            for combi_print in res_spec_dir:
-                print(f"  - {os.path.join(self.nonghost_root,combi_print.split('/',6)[-1])}")
+            
+            # initialise list with all the nc files to be downloaded
+            initial_check_nc_files = []
 
-            valid_res_spec_dir_nc_files = []
+            if not initial_check:
+                print(f"\n{network} observations to download: ({len(res_spec_dir)})")
+            
             # get all the nc files in the date range within the specie and resolution combination
             for remote_dir in res_spec_dir:
+
+                #  print the species, resolution and network combinations that are going to be downloaded
+                if not initial_check:
+                    print(f"\n  - {os.path.join(self.nonghost_root,remote_dir.split('/',6)[-1])}")
+
                 local_dir = os.path.join(self.nonghost_root,remote_dir.split('/',6)[-1])
                 species = remote_dir.split('/')[-1]
                 resolution = remote_dir.split('/')[-2]
@@ -341,7 +388,7 @@ class ProvidentiaDownload(object):
                     nc_files = self.sftp.listdir(remote_dir)
                 except FileNotFoundError:
                     msg = f"There is no data available for {network} network {species} species at {resolution} resolution"
-                    show_message(self, msg)
+                    show_message(self, msg, deactivate=initial_check)
                     continue
 
                 valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
@@ -349,38 +396,48 @@ class ProvidentiaDownload(object):
                 # warning if network + species + resolution + date range combination gets no matching results       
                 if not valid_nc_files:                 
                     msg = f"There is no data available from {self.start_date} to {self.end_date} for {network} network {species} species at {resolution} resolution."
-                    show_message(self, msg)
+                    show_message(self, msg, deactivate=initial_check)
                     continue
-                
-                unique_valid_nc_files = copy.deepcopy(valid_nc_files)
-                valid_res_spec_dir_nc_files.append((remote_dir,local_dir,unique_valid_nc_files))
-            
-            print()
 
-            # download the valid resolution specie date combinations
-            if valid_res_spec_dir_nc_files:
-                for remote_dir,local_dir,valid_nc_files in tqdm(valid_res_spec_dir_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"Available observations ({len(valid_res_spec_dir_nc_files)})"):
+                # download the valid resolution specie date combinations
+                if valid_nc_files:
+        
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
                         os.makedirs(local_dir) 
 
-                    # download each individual nc file using sftp protocol
-                    for nc_file in valid_nc_files:
-                        remote_path = os.path.join(remote_dir,nc_file)
-                        local_path = os.path.join(local_dir,nc_file)
-                        self.sftp.get(remote_path,local_path)
+                    if not initial_check:
+                        # get the ones that are not already downloaded
+                        valid_nc_files = list(filter(lambda x:os.path.join(local_dir,x) in files_to_download, valid_nc_files))
+                        if not valid_nc_files:
+                            msg = "nc files already downloaded."
+                            show_message(self, msg, deactivate=initial_check)     
+                            continue         
+                        valid_nc_files_iter = tqdm(valid_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading nc files ({len(valid_nc_files)})")
+                    else:
+                        # do not print the bar if it is the initial check
+                        valid_nc_files_iter = valid_nc_files
 
-                print(f"\n{network} observations downloaded: ({len(valid_res_spec_dir_nc_files)})")
-                for _,local_dir,_ in valid_res_spec_dir_nc_files:
-                    print(f"  - {os.path.join(local_dir)}")
-            
-            # tell the user if not valid resolution specie date combinations
-            else:
-                print("There are no available observations to be downloaded.")
+                    # download each individual nc file using sftp protocol
+                    for nc_file in valid_nc_files_iter:
+                        local_path = os.path.join(local_dir,nc_file)
+                        if initial_check:
+                            initial_check_nc_files.append(local_path)
+                        else:
+                            remote_path = os.path.join(remote_dir,nc_file)
+                            self.sftp.get(remote_path,local_path)
+
+                # tell the user if not valid resolution specie date combinations
+                else:
+                    msg = "There are no available observations to be downloaded."
+                    show_message(self, msg, deactivate=initial_check)
        
         # tell the user if not valid resolution specie date combinations
         else:
-            print("There are no available observations to be downloaded.")
+            msg = "There are no available observations to be downloaded."
+            show_message(self, msg, deactivate=initial_check)
+
+        return initial_check_nc_files
         
     def download_ghost_network_sftp(self,network):
         # check if ssh exists and check if still active, connect if not
