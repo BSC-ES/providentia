@@ -432,7 +432,7 @@ def update_metadata_fields(instance):
                     valid_station_inds = instance.valid_station_inds[networkspeci][instance.observations_data_label]
                 valid_meta_var_field = instance.metadata_in_memory[networkspeci][meta_var][valid_station_inds, :]
                 meta_var_field.extend(valid_meta_var_field.flatten())
-            # for non-ghost just flatten
+            # just flatten
             else:
                 meta_var_field.extend(instance.metadata_in_memory[networkspeci][meta_var].flatten())
 
