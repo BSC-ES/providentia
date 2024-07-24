@@ -35,7 +35,7 @@ REMOTE_MACHINE = "storage5"
 data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
 
 def check_time(size, file_size):
-    if (time.time() - download.start_time) > download.timeoutLimit:
+    if (time.time() - download.ncfile_dl_start_time) > download.timeoutLimit:
         error = 'Download timeout, try later.'
         sys.exit(error)
         
@@ -434,7 +434,7 @@ class ProvidentiaDownload(object):
                             initial_check_nc_files.append(local_path)
                         else:
                             remote_path = os.path.join(remote_dir,nc_file)
-                            self.start_time = time.time()
+                            self.ncfile_dl_start_time = time.time()
                             self.sftp.get(remote_path,local_path, callback=check_time)
 
                 # tell the user if not valid resolution specie date combinations
@@ -538,7 +538,7 @@ class ProvidentiaDownload(object):
                     for nc_file in valid_nc_files:
                         remote_path = os.path.join(remote_dir,nc_file)
                         local_path = os.path.join(local_dir,nc_file)
-                        self.start_time = time.time()
+                        self.ncfile_dl_start_time = time.time()
                         self.sftp.get(remote_path,local_path, callback=check_time) 
 
                 print(f"\n{network} observations downloaded: ({len(valid_res_spec_dir_nc_files)})")
@@ -772,7 +772,7 @@ class ProvidentiaDownload(object):
                     for nc_file in valid_nc_files:
                         remote_path = os.path.join(remote_dir,nc_file)
                         local_path = os.path.join(local_dir,nc_file)
-                        self.start_time = time.time()
+                        self.ncfile_dl_start_time = time.time()
                         self.sftp.get(remote_path,local_path, callback=check_time) 
 
                 print(f"\n{experiment_new} experiments downloaded: ({len(valid_res_spec_dir_nc_files)})")
