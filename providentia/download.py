@@ -13,6 +13,7 @@ from base64 import decodebytes
 import signal
 import copy
 import time
+import time
 
 # urlparse
 from tqdm import tqdm
@@ -33,6 +34,11 @@ REMOTE_MACHINE = "storage5"
 
 data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
 
+def check_time(size, file_size):
+    if (time.time() - download.start_time) > download.timeoutLimit:
+        error = 'Download timeout, try later.'
+        sys.exit(error)
+        
 def sighandler(*unused):
     print('\nKeyboard Interrupt. Stopping execution.')
     
@@ -93,6 +99,9 @@ class ProvidentiaDownload(object):
         # get user preference over ghost download and overwrite
         self.bsc_download_choice = env.get("BSC_DL_CHOICE")
         self.overwrite_choice = env.get("OVERWRITE")
+
+        # set timeout limit
+        self.timeoutLimit = 3 * 60
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
@@ -425,7 +434,8 @@ class ProvidentiaDownload(object):
                             initial_check_nc_files.append(local_path)
                         else:
                             remote_path = os.path.join(remote_dir,nc_file)
-                            self.sftp.get(remote_path,local_path)
+                            self.start_time = time.time()
+                            self.sftp.get(remote_path,local_path, callback=check_time)
 
                 # tell the user if not valid resolution specie date combinations
                 else:
@@ -528,7 +538,8 @@ class ProvidentiaDownload(object):
                     for nc_file in valid_nc_files:
                         remote_path = os.path.join(remote_dir,nc_file)
                         local_path = os.path.join(local_dir,nc_file)
-                        self.sftp.get(remote_path,local_path)
+                        self.start_time = time.time()
+                        self.sftp.get(remote_path,local_path, callback=check_time) 
 
                 print(f"\n{network} observations downloaded: ({len(valid_res_spec_dir_nc_files)})")
                 for _,local_dir,_ in valid_res_spec_dir_nc_files:
@@ -704,6 +715,9 @@ class ProvidentiaDownload(object):
                     show_message(self, msg)
                     continue
                 for network in sftp_network:
+                    # if network passed by the user and it is ghost, change the slashes for dashes
+                    if not check_for_ghost(network):
+                        network = network.replace("/", "-")
                     res_spec_dir.append(os.path.join(remote_dir,resolution,species,network))
         
         # print the species, resolution and experiment combinations that are going to be downloaded
@@ -758,7 +772,8 @@ class ProvidentiaDownload(object):
                     for nc_file in valid_nc_files:
                         remote_path = os.path.join(remote_dir,nc_file)
                         local_path = os.path.join(local_dir,nc_file)
-                        self.sftp.get(remote_path,local_path)
+                        self.start_time = time.time()
+                        self.sftp.get(remote_path,local_path, callback=check_time) 
 
                 print(f"\n{experiment_new} experiments downloaded: ({len(valid_res_spec_dir_nc_files)})")
                 for _,local_dir,_ in valid_res_spec_dir_nc_files:
