@@ -34,7 +34,6 @@ REMOTE_MACHINE = "storage5"
 data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
 
 def check_time(size, file_size):
-    print(download.timeoutLimit, download.start_time, time.time() - download.start_time)
     if (time.time() - download.start_time) > download.timeoutLimit:
         error = 'Download timeout, try later.'
         sys.exit(error)
