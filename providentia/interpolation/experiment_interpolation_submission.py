@@ -109,10 +109,24 @@ class SubmitInterpolation(object):
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         provconf.check_validity()
 
+        # TODO Hardcoded
+        interp_print_variables = ['chunk_size', 'job_array_limit', 'multithreading', 
+        'reverse_vertical_orientation', 'ghost_version', 'n_neighbours', 'start_date', 
+        'end_date', #'domain', 'ensemble_options', 
+        'experiments', 'species', 'network', 'resolution']
+
         # print variables used, if all species are used print "All Species"        
         print("\nVariables used for the interpolation:\n")
-        for arg,value in self.interpolation_variables.items():
-            print(f"{arg}: {value}")
+        for arg in interp_print_variables:
+            if arg != "experiments":
+                print(f"{arg}: {getattr(self, arg)}")
+            else:
+                print(f"{arg}:")
+                for exp, alias in getattr(self, arg).items():
+                    if self.hasAlias:
+                        print(f" - {exp} ({alias})")
+                    else:
+                        print(f" - {exp}")
 
         # define the QOS (Quality of Service) used to manage jobs on the SLURM system
         if self.machine == 'mn5':
@@ -131,14 +145,17 @@ class SubmitInterpolation(object):
         self.arguments = []
 
         # create list to hold root directory locations of .out log files generated for each task processed
-        self.output_log_roots = []
+        self.output_log_roots = []  
+        
+        # create list of arguments to compare between the iterations
+        last_arguments = None
 
-        # iterate through desired experiment IDs
-        for experiment_to_process, grid_type, ensemble_option in zip(self.exp_id,self.domain,self.ensemble_options):
-            # TODO delete this when sure
-            # experiment_to_process, grid_type, ensemble_option = exp_dom_ens.split("-") # TODO mirar bien el domain
+        # iterate through desired experiment IDs and its types
+        for (exp_dom_ens, alias), experiment_type in zip(self.experiments.items(), self.experiment_types):
+            
+            experiment_to_process, grid_type, ensemble_option = exp_dom_ens.split("-") 
 
-            print('\nEXPERIMENT: {0}'.format(experiment_to_process))
+            print('\nEXPERIMENT: {0}'.format(alias))
 
             # create arguments list
             exp_arguments = []
@@ -149,18 +166,8 @@ class SubmitInterpolation(object):
             obs_files_dates = []
             exp_files_dates = []
 
-            # get experiment type and specific directory 
-            experiment_exists = False
-            for self.experiment_type in experiment_names:
-                if experiment_to_process in experiment_names[self.experiment_type]:
-                    exp_dict = experiment_paths[self.experiment_type]
-                    experiment_exists = True
-                    break
-            
-            # if experiment id is not defined, exit
-            if not experiment_exists:
-                msg = f"THE EXPERIMENT ID '{experiment_to_process}' DOESN'T EXIST"
-                sys.exit(msg)
+            # get experiment specific directory 
+            exp_dict = experiment_paths[experiment_type]
 
             # take gpfs directory preferentially over esarchive directory
             if 'gpfs' in list(exp_dict.keys()):
@@ -171,11 +178,8 @@ class SubmitInterpolation(object):
             # add file to directory path
             exp_dir += f"{experiment_to_process}/"
 
-            # get model name
-            self.model_name = exp_dir.split('/')[-3]
-
             # get model bin edges
-            r_edges, rho_bins = get_model_bin_radii(self.model_name)
+            r_edges, rho_bins = get_model_bin_radii(experiment_type)
 
             # iterate through species to process
             for speci_ii, speci_to_process in enumerate(self.species):
@@ -483,10 +487,11 @@ class SubmitInterpolation(object):
                                     for previous_log in previous_logs:
                                         os.remove(previous_log) 
 
+            # boolean that says if there was any new valid data in the iteration
+            new_arguments = last_arguments != self.arguments
 
-            # if have no arguments after iteration, return message stating that
-            exp_arguments = copy.deepcopy(self.arguments)
-            if len(exp_arguments) == 0:
+            # if list is empty or have no arguments after iteration, return message stating that
+            if len(self.arguments) == 0 or not new_arguments:
                 msg = 'NO INTERSECTING OBSERVATIONAL AND EXPERIMENT DATA FOR INTERPOLATION. \n' 
                 if self.start_date == self.end_date:
                     msg += 'If you want to interpolate data for one month, '
@@ -504,8 +509,13 @@ class SubmitInterpolation(object):
                         else:
                             msg += f'Experiment files: {exp_files}\n'
                             msg += f'Experiment dates: {exp_files_dates}'
-                print(msg)
-                continue
+            else:
+                msg = '***INTERSECTING OBSERVATIONAL AND EXPERIMENTAL DATA IS AVAILABLE FOR INTERPOLATION.***' 
+
+            print(msg)
+
+            # get the arguments from the last iteration
+            last_arguments = copy.deepcopy(self.arguments)
         
         # if have no arguments for all experiments, return message stating that
         if len(self.arguments) == 0:
@@ -835,11 +845,11 @@ class SubmitInterpolation(object):
             process_time = np.max(process_times)
             queue_time = interpolation_time - process_time
             overhead_time = total_time - interpolation_time
-            print('ALL {} INTERPOLATION TASKS COMPLETED SUCCESSFULLY IN {:.2f} MINUTES\n'
+            print('\nALL {} INTERPOLATION TASKS COMPLETED SUCCESSFULLY IN {:.2f} MINUTES\n'
                   '({:.2f} MINUTES PROCESING, {:.2f} MINUTES QUEUING, {:.2f} MINUTES ON OVERHEADS)'.
                   format(len(self.output_log_roots), total_time, process_time, queue_time, overhead_time))
         else:
-            print('{}/{} INTERPOLATION TASKS FINISHED SUCCESSFULLY IN {:.2f} MINUTES'.format(
+            print('\n{}/{} INTERPOLATION TASKS FINISHED SUCCESSFULLY IN {:.2f} MINUTES'.format(
                   len(self.output_log_roots)-(len(not_finished_tasks)+len(failed_tasks)), len(self.output_log_roots), 
                   total_time))
             if len(failed_tasks) > 0:
