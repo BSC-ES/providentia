@@ -1428,6 +1428,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # update fields available for filtering
             update_representativity_fields(self)
             update_period_fields(self)
+
+            # for non-GHOST delete valid station indices variables because we do not want to 
+            # remove the stations with 0 valid measurements before the filter has been updated, 
+            # this will happen later
+            if hasattr(self, 'valid_station_inds') and (not self.reading_ghost):
+                delattr(self, 'valid_station_inds')
+                delattr(self, 'valid_station_inds_temporal_colocation')
+
             update_metadata_fields(self)
             
             # update relevant/nonrelevant temporal resolutions 
