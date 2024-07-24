@@ -247,6 +247,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
         
         elif $interpolation; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+            eval "${load_command}" > /dev/null 2>&1 #TODO try to stop this from showing
             outputString=$(eval "srun -J ${jobname} ${account_option} ${queue_option} ${python_command}")
             jobid=$(eval "sbatch ${account_option} ${queue_option} ${script_dir}/providentia/interpolation/experiment_interpolation_submit_mn5.sh $outputString | awk '{print \$4}'")
             echo "Check submission info in 'providentia/interpolation/management_logs/$jobid.out'"
