@@ -25,6 +25,7 @@ PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'data_paths.yaml')))
 default_values = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_defaults.yaml')))
 multispecies_map = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
+experiment_names = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_names.yaml')))
 
 # set MACHINE to be the hub, workstation or local machine
 if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
@@ -357,7 +358,7 @@ class ProvConfiguration:
             # parse ensemble_options
 
             if value != None:
-                # split list, if only one ensemble_option, then creates list of one element
+                # split list, if only one ensemble_options, then creates list of one element
                 # if it is a number, then make it 3 digits, if not it stays as it is
                 ensemble_opts = [opt.strip().zfill(3) for opt in str(value).split(",")]  
                 return ensemble_opts
@@ -383,7 +384,7 @@ class ProvConfiguration:
                         exps_legend = []
 
                     # decide if alias is possible
-                    self.alias = False
+                    self.read_instance.hasAlias = False
 
                     if exps_legend:
                         # to set an alias is mandatory to have the same number of experiments and legends
@@ -391,19 +392,22 @@ class ProvConfiguration:
                             # if all experiments are full length ([expID]-[domain]-[ensembleNum]) or there's only one experiment with only one possible combination,
                             # then they can be set as alias     
                             if all([len(exp.split("-"))==3 for exp in exps]) or \
-                                (len(exps) == 1 and len(self.domain) == 1 and len(self.ensemble_options == 1)):
-                                self.alias = True
+                                (len(exps) == 1 and len(self.read_instance.domain) == 1 and len(self.read_instance.ensemble_options) == 1):
+                                self.read_instance.hasAlias = True
                         
                         # show warning if alias not possible to be set
-                        if not self.alias:
+                        if not self.read_instance.hasAlias:
                             msg = "Alias could not be set."
                             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
 
-                    # experiment is set as the alias
-                    if not self.alias:
-                        exps_legend = copy.deepcopy(exps)
-                    
-                    return {exp:exp_legend for exp,exp_legend in zip(exps,exps_legend)}
+                    # set alias
+                    if self.read_instance.hasAlias:
+                        self.read_instance.alias = exps_legend
+
+                    return exps
+
+                    # TODO check if this was a good idea
+                    # return {exp:exp_legend for exp,exp_legend in zip(exps,exps_legend)}
 
         elif key == 'map_extent':
             # parse map extent
@@ -578,9 +582,12 @@ class ProvConfiguration:
         return value
 
     def decompose_experiments(self):
-        """ Get experiment components (experiment-domain-ensemble_option) and fill the class variables with their value."""
+        """ Get experiment components (experiment-domain-ensemble_options) and fill the class variables with their value."""
+        # get possible domains
+        possible_domains = default_values["domain"]
+
         # get separated experiment parts list
-        split_experiments = [exp.split("-") for exp in self.read_instance.experiments.keys()]
+        split_experiments = [exp.split("-") for exp in self.read_instance.experiments]
 
         # check if all the experiments are written in the same way
         if len(set([len(exp) for exp in split_experiments])) != 1:
@@ -591,89 +598,107 @@ class ProvConfiguration:
         config_domain = copy.deepcopy(self.read_instance.domain) 
         config_ensemble_options = copy.deepcopy(self.read_instance.ensemble_options)
 
+        # initialize id, domain and ensemble options for each of the experiments
+        exp_id, exp_dom, exp_ens = None, None, None
+
         # iterate through all the experiments
         for split_experiment in split_experiments:
+            # get experiment name
+            exp_id = split_experiment[0]
+
             # if experiment is composed by more than 3 parts, break
             if len(split_experiment) > 3:
                 error = 'Invalid experiment format, experiments have to consist of three elements maximum.'
                 sys.exit(error)
-
-            # identify experiment parts and fill the variables
-            if len(split_experiment) == 1:
-                self.default_domain = True
-                self.default_ensemble_options = True
-
-            if len(split_experiment) == 2:
+            
+            # [expID]-[domain] or [expID]-[ensembleNum] 
+            elif len(split_experiment) == 2:
                 end_experiment = split_experiment[-1]
+                
                 # [expID]-[domain]
-                if end_experiment in self.possible_domains: #TODO possible domaains should pertain provconf or the read_instance object?
-                    if config_domain:
-                        error = (f"Error: Unable to write the ensemble options with experiment '{end_experiment}' "
-                        f"and in the 'ensemble_options' field ({self.read_instance.ensemble_options}) of the configuration file.")
-                        sys.exit(error)
-                    # other experiment goes by the format [expID]-[ensembleNum]  
-                    elif self.default_domain:
+                if end_experiment in possible_domains: 
+                    # other experiment goes by the format [expID]-[ensembleNum]
+                    if exp_dom:
                         error = (f"Error: All the experiments have to follow the same structure: [expID], [expID]-[domain], [expID]-[ensembleNum] or [expID]-[domain]-[ensembleNum].")
                         sys.exit(error)
-                    else:
-                        self.default_ensemble_options = True
-                    self.read_instance.domain.append(end_experiment)
+
+                    exp_dom = end_experiment
+                    self.read_instance.domain.append(exp_dom)
                 # [expID]-[ensembleNum]   
                 else:
-                    if config_ensemble_options:
-                        error = (f"Error: Unable to write the domain with experiment '{end_experiment}' "
-                        f" and in the 'domain' field ({self.read_instance.domain}) of the configuration file.")                    
-                        sys.exit(error)
                     # other experiment goes by the format [expID]-[domain]
-                    elif self.default_ensemble_options:
+                    if exp_ens:
                         error = (f"Error: All the experiments have to follow the same structure: [expID], [expID]-[domain], [expID]-[ensembleNum] or [expID]-[domain]-[ensembleNum].")
                         sys.exit(error)
-                    else:
-                        self.default_domain = True
-                self.read_instance.ensemble_options.append(end_experiment)
+
+                    exp_ens = end_experiment
+                    self.read_instance.ensemble_options.append(exp_ens)
 
             # [expID]-[domain]-[ensembleNum]
-            elif len(split_experiment) == 3:
-                if config_ensemble_options:
-                        error = (f"Error: Unable to write the domain with experiment '{end_experiment}' "
-                        f" and in the 'domain' field ({self.read_instance.domain}) of the configuration file.")                    
-                        sys.exit(error)
-                if config_domain:
-                        error = (f"Error: Unable to write the ensemble options with experiment '{end_experiment}' "
-                        f"and in the 'ensemble_options' field ({self.read_instance.ensemble_options}) of the configuration file.")
-                        sys.exit(error)
-                
-                self.read_instance.ensemble_options.append(split_experiment[2]) 
-                self.read_instance.domain.append(split_experiment[1]) 
+            elif len(split_experiment) == 3:               
+                exp_ens, exp_dom = split_experiment[1], split_experiment[2]
+                self.read_instance.domain.append(exp_dom)
+                self.read_instance.ensemble_options.append(exp_ens)
 
             # add experiment id to the list
-            self.read_instance.exp_id.append(split_experiment[0])
+            self.read_instance.exp_id.append(exp_id)
 
-    def check_experiment(self, exp):
-        """ Check individual experiment and get list of options."""
+            # check if tried to put domain or ensemble option when there's already a domain or ensemble opt
+            if exp_dom and config_domain:
+                error = (f"Error: Unable to write the domain '{exp_dom}' with experiment '{exp_id}'"
+                f" and in the 'domain' field ({self.read_instance.domain}) of the configuration file.")     
+                sys.exit(error)
+            elif exp_ens and config_ensemble_options:
+                error = (f"Error: Unable to write the ensemble options '{exp_ens}' with experiment '{exp_id}'"
+                f"and in the 'ensemble_options' field ({self.read_instance.ensemble_options}) of the configuration file.")                  
+                sys.exit(error)  
 
-        split_experiment = exp.split("-")
+        # when there's no domain/ensemble opt passed in the config file or got from the experiment, then set the default option to true
+        self.default_domain, self.default_ensemble_options = not (bool(exp_dom) or bool(config_domain)), not (bool(exp_ens) or bool(config_ensemble_options))
 
-        if len(split_experiment) > 3:
-            error = 'Invalid experiment format, experiments have to consist of three elements maximum'
-            sys.exit(error)
+    # def check_experiment(self, exp):
+    #     """ Check individual experiment and get list of options."""
 
-        # [expID] or [expID]-[domain]
-        if len(split_experiment) == 1 or (len(split_experiment) == 2 and split_experiment[-1] in self.possible_domains):
-            exp_found = list(filter(lambda x:x.startswith(exp), self.possible_experiments))
-        # [expID]-[domain]-[ensembleNum]
-        elif len(split_experiment) == 3:
-            exp_found = list(filter(lambda x:x == exp, self.possible_experiments))
-        # [expID]-[ensembleNum]        
-        else:
-            exp_found = list(filter(lambda x:x.startswith(split_experiment[0]) and x.endswith(split_experiment[1]), self.possible_experiments))
+    #     split_experiment = exp.split("-")
+
+    #     if len(split_experiment) > 3:
+    #         error = 'Invalid experiment format, experiments have to consist of three elements maximum'
+    #         sys.exit(error)
+
+    #     # [expID] or [expID]-[domain]
+    #     if len(split_experiment) == 1 or (len(split_experiment) == 2 and split_experiment[-1] in self.possible_domains):
+    #         exp_found = list(filter(lambda x:x.startswith(exp), self.possible_experiments))
+    #     # [expID]-[domain]-[ensembleNum]
+    #     elif len(split_experiment) == 3:
+    #         exp_found = list(filter(lambda x:x == exp, self.possible_experiments))
+    #     # [expID]-[ensembleNum]        
+    #     else:
+    #         exp_found = list(filter(lambda x:x.startswith(split_experiment[0]) and x.endswith(split_experiment[1]), self.possible_experiments))
         
-        return exp_found, bool(exp_found)
+    #     return exp_found, bool(exp_found)
     
     # TODO use inheritance in the future 
-    # TODO join experiments as it is done in normal providentia
-    def check_experiment_interpolation(self,exp):
-        pass
+    # TODO add more checking, for now only this is enough
+    def check_experiment_interpolation(self, experiment, domain, ensemble_option):
+        """ Checks if experiment, domain and ensemble option combination works for interpolation.
+        Returns if experiment if valid and the experiment type (if there is one) """
+        
+        # get experiment type and specific directory 
+        # TODO think about what to do about experiment type 
+        # puede que haga una lista con el experiment type para asi no tener que importar de nuevo
+        experiment_exists = False
+        for experiment_type in experiment_names:
+            if experiment in experiment_names[experiment_type]:
+                experiment_exists = True
+                break
+        
+        # if experiment id is not defined, exit
+        if not experiment_exists:
+            msg = f"Cannot find the experiment ID '{experiment}' in '{os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_names.yaml')}'. Please add it to the file."
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            return False, None
+
+        return True, experiment_type
     
     def check_validity(self, deactivate_warning=False):
         """ Check validity of set variables after parsing. """
@@ -737,7 +762,8 @@ class ProvConfiguration:
         # and len of one of network or species == 1,
         # then duplicate respestive network/species
         # in download mode is allowed to not have a different number, so continue
-        if len(self.read_instance.network) != len(self.read_instance.species) and not self.read_instance.download:
+        # TODO in download mode and interpolation separate this somehow.
+        if len(self.read_instance.network) != len(self.read_instance.species) and not (self.read_instance.download or self.read_instance.interpolation):
 
             # 1 network?
             if len(self.read_instance.network) == 1:
@@ -755,8 +781,8 @@ class ProvConfiguration:
                 sys.exit(error)
 
         # throw error if one of networks are non all GHOST or non-GHOST
-        # in download mode it is allowed to have mixed networks
-        if not self.read_instance.download:
+        # in download mode it is allowed to have mixed networks #TODO Change this
+        if not self.read_instance.download and not self.read_instance.interpolation:
             for network_ii, network in enumerate(self.read_instance.network):
                 if network_ii == 0:
                     previous_is_ghost = check_for_ghost(network)
@@ -853,7 +879,6 @@ class ProvConfiguration:
         # TODO MAYBE CHANGE THIS initialization to somewhere else or take it from another place
         # TODO and should it be provconf or no????
         # initialise possible domains
-        self.possible_domains = default_values["domain"]
         self.default_domain = False
         self.default_ensemble_options = False
 
@@ -879,6 +904,29 @@ class ProvConfiguration:
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.ensemble_options = default
 
+        # get correct check experiment function
+        # TODO do it using heritage
+        if self.read_instance.interpolation:
+            check_experiment_fun = self.check_experiment_interpolation
+        else:
+            check_experiment_fun = self.check_experiment
+
+        # join experiments
+        # TODO I think the concept of having the same variable with two different types of values is kind of a bad idea
+        self.read_instance.experiments = {}
+        for exp_i, experiment in enumerate(self.read_instance.exp_id):
+            for domain in self.read_instance.domain:
+                for ens_opt in self.read_instance.ensemble_options:
+                    valid_exp, experiment_type = check_experiment_fun(experiment,domain,ens_opt)
+                    if valid_exp:
+                        new_experiment = experiment + '-' + domain + '-' + ens_opt
+                        self.read_instance.experiment_types.append(experiment_type)
+                        # TODO if it is done like this then maybe we don't need to set the alias as something
+                        if self.read_instance.hasAlias:
+                            self.read_instance.experiments[new_experiment] = self.read_instance.alias[exp_i]
+                        else:
+                            self.read_instance.experiments[new_experiment] = new_experiment
+                        
         # check have statistic_mode information,
         # if offline, throw message, stating are using default instead
         if not self.read_instance.statistic_mode:

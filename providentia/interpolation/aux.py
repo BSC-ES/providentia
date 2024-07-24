@@ -33,7 +33,7 @@ def get_model_bin_radii(model_name):
         :rtype: list, list
     """ 
 
-    if model_name == 'monarch':
+    if 'monarch' in model_name:
         r_edges =[0.1, 0.18, 0.3, 0.6, 1.0, 1.8, 3.0, 6.0, 10.0]
         rho_bins = [2500.0, 2500.0, 2500.0, 2500.0, 2650.0, 2650.0, 2650.0, 2650.0]
         return r_edges, rho_bins
