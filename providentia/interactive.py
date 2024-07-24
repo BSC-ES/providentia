@@ -1215,11 +1215,12 @@ class Interactive:
         :rtype: numpy.ndarray
         """
 
-        # for non-ghost, remove first part of networkspecies name (e.g. ghost_btx/ghost_btx|sconcc6h6 -> ghost_btx|sconcc6h6)
+        # for non-ghost, update networkspecies name 
+        # (e.g. ghost_btx/ghost_btx|sconcc6h6 -> ghost_btx-ghost_btx|sconcc6h6)
         # this will avoid permission denied errors
         networkspeci = self.networkspecies[0]
         if '/' in networkspeci:
-            networkspeci = networkspeci.split('/')[1]
+            networkspeci = networkspeci.replace('/', '-')
 
         # set temporary fname for writing
         temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp_{}'.format(networkspeci))
