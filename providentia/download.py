@@ -47,10 +47,15 @@ def sighandler(*unused):
         download.ssh.close()
         download.sftp.close()
 
+    # delete the las downloaded nc file to avoid corrupted files
+    if hasattr(download,'latest_nc_file_path'):
+        print("\nDeleting last nc file...")
+        os.remove(download.latest_nc_file_path)
+
     # delete temp dir if necessary
     temp_dir = os.path.join(download.ghost_root,'.temp')
     if os.path.exists(temp_dir):
-        print(f"\nDeleting {temp_dir} contents...")
+        print(f"\nDeleting {temp_dir}")
         shutil.rmtree(temp_dir)
     
     # TODO delete when sure
@@ -449,6 +454,7 @@ class ProvidentiaDownload(object):
                             remote_path = os.path.join(remote_dir,nc_file)
                             self.ncfile_dl_start_time = time.time()
                             self.sftp.get(remote_path,local_path, callback=check_time)
+                            self.latest_nc_file_path = local_path
 
             return initial_check_nc_files
         
@@ -569,7 +575,8 @@ class ProvidentiaDownload(object):
                             remote_path = os.path.join(remote_dir,nc_file)
                             self.ncfile_dl_start_time = time.time()
                             self.sftp.get(remote_path,local_path, callback=check_time)
-                        
+                            self.latest_nc_file_path = local_path
+                       
             return initial_check_nc_files
 
         # tell the user if not valid resolution specie date combinations
@@ -697,11 +704,12 @@ class ProvidentiaDownload(object):
                                 valid_nc_files_iter = valid_nc_files
 
                             for nc_file in valid_nc_files_iter:
+                                local_path = os.path.join(tar_dir,nc_file.name)
                                 if initial_check:
-                                    local_path = os.path.join(tar_dir,nc_file.name)
                                     initial_check_nc_files.append(local_path)
                                 else:
                                     tar_file.extract(member = nc_file, path = tar_dir)
+                                    self.latest_nc_file_path = local_path
                 
                 # remove the temp directory
                 shutil.rmtree(os.path.dirname(os.path.dirname(temp_path)))
@@ -854,7 +862,8 @@ class ProvidentiaDownload(object):
                             remote_path = os.path.join(remote_dir,nc_file)
                             self.ncfile_dl_start_time = time.time()
                             self.sftp.get(remote_path,local_path, callback=check_time) 
-
+                            self.latest_nc_file_path = local_path
+            
             return initial_check_nc_files
 
         # tell the user if not valid resolution specie date combinations
