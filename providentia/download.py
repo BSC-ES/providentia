@@ -411,7 +411,7 @@ class ProvidentiaDownload(object):
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
                 except FileNotFoundError:
-                    msg = f"There is no data available for {network} network {species} species at {resolution} resolution"
+                    msg = f"There is no data available for {network} network for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -532,7 +532,7 @@ class ProvidentiaDownload(object):
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
                 except FileNotFoundError:
-                    msg = f"There is no data available for {network} network {species} species at {resolution} resolution"
+                    msg = f"There is no data available for {network} network for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -782,7 +782,7 @@ class ProvidentiaDownload(object):
                 try:
                     sftp_network = self.network if self.network else self.sftp.listdir(os.path.join(remote_dir,resolution,species))
                 except FileNotFoundError:
-                    msg = f"There is no data available for {experiment_new} experiment {species} species at {resolution} resolution"
+                    msg = f"There is no data available for {experiment_new} experiment for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
                 for network in sftp_network:
@@ -817,7 +817,7 @@ class ProvidentiaDownload(object):
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
                 except FileNotFoundError:
-                    msg = f"There is no data available for {experiment_new} experiment {species} species {network} network at {resolution} resolution"
+                    msg = f"There is no data available for {experiment_new} experiment for {species} species {network} network at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
                         
