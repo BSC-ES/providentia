@@ -440,7 +440,7 @@ class ProvidentiaDownload(object):
                             msg = "nc files already downloaded."
                             show_message(self, msg, deactivate=initial_check)     
                             continue         
-                        valid_nc_files_iter = tqdm(valid_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading nc files ({len(valid_nc_files)})")
+                        valid_nc_files_iter = tqdm(valid_nc_files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading nc files ({len(valid_nc_files)})")
                     else:
                         # do not print the bar if it is the initial check
                         valid_nc_files_iter = valid_nc_files
@@ -561,7 +561,7 @@ class ProvidentiaDownload(object):
                             msg = "nc files already downloaded."
                             show_message(self, msg, deactivate=initial_check)     
                             continue         
-                        valid_nc_files_iter = tqdm(valid_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading nc files ({len(valid_nc_files)})")
+                        valid_nc_files_iter = tqdm(valid_nc_files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading nc files ({len(valid_nc_files)})")
                     else:
                         # do not print the bar if it is the initial check
                         valid_nc_files_iter = valid_nc_files
@@ -698,7 +698,7 @@ class ProvidentiaDownload(object):
                             valid_nc_files.sort(key = lambda x:x.name)   
 
                             if not initial_check:    
-                                valid_nc_files_iter = tqdm(valid_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading nc files ({len(valid_nc_files)})")
+                                valid_nc_files_iter = tqdm(valid_nc_files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading nc files ({len(valid_nc_files)})")
                             else:
                                 # do not print the bar if it is the initial check
                                 valid_nc_files_iter = valid_nc_files
@@ -848,7 +848,7 @@ class ProvidentiaDownload(object):
                             msg = "nc files already downloaded."
                             show_message(self, msg, deactivate=initial_check)     
                             continue         
-                        valid_nc_files_iter = tqdm(valid_nc_files,ascii=True, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading nc files ({len(valid_nc_files)})")
+                        valid_nc_files_iter = tqdm(valid_nc_files, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading nc files ({len(valid_nc_files)})")
                     else:
                         # do not print the bar if it is the initial check
                         valid_nc_files_iter = valid_nc_files
