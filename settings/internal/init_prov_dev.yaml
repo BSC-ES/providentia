@@ -18,7 +18,7 @@
             'download': False,
             'network': [],
             'species': [],
-            'resolution': null,
+            'resolution': [],
             'start_date': null,
             'end_date': null,
             'observations_data_label': 'observations',
