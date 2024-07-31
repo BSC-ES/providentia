@@ -8,7 +8,7 @@ netCDF4==1.6.5
 numpy==1.26.4
 pandas==2.2.2
 pyproj==3.6.1
-PyQt5==5.15.10
+PyQt5==5.15.11
 seaborn==0.13.2
 scipy==1.12.0
 ConfigArgParse==1.7
