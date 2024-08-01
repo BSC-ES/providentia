@@ -14,11 +14,7 @@ def test_read_data():
     read_data(inst, test_name)
 
 def test_make_timeseries():
-    make_plot(inst, 'timeseries', expected_annotations, test_name)
+    make_plot(inst, test_name, 'timeseries', ['annotate'], expected_annotations)
 
 def test_make_distribution():
-    make_plot(inst, 'distribution', expected_annotations, test_name)
-
-# def test_make_scatter():
-#    make_plot('scatter')
-
+    make_plot(inst, test_name, 'distribution', ['annotate'], expected_annotations)
