@@ -17,7 +17,7 @@ def read_data(inst, test_name, network_type):
 
     # save data, uncomment if we want to update it
     path = f'tests/reference/{network_type}/{test_name}/data/data.npy'
-    np.save(path, generated_output)
+    # np.save(path, generated_output)
 
     # read expected output
     expected_output = np.load(path, allow_pickle=True)
@@ -67,7 +67,7 @@ def make_plot(inst, test_name, network_type, plot_type, plot_options=[], expecte
             path = f'tests/reference/{network_type}/{test_name}/{plot_type}/{plot_type}_bias_table_values.csv'
         else:
             path = f'tests/reference/{network_type}/{test_name}/{plot_type}/{plot_type}_table_values.csv'
-        generated_output.to_csv(path, index=False)
+        # generated_output.to_csv(path, index=False)
 
         expected_output = pd.read_csv(path, keep_default_na=False)
 
@@ -93,7 +93,7 @@ def make_plot(inst, test_name, network_type, plot_type, plot_options=[], expecte
 
             # save data, uncomment if we want to update it
             path = f'tests/reference/{network_type}/{test_name}/{plot_type}/{plot_type}_line_{line_i}.npy'
-            np.save(path, generated_output)
+            # np.save(path, generated_output)
 
             # read expected output
             expected_output = np.load(path, allow_pickle=True)
