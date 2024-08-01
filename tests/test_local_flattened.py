@@ -7,7 +7,6 @@ inst = Interactive(conf='local.conf', statistic_mode="Flattened", statistic_aggr
 expected_annotations = {
     "timeseries": ["EBAS | Mean: 34.56", "MONARCH | Mean: 29.55, MB: -5.00, RMSE: 11.64, r: 0.69"],
     "distribution": ["EBAS | Min: 0.00, Max: 119.35", "MONARCH | Min: 0.00, Max: 106.75"],
-    "scatter": [""]
 }
 
 def test_read_data():
@@ -18,3 +17,6 @@ def test_make_timeseries():
 
 def test_make_distribution():
     make_plot(inst, test_name, 'distribution', ['annotate'], expected_annotations)
+
+def test_make_statsummary():
+    make_plot(inst, test_name, 'statsummary')
