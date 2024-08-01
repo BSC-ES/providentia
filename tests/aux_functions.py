@@ -5,7 +5,7 @@ import pandas as pd
 from providentia.statistics import get_z_statistic_info
 
 
-def read_data(inst, test_name, network_type):
+def read_data(inst, statistic_mode, network_type):
 
     # get data in memory in xarray format
     data = inst.get_data(format='xr')
@@ -16,7 +16,7 @@ def read_data(inst, test_name, network_type):
     generated_output = data[networkspeci].values
 
     # save data, uncomment if we want to update it
-    path = f'tests/reference/{network_type}/{test_name}/data/data.npy'
+    path = f'tests/reference/{network_type}/{statistic_mode}/data/data.npy'
     # np.save(path, generated_output)
 
     # read expected output
@@ -25,7 +25,7 @@ def read_data(inst, test_name, network_type):
     assert (np.allclose(generated_output, expected_output, equal_nan=True))
 
 
-def make_plot(inst, test_name, network_type, plot_type, plot_options=[], expected_annotations=[], stats=[]):
+def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], expected_annotations=[], stats=[]):
 
     # make plot
     fig = inst.make_plot(plot_type, plot_options=plot_options,
@@ -64,9 +64,9 @@ def make_plot(inst, test_name, network_type, plot_type, plot_options=[], expecte
 
         # save data, uncomment if we want to update it
         if 'bias' in plot_options:
-            path = f'tests/reference/{network_type}/{test_name}/{plot_type}/{plot_type}_bias_table_values.csv'
+            path = f'tests/reference/{network_type}/{statistic_mode}/{plot_type}/{plot_type}_bias_table_values.csv'
         else:
-            path = f'tests/reference/{network_type}/{test_name}/{plot_type}/{plot_type}_table_values.csv'
+            path = f'tests/reference/{network_type}/{statistic_mode}/{plot_type}/{plot_type}_table_values.csv'
         # generated_output.to_csv(path, index=False)
 
         expected_output = pd.read_csv(path, keep_default_na=False)
@@ -92,7 +92,7 @@ def make_plot(inst, test_name, network_type, plot_type, plot_options=[], expecte
             generated_output = line.get_xydata()
 
             # save data, uncomment if we want to update it
-            path = f'tests/reference/{network_type}/{test_name}/{plot_type}/{plot_type}_line_{line_i}.npy'
+            path = f'tests/reference/{network_type}/{statistic_mode}/{plot_type}/{plot_type}_line_{line_i}.npy'
             # np.save(path, generated_output)
 
             # read expected output
