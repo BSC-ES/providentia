@@ -15,10 +15,10 @@ def read_data(inst, test_name):
     assert (np.allclose(generated_output, expected_output, equal_nan=True))
 
 
-def make_plot(inst, plot_type, expected_annotations, test_name):
+def make_plot(inst, test_name, plot_type, plot_options=[], expected_annotations=[]):
 
     # make plot
-    fig = inst.make_plot(plot_type, annotate=True, return_plot=True)
+    fig = inst.make_plot(plot_type, plot_options=plot_options, return_plot=True)
 
     # check that a figure has been returned
     assert (type(fig) == matplotlib.figure.Figure)

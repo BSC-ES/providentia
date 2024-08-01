@@ -639,6 +639,22 @@ class Interactive:
             else:
                 self.reset_filter()
 
+        # make timeseries plot
+        elif base_plot_type == 'timeseries':
+            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
+                 plot_options, chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)
+        
+        # make taylor diagram plot
+        elif base_plot_type == 'taylor':
+            stddev_max = self.selected_station_stddev_max[networkspeci]
+            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
+                 plot_options, zstat=zstat, stddev_max=stddev_max)
+            
+        # other plots
+        elif base_plot_type != 'legend': 
+            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
+                 plot_options)
+
         # get number of total available stations, and individual station information if just have 1 station
         if self.temporal_colocation:
             station_inds = self.valid_station_inds_temporal_colocation[networkspeci][self.observations_data_label]
@@ -654,23 +670,7 @@ class Interactive:
         elif n_stations == 0:
             print('No valid stations for {} in {} subsection. Not making {} plot'.format(networkspeci, self.subsection, plot_type))
             return
-
-        # make timeseries plot
-        elif base_plot_type == 'timeseries':
-            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                 plot_options, chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)
-        
-        # make taylor diagram plot
-        elif base_plot_type == 'taylor':
-            stddev_max = self.selected_station_stddev_max[networkspeci]
-            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                 plot_options, zstat=zstat, stddev_max=stddev_max)
             
-        # other plots
-        else: 
-            func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                 plot_options)
-
         # set title, xlabel and ylabel for plots
 
         # set xlabel / ylabel
