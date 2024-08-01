@@ -667,7 +667,7 @@ class Interactive:
                  plot_options, zstat=zstat, stddev_max=stddev_max)
             
         # other plots
-        else: 
+        elif base_plot_type != 'legend': 
             func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
                  plot_options)
 
