@@ -7,7 +7,6 @@ inst = Interactive(conf='local.conf', statistic_mode="Spatial|Temporal", statist
 expected_annotations = {
     "timeseries": ["EBAS | Mean: 34.57", "MONARCH | Mean: 29.60, MB: -4.97, RMSE: 6.10, r: 0.89"],
     "distribution": ["EBAS | Min: 17.00, Max: 57.78", "MONARCH | Min: 12.63, Max: 52.28"],
-    "scatter": [""]
 }
 
 def test_read_data():
@@ -18,3 +17,6 @@ def test_make_timeseries():
 
 def test_make_distribution():
     make_plot(inst, test_name, 'distribution', ['annotate'], expected_annotations)
+
+def test_make_statsummary():
+    make_plot(inst, test_name, 'statsummary')
