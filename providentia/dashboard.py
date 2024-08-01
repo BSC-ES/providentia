@@ -43,6 +43,7 @@ from .warnings import show_message
 os.environ["QT_ENABLE_HIGHDPI_SCALING"]   = "1"
 os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
 os.environ["QT_SCALE_FACTOR"]             = "1"
+os.environ["QT_FONT_DPI"] = "96"
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
@@ -632,6 +633,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         elif self.operating_system == 'Linux':
             self.show()
             self.showMaximized()
+            self.get_geometry()
         elif self.operating_system == 'Windows':
             self.show()
             self.showMaximized()
