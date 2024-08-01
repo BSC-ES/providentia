@@ -7,8 +7,16 @@ test_name = "local_flattened"
 inst = Interactive(conf='tests_nonghost.conf',
                    statistic_mode="Flattened", statistic_aggregation="")
 expected_annotations = {
-    "timeseries": ["observations | Mean: 0.05", "osuite-global-000 | Mean: 0.01, MB: -0.04, RMSE: 0.05, r: 0.12"],
-    "distribution": ["observations | Min: 0.00, Max: 0.38", "osuite-global-000 | Min: 0.00, Max: 0.09"],
+    "timeseries": [
+        "observations | Mean: 0.05", 
+        "osuite-global-000 | Mean: 0.01, MB: -0.04, RMSE: 0.05, r: 0.12", 
+        "cntrl-global-000 | Mean: 0.00, MB: -0.04, RMSE: 0.05, r: 0.03", 
+        "icap-global-000 | Mean: 0.01, MB: -0.04, RMSE: 0.05, r: 0.10"],
+    "distribution": [
+        "observations | Min: 0.00, Max: 0.38", 
+        "osuite-global-000 | Min: 0.00, Max: 0.09", 
+        "cntrl-global-000 | Min: 0.00, Max: 0.10", 
+        "icap-global-000 | Min: 0.00, Max: 0.12"],
 }
 
 def test_read_data():
