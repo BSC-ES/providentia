@@ -43,8 +43,12 @@ from .warnings import show_message
 os.environ["QT_ENABLE_HIGHDPI_SCALING"]   = "1"
 os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
 os.environ["QT_SCALE_FACTOR"]             = "1"
+
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+#QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_Use96Dpi, True)
+
+os.environ["QT_FONT_DPI"] = "112"
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
@@ -635,6 +639,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         elif self.operating_system == 'Linux':
             self.show()
             self.showMaximized()
+            self.get_geometry()
         elif self.operating_system == 'Windows':
             self.show()
             self.showMaximized()
@@ -1583,6 +1588,11 @@ def main(**kwargs):
 
     # create application
     q_app = QtWidgets.QApplication(sys.argv)
+
+    screen = q_app.screens()[0]
+    pdpi = screen.physicalDotsPerInch()
+    ldpi = screen.logicalDotsPerInch() 
+    print(pdpi,ldpi)
 
     # set Fusion style
     q_app.setStyle("Fusion")
