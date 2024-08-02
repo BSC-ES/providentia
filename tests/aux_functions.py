@@ -44,7 +44,6 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], ex
     else:
         base_plot_type = plot_type.split('_')[0]
 
-    print(base_plot_type)
     if base_plot_type in ['statsummary']:
 
         # get table
@@ -88,22 +87,27 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], ex
         # iterate through plotted lines
         for line_i, line in enumerate(fig.axes[0].lines):
 
-            # get data from line
-            generated_output = line.get_xydata()
+            # extract data from each line
+            data = []
+            for x, y in line.get_xydata():
+                data.append({
+                    "x": x,
+                    "y": y,
+                })
+            generated_output = pd.DataFrame(data)
 
             # save data, uncomment if we want to update it
-            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_line_{line_i}.npy'
-            # np.save(path, generated_output)
+            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_line_{line_i}.csv'
+            # generated_output.to_csv(path, index=False)
 
             # read expected output
-            expected_output = np.load(path, allow_pickle=True)
+            expected_output = pd.read_csv(path)
 
-            # check data for each line is correct
-            assert (np.allclose(generated_output,
-                    expected_output, equal_nan=True))
+            assert assert_frame_equal(generated_output, expected_output) is None
 
     elif base_plot_type in ['map']:
-
+        
+        # get coordinates and values
         for child in fig.axes[0].get_children():
             if isinstance(child, matplotlib.collections.PathCollection):
                 coordinates = child.get_offsets()
