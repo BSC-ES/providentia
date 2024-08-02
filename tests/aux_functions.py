@@ -47,9 +47,9 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], ex
     if base_plot_type in ['statsummary']:
 
         # get table
-        for artist in fig.axes[0].get_children():
-            if isinstance(artist, matplotlib.table.Table):
-                table = artist
+        for child in fig.axes[0].get_children():
+            if isinstance(child, matplotlib.table.Table):
+                table = child
                 break
 
         # extract data from the table
@@ -75,15 +75,6 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], ex
 
     elif base_plot_type in ['timeseries', 'distribution']:
 
-        if 'annotate' in plot_options and expected_annotations:
-            annotations = [child for child in fig.axes[0].get_children()
-                           if type(child) == matplotlib.offsetbox.AnchoredOffsetbox][0]
-
-            for annotation, expected_annotation in zip(annotations.get_child().get_children(),
-                                                       expected_annotations[base_plot_type]):
-                print(annotation.get_text())
-                assert annotation.get_text() == expected_annotation
-
         # iterate through plotted lines
         for line_i, line in enumerate(fig.axes[0].lines):
 
@@ -103,10 +94,11 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], ex
             # read expected output
             expected_output = pd.read_csv(path)
 
-            assert assert_frame_equal(generated_output, expected_output) is None
+            assert assert_frame_equal(
+                generated_output, expected_output) is None
 
     elif base_plot_type in ['map']:
-        
+
         # get coordinates and values
         for child in fig.axes[0].get_children():
             if isinstance(child, matplotlib.collections.PathCollection):
@@ -130,5 +122,15 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], ex
 
         # read expected output
         expected_output = pd.read_csv(path, keep_default_na=False)
-        
+
         assert assert_frame_equal(generated_output, expected_output) is None
+
+    # check annotations
+    if ('annotate' in plot_options) and (base_plot_type in expected_annotations.keys()):
+        annotations = [child for child in fig.axes[0].get_children()
+                       if type(child) == matplotlib.offsetbox.AnchoredOffsetbox][0]
+
+        for annotation, expected_annotation in zip(annotations.get_child().get_children(),
+                                                   expected_annotations[base_plot_type]):
+            print(annotation.get_text())
+            assert annotation.get_text() == expected_annotation
