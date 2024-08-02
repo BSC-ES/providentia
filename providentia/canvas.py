@@ -2344,8 +2344,12 @@ class MPLCanvas(FigureCanvas):
             else:
                 plot_type = copy.deepcopy(plot_type_alt)
 
+            # force Taylor diagram to show bias statistics
+            if ('taylor' in plot_type):
+                z_statistic_sign = 'bias'
             # define z_statistic_sign to be absolute (will be overwritten if bias)
-            z_statistic_sign = 'absolute'
+            else:
+                z_statistic_sign = 'absolute'
 
             # an option is selected or there are options in previous to undo?
             if event_source.currentData() or self.previous_plot_options[plot_type]:
