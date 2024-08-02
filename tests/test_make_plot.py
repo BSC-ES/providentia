@@ -157,7 +157,7 @@ def test_make_map(inst, statistic_mode, network_type, expected_annotations):
               'domain'], expected_annotations)
 
 
-# @pytest.mark.parametrize("inst, statistic_mode, network_type, expected_annotations", possibilities)
-# def test_make_taylor(inst, statistic_mode, network_type, expected_annotations):
-#     make_plot(inst, statistic_mode, network_type,
-#               'taylor-r', ['annotate'], expected_annotations)
+@pytest.mark.parametrize("inst, statistic_mode, network_type, expected_annotations", possibilities)
+def test_make_taylor(inst, statistic_mode, network_type, expected_annotations):
+    make_plot(inst, statistic_mode, network_type,
+              'taylor-r', ['annotate'], expected_annotations)
