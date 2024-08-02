@@ -125,3 +125,9 @@ def test_make_statsummary(inst, statistic_mode, network_type, expected_annotatio
                      "MFE", "RMSE", "NRMSE", "COE", "FAC2", "IOA", "r", "r2", "UPA"]
     make_plot(inst, statistic_mode, network_type,
               'statsummary', ['bias'], stats=expbias_stats)
+
+
+@pytest.mark.parametrize("inst, statistic_mode, network_type, expected_annotations", possibilities)
+def test_make_map(inst, statistic_mode, network_type, expected_annotations):
+    make_plot(inst, statistic_mode, network_type, 'map-Median', [
+              'annotate'], expected_annotations)
