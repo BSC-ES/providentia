@@ -204,7 +204,7 @@ class Interactive:
                   cb=True, legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, 
                   domain=False, hidedata=False, logx=False, logy=False, multispecies=False, regression=False, 
                   smooth=False, threshold=False, plot_options=None, save=False, return_plot=False, format=None,
-                  width=None, height=None):
+                  width=None, height=None, stats=[]):
         """ Wrapper method to make a Providentia plot.
 
         :param plot: Plot type
@@ -263,6 +263,8 @@ class Interactive:
         :type format: int, float, optional
         :return: matplotlib.axes._axes.Axes
         :rtype: Plot axes
+        :return: List of statistics (used in statsummary)
+        :rtype: list
         """
 
         # close any previously open figures
@@ -526,10 +528,13 @@ class Interactive:
         elif base_plot_type == 'statsummary':
             
             # get stats to plot
-            if 'bias' in plot_options:
-                stats_to_plot = self.plot_characteristics[plot_type]['experiment_bias']
+            if stats:
+                stats_to_plot = stats
             else:
-                stats_to_plot = self.plot_characteristics[plot_type]['basic']
+                if 'bias' in plot_options:
+                    stats_to_plot = self.plot_characteristics[plot_type]['experiment_bias']
+                else:
+                    stats_to_plot = self.plot_characteristics[plot_type]['basic']
 
             # create empty dataframe with networkspecies and subsections
             index = pd.MultiIndex.from_product([self.networkspecies, self.subsections, relevant_data_labels],
