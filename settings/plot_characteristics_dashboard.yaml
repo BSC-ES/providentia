@@ -102,7 +102,8 @@
                "marker_annotate_bbox": {"boxstyle": "round", "linewidth": 0.5, "facecolor": "white", 
                                           "edgecolor": "#757575"},
                "marker_annotate_arrowprops": {"frac": 1, "headwidth": 10, "shrink": 0.1, "color": "#757575", 
-                                                "edgecolor": "#5e5e5e"}},
+                                                "edgecolor": "#5e5e5e"},
+               "marker_annotate_text": {"round_decimal_places": 2}},
 
        "timeseries": {"grid": {"axis": "both", "color": "lightgrey", "alpha": 0.8},
                       "remove_spines": ["top", "right"],
@@ -132,7 +133,8 @@
                                                "edgecolor": "#757575"},
                       "marker_annotate_arrowprops": {"frac": 1, "headwidth": 10, "shrink": 0.1, "color": "#757575", 
                                                      "edgecolor": "#5e5e5e"},
-                      "marker_annotate_vline": {"color": "#757575", "linewidth": 0.5, "linestyle": "--"}},
+                      "marker_annotate_vline": {"color": "#757575", "linewidth": 0.5, "linestyle": "--"},
+                      "marker_annotate_text": {"round_decimal_places": 2}},
 
        "periodic": {"axis_title": {"label": "", "fontsize": 8.5, "loc": "left"},
                     "label": {"xy": [0, 1], "xytext": [2, -2], "xycoords": "axes fraction", 
@@ -156,7 +158,8 @@
                                              "edgecolor": "#757575"},
                     "marker_annotate_arrowprops": {"frac": 1, "headwidth": 10, "shrink": 0.1, 
                                                    "color": "#757575", "edgecolor": "#5e5e5e"},
-                    "marker_annotate_vline": {"color": "#757575", "linewidth": 0.5, "linestyle": "--"}},
+                    "marker_annotate_vline": {"color": "#757575", "linewidth": 0.5, "linestyle": "--"},
+                    "marker_annotate_text": {"round_decimal_places": 2}},
 
        "periodic-violin": {"axis_title": {"label":"", "fontsize": 8.5, "loc": "left"},
                            "label": {"xy": [0, 1], "xytext": [2, -2], "xycoords": "axes fraction", 
@@ -187,7 +190,8 @@
                                                     "edgecolor": "#757575"},
                            "marker_annotate_arrowprops": {"frac": 1, "headwidth": 10, "shrink": 0.1, 
                                                           "color": "#757575", "edgecolor": "#5e5e5e"},
-                           "marker_annotate_vline": {"color": "#757575", "linewidth": 0.5, "linestyle": "--"}},
+                           "marker_annotate_vline": {"color": "#757575", "linewidth": 0.5, "linestyle": "--"},
+                           "marker_annotate_text": {"round_decimal_places": 2}},
 
        "distribution": {"grid": {"axis": "both", "color": "lightgrey", "alpha": 0.8},
                         "remove_spines": ["top", "right"],
@@ -216,7 +220,8 @@
                                                 "edgecolor": "#757575"},
                         "marker_annotate_arrowprops": {"frac": 1, "headwidth": 10, "shrink": 0.1, "color": "#757575", 
                                                        "edgecolor": "#5e5e5e"},
-                        "marker_annotate_vline": {"color": "#757575", "linewidth": 0.5, "linestyle": "--"}},
+                        "marker_annotate_vline": {"color": "#757575", "linewidth": 0.5, "linestyle": "--"},
+                        "marker_annotate_text": {"round_decimal_places": 2}},
 
        "scatter": {"grid": {"axis": "both", "color": "lightgrey", "alpha": 0.8},
                    "remove_spines": ["top", "right"],
@@ -248,7 +253,8 @@
                    "marker_annotate_bbox": {"boxstyle": "round", "linewidth": 0.5, "facecolor": "white", 
                                             "edgecolor": "#757575"},
                    "marker_annotate_arrowprops": {"frac": 1, "headwidth": 10, "shrink": 0.1, "color": "#757575", 
-                                                  "edgecolor": "#5e5e5e"}},
+                                                  "edgecolor": "#5e5e5e"},
+                   "marker_annotate_text": {"round_decimal_places": 2}},
 
        "boxplot": {"ygrid": {"color": "lightgrey", "alpha": 0.8, "zorder": 1},
                    "remove_spines": ["top", "right"],
@@ -351,6 +357,7 @@
                                            "edgecolor": "#757575"},
                   "marker_annotate_arrowprops": {"frac": 1, "headwidth": 10, "shrink": 0.1, "color": "#757575", 
                                                  "edgecolor": "#5e5e5e"},
+                  "marker_annotate_text": {"round_decimal_places": 2},
                   "plot": {"marker": "o", "markersize": 6, "linestyle": "None"},
                   "plot_options": ["annotate"]}
 }
