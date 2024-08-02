@@ -104,7 +104,7 @@ possibilities = [
 @pytest.mark.parametrize("inst, statistic_mode, network_type, expected_annotations", possibilities)
 def test_make_timeseries(inst, statistic_mode, network_type, expected_annotations):
     make_plot(inst, statistic_mode, network_type, 'timeseries', [
-              'annotate'], expected_annotations)
+              'annotate', 'smooth'], expected_annotations)
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type, expected_annotations", possibilities)
@@ -130,4 +130,4 @@ def test_make_statsummary(inst, statistic_mode, network_type, expected_annotatio
 @pytest.mark.parametrize("inst, statistic_mode, network_type, expected_annotations", possibilities)
 def test_make_map(inst, statistic_mode, network_type, expected_annotations):
     make_plot(inst, statistic_mode, network_type, 'map-Median', [
-              'annotate'], expected_annotations)
+              'domain'], expected_annotations)
