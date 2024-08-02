@@ -1,7 +1,7 @@
 import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from pandas.testing import assert_frame_equal
 from providentia.statistics import get_z_statistic_info
 
 
@@ -44,6 +44,7 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], ex
     else:
         base_plot_type = plot_type.split('_')[0]
 
+    print(base_plot_type)
     if base_plot_type in ['statsummary']:
 
         # get table
@@ -64,24 +65,23 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], ex
 
         # save data, uncomment if we want to update it
         if 'bias' in plot_options:
-            path = f'tests/reference/{network_type}/{statistic_mode}/{plot_type}/{plot_type}_bias_table_values.csv'
+            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_bias_table_values.csv'
         else:
-            path = f'tests/reference/{network_type}/{statistic_mode}/{plot_type}/{plot_type}_table_values.csv'
+            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_table_values.csv'
         # generated_output.to_csv(path, index=False)
 
         expected_output = pd.read_csv(path, keep_default_na=False)
 
-        assert generated_output.equals(expected_output)
+        assert assert_frame_equal(generated_output, expected_output) is None
 
-    elif plot_type in ['timeseries', 'distribution']:
+    elif base_plot_type in ['timeseries', 'distribution']:
 
-        # check if annotations are correct
         if 'annotate' in plot_options and expected_annotations:
             annotations = [child for child in fig.axes[0].get_children()
                            if type(child) == matplotlib.offsetbox.AnchoredOffsetbox][0]
 
             for annotation, expected_annotation in zip(annotations.get_child().get_children(),
-                                                       expected_annotations[plot_type]):
+                                                       expected_annotations[base_plot_type]):
                 print(annotation.get_text())
                 assert annotation.get_text() == expected_annotation
 
@@ -92,7 +92,7 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], ex
             generated_output = line.get_xydata()
 
             # save data, uncomment if we want to update it
-            path = f'tests/reference/{network_type}/{statistic_mode}/{plot_type}/{plot_type}_line_{line_i}.npy'
+            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_line_{line_i}.npy'
             # np.save(path, generated_output)
 
             # read expected output
@@ -101,3 +101,30 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], ex
             # check data for each line is correct
             assert (np.allclose(generated_output,
                     expected_output, equal_nan=True))
+
+    elif base_plot_type in ['map']:
+
+        for child in fig.axes[0].get_children():
+            if isinstance(child, matplotlib.collections.PathCollection):
+                coordinates = child.get_offsets()
+                values = child.get_array()
+                break
+
+        # extract data from the table
+        data = []
+        for (lon, lat), val in zip(coordinates, values):
+            data.append({
+                "lon": lon,
+                "lat": lat,
+                "value": val
+            })
+        generated_output = pd.DataFrame(data)
+
+        # save data, uncomment if we want to update it
+        path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_values.csv'
+        # generated_output.to_csv(path, index=False)
+
+        # read expected output
+        expected_output = pd.read_csv(path, keep_default_na=False)
+        
+        assert assert_frame_equal(generated_output, expected_output) is None
