@@ -126,11 +126,11 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], ex
         assert assert_frame_equal(generated_output, expected_output) is None
 
     # check annotations
-    if ('annotate' in plot_options) and (base_plot_type in expected_annotations.keys()):
+    if ('annotate' in plot_options) and (expected_annotations):
         annotations = [child for child in fig.axes[0].get_children()
                        if type(child) == matplotlib.offsetbox.AnchoredOffsetbox][0]
 
         for annotation, expected_annotation in zip(annotations.get_child().get_children(),
-                                                   expected_annotations[base_plot_type]):
+                                                   expected_annotations):
             print(annotation.get_text())
             assert annotation.get_text() == expected_annotation
