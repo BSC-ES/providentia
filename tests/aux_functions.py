@@ -44,7 +44,7 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], st
     else:
         base_plot_type = plot_type.split('_')[0]
 
-    if base_plot_type in ['statsummary', 'heatmap']:
+    if base_plot_type in ['statsummary', 'heatmap', 'table']:
 
         # get table
         for child in fig.axes[0].get_children():
@@ -54,7 +54,7 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], st
 
         # extract data from the table/heatmap
         data = []
-        if base_plot_type in ['statsummary']:
+        if base_plot_type in ['statsummary', 'table']:
             for (row, col), cell in table.get_celld().items():
                 data.append({
                     "row": row,
