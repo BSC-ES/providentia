@@ -44,22 +44,30 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], st
     else:
         base_plot_type = plot_type.split('_')[0]
 
-    if base_plot_type in ['statsummary']:
+    if base_plot_type in ['statsummary', 'heatmap']:
 
         # get table
         for child in fig.axes[0].get_children():
-            if isinstance(child, matplotlib.table.Table):
+            if isinstance(child, (matplotlib.table.Table, matplotlib.collections.QuadMesh)):
                 table = child
                 break
 
-        # extract data from the table
+        # extract data from the table/heatmap
         data = []
-        for (row, col), cell in table.get_celld().items():
-            data.append({
-                "row": row,
-                "col": col,
-                "value": cell.get_text().get_text()
-            })
+        if base_plot_type in ['statsummary']:
+            for (row, col), cell in table.get_celld().items():
+                data.append({
+                    "row": row,
+                    "col": col,
+                    "value": cell.get_text().get_text()
+                })
+        else:
+            for (x, y), value in np.ndenumerate(table.get_array()):
+                data.append({
+                    "x": x,
+                    "y": y,
+                    "value": value
+                })
         generated_output = pd.DataFrame(data)
 
         # save data, uncomment if we want to update it
@@ -68,7 +76,6 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], st
         else:
             path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_table_values.csv'
         # generated_output.to_csv(path, index=False)
-
         expected_output = pd.read_csv(path, keep_default_na=False)
 
         assert assert_frame_equal(generated_output, expected_output) is None
@@ -136,7 +143,7 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], st
             data.append({
                 "dataset": annotation.get_text().split('|')[0].strip(),
                 "annotation": annotation.get_text().split('|')[1].strip()
-                })
+            })
         generated_output = pd.DataFrame(data)
 
         # save data, uncomment if we want to update it

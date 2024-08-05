@@ -64,3 +64,8 @@ def test_make_map(inst, statistic_mode, network_type):
 def test_make_taylor(inst, statistic_mode, network_type):
     make_plot(inst, statistic_mode, network_type,
               'taylor-r', ['annotate'])
+
+
+@pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
+def test_make_heatmap(inst, statistic_mode, network_type):
+    make_plot(inst, statistic_mode, network_type, 'heatmap-Median')
