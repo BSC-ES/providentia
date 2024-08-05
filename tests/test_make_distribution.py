@@ -29,24 +29,24 @@ possibilities = [
                  statistic_mode="Flattened",
                  statistic_aggregation=""),
      "flattened", "nonghost", [
-        "observations | Min: 0.00, Max: 1.94",
-        "osuite-global-000 | Min: 0.00, Max: 1.08",
-        "cntrl-global-000 | Min: 0.00, Max: 1.18",
-        "icap-global-000 | Min: 0.00, Max: 1.14"
+        "observations | Min: 0.00, Max: 0.38",
+        "osuite-global-000 | Min: 0.00, Max: 0.09",
+        "cntrl-global-000 | Min: 0.00, Max: 0.10",
+        "icap-global-000 | Min: 0.00, Max: 0.12"
     ]
     ),
     (Interactive(conf='tests_nonghost.conf',
                  statistic_mode="Spatial|Temporal",
                  statistic_aggregation="Median"),
      "spatial_temporal", "nonghost", [
-        "observations | Min: 0.01, Max: 0.08",
+        "observations | Min: 0.00, Max: 0.11",
         "osuite-global-000 | Min: 0.00, Max: 0.01",
         "cntrl-global-000 | Min: 0.00, Max: 0.01",
-        "icap-global-000 | Min: 0.00, Max: 0.04"
+        "icap-global-000 | Min: 0.00, Max: 0.03"
     ]),
     (Interactive(conf='tests_nonghost.conf'),
      "temporal_spatial", "nonghost", [
-        "observations | Min: 0.00, Max: 0.12",
+        "observations | Min: 0.01, Max: 0.16",
         "osuite-global-000 | Min: 0.00, Max: 0.01",
         "cntrl-global-000 | Min: 0.00, Max: 0.01",
         "icap-global-000 | Min: 0.00, Max: 0.02"
