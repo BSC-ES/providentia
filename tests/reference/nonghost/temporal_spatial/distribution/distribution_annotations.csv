@@ -1,0 +1,5 @@
+dataset,annotation
+observations,"Min: 0.01, Max: 0.16"
+osuite-global-000,"Min: 0.00, Max: 0.01"
+cntrl-global-000,"Min: 0.00, Max: 0.01"
+icap-global-000,"Min: 0.00, Max: 0.02"
