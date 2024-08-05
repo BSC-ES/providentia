@@ -30,27 +30,27 @@ possibilities = [
                  statistic_aggregation=""),
      "flattened", "nonghost", [
         "observations | Mean: 0.05",
-        "osuite-global-000 | Mean: 0.02, MB: -0.03, RMSE: 0.07, r: 0.64",
-        "cntrl-global-000 | Mean: 0.02, MB: -0.03, RMSE: 0.08, r: 0.61",
-        "icap-global-000 | Mean: 0.01, MB: -0.04, RMSE: 0.08, r: 0.49"
+        "osuite-global-000 | Mean: 0.01, MB: -0.04, RMSE: 0.05, r: 0.12",
+        "cntrl-global-000 | Mean: 0.00, MB: -0.04, RMSE: 0.05, r: 0.03",
+        "icap-global-000 | Mean: 0.01, MB: -0.04, RMSE: 0.05, r: 0.10"
     ]
     ),
     (Interactive(conf='tests_nonghost.conf',
                  statistic_mode="Spatial|Temporal",
                  statistic_aggregation="Median"),
      "spatial_temporal", "nonghost", [
-        "observations | Mean: 0.03",
-        "osuite-global-000 | Mean: 0.00, MB: -0.03, RMSE: 0.03, r: 0.55",
-        "cntrl-global-000 | Mean: 0.00, MB: -0.03, RMSE: 0.03, r: 0.47",
-        "icap-global-000 | Mean: 0.00, MB: -0.03, RMSE: 0.03, r: 0.36"
+        "observations | Mean: 0.04",
+        "osuite-global-000 | Mean: 0.00, MB: -0.04, RMSE: 0.04, r: 0.23",
+        "cntrl-global-000 | Mean: 0.00, MB: -0.04, RMSE: 0.04, r: 0.21",
+        "icap-global-000 | Mean: 0.00, MB: -0.04, RMSE: 0.04, r: 0.14"
     ]),
     (Interactive(conf='tests_nonghost.conf'),
      "temporal_spatial", "nonghost",
      [
-        "observations | Mean: 0.03",
-        "osuite-global-000 | Mean: 0.00, MB: -0.02, RMSE: 0.03, r: 0.32",
-        "cntrl-global-000 | Mean: 0.00, MB: -0.02, RMSE: 0.03, r: 0.25",
-        "icap-global-000 | Mean: 0.00, MB: -0.02, RMSE: 0.03, r: 0.18"
+        "observations | Mean: 0.05",
+        "osuite-global-000 | Mean: 0.00, MB: -0.04, RMSE: 0.05, r: 0.12",
+        "cntrl-global-000 | Mean: 0.00, MB: -0.04, RMSE: 0.05, r: 0.14",
+        "icap-global-000 | Mean: 0.00, MB: -0.04, RMSE: 0.05, r: 0.11"
     ])
 ]
 
