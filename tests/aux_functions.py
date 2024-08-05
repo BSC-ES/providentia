@@ -72,36 +72,37 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], st
 
         # save data, uncomment if we want to update it
         if 'bias' in plot_options:
-            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_bias_table_values.csv'
+            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_bias_values.csv'
         else:
-            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_table_values.csv'
+            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_values.csv'
         # generated_output.to_csv(path, index=False)
         expected_output = pd.read_csv(path, keep_default_na=False)
 
         assert assert_frame_equal(generated_output, expected_output) is None
 
-    elif base_plot_type in ['timeseries', 'distribution']:
+    elif base_plot_type in ['timeseries', 'distribution', 'periodic']:
 
         # iterate through plotted lines
-        for line_i, line in enumerate(fig.axes[0].lines):
+        for axis_i, axis in enumerate(fig.axes):
+            for line_i, line in enumerate(axis.lines):
 
-            # extract data from each line
-            data = []
-            for x, y in line.get_xydata():
-                data.append({
-                    "x": x,
-                    "y": y,
-                })
-            generated_output = pd.DataFrame(data)
+                # extract data from each line
+                data = []
+                for x, y in line.get_xydata():
+                    data.append({
+                        "x": x,
+                        "y": y,
+                    })
+                generated_output = pd.DataFrame(data)
 
-            # save data, uncomment if we want to update it
-            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_line_{line_i}.csv'
-            # generated_output.to_csv(path, index=False)
+                # save data, uncomment if we want to update it
+                path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_{axis_i}_{line_i}.csv'
+                # generated_output.to_csv(path, index=False)
 
-            # read expected output
-            expected_output = pd.read_csv(path)
+                # read expected output
+                expected_output = pd.read_csv(path)
 
-            assert assert_frame_equal(
+                assert assert_frame_equal(
                 generated_output, expected_output) is None
 
     elif base_plot_type in ['map']:
