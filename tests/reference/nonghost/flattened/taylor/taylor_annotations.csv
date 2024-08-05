@@ -1,0 +1,4 @@
+dataset,annotation
+osuite-global-000,"r: 0.12, StdDev: -0.02"
+cntrl-global-000,"r: 0.03, StdDev: -0.02"
+icap-global-000,"r: 0.10, StdDev: -0.02"

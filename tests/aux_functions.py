@@ -25,7 +25,7 @@ def read_data(inst, statistic_mode, network_type):
     assert (np.allclose(generated_output, expected_output, equal_nan=True))
 
 
-def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], expected_annotations=[], stats=[]):
+def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], stats=[]):
 
     # make plot
     fig = inst.make_plot(plot_type, plot_options=plot_options,
@@ -126,11 +126,24 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], ex
         assert assert_frame_equal(generated_output, expected_output) is None
 
     # check annotations
-    if ('annotate' in plot_options) and (expected_annotations):
+    if 'annotate' in plot_options:
         annotations = [child for child in fig.axes[0].get_children()
                        if type(child) == matplotlib.offsetbox.AnchoredOffsetbox][0]
 
-        for annotation, expected_annotation in zip(annotations.get_child().get_children(),
-                                                   expected_annotations):
-            print(annotation.get_text())
-            assert annotation.get_text() == expected_annotation
+        # extract annotations
+        data = []
+        for annotation in annotations.get_child().get_children():
+            data.append({
+                "dataset": annotation.get_text().split('|')[0].strip(),
+                "annotation": annotation.get_text().split('|')[1].strip()
+                })
+        generated_output = pd.DataFrame(data)
+
+        # save data, uncomment if we want to update it
+        path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_annotations.csv'
+        # generated_output.to_csv(path, index=False)
+
+        # read expected output
+        expected_output = pd.read_csv(path, keep_default_na=False)
+
+        assert assert_frame_equal(generated_output, expected_output) is None
