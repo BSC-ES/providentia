@@ -1,0 +1,5 @@
+dataset,annotation
+observations,Mean: 0.04
+osuite-global-000,"Mean: 0.00, MB: -0.04, RMSE: 0.04, r: 0.23"
+cntrl-global-000,"Mean: 0.00, MB: -0.04, RMSE: 0.04, r: 0.21"
+icap-global-000,"Mean: 0.00, MB: -0.04, RMSE: 0.04, r: 0.14"
