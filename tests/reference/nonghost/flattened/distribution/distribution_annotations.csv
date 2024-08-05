@@ -1,5 +1,4 @@
 dataset,annotation
-observations,"Min: 0.00, Max: 0.38"
-osuite-global-000,"Min: 0.00, Max: 0.09"
-cntrl-global-000,"Min: 0.00, Max: 0.10"
-icap-global-000,"Min: 0.00, Max: 0.12"
+observations,"Min: 0.01, Max: 3.80"
+a2in-regional-000,"Min: 0.00, Max: 3.45"
+a4xf-regional-000,"Min: 0.00, Max: 4.68"

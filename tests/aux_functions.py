@@ -12,7 +12,7 @@ def read_data(inst, statistic_mode, network_type):
     if network_type == 'ghost':
         networkspeci = 'EBAS|sconco3_data'
     else:
-        networkspeci = 'nasa-aeronet_oneill_v3-lev15|od500aerocoarse_data'
+        networkspeci = 'nasa-aeronet_directsun_v3-lev15|od550aero_data'
     generated_output = data[networkspeci].values
 
     # save data, uncomment if we want to update it
