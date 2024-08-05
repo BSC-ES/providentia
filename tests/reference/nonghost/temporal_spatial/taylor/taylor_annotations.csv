@@ -1,4 +1,3 @@
 dataset,annotation
-osuite-global-000,"r: 0.12, StdDev: -0.02"
-cntrl-global-000,"r: 0.14, StdDev: -0.02"
-icap-global-000,"r: 0.11, StdDev: -0.02"
+a2in-regional-000,"r: 0.64, StdDev: 0.00"
+a4xf-regional-000,"r: 0.65, StdDev: 0.14"
