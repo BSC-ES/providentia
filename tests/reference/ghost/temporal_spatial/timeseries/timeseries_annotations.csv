@@ -1,3 +1,3 @@
 dataset,annotation
-observations,Mean: 32.91
-MONARCH,"Mean: 27.88, MB: -5.45, RMSE: 10.97, r: 0.68"
+observations,Mean: 32.00
+MONARCH,"Mean: 28.85, MB: -5.16, RMSE: 10.81, r: 0.69"
