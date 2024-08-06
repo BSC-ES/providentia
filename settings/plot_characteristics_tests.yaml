@@ -234,7 +234,7 @@
                    "1:2_line": {"color": "lightgrey", "linewidth": 1, "linestyle": "--"},
                    "2:1_line": {"color": "lightgrey", "linewidth": 1, "linestyle": "--"},
                    "round_decimal_places": {"title": 2},
-                   "max_points": 100000,
+                   "max_points": 600000,
                    "equal_aspect": true,
                    "markersize_npoints_threshold": 200,
                    "markersize": {"standard": 1.1, "few_points": 4.0},
