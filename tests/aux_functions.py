@@ -10,10 +10,10 @@ def read_data(inst, statistic_mode, network_type):
     # get data in memory in xarray format
     data = inst.get_data(format='xr')
     if network_type == 'ghost':
-        networkspeci = 'EBAS|sconco3_data'
+        networkspeci = 'EBAS|sconco3'
     else:
-        networkspeci = 'nasa-aeronet_directsun_v3-lev15|od550aero_data'
-    generated_output = data[networkspeci].values
+        networkspeci = 'nasa-aeronet_directsun_v3-lev15|od550aero'
+    generated_output = data[f'{networkspeci}_data'].values
 
     # save data, uncomment if we want to update it
     path = f'tests/reference/{network_type}/{statistic_mode}/data/data.npy'
@@ -76,6 +76,8 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], st
         else:
             path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_values.csv'
         # generated_output.to_csv(path, index=False)
+
+        # read expected output
         expected_output = pd.read_csv(path, keep_default_na=False)
 
         assert assert_frame_equal(generated_output, expected_output) is None
