@@ -110,7 +110,11 @@ class Interactive:
 
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
-            self.plot_characteristics_filename = os.path.join(PROVIDENTIA_ROOT, 'settings/plot_characteristics_interactive.yaml')
+            if self.tests:
+                path = 'settings/plot_characteristics_tests.yaml'
+            else:
+                path = 'settings/plot_characteristics_interactive.yaml'
+            self.plot_characteristics_filename = os.path.join(PROVIDENTIA_ROOT, path)
         self.plot_characteristics_templates = yaml.safe_load(open(self.plot_characteristics_filename))
 
         # initialise Plot class
@@ -132,7 +136,7 @@ class Interactive:
 
         # update available experiments for selected fields
         get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
-                                self.network, self.species)
+                              self.network, self.species)
 
         # read data
         self.read()  
@@ -204,7 +208,7 @@ class Interactive:
                   cb=True, legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, 
                   domain=False, hidedata=False, logx=False, logy=False, multispecies=False, regression=False, 
                   smooth=False, threshold=False, plot_options=None, save=False, return_plot=False, format=None,
-                  width=None, height=None, stats=[]):
+                  width=None, height=None):
         """ Wrapper method to make a Providentia plot.
 
         :param plot: Plot type
@@ -528,13 +532,10 @@ class Interactive:
         elif base_plot_type == 'statsummary':
             
             # get stats to plot
-            if stats:
-                stats_to_plot = stats
+            if 'bias' in plot_options:
+                stats_to_plot = self.plot_characteristics[plot_type]['experiment_bias']
             else:
-                if 'bias' in plot_options:
-                    stats_to_plot = self.plot_characteristics[plot_type]['experiment_bias']
-                else:
-                    stats_to_plot = self.plot_characteristics[plot_type]['basic']
+                stats_to_plot = self.plot_characteristics[plot_type]['basic']
 
             # create empty dataframe with networkspecies and subsections
             index = pd.MultiIndex.from_product([self.networkspecies, self.subsections, relevant_data_labels],
