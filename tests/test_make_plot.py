@@ -6,23 +6,29 @@ import pytest
 possibilities = [
     (Interactive(conf='tests_ghost.conf',
                  statistic_mode="Flattened",
-                 statistic_aggregation=""),
+                 statistic_aggregation="",
+                 tests=True),
      "flattened", "ghost"),
     (Interactive(conf='tests_ghost.conf',
                  statistic_mode="Spatial|Temporal",
-                 statistic_aggregation="Median"),
+                 statistic_aggregation="Median",
+                 tests=True),
      "spatial_temporal", "ghost"),
-    (Interactive(conf='tests_ghost.conf'),
+    (Interactive(conf='tests_ghost.conf',
+                 tests=True),
      "temporal_spatial", "ghost"),
     (Interactive(conf='tests_nonghost.conf',
                  statistic_mode="Flattened",
-                 statistic_aggregation=""),
+                 statistic_aggregation="",
+                 tests=True),
      "flattened", "nonghost"),
     (Interactive(conf='tests_nonghost.conf',
                  statistic_mode="Spatial|Temporal",
-                 statistic_aggregation="Median"),
+                 statistic_aggregation="Median",
+                 tests=True),
      "spatial_temporal", "nonghost"),
-    (Interactive(conf='tests_nonghost.conf'),
+    (Interactive(conf='tests_nonghost.conf',
+                 tests=True),
      "temporal_spatial", "nonghost",
      )
 ]
@@ -42,16 +48,8 @@ def test_make_distribution(inst, statistic_mode, network_type):
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_statsummary(inst, statistic_mode, network_type):
-    basic_stats = ["Mean", "StdDev", "Median", "Var", "Min", "Max",
-                   "NData", "Data%", "Exceedances", "p1", "p5", "p10",
-                   "p25", "p75", "p90", "p95", "p99"]
-    make_plot(inst, statistic_mode, network_type,
-              'statsummary', stats=basic_stats)
-
-    expbias_stats = ["MB", "NMB", "ME", "NME", "MNB", "MNE", "MFB",
-                     "MFE", "RMSE", "NRMSE", "COE", "FAC2", "IOA", "r", "r2", "UPA"]
-    make_plot(inst, statistic_mode, network_type,
-              'statsummary', ['bias'], stats=expbias_stats)
+    make_plot(inst, statistic_mode, network_type, 'statsummary')
+    make_plot(inst, statistic_mode, network_type, 'statsummary', ['bias'])
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
