@@ -63,6 +63,7 @@ class DataFilter:
             Only filter if spatial colocation is True.
         """
 
+        print('filter by species')
         # filter all read species by set species ranges
         if (self.read_instance.filter_species) and (self.read_instance.spatial_colocation):
 
