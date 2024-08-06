@@ -25,11 +25,10 @@ def read_data(inst, statistic_mode, network_type):
     assert (np.allclose(generated_output, expected_output, equal_nan=True))
 
 
-def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], stats=[]):
+def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
 
     # make plot
-    fig = inst.make_plot(plot_type, plot_options=plot_options,
-                         return_plot=True, stats=stats)
+    fig = inst.make_plot(plot_type, plot_options=plot_options, return_plot=True)
 
     # check that a figure has been returned
     assert (type(fig) == matplotlib.figure.Figure)
