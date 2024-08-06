@@ -6,24 +6,31 @@ import pytest
 possibilities = [
     (Interactive(conf='tests_ghost.conf',
                  statistic_mode="Flattened",
-                 statistic_aggregation=""),
+                 statistic_aggregation="",
+                 tests=True),
      "flattened", "ghost"),
     (Interactive(conf='tests_ghost.conf',
                  statistic_mode="Spatial|Temporal",
-                 statistic_aggregation="Median"),
+                 statistic_aggregation="Median",
+                 tests=True),
      "spatial_temporal", "ghost"),
-    (Interactive(conf='tests_ghost.conf'),
+    (Interactive(conf='tests_ghost.conf',
+                 tests=True),
      "temporal_spatial", "ghost"),
     (Interactive(conf='tests_nonghost.conf',
                  statistic_mode="Flattened",
-                 statistic_aggregation=""),
+                 statistic_aggregation="",
+                 tests=True),
      "flattened", "nonghost"),
     (Interactive(conf='tests_nonghost.conf',
                  statistic_mode="Spatial|Temporal",
-                 statistic_aggregation="Median"),
+                 statistic_aggregation="Median",
+                 tests=True),
      "spatial_temporal", "nonghost"),
-    (Interactive(conf='tests_nonghost.conf'),
-     "temporal_spatial", "nonghost")
+    (Interactive(conf='tests_nonghost.conf',
+                 tests=True),
+     "temporal_spatial", "nonghost",
+     )
 ]
 
 
