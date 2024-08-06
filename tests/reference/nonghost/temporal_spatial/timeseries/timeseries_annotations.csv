@@ -1,4 +1,4 @@
 dataset,annotation
-observations,Mean: 0.15
-a2in-regional-000,"Mean: 0.04, MB: -0.10, RMSE: 0.15, r: 0.57"
-a4xf-regional-000,"Mean: 0.07, MB: -0.06, RMSE: 0.16, r: 0.57"
+observations,Mean: 0.26
+a2in-regional-000,"Mean: 0.20, MB: -0.07, RMSE: 0.19, r: 0.64"
+a4xf-regional-000,"Mean: 0.38, MB: 0.07, RMSE: 0.31, r: 0.65"
