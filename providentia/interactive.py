@@ -145,7 +145,7 @@ class Interactive:
         self.reset_filter(initialise=True)
 
         # set variable to know if data is in intial state or not
-        self.intialised = True
+        self.initialised = True
 
     def read(self):
         """ Wrapper method to read data. """
@@ -177,7 +177,7 @@ class Interactive:
         :type initialise: boolean, optional
         """
 
-        print('Resetting filter')
+        print(f'Resetting filter for {self.subsection}')
    
         # initialise structures to store fields        
         init_representativity(self)
@@ -189,7 +189,7 @@ class Interactive:
         update_period_fields(self)
         update_metadata_fields(self)
         
-        # apply set fields at intialisation for filtering
+        # apply set fields at initalisation for filtering
         if initialise:
             representativity_conf(self)
             period_conf(self)
@@ -200,9 +200,9 @@ class Interactive:
 
         # set variable to know if data is in intial state or not
         if initialise:
-            self.intialised = True
+            self.initialised = True
         else:
-            self.intialised = False
+            self.initialised = False
 
     def make_plot(self, plot, data_labels=None, labela='', labelb='', title=None, xlabel=None, ylabel=None, 
                   cb=True, legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, 
@@ -543,7 +543,7 @@ class Interactive:
             stats_df = pd.DataFrame(np.nan, index=index, columns=stats_to_plot, dtype=np.float64)
             
             # fill dataframe
-            is_initial = copy.deepcopy(self.intialised)
+            is_initial = copy.deepcopy(self.initialised)
             kwargs = copy.deepcopy(self.kwargs)
             # save current subsection 
             orig_ss = copy.deepcopy(self.subsection)
@@ -580,7 +580,16 @@ class Interactive:
                         
                         # put data in dataframe
                         stats_df.loc[(ns, ss, dl)] = stats_per_data_label
-                
+                    
+                # remove subsection variables from memory (if have subsections)
+                # do not remove fixed section variables
+                for k in self.subsection_opts:
+                    if k not in self.fixed_section_vars:
+                        try:
+                            vars(self).pop(k)
+                        except:
+                            pass
+
             # make plot
             func(relevant_ax, networkspeci, relevant_data_labels, self.plot_characteristics[plot_type], plot_options,
                  statsummary=True, plotting_paradigm='summary', stats_df=stats_df)     
@@ -602,7 +611,7 @@ class Interactive:
             stats_df = pd.DataFrame(np.nan, index=index, columns=relevant_data_labels, dtype=np.float64)
             
             # fill dataframe
-            is_initial = copy.deepcopy(self.intialised)
+            is_initial = copy.deepcopy(self.initialised)
             kwargs = copy.deepcopy(self.kwargs)
             # save current subsection 
             orig_ss = copy.deepcopy(self.subsection)
@@ -631,6 +640,15 @@ class Interactive:
 
                     # put data in dataframe
                     stats_df.loc[(ns, ss)] = stat_per_data_labels
+
+                # remove subsection variables from memory (if have subsections)
+                # do not remove fixed section variables
+                for k in self.subsection_opts:
+                    if k not in self.fixed_section_vars:
+                        try:
+                            vars(self).pop(k)
+                        except:
+                            pass
 
             # make plot
             func(relevant_ax, networkspeci, relevant_data_labels, 
