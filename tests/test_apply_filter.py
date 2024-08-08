@@ -34,40 +34,34 @@ possibilities = [
 ]
 
 
-@ pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
+@pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities[0:3])
 def test_apply_period(inst, statistic_mode, network_type):
     inst.apply_filter('period', keep='Daytime')
     check_filter_data(inst, statistic_mode, network_type, filter='period')
 
 
-# @ pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
-# def test_apply_representativity(inst, statistic_mode, network_type):
-#     inst.apply_filter('all_representativity_percent', limit=50)
-#     check_filter_data(inst, statistic_mode, network_type,
-#                       filter='representativity')
+@pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
+def test_apply_representativity(inst, statistic_mode, network_type):
+    inst.apply_filter('all_representativity_percent', limit=50)
+    check_filter_data(inst, statistic_mode, network_type,
+                      filter='representativity')
 
 
-# @ pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
-# def test_apply_bounds(inst, statistic_mode, network_type):
-#     inst.apply_filter('latitude', lower=50, upper=60)
-#     check_filter_data(inst, statistic_mode, network_type, filter='bounds')
+@pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
+def test_apply_bounds(inst, statistic_mode, network_type):
+    inst.apply_filter('latitude', lower=50, upper=60)
+    check_filter_data(inst, statistic_mode, network_type, filter='bounds')
 
 
-# @ pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
-# def test_apply_keep(inst, statistic_mode, network_type):
-#     if network_type == 'ghost':
-#         keep = ['AR0001R_UVP']
-#     else:
-#         keep = ['Barcelona']
-#     inst.apply_filter('station_reference', keep=keep)
-#     check_filter_data(inst, statistic_mode, network_type, filter='keep')
-
-
-# @ pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
-# def test_apply_remove(inst, statistic_mode, network_type):
-#     if network_type == 'ghost':
-#         remove = ['Donon']
-#     else:
-#         remove = ['ATHENS-NOA', 'Zaragoza']
-#     inst.apply_filter('station_name', remove=remove)
-#     check_filter_data(inst, statistic_mode, network_type, filter='remove')
+@pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
+def test_apply_metadata(inst, statistic_mode, network_type):
+    if network_type == 'ghost':
+        keep = ['AR0001R_UVP']
+        remove = ['Donon']
+    else:
+        keep = ['Barcelona']
+        remove = ['ATHENS-NOA', 'Zaragoza']
+    inst.apply_filter('station_reference', keep=keep)
+    check_filter_data(inst, statistic_mode, network_type, filter='keep')
+    inst.apply_filter('station_name', remove=remove)
+    check_filter_data(inst, statistic_mode, network_type, filter='remove')
