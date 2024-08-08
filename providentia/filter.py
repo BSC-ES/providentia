@@ -164,10 +164,16 @@ class DataFilter:
         if (self.read_instance.offline) or (self.read_instance.interactive):
             if hasattr(self.read_instance, 'period'):
                 keeps, removes = split_options(self.read_instance, self.read_instance.period)
+            else:
+                # Get period if apply_filter is used in interactive mode
+                if self.read_instance.period_menu['checkboxes']['keep_selected']:
+                    keeps = self.read_instance.period_menu['checkboxes']['keep_selected']
+                if self.read_instance.period_menu['checkboxes']['remove_selected']:
+                    removes = self.read_instance.period_menu['checkboxes']['remove_selected']         
         else:
             keeps = self.read_instance.period_menu['checkboxes']['keep_selected']
             removes = self.read_instance.period_menu['checkboxes']['remove_selected']
-
+        
         # filter/limit data for periods selected
         if len(keeps) > 0:
             day_night_codes_to_keep = []
