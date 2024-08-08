@@ -15,7 +15,7 @@ def read_data(inst, path):
         generated_output = data['nasa-aeronet_directsun_v3-lev15|od550aero_data'].values
 
     # save data, uncomment if we want to update it
-    np.save(path, generated_output)
+    # np.save(path, generated_output)
 
     # read expected output
     expected_output = np.load(path, allow_pickle=True)
