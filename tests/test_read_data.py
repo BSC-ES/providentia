@@ -36,4 +36,5 @@ possibilities = [
 
 @ pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_read_data(inst, statistic_mode, network_type):
-    read_data(inst, statistic_mode, network_type)
+    path = f'tests/reference/{network_type}/{statistic_mode}/data/data.npy'
+    read_data(inst, path)
