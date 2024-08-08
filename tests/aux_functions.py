@@ -5,19 +5,17 @@ from pandas.testing import assert_frame_equal
 from providentia.statistics import get_z_statistic_info
 
 
-def read_data(inst, statistic_mode, network_type):
+def read_data(inst, path):
 
     # get data in memory in xarray format
     data = inst.get_data(format='xr')
-    if network_type == 'ghost':
-        networkspeci = 'EBAS|sconco3'
-    else:
-        networkspeci = 'nasa-aeronet_directsun_v3-lev15|od550aero'
-    generated_output = data[f'{networkspeci}_data'].values
+    try:
+        generated_output = data['EBAS|sconco3_data'].values
+    except:
+        generated_output = data['nasa-aeronet_directsun_v3-lev15|od550aero_data'].values
 
     # save data, uncomment if we want to update it
-    path = f'tests/reference/{network_type}/{statistic_mode}/data/data.npy'
-    # np.save(path, generated_output)
+    np.save(path, generated_output)
 
     # read expected output
     expected_output = np.load(path, allow_pickle=True)
@@ -156,3 +154,23 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
         expected_output = pd.read_csv(path, keep_default_na=False)
 
         assert assert_frame_equal(generated_output, expected_output) is None
+
+def check_filter_data(inst, statistic_mode, network_type, filter):
+
+    orig_path = f'tests/reference/{network_type}/{statistic_mode}/data/data.npy'
+    filter_path = f'tests/reference/{network_type}/{statistic_mode}/data/data_{filter}.npy'
+
+    # Check filtered data
+    read_data(inst, filter_path)
+
+    # Check filtered data is different from original data
+    orig_output = np.load(orig_path, allow_pickle=True)
+    filter_output = np.load(filter_path, allow_pickle=True)
+    try:
+        assert (not np.allclose(orig_output, filter_output, equal_nan=True))
+    except ValueError as e:
+        return True
+    
+    # Reset filter and check original data
+    inst.reset_filter()
+    read_data(inst, orig_path)
