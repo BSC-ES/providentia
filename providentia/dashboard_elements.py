@@ -33,7 +33,6 @@ def set_formatting(PyQt5_obj, format):
     for format_name, format_val in format.items():
         if format_name == 'font':
             
-            
             defined_font = QtGui.QFont(format['font']['style'], int(format['font']['size']))
 
             if 'bold' in format[format_name].keys():
@@ -46,6 +45,9 @@ def set_formatting(PyQt5_obj, format):
                 defined_font.setUnderline(format['font']['underline'])
 
             PyQt5_obj.setFont(defined_font)
+
+            if hasattr(PyQt5_obj, 'lineEdit'):
+                PyQt5_obj.lineEdit().setFont(defined_font)
 
         elif format_name == 'height':
             PyQt5_obj.setFixedHeight(format_val)
