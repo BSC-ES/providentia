@@ -270,6 +270,9 @@ class HoverAnnotation(object):
             annotation_dict["s"] = ""
         self.annotation = ax.annotate(**{**annotation_dict, **plot_characteristics['marker_annotate']})
         
+        # set number of decimal places to round the annotation to
+        self.round_decimal_places = plot_characteristics['marker_annotate_text']['round_decimal_places']
+
         # hide when it is initialised
         self.annotation.set_visible(False)
 
@@ -401,7 +404,7 @@ class HoverAnnotation(object):
 
                 # update location
                 self.annotation.xy = (time, concentration)
-                self.vline.set_xdata(time)
+                self.vline.set_xdata([time])
 
                 # update bbox position
                 if time > np.datetime64(self.x_middle['timeseries']):
@@ -430,7 +433,7 @@ class HoverAnnotation(object):
 
             # for all labels if there is data
             if len(concentration) >= 1:
-                text_label += ('\n{0}: {1:.2f}').format(data_label, concentration[0])
+                text_label += ('\n{0}: {1:.{2}f}').format(data_label, concentration[0], self.round_decimal_places)
 
         self.annotation.set_text(text_label)
 
@@ -467,9 +470,9 @@ class HoverAnnotation(object):
                 # experiment label
                 text_label = copy.deepcopy(data_label)
                 # observations label
-                text_label += ('\n{0}: {1:.2f}').format('x', concentration_x)
+                text_label += ('\n{0}: {1:.{2}f}').format('x', concentration_x, self.round_decimal_places)
                 # experiment label
-                text_label += ('\n{0}: {1:.2f}').format('y', concentration_y)
+                text_label += ('\n{0}: {1:.{2}f}').format('y', concentration_y, self.round_decimal_places)
 
         self.annotation.set_text(text_label)
 
@@ -498,7 +501,7 @@ class HoverAnnotation(object):
 
                 # update location
                 self.annotation.xy = (concentration, density)
-                self.vline.set_xdata(concentration)
+                self.vline.set_xdata([concentration])
 
                 # update bbox position
                 if concentration > self.x_middle['distribution']:
@@ -563,9 +566,9 @@ class HoverAnnotation(object):
 
                 # create annotation text
                 text_label = copy.deepcopy(data_label)
-                text_label += ('\n{0}: {1:.2f}').format(self.canvas_instance.plot_characteristics['taylor']['corr_stat'], 
-                                                        np.cos(corr_stat))
-                text_label += ('\n{0}: {1:.2f}').format('StdDev', stddev)
+                text_label += ('\n{0}: {1:.{2}f}').format(self.canvas_instance.plot_characteristics['taylor']['corr_stat'], 
+                                                        np.cos(corr_stat), self.round_decimal_places)
+                text_label += ('\n{0}: {1:.{2}f}').format('StdDev', stddev, self.round_decimal_places)
         
         self.annotation.set_text(text_label)
 
@@ -652,7 +655,7 @@ class HoverAnnotation(object):
 
                 # update location
                 self.canvas_instance.annotations['periodic'][resolution].xy = (time, concentration)
-                self.canvas_instance.annotations_vline['periodic'][resolution].set_xdata(time)
+                self.canvas_instance.annotations_vline['periodic'][resolution].set_xdata([time])
 
                 # update bbox position
                 if time > self.x_middle['periodic'][resolution]:
@@ -692,7 +695,7 @@ class HoverAnnotation(object):
             
             # for all labels if there is data
             if len(concentration) >= 1:
-                text_label += ('\n{0}: {1:.2f}').format(data_label, concentration[0])
+                text_label += ('\n{0}: {1:.{2}f}').format(data_label, concentration[0], self.round_decimal_places)
 
         self.canvas_instance.annotations['periodic'][resolution].set_text(text_label)
 
@@ -721,7 +724,7 @@ class HoverAnnotation(object):
 
                 # update location
                 self.canvas_instance.annotations['periodic-violin'][resolution].xy = (time, concentration)
-                self.canvas_instance.annotations_vline['periodic-violin'][resolution].set_xdata(time)
+                self.canvas_instance.annotations_vline['periodic-violin'][resolution].set_xdata([time])
 
                 # update bbox position
                 if time > self.x_middle['periodic-violin'][resolution]:
@@ -761,7 +764,7 @@ class HoverAnnotation(object):
             
             # for all labels if there is data
             if len(concentration) >= 1:
-                text_label += ('\n{0}: {1:.2f}').format(data_label, concentration[0])
+                text_label += ('\n{0}: {1:.{2}f}').format(data_label, concentration[0], self.round_decimal_places)
 
         self.canvas_instance.annotations['periodic-violin'][resolution].set_text(text_label)
 
@@ -820,7 +823,7 @@ class HoverAnnotation(object):
         text_label += ('Reference: {0}\n').format(station_reference)
         text_label += ('Longitude: {0:.2f}\n').format(station_location[0])
         text_label += ('Latitude: {0:.2f}\n').format(station_location[1])
-        text_label += ('{0}: {1:.2f}').format(self.canvas_instance.map_z_stat.currentText(), station_value)
+        text_label += ('{0}: {1:.{2}f}').format(self.canvas_instance.map_z_stat.currentText(), station_value, self.round_decimal_places)
         self.annotation.set_text(text_label)
 
         return None

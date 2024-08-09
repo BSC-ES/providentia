@@ -110,7 +110,11 @@ class Interactive:
 
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
-            self.plot_characteristics_filename = os.path.join(PROVIDENTIA_ROOT, 'settings/plot_characteristics_interactive.yaml')
+            if self.tests:
+                path = 'settings/plot_characteristics_tests.yaml'
+            else:
+                path = 'settings/plot_characteristics_interactive.yaml'
+            self.plot_characteristics_filename = os.path.join(PROVIDENTIA_ROOT, path)
         self.plot_characteristics_templates = yaml.safe_load(open(self.plot_characteristics_filename))
 
         # initialise Plot class
@@ -132,7 +136,7 @@ class Interactive:
 
         # update available experiments for selected fields
         get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
-                                self.network, self.species)
+                              self.network, self.species)
 
         # read data
         self.read()  
@@ -141,7 +145,7 @@ class Interactive:
         self.reset_filter(initialise=True)
 
         # set variable to know if data is in intial state or not
-        self.intialised = True
+        self.initialised = True
 
     def read(self):
         """ Wrapper method to read data. """
@@ -173,7 +177,7 @@ class Interactive:
         :type initialise: boolean, optional
         """
 
-        print('Resetting filter')
+        print(f'Resetting filter for {self.subsection}')
    
         # initialise structures to store fields        
         init_representativity(self)
@@ -185,7 +189,7 @@ class Interactive:
         update_period_fields(self)
         update_metadata_fields(self)
         
-        # apply set fields at intialisation for filtering
+        # apply set fields at initalisation for filtering
         if initialise:
             representativity_conf(self)
             period_conf(self)
@@ -196,9 +200,9 @@ class Interactive:
 
         # set variable to know if data is in intial state or not
         if initialise:
-            self.intialised = True
+            self.initialised = True
         else:
-            self.intialised = False
+            self.initialised = False
 
     def make_plot(self, plot, data_labels=None, labela='', labelb='', title=None, xlabel=None, ylabel=None, 
                   cb=True, legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, 
@@ -263,6 +267,8 @@ class Interactive:
         :type format: int, float, optional
         :return: matplotlib.axes._axes.Axes
         :rtype: Plot axes
+        :return: List of statistics (used in statsummary)
+        :rtype: list
         """
 
         # close any previously open figures
@@ -451,7 +457,7 @@ class Interactive:
             ax = fig.add_subplot(111)
 
         if base_plot_type in ['periodic', 'periodic-violin']:
-            gs = gridspec.GridSpecFromSubplotSpec(100, 100, subplot_spec=ax)
+            gs = gridspec.GridSpecFromSubplotSpec(100, 100, subplot_spec=ax.get_subplotspec())
             grid_dict = dict()
             grid_dict['hour'] = fig.add_subplot(gs[:46, :])
             grid_dict['dayofweek'] = fig.add_subplot(gs[54:, 64:])
@@ -537,7 +543,7 @@ class Interactive:
             stats_df = pd.DataFrame(np.nan, index=index, columns=stats_to_plot, dtype=np.float64)
             
             # fill dataframe
-            is_initial = copy.deepcopy(self.intialised)
+            is_initial = copy.deepcopy(self.initialised)
             kwargs = copy.deepcopy(self.kwargs)
             # save current subsection 
             orig_ss = copy.deepcopy(self.subsection)
@@ -574,7 +580,16 @@ class Interactive:
                         
                         # put data in dataframe
                         stats_df.loc[(ns, ss, dl)] = stats_per_data_label
-                
+                    
+                # remove subsection variables from memory (if have subsections)
+                # do not remove fixed section variables
+                for k in self.subsection_opts:
+                    if k not in self.fixed_section_vars:
+                        try:
+                            vars(self).pop(k)
+                        except:
+                            pass
+
             # make plot
             func(relevant_ax, networkspeci, relevant_data_labels, self.plot_characteristics[plot_type], plot_options,
                  statsummary=True, plotting_paradigm='summary', stats_df=stats_df)     
@@ -596,7 +611,7 @@ class Interactive:
             stats_df = pd.DataFrame(np.nan, index=index, columns=relevant_data_labels, dtype=np.float64)
             
             # fill dataframe
-            is_initial = copy.deepcopy(self.intialised)
+            is_initial = copy.deepcopy(self.initialised)
             kwargs = copy.deepcopy(self.kwargs)
             # save current subsection 
             orig_ss = copy.deepcopy(self.subsection)
@@ -626,6 +641,15 @@ class Interactive:
                     # put data in dataframe
                     stats_df.loc[(ns, ss)] = stat_per_data_labels
 
+                # remove subsection variables from memory (if have subsections)
+                # do not remove fixed section variables
+                for k in self.subsection_opts:
+                    if k not in self.fixed_section_vars:
+                        try:
+                            vars(self).pop(k)
+                        except:
+                            pass
+
             # make plot
             func(relevant_ax, networkspeci, relevant_data_labels, 
                  self.plot_characteristics[plot_type], plot_options, plotting_paradigm='summary', 
@@ -638,7 +662,7 @@ class Interactive:
                 self.reset_filter(initialise=True)
             else:
                 self.reset_filter()
-        
+
         # make timeseries plot
         elif base_plot_type == 'timeseries':
             func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
@@ -651,7 +675,7 @@ class Interactive:
                  plot_options, zstat=zstat, stddev_max=stddev_max)
             
         # other plots
-        else: 
+        elif base_plot_type != 'legend': 
             func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
                  plot_options)
 
@@ -667,7 +691,10 @@ class Interactive:
             current_lat = round(self.station_latitudes[networkspeci][station_ind], 2)
             current_station_name = self.station_names[networkspeci][station_ind]
             current_station_reference = self.station_references[networkspeci][station_ind]
-
+        elif n_stations == 0:
+            print('No valid stations for {} in {} subsection. Not making {} plot'.format(networkspeci, self.subsection, plot_type))
+            return
+            
         # set title, xlabel and ylabel for plots
 
         # set xlabel / ylabel
@@ -801,9 +828,11 @@ class Interactive:
                         relevant_ax.legend(**legend_handles)
 
         # make colourbar (embedded on plot axis)
-        if cb:
-            if 'cb' in self.plot_characteristics[plot_type]:
-                self.make_colourbar(fig, relevant_ax, zstat, speci, plot_type)
+        if 'cb' in self.plot_characteristics[plot_type]:
+            cb_ax = self.make_colourbar(fig, relevant_ax, zstat, speci, plot_type)
+            # hide colourbar if requested, we still need to create it to get the correct cmap / bounds in the maps
+            if not cb:
+                cb_ax.set_visible(False)
 
         # if save is passed then save plot and return
         if save:
@@ -845,7 +874,7 @@ class Interactive:
         # generate colourbar
         generate_colourbar(self, [plot_ax], [cb_ax], stat, self.plot_characteristics[plot_type], speci)
 
-        return None
+        return cb_ax
     
     def make_legend(self, plot_type, data_labels=None, set_obs=True):
         """ Wrapper method to make legend.
@@ -1210,21 +1239,28 @@ class Interactive:
         :rtype: numpy.ndarray
         """
 
-        # set temporary fname for writing
-        temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp_{}'.format(self.networkspecies[0]))
+        # for non-ghost, update networkspecies name 
+        # (e.g. ghost_btx/ghost_btx|sconcc6h6 -> ghost_btx-ghost_btx|sconcc6h6)
+        # this will avoid permission denied errors
+        networkspeci = self.networkspecies[0]
+        if '/' in networkspeci:
+            networkspeci = networkspeci.replace('/', '-')
 
+        # set temporary fname for writing
+        temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp_{}'.format(networkspeci))
+        
         # check if temporary fname already exists 
         if os.path.isfile(temporary_fname):
             # if so, keep iterating until find fname is new
             invalid_fname = True
             dup_count = 2
             while invalid_fname:
-                temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp_{}_{}'.format(self.networkspecies[0], dup_count))
+                temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp_{}_{}'.format(networkspeci, dup_count))
                 if os.path.isfile(temporary_fname):
                     dup_count += 1
                 else:
                     invalid_fname = False
-
+        
         if format in ['netCDF', 'netcdf', 'netCDF4', 'netcdf4', 'nc', '.nc']:
             data = export_netcdf(self, temporary_fname, set_in_memory=True)
 

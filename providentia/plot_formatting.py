@@ -5,10 +5,12 @@ import os
 from PIL import Image
 
 import cartopy.feature as cfeature
+import matplotlib
 import matplotlib as mpl 
 import matplotlib.pyplot as plt
 from matplotlib.dates import num2date
 import numpy as np
+from packaging.version import Version
 import pandas as pd
 
 from .plot_aux import get_land_polygon_resolution, set_map_extent
@@ -309,7 +311,10 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
 
             # get months that are complete
             months_start = pd.date_range(xlim['left'], xlim['right'], freq='MS')
-            months_end = pd.date_range(xlim['left'], xlim['right'], freq='M')
+            if Version(matplotlib.__version__) < Version("3.9"):
+                months_end = pd.date_range(xlim['left'], xlim['right'], freq='M')
+            else:
+                months_end = pd.date_range(xlim['left'], xlim['right'], freq='ME')
             if months_start.size > 1:
                 if (xlim['right'] - months_end[-1]).days >= 1:
                     months = months_start[:-1]

@@ -702,7 +702,7 @@ class ProvidentiaOffline:
 
                         # setup periodic plot type gridspec
                         if base_plot_type in ['periodic', 'periodic-violin']:
-                            gs = gridspec.GridSpecFromSubplotSpec(100, 100, subplot_spec=ax)
+                            gs = gridspec.GridSpecFromSubplotSpec(100, 100, subplot_spec=ax.get_subplotspec())
                             grid_dict = dict()
                             grid_dict['hour'] = fig.add_subplot(gs[:46, :])
                             grid_dict['dayofweek'] = fig.add_subplot(gs[54:, 64:])

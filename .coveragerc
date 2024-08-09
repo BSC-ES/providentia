@@ -1,0 +1,6 @@
+
+[report]
+omit =
+    providentia/dashboard_interactivity.py
+    providentia/dashboard_elements.py
+    providentia/dependencies/unit-converter/unit_converter.py
