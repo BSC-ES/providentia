@@ -28,8 +28,9 @@ def spatial_colocation_nonghost(station_references, longitudes, latitudes):
         :rtype: dict
     """
 
-    # get indices of intersection of station references across species  
+    # get indices of intersection of station references across species
     intersecting_station_references = list(set.intersection(*map(set,list(station_references.values()))))
+
     intersecting_indices = {}
     for networkspecies in station_references:
         intersecting_indices[networkspecies] = np.array([list(station_references[networkspecies]).index(ref) 
@@ -168,6 +169,10 @@ def spatial_colocation_nonghost(station_references, longitudes, latitudes):
             # append newly found intersecting indices to previously found intersect inds
             for networkspecies in non_intersecting_longitudes:
                 intersecting_indices[networkspecies] = np.array(np.append(intersecting_indices[networkspecies], pairwise_intersect_inds[networkspecies]), dtype=np.int64)
+
+    # sort indices with respect to original order of station references
+    for networkspeci in station_references:
+        intersecting_indices[networkspeci] = np.sort(intersecting_indices[networkspeci])
 
     return intersecting_indices
 

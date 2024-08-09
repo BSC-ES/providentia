@@ -5,18 +5,16 @@ from pandas.testing import assert_frame_equal
 from providentia.statistics import get_z_statistic_info
 
 
-def read_data(inst, statistic_mode, network_type):
+def read_data(inst, path):
 
     # get data in memory in xarray format
     data = inst.get_data(format='xr')
-    if network_type == 'ghost':
-        networkspeci = 'EBAS|sconco3_data'
-    else:
-        networkspeci = 'nasa-aeronet_oneill_v3-lev15|od500aerocoarse_data'
-    generated_output = data[networkspeci].values
+    try:
+        generated_output = data['EBAS|sconco3_data'].values
+    except:
+        generated_output = data['nasa-aeronet_directsun_v3-lev15|od550aero_data'].values
 
     # save data, uncomment if we want to update it
-    path = f'tests/reference/{network_type}/{statistic_mode}/data/data.npy'
     # np.save(path, generated_output)
 
     # read expected output
@@ -25,11 +23,10 @@ def read_data(inst, statistic_mode, network_type):
     assert (np.allclose(generated_output, expected_output, equal_nan=True))
 
 
-def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], expected_annotations=[], stats=[]):
+def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
 
     # make plot
-    fig = inst.make_plot(plot_type, plot_options=plot_options,
-                         return_plot=True, stats=stats)
+    fig = inst.make_plot(plot_type, plot_options=plot_options, return_plot=True)
 
     # check that a figure has been returned
     assert (type(fig) == matplotlib.figure.Figure)
@@ -44,57 +41,67 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], ex
     else:
         base_plot_type = plot_type.split('_')[0]
 
-    if base_plot_type in ['statsummary']:
+    if base_plot_type in ['statsummary', 'heatmap', 'table']:
 
         # get table
         for child in fig.axes[0].get_children():
-            if isinstance(child, matplotlib.table.Table):
+            if isinstance(child, (matplotlib.table.Table, matplotlib.collections.QuadMesh)):
                 table = child
                 break
 
-        # extract data from the table
+        # extract data from the table/heatmap
         data = []
-        for (row, col), cell in table.get_celld().items():
-            data.append({
-                "row": row,
-                "col": col,
-                "value": cell.get_text().get_text()
-            })
+        if base_plot_type in ['statsummary', 'table']:
+            for (row, col), cell in table.get_celld().items():
+                data.append({
+                    "row": row,
+                    "col": col,
+                    "value": cell.get_text().get_text()
+                })
+        else:
+            for (x, y), value in np.ndenumerate(table.get_array()):
+                data.append({
+                    "x": x,
+                    "y": y,
+                    "value": value
+                })
         generated_output = pd.DataFrame(data)
 
         # save data, uncomment if we want to update it
         if 'bias' in plot_options:
-            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_bias_table_values.csv'
+            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_bias_values.csv'
         else:
-            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_table_values.csv'
+            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_values.csv'
         # generated_output.to_csv(path, index=False)
 
+        # read expected output
         expected_output = pd.read_csv(path, keep_default_na=False)
 
         assert assert_frame_equal(generated_output, expected_output) is None
 
-    elif base_plot_type in ['timeseries', 'distribution']:
+    elif base_plot_type in ['timeseries', 'distribution', 'periodic', 'scatter', 'periodic-violin']:
 
         # iterate through plotted lines
-        for line_i, line in enumerate(fig.axes[0].lines):
+        for axis_i, axis in enumerate(fig.axes):
+            for line_i, line in enumerate(axis.lines):
 
-            # extract data from each line
-            data = []
-            for x, y in line.get_xydata():
-                data.append({
-                    "x": x,
-                    "y": y,
-                })
-            generated_output = pd.DataFrame(data)
+                # extract data from each line
+                data = []
+                for x, y in line.get_xydata():
+                    data.append({
+                        "x": x,
+                        "y": y,
+                    })
+                generated_output = pd.DataFrame(data)
 
-            # save data, uncomment if we want to update it
-            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_line_{line_i}.csv'
-            # generated_output.to_csv(path, index=False)
+                # save data, uncomment if we want to update it
+                path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_{axis_i}_{line_i}.csv'
+                # generated_output.to_csv(path, index=False)
 
-            # read expected output
-            expected_output = pd.read_csv(path)
+                # read expected output
+                expected_output = pd.read_csv(path)
 
-            assert assert_frame_equal(
+                assert assert_frame_equal(
                 generated_output, expected_output) is None
 
     elif base_plot_type in ['map']:
@@ -126,11 +133,44 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[], ex
         assert assert_frame_equal(generated_output, expected_output) is None
 
     # check annotations
-    if ('annotate' in plot_options) and (expected_annotations):
+    if 'annotate' in plot_options:
         annotations = [child for child in fig.axes[0].get_children()
                        if type(child) == matplotlib.offsetbox.AnchoredOffsetbox][0]
 
-        for annotation, expected_annotation in zip(annotations.get_child().get_children(),
-                                                   expected_annotations):
-            print(annotation.get_text())
-            assert annotation.get_text() == expected_annotation
+        # extract annotations
+        data = []
+        for annotation in annotations.get_child().get_children():
+            data.append({
+                "dataset": annotation.get_text().split('|')[0].strip(),
+                "annotation": annotation.get_text().split('|')[1].strip()
+            })
+        generated_output = pd.DataFrame(data)
+
+        # save data, uncomment if we want to update it
+        path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_annotations.csv'
+        # generated_output.to_csv(path, index=False)
+
+        # read expected output
+        expected_output = pd.read_csv(path, keep_default_na=False)
+
+        assert assert_frame_equal(generated_output, expected_output) is None
+
+def check_filter_data(inst, statistic_mode, network_type, filter):
+
+    orig_path = f'tests/reference/{network_type}/{statistic_mode}/data/data.npy'
+    filter_path = f'tests/reference/{network_type}/{statistic_mode}/data/data_{filter}.npy'
+
+    # Check filtered data
+    read_data(inst, filter_path)
+
+    # Check filtered data is different from original data
+    orig_output = np.load(orig_path, allow_pickle=True)
+    filter_output = np.load(filter_path, allow_pickle=True)
+    try:
+        assert (not np.allclose(orig_output, filter_output, equal_nan=True))
+    except ValueError as e:
+        return True
+    
+    # Reset filter and check original data
+    inst.reset_filter()
+    read_data(inst, orig_path)
