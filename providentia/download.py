@@ -68,9 +68,6 @@ class ProvidentiaDownload(object):
         # initialise remote hostname
         self.remote_hostname = "transfer1.bsc.es"
 
-        # get ghost_version list
-        self.possible_ghost_versions = os.listdir(os.path.join(CURRENT_PATH,'dependencies', 'GHOST_standards'))
-
         # in case transfer broke
         # global REMOTE_MACHINE
         # self.remote_hostname, REMOTE_MACHINE = "glogin4.bsc.es", "mn5" 

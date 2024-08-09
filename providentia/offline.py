@@ -814,7 +814,7 @@ class ProvidentiaOffline:
 
                 # update subsection variables
                 for k, val in self.subsection_opts.items():
-                    setattr(self, k, provconf.parse_parameter(k, val))
+                    setattr(self, k, provconf.parse_parameter(k, val, deactivate_warning=True))
 
                 # now all variables have been parsed, check validity of those, throwing errors where necessary
                 provconf.check_validity(deactivate_warning=True)
