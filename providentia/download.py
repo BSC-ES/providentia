@@ -479,7 +479,7 @@ class ProvidentiaDownload(object):
             show_message(self, msg, deactivate=initial_check)
             return 
         
-        # If not valid combination of ghost version and network, next 
+        # if not valid combination of ghost version and network, next 
         elif self.ghost_version not in self.sftp.listdir(os.path.join(self.ghost_remote_obs_path,network)):
             msg = f"There is no data available for {network} network for the current ghost version ({self.ghost_version})."
 
@@ -517,8 +517,10 @@ class ProvidentiaDownload(object):
 
             if valid_available_ghost_versions:
                 msg += f" Please check one of the available versions: {', '.join(sorted(valid_available_ghost_versions))}"
+            elif available_ghost_versions:
+                msg += " There are no other versions available at the moment with this configuration."
             else:
-                msg += f" There are no other versions available at the moment."
+                msg += " There are no other versions available at the moment."
 
             show_message(self, msg, deactivate=initial_check)
             return
@@ -836,8 +838,10 @@ class ProvidentiaDownload(object):
                             
             if valid_available_ghost_versions:
                 msg += f" Please check one of the available versions: {', '.join(sorted(valid_available_ghost_versions))}"
+            elif available_ghost_versions:
+                msg += " There are no other versions available at the moment with this configuration."
             else:
-                msg += f" There are no other versions available at the moment."
+                msg += " There are no other versions available at the moment."
 
             show_message(self, msg, deactivate=initial_check)
             return
