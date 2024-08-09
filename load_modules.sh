@@ -3,10 +3,10 @@ module purge
 
 # Marenostrum5
 if [ "${BSC_MACHINE}" == "mn5" ]; then
-    # TODO Check if needed in second step of interpolation
-    module load bsc/1.0 oneapi/2023.2.0 # TODO i mean this part is from denes code
+    module load intel impi
     module load greasy/2.2.4.1
-    module load libexpat udunits hdf5 pnetcdf/1.12.3 netcdf nco/5.2.2
+    module load hdf5/1.14.1-2 pnetcdf/1.12.3
+    module load netcdf
 
 # Nord3v2
 elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then 
