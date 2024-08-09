@@ -19,7 +19,7 @@
             'interpolation': False,
             'network': [],
             'species': [],
-            'resolution': null,
+            'resolution': [],
             'start_date': null,
             'end_date': null,
             'observations_data_label': 'observations',
@@ -65,6 +65,7 @@
                                     'observations_data_label', 'experiments', 'temporal_colocation', 'spatial_colocation', 
                                     'report_type', 'report_summary', 'report_stations', 'report_title', 
                                     'report_filename', 'plot_characteristics_filename', 
-                                    'harmonise_summary', 'harmonise_stations']
+                                    'harmonise_summary', 'harmonise_stations'],
+            'tests': False
 }
 
