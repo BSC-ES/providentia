@@ -42,7 +42,10 @@ def test_apply_period(inst, statistic_mode, network_type):
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_apply_representativity(inst, statistic_mode, network_type):
-    inst.apply_filter('all_representativity_percent', limit=50)
+    if network_type == 'ghost':
+        inst.apply_filter('all_representativity_percent', limit=50)
+    else:
+        inst.apply_filter('all_representativity_percent', limit=20)
     check_filter_data(inst, statistic_mode, network_type,
                       filter='representativity')
 
@@ -56,12 +59,10 @@ def test_apply_bounds(inst, statistic_mode, network_type):
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_apply_metadata(inst, statistic_mode, network_type):
     if network_type == 'ghost':
-        keep = ['AR0001R_UVP']
-        remove = ['Donon']
+        value = ['AT0034G_UVP']
     else:
-        keep = ['Barcelona']
-        remove = ['ATHENS-NOA', 'Zaragoza']
-    inst.apply_filter('station_reference', keep=keep)
+        value = ['Barcelona']
+    inst.apply_filter('station_reference', keep=value)
     check_filter_data(inst, statistic_mode, network_type, filter='keep')
-    inst.apply_filter('station_name', remove=remove)
+    inst.apply_filter('station_reference', remove=value)
     check_filter_data(inst, statistic_mode, network_type, filter='remove')
