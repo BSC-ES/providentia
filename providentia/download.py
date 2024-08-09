@@ -94,7 +94,7 @@ class ProvidentiaDownload(object):
         self.prv_user = env.get("PRV_USER")
         self.prv_password = env.get("PRV_PWD")
 
-        # get user preference over ghost download and overwrite
+        # get user preference over GHOST download and overwrite
         self.bsc_download_choice = env.get("BSC_DL_CHOICE")
         self.overwrite_choice = env.get("OVERWRITE")
 
@@ -174,7 +174,7 @@ class ProvidentiaDownload(object):
                 if filter_species != None:
                     self.species = [filter_species]
 
-                # ghost
+                # GHOST
                 if check_for_ghost(network):
                     # download from the remote machine
                     if self.bsc_download_choice == 'y':
@@ -191,7 +191,7 @@ class ProvidentiaDownload(object):
                     else:
                         error = "Download option not valid, check your .env file."
                         sys.exit(error)
-                # non-ghost
+                # non-GHOST
                 else:
                     # get the files that need to be downloaded, check if they already are and download or not
                     initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
@@ -479,19 +479,19 @@ class ProvidentiaDownload(object):
             show_message(self, msg, deactivate=initial_check)
             return 
         
-        # if not valid combination of ghost version and network, next 
+        # if not valid combination of GHOST version and network, next 
         elif self.ghost_version not in self.sftp.listdir(os.path.join(self.ghost_remote_obs_path,network)):
-            msg = f"There is no data available for {network} network for the current ghost version ({self.ghost_version})."
+            msg = f"There is no data available for {network} network for the current GHOST version ({self.ghost_version})."
 
-            # get available experiments in other ghost versions (considering different formats)
+            # get available experiments in other GHOST versions (considering different formats)
             available_ghost_versions = set(self.sftp.listdir(os.path.join(self.ghost_remote_obs_path,network))).intersection(self.possible_ghost_versions)
 
-            # list that saves the ghost versions with valid nc files
+            # list that saves the GHOST versions with valid nc files
             valid_available_ghost_versions = []
             
             # check for combinations of species, resolutions, network, and day in the available versions
             if available_ghost_versions:
-                # iterate the different ghost versions
+                # iterate the different GHOST versions
                 for possible_ghost_version in available_ghost_versions:
                     remote_dir_ghost_version = os.path.join(self.ghost_remote_obs_path, network, possible_ghost_version)
                     
@@ -622,7 +622,7 @@ class ProvidentiaDownload(object):
             print('\n'+'-'*40)
             print(f"\nDownloading GHOST {network} network data from Zenodo...")
 
-        # if first time reading a ghost network, get current zips urls in zenodo page
+        # if first time reading a GHOST network, get current zips urls in zenodo page
         if not hasattr(self,"zenodo_ghost_available_networks"): 
             self.fetch_zenodo_networks()
 
@@ -672,7 +672,7 @@ class ProvidentiaDownload(object):
                 if not initial_check:
                     print(f"\n{network} observations to download:")
                 
-                # initialise only possible ghost version
+                # initialise only possible GHOST version
                 # TODO in the future there will be various versions in zenodo
                 last_ghost_version = '1.5' 
                 
@@ -767,7 +767,7 @@ class ProvidentiaDownload(object):
         # domain and ensemble option are directories
         experiment_old = experiment.replace("-","/")
         
-        # get remote directory format depending on the ghost version
+        # get remote directory format depending on the GHOST version
         experiment = experiment_old if self.ghost_version in ["1.2", "1.3", "1.3.1"] else experiment_new
 
         # get remote directory
@@ -777,17 +777,17 @@ class ProvidentiaDownload(object):
         try:
             self.sftp.stat(remote_dir)
         except FileNotFoundError:
-            msg = f"There is no data available for {experiment_new} experiment for the current ghost version ({self.ghost_version})."
+            msg = f"There is no data available for {experiment_new} experiment for the current GHOST version ({self.ghost_version})."
             
-            # get possible ghost versions from the combination of GHOST_standards and the real avaibles in the experiment remote machine path
+            # get possible GHOST versions from the combination of GHOST_standards and the real avaibles in the experiment remote machine path
             possible_ghost_versions = set(self.sftp.listdir(self.exp_remote_path)).intersection(set(self.possible_ghost_versions))
             
-            # get available experiments in other ghost versions (considering different formats)
+            # get available experiments in other GHOST versions (considering different formats)
             available_ghost_versions = []
 
             for possible_ghost_version in possible_ghost_versions:
                 try:
-                    # get experiment path depending on the ghost version
+                    # get experiment path depending on the GHOST version
                     remote_dir_ghost_version = os.path.join(self.exp_remote_path, possible_ghost_version, experiment_old if possible_ghost_version in ["1.2", "1.3", "1.3.1"] else experiment_new)
                     
                     # check if directory exists
@@ -799,13 +799,13 @@ class ProvidentiaDownload(object):
                 except FileNotFoundError:
                     continue
                             
-            # list that saves the ghost versions with valid nc files
+            # list that saves the GHOST versions with valid nc files
             valid_available_ghost_versions = []
             
             # check for combinations of species, resolutions, network, and day in the available versions
             if available_ghost_versions:
 
-                # iterate the different ghost versions
+                # iterate the different GHOST versions
                 for possible_ghost_version in available_ghost_versions:
                     remote_dir_ghost_version = os.path.join(self.exp_remote_path, possible_ghost_version, experiment_old if possible_ghost_version in ["1.2", "1.3", "1.3.1"] else experiment_new)
                     
@@ -948,7 +948,7 @@ class ProvidentiaDownload(object):
             show_message(self, msg, deactivate=initial_check)
             
     def fetch_zenodo_networks(self):
-        # Get urls from zenodo to get ghost zip files url
+        # Get urls from zenodo to get GHOST zip files url
 
         # initialize dictionary to store possible networks
         self.zenodo_ghost_available_networks = {} 
