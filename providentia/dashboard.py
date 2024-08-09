@@ -43,6 +43,7 @@ from .warnings_prv import show_message
 os.environ["QT_ENABLE_HIGHDPI_SCALING"]   = "1"
 os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
 os.environ["QT_SCALE_FACTOR"]             = "1"
+os.environ["QT_FONT_DPI"] = "96"
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
@@ -622,9 +623,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         parent_layout.addLayout(config_bar)
         parent_layout.addLayout(hbox)
 
-        # add MPL canvas of plots to parent frame
-        parent_layout.addWidget(self.mpl_canvas)
-
         # set finalised layout
         self.setLayout(parent_layout)
 
@@ -635,9 +633,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         elif self.operating_system == 'Linux':
             self.show()
             self.showMaximized()
+            self.get_geometry()
         elif self.operating_system == 'Windows':
             self.show()
             self.showMaximized()
+
+        # add MPL canvas of plots to parent frame
+        parent_layout.addWidget(self.mpl_canvas)
 
     def generate_pop_up_window(self, menu_root):
         """ Generate pop up window. """
@@ -1403,10 +1405,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.mpl_canvas.figure.canvas.draw_idle()  
             self.mpl_canvas.figure.canvas.flush_events()
 
-            # clear all axes elements 
-            for plot_type, ax in self.mpl_canvas.plot_axes.items():
-                self.mpl_canvas.remove_axis_elements(ax, plot_type)
-
             # set current time array, as previous time array
             self.previous_time_array = self.time_array
 
@@ -1428,6 +1426,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # update fields available for filtering
             update_representativity_fields(self)
             update_period_fields(self)
+
+            # for non-GHOST delete valid station indices variables because we do not want to 
+            # remove the stations with 0 valid measurements before the filter has been updated, 
+            # this will happen later
+            if hasattr(self, 'valid_station_inds') and (not self.reading_ghost):
+                delattr(self, 'valid_station_inds')
+                delattr(self, 'valid_station_inds_temporal_colocation')
+
             update_metadata_fields(self)
             
             # update relevant/nonrelevant temporal resolutions 
