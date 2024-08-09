@@ -22,6 +22,8 @@ def read_data(inst, path):
 
     assert (np.allclose(generated_output, expected_output, equal_nan=True))
 
+    assert (generated_output.size != 0)
+
 
 def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
 
