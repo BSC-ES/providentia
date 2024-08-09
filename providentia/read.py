@@ -560,10 +560,22 @@ class DataReader:
             update_plotting_parameters(self.read_instance) 
 
         # print basic information species
-        print('SELECTED SPECIES')
-        print('- Main network-species', self.read_instance.networkspecies)
+        print('\nOBSERVATIONS')
+        for network in self.read_instance.networkspecies:
+            print(f" - {network}")
         if self.read_instance.filter_species:
-            print('- Filter network-species', self.read_instance.filter_species)
+            print('OBSERVATIONS TO FILTER BY')
+            for network_experiment, parameters in self.read_instance.filter_species.items():
+                print(f" - {network_experiment} {parameters}")                       
+        # print experiments after observations
+        if self.read_instance.experiments:
+            print("EXPERIMENTS")
+            for experiment, alias in self.read_instance.experiments.items():
+                str_experiment = f" - {experiment}"
+                if self.read_instance.hasAlias: 
+                    str_experiment += f" ({alias})"
+                print(str_experiment)
+        print()
 
     def read_basic_metadata(self):     
         """ Get basic unique metadata across networkspecies wanting to read

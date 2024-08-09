@@ -105,15 +105,13 @@ class SubmitInterpolation(object):
             for k, val in sorted(self.current_config.items()):
                 setattr(self, k, provconf.parse_parameter(k, val))
 
-
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         provconf.check_validity()
 
         # TODO Hardcoded
-        interp_print_variables = ['chunk_size', 'job_array_limit', 'multithreading', 
-        'reverse_vertical_orientation', 'ghost_version', 'n_neighbours', 'start_date', 
-        'end_date', #'domain', 'ensemble_options', 
-        'experiments', 'species', 'network', 'resolution']
+        interp_print_variables = ['ghost_version', 'n_neighbours', 'start_date', 
+        'end_date', 'experiments', 'species', 'network', 'resolution', 'chunk_size', 'job_array_limit', 'multithreading', 
+        'reverse_vertical_orientation']
 
         # print variables used, if all species are used print "All Species"        
         print("\nVariables used for the interpolation:\n")
@@ -520,8 +518,8 @@ class SubmitInterpolation(object):
         # if have no arguments for all experiments, return message stating that
         if len(self.arguments) == 0:
             if len(self.experiments) > 1:
-                msg = 'INTERPOLATION CANNOT BE DONE FOR ANY EXPERIMENT'
-                sys.exit(msg)
+                error = 'INTERPOLATION CANNOT BE DONE FOR ANY EXPERIMENT'
+                sys.exit(error)
             else:
                 sys.exit()
 
@@ -669,8 +667,8 @@ class SubmitInterpolation(object):
         if (self.machine == 'power') & (self.multithreading == True):
             submit_file.write("#SBATCH --cpus-per-task=4\n")
         submit_file.write("#SBATCH --qos={}\n".format(self.qos))
-        submit_file.write("##SBATCH --output=/dev/null\n")
-        submit_file.write("##SBATCH --error=/dev/null\n")
+        # submit_file.write("#SBATCH --output=/dev/null\n") # TODO Check what to do with this
+        # submit_file.write("#SBATCH --error=/dev/null\n")
         if self.machine == 'mn5': # TODO when checking if debug works check this
             submit_file.write("#SBATCH --account=bsc32\n")  
             submit_file.write("#SBATCH --ntasks-per-node={}\n".format(n_simultaneous_tasks))
