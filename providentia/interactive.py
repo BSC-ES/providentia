@@ -110,7 +110,11 @@ class Interactive:
 
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
-            self.plot_characteristics_filename = os.path.join(PROVIDENTIA_ROOT, 'settings/plot_characteristics_interactive.yaml')
+            if self.tests:
+                path = 'settings/plot_characteristics_tests.yaml'
+            else:
+                path = 'settings/plot_characteristics_interactive.yaml'
+            self.plot_characteristics_filename = os.path.join(PROVIDENTIA_ROOT, path)
         self.plot_characteristics_templates = yaml.safe_load(open(self.plot_characteristics_filename))
 
         # initialise Plot class
@@ -132,7 +136,7 @@ class Interactive:
 
         # update available experiments for selected fields
         get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
-                                self.network, self.species)
+                              self.network, self.species)
 
         # read data
         self.read()  
@@ -141,7 +145,7 @@ class Interactive:
         self.reset_filter(initialise=True)
 
         # set variable to know if data is in intial state or not
-        self.intialised = True
+        self.initialised = True
 
     def read(self):
         """ Wrapper method to read data. """
@@ -173,7 +177,7 @@ class Interactive:
         :type initialise: boolean, optional
         """
 
-        print('Resetting filter')
+        print(f'Resetting filter for {self.subsection}')
    
         # initialise structures to store fields        
         init_representativity(self)
@@ -185,7 +189,7 @@ class Interactive:
         update_period_fields(self)
         update_metadata_fields(self)
         
-        # apply set fields at intialisation for filtering
+        # apply set fields at initalisation for filtering
         if initialise:
             representativity_conf(self)
             period_conf(self)
@@ -196,15 +200,15 @@ class Interactive:
 
         # set variable to know if data is in intial state or not
         if initialise:
-            self.intialised = True
+            self.initialised = True
         else:
-            self.intialised = False
+            self.initialised = False
 
     def make_plot(self, plot, data_labels=None, labela='', labelb='', title=None, xlabel=None, ylabel=None, 
                   cb=True, legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, 
                   domain=False, hidedata=False, logx=False, logy=False, multispecies=False, regression=False, 
                   smooth=False, threshold=False, plot_options=None, save=False, return_plot=False, format=None,
-                  width=None, height=None, stats=[]):
+                  width=None, height=None):
         """ Wrapper method to make a Providentia plot.
 
         :param plot: Plot type
@@ -528,13 +532,10 @@ class Interactive:
         elif base_plot_type == 'statsummary':
             
             # get stats to plot
-            if stats:
-                stats_to_plot = stats
+            if 'bias' in plot_options:
+                stats_to_plot = self.plot_characteristics[plot_type]['experiment_bias']
             else:
-                if 'bias' in plot_options:
-                    stats_to_plot = self.plot_characteristics[plot_type]['experiment_bias']
-                else:
-                    stats_to_plot = self.plot_characteristics[plot_type]['basic']
+                stats_to_plot = self.plot_characteristics[plot_type]['basic']
 
             # create empty dataframe with networkspecies and subsections
             index = pd.MultiIndex.from_product([self.networkspecies, self.subsections, relevant_data_labels],
@@ -542,7 +543,7 @@ class Interactive:
             stats_df = pd.DataFrame(np.nan, index=index, columns=stats_to_plot, dtype=np.float64)
             
             # fill dataframe
-            is_initial = copy.deepcopy(self.intialised)
+            is_initial = copy.deepcopy(self.initialised)
             kwargs = copy.deepcopy(self.kwargs)
             # save current subsection 
             orig_ss = copy.deepcopy(self.subsection)
@@ -579,7 +580,16 @@ class Interactive:
                         
                         # put data in dataframe
                         stats_df.loc[(ns, ss, dl)] = stats_per_data_label
-                
+                    
+                # remove subsection variables from memory (if have subsections)
+                # do not remove fixed section variables
+                for k in self.subsection_opts:
+                    if k not in self.fixed_section_vars:
+                        try:
+                            vars(self).pop(k)
+                        except:
+                            pass
+
             # make plot
             func(relevant_ax, networkspeci, relevant_data_labels, self.plot_characteristics[plot_type], plot_options,
                  statsummary=True, plotting_paradigm='summary', stats_df=stats_df)     
@@ -601,7 +611,7 @@ class Interactive:
             stats_df = pd.DataFrame(np.nan, index=index, columns=relevant_data_labels, dtype=np.float64)
             
             # fill dataframe
-            is_initial = copy.deepcopy(self.intialised)
+            is_initial = copy.deepcopy(self.initialised)
             kwargs = copy.deepcopy(self.kwargs)
             # save current subsection 
             orig_ss = copy.deepcopy(self.subsection)
@@ -630,6 +640,15 @@ class Interactive:
 
                     # put data in dataframe
                     stats_df.loc[(ns, ss)] = stat_per_data_labels
+
+                # remove subsection variables from memory (if have subsections)
+                # do not remove fixed section variables
+                for k in self.subsection_opts:
+                    if k not in self.fixed_section_vars:
+                        try:
+                            vars(self).pop(k)
+                        except:
+                            pass
 
             # make plot
             func(relevant_ax, networkspeci, relevant_data_labels, 
