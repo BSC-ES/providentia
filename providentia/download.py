@@ -518,9 +518,9 @@ class ProvidentiaDownload(object):
             if valid_available_ghost_versions:
                 msg += f" Please check one of the available versions: {', '.join(sorted(valid_available_ghost_versions))}"
             elif available_ghost_versions:
-                msg += " There are no other versions available at the moment with this configuration."
+                msg += " There is no available data in other GHOST versions with this configuration."
             else:
-                msg += " There are no other versions available at the moment."
+                msg += " There is no available data in other GHOST versions."
 
             show_message(self, msg, deactivate=initial_check)
             return
@@ -839,9 +839,9 @@ class ProvidentiaDownload(object):
             if valid_available_ghost_versions:
                 msg += f" Please check one of the available versions: {', '.join(sorted(valid_available_ghost_versions))}"
             elif available_ghost_versions:
-                msg += " There are no other versions available at the moment with this configuration."
+                msg += " There is no available data in other GHOST versions with this configuration."
             else:
-                msg += " There are no other versions available at the moment."
+                msg += " There is no available data in other GHOST versions."
 
             show_message(self, msg, deactivate=initial_check)
             return
