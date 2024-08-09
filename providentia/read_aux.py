@@ -180,10 +180,15 @@ def read_netcdf_data(tuple_arguments):
                 qa = None
             else:
                 species_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
-        # non-GHOST (transpose array to swap station and time dimensions)
+        # non-GHOST
         else:
-            species_data = ncdf_root[speci][valid_file_time_indices, current_file_station_indices].T
-
+            # transpose array to swap station and time dimensions
+            if ncdf_root[speci].dimensions == ('time', 'station'):
+                species_data = ncdf_root[speci][valid_file_time_indices, current_file_station_indices].T
+            # do not transpose
+            else:
+                species_data = ncdf_root[speci][current_file_station_indices, valid_file_time_indices]
+        
         # reading GHOST data?
         if reading_ghost:
 
@@ -417,7 +422,7 @@ def get_frequency_code(resolution):
     """ Get frequency code. """
     
     if resolution in ['hourly', 'hourly_instantaneous']:
-        active_frequency_code = 'H'
+        active_frequency_code = 'h'
     elif resolution in ['3hourly', '3hourly_instantaneous']:
         active_frequency_code = '3H'
     elif resolution in ['6hourly', '6hourly_instantaneous']:
