@@ -384,6 +384,7 @@ class ProvidentiaDownload(object):
             print(f"\nDownloading non-GHOST {network} network data from {REMOTE_MACHINE}...")
 
         # if not valid network, check if user put the network on init_prov 
+        # TODO Move to configuration.py
         if network not in self.nonghost_available_networks:
             msg = f"The {network} network could not be found on {os.path.join(PROVIDENTIA_ROOT,'settings','init_prov.yaml')} nonghost_available_networks list."
             msg += "\nPlease, add the network to the list and execute again."
@@ -395,11 +396,12 @@ class ProvidentiaDownload(object):
         try:
             self.sftp.stat(os.path.join(self.nonghost_remote_obs_path,network))
         except FileNotFoundError:
-            msg = f"There is no data available for {network} network."
+            msg = f"There is no data available in {REMOTE_MACHINE} for {network} network."
             show_message(self, msg, deactivate=initial_check)
             return
 
         # check if all resolutions are in init_prov, if not warning and delete the not correct ones
+        # TODO move to configuration.py
         not_available_resolutions = set(self.resolution) - set(self.nonghost_available_resolutions)
         if not_available_resolutions:
             available_resolutions = set(self.resolution) - not_available_resolutions
@@ -416,7 +418,7 @@ class ProvidentiaDownload(object):
             try:
                 sftp_species  = self.species if self.species else self.sftp.listdir(os.path.join(self.nonghost_remote_obs_path,network,resolution))
             except FileNotFoundError:
-                msg = f"There is no data available for {network} network at {resolution} resolution"
+                msg = f"There is no data available in {REMOTE_MACHINE} for {network} network at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species: 
@@ -444,7 +446,7 @@ class ProvidentiaDownload(object):
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
                 except FileNotFoundError:
-                    msg = f"There is no data available for {network} network for {species} species at {resolution} resolution"
+                    msg = f"There is no data available in {REMOTE_MACHINE} for {network} network for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -452,7 +454,7 @@ class ProvidentiaDownload(object):
 
                 # warning if network + species + resolution + date range combination gets no matching results       
                 if not valid_nc_files:                 
-                    msg = f"There is no data available from {self.start_date} to {self.end_date} for {network} network {species} species at {resolution} resolution."
+                    msg = f"There is no data available in {REMOTE_MACHINE} from {self.start_date} to {self.end_date} for {network} network {species} species at {resolution} resolution."
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -508,13 +510,13 @@ class ProvidentiaDownload(object):
 
         # if not valid network, next
         if network not in self.sftp.listdir(self.ghost_remote_obs_path):
-            msg = f"There is no data available for {network} network."
+            msg = f"There is no data available in {REMOTE_MACHINE} for {network} network."
             show_message(self, msg, deactivate=initial_check)
             return 
         
         # If not valid combination of ghost version and network, next 
         elif self.ghost_version not in self.sftp.listdir(os.path.join(self.ghost_remote_obs_path,network)):
-            msg = f"There is no data available for {network} network for the current ghost version ({self.ghost_version})."
+            msg = f"There is no data available in {REMOTE_MACHINE} for {network} network for the current ghost version ({self.ghost_version})."
             
             available_ghost_versions = set(self.sftp.listdir(os.path.join(self.ghost_remote_obs_path,network))).intersection(self.possible_ghost_versions)
 
@@ -536,7 +538,7 @@ class ProvidentiaDownload(object):
             try:
                 sftp_species  = self.species if self.species else self.sftp.listdir(os.path.join(remote_dir,resolution))
             except FileNotFoundError:
-                msg = f"There is no data available for {network} network at {resolution} resolution"
+                msg = f"There is no data available in {REMOTE_MACHINE} for {network} network at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species: 
@@ -565,7 +567,7 @@ class ProvidentiaDownload(object):
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
                 except FileNotFoundError:
-                    msg = f"There is no data available for {network} network for {species} species at {resolution} resolution"
+                    msg = f"There is no data available in {REMOTE_MACHINE} for {network} network for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -573,7 +575,7 @@ class ProvidentiaDownload(object):
 
                 # warning if network + species + resolution + date range combination gets no matching results       
                 if not valid_nc_files:                 
-                    msg = f"There is no data available from {self.start_date} to {self.end_date} for {network} network {species} species at {resolution} resolution."
+                    msg = f"There is no data available in {REMOTE_MACHINE} from {self.start_date} to {self.end_date} for {network} network {species} species at {resolution} resolution."
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -629,7 +631,7 @@ class ProvidentiaDownload(object):
 
         # if not valid network, next
         if network not in self.zenodo_ghost_available_networks:
-            msg = f"There is no data available for {network} network."
+            msg = f"There is no data available in {REMOTE_MACHINE} for {network} network."
             show_message(self, msg, deactivate=initial_check)
             return
 
@@ -661,7 +663,7 @@ class ProvidentiaDownload(object):
             if not res_spec_dir_tail:
                 print_spec = f'{",".join(self.species)} species' if self.species else ""
                 print_res = f'at {",".join(self.resolution)} resolutions' if self.resolution else ""
-                msg = f"There is no data available for {network} network {print_spec} {print_res}"
+                msg = f"There is no data available in {REMOTE_MACHINE} for {network} network {print_spec} {print_res}"
                 show_message(self, msg, deactivate=initial_check)
 
             # check if there's any possible combination with user's network, resolution and species
@@ -707,7 +709,7 @@ class ProvidentiaDownload(object):
                         if not valid_nc_file_names:
                             print_spec = f'{",".join(self.species)} species' if self.species else ""
                             print_res = f'at {",".join(self.resolution)} resolutions' if self.resolution else ""
-                            msg = f"There is no data available from {self.start_date} to {self.end_date} for {network} network {print_spec} {print_res}"
+                            msg = f"There is no data available in {REMOTE_MACHINE} from {self.start_date} to {self.end_date} for {network} network {print_spec} {print_res}"
                             show_message(self, msg, deactivate=initial_check)
                             continue
                         # download the valid resolution specie date combinations
@@ -779,7 +781,7 @@ class ProvidentiaDownload(object):
         try:
             self.sftp.stat(remote_dir)
         except FileNotFoundError:
-            msg = f"There is no data available for {experiment_new} experiment for the current ghost version ({self.ghost_version})."
+            msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment for the current ghost version ({self.ghost_version})."
             
             # get possible ghost versions from the combination of GHOST_standards and the real avaibles in the experiment remote machine path
             possible_ghost_versions = set(self.sftp.listdir(self.exp_remote_path)).intersection(set(self.possible_ghost_versions))
@@ -808,14 +810,14 @@ class ProvidentiaDownload(object):
             try:
                 sftp_species  = self.species if self.species else self.sftp.listdir(os.path.join(remote_dir,resolution))
             except FileNotFoundError:
-                msg = f"There is no data available for {experiment_new} experiment at {resolution} resolution"
+                msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species: 
                 try:
                     sftp_network = self.network if self.network else self.sftp.listdir(os.path.join(remote_dir,resolution,species))
                 except FileNotFoundError:
-                    msg = f"There is no data available for {experiment_new} experiment for {species} species at {resolution} resolution"
+                    msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
                 for network in sftp_network:
@@ -850,7 +852,7 @@ class ProvidentiaDownload(object):
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
                 except FileNotFoundError:
-                    msg = f"There is no data available for {experiment_new} experiment for {species} species {network} network at {resolution} resolution"
+                    msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment for {species} species {network} network at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
                         
@@ -858,7 +860,7 @@ class ProvidentiaDownload(object):
 
                 # warning if experiment + species + resolution + network + date range combination gets no matching results       
                 if not valid_nc_files:                 
-                    msg = f"There is no data available from {self.start_date} to {self.end_date} for {experiment_new} experiment {species} species {network} network at {resolution} resolution"
+                    msg = f"There is no data available in {REMOTE_MACHINE} from {self.start_date} to {self.end_date} for {experiment_new} experiment {species} species {network} network at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
