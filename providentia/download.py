@@ -83,10 +83,6 @@ class ProvidentiaDownload(object):
         # global REMOTE_MACHINE
         # self.remote_hostname, REMOTE_MACHINE = "glogin4.bsc.es", "mn5" 
 
-        self.ghost_remote_obs_path = data_paths[REMOTE_MACHINE]["ghost_root"]
-        self.nonghost_remote_obs_path = data_paths[REMOTE_MACHINE]["nonghost_root"]
-        self.exp_remote_path = data_paths[REMOTE_MACHINE]["exp_root"]
-
         # get ssh user and password 
         env = dotenv_values(os.path.join(PROVIDENTIA_ROOT, ".env"))
 
@@ -139,6 +135,9 @@ class ProvidentiaDownload(object):
 
         # initialise ssh 
         self.ssh = None
+
+        # initialise boolean thath indicates whether remote machine changed 
+        self.switched_remote = False
 
     def run(self):
         for section_ind, section in enumerate(self.parent_section_names):
@@ -222,9 +221,43 @@ class ProvidentiaDownload(object):
             self.sftp.close()
 
     def connect(self):
+        # declare that we are using the remote machine
+        global REMOTE_MACHINE
+        
+        # initialise the paths
+        self.ghost_remote_obs_path = data_paths[REMOTE_MACHINE]["ghost_root"]
+        self.nonghost_remote_obs_path = data_paths[REMOTE_MACHINE]["nonghost_root"]
+        self.exp_remote_path = data_paths[REMOTE_MACHINE]["exp_root"]
+
         # get public remote machine public key and add it to ssh object
         _, output = subprocess.getstatusoutput(f"ssh-keyscan -t ed25519 {self.remote_hostname}")
-        ed25519_key = output.split()[-1].encode()
+        
+        # encode the output public key if possible
+        try:
+            ed25519_key = output.split()[-1].encode()
+        
+        # in case transfer broke
+        except IndexError:
+            msg = f"Remote machine {REMOTE_MACHINE} not working right now."
+
+            # if the remote machine has not been changed
+            if not self.switched_remote:
+                # change remote machine and hostname
+                self.remote_hostname, REMOTE_MACHINE = "glogin4.bsc.es", "mn5" 
+                msg += f" Changing it to {REMOTE_MACHINE}..."
+
+            show_message(self, msg)
+            
+            # if the remote machine has not been changed
+            if not self.switched_remote:
+                # connect but with the new machine
+                self.switched_remote = True
+                return self.connect()
+            # if it has been changed already, exit
+            else:
+                error = "Error: None of the machines are working right now. Try later."
+                sys.exit(error)
+
         key = paramiko.Ed25519Key(data=decodebytes(ed25519_key))
 
         self.ssh = paramiko.SSHClient()
