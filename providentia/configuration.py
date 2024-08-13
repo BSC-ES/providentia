@@ -71,6 +71,10 @@ class ProvConfiguration:
         sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia'))
         from warnings_prv import show_message
 
+        # when the value is default then it is as if it was a blank value
+        if value == 'default':
+            return self.var_defaults[key]
+
         # parse config file name
         if key == 'conf':
             if value != '':
@@ -763,7 +767,7 @@ class ProvConfiguration:
         # check have network information, 
         # if offline, throw message, stating are using default instead
         # in download mode is allowed to not have network, so continue
-        if (not self.read_instance.network and not self.read_instance.download) or self.read_instance.network == "default":
+        if (not self.read_instance.network and not self.read_instance.download):
             #default = ['GHOST']
             if self.read_instance.interpolation:
                 default = self.read_instance.ghost_available_networks
@@ -776,7 +780,7 @@ class ProvConfiguration:
         # check have species information, TODO REFACTOR INTERPOLATION STUFF
         # if offline, throw message, stating are using default instead
         # in download mode is allowed to not pass any species, so continue
-        if (not self.read_instance.species and not self.read_instance.download) or self.read_instance.species == "default":
+        if (not self.read_instance.species and not self.read_instance.download):
             if self.read_instance.interpolation:
                 default = [self.standard_parameters[param]['bsc_parameter_name'] for param in self.standard_parameters.keys()] 
             else:
@@ -822,7 +826,7 @@ class ProvConfiguration:
 
         # check have resolution information, TODO when refactoring init change this way of checking defaults
         # if offline, throw message, stating are using default instead
-        if (not self.read_instance.resolution and not self.read_instance.download) or self.read_instance.resolution == "default":
+        if (not self.read_instance.resolution and not self.read_instance.download):
             if self.read_instance.interpolation:
                 default = ["hourly", "hourly_instantaneous", "daily", "monthly"]
             else:
@@ -897,7 +901,7 @@ class ProvConfiguration:
         # check have n_neighbours information, TODO ONLY FOR INTERPOLATION
         # if offline, throw message, stating are using default instead
         # TODO CHANGE THE MESSAGE WHEN ITS DEFAULT AND WHEN ITS BECAUSE I DIDNT PUT THE NAME
-        if self.read_instance.interpolation and (not self.read_instance.n_neighbours or self.read_instance.n_neighbour == "default"):
+        if self.read_instance.interpolation and not self.read_instance.n_neighbours:
             default = default_values['n_neighbours']
             msg = "Number of neighbours (n_neighbours) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
@@ -915,7 +919,7 @@ class ProvConfiguration:
         # check have domain information, TODO ONLY FOR INTERPOLATION
         # TODO think if we need one separated variable for this one because it is already included on experiments
         # if offline, throw message, stating are using default instead
-        if self.read_instance.experiments and (self.read_instance.domain == "default" or self.default_domain):
+        if self.read_instance.experiments and self.default_domain:
             default = default_values['domain']
             msg = "Domain (domain) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
@@ -925,7 +929,7 @@ class ProvConfiguration:
         # TODO think if we need one separated variable for this one because it is already included on experiments
         # if offline, throw message, stating are using default instead
         # TODO maybe think this a bit better, if i dont pass it it should check better if i already passed it in experiments and so
-        if self.read_instance.experiments and (self.read_instance.ensemble_options == "default" or self.default_ensemble_options):
+        if self.read_instance.experiments and self.default_ensemble_options:
             default = default_values['ensemble_options']
             msg = "Ensemble options (ensemble_options) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
