@@ -984,7 +984,7 @@ def read_conf(fpath=None):
         
         with open(fpath) as file:
             for line in file:
-                line_strip = line.strip()
+                line_strip = line.strip().split('#')[0]
                 # parsing all but last section 
                 if section_modified != all_sections_modified[-1]:
                     # start of relevant section 
