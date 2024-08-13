@@ -660,7 +660,7 @@ class SubmitInterpolation(object):
         submit_file.write("#SBATCH --ntasks={}\n".format(n_simultaneous_tasks))
         # fix number of nodes to be 1 (for faster execution)
         submit_file.write("#SBATCH --nodes=1\n")
-        submit_file.write("#SBATCH --time=02:00:00\n")
+        submit_file.write("#SBATCH --time=48:00:00\n")
         submit_file.write("#SBATCH --array=1-{}\n".format(len(argument_files)))
         # if machine is power9, then there are 4 threads per physical CPU, which show as 4 separate CPUs. 
         # if multithreading is enabled, ensure 4 virtual cores are actually seen as 1 CPU.
