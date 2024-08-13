@@ -666,7 +666,9 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
     """
 
     # get all different experiment names (from providentia-interpolation output dir)
-    available_experiments = os.listdir('%s/%s' % (instance.exp_root, instance.ghost_version))
+    available_experiments = []
+    if os.path.exists(os.path.join(instance.exp_root,instance.ghost_version)):
+        available_experiments = os.listdir('%s/%s' % (instance.exp_root, instance.ghost_version))
 
     # create dictionary to store available experiment data
     instance.available_experiment_data = {}

@@ -668,10 +668,13 @@ class ProvConfiguration:
         
         # get all possible experiments
         exp_path = os.path.join(self.read_instance.exp_root,self.read_instance.ghost_version)
-        self.possible_experiments = os.listdir(exp_path)
+        self.possible_experiments = [] if not os.path.exists(exp_path) else os.listdir(exp_path)
 
         # initialise list of possible ghost versions
         available_ghost_versions = []
+
+        # remove possible ghost versions if they are not really in the directories
+        possible_ghost_versions = list(set(os.listdir(self.read_instance.exp_root)) & set(self.read_instance.possible_ghost_versions))
 
         # if allmembers, get all the possible ensemble options
         if ensemble_option == "allmembers":
@@ -679,7 +682,7 @@ class ProvConfiguration:
            
             # search for other ghost versions
             if not exp_found:
-                for ghost_version in self.read_instance.possible_ghost_versions:
+                for ghost_version in possible_ghost_versions:
                     ghost_exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), os.listdir(os.path.join(self.read_instance.exp_root,ghost_version))))
                     if ghost_exp_found:
                         available_ghost_versions.append(ghost_version)
@@ -688,7 +691,7 @@ class ProvConfiguration:
 
             # search for other ghost versions
             if not exp_found:
-                available_ghost_versions = list(filter(lambda x:full_experiment in os.listdir(os.path.join(self.read_instance.exp_root,x)), self.read_instance.possible_ghost_versions))
+                available_ghost_versions = list(filter(lambda x:full_experiment in os.listdir(os.path.join(self.read_instance.exp_root,x)), possible_ghost_versions))
         
         # if not found because of the ghost version, tell the user
         if available_ghost_versions:
@@ -727,6 +730,48 @@ class ProvConfiguration:
 
         return experiment_exists, [full_experiment]
     
+    def check_experiment_download(self, full_experiment, deactivate_warning):
+        """ Check individual experiment and get list of options."""
+
+        # TODO Check if i can only import one time
+        from warnings_prv import show_message
+
+        self.read_instance.connect()
+
+        # split full experiment
+        experiment, domain, ensemble_option = full_experiment.split('-')
+        
+        # get all possible experiments
+        exp_path = os.path.join(self.read_instance.exp_remote_path,self.read_instance.ghost_version)
+        self.possible_experiments = self.read_instance.sftp.listdir(exp_path)
+
+        # initialise list of possible ghost versions
+        available_ghost_versions = []
+
+        # if allmembers, get all the possible ensemble options
+        if ensemble_option == "allmembers":
+            exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.possible_experiments))
+           
+            # search for other ghost versions
+            if not exp_found:
+                for ghost_version in self.read_instance.possible_ghost_versions:
+                    ghost_exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.read_instance.sftp.listdir(os.path.join(self.read_instance.exp_remote_path,ghost_version))))
+                    if ghost_exp_found:
+                        available_ghost_versions.append(ghost_version)
+        else:
+            exp_found = [full_experiment] if full_experiment in self.possible_experiments else []
+
+            # search for other ghost versions
+            if not exp_found:
+                available_ghost_versions = list(filter(lambda x:full_experiment in self.read_instance.sftp.listdir(os.path.join(self.read_instance.exp_remote_path,x)), self.read_instance.possible_ghost_versions))
+        
+        # if not found because of the ghost version, tell the user
+        if available_ghost_versions:
+            msg = f"There is no data available for {full_experiment} experiment for the current ghost version ({self.read_instance.ghost_version}). Please check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+
+        return bool(exp_found), exp_found        
+
     def check_validity(self, deactivate_warning=False):
         """ Check validity of set variables after parsing. """
        
@@ -935,6 +980,8 @@ class ProvConfiguration:
         # TODO do it using heritage
         if self.read_instance.interpolation:
             check_experiment_fun = self.check_experiment_interpolation
+        elif self.read_instance.download:
+            check_experiment_fun = self.check_experiment_download
         else:
             check_experiment_fun = self.check_experiment
 
