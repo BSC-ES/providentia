@@ -5,8 +5,8 @@ module purge
 if [ "${BSC_MACHINE}" == "mn5" ]; then
     module load intel impi
     module load greasy/2.2.4.1
-    module load hdf5/1.14.1-2 pnetcdf/1.12.3
-    module load netcdf
+    module load hdf5/1.14.1-2 pnetcdf/1.12.3 netcdf libexpat udunits
+    module load nco/5.2.2
 
 # Nord3v2
 elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then 
