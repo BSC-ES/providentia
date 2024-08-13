@@ -169,6 +169,10 @@ class ExperimentInterpolation(object):
                                                         self.model_temporal_resolution,
                                                         self.speci_to_process, self.ensemble_option, 
                                                         self.speci_to_process, self.yearmonth, self.ensemble_option)))
+        # if have no valid model files, exit
+        if len(self.model_files) == 0:
+            self.log_file_str += 'No valid model files in {}. Skipping month.'.format(self.yearmonth)
+            self.create_output_logfile(1)
 
     def get_model_information(self):
         """ Take first valid model file in month and get grid dimension/coordinate information.
