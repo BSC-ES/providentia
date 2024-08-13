@@ -90,7 +90,7 @@ class ProvidentiaDownload(object):
         self.prv_user = env.get("PRV_USER")
         self.prv_password = env.get("PRV_PWD")
 
-        # get user preference over ghost download and overwrite
+        # get user preference over GHOST download and overwrite
         self.bsc_download_choice = env.get("BSC_DL_CHOICE")
         self.overwrite_choice = env.get("OVERWRITE")
 
@@ -173,7 +173,7 @@ class ProvidentiaDownload(object):
                 if filter_species != None:
                     self.species = [filter_species]
 
-                # ghost
+                # GHOST
                 if check_for_ghost(network):
                     # download from the remote machine
                     if self.bsc_download_choice == 'y':
@@ -190,7 +190,7 @@ class ProvidentiaDownload(object):
                     else:
                         error = "Download option not valid, check your .env file."
                         sys.exit(error)
-                # non-ghost
+                # non-GHOST
                 else:
                     # get the files that need to be downloaded, check if they already are and download or not
                     initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
@@ -514,17 +514,48 @@ class ProvidentiaDownload(object):
             show_message(self, msg, deactivate=initial_check)
             return 
         
-        # If not valid combination of ghost version and network, next 
+        # if not valid combination of GHOST version and network, next 
         elif self.ghost_version not in self.sftp.listdir(os.path.join(self.ghost_remote_obs_path,network)):
             msg = f"There is no data available in {REMOTE_MACHINE} for {network} network for the current ghost version ({self.ghost_version})."
             
             available_ghost_versions = set(self.sftp.listdir(os.path.join(self.ghost_remote_obs_path,network))).intersection(self.possible_ghost_versions)
 
-            if available_ghost_versions:
-                msg += f" Please check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
-            else:
-                msg += f" There are no other versions available at the moment."
+            # list that saves the GHOST versions with valid nc files
+            valid_available_ghost_versions = []
             
+            # check for combinations of species, resolutions, network, and day in the available versions
+            if available_ghost_versions:
+                # iterate the different GHOST versions
+                for possible_ghost_version in available_ghost_versions:
+                    remote_dir_ghost_version = os.path.join(self.ghost_remote_obs_path, network, possible_ghost_version)
+                    
+                    # iterate the different resolutions
+                    sftp_resolutions = self.resolution if self.resolution else set(self.sftp.listdir(remote_dir_ghost_version)).intersection(self.ghost_available_resolutions)
+                    for resolution in sftp_resolutions:
+                        try:
+                            species_list = self.species if self.species else self.sftp.listdir(os.path.join(remote_dir_ghost_version, resolution))
+                        except FileNotFoundError:
+                            continue
+
+                        # iterate the different species
+                        for species in species_list:
+                            # look for valid nc files in the date range
+                            try:
+                                nc_files = self.sftp.listdir(os.path.join(remote_dir_ghost_version, resolution, species))
+                                valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
+                                if valid_nc_files:
+                                    valid_available_ghost_versions.append(possible_ghost_version)
+                                    break
+                            except FileNotFoundError:
+                                continue
+
+            if valid_available_ghost_versions:
+                msg += f" Please check one of the available versions: {', '.join(sorted(valid_available_ghost_versions))}"
+            elif available_ghost_versions:
+                msg += " There are no other versions available at the moment with this configuration."
+            else:
+                msg += " There are no other versions available at the moment."
+
             show_message(self, msg, deactivate=initial_check)
             return
 
@@ -625,7 +656,7 @@ class ProvidentiaDownload(object):
             print('\n'+'-'*40)
             print(f"\nDownloading GHOST {network} network data from Zenodo...")
 
-        # if first time reading a ghost network, get current zips urls in zenodo page
+        # if first time reading a GHOST network, get current zips urls in zenodo page
         if not hasattr(self,"zenodo_ghost_available_networks"): 
             self.fetch_zenodo_networks()
 
@@ -675,7 +706,7 @@ class ProvidentiaDownload(object):
                 if not initial_check:
                     print(f"\n{network} observations to download:")
                 
-                # initialise only possible ghost version
+                # initialise only possible GHOST version
                 # TODO in the future there will be various versions in zenodo
                 last_ghost_version = '1.5' 
                 
@@ -770,38 +801,82 @@ class ProvidentiaDownload(object):
         # domain and ensemble option are directories
         experiment_old = experiment.replace("-","/")
         
-        # get remote directory format depending on the ghost version
+        # get remote directory format depending on the GHOST version
         experiment = experiment_old if self.ghost_version in ["1.2", "1.3", "1.3.1"] else experiment_new
 
         # get remote directory
         remote_dir = os.path.join(self.exp_remote_path,self.ghost_version,experiment)
 
-        # TODO, should check if experiment is checked in when merged to interpolation branch
         # check if experiment exists
         try:
             self.sftp.stat(remote_dir)
         except FileNotFoundError:
             msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment for the current ghost version ({self.ghost_version})."
             
-            # get possible ghost versions from the combination of GHOST_standards and the real avaibles in the experiment remote machine path
+            # get possible GHOST versions from the combination of GHOST_standards and the real avaibles in the experiment remote machine path
             possible_ghost_versions = set(self.sftp.listdir(self.exp_remote_path)).intersection(set(self.possible_ghost_versions))
             
-            # get available experiments available in other ghost versions (considering different formats)
+            # get available experiments in other GHOST versions (considering different formats)
             available_ghost_versions = []
+
             for possible_ghost_version in possible_ghost_versions:
                 try:
-                    if possible_ghost_version in ["1.2", "1.3", "1.3.1"]:
-                        self.sftp.stat(os.path.join(self.exp_remote_path,possible_ghost_version,experiment_old))
-                    else:
-                        self.sftp.stat(os.path.join(self.exp_remote_path,possible_ghost_version,experiment_new))
-                    available_ghost_versions.append(possible_ghost_version)
-                except FileNotFoundError:
-                    pass
+                    # get experiment path depending on the GHOST version
+                    remote_dir_ghost_version = os.path.join(self.exp_remote_path, possible_ghost_version, experiment_old if possible_ghost_version in ["1.2", "1.3", "1.3.1"] else experiment_new)
+                    
+                    # check if directory exists
+                    self.sftp.stat(remote_dir_ghost_version)
 
+                    # if it doesn't break, the experiment exists in this version
+                    available_ghost_versions.append(possible_ghost_version)
+
+                except FileNotFoundError:
+                    continue
+                            
+            # list that saves the GHOST versions with valid nc files
+            valid_available_ghost_versions = []
+            
+            # check for combinations of species, resolutions, network, and day in the available versions
             if available_ghost_versions:
-                msg += f" Please check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
+
+                # iterate the different GHOST versions
+                for possible_ghost_version in available_ghost_versions:
+                    remote_dir_ghost_version = os.path.join(self.exp_remote_path, possible_ghost_version, experiment_old if possible_ghost_version in ["1.2", "1.3", "1.3.1"] else experiment_new)
+                    
+                    # iterate the different resolutions
+                    sftp_resolutions = self.resolution if self.resolution else self.sftp.listdir(remote_dir)
+                    for resolution in sftp_resolutions:                        
+                        try:
+                            species_list = self.species if self.species else self.sftp.listdir(os.path.join(remote_dir_ghost_version, resolution))
+                        except FileNotFoundError:
+                            continue
+                        
+                        # iterate the different species
+                        for species in species_list:
+                            try:
+                                network_list = self.network if self.network else self.sftp.listdir(os.path.join(remote_dir_ghost_version, resolution, species))
+                            except FileNotFoundError:
+                                continue
+                            
+                            # iterate the different networks
+                            for network in network_list:
+                                # look for valid nc files in the date range
+                                try:
+                                    nc_files = self.sftp.listdir(os.path.join(remote_dir_ghost_version, resolution, species, network))
+                                    valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
+                                    if valid_nc_files:
+                                        valid_available_ghost_versions.append(possible_ghost_version)
+                                        break
+                                except FileNotFoundError:
+                                    continue
+                            
+            if valid_available_ghost_versions:
+                msg += f" Please check one of the available versions: {', '.join(sorted(valid_available_ghost_versions))}"
+            elif available_ghost_versions:
+                msg += " There are no other versions available at the moment with this configuration."
             else:
-                msg += f" There are no other versions available at the moment."
+                msg += " There are no other versions available at the moment."
+
             show_message(self, msg, deactivate=initial_check)
             return
 
@@ -907,7 +982,7 @@ class ProvidentiaDownload(object):
             show_message(self, msg, deactivate=initial_check)
             
     def fetch_zenodo_networks(self):
-        # Get urls from zenodo to get ghost zip files url
+        # Get urls from zenodo to get GHOST zip files url
 
         # initialize dictionary to store possible networks
         self.zenodo_ghost_available_networks = {} 
