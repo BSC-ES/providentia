@@ -8,7 +8,7 @@ rm -rf reports/*
 rm -rf saved_data/*
 rm -rf providentia/__pycache__
 rm -rf notebooks/.ipynb_checkpoints
-rm interactive.out
+rm -f interactive.out
 
 # Interpolation
 rm -rf providentia/interpolation/arguments/*
