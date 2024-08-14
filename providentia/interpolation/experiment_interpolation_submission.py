@@ -52,10 +52,6 @@ class SubmitInterpolation(object):
         # defined to process in the configuration file
         self.unique_ID = sys.argv[1]
 
-        # structure kwargs properly 
-        json_kwargs = "".join(sys.argv[2:]).replace(":", '":"').replace(",", '","').replace("{", '{"').replace("}", '"}')
-        kwargs = json.loads(json_kwargs)
-
         # TODO atributes that were in prov interp default but not in main one, add it at some point
         self.reverse_vertical_orientation = False
         self.multithreading = False
@@ -685,7 +681,6 @@ class SubmitInterpolation(object):
         # close submit file
         submit_file.close()
 
-
     def create_lsf_submission_script(self):
         """ Write a lsf submission shell script that submits a greasy job. """
 
@@ -737,7 +732,6 @@ class SubmitInterpolation(object):
         # close submit file
         submit_file.close()
 
-    
     def submit_job(self):
 
         # time start of interpolation jobs
@@ -851,11 +845,10 @@ class SubmitInterpolation(object):
             if len(not_finished_tasks) > 0:
                 print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
 
-
-if __name__ == "__main__":
+def main(**kwargs):
 
     # initialise SubmitInterpolation object
-    SI = SubmitInterpolation()
+    SI = SubmitInterpolation(**kwargs)
 
     # get all unique arguments to process interpolation tasks
     SI.gather_arguments()
