@@ -130,6 +130,16 @@ python_command="python3 -u -Wi -c 'from providentia import main;main.main()' $OT
 interactive_alloc_command="sbatch -t $time -c $cores -J $jobname"
 script_dir=$(dirname $(realpath $(dirname $0)))
 
+# use clean mode and exit
+if [[ $PARSED =~ "--clean" ]]; then
+    if [ "${BSC_MACHINE}" == "mn5" ]; then
+        eval "bash clean_output.sh"
+    else
+        sbatch clean_output.sh #TODO Check if it can be done in nord3v2 when it works
+    fi
+    exit 0
+fi
+
 # avoid x11 forwarding when creating offline reports or doing interpolations
 if [[ $PARSED =~ "--offline" || $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" || $PARSED =~ "--download" || $PARSED =~ "--dl" ]]; then
     salloc_command="salloc -t $time -c $cores -J $jobname"
@@ -172,16 +182,6 @@ if [[ " $VALID_HOSTS " =~ .*\ $HOST\ .* ]]; then
     debugexec=false
 else
     debugexec=true
-fi
-
-# use clean mode and exit
-if [[ $PARSED =~ "--clean" ]]; then
-    if [ "${BSC_MACHINE}" == "mn5" ]; then
-        eval "sbatch ${account_option} ${queue_option} clean_output.sh"
-    else
-        sbatch clean_output.sh
-    fi
-    exit 0
 fi
 
 # load modules from conda environment
