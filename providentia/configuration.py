@@ -28,7 +28,7 @@ multispecies_map = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings'
 experiment_names = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_names.yaml')))
 
 # set MACHINE to be the hub, workstation or local machine
-if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
+if MACHINE not in ['nord3v2', 'mn5']:
     hostname = os.environ.get('HOSTNAME', '')
     ip = socket.gethostbyname(socket.gethostname())
     if "bscearth" in hostname:
@@ -106,7 +106,7 @@ class ProvConfiguration:
         
         elif key == 'machine':
             # set filetree type
-            if MACHINE in ['power', 'mn4', 'nord3v2', 'mn5', 'dust']:
+            if MACHINE in ['nord3v2', 'mn5', 'dust']:
                 self.read_instance.filetree_type = 'remote'
             else:
                 self.read_instance.filetree_type = 'local'
@@ -114,7 +114,7 @@ class ProvConfiguration:
 
         elif key == 'available_cpus':
             # get available N CPUs
-            if MACHINE in ['power', 'mn4', 'nord3v2', 'mn5']:
+            if MACHINE in ['nord3v2', 'mn5']:
                 # handle cases where are testing briefly on login nodes (1 cpu capped)
                 try:
                     return int(os.getenv('SLURM_CPUS_PER_TASK'))
@@ -127,11 +127,11 @@ class ProvConfiguration:
                     return os.cpu_count()
 
         elif key == 'cartopy_data_dir':
-            # set cartopy data directory (needed on CTE-POWER/MN4/Nord3v2/MN5 as has no external
+            # set cartopy data directory (needed on Nord3v2/MN5 as has no external
             # internet connection)
-            if MACHINE in ['power', 'mn4', 'nord3v2']:
+            if MACHINE == 'nord3v2':
                 return '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
-            elif MACHINE in ['mn5']:
+            elif MACHINE == 'mn5':
                 return '/gpfs/projects/bsc32/software/rhel/9.2/software/Cartopy/0.23.0-foss-2023b-Python-3.11.5/lib/python3.11/site-packages/cartopy/data'
             # on all other machines pull from internet
 

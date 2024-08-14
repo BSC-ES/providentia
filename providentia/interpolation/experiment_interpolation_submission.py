@@ -662,10 +662,6 @@ class SubmitInterpolation(object):
         submit_file.write("#SBATCH --nodes=1\n")
         submit_file.write("#SBATCH --time=48:00:00\n")
         submit_file.write("#SBATCH --array=1-{}\n".format(len(argument_files)))
-        # if machine is power9, then there are 4 threads per physical CPU, which show as 4 separate CPUs. 
-        # if multithreading is enabled, ensure 4 virtual cores are actually seen as 1 CPU.
-        if (self.machine == 'power') & (self.multithreading == True):
-            submit_file.write("#SBATCH --cpus-per-task=4\n")
         submit_file.write("#SBATCH --qos={}\n".format(self.qos))
         # submit_file.write("#SBATCH --output=/dev/null\n") # TODO Check what to do with this
         # submit_file.write("#SBATCH --error=/dev/null\n")
@@ -786,7 +782,7 @@ class SubmitInterpolation(object):
             n_jobs_in_queue = len(squeue_status.split('\n')[:-1])
             # if number of jobs in queue > 0, then sleep for 10
             # seconds and then check again how many jobs there are in queue
-            if (self.machine in ('mn4', 'power','nord3v2', 'amd', 'mn5')) and (n_jobs_in_queue > 0):
+            if (self.machine in ('nord3v2', 'amd', 'mn5')) and (n_jobs_in_queue > 0):
                 time.sleep(10)
                 continue
             elif self.machine == 'nord3':
