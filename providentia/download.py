@@ -23,7 +23,7 @@ from getpass import getpass
 
 from .configuration import ProvConfiguration, load_conf
 from .read_aux import check_for_ghost
-from .warnings import show_message
+from .warnings_prv import show_message
 # TODO delete when sure
 # from .read_aux import get_ghost_observational_tree, get_nonghost_observational_tree
 
