@@ -1036,7 +1036,7 @@ class ExperimentInterpolation(object):
         set_file_permissions_ownership(netCDF_fname)
 
         # copy file to esarchive (if have access)
-        if MACHINE in ('power', 'nord3v2'):
+        if MACHINE == 'nord3v2':
             
             # set esarchive output dir
             esarchive_output_dir = '/esarchive/recon/prov_interp/{}'.format('/'.join(netCDF_fname.split('/exp_interp/')[1].split('/')[:-1]))
