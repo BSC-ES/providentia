@@ -56,7 +56,8 @@ class Providentia(object):
                 from . import offline as offline
                 offline.main(**res)
             elif args.interpolation:
-                print(res)
+                from .interpolation import experiment_interpolation_submission as interpolation
+                interpolation.main(**res)
             elif args.download:
                 from . import download as download
                 download.main(**res)
