@@ -36,7 +36,7 @@ experiment_names = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'ex
 class SubmitInterpolation(object):
     """ Class that handles the interpolation submission. """
 
-    def __init__(self):
+    def __init__(self,**kwargs):
 
         # start timer
         self.start = time.time()
@@ -48,14 +48,9 @@ class SubmitInterpolation(object):
         self.submit_dir = '{}/submit'.format(self.working_directory)
         self.interpolation_log_dir = '{}/interpolation_logs'.format(self.working_directory)
 
-        # set SLURM job ID as unique ID for tracking tasks
-        # defined to process in the configuration file
-        self.unique_ID = sys.argv[1]
-
         # TODO atributes that were in prov interp default but not in main one, add it at some point
         self.reverse_vertical_orientation = False
         self.multithreading = False
-        # self.standard_parameters = #no cal
         self.chunk_size = 16
         self.job_array_limit = 100
 
@@ -461,7 +456,7 @@ class SubmitInterpolation(object):
                                                                                         temporal_resolution_to_output, 
                                                                                         yearmonth, 
                                                                                         original_speci_to_process,
-                                                                                        self.unique_ID))
+                                                                                        self.slurm_job_id))
 
                                     # append root name of .out file that will be output for each processed task
                                     self.output_log_roots.append('{}/{}/{}/{}/{}/{}'.format(self.interpolation_log_dir, 
@@ -562,11 +557,11 @@ class SubmitInterpolation(object):
             N_submit_files = copy.deepcopy(self.job_array_limit)
 
         # create file which will store a list of all chunked argument filenames
-        greasy_file = open('{}/{}.grz'.format(self.arguments_dir, self.unique_ID), 'w')
+        greasy_file = open('{}/{}.grz'.format(self.arguments_dir, self.slurm_job_id), 'w')
         
         # create all chunked argument filenames
         for ii in range(N_submit_files):
-            argument_fname = '{}/{}_{}.txt'.format(self.arguments_dir,self.unique_ID,ii)
+            argument_fname = '{}/{}_{}.txt'.format(self.arguments_dir,self.slurm_job_id,ii)
             argument_files.append(argument_fname)
             greasy_file.write('{}\n'.format(argument_fname))
         greasy_file.close()
@@ -626,10 +621,10 @@ class SubmitInterpolation(object):
         ''' Write a slurm submission shell script that submits a greasy job. '''
 
         # create job_fname (unique_ID + 'sh.')
-        self.job_fname = self.unique_ID+'.sh'
+        self.job_fname = self.slurm_job_id+'.sh'
     
         # get all argument files
-        argument_files = sorted(glob.glob('{}/{}_*.txt'.format(self.arguments_dir,self.unique_ID)))
+        argument_files = sorted(glob.glob('{}/{}_*.txt'.format(self.arguments_dir,self.slurm_job_id)))
 
         # read how many lines are in first arguments file
         with open(argument_files[0]) as f: 
@@ -652,14 +647,14 @@ class SubmitInterpolation(object):
 
         submit_file.write("#!/bin/bash\n")
         submit_file.write("\n")
-        submit_file.write("#SBATCH --job-name=PRVI_{}\n".format(self.unique_ID))
+        submit_file.write("#SBATCH --job-name=PRVI_{}\n".format(self.slurm_job_id))
         submit_file.write("#SBATCH --ntasks={}\n".format(n_simultaneous_tasks))
         # fix number of nodes to be 1 (for faster execution)
         submit_file.write("#SBATCH --nodes=1\n")
         submit_file.write("#SBATCH --time=48:00:00\n")
         submit_file.write("#SBATCH --array=1-{}\n".format(len(argument_files)))
         submit_file.write("#SBATCH --qos={}\n".format(self.qos))
-        # submit_file.write("#SBATCH --output=/dev/null\n") # TODO Check what to do with this
+        # submit_file.write("#SBATCH --output=/dev/null\n") # decomment when debugging
         # submit_file.write("#SBATCH --error=/dev/null\n")
         if self.machine == 'mn5': # TODO when checking if debug works check this
             submit_file.write("#SBATCH --account=bsc32\n")  
@@ -671,9 +666,9 @@ class SubmitInterpolation(object):
             submit_file.write("source {}/load_modules.sh\n".format(self.working_directory))
         submit_file.write("export GREASY_NWORKERS=$SLURM_NPROCS\n") 
         submit_file.write("export GREASY_LOGFILE={}/{}_$SLURM_ARRAY_TASK_ID.log\n".format(self.submit_dir, 
-                                                                                          self.unique_ID))
+                                                                                          self.slurm_job_id))
         submit_file.write("export SLURM_CPU_BIND=none\n")
-        submit_file.write("arguments_store={}/{}.grz\n".format(self.arguments_dir, self.unique_ID))
+        submit_file.write("arguments_store={}/{}.grz\n".format(self.arguments_dir, self.slurm_job_id))
         submit_file.write("argument_file=$(cat $arguments_store | awk -v var=$SLURM_ARRAY_TASK_ID 'NR==var {print $1}')\n")
         submit_file.write("\n")
         submit_file.write("greasy $argument_file")
@@ -685,10 +680,10 @@ class SubmitInterpolation(object):
         """ Write a lsf submission shell script that submits a greasy job. """
 
         # create job_fname (unique_ID + 'sh.')
-        self.job_fname = self.unique_ID + '.sh'
+        self.job_fname = self.slurm_job_id + '.sh'
 
         # get all argument files
-        argument_files = sorted(glob.glob('{}/{}_*.txt'.format(self.arguments_dir, self.unique_ID)))
+        argument_files = sorted(glob.glob('{}/{}_*.txt'.format(self.arguments_dir, self.slurm_job_id)))
 
         # read how many lines are in first arguments file
         with open(argument_files[0]) as f:
@@ -715,7 +710,7 @@ class SubmitInterpolation(object):
         submit_file.write("\n")
         submit_file.write("#BSUB -n {}\n".format(n_simultaneous_tasks))
         submit_file.write("#BSUB -W 01:00\n")
-        submit_file.write("#BSUB -J PRVI_{}[1-{}]\n".format(self.unique_ID, len(argument_files)))
+        submit_file.write("#BSUB -J PRVI_{}[1-{}]\n".format(self.slurm_job_id, len(argument_files)))
         submit_file.write("#BSUB -q {}\n".format(self.qos))
         submit_file.write("#BSUB -oo /dev/null\n")
         submit_file.write("#BSUB -eo /dev/null\n")
@@ -723,8 +718,8 @@ class SubmitInterpolation(object):
 
         submit_file.write("source {}/load_modules.sh\n".format(self.working_directory))
         submit_file.write("export GREASY_NWORKERS=$LSB_DJOB_NUMPROC\n")
-        submit_file.write("export GREASY_LOGFILE={}/{}_$LSB_JOBINDEX.log\n".format(self.submit_dir, self.unique_ID))
-        submit_file.write("arguments_store={}/{}.grz\n".format(self.arguments_dir, self.unique_ID))
+        submit_file.write("export GREASY_LOGFILE={}/{}_$LSB_JOBINDEX.log\n".format(self.submit_dir, self.slurm_job_id))
+        submit_file.write("arguments_store={}/{}.grz\n".format(self.arguments_dir, self.slurm_job_id))
         submit_file.write("argument_file=$(cat $arguments_store | awk -v var=$LSB_JOBINDEX 'NR==var {print $1}')\n")
         submit_file.write("\n")
         submit_file.write("greasy $argument_file")
@@ -767,10 +762,10 @@ class SubmitInterpolation(object):
 
         while all_tasks_finished == False:
             if self.machine == "nord3":
-                # cmd = ['bjobs', '-noheader', '-J', 'PRVI_{}[1]'.format(self.unique_ID)]
+                # cmd = ['bjobs', '-noheader', '-J', 'PRVI_{}[1]'.format(self.slurm_job_id)]
                 cmd = ['bjobs', '-noheader']
             else:
-                cmd = ['squeue', '-h', '-n', 'PRVI_{}'.format(self.unique_ID)]
+                cmd = ['squeue', '-h', '-n', 'PRVI_{}'.format(self.slurm_job_id)]
             squeue_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, encoding='utf8')
             squeue_status = squeue_process.communicate()[0]
             n_jobs_in_queue = len(squeue_status.split('\n')[:-1])
@@ -781,7 +776,7 @@ class SubmitInterpolation(object):
                 continue
             elif self.machine == 'nord3':
                 # has submitted jobs entered the queue?
-                if self.unique_ID[1:] in squeue_status.split('\n')[1:][0]:
+                if self.slurm_job_id[1:] in squeue_status.split('\n')[1:][0]:
                     job_entered = True
                     time.sleep(10)
                     continue
