@@ -3,7 +3,7 @@
 #SBATCH --job-name=PRVI                                         
 #SBATCH --ntasks=1                                                
 #SBATCH --output=providentia/interpolation/submission_logs/%J.out
-#SBATCH --error=/dev/null
+#SBATCH --error=providentia/interpolation/submission_logs/%J_error.out
 #SBATCH --account=bsc32
 #SBATCH --qos=gp_bsces
 
@@ -21,4 +21,6 @@ else
     echo "Environment not found in /gpfs/projects/bsc32/repository/apps/conda_envs/"
 fi
 
-srun --output=providentia/interpolation/management_logs/$SLURM_JOB_ID.out python -u providentia/interpolation/experiment_interpolation_submission.py $SLURM_JOB_ID $*
+JOB_ID="--slurm_job_id=$SLURM_JOB_ID"
+
+srun --output=providentia/interpolation/management_logs/$SLURM_JOB_ID.out python -u -c "from providentia.main import main; main()" $@ $JOB_ID

@@ -132,11 +132,7 @@ script_dir=$(dirname $(realpath $(dirname $0)))
 
 # use clean mode and exit
 if [[ $PARSED =~ "--clean" ]]; then
-    if [ "${BSC_MACHINE}" == "mn5" ]; then
-        eval "bash clean_output.sh"
-    else
-        sbatch clean_output.sh #TODO Check if it can be done in nord3v2 when it works
-    fi
+    bash clean_output.sh
     exit 0
 fi
 
@@ -251,15 +247,10 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
         elif $interpolation; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
             echo "Loading dependencies..."
-            eval "${load_command}" 
-            # outputString=$(eval "srun -J ${jobname} ${account_option} ${queue_option} ${python_command}")
-            # eval "srun -J ${jobname} ${account_option} ${queue_option} ${python_command}"
-            # echo outputString
-    
-            # jobid=$(eval "sbatch --account=${account_option} ${script_dir}/providentia/experiment_interpolation_submit_mn5.sh | awk '{print \$4}'")
-            eval "bg $"
-            eval "${salloc_command} ${account_option} ${queue_option} srun --output=providentia/interpolation/management_logs/paula.out ${python_command}"
-            # echo "Check submission info in 'providentia/interpolation/management_logs/$jobid.out'"
+            eval "${load_command}"
+            jobid=$(eval "sbatch ${account_option} ${queue_option} ${script_dir}/providentia/interpolation/experiment_interpolation_submit_mn5.sh $OTHEROPTS | awk '{print \$4}'")
+
+            echo "Check submission info in 'providentia/interpolation/management_logs/$jobid.out'"
 
 
         else
