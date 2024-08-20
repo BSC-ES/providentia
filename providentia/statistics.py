@@ -56,7 +56,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
 
         # transform resolution to code for .resample function
         if read_instance.resampling_resolution in ['hourly', 'hourly_instantaneous']:
-            temporal_resolution_to_output_code = 'H'
+            temporal_resolution_to_output_code = 'h'
         elif read_instance.resampling_resolution in ['3hourly', '3hourly_instantaneous']:
             temporal_resolution_to_output_code = '3H'
         elif read_instance.resampling_resolution in ['6hourly', '6hourly_instantaneous']:
