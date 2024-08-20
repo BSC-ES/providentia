@@ -14,7 +14,8 @@ import mpl_toolkits.axisartist.grid_finder as gf
 import numpy as np
 import pandas as pd
 from pypdf import PdfReader, PdfWriter
-from scipy.signal import convolve, gaussian
+from scipy.signal import convolve
+from scipy.signal.windows import gaussian
 from scipy.sparse import coo_matrix
 import seaborn as sns
 from .statistics import calculate_statistic, get_z_statistic_sign
