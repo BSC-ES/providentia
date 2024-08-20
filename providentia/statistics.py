@@ -66,7 +66,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
         elif read_instance.resampling_resolution == 'monthly':
             temporal_resolution_to_output_code = 'MS'
         elif read_instance.resampling_resolution == 'annual':
-            temporal_resolution_to_output_code = 'AS'
+            temporal_resolution_to_output_code = 'YS'
     
     else:
         # update relevant/nonrelevant temporal resolutions 
