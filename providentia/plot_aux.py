@@ -466,9 +466,9 @@ def get_taylor_diagram_ghelper(reference_stddev, plot_characteristics, extend=Fa
                                                                        extend)
 
     # get grid helper
-    ghelper = fa.GridHelperCurveLinear(PolarAxes.PolarTransform(),
+    ghelper = fa.GridHelperCurveLinear(PolarAxes.PolarTransform(apply_theta_transforms=False),
                                        extremes=(tmin, tmax, smin, smax),
-                                       grid_locator1=gl1, tick_formatter1=tf1)
+                                       grid_locator1=gl1, tick_formatter1=tf1,)
 
     return ghelper
 
