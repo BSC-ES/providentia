@@ -1397,7 +1397,7 @@ class Plot:
         if 'annotate' in plot_options:
             # get rounded labels
             decimal_places = plot_characteristics['round_decimal_places']['table']
-            annotate = stats_df.applymap(lambda x: round_decimal_places(x, decimal_places))
+            annotate = stats_df.map(lambda x: round_decimal_places(x, decimal_places))
         else:
             annotate = False
 
@@ -1579,7 +1579,7 @@ class Plot:
 
         # round dataframe
         decimal_places = plot_characteristics['round_decimal_places']['table']
-        stats_df = stats_df.applymap(lambda x: round_decimal_places(x, decimal_places))
+        stats_df = stats_df.map(lambda x: round_decimal_places(x, decimal_places))
         
         # offline reports
         if (self.read_instance.offline) or (self.read_instance.interactive):
