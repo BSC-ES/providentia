@@ -1746,7 +1746,8 @@ class Plot:
         """
 
         if (self.read_instance.offline) or (self.read_instance.interactive):
-            self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(PolarAxes.PolarTransform())
+            self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(
+                PolarAxes.PolarTransform(apply_theta_transforms=False))
 
         # calculate statistics
         stats_dict = {}
