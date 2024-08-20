@@ -13,7 +13,7 @@ import mpl_toolkits.axisartist.floating_axes as fa
 import mpl_toolkits.axisartist.grid_finder as gf
 import numpy as np
 import pandas as pd
-from PyPDF2 import PdfReader, PdfWriter
+from pypdf import PdfReader, PdfWriter
 from scipy.signal import convolve, gaussian
 from scipy.sparse import coo_matrix
 import seaborn as sns
