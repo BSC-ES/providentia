@@ -17,6 +17,7 @@
             'interactive': False,
             'download': False,
             'interpolation': False,
+            'slurm_job_id' : null,
             'network': [],
             'species': [],
             'resolution': [],
