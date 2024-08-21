@@ -217,7 +217,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
     def resizeEvent(self, event):
         """ Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry. """
-        
+
         self.resized.emit()
 
         return super(ProvidentiaMainWindow, self).resizeEvent(event)
@@ -629,13 +629,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # set finalised layout
         self.setLayout(parent_layout)
 
+        # set minimum height to avoid error 'box_aspect' and 'fig_aspect' must be positive
+        self.setMinimumHeight(650)
+
         # show dashboard. How to do this is different per system 
         if self.operating_system == 'Mac':
             self.showMaximized()
             self.get_geometry()
         elif self.operating_system == 'Linux':
+            self.show()
             self.showMaximized()
-            self.get_geometry()
         elif self.operating_system == 'Windows':
             self.show()
             self.showMaximized()
