@@ -339,6 +339,11 @@ class ProvConfiguration:
                     return []
                 # if the flags are written with their names
                 elif isinstance(value, str):
+                    # check if all the flags appear in the GHOST_standards of the current version
+                    for flag in value.split(","):
+                        if flag.strip() not in self.read_instance.standard_data_flag_name_to_data_flag_code:
+                            error = (f"Error: Flag '{flag}' not in this GHOST version ({self.read_instance.ghost_version}).")
+                            sys.exit(error)
                     return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[f.strip()] for f in value.split(",")])
                 # list of integer codes
                 else:
