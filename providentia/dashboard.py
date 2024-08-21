@@ -219,7 +219,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         """ Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry. """
         
         self.resized.emit()
-        
+
         return super(ProvidentiaMainWindow, self).resizeEvent(event)
 
     def moveEvent(self, event):
@@ -623,6 +623,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         parent_layout.addLayout(config_bar)
         parent_layout.addLayout(hbox)
 
+        # add MPL canvas of plots to parent frame
+        parent_layout.addWidget(self.mpl_canvas)
+
         # set finalised layout
         self.setLayout(parent_layout)
 
@@ -631,15 +634,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.showMaximized()
             self.get_geometry()
         elif self.operating_system == 'Linux':
-            self.show()
             self.showMaximized()
             self.get_geometry()
         elif self.operating_system == 'Windows':
             self.show()
             self.showMaximized()
-
-        # add MPL canvas of plots to parent frame
-        parent_layout.addWidget(self.mpl_canvas)
 
     def generate_pop_up_window(self, menu_root):
         """ Generate pop up window. """
@@ -1404,6 +1403,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 self.mpl_canvas.lower_canvas_cover.show()
             self.mpl_canvas.figure.canvas.draw_idle()  
             self.mpl_canvas.figure.canvas.flush_events()
+
+            # clear all axes elements 
+            for plot_type, ax in self.mpl_canvas.plot_axes.items():
+                self.mpl_canvas.remove_axis_elements(ax, plot_type)
 
             # set current time array, as previous time array
             self.previous_time_array = self.time_array
