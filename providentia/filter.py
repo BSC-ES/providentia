@@ -562,7 +562,7 @@ class DataFilter:
                                 non_finite_stat = ~np.isfinite(calc_stat)
                                 self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,non_finite_stat,:] = np.NaN
                                 for specific_stat_argument in specific_stat_arguments:
-                                    invalid_stations = ast.literal_eval('calc_stat{}'.format(specific_stat_argument))
+                                    invalid_stations = eval('calc_stat{}'.format(specific_stat_argument))
                                     self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,invalid_stations,:] = np.NaN
                                     
 
