@@ -126,7 +126,6 @@ class ProvidentiaOffline:
             else:
                 self.filenames = []
                 for i, parent_section in enumerate(self.parent_section_names):
-                    print(parent_section, self.sub_opts[parent_section].keys())
                     if 'report_filename' in self.sub_opts[parent_section].keys():
                         self.filenames.append(self.sub_opts[parent_section]['report_filename'])
                     else:
