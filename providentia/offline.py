@@ -15,7 +15,7 @@ import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 from packaging.version import Version
 import pandas as pd
-from pypdf import PdfReader
+from PyPDF2 import PdfReader
 
 from .configuration import load_conf
 from .configuration import ProvConfiguration
