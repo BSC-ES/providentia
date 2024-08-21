@@ -237,7 +237,7 @@ class ProvidentiaOffline:
             if Version(matplotlib.__version__) < Version("3.8"):
                 if plot_type[:6] == 'taylor':
                     if (plot_type in self.station_plots_to_make) or (plot_type in self.summary_plots_to_make):
-                        error = 'It is not possible to create Taylor diagrams yet, please remove.'
+                        error = 'It is not possible to create Taylor diagrams yet, please remove from settings/report_plots.yaml.'
                         sys.exit(error)
 
             # check if there are multispecies plots
