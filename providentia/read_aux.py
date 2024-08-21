@@ -432,7 +432,7 @@ def get_frequency_code(resolution):
     elif resolution == 'monthly':
         active_frequency_code = 'MS'
     elif resolution == 'annual':
-        active_frequency_code = 'AS'
+        active_frequency_code = 'YS'
 
     return active_frequency_code
 
