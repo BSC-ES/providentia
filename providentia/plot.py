@@ -1871,7 +1871,7 @@ class Plot:
             relevant_axis.axis['left'].label.set_fontsize(plot_characteristics['xylabel']['fontsize'])  
 
         # add contours around observations standard deviation
-        reference_stddev = stats_df[xylabel][obs_index]
+        reference_stddev = stats_df[xylabel].iloc[obs_index]
         num_levels = plot_characteristics['contours']['levels']['number']
         rs, ts = np.meshgrid(np.linspace(smin, smax), np.linspace(0, tmax))
         rms = np.sqrt(reference_stddev**2 + rs**2 - 2*reference_stddev*rs*np.cos(ts))
