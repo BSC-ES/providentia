@@ -173,30 +173,39 @@ class ProvidentiaDownload(object):
                 if filter_species != None:
                     self.species = [filter_species]
 
-                # GHOST
-                if check_for_ghost(network):
-                    # download from the remote machine
-                    if self.bsc_download_choice == 'y':
+                # get the files to be downlaoded, check if they files were already downlaoded and download if not
+                # download from the remote machine
+                if self.bsc_download_choice == 'y':
+                    # GHOST
+                    if check_for_ghost(network):
                         initial_check_nc_files = self.download_ghost_network_sftp(network, initial_check=True)
                         files_to_download = self.select_files_to_download(initial_check_nc_files)
                         if not initial_check_nc_files or files_to_download:
                             self.download_ghost_network_sftp(network, initial_check=False, files_to_download=files_to_download)
-                    # download from the zenodo webpage
-                    elif self.bsc_download_choice == 'n':
+                    # non-GHOST
+                    else:
+                        initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
+                        files_to_download = self.select_files_to_download(initial_check_nc_files)
+                        if not initial_check_nc_files or files_to_download:
+                            self.download_nonghost_network(network, initial_check=False, files_to_download=files_to_download)
+
+                # download from the zenodo webpage
+                elif self.bsc_download_choice == 'n':
+                    # GHOST
+                    if check_for_ghost(network):
                         initial_check_nc_files = self.download_ghost_network_zenodo(network, initial_check=True)
                         files_to_download = self.select_files_to_download(initial_check_nc_files)
                         if not initial_check_nc_files or files_to_download:
                             self.download_ghost_network_zenodo(network, initial_check=False, files_to_download=files_to_download)
+                    # non-GHOST
                     else:
-                        error = "Download option not valid, check your .env file."
+                        error = f"Error: It is not possible to download files from the non-GHOST network {network} from the zenodo webpage. Change the BSC_DL_CHOICE on your .env file to 'y'."
                         sys.exit(error)
-                # non-GHOST
+                
+                # download option invalid
                 else:
-                    # get the files that need to be downloaded, check if they already are and download or not
-                    initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
-                    files_to_download = self.select_files_to_download(initial_check_nc_files)
-                    if not initial_check_nc_files or files_to_download:
-                        self.download_nonghost_network(network, initial_check=False, files_to_download=files_to_download)
+                    error = "Error: Download option not valid, check your .env file."
+                    sys.exit(error)
 
             # when one of those symbols is passed, get all experiments
             # TODO check this when merging with the interpolation
@@ -204,13 +213,18 @@ class ProvidentiaDownload(object):
                 self.get_all_experiments()
 
             # experiment
+            # download from the remote machine
             if self.bsc_download_choice == 'y':
                 for experiment in self.experiments.keys():
                     initial_check_nc_files = self.download_experiment(experiment, initial_check=True)
                     files_to_download = self.select_files_to_download(initial_check_nc_files)
                     if not initial_check_nc_files or files_to_download:
                         self.download_experiment(experiment, initial_check=False, files_to_download=files_to_download)
-            
+            # download from the zenodo webpage
+            else:
+                error = f"Error: It is not possible to download experiments from the zenodo webpage. Change the BSC_DL_CHOICE on your .env file to 'y'."
+                sys.exit(error)
+
             # TODO delete when sure
             # update filetrees
             # self.update_filetrees()
