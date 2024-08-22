@@ -219,21 +219,26 @@ class DataReader:
                     period_set + self.read_instance.representativity_menu['rangeboxes']['map_vars']
                 
                 # remove all the valid fields from the invalid field list
-                invalid_fields = {field_name: fields-set(valid_fields)
-                                for field_name, fields in self.read_instance.non_default_fields_per_section.items() 
-                                if field_name==self.read_instance.section or field_name.startswith(self.read_instance.section+"·")}
+                self.read_instance.invalid_fields = {field_name: fields-set(valid_fields)
+                    for field_name, fields in self.read_instance.non_default_fields_per_section.items() 
+                    if field_name==self.read_instance.section or field_name.startswith(self.read_instance.section+"·")}
+                
+                # turn the values blank again
+                init_representativity(self.read_instance)
 
                 # show warning if there's an invalid field
-                invalid_var = [f"""{i} ('{"', '".join(j)}')""" for i,j in invalid_fields.items() if j]
+                invalid_var = [f"""{i} ('{"', '".join(j)}')""" for i,j in self.read_instance.invalid_fields.items() if j]
                 if invalid_var:
                     msg = f"Invalid field(s) in configuration file {self.read_instance.config.split('/')[-1]}. "
                     msg += f"Section(s) and Field(s): {', '.join(invalid_var)}."
                     show_message(self.read_instance, msg)
 
                     # delete from instance all invalid fields from the configuration file
-                    for section,section_invalid_fields in invalid_fields.items():
+                    for section,section_invalid_fields in self.read_instance.invalid_fields.items():
                         for k in section_invalid_fields:
-                            delattr(self.read_instance, k)                 
+                            # control if the atribute exists because in offline mode the subsection ones are not set yet
+                            if hasattr(self.read_instance, k):
+                                delattr(self.read_instance, k)                 
 
             self.read_instance.metadata_in_memory = {networkspeci: 
                                                      np.full((len(self.read_instance.station_references['{}'.format(networkspeci)]),
