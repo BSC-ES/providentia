@@ -168,6 +168,9 @@ class ProvidentiaDownload(object):
             combined_networks = [(network, None) for network in self.network] + \
                                 [(network_specie.split('|')[0], network_specie.split('|')[1]) for network_specie in self.filter_species]
             
+            # save main species
+            main_species = copy.deepcopy(self.species)
+            
             for network, filter_species in combined_networks:
                 # change species when turn of filter species
                 if filter_species != None:
@@ -206,6 +209,9 @@ class ProvidentiaDownload(object):
                 else:
                     error = "Error: Download option not valid, check your .env file."
                     sys.exit(error)
+
+            # get orignal species back
+            self.species = main_species
 
             # when one of those symbols is passed, get all experiments
             # TODO check this when merging with the interpolation
