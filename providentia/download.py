@@ -199,7 +199,7 @@ class ProvidentiaDownload(object):
                             self.download_ghost_network_zenodo(network, initial_check=False, files_to_download=files_to_download)
                     # non-GHOST
                     else:
-                        error = f"Error: It is not possible to download files from the non-GHOST network {network} from the zenodo webpage. Change the BSC_DL_CHOICE on your .env file to 'y'."
+                        error = f"Error: It is not possible to download files from the non-GHOST network {network} from the zenodo webpage."
                         sys.exit(error)
                 
                 # download option invalid
@@ -222,7 +222,7 @@ class ProvidentiaDownload(object):
                         self.download_experiment(experiment, initial_check=False, files_to_download=files_to_download)
             # download from the zenodo webpage
             else:
-                error = f"Error: It is not possible to download experiments from the zenodo webpage. Change the BSC_DL_CHOICE on your .env file to 'y'."
+                error = f"Error: It is not possible to download experiments from the zenodo webpage."
                 sys.exit(error)
 
             # TODO delete when sure
