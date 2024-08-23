@@ -1885,7 +1885,7 @@ class Plot:
             **plot_characteristics['contours']['style']['general'])
 
         # add contour labels
-        self.taylor_polar_relevant_axis.clabel(contours, contours.levels, inline=True, fmt = '%r', fontsize=6)
+        self.taylor_polar_relevant_axis.clabel(contours, contours.levels, inline=True, fmt = "%.2f", fontsize=6)
 
         # add reference contour of observational standard deviation
         ref_x = np.linspace(0, tmax)
