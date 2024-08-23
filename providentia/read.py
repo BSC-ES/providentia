@@ -158,7 +158,6 @@ class DataReader:
             # initialise variables and get representativity resolutions
             self.read_instance.ghost_data_in_memory = {}
             self.read_instance.ghost_data_vars_to_read = []
-            self.read_instance.nonghost_data_vars_to_read = []
             if self.read_instance.resolution in ['hourly', 'hourly_instantaneous']:
                 resolution = 'hourly'
             elif self.read_instance.resolution in ['daily', '3hourly', '6hourly', '3hourly_instantaneous', '6hourly_instantaneous']:
@@ -185,10 +184,12 @@ class DataReader:
                                                  len(self.read_instance.station_references[networkspeci]),
                                                  len(self.read_instance.time_array)),
                                                  np.NaN, dtype=np.float32) for networkspeci in self.read_instance.networkspecies} 
-            else:
-                # get representativity fields
-                self.read_instance.nonghost_data_vars_to_read = self.read_instance.representativity_info['nonghost'][resolution]['map_vars']
             
+            if self.read_instance.reading_ghost:
+                representativity_valid_vars = self.read_instance.representativity_info['ghost'][resolution]['map_vars']
+            else:
+                representativity_valid_vars = self.read_instance.representativity_info['nonghost'][resolution]['map_vars']
+
             # metadata 
             # non-GHOST
             if not self.read_instance.reading_ghost:
@@ -205,7 +206,7 @@ class DataReader:
                 # get all the valid args in one list
                 period_set = ['period'] if self.read_instance.reading_ghost else []
                 valid_fields = self.read_instance.metadata_vars_to_read + self.read_instance.ghost_data_vars_to_read + \
-                    period_set + self.read_instance.nonghost_data_vars_to_read
+                    period_set + representativity_valid_vars
 
                 # remove all the valid fields from the invalid field list
                 self.read_instance.invalid_fields = {field_name: fields-set(valid_fields)
