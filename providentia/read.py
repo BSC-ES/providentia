@@ -156,44 +156,40 @@ class DataReader:
             else:
                 self.read_instance.filter_data_in_memory = {}
 
-            # GHOST data --> data variables which change per measurement (for filtering)
+            # initialise variables and get representativity resolutions
+            self.read_instance.ghost_data_in_memory = {}
+            self.read_instance.ghost_data_vars_to_read = []
+            self.read_instance.nonghost_data_vars_to_read = []
+            if self.read_instance.resolution in ['hourly', 'hourly_instantaneous']:
+                resolution = 'hourly'
+            elif self.read_instance.resolution in ['daily', '3hourly', '6hourly', '3hourly_instantaneous', '6hourly_instantaneous']:
+                resolution = 'daily'
+            elif self.read_instance.resolution == 'monthly':
+                resolution = 'monthly'
+
+            # get data variables which change per measurement (for filtering)
             if self.read_instance.reading_ghost:
+                # get representativity fields (only native)
+                self.read_instance.ghost_data_vars_to_read = self.read_instance.representativity_info['ghost'][resolution]['map_vars']
+                self.read_instance.ghost_data_vars_to_read = [var for var in self.read_instance.ghost_data_vars_to_read if 'native' in var]
+                
+                # add annual reprentativity and daytime and seasonal variables
+                self.read_instance.ghost_data_vars_to_read += ['annual_native_representativity_percent', 'season_code']
+                if self.read_instance.resolution != 'monthly':
+                    self.read_instance.ghost_data_vars_to_read += ['weekday_weekend_code']
+                if self.read_instance.resolution not in ['monthly', 'daily']:
+                    self.read_instance.ghost_data_vars_to_read += ['day_night_code']
 
-                # set ghost data variables to read (dependent on data resolution)
-                if (self.read_instance.resolution == 'hourly') or (self.read_instance.resolution == 'hourly_instantaneous'):
-                    self.read_instance.ghost_data_vars_to_read = ['hourly_native_representativity_percent',
-                                                                  'daily_native_representativity_percent',
-                                                                  'monthly_native_representativity_percent',
-                                                                  'annual_native_representativity_percent', 
-                                                                  'day_night_code', 'weekday_weekend_code',
-                                                                  'season_code']
-                elif (self.read_instance.resolution == '3hourly') or \
-                        (self.read_instance.resolution == '6hourly') or (self.read_instance.resolution == '3hourly_instantaneous') or \
-                        (self.read_instance.resolution == '6hourly_instantaneous'):
-                    self.read_instance.ghost_data_vars_to_read = ['daily_native_representativity_percent',
-                                                                  'monthly_native_representativity_percent',
-                                                                  'annual_native_representativity_percent',
-                                                                  'day_night_code', 'weekday_weekend_code',
-                                                                  'season_code']
-                elif self.read_instance.resolution == 'daily':
-                    self.read_instance.ghost_data_vars_to_read = ['daily_native_representativity_percent',
-                                                                  'monthly_native_representativity_percent',
-                                                                  'annual_native_representativity_percent',
-                                                                  'weekday_weekend_code', 'season_code']
-                elif self.read_instance.resolution == 'monthly':
-                    self.read_instance.ghost_data_vars_to_read = ['monthly_native_representativity_percent',
-                                                                  'annual_native_representativity_percent', 
-                                                                  'season_code']
-
+                # initialise data in memory for GHOST with NaN for these variables
                 self.read_instance.ghost_data_in_memory = {networkspeci:
                                         np.full((len(self.read_instance.ghost_data_vars_to_read),
                                                  len(self.read_instance.station_references[networkspeci]),
                                                  len(self.read_instance.time_array)),
                                                  np.NaN, dtype=np.float32) for networkspeci in self.read_instance.networkspecies} 
             else:
-                self.read_instance.ghost_data_in_memory = {}
-                self.read_instance.ghost_data_vars_to_read = []
-
+                # get representativity fields
+                self.read_instance.nonghost_data_vars_to_read = self.read_instance.representativity_info['nonghost'][resolution]['map_vars']
+            
             # metadata 
             # non-GHOST
             if not self.read_instance.reading_ghost:
@@ -207,21 +203,12 @@ class DataReader:
 
             # show warning when there is a non-defined field if launching from a config file
             if hasattr(self.read_instance, "non_default_fields_per_section"):
-                # add the period field to the valid fields
-                period_set = ['period'] if self.read_instance.reading_ghost else []
-
-                # get valid representativity fields
-                network_type = 'ghost' if self.read_instance.reading_ghost else 'nonghost'
-                if self.read_instance.resolution in ['hourly', 'hourly_instantaneous']:
-                    valid_representativity_fields = self.read_instance.representativity_info[network_type]['hourly']['map_vars']
-                elif self.read_instance.resolution in ['daily', '3hourly', '6hourly', '3hourly_instantaneous', '6hourly_instantaneous']:
-                    valid_representativity_fields = self.read_instance.representativity_info[network_type]['daily']['map_vars']
-                elif self.read_instance.resolution == 'monthly':
-                    valid_representativity_fields = self.read_instance.representativity_info[network_type]['monthly']['map_vars']
-                     
                 # get all the valid args in one list
-                valid_fields = self.read_instance.metadata_vars_to_read + self.read_instance.ghost_data_vars_to_read + \
-                    period_set + valid_representativity_fields
+                valid_fields = self.read_instance.metadata_vars_to_read
+                if self.read_instance.metadata_vars_to_read:
+                    valid_fields += self.read_instance.ghost_data_vars_to_read + ['period']
+                else:
+                    valid_fields += self.read_instance.nonghost_data_vars_to_read
                 
                 # remove all the valid fields from the invalid field list
                 self.read_instance.invalid_fields = {field_name: fields-set(valid_fields)
