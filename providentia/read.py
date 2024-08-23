@@ -210,21 +210,23 @@ class DataReader:
                 # add the period field to the valid fields
                 period_set = ['period'] if self.read_instance.reading_ghost else []
 
-                # add representativity fields to the valid fields 
-                init_representativity(self.read_instance)
-                update_representativity_fields(self.read_instance)
-
+                # get valid representativity fields
+                network_type = 'ghost' if self.read_instance.reading_ghost else 'nonghost'
+                if self.read_instance.resolution in ['hourly', 'hourly_instantaneous']:
+                    valid_representativity_fields = self.read_instance.representativity_info[network_type]['hourly']['map_vars']
+                elif self.read_instance.resolution in ['daily', '3hourly', '6hourly', '3hourly_instantaneous', '6hourly_instantaneous']:
+                    valid_representativity_fields = self.read_instance.representativity_info[network_type]['daily']['map_vars']
+                elif self.read_instance.resolution == 'monthly':
+                    valid_representativity_fields = self.read_instance.representativity_info[network_type]['monthly']['map_vars']
+                     
                 # get all the valid args in one list
                 valid_fields = self.read_instance.metadata_vars_to_read + self.read_instance.ghost_data_vars_to_read + \
-                    period_set + self.read_instance.representativity_menu['rangeboxes']['map_vars']
+                    period_set + valid_representativity_fields
                 
                 # remove all the valid fields from the invalid field list
                 self.read_instance.invalid_fields = {field_name: fields-set(valid_fields)
                     for field_name, fields in self.read_instance.non_default_fields_per_section.items() 
                     if field_name==self.read_instance.section or field_name.startswith(self.read_instance.section+"·")}
-                
-                # turn the values blank again
-                init_representativity(self.read_instance)
 
                 # show warning if there's an invalid field
                 invalid_var = [f"""{i} ('{"', '".join(j)}')""" for i,j in self.read_instance.invalid_fields.items() if j]
@@ -234,7 +236,7 @@ class DataReader:
                     show_message(self.read_instance, msg)
 
                     # delete from instance all invalid fields from the configuration file
-                    for section,section_invalid_fields in self.read_instance.invalid_fields.items():
+                    for section_invalid_fields in self.read_instance.invalid_fields.values():
                         for k in section_invalid_fields:
                             # control if the atribute exists because in offline mode the subsection ones are not set yet
                             if hasattr(self.read_instance, k):
