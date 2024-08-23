@@ -63,7 +63,7 @@ def spatial_colocation_nonghost(station_references, longitudes, latitudes):
         # convert speci longitude and latitudes in geographic coordinates to cartesian ECEF 
         # (Earth Centred, Earth Fixed) coordinates assuming WGS84 datum and ellipsoid, and that all heights equal zero
         # ECEF coordinates represent positions (in metres) as X, Y, Z coordinates, approximating the earth surface as an ellipsoid of revolution
-        if Version(pyproj.__version__) >= Version("2.6.1"):
+        if Version(pyproj.__version__) >= Version("2.0.0"):
             lla = {"proj": "latlong", "ellps": "WGS84", "datum": "WGS84"}
             ecef = {"proj": "geocent", "ellps": "WGS84", "datum": "WGS84"}
             transformer = pyproj.Transformer.from_crs(lla, ecef)
