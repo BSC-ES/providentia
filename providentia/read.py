@@ -19,7 +19,6 @@ from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_
 from .spatial_colocation import (resolve_duplicate_spatial_colocation_matches, spatial_colocation_ghost, 
                                  spatial_colocation_nonghost)
 from .warnings import show_message
-from .fields_menus import (init_representativity, update_representativity_fields)
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
