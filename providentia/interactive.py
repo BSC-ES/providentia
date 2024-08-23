@@ -821,7 +821,7 @@ class Interactive:
                         try:
                             ax_to_plot = self.plot_characteristics[plot_type]['legend']['handles']['ax']
                         except:
-                            print("Warning: axis to plot legend on not defined for plot type in plot_characteristics_interactive.yaml, or passed via 'format' argument.\n\Taking first available axis.")
+                            print("Warning: axis to plot legend on not defined for plot type in plot_characteristics_interactive.yaml, or passed via 'format' argument.\nTaking first available axis.")
                             ax_to_plot = self.relevant_temporal_resolutions[0]
                         if ax_to_plot not in self.relevant_temporal_resolutions:
                             print("Warning: defined axis to plot legend on not available for data resolution of read data.\nInstead, taking first available axis.")
