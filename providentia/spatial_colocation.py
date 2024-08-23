@@ -4,7 +4,7 @@ import itertools
 import numpy as np
 import pyproj
 from scipy.spatial import cKDTree
-
+from packaging.version import Version
 
 def spatial_colocation_nonghost(station_references, longitudes, latitudes):
     """ Given multiple species, return intersecting indices for matching stations across species (per network/species)
@@ -63,11 +63,19 @@ def spatial_colocation_nonghost(station_references, longitudes, latitudes):
         # convert speci longitude and latitudes in geographic coordinates to cartesian ECEF 
         # (Earth Centred, Earth Fixed) coordinates assuming WGS84 datum and ellipsoid, and that all heights equal zero
         # ECEF coordinates represent positions (in metres) as X, Y, Z coordinates, approximating the earth surface as an ellipsoid of revolution
-        lla = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84')
-        ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
-        firstnetworkspecies_x, firstnetworkspecies_y, firstnetworkspecies_z = pyproj.transform(lla, ecef, 
-            firstnetworkspecies_longitudes, firstnetworkspecies_latitudes, 
-            np.zeros(len(firstnetworkspecies_longitudes)), radians=False)
+        if Version(pyproj.__version__) >= Version("2.0.0"):
+            lla = {"proj": "latlong", "ellps": "WGS84", "datum": "WGS84"}
+            ecef = {"proj": "geocent", "ellps": "WGS84", "datum": "WGS84"}
+            transformer = pyproj.Transformer.from_crs(lla, ecef)
+            firstnetworkspecies_x, firstnetworkspecies_y, firstnetworkspecies_z = transformer.transform(
+                firstnetworkspecies_longitudes, firstnetworkspecies_latitudes, 
+                np.zeros(len(firstnetworkspecies_longitudes)), radians=False)
+        else:
+            lla = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84')
+            ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
+            firstnetworkspecies_x, firstnetworkspecies_y, firstnetworkspecies_z = pyproj.transform(
+                lla, ecef, firstnetworkspecies_longitudes, firstnetworkspecies_latitudes, 
+                np.zeros(len(firstnetworkspecies_longitudes)), radians=False)
         
         # merge coordinates to 3D array
         firstnetworkspecies_xyz = np.column_stack((firstnetworkspecies_x, firstnetworkspecies_y, firstnetworkspecies_z))
@@ -216,11 +224,19 @@ def spatial_colocation_ghost(longitudes, latitudes, measurement_altitudes):
     # convert longitudes / latitudes / measurement_altitudes in geographic coordinates to cartesian ECEF 
     # (Earth Centred, Earth Fixed) coordinates assuming WGS84 datum and ellipsoid, and that all heights equal zero
     # ECEF coordinates represent positions (in metres) as X, Y, Z coordinates, approximating the earth surface as an ellipsoid of revolution
-    lla = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84')
-    ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
-    firstnetworkspecies_x, firstnetworkspecies_y, firstnetworkspecies_z = pyproj.transform(lla, ecef, 
-        firstnetworkspecies_longitudes, firstnetworkspecies_latitudes, firstnetworkspecies_measurement_altitudes,
-        radians=False)
+    if Version(pyproj.__version__) >= Version("2.0.0"):
+        lla = {"proj": "latlong", "ellps": "WGS84", "datum": "WGS84"}
+        ecef = {"proj": "geocent", "ellps": "WGS84", "datum": "WGS84"}
+        transformer = pyproj.Transformer.from_crs(lla, ecef)
+        firstnetworkspecies_x, firstnetworkspecies_y, firstnetworkspecies_z = transformer.transform(
+            firstnetworkspecies_longitudes, firstnetworkspecies_latitudes, 
+            firstnetworkspecies_measurement_altitudes, radians=False)
+    else:
+        lla = pyproj.Proj(proj='latlong', ellps='WGS84', datum='WGS84')
+        ecef = pyproj.Proj(proj='geocent', ellps='WGS84', datum='WGS84')
+        firstnetworkspecies_x, firstnetworkspecies_y, firstnetworkspecies_z = pyproj.transform(
+            lla, ecef, firstnetworkspecies_longitudes, firstnetworkspecies_latitudes, 
+            firstnetworkspecies_measurement_altitudes, radians=False)
 
     # merge coordinates to 3D array
     firstnetworkspecies_xyz = np.column_stack((firstnetworkspecies_x, firstnetworkspecies_y, firstnetworkspecies_z))
