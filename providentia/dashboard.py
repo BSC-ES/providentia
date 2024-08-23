@@ -66,6 +66,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
         self.expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
 
+        # load representativity information
+        self.representativity_info = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
+
         # initialise default configuration variables
         # modified by commandline arguments, if given
         provconf = ProvConfiguration(self, **kwargs)
