@@ -1104,7 +1104,7 @@ class ProvConfiguration:
         else:
             if Version(matplotlib.__version__) < Version("3.8"):
                 if 'taylor' in self.read_instance.active_dashboard_plots:
-                    error = 'It is not possible to create Taylor diagrams yet, please remove.'
+                    error = 'It is not possible to create Taylor diagrams yet, please remove from settings/report_plots.yaml.'
                     sys.exit(error)
 
         if (len(self.read_instance.active_dashboard_plots) != 4) and (not self.read_instance.offline) & (not self.read_instance.interactive):
