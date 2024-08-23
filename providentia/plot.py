@@ -3,6 +3,7 @@
 import copy
 import json
 import os
+import sys
 
 import cartopy
 import cartopy.crs as ccrs
@@ -148,7 +149,11 @@ class Plot:
                 if plot_type in self.canvas_instance.plot_characteristics_templates:
                     self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[plot_type])
                 else:
-                    self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[base_plot_type])
+                    try:
+                        self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[base_plot_type])
+                    except KeyError:
+                        error = f'Error: Plot type {plot_type} is not available. Remove from settings/report_plots.yaml'
+                        sys.exit(error)
 
                 # overwrite default plot characteristics with custom formatting
                 for format_var in format:
