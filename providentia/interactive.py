@@ -62,6 +62,9 @@ class Interactive:
         self.basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
         self.expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
 
+        # load representativity information
+        self.representativity_info = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
+
         # set configuration variables, as well as any other defined variables
         valid_config = self.set_config(**self.kwargs)
         # if configuration read was not valid then return here
