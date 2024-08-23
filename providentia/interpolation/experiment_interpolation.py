@@ -800,7 +800,7 @@ class ExperimentInterpolation(object):
         # Defining the distance between two points on the earth's surface as simply the euclidean distance 
         # between the two lat/lon pairs could lead to inaccurate results depending on the distance 
         # between two points (i.e. 1 deg. of longitude varies with latitude).
-        if Version(pyproj.__version__) >= Version("2.6.1"):
+        if Version(pyproj.__version__) >= Version("2.0.0"):
             lla = {"proj": "latlong", "ellps": "WGS84", "datum": "WGS84"}
             ecef = {"proj": "geocent", "ellps": "WGS84", "datum": "WGS84"}
             transformer = pyproj.Transformer.from_crs(lla, ecef)
