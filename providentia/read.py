@@ -204,12 +204,10 @@ class DataReader:
             # show warning when there is a non-defined field if launching from a config file
             if hasattr(self.read_instance, "non_default_fields_per_section"):
                 # get all the valid args in one list
-                valid_fields = self.read_instance.metadata_vars_to_read
-                if self.read_instance.reading_ghost:
-                    valid_fields += self.read_instance.ghost_data_vars_to_read + ['period']
-                else:
-                    valid_fields += self.read_instance.nonghost_data_vars_to_read
-                
+                period_set = ['period'] if self.read_instance.reading_ghost else []
+                valid_fields = self.read_instance.metadata_vars_to_read + self.read_instance.ghost_data_vars_to_read + \
+                    period_set + self.read_instance.nonghost_data_vars_to_read
+
                 # remove all the valid fields from the invalid field list
                 self.read_instance.invalid_fields = {field_name: fields-set(valid_fields)
                     for field_name, fields in self.read_instance.non_default_fields_per_section.items() 
