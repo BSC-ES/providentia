@@ -208,7 +208,7 @@ class DataReader:
             # show warning when there is a non-defined field if launching from a config file
             if hasattr(self.read_instance, "non_default_fields_per_section"):
                 # add the period field to the valid fields
-                period_set = ['period'] if self.read_instance.reading_ghost else set()
+                period_set = ['period'] if self.read_instance.reading_ghost else []
 
                 # add representativity fields to the valid fields 
                 init_representativity(self.read_instance)
