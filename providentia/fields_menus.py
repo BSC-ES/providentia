@@ -247,56 +247,20 @@ def update_representativity_fields(instance):
     # get previously set rangebox labels / values
     previous_mapped_labels = copy.deepcopy(instance.representativity_menu['rangeboxes']['map_vars'])
     previous_lower = copy.deepcopy(instance.representativity_menu['rangeboxes']['current_lower'])
-
-    # hourly temporal resolution?
+    
+    # build representativity menu
+    network_type = 'ghost' if instance.reading_ghost else 'nonghost'
     if instance.resolution in ['hourly', 'hourly_instantaneous']:
-        # GHOST 
-        if instance.reading_ghost:
-
-            instance.representativity_menu['rangeboxes']['map_vars'] = instance.representativity_info['ghost']['hourly']['map_vars']
-            instance.representativity_menu['rangeboxes']['labels'] = instance.representativity_info['ghost']['hourly']['labels']
-            instance.representativity_menu['rangeboxes']['subtitles'] = instance.representativity_info['ghost']['hourly']['subtitles']
-            instance.representativity_menu['rangeboxes']['subtitle_inds'] = instance.representativity_info['ghost']['hourly']['subtitle_inds']
-
-        # non-GHOST
-        else:
-            instance.representativity_menu['rangeboxes']['map_vars'] = instance.representativity_info['nonghost']['hourly']['map_vars']
-            instance.representativity_menu['rangeboxes']['labels'] = instance.representativity_info['nonghost']['hourly']['labels']
-            instance.representativity_menu['rangeboxes']['subtitles'] = instance.representativity_info['nonghost']['hourly']['subtitles']
-            instance.representativity_menu['rangeboxes']['subtitle_inds'] = instance.representativity_info['nonghost']['hourly']['subtitle_inds']                                                               
-
-    # daily temporal resolution?
+        resolution = 'hourly'
     elif instance.resolution in ['daily', '3hourly', '6hourly', '3hourly_instantaneous', '6hourly_instantaneous']:
-        # GHOST 
-        if instance.reading_ghost:
-            instance.representativity_menu['rangeboxes']['map_vars'] = instance.representativity_info['ghost']['daily']['map_vars']
-            instance.representativity_menu['rangeboxes']['labels'] = instance.representativity_info['ghost']['daily']['labels']
-            instance.representativity_menu['rangeboxes']['subtitles'] = instance.representativity_info['ghost']['daily']['subtitles']
-            instance.representativity_menu['rangeboxes']['subtitle_inds'] = instance.representativity_info['ghost']['daily']['subtitle_inds']
-
-        # non-GHOST
-        else:
-            instance.representativity_menu['rangeboxes']['map_vars'] = instance.representativity_info['nonghost']['daily']['map_vars']
-            instance.representativity_menu['rangeboxes']['labels'] = instance.representativity_info['nonghost']['daily']['labels']
-            instance.representativity_menu['rangeboxes']['subtitles'] = instance.representativity_info['nonghost']['daily']['subtitles']
-            instance.representativity_menu['rangeboxes']['subtitle_inds'] = instance.representativity_info['nonghost']['daily']['subtitle_inds']
-
-    # monthly temporal resolution?
+        resolution = 'daily'
     elif instance.resolution == 'monthly':
-        # GHOST 
-        if instance.reading_ghost:
-            instance.representativity_menu['rangeboxes']['map_vars'] = instance.representativity_info['ghost']['monthly']['map_vars']
-            instance.representativity_menu['rangeboxes']['labels'] = instance.representativity_info['ghost']['monthly']['labels']
-            instance.representativity_menu['rangeboxes']['subtitles'] = instance.representativity_info['ghost']['monthly']['subtitles']
-            instance.representativity_menu['rangeboxes']['subtitle_inds'] = instance.representativity_info['ghost']['monthly']['subtitle_inds']
-
-        # non-GHOST
-        else:
-            instance.representativity_menu['rangeboxes']['map_vars'] = instance.representativity_info['nonghost']['monthly']['map_vars']
-            instance.representativity_menu['rangeboxes']['labels'] = instance.representativity_info['nonghost']['monthly']['labels']
-            instance.representativity_menu['rangeboxes']['subtitles'] = instance.representativity_info['nonghost']['monthly']['subtitles']
-            instance.representativity_menu['rangeboxes']['subtitle_inds'] = instance.representativity_info['nonghost']['monthly']['subtitle_inds']   
-
+        resolution = 'monthly'
+    instance.representativity_menu['rangeboxes']['map_vars'] = instance.representativity_info[network_type][resolution]['map_vars']
+    instance.representativity_menu['rangeboxes']['labels'] = instance.representativity_info[network_type][resolution]['labels']
+    instance.representativity_menu['rangeboxes']['subtitles'] = instance.representativity_info[network_type][resolution]['subtitles']
+    instance.representativity_menu['rangeboxes']['subtitle_inds'] = instance.representativity_info[network_type][resolution]['subtitle_inds']
+    
     # initialise rangebox values --> for data representativity fields
     # the default is 0%, for max gap fields % the default is 100%
     instance.representativity_menu['rangeboxes']['current_lower'] = []
