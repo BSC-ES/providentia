@@ -167,9 +167,10 @@ class DataReader:
 
             # get data variables which change per measurement (for filtering)
             if self.read_instance.reading_ghost:
-                # get representativity fields (only native)
-                self.read_instance.ghost_data_vars_to_read = self.read_instance.representativity_info['ghost'][resolution]['map_vars']
-                self.read_instance.ghost_data_vars_to_read = [var for var in self.read_instance.ghost_data_vars_to_read if 'native' in var]
+                # get representativity fields (only native because non-native and all are calculated on-the-fly)
+                self.read_instance.ghost_data_vars_to_read = [var for var 
+                                                              in self.read_instance.representativity_info['ghost'][resolution]['map_vars'] 
+                                                              if 'native' in var]
                 
                 # add annual reprentativity and daytime and seasonal variables
                 self.read_instance.ghost_data_vars_to_read += ['annual_native_representativity_percent', 'season_code']
@@ -676,7 +677,7 @@ class DataReader:
                 elif 'station_name' in ncdf_root.variables:
                     station_reference_var = 'station_name'
                 else: 
-                    error = 'Error: {} cannot be read because it has no station_name.'.format(relevant_file)
+                    error = 'Error: {} cannot be read because it has no station_name.'.format(relevant_files[0])
                     sys.exit(error)
                 self.read_instance.nonghost_metadata_vars_to_read.append('station_reference') 
 
