@@ -205,7 +205,7 @@ class DataReader:
             if hasattr(self.read_instance, "non_default_fields_per_section"):
                 # get all the valid args in one list
                 valid_fields = self.read_instance.metadata_vars_to_read
-                if self.read_instance.metadata_vars_to_read:
+                if self.read_instance.reading_ghost:
                     valid_fields += self.read_instance.ghost_data_vars_to_read + ['period']
                 else:
                     valid_fields += self.read_instance.nonghost_data_vars_to_read
