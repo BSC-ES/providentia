@@ -14,8 +14,8 @@
     "monarch_gpfs": {
         "experiments": ["a6gn"],
         "paths": [ 
-            "/esarchive/exp/monarch/",
-            "/gpfs/scratch/bsc32/bsc32359/esarchive_scratch/exp/monarch/"
+            "/gpfs/scratch/bsc32/bsc32359/esarchive_scratch/exp/monarch/",
+            "/esarchive/exp/monarch/"
         ]
     },
     "testing": {
