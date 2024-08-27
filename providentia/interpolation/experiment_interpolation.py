@@ -45,7 +45,7 @@ config_format = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'inter
 bin_vars = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 
 # load the defined experiments paths and agrupations jsons
-experiment_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_data.yaml')))
+interp_experiments = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 
 # add unit-converter submodule to python load path
 sys.path.append(os.path.join(PROVIDENTIA_ROOT,'providentia','dependencies','unit-converter'))
@@ -109,7 +109,7 @@ class ExperimentInterpolation(object):
         self.GHOST_speci_upper_limit = self.standard_parameter_speci['extreme_upper_limit']
 
         # get experiment type and specific directories
-        for experiment_type, experiment_dict in experiment_data.items():
+        for experiment_type, experiment_dict in interp_experiments.items():
             if self.experiment_to_process in experiment_dict["experiments"]:
                 exp_dir_list = experiment_dict["paths"]
                 break
@@ -763,9 +763,6 @@ class ExperimentInterpolation(object):
 
                 # get indices in yearmonth to fill with read data
                 inds_to_fill = np.isin(self.yearmonth_dt, xr_data.time.values)
-                if all(inds_to_fill) is False:
-                    self.log_file_str += 'Time in model dataset {} is not in standard format: \n {}'.format(model_file, xr_data.time.values)
-                    self.create_output_logfile(1)
 
                 # fill in data array
                 self.monthly_model_data[inds_to_fill,:,:] = xr_data.values
