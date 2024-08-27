@@ -351,6 +351,7 @@ class SubmitInterpolation(object):
                                 
                                 # determine if simulation generates files with ensemble member numbers or not 
                                 # (test first file)
+                                # if the ensemble number is in the nc file name next to species
                                 if exp_files_all[0].split('/')[-1].rsplit('_', 1)[0] != speci_to_process:
                                     have_ensemble_members = True
                                     # if have ensemble members in filename, get all unique numbers
@@ -366,11 +367,12 @@ class SubmitInterpolation(object):
                                             available_ensemble_options = [ensemble_option]
                                         else:
                                             continue
+                                # if there's no ensemble number in the file name
                                 else:
                                     have_ensemble_members = False
                                     # if have defined ensemble members to process, then continue as no files in this 
                                     # directory have ensemble member number
-                                    if ensemble_option != 'allmembers':
+                                    if ensemble_option not in ['allmembers', '000']:
                                         continue
                                     # otherwise, proceed (tag files as ensemble member '000' for sake of operation)
                                     else:
