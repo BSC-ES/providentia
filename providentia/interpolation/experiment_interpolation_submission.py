@@ -26,7 +26,6 @@ from configuration import ProvConfiguration, load_conf
 
 # load the data_paths for the different machines and the default values jsons
 data_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'data_paths.yaml')))
-config_format = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_interp_defaults.yaml')))
 bin_vars = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 
 # load the defined experiments paths and agrupations jsons
