@@ -169,7 +169,7 @@ class ExperimentInterpolation(object):
                                                         self.speci_to_process, self.yearmonth, self.ensemble_option)))
         # if have no valid model files, exit
         if len(self.model_files) == 0:
-            self.log_file_str += 'No valid model files in {}. Skipping month.'.format(self.yearmonth)
+            log_file_str += 'No valid model files in {}. Skipping month.'.format(self.yearmonth)
             self.create_output_logfile(1)
 
     def get_model_information(self):
@@ -659,7 +659,10 @@ class ExperimentInterpolation(object):
             aeronet_bin_radius = get_aeronet_bin_radius_from_bin_variable(self.original_speci_to_process)
             bin_index, rmin, rmax, rho_bin = get_aeronet_model_bin(self.model_name, aeronet_bin_radius)
             bin_transform_factor = get_model_to_aeronet_bin_transform_factor(self.model_name, rmin, rmax)
-                
+        
+        # initialise string variable
+        global log_file_str
+
         # iterate and read chunked model files
         for model_ii, model_file in enumerate(self.model_files):
 
