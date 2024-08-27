@@ -66,6 +66,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
         self.expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
 
+        # load representativity information
+        self.representativity_info = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
+
         # initialise default configuration variables
         # modified by commandline arguments, if given
         provconf = ProvConfiguration(self, **kwargs)
@@ -217,7 +220,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
     def resizeEvent(self, event):
         """ Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry. """
-        
+
         self.resized.emit()
 
         return super(ProvidentiaMainWindow, self).resizeEvent(event)
@@ -628,6 +631,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # set finalised layout
         self.setLayout(parent_layout)
+
+        # set minimum height to avoid error 'box_aspect' and 'fig_aspect' must be positive
+        self.setMinimumHeight(650)
 
         # show dashboard. How to do this is different per system 
         if self.operating_system == 'Mac':
