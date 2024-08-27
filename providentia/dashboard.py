@@ -634,8 +634,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.showMaximized()
             self.get_geometry()
         elif self.operating_system == 'Linux':
+            self.show()
             self.showMaximized()
-            self.get_geometry()
         elif self.operating_system == 'Windows':
             self.show()
             self.showMaximized()
