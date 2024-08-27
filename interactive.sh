@@ -9,12 +9,8 @@ user=$(whoami)
 login=$(printf $SLURM_SUBMIT_HOST | awk -F 'login' '{print $2}')
 if [ "${BSC_MACHINE}" == "nord3v2" ]; then
     bsc_hostname="nord${login}"
-elif [ "${BSC_MACHINE}" == "mn4" ]; then
-    bsc_hostname="mn${login}"
 elif [ "${BSC_MACHINE}" = "amd" ]; then
     bsc_hostname="amdlogin1"
-elif [ "${BSC_MACHINE}" = "power" ]; then
-    bsc_hostname="plogin${login}"
 elif [ "${BSC_MACHINE}" = "mn5" ]; then
     bsc_hostname="glogin${login}"
 fi

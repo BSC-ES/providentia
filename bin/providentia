@@ -1,13 +1,7 @@
 #!/usr/bin/env bash
 # init
-cores=12
 jobname="PRV"
 time="02:00:00"
-if [ "${BSC_MACHINE}" == "mn5" ]; then
-    queue="gp_debug"
-else
-    queue="debug"
-fi
 mem="20Gb"
 constraint="medmem"
 
@@ -35,7 +29,7 @@ IFS=$'\n\t'
 # An option followed by double colons '::' means that its argument is optional.
 # See `man getopt'.
 SHORT=uc:t:J:q:m:V
-LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,interactive,conf:,config:,config_dir:,section:,ghost_version:,cartopy_data_dir:,generate_file_tree,gft,disable_file_tree,dft,offline,interactive,download,dl,network:,species:,resolution:,start_date:,end_date:,experiments:,temporal_colocation:,spatial_colocation:,filter_species:,lower_bound:,upper_bound:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,map_extent:,active_dashboard_plots:,plot_characteristics_filename:
+LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,clean,interactive,conf:,config:,config_dir:,section:,ghost_version:,cartopy_data_dir:,generate_file_tree,gft,disable_file_tree,dft,offline,interactive,download,dl,interpolation,interp,interpolate,network:,species:,resolution:,start_date:,end_date:,experiments:,domain:,ensemble_options:temporal_colocation:,spatial_colocation:,filter_species:,lower_bound:,upper_bound:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,map_extent:,active_dashboard_plots:,plot_characteristics_filename:
 
 # parse arguments
 PARSED=$(getopt --options ${SHORT} \
@@ -45,6 +39,29 @@ PARSED=$(getopt --options ${SHORT} \
 # exit if getopt has complained about wrong arguments to stdout
 if [[ $? -ne 0 ]]; then
     exit 2
+fi
+
+# set qos depending on the mode and machine
+if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" ]]; then
+    # define core as one when it is interpolation
+    cores="1"
+    
+    # define qos in interpolation
+    if [ "${BSC_MACHINE}" == "mn5" ]; then
+        queue="gp_bsces" #TODO Check if i can "gp_debug"
+    else
+        queue="bsc_es"
+    fi
+else
+    # define core as twelve if it is not an interpolation
+        cores="12"
+    
+    # define qos in every mode but interpolation
+    if [ "${BSC_MACHINE}" == "mn5" ]; then
+        queue="gp_debug"
+    else
+        queue="debug"
+    fi 
 fi
 
 # reset SLURM_EXPORT_ENV so that things like srun & sbatch work out of the box
@@ -111,9 +128,16 @@ constraint_option="--constraint=$constraint"
 load_command="source load_modules.sh"
 python_command="python3 -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
 interactive_alloc_command="sbatch -t $time -c $cores -J $jobname"
+script_dir=$(dirname $(realpath $(dirname $0)))
 
-# avoid x11 forwarding when creating offline reports
-if [[ $PARSED =~ "--offline" || $PARSED =~ "--download" || $PARSED =~ "--dl" ]]; then
+# use clean mode and exit
+if [[ $PARSED =~ "--clean" ]]; then
+    bash clean_output.sh
+    exit 0
+fi
+
+# avoid x11 forwarding when creating offline reports or doing interpolations
+if [[ $PARSED =~ "--offline" || $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" || $PARSED =~ "--download" || $PARSED =~ "--dl" ]]; then
     salloc_command="salloc -t $time -c $cores -J $jobname"
 else
     salloc_command="salloc -t $time -c $cores -J $jobname --x11"
@@ -131,6 +155,13 @@ if [[ $PARSED =~ "--interactive" ]]; then
     interactive=true
 else
     interactive=false
+fi
+
+# if using interpolation mode then
+if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" ]]; then
+    interpolation=true
+else
+    interpolation=false
 fi
 
 # if using download mode then 
@@ -171,38 +202,8 @@ if $download; then
 fi
 
 # execution
-# CTE POWER 9
-if [ "${BSC_MACHINE}" == "power" ]; then
-    echo "INFO: Running on Power9..."
-    
-    if $interactive; then
-        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
-        echo "Starting interactive jupyter session."
-        echo "Check 'interactive.out' for information on how to connect to session."
-        eval "${load_command}"
-        eval "${interactive_alloc_command} ${queue_option} ${memory_option} interactive.sh"
-
-    elif $debug; then
-        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
-        echo "Entering debug mode"
-        eval "${load_command}"
-        eval "${salloc_command} ${queue_option} ${memory_option}"
-
-    elif $download; then
-        echo "Download mode only available in local."
-
-    else
-        if $debugexec; then
-            eval "srun ${python_command}"
-        else
-            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
-            eval "${load_command}"
-            eval "${salloc_command} ${queue_option} ${memory_option} srun ${python_command}"
-        fi
-    fi
-
 # Marenostrum5
-elif [ "${BSC_MACHINE}" == "mn5" ]; then
+if [ "${BSC_MACHINE}" == "mn5" ]; then
 
     echo "INFO: Running on MN5..."
 
@@ -242,6 +243,14 @@ elif [ "${BSC_MACHINE}" == "mn5" ]; then
             else
                 eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option}"
             fi
+        
+        elif $interpolation; then
+            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+            echo "Loading dependencies..."
+            eval "${load_command}"
+            jobid=$(eval "sbatch ${account_option} ${queue_option} ${script_dir}/providentia/interpolation/experiment_interpolation_submit_mn5.sh $OTHEROPTS | awk '{print \$4}'")
+
+            echo "Check submission info in 'providentia/interpolation/management_logs/$jobid.out'"
 
         else
             if $debugexec; then
@@ -257,51 +266,9 @@ elif [ "${BSC_MACHINE}" == "mn5" ]; then
         fi
     fi
 
-# Marenostrum4
-elif [ "${BSC_MACHINE}" == "mn4" ]; then
-    echo "INFO: Running on MN4..."
-
-    # avoid magnified graphics
-    eval export QT_AUTO_SCREEN_SCALE_FACTOR=0
-
-    if $interactive; then
-        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-        echo "Starting interactive jupyter session."
-        echo "Check 'interactive.out' for information on how to connect to session."
-        eval "${load_command}"
-        if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
-            eval "${interactive_alloc_command} ${queue_option} interactive.sh"
-        else
-            eval "${interactive_alloc_command} ${constraint_option} ${queue_option} interactive.sh"
-        fi
-
-    elif $debug; then
-        echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-        echo "Entering debug mode"
-        eval "${load_command}"
-        if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
-            eval "${salloc_command} ${queue_option}"
-        else
-            eval "${salloc_command} ${constraint_option} ${queue_option}"
-        fi
-
-    else
-        if $debugexec; then
-            eval "srun ${python_command}"
-        else
-            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-            eval "${load_command}"
-            if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
-                eval "${salloc_command} ${queue_option} srun ${python_command}"
-            else
-                eval "${salloc_command} ${constraint_option} ${queue_option} srun ${python_command}"
-            fi
-        fi
-    fi
-
 # Nord3v2
-elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
-    echo "INFO: Running on Nord3v2..."
+elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
+    echo "INFO: Running on ${BSC_MACHINE}..."
     if $interactive; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
         echo "Starting interactive jupyter session."
@@ -322,6 +289,14 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ]; then
         else
             eval "${salloc_command} ${constraint_option} ${queue_option}"
         fi
+
+     elif $interpolation; then
+            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+            echo "Loading dependencies..."
+            eval "${load_command}"
+            jobid=$(eval "sbatch ${account_option} ${queue_option} ${script_dir}/providentia/interpolation/experiment_interpolation_submit_mn5.sh $OTHEROPTS | awk '{print \$4}'")
+
+            echo "Check submission info in 'providentia/interpolation/management_logs/$jobid.out'"
 
     else
         if $debugexec; then
@@ -353,6 +328,11 @@ elif [ "${ip}" == "84.88.185.48" ]; then
 # Local machines (Workstations, dust02 machine and personal laptops)
 else
     echo "INFO: Running on a local machine..."
+
+    # break if user wants to do interpolation in local mode
+    if $interpolation; then
+         echo "Download mode only available in local. Exiting..."
+    fi
     
     # load modules from conda environment
     active_env=false

@@ -16,13 +16,20 @@
             'offline': False,
             'interactive': False,
             'download': False,
+            'interpolation': False,
+            'slurm_job_id' : null,
             'network': [],
             'species': [],
             'resolution': [],
             'start_date': null,
             'end_date': null,
             'observations_data_label': 'observations',
-            'experiments': {},
+            'experiments': [],
+            "n_neighbours" : null, #interpolation
+            "domain" : null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
+            "ensemble_options" : null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
+            'exp_id' : [], # TODO remove if changed 
+            'experiment_types' : [], # TODO remove if changed # interpolation
             'qa': null,
             'flags': null,
             'add_qa': null,
