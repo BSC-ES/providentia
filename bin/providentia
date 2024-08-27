@@ -252,7 +252,6 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
 
             echo "Check submission info in 'providentia/interpolation/management_logs/$jobid.out'"
 
-
         else
             if $debugexec; then
                 eval "srun ${account_option} ${python_command}"
@@ -291,6 +290,14 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
             eval "${salloc_command} ${constraint_option} ${queue_option}"
         fi
 
+     elif $interpolation; then
+            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+            echo "Loading dependencies..."
+            eval "${load_command}"
+            jobid=$(eval "sbatch ${account_option} ${queue_option} ${script_dir}/providentia/interpolation/experiment_interpolation_submit_mn5.sh $OTHEROPTS | awk '{print \$4}'")
+
+            echo "Check submission info in 'providentia/interpolation/management_logs/$jobid.out'"
+
     else
         if $debugexec; then
             eval "srun ${python_command}"
@@ -321,6 +328,11 @@ elif [ "${ip}" == "84.88.185.48" ]; then
 # Local machines (Workstations, dust02 machine and personal laptops)
 else
     echo "INFO: Running on a local machine..."
+
+    # break if user wants to do interpolation in local mode
+    if $interpolation; then
+         echo "Download mode only available in local. Exiting..."
+    fi
     
     # load modules from conda environment
     active_env=false

@@ -3,7 +3,7 @@
 #SBATCH --job-name=PRVI                                         
 #SBATCH --ntasks=1                                                
 #SBATCH --output=providentia/interpolation/submission_logs/%J.out
-#SBATCH --error=providentia/interpolation/submission_logs/%J_error.out
+#SBATCH --error=/dev/null
 #SBATCH --account=bsc32
 #SBATCH --qos=gp_bsces
 
