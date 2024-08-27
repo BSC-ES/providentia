@@ -41,7 +41,6 @@ CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
 
 # load the default values jsonsdefault_values
-config_format = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_interp_defaults.yaml')))
 bin_vars = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 
 # load the defined experiments paths and agrupations jsons
