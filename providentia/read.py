@@ -18,7 +18,7 @@ from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_
                        init_shared_vars_read_netcdf_data, read_netcdf_data, read_netcdf_metadata)
 from .spatial_colocation import (resolve_duplicate_spatial_colocation_matches, spatial_colocation_ghost, 
                                  spatial_colocation_nonghost)
-from .warnings import show_message
+from .warnings_prv import show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
@@ -567,10 +567,22 @@ class DataReader:
             update_plotting_parameters(self.read_instance) 
 
         # print basic information species
-        print('SELECTED SPECIES')
-        print('- Main network-species', self.read_instance.networkspecies)
+        print('\nOBSERVATIONS')
+        for network in self.read_instance.networkspecies:
+            print(f" - {network}")
         if self.read_instance.filter_species:
-            print('- Filter network-species', self.read_instance.filter_species)
+            print('OBSERVATIONS TO FILTER BY')
+            for network_experiment, parameters in self.read_instance.filter_species.items():
+                print(f" - {network_experiment} {parameters}")                       
+        # print experiments after observations
+        if self.read_instance.experiments:
+            print("EXPERIMENTS")
+            for experiment, alias in self.read_instance.experiments.items():
+                str_experiment = f" - {experiment}"
+                if self.read_instance.hasAlias: 
+                    str_experiment += f" ({alias})"
+                print(str_experiment)
+        print()
 
     def read_basic_metadata(self):     
         """ Get basic unique metadata across networkspecies wanting to read
