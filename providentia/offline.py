@@ -15,7 +15,7 @@ import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 from packaging.version import Version
 import pandas as pd
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 
 from .configuration import load_conf
 from .configuration import ProvConfiguration
@@ -47,6 +47,9 @@ class ProvidentiaOffline:
         # load statistical yamls
         self.basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
         self.expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
+
+        # load representativity information
+        self.representativity_info = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
@@ -237,7 +240,7 @@ class ProvidentiaOffline:
             if Version(matplotlib.__version__) < Version("3.8"):
                 if plot_type[:6] == 'taylor':
                     if (plot_type in self.station_plots_to_make) or (plot_type in self.summary_plots_to_make):
-                        error = 'It is not possible to create Taylor diagrams yet, please remove.'
+                        error = 'It is not possible to create Taylor diagrams yet, please remove from settings/report_plots.yaml.'
                         sys.exit(error)
 
             # check if there are multispecies plots
