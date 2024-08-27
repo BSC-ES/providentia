@@ -763,6 +763,9 @@ class ExperimentInterpolation(object):
 
                 # get indices in yearmonth to fill with read data
                 inds_to_fill = np.isin(self.yearmonth_dt, xr_data.time.values)
+                if all(inds_to_fill) is False:
+                    self.log_file_str += 'Time in model dataset {} is not in standard format: \n {}'.format(model_file, xr_data.time.values)
+                    self.create_output_logfile(1)
 
                 # fill in data array
                 self.monthly_model_data[inds_to_fill,:,:] = xr_data.values
