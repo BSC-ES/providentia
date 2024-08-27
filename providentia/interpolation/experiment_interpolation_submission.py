@@ -156,15 +156,17 @@ class SubmitInterpolation(object):
             # get experiment specific directories list
             exp_dir_list = interp_experiments[experiment_type]["paths"]
 
-            # take gpfs directory preferentially over esarchive directory
-            # if all are esarchive get the first one
-            exp_dir = exp_dir_list[0]
-            
+             # take first functional directory 
+            exp_dir = None      
             for temp_exp_dir in exp_dir_list:
-                if "esarchive" not in temp_exp_dir:
+                if os.path.exists(temp_exp_dir):
                     exp_dir = temp_exp_dir
                     break
 
+            # if none of the paths are in this current machine, break
+            if exp_dir:
+                error = f"Error: None of the experiment paths in {os.path.join('settings', 'interp_experiments.yaml')} are available in this machine ({MACHINE})."
+            
             # add file to directory path
             exp_dir += f"{experiment_to_process}/"
 
