@@ -45,8 +45,7 @@ config_format = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'inter
 bin_vars = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 
 # load the defined experiments paths and agrupations jsons
-experiment_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_paths.yaml')))
-experiment_names = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_names.yaml')))
+experiment_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_data.yaml')))
 
 # add unit-converter submodule to python load path
 sys.path.append(os.path.join(PROVIDENTIA_ROOT,'providentia','dependencies','unit-converter'))
@@ -61,12 +60,6 @@ class ExperimentInterpolation(object):
         self.machine = MACHINE
 
         # set variables from input keywords
-        self.prov_exp_code                        = submit_args['prov_exp_code']
-        prov_exp_code_split = self.prov_exp_code.split('-')
-    
-        self.experiment_to_process                = prov_exp_code_split[0]
-        self.grid_type                            = prov_exp_code_split[1]
-        self.ensemble_option                      = prov_exp_code_split[2]
         self.model_temporal_resolution            = submit_args['model_temporal_resolution']
         self.speci_to_process                     = submit_args['speci_to_process']
         self.network_to_interpolate_against       = submit_args['network_to_interpolate_against']
@@ -74,6 +67,8 @@ class ExperimentInterpolation(object):
         self.yearmonth                            = submit_args['yearmonth']
         self.original_speci_to_process            = submit_args['original_speci_to_process']
         self.unique_id                            = submit_args['job_id']
+        self.prov_exp_code                        = submit_args['prov_exp_code']
+        self.experiment_to_process, self.grid_type, self.ensemble_option = self.prov_exp_code.split('-')
         
         # get year/month string
         self.year = self.yearmonth[:4]
@@ -113,17 +108,20 @@ class ExperimentInterpolation(object):
         self.GHOST_speci_lower_limit = self.standard_parameter_speci['extreme_lower_limit']
         self.GHOST_speci_upper_limit = self.standard_parameter_speci['extreme_upper_limit']
 
-        # get experiment type and specific directory 
-        for self.experiment_type in experiment_names:
-            if self.experiment_to_process in experiment_names[self.experiment_type]:
-                exp_dict = experiment_paths[self.experiment_type]
+        # get experiment type and specific directories
+        for experiment_type, experiment_dict in experiment_data.items():
+            if self.experiment_to_process in experiment_dict["experiments"]:
+                exp_dir_list = experiment_dict["paths"]
                 break
 
         # take gpfs directory preferentially over esarchive directory
-        if 'gpfs' in list(exp_dict.keys()):
-            exp_dir = exp_dict['gpfs']
-        else:
-            exp_dir = exp_dict['esarchive']
+        # if all are esarchive get the first one
+        exp_dir = exp_dir_list[0]
+        
+        for temp_exp_dir in exp_dir_list:
+            if "esarchive" not in temp_exp_dir:
+                exp_dir = temp_exp_dir
+                break
 
         # add file to directory path
         exp_dir += f"{self.experiment_to_process}/" 
