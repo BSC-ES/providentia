@@ -113,6 +113,19 @@ class ProvidentiaDownload(object):
             if read_conf:
                 load_conf(self, self.config)
                 self.from_conf = True
+                # get the section in case it was passed on the command line                
+                if 'section' in kwargs:
+                    # config and section defined 
+                    if kwargs['section'] in self.all_sections:
+                        self.sections = [kwargs['section']]
+                    else:
+                        error = 'Error: The section specified in the command line ({0}) does not exist.'.format(kwargs['section'])
+                        tip = 'Tip: For subsections, add the name of the parent section followed by an interpunct (·) '
+                        tip += 'before the subsection name (e.g. SECTIONA·Spain).'
+                        sys.exit(error + '\n' + tip)
+                # if no section passed, then get all the parent sections
+                else:
+                    self.sections = self.parent_section_names
             else:
                 error = 'Error: The path to the configuration file specified in the command line does not exist.'
                 sys.exit(error)
@@ -140,7 +153,7 @@ class ProvidentiaDownload(object):
         self.switched_remote = False
 
     def run(self):
-        for section_ind, section in enumerate(self.parent_section_names):
+        for section_ind, section in enumerate(self.sections):
             # update for new section parameters
             self.section = section
             self.section_opts = self.sub_opts[self.section]
