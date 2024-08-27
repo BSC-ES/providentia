@@ -113,12 +113,10 @@ class ExperimentInterpolation(object):
                 exp_dir_list = experiment_dict["paths"]
                 break
 
-        # take gpfs directory preferentially over esarchive directory
-        # if all are esarchive get the first one
-        exp_dir = exp_dir_list[0]
-        
+        # take first functional directory 
+        exp_dir = None      
         for temp_exp_dir in exp_dir_list:
-            if "esarchive" not in temp_exp_dir:
+            if os.path.exists(temp_exp_dir):
                 exp_dir = temp_exp_dir
                 break
 
