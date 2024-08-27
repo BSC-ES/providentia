@@ -732,7 +732,7 @@ class ProvConfiguration:
         
         # if experiment id is not defined, exit
         if not experiment_exists:
-            msg = f"Cannot find the experiment ID '{experiment}' in '{os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_data.yaml')}'. Please add it to the file."
+            msg = f"Cannot find the experiment ID '{experiment}' in '{os.path.join('settings', 'experiment_data.yaml')}'. Please add it to the file."
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
         else:
             self.read_instance.experiment_types.append(experiment_type)
