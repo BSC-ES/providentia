@@ -30,8 +30,7 @@ config_format = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'inter
 bin_vars = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 
 # load the defined experiments paths and agrupations jsons
-experiment_paths = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_paths.yaml')))
-experiment_names = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_names.yaml')))
+experiment_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_data.yaml')))
 
 class SubmitInterpolation(object):
     """ Class that handles the interpolation submission. """
@@ -155,14 +154,17 @@ class SubmitInterpolation(object):
             obs_files_dates = []
             exp_files_dates = []
 
-            # get experiment specific directory 
-            exp_dict = experiment_paths[experiment_type]
+            # get experiment specific directories list
+            exp_dir_list = experiment_data[experiment_type]["paths"]
 
             # take gpfs directory preferentially over esarchive directory
-            if 'gpfs' in list(exp_dict.keys()):
-                exp_dir = exp_dict['gpfs']
-            else:
-                exp_dir = exp_dict['esarchive']
+            # if all are esarchive get the first one
+            exp_dir = exp_dir_list[0]
+            
+            for temp_exp_dir in exp_dir_list:
+                if "esarchive" not in temp_exp_dir:
+                    exp_dir = temp_exp_dir
+                    break
 
             # add file to directory path
             exp_dir += f"{experiment_to_process}/"
