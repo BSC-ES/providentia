@@ -491,17 +491,16 @@ class SubmitInterpolation(object):
                     msg += 'you need to set the end date to be the next one. \n'
                     msg += 'e.g. For November 2018, this is 201811 to 201812.'
                 else:
-                    if len(obs_files) == 0:
-                        msg += f'Observational data between {self.start_date} and {self.end_date} cannot be found.'
+                    if len(exp_files) == 0:
+                        msg += f'Experiment data between {self.start_date} and {self.end_date} cannot be found.'
                     else:
-                        msg += f'Observational files: {obs_files}\n'
-                        msg += f'Observational dates: {obs_files_dates}\n'
-                    
-                        if len(exp_files) == 0:
-                            msg += f'Experiment data between {self.start_date} and {self.end_date} cannot be found.'
+                        msg += f'Experiment files: {exp_files}\n'
+                        msg += f'Experiment dates: {exp_files_dates}'
+                        if len(obs_files) == 0:
+                            msg += f'Observational data between {self.start_date} and {self.end_date} cannot be found.'
                         else:
-                            msg += f'Experiment files: {exp_files}\n'
-                            msg += f'Experiment dates: {exp_files_dates}'
+                            msg += f'Observational files: {obs_files}\n'
+                            msg += f'Observational dates: {obs_files_dates}\n'
             else:
                 msg = '***INTERSECTING OBSERVATIONAL AND EXPERIMENTAL DATA IS AVAILABLE FOR INTERPOLATION.***' 
 
