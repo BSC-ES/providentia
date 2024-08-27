@@ -11,23 +11,24 @@ import subprocess
 import sys
 import yaml
 
-import matplotlib
 import numpy as np
 from packaging.version import Version
 import pandas as pd
-
-from .read_aux import check_for_ghost, get_default_qa
-from .warnings import show_message
+from itertools import compress
+import ast
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
+
+# get current path and providentia root path
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
+data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'data_paths.yaml')))
 default_values = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_defaults.yaml')))
 multispecies_map = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
+experiment_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_data.yaml')))
 
 # set MACHINE to be the hub, workstation or local machine
-if MACHINE not in ['power', 'mn4', 'nord3v2', 'mn5']:
+if MACHINE not in ['nord3v2', 'mn5']:
     hostname = os.environ.get('HOSTNAME', '')
     ip = socket.gethostbyname(socket.gethostname())
     if "bscearth" in hostname:
@@ -63,8 +64,16 @@ class ProvConfiguration:
             val = kwargs.get(k, val)
             setattr(self.read_instance, k, self.parse_parameter(k, val))
 
-    def parse_parameter(self, key, value):
+    def parse_parameter(self, key, value, deactivate_warning=False):
         """ Parse a parameter. """
+        
+        # import show_mesage from warnings
+        sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia'))
+        from warnings_prv import show_message
+
+        # when the value is default then it is as if it was a blank value
+        if value == 'default':
+            return self.var_defaults[key]
 
         # parse config file name
         if key == 'conf':
@@ -97,7 +106,7 @@ class ProvConfiguration:
         
         elif key == 'machine':
             # set filetree type
-            if MACHINE in ['power', 'mn4', 'nord3v2', 'mn5', 'dust']:
+            if MACHINE in ['nord3v2', 'mn5', 'dust']:
                 self.read_instance.filetree_type = 'remote'
             else:
                 self.read_instance.filetree_type = 'local'
@@ -105,7 +114,7 @@ class ProvConfiguration:
 
         elif key == 'available_cpus':
             # get available N CPUs
-            if MACHINE in ['power', 'mn4', 'nord3v2', 'mn5']:
+            if MACHINE in ['nord3v2', 'mn5']:
                 # handle cases where are testing briefly on login nodes (1 cpu capped)
                 try:
                     return int(os.getenv('SLURM_CPUS_PER_TASK'))
@@ -118,11 +127,11 @@ class ProvConfiguration:
                     return os.cpu_count()
 
         elif key == 'cartopy_data_dir':
-            # set cartopy data directory (needed on CTE-POWER/MN4/Nord3v2/MN5 as has no external
+            # set cartopy data directory (needed on Nord3v2/MN5 as has no external
             # internet connection)
-            if MACHINE in ['power', 'mn4', 'nord3v2']:
+            if MACHINE == 'nord3v2':
                 return '/gpfs/projects/bsc32/software/rhel/7.5/ppc64le/POWER9/software/Cartopy/0.17.0-foss-2018b-Python-3.7.0/lib/python3.7/site-packages/Cartopy-0.17.0-py3.7-linux-ppc64le.egg/cartopy/data'
-            elif MACHINE in ['mn5']:
+            elif MACHINE == 'mn5':
                 return '/gpfs/projects/bsc32/software/rhel/9.2/software/Cartopy/0.23.0-foss-2023b-Python-3.11.5/lib/python3.11/site-packages/cartopy/data'
             # on all other machines pull from internet
 
@@ -222,15 +231,9 @@ class ProvConfiguration:
             # parse resolution
             
             if isinstance(value, str):
-                # resolution is a list in download mode
-                if self.read_instance.download:
-                    # parse multiple resolutions
-                    if ',' in value:
-                        return [speci.strip() for speci in value.split(',')]
-                    else:
-                        return [value.strip()]
-                else:
-                    # parse one single resolution
+                if self.read_instance.interpolation or self.read_instance.download:
+                    return [res.strip() for res in value.split(',')]
+                else:        
                     return value.strip()
 
         elif key == 'start_date':
@@ -336,6 +339,11 @@ class ProvConfiguration:
                     return []
                 # if the flags are written with their names
                 elif isinstance(value, str):
+                    # check if all the flags appear in the GHOST_standards of the current version
+                    for flag in value.split(","):
+                        if flag.strip() not in self.read_instance.standard_data_flag_name_to_data_flag_code:
+                            error = (f"Error: Flag '{flag}' not in this GHOST version ({self.read_instance.ghost_version}).")
+                            sys.exit(error)
                     return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[f.strip()] for f in value.split(",")])
                 # list of integer codes
                 else:
@@ -344,13 +352,34 @@ class ProvConfiguration:
             else:
                 return []
 
+        elif key == "domain": # TODO maybe there's no need of domain because it is included on experiments
+            # parse domain
+
+            if value != None:
+                # split list, if only one domain, then creates list of one element
+                domains = [dom.strip() for dom in value.split(",")]      
+                return domains
+            else:
+                return []
+
+        elif key == "ensemble_options": # TODO maybe there's no need of ensemble num because it is included on experiments
+            # parse ensemble_options
+
+            if value != None:
+                # split list, if only one ensemble_options, then creates list of one element
+                # if it is a number, then make it 3 digits, if not it stays as it is
+                ensemble_opts = [opt.strip().zfill(3) for opt in str(value).split(",")]  
+                return ensemble_opts
+            else:
+                return []
+            
         elif key == 'experiments':
             # parse experiments
 
             if isinstance(value, str):
                 # empty string
                 if value == "":
-                    return {}
+                    return []
                 # split experiments
                 else:
                     # have alternative experiment names for the legend, then parse them?
@@ -360,8 +389,33 @@ class ProvConfiguration:
                     # otherwise set legend names as given experiment names in full
                     else: 
                         exps = [exp.strip() for exp in value.split(",")]
-                        exps_legend = copy.deepcopy(exps)
-                    return {exp:exp_legend for exp,exp_legend in zip(exps,exps_legend)}
+                        exps_legend = []
+
+                    # decide if alias is possible
+                    self.read_instance.hasAlias = False
+
+                    if exps_legend:
+                        # to set an alias is mandatory to have the same number of experiments and legends
+                        if len(exps)==len(exps_legend): 
+                            # if all experiments are full length ([expID]-[domain]-[ensembleNum]) or there's only one experiment with only one possible combination,
+                            # then they can be set as alias     
+                            if all([len(exp.split("-"))==3 for exp in exps]) or \
+                                (len(exps) == 1 and len(self.read_instance.domain) == 1 and len(self.read_instance.ensemble_options) == 1):
+                                self.read_instance.hasAlias = True
+                        
+                        # show warning if alias not possible to be set
+                        if not deactivate_warning and not self.read_instance.hasAlias:
+                            msg = "Alias could not be set."
+                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+
+                    # set alias
+                    if self.read_instance.hasAlias:
+                        self.read_instance.alias = exps_legend
+
+                    return exps
+
+                    # TODO check if this was a good idea
+                    # return {exp:exp_legend for exp,exp_legend in zip(exps,exps_legend)}
 
         elif key == 'map_extent':
             # parse map extent
@@ -515,7 +569,7 @@ class ProvConfiguration:
 
                 # detect if calibration factor is passed by experiment
                 calibration_by_experiment = False
-                for experiment in self.read_instance.experiments.keys():
+                for experiment in self.read_instance.experiments:
                     if experiment in value_strip:
                         calibration_by_experiment = True
                         break
@@ -523,11 +577,11 @@ class ProvConfiguration:
                 # create dictionary per experiment
                 calibration_factor_dict = {}
                 if calibration_by_experiment:
-                    for i, experiment in enumerate(self.read_instance.experiments.keys()):
+                    for i, experiment in enumerate(self.read_instance.experiments):
                         calibration_factor_exp = value_strip.split('(')[i+1].split(')')[0]
                         calibration_factor_dict[experiment] = calibration_factor_exp
                 else:
-                    for i, experiment in enumerate(self.read_instance.experiments.keys()):
+                    for i, experiment in enumerate(self.read_instance.experiments):
                         calibration_factor_dict[experiment] = value
 
                 return calibration_factor_dict
@@ -535,8 +589,210 @@ class ProvConfiguration:
         # if no special parsing treatment for variable, simply return value
         return value
 
+    def decompose_experiments(self):
+        """ Get experiment components (experiment-domain-ensemble_options) and fill the class variables with their value."""
+        # get possible domains
+        possible_domains = default_values["domain"]
+
+        # get separated experiment parts list
+        split_experiments = [exp.split("-") for exp in self.read_instance.experiments]
+
+        # check if all the experiments are written in the same way
+        if len(set([len(exp) for exp in split_experiments])) > 1:
+            error = (f"Error: All the experiments have to follow the same structure: [expID], [expID]-[domain], [expID]-[ensembleNum] or [expID]-[domain]-[ensembleNum].")
+            sys.exit(error)
+
+        # get original domain and ensemble options as passed in the configuration file
+        config_domain = copy.deepcopy(self.read_instance.domain) 
+        config_ensemble_options = copy.deepcopy(self.read_instance.ensemble_options)
+
+        # initialize id, domain and ensemble options for each of the experiments
+        exp_id, exp_dom, exp_ens = None, None, None
+
+        # iterate through all the experiments
+        for exp_i, split_experiment in enumerate(split_experiments):
+            # get experiment name
+            exp_id = split_experiment[0]
+
+            # if experiment is composed by more than 3 parts, break
+            if len(split_experiment) > 3:
+                error = 'Invalid experiment format, experiments have to consist of three elements maximum.'
+                sys.exit(error)
+            
+            # [expID]-[domain] or [expID]-[ensembleNum] 
+            elif len(split_experiment) == 2:
+                end_experiment = split_experiment[-1]
+                
+                # [expID]-[domain]
+                if end_experiment in possible_domains: 
+                    # other experiment goes by the format [expID]-[ensembleNum]
+                    if exp_ens:
+                        error = (f"Error: All the experiments have to follow the same structure: [expID], [expID]-[domain], [expID]-[ensembleNum] or [expID]-[domain]-[ensembleNum].")
+                        sys.exit(error)
+
+                    exp_dom = end_experiment
+                    self.read_instance.domain.append(exp_dom)
+                # [expID]-[ensembleNum]   
+                else:
+                    # other experiment goes by the format [expID]-[domain]
+                    if exp_dom:
+                        error = (f"Error: All the experiments have to follow the same structure: [expID], [expID]-[domain], [expID]-[ensembleNum] or [expID]-[domain]-[ensembleNum].")
+                        sys.exit(error)
+
+                    exp_ens = end_experiment
+                    self.read_instance.ensemble_options.append(exp_ens)
+
+            # [expID]-[domain]-[ensembleNum]
+            elif len(split_experiment) == 3:               
+                exp_dom, exp_ens = split_experiment[1], split_experiment[2]
+                self.read_instance.domain.append(exp_dom)
+                self.read_instance.ensemble_options.append(exp_ens)
+
+            # add experiment id to the list
+            self.read_instance.exp_id.append(exp_id)
+
+            # check if tried to put domain or ensemble option when there's already a domain or ensemble opt
+            if exp_dom and config_domain:
+                error = (f"Error: Unable to set domain/s as {', '.join(config_domain)} because experiment {self.read_instance.experiments[exp_i]}"
+                f" already contain the domain.")     
+                sys.exit(error)
+            elif exp_ens and config_ensemble_options:
+                error = (f"Error: Unable to set ensemble option/s as {', '.join(config_ensemble_options)} because experiment {self.read_instance.experiments[exp_i]}"
+                f" already contain the ensemble option.")                  
+                sys.exit(error)  
+
+        # when there's no domain/ensemble opt passed in the config file or got from the experiment, then set the default option to true
+        self.default_domain, self.default_ensemble_options = not (bool(exp_dom) or bool(config_domain)), not (bool(exp_ens) or bool(config_ensemble_options))
+
+        # set the bool which tells you if domain/ensemble_options have to be combined as it was done in interpolation mode or not
+        self.combined_domain, self.combined_ensemble_options = bool(config_domain or self.default_domain), bool(config_ensemble_options or self.default_ensemble_options)
+
+    def check_experiment(self, full_experiment, deactivate_warning):
+        # TODO Check if i can only import one time
+        from warnings_prv import show_message
+
+        """ Check individual experiment and get list of options."""
+        # split full experiment
+        experiment, domain, ensemble_option = full_experiment.split('-')
+        
+        # get all possible experiments
+        exp_path = os.path.join(self.read_instance.exp_root,self.read_instance.ghost_version)
+        self.possible_experiments = [] if not os.path.exists(exp_path) else os.listdir(exp_path)
+
+        # initialise list of possible ghost versions
+        available_ghost_versions = []
+
+        # remove possible ghost versions if they are not really in the directories
+        possible_ghost_versions = list(set(os.listdir(self.read_instance.exp_root)) & set(self.read_instance.possible_ghost_versions))
+
+        # if allmembers, get all the possible ensemble options
+        if ensemble_option == "allmembers":
+            exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.possible_experiments))
+           
+            # search for other ghost versions
+            if not exp_found:
+                for ghost_version in possible_ghost_versions:
+                    ghost_exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), os.listdir(os.path.join(self.read_instance.exp_root,ghost_version))))
+                    if ghost_exp_found:
+                        available_ghost_versions.append(ghost_version)
+        else:
+            exp_found = [full_experiment] if full_experiment in self.possible_experiments else []
+
+            # search for other ghost versions
+            if not exp_found:
+                available_ghost_versions = list(filter(lambda x:full_experiment in os.listdir(os.path.join(self.read_instance.exp_root,x)), possible_ghost_versions))
+        
+        # if not found because of the ghost version, tell the user
+        if available_ghost_versions:
+            msg = f"There is no data available for {full_experiment} experiment for the current ghost version ({self.read_instance.ghost_version}). Please check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+
+        return bool(exp_found), exp_found
+    
+    # TODO use inheritance in the future 
+    # TODO add more checking, for now only this is enough
+    def check_experiment_interpolation(self, full_experiment, deactivate_warning):
+        # TODO Check if i can only import one time
+        from warnings_prv import show_message
+
+        """ Checks if experiment, domain and ensemble option combination works for interpolation.
+        Returns if experiment if valid and the experiment type (if there is one) """
+        
+        # get experiment type and specific directory 
+        # TODO think about what to do about experiment type 
+        # puede que haga una lista con el experiment type para asi no tener que importar de nuevo
+        # split full experiment
+        experiment, domain, ensemble_option = full_experiment.split('-')
+
+        experiment_exists = False
+        for experiment_type, experiment_dict in experiment_data.items():
+            if experiment in experiment_dict["experiments"]:
+                experiment_exists = True
+                break
+        
+        # if experiment id is not defined, exit
+        if not experiment_exists:
+            msg = f"Cannot find the experiment ID '{experiment}' in '{os.path.join('settings', 'experiment_data.yaml')}'. Please add it to the file."
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+        else:
+            self.read_instance.experiment_types.append(experiment_type)
+
+        return experiment_exists, [full_experiment]
+    
+    def check_experiment_download(self, full_experiment, deactivate_warning):
+        """ Check individual experiment and get list of options."""
+
+        # TODO Check if i can only import one time
+        from warnings_prv import show_message
+
+        self.read_instance.connect()
+
+        # split full experiment
+        experiment, domain, ensemble_option = full_experiment.split('-')
+        
+        # get all possible experiments
+        exp_path = os.path.join(self.read_instance.exp_remote_path,self.read_instance.ghost_version)
+        self.possible_experiments = self.read_instance.sftp.listdir(exp_path)
+
+        # initialise list of possible ghost versions
+        available_ghost_versions = []
+
+        # if allmembers, get all the possible ensemble options
+        if ensemble_option == "allmembers":
+            exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.possible_experiments))
+           
+            # search for other ghost versions
+            if not exp_found:
+                for ghost_version in self.read_instance.possible_ghost_versions:
+                    ghost_exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.read_instance.sftp.listdir(os.path.join(self.read_instance.exp_remote_path,ghost_version))))
+                    if ghost_exp_found:
+                        available_ghost_versions.append(ghost_version)
+        else:
+            exp_found = [full_experiment] if full_experiment in self.possible_experiments else []
+
+            # search for other ghost versions
+            if not exp_found:
+                available_ghost_versions = list(filter(lambda x:full_experiment in self.read_instance.sftp.listdir(os.path.join(self.read_instance.exp_remote_path,x)), self.read_instance.possible_ghost_versions))
+        
+        # if not found because of the ghost version, tell the user
+        if available_ghost_versions:
+            msg = f"There is no data available for {full_experiment} experiment for the current ghost version ({self.read_instance.ghost_version}). Please check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+
+        return bool(exp_found), exp_found        
+
     def check_validity(self, deactivate_warning=False):
         """ Check validity of set variables after parsing. """
+       
+        # import matplotlib for Taylor Diagrams
+        import matplotlib
+
+        # import check_for_ghost and get_default_qa
+        from read_aux import check_for_ghost, get_default_qa
+
+        # import show_mesage from warnings
+        from warnings_prv import show_message
+
         # check if species is valid
         if self.read_instance.species:
             for speci in self.read_instance.species:
@@ -557,22 +813,28 @@ class ProvConfiguration:
             self.read_instance.non_default_fields_per_section = {
                 field_name:fields-set(self.var_defaults) 
                 for field_name, fields in self.read_instance.fields_per_section.items()}
-        
+
         # check have network information, 
         # if offline, throw message, stating are using default instead
-        # in download mode is allowed to not have download, so continue
-        if not self.read_instance.network and not self.read_instance.download:
+        # in download mode is allowed to not have network, so continue
+        if (not self.read_instance.network and not self.read_instance.download):
             #default = ['GHOST']
-            default = default_values['network']
+            if self.read_instance.interpolation:
+                default = self.read_instance.ghost_available_networks
+            else:
+                default = default_values['network']
             msg = "Network (network) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.network = default
 
-        # check have species information, 
+        # check have species information, TODO REFACTOR INTERPOLATION STUFF
         # if offline, throw message, stating are using default instead
         # in download mode is allowed to not pass any species, so continue
-        if not self.read_instance.species and not self.read_instance.download:
-            default = default_values['species']
+        if (not self.read_instance.species and not self.read_instance.download):
+            if self.read_instance.interpolation:
+                default = [self.standard_parameters[param]['bsc_parameter_name'] for param in self.standard_parameters.keys()] 
+            else:
+                default = default_values['species']
             msg = "Species (species) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.species = default
@@ -581,7 +843,8 @@ class ProvConfiguration:
         # and len of one of network or species == 1,
         # then duplicate respestive network/species
         # in download mode is allowed to not have a different number, so continue
-        if len(self.read_instance.network) != len(self.read_instance.species) and not self.read_instance.download:
+        # TODO in download mode and interpolation separate this somehow.
+        if len(self.read_instance.network) != len(self.read_instance.species) and not (self.read_instance.download or self.read_instance.interpolation):
 
             # 1 network?
             if len(self.read_instance.network) == 1:
@@ -599,8 +862,8 @@ class ProvConfiguration:
                 sys.exit(error)
 
         # throw error if one of networks are non all GHOST or non-GHOST
-        # in download mode it is allowed to have mixed networks
-        if not self.read_instance.download:
+        # in download mode it is allowed to have mixed networks #TODO Change this
+        if not self.read_instance.download and not self.read_instance.interpolation:
             for network_ii, network in enumerate(self.read_instance.network):
                 if network_ii == 0:
                     previous_is_ghost = check_for_ghost(network)
@@ -611,31 +874,173 @@ class ProvConfiguration:
                         sys.exit(error)
                     previous_is_ghost = is_ghost
 
-        # check have resolution information, 
+        # check have resolution information, TODO when refactoring init change this way of checking defaults
         # if offline, throw message, stating are using default instead
-        if not self.read_instance.resolution and not self.read_instance.download:
-            #default = 'monthly'
-            default = default_values['resolution']
+        if (not self.read_instance.resolution and not self.read_instance.download):
+            if self.read_instance.interpolation:
+                default = ["hourly", "hourly_instantaneous", "daily", "monthly"]
+            else:
+                #default = 'monthly'
+                default = default_values['resolution']
             msg = "Resolution (resolution) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.resolution = default
 
-        # check have start_date information, 
+        # check start_date format, TODO START DATE IS DIFFERENT IN INTERPOLATION (check in the refactoring)
         # if offline, throw message, stating are using default instead
         if not self.read_instance.start_date:
-            default = default_values['start_date']
+            if self.read_instance.interpolation:
+                default = '201801'
+            else:
+                default = default_values['start_date']
             msg = "Start date (start_date) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.start_date = default
+        else:
+            len_start_date = len(self.read_instance.start_date)
+            if self.read_instance.interpolation:
+                if len_start_date != 6:
+                    if len_start_date == 8:
+                        self.read_instance.start_date = self.read_instance.start_date[:-2]
+                        msg = "Start date (start_date) was defined as YYYYMMDD, changing it to YYYYMM. Using '{}'.".format(self.read_instance.start_date)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                    else:
+                        error = "Format of Start date (start_date) not correct, please change it to YYYYMM."
+                        sys.exit(error)
+            else:
+                if len_start_date != 8:
+                    if len_start_date == 6:
+                        self.read_instance.start_date = self.read_instance.start_date + "01"
+                        msg = "Start date (start_date) was defined as YYYYMM, changing it to YYYYMMDD. Using '{}'.".format(self.read_instance.start_date)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                    else:
+                        error = "The format of Start date (start_date) is not correct, please change it to YYYYMMDD."
+                        sys.exit(error)
 
-        # check have end_date information, 
+        # check end_date  format, TODO START DATE IS DIFFERENT IN INTERPOLATION (check in the refactoring)
         # if offline, throw message, stating are using default instead
         if not self.read_instance.end_date:
-            default = default_values['end_date']
+            if self.read_instance.interpolation:
+                default = '201901'
+            else:
+                default = default_values['end_date']
             msg = "End date (end_date) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.end_date = default
+        else:
+            len_end_date = len(self.read_instance.end_date)
+            if self.read_instance.interpolation:
+                if len_end_date != 6:
+                    if len_end_date == 8:
+                        self.read_instance.end_date = self.read_instance.end_date[:-2]
+                        msg = "End Date (end_date) was defined as YYYYMMDD, changing it to YYYYMM. Using '{}'.".format(self.read_instance.end_date)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                    else:
+                        error = "Format of End Date (end_date) not correct, please change it to YYYYMM."
+                        sys.exit(error)
+            else:
+                if len_end_date != 8:
+                    if len_end_date == 6:
+                        self.read_instance.end_date = self.read_instance.end_date + "01"
+                        msg = "End Date (end_date) was defined as YYYYMM, changing it to YYYYMMDD. Using '{}'.".format(self.read_instance.end_date)
+                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                    else:
+                        error = "The format of End Date (end_date) is not correct, please change it to YYYYMMDD."
+                        sys.exit(error)
 
+        # check have n_neighbours information, TODO ONLY FOR INTERPOLATION
+        # if offline, throw message, stating are using default instead
+        # TODO CHANGE THE MESSAGE WHEN ITS DEFAULT AND WHEN ITS BECAUSE I DIDNT PUT THE NAME
+        if self.read_instance.interpolation and not self.read_instance.n_neighbours:
+            default = default_values['n_neighbours']
+            msg = "Number of neighbours (n_neighbours) was not defined in the configuration file. Using '{}' as default.".format(default)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            self.read_instance.n_neighbours = default
+    
+        # TODO MAYBE CHANGE THIS initialization to somewhere else or take it from another place
+        # TODO and should it be provconf or no????
+        # initialise possible domains
+        self.default_domain = False
+        self.default_ensemble_options = False
+
+        # get domain, ensemble options, experiment ids and flag to get the default values of these variables
+        self.decompose_experiments()
+
+        # check have domain information, TODO ONLY FOR INTERPOLATION
+        # TODO think if we need one separated variable for this one because it is already included on experiments
+        # if offline, throw message, stating are using default instead
+        if self.read_instance.experiments and self.default_domain:
+            default = default_values['domain']
+            msg = "Domain (domain) was not defined in the configuration file. Using '{}' as default.".format(default)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            self.read_instance.domain = default
+
+        # check have ensemble_options information, TODO ONLY FOR INTERPOLATION
+        # TODO think if we need one separated variable for this one because it is already included on experiments
+        # if offline, throw message, stating are using default instead
+        # TODO maybe think this a bit better, if i dont pass it it should check better if i already passed it in experiments and so
+        if self.read_instance.experiments and self.default_ensemble_options:
+            default = default_values['ensemble_options']
+            msg = "Ensemble options (ensemble_options) was not defined in the configuration file. Using '{}' as default.".format(default)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            self.read_instance.ensemble_options = default
+
+        # get correct check experiment function
+        # TODO do it using heritage
+        if self.read_instance.interpolation:
+            check_experiment_fun = self.check_experiment_interpolation
+        elif self.read_instance.download:
+            check_experiment_fun = self.check_experiment_download
+        else:
+            check_experiment_fun = self.check_experiment
+
+        # get ghost_version list
+        self.read_instance.possible_ghost_versions = os.listdir(os.path.join(CURRENT_PATH,'dependencies', 'GHOST_standards'))
+
+        # temp dictionary to store experiments
+        # TODO change names
+        final_experiments = []
+        correct_experiments = {}
+
+        # join experiments
+        # TODO I think the concept of having the same variable with two different types of values is kind of a bad idea
+        for exp_i, experiment in enumerate(self.read_instance.exp_id):
+            # experiment, domain, ensemble_options
+            if self.combined_domain and self.combined_ensemble_options:
+                final_experiments += [f'{experiment}-{domain}-{ens_opt}' for domain in self.read_instance.domain for ens_opt in self.read_instance.ensemble_options]
+            else:
+                if self.combined_domain or self.combined_ensemble_options:
+                    # experiment-ensemble_options, domain
+                    if self.combined_domain:
+                        final_experiments += [f'{experiment}-{domain}-{self.read_instance.ensemble_options[exp_i]}' for domain in self.read_instance.domain]
+                    # experiment-domain, ensemble_options 
+                    else:
+                        final_experiments += [f'{experiment}-{self.read_instance.domain[exp_i]}-{ens_opt}' for ens_opt in self.read_instance.ensemble_options]
+                # experiment-domain-ensemble_options
+                else:
+                    final_experiments.append(f'{experiment}-{self.read_instance.domain[exp_i]}-{self.read_instance.ensemble_options[exp_i]}')
+
+        for exp_i, experiment in enumerate(final_experiments):
+            # TODO change boolean name
+            exp_is_valid, valid_exp_list = check_experiment_fun(experiment, deactivate_warning)
+            if exp_is_valid:
+                for valid_exp in valid_exp_list:
+                    if self.read_instance.hasAlias:
+                        correct_experiments[valid_exp] = self.read_instance.alias[exp_i]
+                    else:
+                        correct_experiments[valid_exp] = valid_exp
+        
+        # if experiments were passed and there's no valid experiment, show warning
+        if self.read_instance.experiments != [] and correct_experiments == {}:
+            msg = 'No experiment data available.'
+            if self.read_instance.interpolation:
+                sys.exit("Error: " + msg)
+            else:
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+
+        # replace experiments by new ones found
+        self.read_instance.experiments = correct_experiments
+                        
         # check have statistic_mode information,
         # if offline, throw message, stating are using default instead
         if not self.read_instance.statistic_mode:
@@ -1057,10 +1462,12 @@ def read_conf(fpath=None):
                 # if first character of key is comment character (#), do not parse this attribute
                 if par_k[0] == '#':
                     continue
+                # transform str booleans, ints, floats etc. to their real type if possible
                 try:
-                    res_sub[par_k] = eval(par_val)
+                    par_val = ast.literal_eval(par_val)
                 except:
-                    res_sub[par_k] = par_val
+                    pass
+                res_sub[par_k] = par_val
         else:
             is_subsection = False
 
@@ -1075,10 +1482,12 @@ def read_conf(fpath=None):
             if k[0] == '#':
                 continue
             # overwrite attributes from current subsection
+            # transform str booleans, ints, floats etc. to their real type if possible
             try:
-                res_sub[k] = eval(val)
+                val = ast.literal_eval(val)
             except:
-                res_sub[k] = val
+                pass
+            res_sub[k] = val
 
         # store pairs into res variable
         res[section_modified] = res_sub
@@ -1087,7 +1496,6 @@ def read_conf(fpath=None):
         res_sub = {}
 
     return res, all_sections_modified, parent_sections, subsections_modified, filenames
-   
 
 def write_conf(section, subsection, fpath, opts):
     """ Write configurations on file. """
@@ -1106,13 +1514,12 @@ def write_conf(section, subsection, fpath, opts):
     with open(fpath, 'w') as configfile:
         config.write(configfile)
 
-
 def load_conf(self, fpath=None):
     """ Load existing configurations from file
         for running offline Providentia.
     """
-
-    from .configuration import read_conf
+    sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia'))
+    from configuration import read_conf
 
     if fpath is None:
         print("No configuration file found")
@@ -1125,11 +1532,12 @@ def load_conf(self, fpath=None):
 
     self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names, self.filenames = read_conf(fpath)
 
-
 def split_options(read_instance, conf_string, separator="||"):
     """ For the options in the configuration that define the keep and remove
         options. Returns the values in two lists, the keeps and removes.
     """
+    # import show_mesage from warnings
+    from .warnings_prv import show_message
     
     keeps, removes = [], []
 

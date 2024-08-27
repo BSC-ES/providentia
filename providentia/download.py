@@ -23,7 +23,7 @@ from getpass import getpass
 
 from .configuration import ProvConfiguration, load_conf
 from .read_aux import check_for_ghost
-from .warnings import show_message
+from .warnings_prv import show_message
 # TODO delete when sure
 # from .read_aux import get_ghost_observational_tree, get_nonghost_observational_tree
 
@@ -75,9 +75,6 @@ class ProvidentiaDownload(object):
 
         # initialise remote hostname
         self.remote_hostname = "transfer1.bsc.es"
-
-        # get ghost_version list
-        self.possible_ghost_versions = os.listdir(os.path.join(CURRENT_PATH,'dependencies', 'GHOST_standards'))
 
         # in case transfer broke
         # global REMOTE_MACHINE
