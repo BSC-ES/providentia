@@ -155,43 +155,41 @@ class DataReader:
             else:
                 self.read_instance.filter_data_in_memory = {}
 
-            # GHOST data --> data variables which change per measurement (for filtering)
+            # initialise variables and get representativity resolutions
+            self.read_instance.ghost_data_in_memory = {}
+            self.read_instance.ghost_data_vars_to_read = []
+            if self.read_instance.resolution in ['hourly', 'hourly_instantaneous']:
+                resolution = 'hourly'
+            elif self.read_instance.resolution in ['daily', '3hourly', '6hourly', '3hourly_instantaneous', '6hourly_instantaneous']:
+                resolution = 'daily'
+            elif self.read_instance.resolution == 'monthly':
+                resolution = 'monthly'
+
+            # get data variables which change per measurement (for filtering)
             if self.read_instance.reading_ghost:
+                # get representativity fields (only native because non-native and all are calculated on-the-fly)
+                self.read_instance.ghost_data_vars_to_read = [var for var 
+                                                              in self.read_instance.representativity_info['ghost'][resolution]['map_vars'] 
+                                                              if 'native' in var]
+                
+                # add annual reprentativity and daytime and seasonal variables
+                self.read_instance.ghost_data_vars_to_read += ['annual_native_representativity_percent', 'season_code']
+                if self.read_instance.resolution != 'monthly':
+                    self.read_instance.ghost_data_vars_to_read += ['weekday_weekend_code']
+                if self.read_instance.resolution not in ['monthly', 'daily']:
+                    self.read_instance.ghost_data_vars_to_read += ['day_night_code']
 
-                # set ghost data variables to read (dependent on data resolution)
-                if (self.read_instance.resolution == 'hourly') or (self.read_instance.resolution == 'hourly_instantaneous'):
-                    self.read_instance.ghost_data_vars_to_read = ['hourly_native_representativity_percent',
-                                                                  'daily_native_representativity_percent',
-                                                                  'monthly_native_representativity_percent',
-                                                                  'annual_native_representativity_percent', 
-                                                                  'day_night_code', 'weekday_weekend_code',
-                                                                  'season_code']
-                elif (self.read_instance.resolution == '3hourly') or \
-                        (self.read_instance.resolution == '6hourly') or (self.read_instance.resolution == '3hourly_instantaneous') or \
-                        (self.read_instance.resolution == '6hourly_instantaneous'):
-                    self.read_instance.ghost_data_vars_to_read = ['daily_native_representativity_percent',
-                                                                  'monthly_native_representativity_percent',
-                                                                  'annual_native_representativity_percent',
-                                                                  'day_night_code', 'weekday_weekend_code',
-                                                                  'season_code']
-                elif self.read_instance.resolution == 'daily':
-                    self.read_instance.ghost_data_vars_to_read = ['daily_native_representativity_percent',
-                                                                  'monthly_native_representativity_percent',
-                                                                  'annual_native_representativity_percent',
-                                                                  'weekday_weekend_code', 'season_code']
-                elif self.read_instance.resolution == 'monthly':
-                    self.read_instance.ghost_data_vars_to_read = ['monthly_native_representativity_percent',
-                                                                  'annual_native_representativity_percent', 
-                                                                  'season_code']
-
+                # initialise data in memory for GHOST with NaN for these variables
                 self.read_instance.ghost_data_in_memory = {networkspeci:
                                         np.full((len(self.read_instance.ghost_data_vars_to_read),
                                                  len(self.read_instance.station_references[networkspeci]),
                                                  len(self.read_instance.time_array)),
                                                  np.NaN, dtype=np.float32) for networkspeci in self.read_instance.networkspecies} 
+            
+            if self.read_instance.reading_ghost:
+                representativity_valid_vars = self.read_instance.representativity_info['ghost'][resolution]['map_vars']
             else:
-                self.read_instance.ghost_data_in_memory = {}
-                self.read_instance.ghost_data_vars_to_read = []
+                representativity_valid_vars = self.read_instance.representativity_info['nonghost'][resolution]['map_vars']
 
             # metadata 
             # non-GHOST
@@ -206,20 +204,29 @@ class DataReader:
 
             # show warning when there is a non-defined field if launching from a config file
             if hasattr(self.read_instance, "non_default_fields_per_section"):
-                period_set = {'period'} if self.read_instance.reading_ghost else set()
-                invalid_args = {field_name:fields-set(self.read_instance.metadata_vars_to_read)-set(self.read_instance.ghost_data_vars_to_read)-period_set
-                                for field_name, fields in self.read_instance.non_default_fields_per_section.items() 
-                                if field_name==self.read_instance.section or field_name.startswith(self.read_instance.section+"·")}
-                invalid_var = [f"""{i} ('{"', '".join(j)}')""" for i,j in invalid_args.items() if j]
+                # get all the valid args in one list
+                period_set = ['period'] if self.read_instance.reading_ghost else []
+                valid_fields = self.read_instance.metadata_vars_to_read + self.read_instance.ghost_data_vars_to_read + \
+                    period_set + representativity_valid_vars
+
+                # remove all the valid fields from the invalid field list
+                self.read_instance.invalid_fields = {field_name: fields-set(valid_fields)
+                    for field_name, fields in self.read_instance.non_default_fields_per_section.items() 
+                    if field_name==self.read_instance.section or field_name.startswith(self.read_instance.section+"·")}
+
+                # show warning if there's an invalid field
+                invalid_var = [f"""{i} ('{"', '".join(j)}')""" for i,j in self.read_instance.invalid_fields.items() if j]
                 if invalid_var:
                     msg = f"Invalid field(s) in configuration file {self.read_instance.config.split('/')[-1]}. "
                     msg += f"Section(s) and Field(s): {', '.join(invalid_var)}."
                     show_message(self.read_instance, msg)
 
                     # delete from instance all invalid fields from the configuration file
-                    for section,section_invalid_args in invalid_args.items():
-                        for k in section_invalid_args:
-                            delattr(self.read_instance, k)                 
+                    for section_invalid_fields in self.read_instance.invalid_fields.values():
+                        for k in section_invalid_fields:
+                            # control if the atribute exists because in offline mode the subsection ones are not set yet
+                            if hasattr(self.read_instance, k):
+                                delattr(self.read_instance, k)                 
 
             self.read_instance.metadata_in_memory = {networkspeci: 
                                                      np.full((len(self.read_instance.station_references['{}'.format(networkspeci)]),
@@ -670,7 +677,7 @@ class DataReader:
                 elif 'station_name' in ncdf_root.variables:
                     station_reference_var = 'station_name'
                 else: 
-                    error = 'Error: {} cannot be read because it has no station_name.'.format(relevant_file)
+                    error = 'Error: {} cannot be read because it has no station_name.'.format(relevant_files[0])
                     sys.exit(error)
                 self.read_instance.nonghost_metadata_vars_to_read.append('station_reference') 
 

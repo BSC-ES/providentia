@@ -1,4 +1,4 @@
-from .aux_functions import read_data, make_plot
+from .aux_functions import read_data
 from providentia import Interactive
 import pytest
 
