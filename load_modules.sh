@@ -43,7 +43,7 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
         pyproj/3.2.1-foss-2019b-Python-3.7.4 \
         kdepy/1.1.1-foss-2019b-Python-3.7.4 \
         jupyterlab/3.0.9-foss-2019b-Python-3.7.4 \
-        pypdf2/3.0.1-foss-2019b-Python-3.7.4 \
+        pypdf/3.6.0-foss-2019b-Python-3.7.4 \
         matplotlib/3.4.3-foss-2019b-Python-3.7.4 \
 
 # Hub
