@@ -4,7 +4,7 @@
                         "a1wdwodu", "a21m", "a22r", "a22s", "a28j", "a28j_v2", "a28jwodu", "a29d", "a29d_v2", "a29dwodu", "a2ba", 
                         "a2bg", "a2bk", "a2bz", "a2jj", "a2m7", "a2m8", "a2sp_bug", "a2eb", "a2ew", "a2ex", "a2vn", "a2vw", 
                         "a2yb", "a2yu", "a3bv", "a48a", "a23v", "a6fr", "a4cp", "a3ge", "a483", "a4ic", "a4in", "a45g", "a4dd", 
-                        "a4vd", "a560", "a55u", "a4j1", "a4ej", "a4o1", "a4p1", "a4gy", "a4s2", "a5ec", "a57s", "a592", "a5e9", 
+                        "a4vd", "a560", "a55u", "a4j1", "a4k2", "a4ej", "a4o1", "a4p1", "a4gy", "a4s2", "a5ec", "a57s", "a592", "a5e9", 
                         "a5fm", "a5fn", "a5ft", "a5g2", "a5ff", "a5gg", "a5gh", "a5gi", "a5gf", "a4vk", "a0yh", "a5c3", "a5nt", 
                         "a6pr", "a7bn", "a7bo", "a7bp", "a7by", "a7bz", "a2in", "a4xf"],
         "paths": [
@@ -14,8 +14,8 @@
     "monarch_gpfs": {
         "experiments": ["a6gn"],
         "paths": [ 
-            "/esarchive/exp/monarch/",
-            "/gpfs/scratch/bsc32/bsc32359/esarchive_scratch/exp/monarch/"
+            "/gpfs/scratch/bsc32/bsc32359/esarchive_scratch/exp/monarch/",
+            "/esarchive/exp/monarch/"
         ]
     },
     "testing": {
