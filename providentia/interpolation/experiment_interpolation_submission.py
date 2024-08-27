@@ -30,7 +30,7 @@ config_format = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'inter
 bin_vars = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 
 # load the defined experiments paths and agrupations jsons
-experiment_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'experiment_data.yaml')))
+interp_experiments = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 
 class SubmitInterpolation(object):
     """ Class that handles the interpolation submission. """
@@ -155,7 +155,7 @@ class SubmitInterpolation(object):
             exp_files_dates = []
 
             # get experiment specific directories list
-            exp_dir_list = experiment_data[experiment_type]["paths"]
+            exp_dir_list = interp_experiments[experiment_type]["paths"]
 
             # take gpfs directory preferentially over esarchive directory
             # if all are esarchive get the first one
