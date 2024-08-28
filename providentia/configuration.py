@@ -1043,7 +1043,8 @@ class ProvConfiguration:
                         
         # check have statistic_mode information,
         # if offline, throw message, stating are using default instead
-        if not self.read_instance.statistic_mode:
+        # TODO not needed in interpolation 
+        if not self.read_instance.statistic_mode and not self.read_instance.interpolation:
             default = default_values['statistic_mode']
             msg = "Statistic mode (statistic_mode) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
@@ -1051,21 +1052,24 @@ class ProvConfiguration:
 
         # check have statistic_aggregation information,
         # if offline, throw message, stating are using default instead
-        default = default_values['statistic_aggregation'][self.read_instance.statistic_mode]
-        if not self.read_instance.statistic_aggregation:  
-            if self.read_instance.statistic_mode != 'Flattened':
-                msg = "Statistic aggregation (statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
-            self.read_instance.statistic_aggregation = default
-        # if statistic_aggregation is defined ensure that it matches with the statistic_mode
-        elif (self.read_instance.statistic_mode == 'Flattened'):
-                msg = "statistic_mode is set to be 'Flattened', therefore statistic_aggregation must be empty, not '{}'. Setting to be empty.".format(self.read_instance.statistic_aggregation)                
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+        # TODO not needed in interpolation 
+        if not self.read_instance.interpolation:
+            default = default_values['statistic_aggregation'][self.read_instance.statistic_mode]
+            if not self.read_instance.statistic_aggregation:  
+                if self.read_instance.statistic_mode != 'Flattened':
+                    msg = "Statistic aggregation (statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
+                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
                 self.read_instance.statistic_aggregation = default
+            # if statistic_aggregation is defined ensure that it matches with the statistic_mode
+            elif (self.read_instance.statistic_mode == 'Flattened'):
+                    msg = "statistic_mode is set to be 'Flattened', therefore statistic_aggregation must be empty, not '{}'. Setting to be empty.".format(self.read_instance.statistic_aggregation)                
+                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                    self.read_instance.statistic_aggregation = default
 
         # check have periodic_statistic_mode information,
         # if offline, throw message, stating are using default instead
-        if not self.read_instance.periodic_statistic_mode:
+        # TODO not needed in interpolation 
+        if not self.read_instance.periodic_statistic_mode and not self.read_instance.interpolation:
             #default = 'Cycle'
             default = default_values['periodic_statistic_mode']
             msg = "Periodic statistic mode (periodic_statistic_mode) was not defined in the configuration file. Using '{}' as default.".format(default)
@@ -1074,7 +1078,8 @@ class ProvConfiguration:
 
         # check have periodic_statistic_aggregation information,
         # if offline, throw message, stating are using default instead
-        if not self.read_instance.periodic_statistic_aggregation:
+        # TODO not needed in interpolation 
+        if not self.read_instance.periodic_statistic_aggregation and not self.read_instance.interpolation:
             default = default_values['periodic_statistic_aggregation']
             msg = "Periodic statistic aggregation (periodic_statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
@@ -1082,7 +1087,8 @@ class ProvConfiguration:
 
         # check have timeseries_statistic_aggregation information,
         # if offline, throw message, stating are using default instead
-        if not self.read_instance.timeseries_statistic_aggregation:
+        # TODO not needed in interpolation 
+        if not self.read_instance.timeseries_statistic_aggregation and not self.read_instance.interpolation:
             default = default_values['timeseries_statistic_aggregation']
             msg = "Timeseries statistic aggregation (timeseries_statistic_aggregation) was not "
             msg += "defined in the configuration file. Using '{}' as default.".format(default)
