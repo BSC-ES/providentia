@@ -557,10 +557,10 @@ class ProvConfiguration:
             self.read_instance.non_default_fields_per_section = {
                 field_name:fields-set(self.var_defaults) 
                 for field_name, fields in self.read_instance.fields_per_section.items()}
-        
+          
         # check have network information, 
         # if offline, throw message, stating are using default instead
-        # in download mode is allowed to not have download, so continue
+        # in download mode is allowed to not have network, so continue
         if not self.read_instance.network and not self.read_instance.download:
             #default = ['GHOST']
             default = default_values['network']
@@ -875,7 +875,7 @@ class ProvConfiguration:
 
         # if are using dashboard then just take first network/species pair, as multivar not supported yet
         if ((len(self.read_instance.network) > 1) and (len(self.read_instance.species) > 1) and 
-            (not self.read_instance.offline) and (not self.read_instance.interactive) and (not self.read_instance.download)):
+            (not self.read_instance.offline) and (not self.read_instance.interactive) and (not self.read_instance.download) and (not self.read_instance.interpolation)):
              
             msg = 'Multiple networks/species are not supported in the dashboard. First ones will be taken.'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
