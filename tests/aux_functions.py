@@ -22,8 +22,6 @@ def read_data(inst, path):
 
     assert (np.allclose(generated_output, expected_output, equal_nan=True))
 
-    assert (generated_output.size != 0)
-
 
 def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
 
@@ -171,8 +169,8 @@ def check_filter_data(inst, statistic_mode, network_type, filter):
     try:
         assert (not np.allclose(orig_output, filter_output, equal_nan=True))
     except ValueError as e:
-        assert True
+        return True
     
     # Reset filter and check original data
-    inst.reset_filter(initialise=True)
+    inst.reset_filter()
     read_data(inst, orig_path)

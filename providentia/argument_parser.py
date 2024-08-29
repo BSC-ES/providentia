@@ -31,15 +31,6 @@ class ProvArgumentParser(object):
                                      help="runs Providentia in debug mode, just reserving allocation")
             self.parser.add_argument('--interactive',
                                      help="runs Providentia interactive mode on Jupyter notebook")
-            self.parser.add_argument('--interpolation','--interp','--interpolate', 
-                                     action='store_true',
-                                     help='runs Providentia Interpolation') 
-            self.parser.add_argument('--clean',
-                                     action='store_true',
-                                     help='cleans all output files')
-            self.parser.add_argument("--slurm_job_id",
-                                     dest="slurm_job_id",
-                                     help="id of the interpolation sbatch job")                
             self.parser.add_argument('--conf', '--config', 
                                      dest="config",
                                      help='specifies the config file to read') 
@@ -105,12 +96,6 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--experiments",
                                      dest="experiments",
                                      help="experiments to read")
-            self.parser.add_argument("--ensemble_options",
-                                     dest="ensemble_options",
-                                     help="ensemble options of the experiment")
-            self.parser.add_argument("--domain",
-                                     dest="domain",
-                                     help="domain of the experiment")
             self.parser.add_argument("--temporal_colocation",
                                      dest="temporal_colocation",
                                      help="activate temporal colocation betwen observations and experiments")
@@ -159,6 +144,7 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--remove_extreme_stations",
                                      dest="remove_extreme_stations",
                                      help="remove extreme stations using defined statistic limits")
+
 
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)
