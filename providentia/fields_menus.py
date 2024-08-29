@@ -247,89 +247,20 @@ def update_representativity_fields(instance):
     # get previously set rangebox labels / values
     previous_mapped_labels = copy.deepcopy(instance.representativity_menu['rangeboxes']['map_vars'])
     previous_lower = copy.deepcopy(instance.representativity_menu['rangeboxes']['current_lower'])
-
-    # hourly temporal resolution?
-    if (instance.resolution == 'hourly') or (instance.resolution == 'hourly_instantaneous'):
-        # GHOST 
-        if instance.reading_ghost:
-
-            instance.representativity_menu['rangeboxes']['map_vars'] = ['hourly_native_representativity_percent',
-                                                                        'daily_native_representativity_percent',
-                                                                        'monthly_native_representativity_percent',
-                                                                        'daily_representativity_percent',
-                                                                        'monthly_representativity_percent',
-                                                                        'all_representativity_percent']
-            instance.representativity_menu['rangeboxes']['labels'] = ['Hourly',
-                                                                      'Daily',
-                                                                      'Monthly',
-                                                                      'Daily',
-                                                                      'Monthly',
-                                                                      'All']
-
-            instance.representativity_menu['rangeboxes']['subtitles'] = ['Native', 'Averaged']
-            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0, 3]
-
-        # non-GHOST
-        else:
-            instance.representativity_menu['rangeboxes']['map_vars'] = ['daily_representativity_percent',
-                                                                        'monthly_representativity_percent',
-                                                                        'all_representativity_percent']
-            instance.representativity_menu['rangeboxes']['labels'] = ['Daily',
-                                                                      'Monthly',
-                                                                      'All']
-
-            instance.representativity_menu['rangeboxes']['subtitles'] = ['Averaged']
-            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0]                                                                   
-
-    # daily temporal resolution?
-    elif (instance.resolution == 'daily') or (instance.resolution == '3hourly') or \
-            (instance.resolution == '6hourly') or (instance.resolution == '3hourly_instantaneous') or \
-            (instance.resolution == '6hourly_instantaneous'):
-        # GHOST 
-        if instance.reading_ghost:
-            instance.representativity_menu['rangeboxes']['map_vars'] = ['daily_native_representativity_percent',
-                                                                        'monthly_native_representativity_percent',
-                                                                        'monthly_representativity_percent',
-                                                                        'all_representativity_percent']
-            instance.representativity_menu['rangeboxes']['labels'] = ['Daily',
-                                                                      'Monthly',
-                                                                      'Monthly',
-                                                                      'All']
-
-            instance.representativity_menu['rangeboxes']['subtitles'] = ['Native', 'Averaged']
-            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0, 2]
-
-        # non-GHOST
-        else:
-            instance.representativity_menu['rangeboxes']['map_vars'] = ['monthly_representativity_percent',
-                                                                        'all_representativity_percent']
-            instance.representativity_menu['rangeboxes']['labels'] = ['Monthly',
-                                                                      'All']
-
-            instance.representativity_menu['rangeboxes']['subtitles'] = ['Averaged']
-            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0] 
-
-    # monthly temporal resolution?
+    
+    # build representativity menu
+    network_type = 'ghost' if instance.reading_ghost else 'nonghost'
+    if instance.resolution in ['hourly', 'hourly_instantaneous']:
+        resolution = 'hourly'
+    elif instance.resolution in ['daily', '3hourly', '6hourly', '3hourly_instantaneous', '6hourly_instantaneous']:
+        resolution = 'daily'
     elif instance.resolution == 'monthly':
-        # GHOST 
-        if instance.reading_ghost:
-            instance.representativity_menu['rangeboxes']['map_vars'] = ['monthly_native_representativity_percent',
-                                                                        'all_representativity_percent']
-            instance.representativity_menu['rangeboxes']['labels'] = ['Monthly',
-                                                                      'All']
-            
-            instance.representativity_menu['rangeboxes']['subtitles'] = ['Native', 'Averaged']
-            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0, 1]  
-
-        # non-GHOST
-        else:
-            instance.representativity_menu['rangeboxes']['map_vars'] = ['all_representativity_percent']
-            instance.representativity_menu['rangeboxes']['labels'] = ['All']
-
-            instance.representativity_menu['rangeboxes']['subtitles'] = ['Averaged']
-            instance.representativity_menu['rangeboxes']['subtitle_inds'] = [0] 
-            
-
+        resolution = 'monthly'
+    instance.representativity_menu['rangeboxes']['map_vars'] = instance.representativity_info[network_type][resolution]['map_vars']
+    instance.representativity_menu['rangeboxes']['labels'] = instance.representativity_info[network_type][resolution]['labels']
+    instance.representativity_menu['rangeboxes']['subtitles'] = instance.representativity_info[network_type][resolution]['subtitles']
+    instance.representativity_menu['rangeboxes']['subtitle_inds'] = instance.representativity_info[network_type][resolution]['subtitle_inds']
+    
     # initialise rangebox values --> for data representativity fields
     # the default is 0%, for max gap fields % the default is 100%
     instance.representativity_menu['rangeboxes']['current_lower'] = []

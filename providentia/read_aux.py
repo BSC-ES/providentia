@@ -432,7 +432,7 @@ def get_frequency_code(resolution):
     elif resolution == 'monthly':
         active_frequency_code = 'MS'
     elif resolution == 'annual':
-        active_frequency_code = 'AS'
+        active_frequency_code = 'YS'
 
     return active_frequency_code
 
@@ -563,7 +563,7 @@ def get_nonghost_observational_tree(instance):
                 # get all available netCDF files 
                 available_files = glob('%s/%s/%s/%s/%s_??????.nc' % (instance.nonghost_root, network, resolution, speci, speci))
 
-                # coninue if have no files
+                # continue if have no files
                 if len(available_files) == 0:
                     continue
 
@@ -666,7 +666,9 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
     """
 
     # get all different experiment names (from providentia-interpolation output dir)
-    available_experiments = os.listdir('%s/%s' % (instance.exp_root, instance.ghost_version))
+    available_experiments = []
+    if os.path.exists(os.path.join(instance.exp_root,instance.ghost_version)):
+        available_experiments = os.listdir('%s/%s' % (instance.exp_root, instance.ghost_version))
 
     # create dictionary to store available experiment data
     instance.available_experiment_data = {}
