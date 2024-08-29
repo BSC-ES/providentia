@@ -2,13 +2,14 @@ from calendar import monthrange
 import cartopy.crs as ccrs
 import cftime
 import glob
+import inspect
 import os
 import shutil
 import subprocess
 import sys
 import time
 import traceback
-import yaml
+import json
 from pydoc import locate
 
 import datetime
@@ -40,10 +41,10 @@ CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
 
 # load the default values jsonsdefault_values
-bin_vars = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
+bin_vars = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 
 # load the defined experiments paths and agrupations jsons
-interp_experiments = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
+interp_experiments = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 
 # add unit-converter submodule to python load path
 sys.path.append(os.path.join(PROVIDENTIA_ROOT,'providentia','dependencies','unit-converter'))
