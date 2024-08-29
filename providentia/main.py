@@ -17,7 +17,7 @@ from __future__ import print_function
 import logging
 import sys
 
-from providentia.argument_parser import ProvArgumentParser
+from .argument_parser import ProvArgumentParser
 
 logging.basicConfig(level=logging.WARNING)
 LOG = logging.getLogger(__name__)
@@ -55,9 +55,8 @@ class Providentia(object):
             if args.offline:
                 from . import offline as offline
                 offline.main(**res)
-            elif args.interpolation:
-                from .interpolation import experiment_interpolation_submission as interpolation
-                interpolation.main(**res)
+            elif args.interactive:
+                return res
             elif args.download:
                 from . import download as download
                 download.main(**res)
@@ -76,3 +75,8 @@ def main():
         sys.exit(1)
     sys.exit(0)
 
+
+if __name__ == "__main__":
+    if Providentia(ProvArgumentParser()).main() is False:
+        sys.exit(1)
+    sys.exit(0)

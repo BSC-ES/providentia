@@ -62,9 +62,6 @@ class Interactive:
         self.basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
         self.expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
 
-        # load representativity information
-        self.representativity_info = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
-
         # set configuration variables, as well as any other defined variables
         valid_config = self.set_config(**self.kwargs)
         # if configuration read was not valid then return here
@@ -821,7 +818,7 @@ class Interactive:
                         try:
                             ax_to_plot = self.plot_characteristics[plot_type]['legend']['handles']['ax']
                         except:
-                            print("Warning: axis to plot legend on not defined for plot type in plot_characteristics_interactive.yaml, or passed via 'format' argument.\nTaking first available axis.")
+                            print("Warning: axis to plot legend on not defined for plot type in plot_characteristics_interactive.yaml, or passed via 'format' argument.\n\Taking first available axis.")
                             ax_to_plot = self.relevant_temporal_resolutions[0]
                         if ax_to_plot not in self.relevant_temporal_resolutions:
                             print("Warning: defined axis to plot legend on not available for data resolution of read data.\nInstead, taking first available axis.")

@@ -17,7 +17,19 @@
         "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp"
     },
 
+    "mn4": {
+        "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
+        "nonghost_root": "/gpfs/projects/bsc32/AC_cache/obs/nonghost",
+        "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp"
+    },
+    
     "nord3v2": {
+        "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
+        "nonghost_root": "/esarchive/obs",
+        "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp"
+    },
+
+    "power": {
         "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
         "nonghost_root": "/esarchive/obs",
         "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp"

@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtWidgets
 
 from .read_aux import get_default_qa
 from .dashboard_elements import set_formatting, wrap_tooltip_text
-from .warnings_prv import show_message
+from .warnings import show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])

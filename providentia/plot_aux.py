@@ -13,9 +13,8 @@ import mpl_toolkits.axisartist.floating_axes as fa
 import mpl_toolkits.axisartist.grid_finder as gf
 import numpy as np
 import pandas as pd
-from pypdf import PdfReader, PdfWriter
-from scipy.signal import convolve
-from scipy.signal.windows import gaussian
+from PyPDF2 import PdfReader, PdfWriter
+from scipy.signal import convolve, gaussian
 from scipy.sparse import coo_matrix
 import seaborn as sns
 from .statistics import calculate_statistic, get_z_statistic_sign
@@ -466,9 +465,9 @@ def get_taylor_diagram_ghelper(reference_stddev, plot_characteristics, extend=Fa
                                                                        extend)
 
     # get grid helper
-    ghelper = fa.GridHelperCurveLinear(PolarAxes.PolarTransform(apply_theta_transforms=False),
+    ghelper = fa.GridHelperCurveLinear(PolarAxes.PolarTransform(),
                                        extremes=(tmin, tmax, smin, smax),
-                                       grid_locator1=gl1, tick_formatter1=tf1,)
+                                       grid_locator1=gl1, tick_formatter1=tf1)
 
     return ghelper
 

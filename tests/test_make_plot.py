@@ -1,5 +1,4 @@
-import warnings
-from .aux_functions import make_plot
+from .aux_functions import read_data, make_plot
 from providentia import Interactive
 import pytest
 
@@ -34,15 +33,6 @@ possibilities = [
      )
 ]
 
-
-@pytest.fixture(autouse=True)
-def suppress_warnings():
-    # Hide runtime errors coming from calculating statistics with nans
-    # These nans appear because sometimes we don't have data for all stations
-    # In the whole period of time
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=RuntimeWarning)
-        yield
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_timeseries(inst, statistic_mode, network_type):

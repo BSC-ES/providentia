@@ -1,14 +1,14 @@
-# define the exceedance thresholds per component or network|component pair
+# define the exceedance thresholds per component or network-component pair
 # e.g 'sconco3: 90.21', or 'EBAS|sconco3: 109.77'
-# the exceedances statistic will simply count the number of instances above these thresholds
+# he exceedances statistic will simply count the number of instances above these thresholds
 
-# ozone exceedance threshold, defined to be the peak season WHO 2021 air quality guideline (60 ug/m3 = 30.07 nmol mol-1)
+# ozone exceedance threshold, defined to be the peak season WHO 2021 air quality guideline (60 ug/m3)
 sconco3: 30.07 
-# nitrogen dioxide exceedance threshold, defined to be the annual WHO 2021 air quality guideline (10 ug/m = 5.23 nmol mol-1)
+# nitrogen dioxide exceedance threshold, defined to be the annual WHO 2021 air quality guideline (10 ug/m3)
 sconcno2: 5.23
-# sulphur dioxide exceedance threshold, defined to be the 24-hour WHO 2021 air quality guideline (40 ug/m3 = 15.02 nmol mol-1)
+# sulphur dioxide exceedance threshold, defined to be the 24-hour WHO 2021 air quality guideline (40 ug/m3)
 sconcso2: 15.02
-# carbon monoxide exceedance threshold, defined to be the 24-hour WHO 2021 air quality guideline (4000 ug/m3 = 3435.18 nmol mol-1)
+# carbon monoxide exceedance threshold, defined to be the 24-hour WHO 2021 air quality guideline (4000 ug/m3)
 sconcco: 3435.18
 # PM2.5 exceedance threshold, defined to be the annual WHO 2021 air quality guideline (5 ug/m3)
 pm2p5: 5.0

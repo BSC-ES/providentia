@@ -1,9 +1,9 @@
 {
-    "network": ["EBAS"], # TODO different in interpolation (change done in validation)
-    "species": ["sconco3"], # TODO different in interpolation (change done in validation)
-    "resolution": "hourly", # TODO different in interpolation (change done in validation)
-    "start_date": "20180101", # TODO different in interpolation (change done in validation) #dont know if the number in interpolation is the default
-    "end_date": "20190101", # TODO different in interpolation (change done in validation) #dont know if the number in interpolation is the default
+    "network": ["EBAS"],
+    "species": ["sconco3"],
+    "resolution": "hourly",
+    "start_date": "20180101",
+    "end_date": "20190101",
     "statistic_mode": "Temporal|Spatial",
     "statistic_aggregation": {
                                 "Temporal|Spatial": "Median", 
@@ -13,9 +13,6 @@
     "periodic_statistic_mode": "Independent",
     "periodic_statistic_aggregation": "Median",
     "timeseries_statistic_aggregation": "Median",
-    "active_dashboard_plots": ["timeseries", "statsummary", "distribution", "periodic"],
-    "n_neighbours" : "4", #interpolation
-    "domain" : ["ip", "d03", "d01", "regional", "eu", "reg", "ex", "bcn", "cat", "d02", "global","regional_i01", "regional_i02", "regional_i03"], #interpolation
-    "ensemble_options" : ["allmembers"], #interpolation
+    "active_dashboard_plots": ["timeseries", "statsummary", "distribution", "periodic"]
 }
 

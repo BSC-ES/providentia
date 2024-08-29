@@ -15,7 +15,7 @@ import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 from packaging.version import Version
 import pandas as pd
-from pypdf import PdfReader
+from PyPDF2 import PdfReader
 
 from .configuration import load_conf
 from .configuration import ProvConfiguration
@@ -47,9 +47,6 @@ class ProvidentiaOffline:
         # load statistical yamls
         self.basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
         self.expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
-
-        # load representativity information
-        self.representativity_info = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
@@ -129,6 +126,7 @@ class ProvidentiaOffline:
             else:
                 self.filenames = []
                 for i, parent_section in enumerate(self.parent_section_names):
+                    print(parent_section, self.sub_opts[parent_section].keys())
                     if 'report_filename' in self.sub_opts[parent_section].keys():
                         self.filenames.append(self.sub_opts[parent_section]['report_filename'])
                     else:
@@ -240,7 +238,7 @@ class ProvidentiaOffline:
             if Version(matplotlib.__version__) < Version("3.8"):
                 if plot_type[:6] == 'taylor':
                     if (plot_type in self.station_plots_to_make) or (plot_type in self.summary_plots_to_make):
-                        error = 'It is not possible to create Taylor diagrams yet, please remove from settings/report_plots.yaml.'
+                        error = 'It is not possible to create Taylor diagrams yet, please remove.'
                         sys.exit(error)
 
             # check if there are multispecies plots
@@ -816,7 +814,7 @@ class ProvidentiaOffline:
 
                 # update subsection variables
                 for k, val in self.subsection_opts.items():
-                    setattr(self, k, provconf.parse_parameter(k, val, deactivate_warning=True))
+                    setattr(self, k, provconf.parse_parameter(k, val))
 
                 # now all variables have been parsed, check validity of those, throwing errors where necessary
                 provconf.check_validity(deactivate_warning=True)
@@ -1345,7 +1343,7 @@ class ProvidentiaOffline:
                 if data_label in self.selected_station_data_labels[networkspeci]:
                     plot_validity = True
         if not plot_validity:
-            print(f'Warning: {plot_type} cannot be created because there is no available data.')
+            print(f'Warning: {plot_type} cannot be created because we have no available data.')
             return plot_indices
 
         # get data ranges for plotting paradigm
@@ -1389,7 +1387,7 @@ class ProvidentiaOffline:
                         unavailable_label = '{}'.format(z1_label)
                     else:
                         unavailable_label = '{} - {}'.format(z2_label, z1_label)
-                    msg = f'Warning: {plot_type} cannot be created because there is no available data of {unavailable_label}.'
+                    msg = f'Warning: {plot_type} cannot be created because we have no available data of {unavailable_label}.'
                     print(msg)
                     return plot_indices
                     
@@ -1486,7 +1484,7 @@ class ProvidentiaOffline:
                 # skip individual plots if we have no data for a specific label
                 if 'individual' in plot_options:
                     if data_labels not in self.selected_station_data_labels[networkspeci]:
-                        print(f'Warning: {plot_type} cannot be created because there is no available data.')
+                        print(f'Warning: {plot_type} cannot be created because we have no available data.')
                         return plot_indices
 
                 # get relevant axis to plot on
