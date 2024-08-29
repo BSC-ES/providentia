@@ -4,6 +4,7 @@ import copy
 import os
 from PIL import Image
 
+import cartopy
 import cartopy.feature as cfeature
 import matplotlib
 import matplotlib as mpl 
@@ -707,8 +708,12 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
 
             # add gridlines ?
             if 'gridlines' in plot_characteristics_vars:
+                gridlines_characteristics = plot_characteristics['gridlines']
+                if Version(cartopy.__version__) >= Version("0.23"):
+                    if 'auto_update' in plot_characteristics['gridlines'].keys():
+                        gridlines_characteristics.pop('auto_update', None)
                 ax_to_format.gridlines(crs=canvas_instance.datacrs, 
-                                       **plot_characteristics['gridlines'])
+                                       **gridlines_characteristics)
 
             # set map extent (if wanted)
             if map_extent:

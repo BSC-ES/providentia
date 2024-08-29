@@ -35,7 +35,7 @@ from .plot_formatting import format_axis, harmonise_xy_lims_paradigm, log_validi
 from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
 from .read_aux import get_lower_resolutions
 from .statistics import *
-from .warnings import show_message
+from .warnings_prv import show_message
 
 # make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')

@@ -5,6 +5,7 @@ import sys
 
 import numpy as np
 import pandas as pd
+import ast
 
     
 def get_molecular_mass(species):
@@ -254,11 +255,11 @@ class convert_units:
             # by: input_quantity*conversion_factor
             if self.conversion_input_quantity != '':
                 formula = self.get_conversion_formula(formula_type='conversion_factor')
-                conversion_scaling_factor_2 = eval(formula,self.SI_input_quantities)
+                conversion_scaling_factor_2 = ast.literal_eval(formula,self.SI_input_quantities)
                 self.conversion_factor = conversion_scaling_factor_1 * conversion_scaling_factor_2
             
             # take converted SI quantities and calculate SI output quantity using appropriate formula
-            self.converted_value = eval(self.formula,self.SI_input_quantities)
+            self.converted_value = ast.literal_eval(self.formula,self.SI_input_quantities)
     
             # finally, convert output SI quantity into desired output units (if necessary)
             if self.output_standard_units != self.output_reference_units:

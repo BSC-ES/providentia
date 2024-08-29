@@ -3,6 +3,7 @@
 import copy
 import json
 import os
+import sys
 
 import cartopy
 import cartopy.crs as ccrs
@@ -148,7 +149,11 @@ class Plot:
                 if plot_type in self.canvas_instance.plot_characteristics_templates:
                     self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[plot_type])
                 else:
-                    self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[base_plot_type])
+                    try:
+                        self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[base_plot_type])
+                    except KeyError:
+                        error = f'Error: Plot type {plot_type} is not available. Remove from settings/report_plots.yaml'
+                        sys.exit(error)
 
                 # overwrite default plot characteristics with custom formatting
                 for format_var in format:
@@ -1397,7 +1402,10 @@ class Plot:
         if 'annotate' in plot_options:
             # get rounded labels
             decimal_places = plot_characteristics['round_decimal_places']['table']
-            annotate = stats_df.applymap(lambda x: round_decimal_places(x, decimal_places))
+            if Version(pd.__version__) >= Version("2.1.0"):
+                annotate = stats_df.map(lambda x: round_decimal_places(x, decimal_places))
+            else:
+                annotate = stats_df.applymap(lambda x: round_decimal_places(x, decimal_places))
         else:
             annotate = False
 
@@ -1579,8 +1587,11 @@ class Plot:
 
         # round dataframe
         decimal_places = plot_characteristics['round_decimal_places']['table']
-        stats_df = stats_df.applymap(lambda x: round_decimal_places(x, decimal_places))
-        
+        if Version(pd.__version__) >= Version("2.1.0"):
+            stats_df = stats_df.map(lambda x: round_decimal_places(x, decimal_places))
+        else: 
+            stats_df = stats_df.applymap(lambda x: round_decimal_places(x, decimal_places))
+
         # offline reports
         if (self.read_instance.offline) or (self.read_instance.interactive):
             
@@ -1746,7 +1757,8 @@ class Plot:
         """
 
         if (self.read_instance.offline) or (self.read_instance.interactive):
-            self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(PolarAxes.PolarTransform())
+            self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(
+                PolarAxes.PolarTransform(apply_theta_transforms=False))
 
         # calculate statistics
         stats_dict = {}
@@ -1870,7 +1882,7 @@ class Plot:
             relevant_axis.axis['left'].label.set_fontsize(plot_characteristics['xylabel']['fontsize'])  
 
         # add contours around observations standard deviation
-        reference_stddev = stats_df[xylabel][obs_index]
+        reference_stddev = stats_df[xylabel].iloc[obs_index]
         num_levels = plot_characteristics['contours']['levels']['number']
         rs, ts = np.meshgrid(np.linspace(smin, smax), np.linspace(0, tmax))
         rms = np.sqrt(reference_stddev**2 + rs**2 - 2*reference_stddev*rs*np.cos(ts))
@@ -1878,7 +1890,7 @@ class Plot:
             **plot_characteristics['contours']['style']['general'])
 
         # add contour labels
-        self.taylor_polar_relevant_axis.clabel(contours, contours.levels, inline=True, fmt = '%r', fontsize=6)
+        self.taylor_polar_relevant_axis.clabel(contours, contours.levels, inline=True, fmt = "%.2f", fontsize=6)
 
         # add reference contour of observational standard deviation
         ref_x = np.linspace(0, tmax)
