@@ -153,17 +153,18 @@ class SubmitInterpolation(object):
             # get experiment specific directories list
             exp_dir_list = interp_experiments[experiment_type]["paths"]
 
-             # take first functional directory 
+            # take first functional directory 
             exp_dir = None      
             for temp_exp_dir in exp_dir_list:
-                if os.path.exists(temp_exp_dir):
+                if os.path.exists(os.path.join(temp_exp_dir,experiment_to_process)):
                     exp_dir = temp_exp_dir
                     break
 
             # if none of the paths are in this current machine, break
-            if exp_dir:
+            if not exp_dir:
                 error = f"Error: None of the experiment paths in {os.path.join('settings', 'interp_experiments.yaml')} are available in this machine ({MACHINE})."
-            
+                sys.exit(error)
+                
             # add file to directory path
             exp_dir += f"{experiment_to_process}/"
 
