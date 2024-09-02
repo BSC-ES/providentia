@@ -59,5 +59,11 @@
         "paths": [ 
             "/example/experiment/path"
         ]
+    },
+    "auto-caliope-urban": {
+        "experiments": ["a7n2"],
+        "paths": [
+            "/gpfs/scratch/bsc32/bsc956599/data/"
+        ]
     }
 }
