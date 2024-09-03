@@ -555,33 +555,17 @@ class ProvConfiguration:
         elif key == 'calibration_factor':
             # parse calibration factor
 
-            if isinstance(value, (str, int, float)):
+            if isinstance(value, (str)):
 
                 # convert to string if not
                 if np.issubdtype(type(value), np.number):
                     value = str(value)
 
                 # strip all whitespace
-                value_strip = "".join(value.split())
-
-                # detect if calibration factor is passed by experiment
-                calibration_by_experiment = False
-                for experiment in self.read_instance.experiments:
-                    if experiment in value_strip:
-                        calibration_by_experiment = True
-                        break
-                
-                # create dictionary per experiment
-                calibration_factor_dict = {}
-                if calibration_by_experiment:
-                    for i, experiment in enumerate(self.read_instance.experiments):
-                        calibration_factor_exp = value_strip.split('(')[i+1].split(')')[0]
-                        calibration_factor_dict[experiment] = calibration_factor_exp
+                if ',' in value:
+                    return [calibration_factor.strip() for calibration_factor in value.split(',')]
                 else:
-                    for i, experiment in enumerate(self.read_instance.experiments):
-                        calibration_factor_dict[experiment] = value
-
-                return calibration_factor_dict
+                    return [value.strip()]
             
         # if no special parsing treatment for variable, simply return value
         return value
@@ -1037,7 +1021,35 @@ class ProvConfiguration:
 
         # replace experiments by new ones found
         self.read_instance.experiments = correct_experiments
-                        
+
+        # check calibration factor
+        if self.read_instance.calibration_factor:
+
+            # detect if calibration factor is passed by experiment
+            calibration_by_experiment = not self.read_instance.calibration_factor[0][0] in ['+', '-', '*', '/']
+
+            # control that calibration factor not by experiment can only be one element
+            if not calibration_by_experiment and len(self.read_instance.calibration_factor) > 1:
+                error = "Error: When calibration factor is not provided by the experiment, only one value can be passed."
+                sys.exit(error)
+
+            # create dictionary per experiment
+            calibration_factor_dict = {}
+
+            # if calibration is by experiment
+            if calibration_by_experiment:
+                for i, experiment in enumerate(self.read_instance.experiments):
+                    for calibration_factor in self.read_instance.calibration_factor:
+                        if experiment in calibration_factor:
+                            calibration_factor_exp = calibration_factor.split("(")[1][:-1]
+                            calibration_factor_dict[experiment] = calibration_factor_exp
+            # if the same calibration is applied to all experiments
+            else:
+                calibration_factor_dict = {experiment:self.read_instance.calibration_factor[0] for experiment in self.read_instance.experiments}                 
+
+        # replace calibration factors by new dictionary
+        self.read_instance.calibration_factor = calibration_factor_dict
+
         # check have statistic_mode information,
         # if offline, throw message, stating are using default instead
         # TODO not needed in interpolation 
