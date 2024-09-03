@@ -107,7 +107,7 @@ class SubmitInterpolation(object):
             else:
                 print(f"{arg}:")
                 for exp, alias in getattr(self, arg).items():
-                    if self.hasAlias:
+                    if self.alias_flag:
                         print(f" - {exp} ({alias})")
                     else:
                         print(f" - {exp}")
