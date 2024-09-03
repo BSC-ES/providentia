@@ -401,7 +401,7 @@ class ProvConfiguration:
                         # show warning if alias not possible to be set
                         if not deactivate_warning and not self.read_instance.alias_flag:
                             msg = "Alias could not be set."
-                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
                     # set alias
                     if self.read_instance.alias_flag:
@@ -1053,12 +1053,12 @@ class ProvConfiguration:
             if not self.read_instance.statistic_aggregation:  
                 if self.read_instance.statistic_mode != 'Flattened':
                     msg = "Statistic aggregation (statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
-                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                 self.read_instance.statistic_aggregation = default
             # if statistic_aggregation is defined ensure that it matches with the statistic_mode
             elif (self.read_instance.statistic_mode == 'Flattened'):
                     msg = "statistic_mode is set to be 'Flattened', therefore statistic_aggregation must be empty, not '{}'. Setting to be empty.".format(self.read_instance.statistic_aggregation)                
-                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     self.read_instance.statistic_aggregation = default
 
         # check have periodic_statistic_mode information,
