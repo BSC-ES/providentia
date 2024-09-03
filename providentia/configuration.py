@@ -1047,8 +1047,8 @@ class ProvConfiguration:
             else:
                 calibration_factor_dict = {experiment:self.read_instance.calibration_factor[0] for experiment in self.read_instance.experiments}                 
 
-        # replace calibration factors by new dictionary
-        self.read_instance.calibration_factor = calibration_factor_dict
+            # replace calibration factors by new dictionary
+            self.read_instance.calibration_factor = calibration_factor_dict
 
         # check have statistic_mode information,
         # if offline, throw message, stating are using default instead
