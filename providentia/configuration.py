@@ -388,8 +388,6 @@ class ProvConfiguration:
                         exps = [exp.strip() for exp in value.split(",")]
                         exps_legend = []
 
-                    # decide if alias is possible
-                    self.read_instance.hasAlias = False
 
                     if exps_legend:
                         # to set an alias is mandatory to have the same number of experiments and legends
@@ -398,15 +396,15 @@ class ProvConfiguration:
                             # then they can be set as alias     
                             if all([len(exp.split("-"))==3 for exp in exps]) or \
                                 (len(exps) == 1 and len(self.read_instance.domain) == 1 and len(self.read_instance.ensemble_options) == 1):
-                                self.read_instance.hasAlias = True
+                                self.read_instance.alias_flag = True
                         
                         # show warning if alias not possible to be set
-                        if not deactivate_warning and not self.read_instance.hasAlias:
+                        if not deactivate_warning and not self.read_instance.alias_flag:
                             msg = "Alias could not be set."
-                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
                     # set alias
-                    if self.read_instance.hasAlias:
+                    if self.read_instance.alias_flag:
                         self.read_instance.alias = exps_legend
 
                     return exps
@@ -1022,7 +1020,7 @@ class ProvConfiguration:
             exp_is_valid, valid_exp_list = check_experiment_fun(experiment, deactivate_warning)
             if exp_is_valid:
                 for valid_exp in valid_exp_list:
-                    if self.read_instance.hasAlias:
+                    if self.read_instance.alias_flag:
                         correct_experiments[valid_exp] = self.read_instance.alias[exp_i]
                     else:
                         correct_experiments[valid_exp] = valid_exp
@@ -1055,12 +1053,12 @@ class ProvConfiguration:
             if not self.read_instance.statistic_aggregation:  
                 if self.read_instance.statistic_mode != 'Flattened':
                     msg = "Statistic aggregation (statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
-                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                 self.read_instance.statistic_aggregation = default
             # if statistic_aggregation is defined ensure that it matches with the statistic_mode
             elif (self.read_instance.statistic_mode == 'Flattened'):
                     msg = "statistic_mode is set to be 'Flattened', therefore statistic_aggregation must be empty, not '{}'. Setting to be empty.".format(self.read_instance.statistic_aggregation)                
-                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     self.read_instance.statistic_aggregation = default
 
         # check have periodic_statistic_mode information,
