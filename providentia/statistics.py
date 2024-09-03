@@ -361,7 +361,7 @@ def group_timeseries(read_instance, canvas_instance, networkspeci):
                                              hour=23)
                 
             # is annual chunk resolution?
-            elif new_freq == "AS":
+            elif new_freq == "YS":
                 start_date = datetime.datetime(year=new_index[i].year, 
                                                month=1, 
                                                day=1,
