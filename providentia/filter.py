@@ -752,7 +752,7 @@ class DataFilter:
                         calibration_factor = calibration_factor.split(',')[networkspeci_ii]
                     
                     msg = 'Applying calibration factor: '
-                    msg += '{0} in {1} to {2}'.format(calibration_factor, data_label, networkspeci)
+                    msg += '{0} in {1} experiment'.format(calibration_factor, data_label)
                     print(msg)
                     
                     # apply calibration factor
