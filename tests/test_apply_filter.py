@@ -1,3 +1,4 @@
+import warnings
 from .aux_functions import check_filter_data
 from providentia import Interactive
 import pytest
@@ -32,6 +33,16 @@ possibilities = [
      "temporal_spatial", "nonghost",
      )
 ]
+
+
+@pytest.fixture(autouse=True)
+def suppress_warnings():
+    # Hide runtime errors coming from calculating statistics with nans
+    # These nans appear because sometimes we don't have data for all stations
+    # In the whole period of time
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        yield
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities[0:3])

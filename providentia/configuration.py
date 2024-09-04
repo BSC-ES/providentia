@@ -388,8 +388,6 @@ class ProvConfiguration:
                         exps = [exp.strip() for exp in value.split(",")]
                         exps_legend = []
 
-                    # decide if alias is possible
-                    self.read_instance.hasAlias = False
 
                     if exps_legend:
                         # to set an alias is mandatory to have the same number of experiments and legends
@@ -398,15 +396,15 @@ class ProvConfiguration:
                             # then they can be set as alias     
                             if all([len(exp.split("-"))==3 for exp in exps]) or \
                                 (len(exps) == 1 and len(self.read_instance.domain) == 1 and len(self.read_instance.ensemble_options) == 1):
-                                self.read_instance.hasAlias = True
+                                self.read_instance.alias_flag = True
                         
                         # show warning if alias not possible to be set
-                        if not deactivate_warning and not self.read_instance.hasAlias:
+                        if not deactivate_warning and not self.read_instance.alias_flag:
                             msg = "Alias could not be set."
-                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
                     # set alias
-                    if self.read_instance.hasAlias:
+                    if self.read_instance.alias_flag:
                         self.read_instance.alias = exps_legend
 
                     return exps
@@ -1006,7 +1004,7 @@ class ProvConfiguration:
             exp_is_valid, valid_exp_list = check_experiment_fun(experiment, deactivate_warning)
             if exp_is_valid:
                 for valid_exp in valid_exp_list:
-                    if self.read_instance.hasAlias:
+                    if self.read_instance.alias_flag:
                         correct_experiments[valid_exp] = self.read_instance.alias[exp_i]
                     else:
                         correct_experiments[valid_exp] = valid_exp
@@ -1067,12 +1065,12 @@ class ProvConfiguration:
             if not self.read_instance.statistic_aggregation:  
                 if self.read_instance.statistic_mode != 'Flattened':
                     msg = "Statistic aggregation (statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
-                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                 self.read_instance.statistic_aggregation = default
             # if statistic_aggregation is defined ensure that it matches with the statistic_mode
             elif (self.read_instance.statistic_mode == 'Flattened'):
                     msg = "statistic_mode is set to be 'Flattened', therefore statistic_aggregation must be empty, not '{}'. Setting to be empty.".format(self.read_instance.statistic_aggregation)                
-                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     self.read_instance.statistic_aggregation = default
 
         # check have periodic_statistic_mode information,
@@ -1173,83 +1171,85 @@ class ProvConfiguration:
         if invalid_filter_species:
             msg = f'Removing invalid filter species {", ".join(invalid_filter_species)} for the current GHOST version ({self.read_instance.ghost_version})'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            filter_species_keys = list(self.read_instance.filter_species.keys())
-            for filter_species in filter_species_keys:
+            # remove them from the filter_species atribute
+            for filter_species in self.read_instance.filter_species.keys():
                 if filter_species.split('|')[1] in invalid_filter_species:
                     del self.read_instance.filter_species[filter_species]
 
-        # create variable for all unique species (plus filter species)
-        filter_species = []
-        species_plus_filter_species = copy.deepcopy(self.read_instance.species)
-        if self.read_instance.filter_species:
-            for networkspeci in self.read_instance.filter_species:
-                speci = networkspeci.split('|')[1]
-                if speci not in self.read_instance.species:
-                    filter_species.append(speci)
-                    species_plus_filter_species.append(speci)
-                    
-        # set lower_bound and upper_bound as dicts with limits per species (including filter species)
-        # if type is dict then set bound using GHOST extreme limits per species
+        # TODO change this in the refactoring, not do this in download mode
+        if not self.read_instance.download: 
+            # create variable for all unique species (plus filter species)
+            filter_species = []
+            species_plus_filter_species = copy.deepcopy(self.read_instance.species)
+            if self.read_instance.filter_species:
+                for networkspeci in self.read_instance.filter_species:
+                    speci = networkspeci.split('|')[1]
+                    if speci not in self.read_instance.species:
+                        filter_species.append(speci)
+                        species_plus_filter_species.append(speci)
+                        
+            # set lower_bound and upper_bound as dicts with limits per species (including filter species)
+            # if type is dict then set bound using GHOST extreme limits per species
 
-        # lower_bound
-        # type is dict, then set as default limit per species using GHOST limits
-        if isinstance(self.read_instance.lower_bound, dict):
-            self.read_instance.lower_bound = {speci:
-                                              np.float32(self.read_instance.parameter_dictionary[speci]['extreme_lower_limit']) 
-                                              for speci in species_plus_filter_species}
-        # otherwise set list values to dict, saving limits per species
-        # if have just 1 limit apply for all read species, but if have multiple, set limits per species
-        # throw error if have multiple lower bounds, but not equal to number of species to read  
-        else:      
-            lower_bound_dict = {}
-            if len(self.read_instance.lower_bound) == 1:
-                for speci in species_plus_filter_species:
-                    lower_bound_dict[speci] = self.read_instance.lower_bound[0]
-            elif len(self.read_instance.lower_bound) > 1:
-                if len(self.read_instance.species) != len(self.read_instance.lower_bound):
-                    error = 'Error: "lower_bound" variable must be same length as number of species read.'
-                    sys.exit(error)
-                else:
-                    for speci_ii, speci in enumerate(self.read_instance.species):
-                        lower_bound_dict[speci] = self.read_instance.lower_bound[speci_ii] 
-                    # add filter_species (using GHOST limits)
-                    for speci in filter_species:
-                        lower_bound_dict[speci] = np.float32(self.read_instance.parameter_dictionary[speci]['extreme_lower_limit'])
-            self.read_instance.lower_bound = lower_bound_dict
+            # lower_bound
+            # type is dict, then set as default limit per species using GHOST limits
+            if isinstance(self.read_instance.lower_bound, dict):
+                self.read_instance.lower_bound = {speci:
+                                                np.float32(self.read_instance.parameter_dictionary[speci]['extreme_lower_limit']) 
+                                                for speci in species_plus_filter_species}
+            # otherwise set list values to dict, saving limits per species
+            # if have just 1 limit apply for all read species, but if have multiple, set limits per species
+            # throw error if have multiple lower bounds, but not equal to number of species to read  
+            else:      
+                lower_bound_dict = {}
+                if len(self.read_instance.lower_bound) == 1:
+                    for speci in species_plus_filter_species:
+                        lower_bound_dict[speci] = self.read_instance.lower_bound[0]
+                elif len(self.read_instance.lower_bound) > 1:
+                    if len(self.read_instance.species) != len(self.read_instance.lower_bound):
+                        error = 'Error: "lower_bound" variable must be same length as number of species read.'
+                        sys.exit(error)
+                    else:
+                        for speci_ii, speci in enumerate(self.read_instance.species):
+                            lower_bound_dict[speci] = self.read_instance.lower_bound[speci_ii] 
+                        # add filter_species (using GHOST limits)
+                        for speci in filter_species:
+                            lower_bound_dict[speci] = np.float32(self.read_instance.parameter_dictionary[speci]['extreme_lower_limit'])
+                self.read_instance.lower_bound = lower_bound_dict
 
-        # upper_bound
-        # type is dict, then set as default limit per species using GHOST limits
-        if isinstance(self.read_instance.upper_bound, dict):
-            self.read_instance.upper_bound = {speci:np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit']) 
-                                              for speci in species_plus_filter_species}
-        # otherwise set list values to dict, saving limits per species
-        # if have just 1 limit apply for all read species, but if have multiple, set limits per species
-        # throw error if have multiple upper bounds, but not equal to number of species to read  
-        else:      
-            upper_bound_dict = {}
-            if len(self.read_instance.upper_bound) == 1:
-                for speci in species_plus_filter_species:
-                    upper_bound_dict[speci] = self.read_instance.upper_bound[0]
-            elif len(self.read_instance.upper_bound) > 1:
-                if len(self.read_instance.species) != len(self.read_instance.upper_bound):
-                    error = 'Error: "upper_bound" variable must be same length as number of species read.'
-                    sys.exit(error)
-                else:
-                    for speci_ii, speci in enumerate(self.read_instance.species):
-                        upper_bound_dict[speci] = self.read_instance.upper_bound[speci_ii] 
-                    # add filter_species (using GHOST limits)
-                    for speci in filter_species:
-                        upper_bound_dict[speci] = np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit'])
-            self.read_instance.upper_bound = upper_bound_dict
+            # upper_bound
+            # type is dict, then set as default limit per species using GHOST limits
+            if isinstance(self.read_instance.upper_bound, dict):
+                self.read_instance.upper_bound = {speci:np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit']) 
+                                                for speci in species_plus_filter_species}
+            # otherwise set list values to dict, saving limits per species
+            # if have just 1 limit apply for all read species, but if have multiple, set limits per species
+            # throw error if have multiple upper bounds, but not equal to number of species to read  
+            else:      
+                upper_bound_dict = {}
+                if len(self.read_instance.upper_bound) == 1:
+                    for speci in species_plus_filter_species:
+                        upper_bound_dict[speci] = self.read_instance.upper_bound[0]
+                elif len(self.read_instance.upper_bound) > 1:
+                    if len(self.read_instance.species) != len(self.read_instance.upper_bound):
+                        error = 'Error: "upper_bound" variable must be same length as number of species read.'
+                        sys.exit(error)
+                    else:
+                        for speci_ii, speci in enumerate(self.read_instance.species):
+                            upper_bound_dict[speci] = self.read_instance.upper_bound[speci_ii] 
+                        # add filter_species (using GHOST limits)
+                        for speci in filter_species:
+                            upper_bound_dict[speci] = np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit'])
+                self.read_instance.upper_bound = upper_bound_dict
 
-        # create a variable to set qa per species (including filter species), setting defaults in the process
-        if isinstance(self.read_instance.qa, dict):
-            self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) 
-                                                 for speci in species_plus_filter_species}
-            # set qa to be first of qa per species pairs
-            self.read_instance.qa = self.read_instance.qa_per_species[list(self.read_instance.qa_per_species.keys())[0]]
-        else:
-            self.read_instance.qa_per_species = {speci:self.read_instance.qa for speci in species_plus_filter_species}
+            # create a variable to set qa per species (including filter species), setting defaults in the process
+            if isinstance(self.read_instance.qa, dict):
+                self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) 
+                                                    for speci in species_plus_filter_species}
+                # set qa to be first of qa per species pairs
+                self.read_instance.qa = self.read_instance.qa_per_species[list(self.read_instance.qa_per_species.keys())[0]]
+            else:
+                self.read_instance.qa_per_species = {speci:self.read_instance.qa for speci in species_plus_filter_species}
 
         # add to qa
         if self.read_instance.add_qa:
