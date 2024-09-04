@@ -21,11 +21,11 @@ import pyproj
 from scipy import spatial
 from shapely.geometry import Polygon, Point
 import xarray as xr
-from experiment_interpolation_submission import data_paths, MACHINE
-
 from aux import (check_for_ghost, findMiddle, check_directory_existence, set_file_permissions_ownership,
                  get_aeronet_bin_radius_from_bin_variable, get_aeronet_model_bin, 
                  get_model_to_aeronet_bin_transform_factor)
+
+MACHINE = os.environ.get('BSC_MACHINE', '')
 
 # change current working directory from submit directory 
 # to import global configuration file
@@ -40,7 +40,8 @@ CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
 
 # load the default values jsonsdefault_values
-bin_vars = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
+# load the data_paths for the different machines and the default values jsons
+data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'data_paths.yaml')))
 
 # load the defined experiments paths and agrupations jsons
 interp_experiments = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
@@ -86,10 +87,14 @@ class ExperimentInterpolation(object):
         with open(submission_file, 'r') as f:
             submission_file_txt = f.read().split()
 
+        # get configuration variables from the management_logs
         for variable_key in ["ghost_version","reverse_vertical_orientation","n_neighbours"]:
             variable_val_idx = submission_file_txt.index(variable_key+":")+1
             variable_val = submission_file_txt[variable_val_idx]
             setattr(self, variable_key, variable_val)
+
+        # set experiment paths
+        self.exp_root = data_paths[MACHINE]["exp_root"]
 
         # import GHOST standards
         sys.path.insert(1, data_paths[self.machine]["ghost_root"] + '/GHOST_standards/{}'.format(self.ghost_version))
@@ -851,12 +856,11 @@ class ExperimentInterpolation(object):
         else:
             # as it appears in PRV (e.g. nasa-aeronet/oneill_v3-lev15 -> nasa-aeronet-oneill_v3-lev15)
             network_name = self.network_to_interpolate_against.replace('/', '-')
-        output_dir = '/gpfs/projects/bsc32/AC_cache/recon/exp_interp/{}/{}/{}/{}/{}'.format(
-                self.ghost_version, self.prov_exp_code, self.temporal_resolution_to_output, 
-                self.original_speci_to_process, network_name)
+        output_dir = os.path.join(self.exp_root,self.ghost_version, self.prov_exp_code, 
+                                  self.temporal_resolution_to_output, self.original_speci_to_process, network_name)
 
         # check if need to create any directories in path 
-        check_directory_existence(output_dir,'/gpfs/projects/bsc32/AC_cache/recon/exp_interp')
+        check_directory_existence(output_dir,self.exp_root)
 
         # create netCDF dataset
         netCDF_fname = '{}/{}_{}.nc'.format(output_dir, self.original_speci_to_process, self.yearmonth)
