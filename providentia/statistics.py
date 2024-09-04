@@ -58,9 +58,9 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
         if read_instance.resampling_resolution in ['hourly', 'hourly_instantaneous']:
             temporal_resolution_to_output_code = 'h'
         elif read_instance.resampling_resolution in ['3hourly', '3hourly_instantaneous']:
-            temporal_resolution_to_output_code = '3H'
+            temporal_resolution_to_output_code = '3h'
         elif read_instance.resampling_resolution in ['6hourly', '6hourly_instantaneous']:
-            temporal_resolution_to_output_code = '6H'
+            temporal_resolution_to_output_code = '6h'
         elif read_instance.resampling_resolution == 'daily':
             temporal_resolution_to_output_code = 'D'
         elif read_instance.resampling_resolution == 'monthly':
@@ -361,7 +361,7 @@ def group_timeseries(read_instance, canvas_instance, networkspeci):
                                              hour=23)
                 
             # is annual chunk resolution?
-            elif new_freq == "AS":
+            elif new_freq == "YS":
                 start_date = datetime.datetime(year=new_index[i].year, 
                                                month=1, 
                                                day=1,
