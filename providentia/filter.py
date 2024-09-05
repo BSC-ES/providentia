@@ -4,6 +4,7 @@ import copy
 import json
 import os
 import yaml
+import sys
 
 import numpy as np
 import pandas as pd
@@ -738,6 +739,10 @@ class DataFilter:
                     if isinstance(self.read_instance.calibration_factor, dict):
                         exp_label = list(self.read_instance.experiments.keys())[
                             list(self.read_instance.experiments.values()).index(data_label)]
+                        if exp_label not in self.read_instance.calibration_factor:
+                            msg = f"No calibration factor applied to experiment {exp_label}."
+                            print(msg)
+                            continue
                         calibration_factor = self.read_instance.calibration_factor[exp_label]
                     else:
                         calibration_factor = self.read_instance.calibration_factor
@@ -747,19 +752,22 @@ class DataFilter:
                         calibration_factor = calibration_factor.split(',')[networkspeci_ii]
                     
                     msg = 'Applying calibration factor: '
-                    msg += '{0} in {1} to {2}'.format(calibration_factor, data_label, networkspeci)
+                    msg += '{0} in {1} experiment'.format(calibration_factor, data_label)
                     print(msg)
                     
                     # apply calibration factor
-                    if '*' in calibration_factor:
+                    if calibration_factor.count('*') == 1 and calibration_factor[0] == '*':
                         self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] *= \
                             float(calibration_factor.replace('*', ''))
-                    elif '/' in calibration_factor:
+                    elif calibration_factor.count('/') == 1 and calibration_factor[0] == '/':
                         self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] /= \
                             float(calibration_factor.replace('/', ''))
-                    elif '-' in calibration_factor:
+                    elif calibration_factor.count('-') == 1 and calibration_factor[0] == '-':
                         self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] -= \
                             float(calibration_factor.replace('-', ''))
-                    else:
+                    elif calibration_factor.count('+') == 1 and calibration_factor[0] == '+':
                         self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] += \
                             float(calibration_factor)
+                    else:
+                        error = f"Error: Invalid format '{calibration_factor}' in calibration factor. Accepted formats are: '+num', '-num', '*num', or '/num'."
+                        sys.exit(error)
