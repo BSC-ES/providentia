@@ -135,6 +135,16 @@ class ProvidentiaOffline:
                         # add a number next to the filename to avoid overwriting
                         self.filenames.append(f'{self.report_filename}_{i}')
 
+        # select section if passed through command line arguments
+        if "section" in self.commandline_arguments.keys():
+            if self.commandline_arguments["section"] in self.all_sections:
+                index = self.parent_section_names.index(self.commandline_arguments["section"].split("·")[0])
+                self.filenames = [self.filenames[index]]
+                self.parent_section_names = [self.parent_section_names[index]]
+            else:
+                msg = "Error: Section {} does not exist in configuration file.".format(self.commandline_arguments["section"])
+                sys.exit(msg)
+
         # iterate through configuration sections
         for section_ind, (filename, section) in enumerate(zip(self.filenames, self.parent_section_names)):
             print('Starting to create PDF for {} section'.format(section))
@@ -314,7 +324,9 @@ class ProvidentiaOffline:
             # get subsection names
             self.child_subsection_names = [subsection_name for subsection_name in self.subsection_names 
                                            if self.section == subsection_name.split('·')[0]]
-            if "section" in self.commandline_arguments.keys():
+            
+            # if subsection has been passed in command line arguments get subsection
+            if ("section" in self.commandline_arguments.keys()) and ("·" in self.commandline_arguments["section"]):
                 self.subsections = [self.commandline_arguments["section"]]
             else:
                 if len(self.child_subsection_names) > 0:
