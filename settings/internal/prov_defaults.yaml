@@ -16,6 +16,6 @@
     "active_dashboard_plots": ["timeseries", "statsummary", "distribution", "periodic"],
     "n_neighbours" : "4", #interpolation
     "domain" : ["ip", "d03", "d01", "regional", "eu", "reg", "ex", "bcn", "cat", "d02", "global","regional_i01", "regional_i02", "regional_i03"], #interpolation
-    "ensemble_options" : ["000"], #interpolation
+    "ensemble_options" : ["allmembers"], #interpolation
 }
 
