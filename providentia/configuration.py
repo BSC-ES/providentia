@@ -208,6 +208,9 @@ class ProvConfiguration:
             # parse network
 
             if isinstance(value, str):
+                # treat leaving the field blank as default
+                if value == '':
+                    return self.var_defaults[key]
                 # parse multiple networks
                 if ',' in value:
                     return [network.strip() for network in value.split(',')]
@@ -218,6 +221,9 @@ class ProvConfiguration:
             # parse species
 
             if isinstance(value, str):
+                # treat leaving the field blank as default
+                if value == '':
+                    return self.var_defaults[key]
                 # parse multiple species
                 if ',' in value:
                     return [speci.strip() for speci in value.split(',')]
@@ -228,6 +234,10 @@ class ProvConfiguration:
             # parse resolution
             
             if isinstance(value, str):
+                # treat leaving the field blank as default
+                if value == '':
+                    return self.var_defaults[key]
+                # parse multiple species only in interpolation and download
                 if self.read_instance.interpolation or self.read_instance.download:
                     return [res.strip() for res in value.split(',')]
                 else:        
@@ -237,6 +247,9 @@ class ProvConfiguration:
             # parse start_date
 
             if (isinstance(value, str)) or (isinstance(value, int)):
+                # treat leaving the field blank as default
+                if value == '':
+                    return self.var_defaults[key]
                 # throw error if start_date is empty str
                 value = str(value)
                 return value.strip()
@@ -245,6 +258,9 @@ class ProvConfiguration:
             # parse end_date
 
             if (isinstance(value, str)) or (isinstance(value, int)):
+                # treat leaving the field blank as default
+                if value == '':
+                    return self.var_defaults[key]
                 # throw error if start_date is empty str
                 value = str(value)
                 return value.strip()
@@ -353,6 +369,9 @@ class ProvConfiguration:
             # parse domain
 
             if value != None:
+                # treat leaving the field blank as default
+                if value == '':
+                    return self.var_defaults[key]
                 # split list, if only one domain, then creates list of one element
                 domains = [dom.strip() for dom in value.split(",")]      
                 return domains
@@ -363,6 +382,9 @@ class ProvConfiguration:
             # parse ensemble_options
 
             if value != None:
+                # treat leaving the field blank as default
+                if value == '':
+                    return self.var_defaults[key]
                 # split list, if only one ensemble_options, then creates list of one element
                 # if it is a number, then make it 3 digits, if not it stays as it is
                 ensemble_opts = [opt.strip().zfill(3) for opt in str(value).split(",")]  
@@ -564,6 +586,11 @@ class ProvConfiguration:
                     return [calibration_factor.strip() for calibration_factor in value.split(',')]
                 else:
                     return [value.strip()]
+        
+        elif key in ['n_neighbors','statistic_mode','statistic_aggregation','periodic_statistic_mode','timeseries_statistic_aggregation']:
+            # treat leaving the field blank as default
+            if value == '':
+                return self.var_defaults[key]
             
         # if no special parsing treatment for variable, simply return value
         return value
@@ -809,7 +836,7 @@ class ProvConfiguration:
         # check have species information, TODO REFACTOR INTERPOLATION STUFF
         # if offline, throw message, stating are using default instead
         # in download mode is allowed to not pass any species, so continue
-        if (not self.read_instance.species and not self.read_instance.download):
+        if (not self.read_instance.species and not self.read_instance.download and not self.read_instance.interpolation):
             if self.read_instance.interpolation:
                 default = [self.standard_parameters[param]['bsc_parameter_name'] for param in self.standard_parameters.keys()] 
             else:
