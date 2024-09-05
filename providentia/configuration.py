@@ -745,6 +745,7 @@ class ProvConfiguration:
 
         return experiment_exists, [full_experiment]
     
+    # TODO maybe remove this one and keep the download check since its much cleaner
     def check_experiment_download(self, full_experiment, deactivate_warning):
         """ Check individual experiment and get list of options."""
 
@@ -755,6 +756,10 @@ class ProvConfiguration:
 
         # split full experiment
         experiment, domain, ensemble_option = full_experiment.split('-')
+        
+        # accept asterisk to download all experiments
+        if experiment == '*':
+            return True, experiment
         
         # get all possible experiments
         exp_path = os.path.join(self.read_instance.exp_remote_path,self.read_instance.ghost_version)
@@ -767,8 +772,11 @@ class ProvConfiguration:
         if ensemble_option == "allmembers":
             exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.possible_experiments))
            
-            # search for other ghost versions
             if not exp_found:
+                # get experiment for printing
+                experiment_wng = experiment + '-' + domain
+                
+                # search for other ghost versions
                 for ghost_version in self.read_instance.possible_ghost_versions:
                     ghost_exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.read_instance.sftp.listdir(os.path.join(self.read_instance.exp_remote_path,ghost_version))))
                     if ghost_exp_found:
@@ -778,12 +786,18 @@ class ProvConfiguration:
 
             # search for other ghost versions
             if not exp_found:
+                # get experiment for printing
+                experiment_wng = full_experiment
+
+                # search for other ghost versions
                 available_ghost_versions = list(filter(lambda x:full_experiment in self.read_instance.sftp.listdir(os.path.join(self.read_instance.exp_remote_path,x)), self.read_instance.possible_ghost_versions))
         
         # if not found because of the ghost version, tell the user
-        if available_ghost_versions:
-            msg = f"There is no data available for {full_experiment} experiment for the current ghost version ({self.read_instance.ghost_version}). Please check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+        if not exp_found:
+            msg = f"There is not experiment {experiment_wng} data for the current ghost version ({self.read_instance.ghost_version})." 
+            if available_ghost_versions:
+                msg += f" Please, check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
 
         return bool(exp_found), exp_found        
 
@@ -986,7 +1000,10 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         # TODO maybe think this a bit better, if i dont pass it it should check better if i already passed it in experiments and so
         if self.read_instance.experiments and self.default_ensemble_options:
-            default = default_values['ensemble_options']
+            if self.read_instance.interpolation:
+                default = ["000"]
+            else:
+                default = default_values['ensemble_options']
             msg = "Ensemble options (ensemble_options) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.ensemble_options = default
