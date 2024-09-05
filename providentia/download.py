@@ -225,21 +225,22 @@ class ProvidentiaDownload(object):
 
             # when one of those symbols is passed, get all experiments
             # TODO check this when merging with the interpolation
-            if self.experiments == {'*': '*'} or self.experiments == {'default': 'default'}:
+            if self.experiments == {'*': '*'}:
                 self.get_all_experiments()
 
             # experiment
             # download from the remote machine
-            if self.bsc_download_choice == 'y':
-                for experiment in self.experiments.keys():
-                    initial_check_nc_files = self.download_experiment(experiment, initial_check=True)
-                    files_to_download = self.select_files_to_download(initial_check_nc_files)
-                    if not initial_check_nc_files or files_to_download:
-                        self.download_experiment(experiment, initial_check=False, files_to_download=files_to_download)
-            # download from the zenodo webpage
-            else:
-                error = f"Error: It is not possible to download experiments from the zenodo webpage."
-                sys.exit(error)
+            if self.experiments:
+                if self.bsc_download_choice == 'y':
+                    for experiment in self.experiments.keys():
+                        initial_check_nc_files = self.download_experiment(experiment, initial_check=True)
+                        files_to_download = self.select_files_to_download(initial_check_nc_files)
+                        if not initial_check_nc_files or files_to_download:
+                            self.download_experiment(experiment, initial_check=False, files_to_download=files_to_download)
+                # download from the zenodo webpage
+                else:
+                    error = f"Error: It is not possible to download experiments from the zenodo webpage."
+                    sys.exit(error)
 
             # TODO delete when sure
             # update filetrees
@@ -265,9 +266,10 @@ class ProvidentiaDownload(object):
         # encode the output public key if possible
         try:
             ed25519_key = output.split()[-1].encode()
+            key = paramiko.Ed25519Key(data=decodebytes(ed25519_key))
         
         # in case transfer broke
-        except IndexError:
+        except:
             msg = f"Remote machine {REMOTE_MACHINE} not working right now."
 
             # if the remote machine has not been changed
@@ -287,8 +289,6 @@ class ProvidentiaDownload(object):
             else:
                 error = "Error: None of the machines are working right now. Try later."
                 sys.exit(error)
-
-        key = paramiko.Ed25519Key(data=decodebytes(ed25519_key))
 
         self.ssh = paramiko.SSHClient()
         hostkeys = self.ssh.get_host_keys().add(self.remote_hostname, 'ed25519', key)
