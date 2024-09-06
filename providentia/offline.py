@@ -120,6 +120,11 @@ class ProvidentiaOffline:
                 msg = "Error: Section {} does not exist in configuration file.".format(self.commandline_arguments["section"])
                 sys.exit(msg)
 
+        # if no parent section names are found throw an error
+        if len(self.parent_section_names) == 0:
+            msg = "No sections were found in configuration file, make sure to name them using square brackets."
+            sys.exit(msg)
+
         # iterate through configuration sections
         for section_ind, (filename, section) in enumerate(zip(self.filenames, self.parent_section_names)):
             print('Starting to create PDF for {} section'.format(section))
