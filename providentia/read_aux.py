@@ -815,3 +815,46 @@ def get_lower_resolutions(resolution):
         resolutions = []
 
     return resolutions
+
+
+def generate_file_trees(instance, force=False):
+    """ Generate file trees. Force if we want to remove depedency on the machine.
+    """
+    
+    # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
+    # if have filetree flags, then these overwrite any defaults
+    gft = False
+    if instance.generate_file_tree:
+        gft = True
+    elif instance.disable_file_tree:
+        gft = False
+    # by default generate filetree on MN5
+    elif instance.machine in ['mn5']:
+        gft = True
+    # by default generate filetree locally
+    elif instance.filetree_type == 'local':
+        gft = True
+
+    # generate file trees
+    if gft or force:
+        print('Generating file trees...')
+        instance.all_observation_data = get_ghost_observational_tree(instance)
+        if instance.nonghost_root is not None:
+            nonghost_observation_data = get_nonghost_observational_tree(instance)
+    # load file trees
+    else:
+        try:
+            instance.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(instance.ghost_version)))) 
+        except FileNotFoundError as file_error:
+            msg = "Error: Trying to load 'settings/internal/ghost_filetree_{}.json' but file does not exist. Run with the flag '--gft' to generate this file.".format(instance.ghost_version)
+            sys.exit(msg)
+        if instance.nonghost_root is not None:
+            try:
+                nonghost_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json')))
+            except FileNotFoundError as file_error:
+                msg = "Error: Trying to load 'settings/internal/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                sys.exit(msg)
+
+    # merge GHOST and non-GHOST filetrees
+    if instance.nonghost_root is not None:
+        instance.all_observation_data = {**instance.all_observation_data, **nonghost_observation_data}
