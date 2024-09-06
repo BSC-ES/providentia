@@ -27,7 +27,7 @@ from .plot import Plot
 from .plot_aux import get_taylor_diagram_ghelper, set_map_extent, reorder_pdf_pages
 from .plot_formatting import format_plot_options, format_axis, harmonise_xy_lims_paradigm, set_axis_label, set_axis_title
 from .read import DataReader
-from .read_aux import (get_ghost_observational_tree, get_lower_resolutions, get_nonghost_observational_tree, 
+from .read_aux import (generate_file_trees, get_lower_resolutions, 
                        get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
                        get_valid_experiments, get_valid_obs_files_in_date_range)
 from .statistics import calculate_statistic, generate_colourbar, get_selected_station_data, get_z_statistic_info
@@ -94,31 +94,6 @@ class ProvidentiaOffline:
         elif self.filetree_type == 'local':
             gft = True
 
-        # generate file trees
-        if gft:
-            self.all_observation_data = get_ghost_observational_tree(self)
-            if self.nonghost_root is not None:
-                nonghost_observation_data = get_nonghost_observational_tree(self)
-        # load file trees
-        else:
-            try:
-                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(self.ghost_version)))) 
-            except FileNotFoundError as file_error:
-                msg = "Error: Trying to load 'settings/internal/ghost_filetree_{}.json' but file does not exist. Run with the flag '--gft' to generate this file.".format(self.ghost_version)
-                sys.exit(msg)
-            if self.nonghost_root is not None:
-                try:
-                    nonghost_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json')))
-                except FileNotFoundError as file_error:
-                    msg = "Error: Trying to load 'settings/internal/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
-                    sys.exit(msg)
-        # merge GHOST and non-GHOST filetrees
-        if self.nonghost_root is not None:
-            self.all_observation_data = {**self.all_observation_data, **nonghost_observation_data}
-
-        # initialise DataReader class
-        self.datareader = DataReader(self)
-
         # if some filename has not been provided through the configuration file use default names
         if len(self.filenames) != len(self.parent_section_names):
             msg = 'Report filename/s (report_filename) has not been defined in '
@@ -160,9 +135,24 @@ class ProvidentiaOffline:
             # modified by commandline arguments, if given
             provconf = ProvConfiguration(self, **self.commandline_arguments)
 
+            # get GHOST version before reading configuration file section parameters
+            current_ghost_version = self.ghost_version 
+
             # update self with section variables
             for k, val in self.section_opts.items():
                 setattr(self, k, provconf.parse_parameter(k, val))
+            
+            # if first section or GHOST version has changed
+            if (section_ind == 0) or (current_ghost_version != self.ghost_version):
+                # if GHOST version has changed, generate file trees always (independently of the machine)
+                if (current_ghost_version != self.ghost_version):
+                    generate_file_trees(self, force=True)
+                # if it hasn't and we are in the first section, generate if needed
+                else:
+                    generate_file_trees(self)
+
+                # initialise DataReader class
+                self.datareader = DataReader(self)
 
             # check for self defined plot characteristics file
             if self.plot_characteristics_filename == '':
@@ -849,6 +839,14 @@ class ProvidentiaOffline:
             update_period_fields(self)
             period_conf(self)
             init_metadata(self)
+
+            # for non-GHOST delete valid station indices variables because we do not want to 
+            # remove the stations with 0 valid measurements before the filter has been updated, 
+            # this will happen later
+            if hasattr(self, 'valid_station_inds') and (not self.reading_ghost):
+                delattr(self, 'valid_station_inds')
+                delattr(self, 'valid_station_inds_temporal_colocation')
+
             update_metadata_fields(self)
             metadata_conf(self)
 
