@@ -709,8 +709,10 @@ class ProvConfiguration:
                 available_ghost_versions = list(filter(lambda x:full_experiment in os.listdir(os.path.join(self.read_instance.exp_root,x)), possible_ghost_versions))
         
         # if not found because of the ghost version, tell the user
-        if available_ghost_versions:
-            msg = f"There is no data available for {full_experiment} experiment for the current ghost version ({self.read_instance.ghost_version}). Please check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
+        if available_ghost_versions and ('/' not in self.read_instance.network[0]):
+            msg = f"There is no data available for {full_experiment} experiment for the current"
+            msg += f" GHOST version ({self.read_instance.ghost_version}). Please check one of the available versions:"
+            msg += f" {', '.join(sorted(available_ghost_versions))}"
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
         return bool(exp_found), exp_found
