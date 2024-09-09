@@ -1391,7 +1391,6 @@ def read_conf(fpath=None):
     """ Read configuration files. """
 
     res = {}
-    res_sub = {}
     config = {}
     all_sections = []
     all_sections_modified = []
@@ -1443,19 +1442,34 @@ def read_conf(fpath=None):
 
     # get attributes for each section and store in dict
     for (i, section), section_modified in zip(enumerate(all_sections), all_sections_modified):
-        
         repetition = 0
         copy = False
-        config[section_modified] = {}
-        
+        config[section_modified] = {} 
         with open(fpath) as file:
             for line in file:
+                # allow # after first character to partially comment lines
                 line_strip = line.strip().split('#')[0]
+                
+                # get current section                        
+                if '[' in line and ']' in line and '[[' not in line and ']]' not in line:
+                    current_section = line_strip.replace('[', '').replace(']', '')
+                
+                # get current subsection
+                if ('[[' in line_strip) and (']]' in line_strip):
+                    current_modified_subsection = current_section + "·" + line_strip.replace('[[', '').replace(']]', '')
+                
                 # parsing all but last section 
                 if section_modified != all_sections_modified[-1]:
                     # start of relevant section 
                     if line_strip == all_sections[i]:
-                        if line_strip in repeated_subsections:
+                        # if subsection, make sure its section corresponds to current section to avoid
+                        # problems with repeated subsection names (SECTIONA·SUBSECTION, SECTIONB·SUBSECTION)
+                        if ('[[' in line_strip) and (']]' in line_strip):
+                            if (current_modified_subsection != section_modified):
+                                copy = False
+                            else:
+                                copy = True
+                        elif line_strip in repeated_subsections:
                             position = repeated_subsections_modified[section].index(section_modified)
                             if position == repetition:
                                 copy = True
@@ -1474,7 +1488,14 @@ def read_conf(fpath=None):
                 else:
                     # start of relevant section ?
                     if line_strip == all_sections[-1]:
-                        if line_strip in repeated_subsections:
+                        # if subsection, make sure its section corresponds to current section to avoid
+                        # problems with repeated subsection names (SECTIONA·SUBSECTION, SECTIONB·SUBSECTION)
+                        if ('[[' in line_strip) and (']]' in line_strip):
+                            if (current_modified_subsection != section_modified):
+                                copy = False
+                            else:
+                                copy = True
+                        elif line_strip in repeated_subsections:
                             position = repeated_subsections_modified[section].index(section_modified)
                             if position == repetition:
                                 copy = True
@@ -1514,6 +1535,9 @@ def read_conf(fpath=None):
     # add section attributes to subsection if do not exist there (e.g. add SECTIONA values to SECTIONA-Spain)
     for section_modified in all_sections_modified:
         
+        # reset res variable
+        res_sub = {}
+
         # determine if subsection or not
         if '·' in section_modified:
             is_subsection = True
@@ -1552,9 +1576,6 @@ def read_conf(fpath=None):
 
         # store pairs into res variable
         res[section_modified] = res_sub
-
-        # reset res variable
-        res_sub = {}
 
     return res, all_sections_modified, parent_sections, subsections_modified, filenames
 
