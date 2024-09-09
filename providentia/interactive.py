@@ -108,6 +108,9 @@ class Interactive:
 
         # read data
         self.read()  
+        if self.invalid_read:
+            print('No valid data to read')
+            return
 
         # filter
         self.reset_filter(initialise=True)
@@ -122,10 +125,6 @@ class Interactive:
 
         # read data
         self.datareader.read_setup(['reset'])
-
-        if self.invalid_read:
-            print('No valid data to read')
-            return
 
     def filter(self):
         """ Wrapper method to filter data. """
