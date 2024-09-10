@@ -117,6 +117,27 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--spatial_colocation",
                                      dest="spatial_colocation",
                                      help="activate spatial colocation between multiple read species")
+            self.parser.add_argument("--spatial_colocation_tolerance",
+                                     dest="spatial_colocation_tolerance",
+                                     help="set spatial colocation tolerance to match stations by longitudes/latitudes and/or measurement_altitudes (in metres)")
+            self.parser.add_argument("--spatial_colocation_station_reference",
+                                     dest="spatial_colocation_station_reference",
+                                     help="use 'station_reference' variable for spatial colocation?")
+            self.parser.add_argument("--spatial_colocation_station_name",
+                                     dest="spatial_colocation_station_name",
+                                     help="use 'station_name' variable for spatial colocation?")
+            self.parser.add_argument("--spatial_colocation_longitude_latitude",
+                                     dest="spatial_colocation_longitude_latitude",
+                                     help="use 'longitude' and 'latitude' variables for spatial colocation?")
+            self.parser.add_argument("--spatial_colocation_measurement_altitude",
+                                     dest="spatial_colocation_measurement_altitude",
+                                     help="use 'measurement_altitude' variable for spatial colocation?")
+            self.parser.add_argument("--spatial_colocation_validation",
+                                     dest="spatial_colocation_validation",
+                                     help="validate spatial colocation intersections via position using 'spatial_colocation_tolerance'?")
+            self.parser.add_argument("--spatial_colocation_validation_tolerance",
+                                     dest="spatial_colocation_validation_tolerance",
+                                     help="set spatial colocation validation tolerance to validate station reference/station name match of stations by longitude/latitude position (in metres)")
             self.parser.add_argument("--filter_species",
                                      dest="filter_species",
                                      help="filter read species by other species within a given data range")
