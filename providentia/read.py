@@ -16,8 +16,7 @@ import pandas as pd
 from .plot_aux import update_plotting_parameters
 from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_yearmonths_to_read, 
                        init_shared_vars_read_netcdf_data, read_netcdf_data, read_netcdf_metadata)
-from .spatial_colocation import (resolve_duplicate_spatial_colocation_matches, spatial_colocation_ghost, 
-                                 spatial_colocation_nonghost)
+from .spatial_colocation import SpatialColocation
 from .warnings_prv import show_message
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -746,24 +745,21 @@ class DataReader:
         # then spatially colocate stations across species
         if (len((self.read_instance.networkspecies + self.read_instance.filter_networkspecies)) > 1) & (self.read_instance.spatial_colocation):
             # get intersecting station indices across species (handle both GHOST and non-GHOST cases)
-            if self.read_instance.reading_ghost:
-                intersecting_indices = spatial_colocation_ghost(self.read_instance.station_longitudes, 
-                                                                self.read_instance.station_latitudes, 
-                                                                self.read_instance.station_measurement_altitudes)
-            else:
-                intersecting_indices = spatial_colocation_nonghost(self.read_instance.station_references, 
-                                                                   self.read_instance.station_longitudes, 
-                                                                   self.read_instance.station_latitudes)
-            
-            # iterate through networkspecies specific intersecting indices, setting 
-            for ns, ns_intersects in intersecting_indices.items():
-                self.read_instance.station_references[ns] = self.read_instance.station_references[ns][ns_intersects]
-                self.read_instance.station_longitudes[ns] = self.read_instance.station_longitudes[ns][ns_intersects]
-                self.read_instance.station_latitudes[ns] = self.read_instance.station_latitudes[ns][ns_intersects]
-                if ns in self.read_instance.station_measurement_altitudes:
-                    self.read_instance.station_measurement_altitudes[ns] = self.read_instance.station_measurement_altitudes[ns][ns_intersects]
-                if ns in self.read_instance.station_names:
-                    self.read_instance.station_names[ns] = self.read_instance.station_names[ns][ns_intersects]
+            self.sc = SpatialColocation(self.read_instance)
+
+            if len(self.sc.intersecting_indices[self.sc.firstnetworkspeci]) == 0:
+                print("Warning: spatial_colocation is set to False, as have 0 intersecting stations across species.")
+                self.read_instance.spatial_colocation = False
+            # otherwise, iterate through networkspecies specific intersecting indices, reducing variables for only specific indices
+            else:            
+                for ns, ns_intersects in self.sc.intersecting_indices.items():
+                    self.read_instance.station_references[ns] = self.read_instance.station_references[ns][ns_intersects]
+                    self.read_instance.station_longitudes[ns] = self.read_instance.station_longitudes[ns][ns_intersects]
+                    self.read_instance.station_latitudes[ns] = self.read_instance.station_latitudes[ns][ns_intersects]
+                    if ns in self.read_instance.station_measurement_altitudes:
+                        self.read_instance.station_measurement_altitudes[ns] = self.read_instance.station_measurement_altitudes[ns][ns_intersects]
+                    if ns in self.read_instance.station_names:
+                        self.read_instance.station_names[ns] = self.read_instance.station_names[ns][ns_intersects]
 
     def read_data(self, yearmonths_to_read, data_labels):
         """ Function that handles reading of observational/experiment data.

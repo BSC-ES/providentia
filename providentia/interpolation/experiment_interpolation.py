@@ -821,7 +821,7 @@ class ExperimentInterpolation(object):
         tree = spatial.cKDTree(mod_lonlat)
     
         # get n-neighbour nearest distances/indices (ravel form) of model gridcell centres from each observational station  
-        dists,idx = tree.query(obs_lonlat,k=int(self.n_neighbours))
+        dists,idx = tree.query(obs_lonlat,k=int(self.n_neighbours),workers=-1)
         
         # for n neighbours == 1, do rehsaping of array so doesn't break
         if len(dists.shape) == 1:
