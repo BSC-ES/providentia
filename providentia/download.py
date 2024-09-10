@@ -65,7 +65,7 @@ def sighandler(*unused):
     sys.exit()
 
 class ProvidentiaDownload(object):
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         # TODO move some of these variables to configuration.py
         # initialise zenodo url
         self.ghost_url = 'https://zenodo.org/records/10637450'
@@ -225,21 +225,22 @@ class ProvidentiaDownload(object):
 
             # when one of those symbols is passed, get all experiments
             # TODO check this when merging with the interpolation
-            if self.experiments == {'*': '*'} or self.experiments == {'default': 'default'}:
+            if self.experiments == {'*': '*'}:
                 self.get_all_experiments()
 
             # experiment
             # download from the remote machine
-            if self.bsc_download_choice == 'y':
-                for experiment in self.experiments.keys():
-                    initial_check_nc_files = self.download_experiment(experiment, initial_check=True)
-                    files_to_download = self.select_files_to_download(initial_check_nc_files)
-                    if not initial_check_nc_files or files_to_download:
-                        self.download_experiment(experiment, initial_check=False, files_to_download=files_to_download)
-            # download from the zenodo webpage
-            else:
-                error = f"Error: It is not possible to download experiments from the zenodo webpage."
-                sys.exit(error)
+            if self.experiments:
+                if self.bsc_download_choice == 'y':
+                    for experiment in self.experiments.keys():
+                        initial_check_nc_files = self.download_experiment(experiment, initial_check=True)
+                        files_to_download = self.select_files_to_download(initial_check_nc_files)
+                        if not initial_check_nc_files or files_to_download:
+                            self.download_experiment(experiment, initial_check=False, files_to_download=files_to_download)
+                # download from the zenodo webpage
+                else:
+                    error = f"Error: It is not possible to download experiments from the zenodo webpage."
+                    sys.exit(error)
 
             # TODO delete when sure
             # update filetrees
@@ -265,9 +266,10 @@ class ProvidentiaDownload(object):
         # encode the output public key if possible
         try:
             ed25519_key = output.split()[-1].encode()
+            key = paramiko.Ed25519Key(data=decodebytes(ed25519_key))
         
         # in case transfer broke
-        except IndexError:
+        except:
             msg = f"Remote machine {REMOTE_MACHINE} not working right now."
 
             # if the remote machine has not been changed
@@ -287,8 +289,6 @@ class ProvidentiaDownload(object):
             else:
                 error = "Error: None of the machines are working right now. Try later."
                 sys.exit(error)
-
-        key = paramiko.Ed25519Key(data=decodebytes(ed25519_key))
 
         self.ssh = paramiko.SSHClient()
         hostkeys = self.ssh.get_host_keys().add(self.remote_hostname, 'ed25519', key)
@@ -403,7 +403,7 @@ class ProvidentiaDownload(object):
 
         return not_downloaded_files
 
-    def download_nonghost_network(self,network,initial_check,files_to_download=None):
+    def download_nonghost_network(self, network, initial_check, files_to_download=None):
         # check if ssh exists and check if still active, connect if not
         if self.ssh == None or self.ssh.get_transport().is_active():
             self.connect() 
@@ -528,7 +528,7 @@ class ProvidentiaDownload(object):
             msg = "There are no available observations to be downloaded."
             show_message(self, msg, deactivate=initial_check)
         
-    def download_ghost_network_sftp(self,network,initial_check,files_to_download=None):
+    def download_ghost_network_sftp(self, network, initial_check, files_to_download=None):
         # check if ssh exists and check if still active, connect if not
         if self.ssh == None or self.ssh.get_transport().is_active():
             self.connect() 
@@ -680,7 +680,7 @@ class ProvidentiaDownload(object):
             msg = "There are no available observations to be downloaded."
             show_message(self, msg, deactivate=initial_check)
 
-    def download_ghost_network_zenodo(self,network,initial_check,files_to_download=None):
+    def download_ghost_network_zenodo(self, network, initial_check, files_to_download=None):
         if not initial_check:
             # print current_network
             print('\n'+'-'*40)
@@ -812,7 +812,7 @@ class ProvidentiaDownload(object):
                 
                 return initial_check_nc_files             
                                 
-    def download_experiment(self,experiment,initial_check,files_to_download=None):
+    def download_experiment(self, experiment, initial_check, files_to_download=None):
         # check if ssh exists and check if still active, connect if not
         if self.ssh == None or self.ssh.get_transport().is_active():
             self.connect()  
@@ -841,8 +841,11 @@ class ProvidentiaDownload(object):
         try:
             self.sftp.stat(remote_dir)
         except FileNotFoundError:
-            msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment for the current ghost version ({self.ghost_version})."
-            
+            if check_for_ghost(network):
+                msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment for the current GHOST version ({self.ghost_version})."
+            else:
+                msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment."
+
             # get possible GHOST versions from the combination of GHOST_standards and the real avaibles in the experiment remote machine path
             possible_ghost_versions = set(self.sftp.listdir(self.exp_remote_path)).intersection(set(self.possible_ghost_versions))
             
@@ -900,7 +903,7 @@ class ProvidentiaDownload(object):
                                 except FileNotFoundError:
                                     continue
                             
-            if valid_available_ghost_versions:
+            if valid_available_ghost_versions and check_for_ghost(network)::
                 msg += f" Please check one of the available versions: {', '.join(sorted(valid_available_ghost_versions))}"
             elif available_ghost_versions:
                 msg += " There are no other versions available at the moment with this configuration."

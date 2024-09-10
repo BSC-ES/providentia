@@ -26,10 +26,9 @@ from .plot_aux import get_taylor_diagram_ghelper
 from .plot_formatting import (format_plot_options, format_axis, set_axis_label, set_axis_title, 
                               harmonise_xy_lims_paradigm)
 from .read import DataReader
-from .read_aux import (get_ghost_observational_tree, get_lower_resolutions, 
-                       get_nonghost_observational_tree, get_nonrelevant_temporal_resolutions, 
-                       get_relevant_temporal_resolutions, get_valid_experiments, 
-                       get_valid_obs_files_in_date_range)
+from .read_aux import (generate_file_trees, get_lower_resolutions, 
+                       get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
+                       get_valid_experiments, get_valid_obs_files_in_date_range)
 from .statistics import (calculate_statistic, generate_colourbar, generate_colourbar_detail, 
                          get_selected_station_data, get_z_statistic_info)
 from .writing import export_configuration, export_data_npz, export_netcdf
@@ -71,43 +70,9 @@ class Interactive:
         if not valid_config:
             return
 
-        # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
-        # if have filetree flags, then these overwrite any defaults
-        gft = False
-        if self.generate_file_tree:
-            gft = True
-        elif self.disable_file_tree:
-            gft = False
-        # by default generate filetree on MN5
-        elif self.machine in ['mn5']:
-            gft = True
-        # by default generate filetree locally
-        elif self.filetree_type == 'local':
-            gft = True
-
-        # generate file trees
-        if gft:
-            self.all_observation_data = get_ghost_observational_tree(self)
-            if self.nonghost_root is not None:
-                nonghost_observation_data = get_nonghost_observational_tree(self)
-        # load file trees
-        else:
-            try:
-                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(self.ghost_version)))) 
-            except FileNotFoundError as file_error:
-                msg = "Error: Trying to load 'settings/internal/ghost_filetree_{}.json' but file does not exist. Run with the flag '--gft' to generate this file.".format(self.ghost_version)
-                sys.exit(msg)
-            if self.nonghost_root is not None:
-                try:
-                    nonghost_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json')))
-                except FileNotFoundError as file_error:
-                    msg = "Error: Trying to load 'settings/internal/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
-                    sys.exit(msg)
+        # generate file trees if needed
+        generate_file_trees(self)
         
-        # merge GHOST and non-GHOST filetrees
-        if self.nonghost_root is not None:
-            self.all_observation_data = {**self.all_observation_data, **nonghost_observation_data}
-
         # initialise DataReader class
         self.datareader = DataReader(self)
 
@@ -143,6 +108,9 @@ class Interactive:
 
         # read data
         self.read()  
+        if self.invalid_read:
+            print('No valid data to read')
+            return
 
         # filter
         self.reset_filter(initialise=True)
@@ -157,10 +125,6 @@ class Interactive:
 
         # read data
         self.datareader.read_setup(['reset'])
-
-        if self.invalid_read:
-            print('No valid data to read')
-            return
 
     def filter(self):
         """ Wrapper method to filter data. """
@@ -190,6 +154,14 @@ class Interactive:
         # update available fields
         update_representativity_fields(self)
         update_period_fields(self)
+
+        # for non-GHOST delete valid station indices variables because we do not want to 
+        # remove the stations with 0 valid measurements before the filter has been updated, 
+        # this will happen later
+        if hasattr(self, 'valid_station_inds') and (not self.reading_ghost):
+            delattr(self, 'valid_station_inds')
+            delattr(self, 'valid_station_inds_temporal_colocation')
+
         update_metadata_fields(self)
         
         # apply set fields at initalisation for filtering
@@ -198,7 +170,7 @@ class Interactive:
             period_conf(self)
             metadata_conf(self)
             
-        #re-filter 
+        # re-filter 
         self.filter()
 
         # set variable to know if data is in intial state or not

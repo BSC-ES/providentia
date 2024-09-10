@@ -15,6 +15,7 @@ from .configuration import load_conf
 from .dashboard_elements import InputDialog
 from .dashboard_interactivity import LassoSelector
 from .fields_menus import metadata_conf, multispecies_conf, period_conf, representativity_conf
+from .read_aux import generate_file_trees
 from .warnings_prv import show_message
 from .writing import export_configuration, export_data_npz, export_netcdf
 
@@ -157,6 +158,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         except Exception as e:
             msg = 'There was an error loading the configuration file.'
             show_message(self.read_instance, msg)
+            print(e)
 
     def connect_lasso(self):
         """ Connect / disconnect map lasso selection. """
@@ -239,6 +241,9 @@ class NavigationToolbar(NavigationToolbar2QT):
         # no commandline arguments considered as reloading config
         provconf = ProvConfiguration(self.read_instance)
 
+        # get current GHOST version
+        current_ghost_version = self.read_instance.ghost_version
+
         # update config and section attributes of instance
         self.read_instance.config = fpath
         self.read_instance.section = section
@@ -250,6 +255,10 @@ class NavigationToolbar(NavigationToolbar2QT):
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         provconf.check_validity()
 
+        # generate file trees if GHOST version has changed
+        if current_ghost_version != self.read_instance.ghost_version:
+            generate_file_trees(self.read_instance, force=True)
+        
         # update species, experiments, qa & flags
         self.read_instance.config_bar_initialisation = True
         self.read_instance.update_configuration_bar_fields()
