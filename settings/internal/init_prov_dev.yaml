@@ -24,12 +24,14 @@
             'start_date': null,
             'end_date': null,
             'observations_data_label': 'observations',
+            'alias_flag' : False,
             'experiments': [],
             "n_neighbours" : null, #interpolation
             "domain" : null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
             "ensemble_options" : null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
             'exp_id' : [], # TODO remove if changed 
             'experiment_types' : [], # TODO remove if changed # interpolation
+            'n_neighbors' : null,
             'qa': null,
             'flags': null,
             'add_qa': null,

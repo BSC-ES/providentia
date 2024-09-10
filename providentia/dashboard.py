@@ -32,8 +32,8 @@ from .plot_aux import get_taylor_diagram_ghelper
 from .plot_formatting import format_axis
 from .pop_up_window import PopUpWindow
 from .read import DataReader
-from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_ghost_observational_tree, 
-                       get_nonghost_observational_tree, get_valid_experiments, get_valid_obs_files_in_date_range,
+from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, generate_file_trees, 
+                       get_valid_experiments, get_valid_obs_files_in_date_range,
                        get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions,
                        temporal_resolution_order_dict, get_lower_resolutions)
 from .toolbar import NavigationToolbar
@@ -163,41 +163,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # arguments are only local
         self.full_window_geometry = None
 
-        # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
-        # if have filetree flags, then these overwrite any defaults
-        gft = False
-        if self.generate_file_tree:
-            gft = True
-        elif self.disable_file_tree:
-            gft = False
-        # by default generate filetree on MN5
-        elif self.machine in ['mn5']:
-            gft = True
-        # by default generate filetree locally
-        elif self.filetree_type == 'local':
-            gft = True
-
-        # generate file trees
-        if gft:
-            self.all_observation_data = get_ghost_observational_tree(self)
-            if self.nonghost_root is not None:
-                nonghost_observation_data = get_nonghost_observational_tree(self)
-        # load file trees
-        else:
-            try:
-                self.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(self.ghost_version)))) 
-            except FileNotFoundError as file_error:
-                msg = "Error: Trying to load 'settings/internal/ghost_filetree_{}.json' but file does not exist. Run with the flag '--gft' to generate this file.".format(self.ghost_version)
-                sys.exit(msg)
-            if self.nonghost_root is not None:
-                try:
-                    nonghost_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json')))
-                except FileNotFoundError as file_error:
-                    msg = "Error: Trying to load 'settings/internal/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
-                    sys.exit(msg)
-        # merge GHOST and non-GHOST filetrees
-        if self.nonghost_root is not None:
-            self.all_observation_data = {**self.all_observation_data, **nonghost_observation_data}
+        # generate file trees if needed
+        generate_file_trees(self)
 
         # initialise DataReader
         self.datareader = DataReader(self)

@@ -208,6 +208,9 @@ class ProvConfiguration:
             # parse network
 
             if isinstance(value, str):
+                # treat leaving the field blank as default
+                if value == '':
+                    return self.var_defaults[key]
                 # parse multiple networks
                 if ',' in value:
                     return [network.strip() for network in value.split(',')]
@@ -218,6 +221,9 @@ class ProvConfiguration:
             # parse species
 
             if isinstance(value, str):
+                # treat leaving the field blank as default
+                if value == '':
+                    return self.var_defaults[key]
                 # parse multiple species
                 if ',' in value:
                     return [speci.strip() for speci in value.split(',')]
@@ -228,6 +234,10 @@ class ProvConfiguration:
             # parse resolution
             
             if isinstance(value, str):
+                # treat leaving the field blank as default
+                if value == '':
+                    return self.var_defaults[key]
+                # parse multiple species only in interpolation and download
                 if self.read_instance.interpolation or self.read_instance.download:
                     return [res.strip() for res in value.split(',')]
                 else:        
@@ -237,6 +247,9 @@ class ProvConfiguration:
             # parse start_date
 
             if (isinstance(value, str)) or (isinstance(value, int)):
+                # treat leaving the field blank as default
+                if value == '':
+                    return self.var_defaults[key]
                 # throw error if start_date is empty str
                 value = str(value)
                 return value.strip()
@@ -245,6 +258,9 @@ class ProvConfiguration:
             # parse end_date
 
             if (isinstance(value, str)) or (isinstance(value, int)):
+                # treat leaving the field blank as default
+                if value == '':
+                    return self.var_defaults[key]
                 # throw error if start_date is empty str
                 value = str(value)
                 return value.strip()
@@ -353,6 +369,9 @@ class ProvConfiguration:
             # parse domain
 
             if value != None:
+                # treat leaving the field blank as default
+                if value == '':
+                    return self.var_defaults[key]
                 # split list, if only one domain, then creates list of one element
                 domains = [dom.strip() for dom in value.split(",")]      
                 return domains
@@ -363,6 +382,9 @@ class ProvConfiguration:
             # parse ensemble_options
 
             if value != None:
+                # treat leaving the field blank as default
+                if value == '':
+                    return self.var_defaults[key]
                 # split list, if only one ensemble_options, then creates list of one element
                 # if it is a number, then make it 3 digits, if not it stays as it is
                 ensemble_opts = [opt.strip().zfill(3) for opt in str(value).split(",")]  
@@ -388,8 +410,6 @@ class ProvConfiguration:
                         exps = [exp.strip() for exp in value.split(",")]
                         exps_legend = []
 
-                    # decide if alias is possible
-                    self.read_instance.hasAlias = False
 
                     if exps_legend:
                         # to set an alias is mandatory to have the same number of experiments and legends
@@ -398,15 +418,15 @@ class ProvConfiguration:
                             # then they can be set as alias     
                             if all([len(exp.split("-"))==3 for exp in exps]) or \
                                 (len(exps) == 1 and len(self.read_instance.domain) == 1 and len(self.read_instance.ensemble_options) == 1):
-                                self.read_instance.hasAlias = True
+                                self.read_instance.alias_flag = True
                         
                         # show warning if alias not possible to be set
-                        if not deactivate_warning and not self.read_instance.hasAlias:
+                        if not deactivate_warning and not self.read_instance.alias_flag:
                             msg = "Alias could not be set."
-                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
                     # set alias
-                    if self.read_instance.hasAlias:
+                    if self.read_instance.alias_flag:
                         self.read_instance.alias = exps_legend
 
                     return exps
@@ -555,33 +575,22 @@ class ProvConfiguration:
         elif key == 'calibration_factor':
             # parse calibration factor
 
-            if isinstance(value, (str, int, float)):
+            if isinstance(value, (str)):
 
                 # convert to string if not
                 if np.issubdtype(type(value), np.number):
                     value = str(value)
 
                 # strip all whitespace
-                value_strip = "".join(value.split())
-
-                # detect if calibration factor is passed by experiment
-                calibration_by_experiment = False
-                for experiment in self.read_instance.experiments:
-                    if experiment in value_strip:
-                        calibration_by_experiment = True
-                        break
-                
-                # create dictionary per experiment
-                calibration_factor_dict = {}
-                if calibration_by_experiment:
-                    for i, experiment in enumerate(self.read_instance.experiments):
-                        calibration_factor_exp = value_strip.split('(')[i+1].split(')')[0]
-                        calibration_factor_dict[experiment] = calibration_factor_exp
+                if ',' in value:
+                    return [calibration_factor.strip() for calibration_factor in value.split(',')]
                 else:
-                    for i, experiment in enumerate(self.read_instance.experiments):
-                        calibration_factor_dict[experiment] = value
-
-                return calibration_factor_dict
+                    return [value.strip()]
+        
+        elif key in ['n_neighbors','statistic_mode','statistic_aggregation','periodic_statistic_mode','timeseries_statistic_aggregation']:
+            # treat leaving the field blank as default
+            if value == '':
+                return self.var_defaults[key]
             
         # if no special parsing treatment for variable, simply return value
         return value
@@ -700,8 +709,10 @@ class ProvConfiguration:
                 available_ghost_versions = list(filter(lambda x:full_experiment in os.listdir(os.path.join(self.read_instance.exp_root,x)), possible_ghost_versions))
         
         # if not found because of the ghost version, tell the user
-        if available_ghost_versions:
-            msg = f"There is no data available for {full_experiment} experiment for the current ghost version ({self.read_instance.ghost_version}). Please check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
+        if available_ghost_versions and ('/' not in self.read_instance.network[0]):
+            msg = f"There is no data available for {full_experiment} experiment for the current"
+            msg += f" GHOST version ({self.read_instance.ghost_version}). Please check one of the available versions:"
+            msg += f" {', '.join(sorted(available_ghost_versions))}"
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
         return bool(exp_found), exp_found
@@ -736,6 +747,7 @@ class ProvConfiguration:
 
         return experiment_exists, [full_experiment]
     
+    # TODO maybe remove this one and keep the download check since its much cleaner
     def check_experiment_download(self, full_experiment, deactivate_warning):
         """ Check individual experiment and get list of options."""
 
@@ -746,6 +758,10 @@ class ProvConfiguration:
 
         # split full experiment
         experiment, domain, ensemble_option = full_experiment.split('-')
+        
+        # accept asterisk to download all experiments
+        if experiment == '*':
+            return True, experiment
         
         # get all possible experiments
         exp_path = os.path.join(self.read_instance.exp_remote_path,self.read_instance.ghost_version)
@@ -758,8 +774,11 @@ class ProvConfiguration:
         if ensemble_option == "allmembers":
             exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.possible_experiments))
            
-            # search for other ghost versions
             if not exp_found:
+                # get experiment for printing
+                experiment_wng = experiment + '-' + domain
+                
+                # search for other ghost versions
                 for ghost_version in self.read_instance.possible_ghost_versions:
                     ghost_exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.read_instance.sftp.listdir(os.path.join(self.read_instance.exp_remote_path,ghost_version))))
                     if ghost_exp_found:
@@ -769,12 +788,18 @@ class ProvConfiguration:
 
             # search for other ghost versions
             if not exp_found:
+                # get experiment for printing
+                experiment_wng = full_experiment
+
+                # search for other ghost versions
                 available_ghost_versions = list(filter(lambda x:full_experiment in self.read_instance.sftp.listdir(os.path.join(self.read_instance.exp_remote_path,x)), self.read_instance.possible_ghost_versions))
         
         # if not found because of the ghost version, tell the user
-        if available_ghost_versions:
-            msg = f"There is no data available for {full_experiment} experiment for the current ghost version ({self.read_instance.ghost_version}). Please check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+        if not exp_found:
+            msg = f"There is not experiment {experiment_wng} data for the current ghost version ({self.read_instance.ghost_version})." 
+            if available_ghost_versions:
+                msg += f" Please, check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
 
         return bool(exp_found), exp_found        
 
@@ -827,7 +852,7 @@ class ProvConfiguration:
         # check have species information, TODO REFACTOR INTERPOLATION STUFF
         # if offline, throw message, stating are using default instead
         # in download mode is allowed to not pass any species, so continue
-        if (not self.read_instance.species and not self.read_instance.download):
+        if (not self.read_instance.species and not self.read_instance.download and not self.read_instance.interpolation):
             if self.read_instance.interpolation:
                 default = [self.standard_parameters[param]['bsc_parameter_name'] for param in self.standard_parameters.keys()] 
             else:
@@ -977,7 +1002,10 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         # TODO maybe think this a bit better, if i dont pass it it should check better if i already passed it in experiments and so
         if self.read_instance.experiments and self.default_ensemble_options:
-            default = default_values['ensemble_options']
+            if self.read_instance.interpolation:
+                default = ["000"]
+            else:
+                default = default_values['ensemble_options']
             msg = "Ensemble options (ensemble_options) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.ensemble_options = default
@@ -1022,7 +1050,7 @@ class ProvConfiguration:
             exp_is_valid, valid_exp_list = check_experiment_fun(experiment, deactivate_warning)
             if exp_is_valid:
                 for valid_exp in valid_exp_list:
-                    if self.read_instance.hasAlias:
+                    if self.read_instance.alias_flag:
                         correct_experiments[valid_exp] = self.read_instance.alias[exp_i]
                     else:
                         correct_experiments[valid_exp] = valid_exp
@@ -1037,7 +1065,35 @@ class ProvConfiguration:
 
         # replace experiments by new ones found
         self.read_instance.experiments = correct_experiments
-                        
+
+        # check calibration factor
+        if self.read_instance.calibration_factor:
+
+            # detect if calibration factor is passed by experiment
+            calibration_by_experiment = not self.read_instance.calibration_factor[0][0] in ['+', '-', '*', '/']
+
+            # control that calibration factor not by experiment can only be one element
+            if not calibration_by_experiment and len(self.read_instance.calibration_factor) > 1:
+                error = "Error: When calibration factor is not provided by the experiment, only one value can be passed."
+                sys.exit(error)
+
+            # create dictionary per experiment
+            calibration_factor_dict = {}
+
+            # if calibration is by experiment
+            if calibration_by_experiment:
+                for i, experiment in enumerate(self.read_instance.experiments):
+                    for calibration_factor in self.read_instance.calibration_factor:
+                        if experiment in calibration_factor:
+                            calibration_factor_exp = calibration_factor.split("(")[1][:-1]
+                            calibration_factor_dict[experiment] = calibration_factor_exp
+            # if the same calibration is applied to all experiments
+            else:
+                calibration_factor_dict = {experiment:self.read_instance.calibration_factor[0] for experiment in self.read_instance.experiments}                 
+
+            # replace calibration factors by new dictionary
+            self.read_instance.calibration_factor = calibration_factor_dict
+
         # check have statistic_mode information,
         # if offline, throw message, stating are using default instead
         # TODO not needed in interpolation 
@@ -1055,12 +1111,12 @@ class ProvConfiguration:
             if not self.read_instance.statistic_aggregation:  
                 if self.read_instance.statistic_mode != 'Flattened':
                     msg = "Statistic aggregation (statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
-                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                 self.read_instance.statistic_aggregation = default
             # if statistic_aggregation is defined ensure that it matches with the statistic_mode
             elif (self.read_instance.statistic_mode == 'Flattened'):
                     msg = "statistic_mode is set to be 'Flattened', therefore statistic_aggregation must be empty, not '{}'. Setting to be empty.".format(self.read_instance.statistic_aggregation)                
-                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     self.read_instance.statistic_aggregation = default
 
         # check have periodic_statistic_mode information,
@@ -1161,83 +1217,85 @@ class ProvConfiguration:
         if invalid_filter_species:
             msg = f'Removing invalid filter species {", ".join(invalid_filter_species)} for the current GHOST version ({self.read_instance.ghost_version})'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            filter_species_keys = list(self.read_instance.filter_species.keys())
-            for filter_species in filter_species_keys:
+            # remove them from the filter_species atribute
+            for filter_species in self.read_instance.filter_species.keys():
                 if filter_species.split('|')[1] in invalid_filter_species:
                     del self.read_instance.filter_species[filter_species]
 
-        # create variable for all unique species (plus filter species)
-        filter_species = []
-        species_plus_filter_species = copy.deepcopy(self.read_instance.species)
-        if self.read_instance.filter_species:
-            for networkspeci in self.read_instance.filter_species:
-                speci = networkspeci.split('|')[1]
-                if speci not in self.read_instance.species:
-                    filter_species.append(speci)
-                    species_plus_filter_species.append(speci)
-                    
-        # set lower_bound and upper_bound as dicts with limits per species (including filter species)
-        # if type is dict then set bound using GHOST extreme limits per species
+        # TODO change this in the refactoring, not do this in download mode
+        if not self.read_instance.download: 
+            # create variable for all unique species (plus filter species)
+            filter_species = []
+            species_plus_filter_species = copy.deepcopy(self.read_instance.species)
+            if self.read_instance.filter_species:
+                for networkspeci in self.read_instance.filter_species:
+                    speci = networkspeci.split('|')[1]
+                    if speci not in self.read_instance.species:
+                        filter_species.append(speci)
+                        species_plus_filter_species.append(speci)
+                        
+            # set lower_bound and upper_bound as dicts with limits per species (including filter species)
+            # if type is dict then set bound using GHOST extreme limits per species
 
-        # lower_bound
-        # type is dict, then set as default limit per species using GHOST limits
-        if isinstance(self.read_instance.lower_bound, dict):
-            self.read_instance.lower_bound = {speci:
-                                              np.float32(self.read_instance.parameter_dictionary[speci]['extreme_lower_limit']) 
-                                              for speci in species_plus_filter_species}
-        # otherwise set list values to dict, saving limits per species
-        # if have just 1 limit apply for all read species, but if have multiple, set limits per species
-        # throw error if have multiple lower bounds, but not equal to number of species to read  
-        else:      
-            lower_bound_dict = {}
-            if len(self.read_instance.lower_bound) == 1:
-                for speci in species_plus_filter_species:
-                    lower_bound_dict[speci] = self.read_instance.lower_bound[0]
-            elif len(self.read_instance.lower_bound) > 1:
-                if len(self.read_instance.species) != len(self.read_instance.lower_bound):
-                    error = 'Error: "lower_bound" variable must be same length as number of species read.'
-                    sys.exit(error)
-                else:
-                    for speci_ii, speci in enumerate(self.read_instance.species):
-                        lower_bound_dict[speci] = self.read_instance.lower_bound[speci_ii] 
-                    # add filter_species (using GHOST limits)
-                    for speci in filter_species:
-                        lower_bound_dict[speci] = np.float32(self.read_instance.parameter_dictionary[speci]['extreme_lower_limit'])
-            self.read_instance.lower_bound = lower_bound_dict
+            # lower_bound
+            # type is dict, then set as default limit per species using GHOST limits
+            if isinstance(self.read_instance.lower_bound, dict):
+                self.read_instance.lower_bound = {speci:
+                                                np.float32(self.read_instance.parameter_dictionary[speci]['extreme_lower_limit']) 
+                                                for speci in species_plus_filter_species}
+            # otherwise set list values to dict, saving limits per species
+            # if have just 1 limit apply for all read species, but if have multiple, set limits per species
+            # throw error if have multiple lower bounds, but not equal to number of species to read  
+            else:      
+                lower_bound_dict = {}
+                if len(self.read_instance.lower_bound) == 1:
+                    for speci in species_plus_filter_species:
+                        lower_bound_dict[speci] = self.read_instance.lower_bound[0]
+                elif len(self.read_instance.lower_bound) > 1:
+                    if len(self.read_instance.species) != len(self.read_instance.lower_bound):
+                        error = 'Error: "lower_bound" variable must be same length as number of species read.'
+                        sys.exit(error)
+                    else:
+                        for speci_ii, speci in enumerate(self.read_instance.species):
+                            lower_bound_dict[speci] = self.read_instance.lower_bound[speci_ii] 
+                        # add filter_species (using GHOST limits)
+                        for speci in filter_species:
+                            lower_bound_dict[speci] = np.float32(self.read_instance.parameter_dictionary[speci]['extreme_lower_limit'])
+                self.read_instance.lower_bound = lower_bound_dict
 
-        # upper_bound
-        # type is dict, then set as default limit per species using GHOST limits
-        if isinstance(self.read_instance.upper_bound, dict):
-            self.read_instance.upper_bound = {speci:np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit']) 
-                                              for speci in species_plus_filter_species}
-        # otherwise set list values to dict, saving limits per species
-        # if have just 1 limit apply for all read species, but if have multiple, set limits per species
-        # throw error if have multiple upper bounds, but not equal to number of species to read  
-        else:      
-            upper_bound_dict = {}
-            if len(self.read_instance.upper_bound) == 1:
-                for speci in species_plus_filter_species:
-                    upper_bound_dict[speci] = self.read_instance.upper_bound[0]
-            elif len(self.read_instance.upper_bound) > 1:
-                if len(self.read_instance.species) != len(self.read_instance.upper_bound):
-                    error = 'Error: "upper_bound" variable must be same length as number of species read.'
-                    sys.exit(error)
-                else:
-                    for speci_ii, speci in enumerate(self.read_instance.species):
-                        upper_bound_dict[speci] = self.read_instance.upper_bound[speci_ii] 
-                    # add filter_species (using GHOST limits)
-                    for speci in filter_species:
-                        upper_bound_dict[speci] = np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit'])
-            self.read_instance.upper_bound = upper_bound_dict
+            # upper_bound
+            # type is dict, then set as default limit per species using GHOST limits
+            if isinstance(self.read_instance.upper_bound, dict):
+                self.read_instance.upper_bound = {speci:np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit']) 
+                                                for speci in species_plus_filter_species}
+            # otherwise set list values to dict, saving limits per species
+            # if have just 1 limit apply for all read species, but if have multiple, set limits per species
+            # throw error if have multiple upper bounds, but not equal to number of species to read  
+            else:      
+                upper_bound_dict = {}
+                if len(self.read_instance.upper_bound) == 1:
+                    for speci in species_plus_filter_species:
+                        upper_bound_dict[speci] = self.read_instance.upper_bound[0]
+                elif len(self.read_instance.upper_bound) > 1:
+                    if len(self.read_instance.species) != len(self.read_instance.upper_bound):
+                        error = 'Error: "upper_bound" variable must be same length as number of species read.'
+                        sys.exit(error)
+                    else:
+                        for speci_ii, speci in enumerate(self.read_instance.species):
+                            upper_bound_dict[speci] = self.read_instance.upper_bound[speci_ii] 
+                        # add filter_species (using GHOST limits)
+                        for speci in filter_species:
+                            upper_bound_dict[speci] = np.float32(self.read_instance.parameter_dictionary[speci]['extreme_upper_limit'])
+                self.read_instance.upper_bound = upper_bound_dict
 
-        # create a variable to set qa per species (including filter species), setting defaults in the process
-        if isinstance(self.read_instance.qa, dict):
-            self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) 
-                                                 for speci in species_plus_filter_species}
-            # set qa to be first of qa per species pairs
-            self.read_instance.qa = self.read_instance.qa_per_species[list(self.read_instance.qa_per_species.keys())[0]]
-        else:
-            self.read_instance.qa_per_species = {speci:self.read_instance.qa for speci in species_plus_filter_species}
+            # create a variable to set qa per species (including filter species), setting defaults in the process
+            if isinstance(self.read_instance.qa, dict):
+                self.read_instance.qa_per_species = {speci:get_default_qa(self.read_instance, speci) 
+                                                    for speci in species_plus_filter_species}
+                # set qa to be first of qa per species pairs
+                self.read_instance.qa = self.read_instance.qa_per_species[list(self.read_instance.qa_per_species.keys())[0]]
+            else:
+                self.read_instance.qa_per_species = {speci:self.read_instance.qa for speci in species_plus_filter_species}
 
         # add to qa
         if self.read_instance.add_qa:
@@ -1333,7 +1391,6 @@ def read_conf(fpath=None):
     """ Read configuration files. """
 
     res = {}
-    res_sub = {}
     config = {}
     all_sections = []
     all_sections_modified = []
@@ -1385,19 +1442,34 @@ def read_conf(fpath=None):
 
     # get attributes for each section and store in dict
     for (i, section), section_modified in zip(enumerate(all_sections), all_sections_modified):
-        
         repetition = 0
         copy = False
-        config[section_modified] = {}
-        
+        config[section_modified] = {} 
         with open(fpath) as file:
             for line in file:
+                # allow # after first character to partially comment lines
                 line_strip = line.strip().split('#')[0]
+                
+                # get current section                        
+                if '[' in line and ']' in line and '[[' not in line and ']]' not in line:
+                    current_section = line_strip.replace('[', '').replace(']', '')
+                
+                # get current subsection
+                if ('[[' in line_strip) and (']]' in line_strip):
+                    current_modified_subsection = current_section + "·" + line_strip.replace('[[', '').replace(']]', '')
+                
                 # parsing all but last section 
                 if section_modified != all_sections_modified[-1]:
                     # start of relevant section 
                     if line_strip == all_sections[i]:
-                        if line_strip in repeated_subsections:
+                        # if subsection, make sure its section corresponds to current section to avoid
+                        # problems with repeated subsection names (SECTIONA·SUBSECTION, SECTIONB·SUBSECTION)
+                        if ('[[' in line_strip) and (']]' in line_strip):
+                            if (current_modified_subsection != section_modified):
+                                copy = False
+                            else:
+                                copy = True
+                        elif line_strip in repeated_subsections:
                             position = repeated_subsections_modified[section].index(section_modified)
                             if position == repetition:
                                 copy = True
@@ -1416,7 +1488,14 @@ def read_conf(fpath=None):
                 else:
                     # start of relevant section ?
                     if line_strip == all_sections[-1]:
-                        if line_strip in repeated_subsections:
+                        # if subsection, make sure its section corresponds to current section to avoid
+                        # problems with repeated subsection names (SECTIONA·SUBSECTION, SECTIONB·SUBSECTION)
+                        if ('[[' in line_strip) and (']]' in line_strip):
+                            if (current_modified_subsection != section_modified):
+                                copy = False
+                            else:
+                                copy = True
+                        elif line_strip in repeated_subsections:
                             position = repeated_subsections_modified[section].index(section_modified)
                             if position == repetition:
                                 copy = True
@@ -1456,6 +1535,9 @@ def read_conf(fpath=None):
     # add section attributes to subsection if do not exist there (e.g. add SECTIONA values to SECTIONA-Spain)
     for section_modified in all_sections_modified:
         
+        # reset res variable
+        res_sub = {}
+
         # determine if subsection or not
         if '·' in section_modified:
             is_subsection = True
@@ -1494,9 +1576,6 @@ def read_conf(fpath=None):
 
         # store pairs into res variable
         res[section_modified] = res_sub
-
-        # reset res variable
-        res_sub = {}
 
     return res, all_sections_modified, parent_sections, subsections_modified, filenames
 

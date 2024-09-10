@@ -24,7 +24,6 @@ from configuration import ProvConfiguration, load_conf
 
 # load the data_paths for the different machines and the default values jsons
 data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'data_paths.yaml')))
-bin_vars = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 
 # load the defined experiments paths and agrupations jsons
 interp_experiments = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
@@ -108,7 +107,7 @@ class SubmitInterpolation(object):
             else:
                 print(f"{arg}:")
                 for exp, alias in getattr(self, arg).items():
-                    if self.hasAlias:
+                    if self.alias_flag:
                         print(f" - {exp} ({alias})")
                     else:
                         print(f" - {exp}")
@@ -154,17 +153,18 @@ class SubmitInterpolation(object):
             # get experiment specific directories list
             exp_dir_list = interp_experiments[experiment_type]["paths"]
 
-             # take first functional directory 
+            # take first functional directory 
             exp_dir = None      
             for temp_exp_dir in exp_dir_list:
-                if os.path.exists(temp_exp_dir):
+                if os.path.exists(os.path.join(temp_exp_dir,experiment_to_process)):
                     exp_dir = temp_exp_dir
                     break
 
             # if none of the paths are in this current machine, break
-            if exp_dir:
+            if not exp_dir:
                 error = f"Error: None of the experiment paths in {os.path.join('settings', 'interp_experiments.yaml')} are available in this machine ({MACHINE})."
-            
+                sys.exit(error)
+                
             # add file to directory path
             exp_dir += f"{experiment_to_process}/"
 
