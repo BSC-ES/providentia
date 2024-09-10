@@ -572,20 +572,6 @@ class DataFilter:
             otherwise it is done independently per network / species.
             This in reality means storing the indices for the temporal colocation.
         """
-
-        # if do not have any experiment data loaded, no colocation is possible.
-        #if not self.read_instance.temporal_colocation:
-        #    # iterate through network / species setting all data as being available
-        #    for ii, networkspeci in enumerate(self.read_instance.networkspecies):
-        #        self.read_instance.temporal_colocation_nans[networkspeci] = np.full(self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:].shape, False)
-        #    return
-        #else:
-            # colocate observational data array to every different experiment array in memory, 
-            # and all experiment arrays to observations.
-            # wherever there is a NaN at one time in one of the observations/experiment arrays 
-            # the other array value is also made NaN.
-            # this is done across all networks / species if spatial colocation is active,
-            # otherwise it is done independently per network / species
             
         # iterate through network / species  
         for ii, networkspeci in enumerate(self.read_instance.networkspecies):
@@ -601,7 +587,7 @@ class DataFilter:
                 exps_all_nan = np.full(obs_all_nan.shape, False)
 
             # get all instances observations is NaN
-            nan_obs = np.isnan(self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:])             
+            nan_obs = np.isnan(self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:])
 
             # update obs_all_nan array, making True all instances where have NaNs
             # if all observations are nan then do not update
@@ -676,7 +662,7 @@ class DataFilter:
                     
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = \
-                        np.arange(len(station_data_availability_number), dtype=np.int64)[station_data_availability_number > 1]
+                        np.arange(len(station_data_availability_number), dtype=np.int64)[station_data_availability_number > 1]                    
 
             # get equivalent valid station indices for experimental arrays
             # subset observational valid station indices, with experimental array stations with > 1 valid measurements
