@@ -162,8 +162,8 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             elif base_plot_type == 'timeseries':
                 xlim_lower, xlim_upper = get_no_margin_lim(ax, 'xlim')
                 try:
-                    xlim_lower = num2date(xlim_lower)
-                    xlim_upper = num2date(xlim_upper)
+                    xlim_lower = num2date(xlim_lower).replace(tzinfo=None)
+                    xlim_upper = num2date(xlim_upper).replace(tzinfo=None)
                 except ValueError:
                     continue
 
