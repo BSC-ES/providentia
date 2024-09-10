@@ -26,7 +26,7 @@ expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/exp
 
 
 def get_selected_station_data(read_instance, canvas_instance, networkspecies, 
-                              station_index=False, data_range_min=False, data_range_max=False, stddev_max=False):
+                              station_index=None, data_range_min=None, data_range_max=None, stddev_max=None):
     """ Function that takes full data array and cuts it for selected stations, per network / species, per data label.
 
         :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
@@ -92,15 +92,15 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
         # add nested dictionary for networkspeci in selected station data / metadata dictionaries
         canvas_instance.selected_station_data[networkspeci] = {}
         canvas_instance.selected_station_metadata[networkspeci] = {}
-        if data_range_min:
+        if data_range_min is not None:
             canvas_instance.selected_station_data_min[networkspeci] = data_range_min[networkspeci]
         else:
             canvas_instance.selected_station_data_min[networkspeci] = np.inf
-        if data_range_max:
+        if data_range_max is not None:
             canvas_instance.selected_station_data_max[networkspeci] = data_range_max[networkspeci]
         else:
             canvas_instance.selected_station_data_max[networkspeci] = 0.0
-        if stddev_max:
+        if stddev_max is not None:
             canvas_instance.selected_station_stddev_max[networkspeci] = stddev_max[networkspeci]
         else:
             canvas_instance.selected_station_stddev_max[networkspeci] = 0.0      
@@ -117,7 +117,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
 
         # get data cut for relevant stations
         read_instance.data_array = read_instance.data_array[:,canvas_instance.station_inds[networkspeci],:]
-                    
+
         # get NaNs in data array
         nan_data_array = np.isnan(read_instance.data_array)
 
@@ -252,7 +252,7 @@ def boxplot_inner_fences(data):
 def get_station_inds(read_instance, canvas_instance, networkspeci, station_index):
     """ Get selected station indices """
         
-    if station_index:
+    if station_index is not None:
         station_inds = np.array([station_index])
     else:
         if (read_instance.offline) or (read_instance.interactive):

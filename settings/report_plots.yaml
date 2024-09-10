@@ -53,6 +53,6 @@
                   "scatter_threshold", "boxplot_threshold", "distribution_threshold",
                   "taylor-r2", "taylor-r"],
     
-    "debug": ["scatter", "taylor-r2", "taylor-r"]
+    "debug": ["timeseries"]
 
 }
