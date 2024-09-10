@@ -578,8 +578,8 @@ class DataReader:
             print("EXPERIMENTS")
             for experiment, alias in self.read_instance.experiments.items():
                 str_experiment = f" - {experiment}"
-                # if self.read_instance.hasAlias: 
-                #     str_experiment += f" ({alias})"
+                if self.read_instance.alias_flag: 
+                   str_experiment += f" ({alias})"
                 print(str_experiment)
         print()
 
