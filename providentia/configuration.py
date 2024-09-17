@@ -1006,7 +1006,7 @@ class ProvConfiguration:
         if self.read_instance.experiments and self.default_domain:
             default = default_values['domain']
             msg = "Domain (domain) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.domain = default
 
         # check have ensemble_options information, TODO ONLY FOR INTERPOLATION
@@ -1019,7 +1019,7 @@ class ProvConfiguration:
             else:
                 default = default_values['ensemble_options']
             msg = "Ensemble options (ensemble_options) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.ensemble_options = default
 
         # get correct check experiment function
