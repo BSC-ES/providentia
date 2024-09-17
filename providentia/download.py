@@ -246,6 +246,13 @@ class ProvidentiaDownload(object):
             # update filetrees
             # self.update_filetrees()
 
+            # remove section variables from memory
+            for k in self.section_opts:
+                try:
+                    vars(self).pop(k)
+                except:
+                    pass
+
         # close connection, if it exists
         if self.ssh != None:
             self.ssh.close() 
