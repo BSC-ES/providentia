@@ -616,9 +616,13 @@ class ProvConfiguration:
         exp_id, exp_dom, exp_ens = None, None, None
 
         # iterate through all the experiments
+        exp_domains = []
+        exp_ensemble_options = []
+        exp_ids = []
         for exp_i, split_experiment in enumerate(split_experiments):
-            # get experiment name
+            # get experiment name and save into list
             exp_id = split_experiment[0]
+            exp_ids.append(exp_id)
 
             # if experiment is composed by more than 3 parts, break
             if len(split_experiment) > 3:
@@ -637,7 +641,7 @@ class ProvConfiguration:
                         sys.exit(error)
 
                     exp_dom = end_experiment
-                    self.read_instance.domain.append(exp_dom)
+                    exp_domains.append(exp_dom)
                 # [expID]-[ensembleNum]   
                 else:
                     # other experiment goes by the format [expID]-[domain]
@@ -646,29 +650,37 @@ class ProvConfiguration:
                         sys.exit(error)
 
                     exp_ens = end_experiment
-                    self.read_instance.ensemble_options.append(exp_ens)
+                    exp_ensemble_options.append(exp_ens)
 
             # [expID]-[domain]-[ensembleNum]
             elif len(split_experiment) == 3:               
                 exp_dom, exp_ens = split_experiment[1], split_experiment[2]
-                self.read_instance.domain.append(exp_dom)
-                self.read_instance.ensemble_options.append(exp_ens)
+                exp_domains.append(exp_dom)
+                exp_ensemble_options.append(exp_ens)
 
-            # add experiment id to the list
-            self.read_instance.exp_id.append(exp_id)
-
-            # check if tried to put domain or ensemble option when there's already a domain or ensemble opt
+            # check if domain has been defined in configuration file and in experiment name
             if exp_dom and config_domain:
-                error = (f"Error: Unable to set domain/s as {', '.join(config_domain)} because experiment {self.read_instance.experiments[exp_i]}"
-                f" already contain the domain.")     
+                error = f"Error: Unable to set domain/s as {', '.join(config_domain)} because "
+                error += f"experiment {self.read_instance.experiments[exp_i]} already contain the domain."
                 sys.exit(error)
-            elif exp_ens and config_ensemble_options:
-                error = (f"Error: Unable to set ensemble option/s as {', '.join(config_ensemble_options)} because experiment {self.read_instance.experiments[exp_i]}"
-                f" already contain the ensemble option.")                  
-                sys.exit(error)  
+            else:
+                self.read_instance.domain = exp_domains
+            
+            # check if ensemble options has been defined in configuration file and in experiment name
+            if exp_ens and config_ensemble_options:
+                error = f"Error: Unable to set ensemble option/s as {', '.join(config_ensemble_options)} because "
+                error +=  f"experiment {self.read_instance.experiments[exp_i]} already contain the ensemble option."                  
+                sys.exit(error)
+            else:
+                self.read_instance.ensemble_options = exp_ensemble_options
+
+            self.read_instance.exp_ids = exp_ids
 
         # when there's no domain/ensemble opt passed in the config file or got from the experiment, then set the default option to true
-        self.default_domain, self.default_ensemble_options = not (bool(exp_dom) or bool(config_domain)), not (bool(exp_ens) or bool(config_ensemble_options))
+        if not self.read_instance.domain:
+            self.default_domain = True
+        if not self.read_instance.ensemble_options:
+            self.default_ensemble_options = True
 
         # set the bool which tells you if domain/ensemble_options have to be combined as it was done in interpolation mode or not
         self.combined_domain, self.combined_ensemble_options = bool(config_domain or self.default_domain), bool(config_ensemble_options or self.default_ensemble_options)
@@ -796,7 +808,7 @@ class ProvConfiguration:
         
         # if not found because of the ghost version, tell the user
         if not exp_found:
-            msg = f"There is not experiment {experiment_wng} data for the current ghost version ({self.read_instance.ghost_version})." 
+            msg = f"There is no experiment {experiment_wng} data for the current ghost version ({self.read_instance.ghost_version})." 
             if available_ghost_versions:
                 msg += f" Please, check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
@@ -1029,7 +1041,7 @@ class ProvConfiguration:
 
         # join experiments
         # TODO I think the concept of having the same variable with two different types of values is kind of a bad idea
-        for exp_i, experiment in enumerate(self.read_instance.exp_id):
+        for exp_i, experiment in enumerate(self.read_instance.exp_ids):
             # experiment, domain, ensemble_options
             if self.combined_domain and self.combined_ensemble_options:
                 final_experiments += [f'{experiment}-{domain}-{ens_opt}' for domain in self.read_instance.domain for ens_opt in self.read_instance.ensemble_options]
