@@ -253,6 +253,10 @@ class ProvidentiaDownload(object):
                 except:
                     pass
 
+            # reset domain and ensemble options for new section
+            self.domain = []
+            self.ensemble_options = []
+
         # close connection, if it exists
         if self.ssh != None:
             self.ssh.close() 
