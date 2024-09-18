@@ -1,3 +1,4 @@
+import ast
 from calendar import monthrange
 import cartopy.crs as ccrs
 import cftime
@@ -93,7 +94,11 @@ class ExperimentInterpolation(object):
         for variable_key in ["ghost_version","reverse_vertical_orientation","n_neighbours"]:
             variable_val_idx = submission_file_txt.index(variable_key+":")+1
             variable_val = submission_file_txt[variable_val_idx]
-            setattr(self, variable_key, variable_val)
+            # make sure vertical orientiation is a boolean!
+            if variable_key == "reverse_vertical_orientation":
+                setattr(self, variable_key, ast.literal_eval(variable_val))
+            else:
+                setattr(self, variable_key, variable_val)
 
         # set experiment paths
         self.exp_root = data_paths[MACHINE]["exp_root"]
