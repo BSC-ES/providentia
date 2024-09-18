@@ -246,6 +246,17 @@ class ProvidentiaDownload(object):
             # update filetrees
             # self.update_filetrees()
 
+            # remove section variables from memory
+            for k in self.section_opts:
+                try:
+                    vars(self).pop(k)
+                except:
+                    pass
+
+            # reset domain and ensemble options for new section
+            self.domain = []
+            self.ensemble_options = []
+
         # close connection, if it exists
         if self.ssh != None:
             self.ssh.close() 
