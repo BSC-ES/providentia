@@ -6,6 +6,10 @@
 
 (If you are using the dashboard, please download the configuration file from there. Do not write the path to your configuration file, only copy and paste its content)
 
+## Report plots
+
+(If you are creating offline reports, add here your definition of report plots, e.g. `['timeseries', 'taylor-r', 'scatter']`)
+
 ## Machine
 
 (Tell us in which machine you are running Providentia (mn5, nord3v2, etc.))
