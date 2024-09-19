@@ -1484,7 +1484,7 @@ class ProvidentiaOffline:
                         return plot_indices
                     
                     # show warning if chunk stat is NStations and mode is not Temporal|Spatial
-                    if chunk_stat == 'NStations' and self.statistic_mode != 'Temporal|Spatial':
+                    if (chunk_stat == 'NStations') and (self.statistic_mode != 'Temporal|Spatial'):
                         msg = f'Warning: {plot_type} cannot be created because {chunk_stat} '
                         msg += 'it is only available when Temporal|Spatial mode is active.'
                         print(msg)

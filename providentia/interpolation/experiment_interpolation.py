@@ -18,7 +18,8 @@ import numpy as np
 from packaging.version import Version
 import pandas as pd
 import pyproj
-from scipy import spatial
+import scipy
+from scipy.spatial import cKDTree
 from shapely.geometry import Polygon, Point
 import xarray as xr
 from aux import (check_for_ghost, findMiddle, check_directory_existence, set_file_permissions_ownership,
@@ -88,7 +89,7 @@ class ExperimentInterpolation(object):
             submission_file_txt = f.read().split()
 
         # get configuration variables from the management_logs
-        for variable_key in ["ghost_version","reverse_vertical_orientation","n_neighbours"]:
+        for variable_key in ["ghost_version", "interp_n_neighbours", "interp_reverse_vertical_orientation", "forecast_day"]:
             variable_val_idx = submission_file_txt.index(variable_key+":")+1
             variable_val = submission_file_txt[variable_val_idx]
             setattr(self, variable_key, variable_val)
@@ -204,7 +205,7 @@ class ExperimentInterpolation(object):
             except:
                 # if have got to last file of month and that is corrupted, return from function
                 if model_file_ii == (len(self.model_files)-1):
-                    log_file_str += '---- All model files corrupted in {}. Skipping month.'.format(self.yearmonth)
+                    log_file_str += 'All model files corrupted in {}. Skipping month.'.format(self.yearmonth)
                     create_output_logfile(1)
                 # else, continue to next file in month
                 else:
@@ -235,13 +236,13 @@ class ExperimentInterpolation(object):
                 
                 # if direction == 'up', surface index is location of mininum value in z var
                 if direction == 'up':
-                    if self.reverse_vertical_orientation:
+                    if self.interp_reverse_vertical_orientation:
                         self.z_index = np.argmax(mod_vert_obj[:])
                     else:
                         self.z_index = np.argmin(mod_vert_obj[:])
                 # if direction == 'down', surface index is location of maximum value in z var
                 elif direction == 'down':
-                    if self.reverse_vertical_orientation:
+                    if self.interp_reverse_vertical_orientation:
                         self.z_index = np.argmin(mod_vert_obj[:])
                     else:
                         self.z_index = np.argmax(mod_vert_obj[:])
@@ -675,12 +676,12 @@ class ExperimentInterpolation(object):
 
                 # check if have time dimension in daily file, if do not, do not process file
                 if 'time' not in list(self.mod_nc_root.dimensions.keys()):
-                    log_file_str += '---- File {} is corrupt. Skipping.\n'.format(model_file)
+                    log_file_str += 'File {} is corrupt. Skipping.\n'.format(model_file)
                     continue 
 
                 # get date from filename
                 file_date = model_file.split('_')[-1][:-3]                
-                
+
                 # get file start and end datetime
                 if len(file_date) == 6:
                     chunk_type = 'monthly'
@@ -691,6 +692,11 @@ class ExperimentInterpolation(object):
                     chunk_type = 'daily'
                     start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), 
                                                       day=int(file_date[6:8]), hour=0, minute=0)
+                    end_file_dt = start_file_dt + datetime.timedelta(days=1)
+                elif len(file_date) == 10:
+                    chunk_type = 'daily'
+                    start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), 
+                                                      day=int(file_date[6:8]), hour=int(file_date[8:10]), minute=0)
                     end_file_dt = start_file_dt + datetime.timedelta(days=1)
 
                 # get file time (handle monthly resolution data differently to hourly/daily
@@ -713,8 +719,21 @@ class ExperimentInterpolation(object):
                         file_time_dt = file_time_dt.astype('datetime64[ns]')
                         file_time_dt = pd.to_datetime([t for t in file_time_dt])
 
-                # get indices of file time inside yearmonth
-                valid_file_time_inds = np.where((file_time_dt >= start_month_dt) & (file_time_dt < end_month_dt))[0]
+                # get indices of file time inside yearmonth, and for the appropriate forecast day
+                if chunk_type == 'daily':
+                    # get forecast start_dt and end_dt
+                    forecast_start_dt = start_file_dt + datetime.timedelta(days=(int(self.forecast_day) - 1))
+                    forecast_end_dt = end_file_dt + datetime.timedelta(days=(int(self.forecast_day) - 1))
+                    # get indices of file time inside join of yearmonth and forecast day
+                    valid_file_time_inds = np.where((file_time_dt >= start_month_dt) & (file_time_dt < end_month_dt) & (file_time_dt >= forecast_start_dt) & (file_time_dt < forecast_end_dt))[0]
+                elif chunk_type == 'monthly':
+                    # cannot have monthly file which has forecast data, so if wanting forecast data for day > 1,
+                    # throw an error
+                    if int(self.forecast_day) > 1:
+                        log_file_str += 'File {} is monthly, so does not contain data for forcast day {}. Terminating process.'.format(model_file,self.forecast_day)
+                        create_output_logfile(1)
+                    # get indices of file time inside yearmonth
+                    valid_file_time_inds = np.where((file_time_dt >= start_month_dt) & (file_time_dt < end_month_dt))[0]
                 
                 # cut file time dt for only valid times
                 file_time_dt = file_time_dt[valid_file_time_inds]
@@ -772,7 +791,7 @@ class ExperimentInterpolation(object):
                 self.mod_nc_root.close()
 
             except Exception as e:
-                log_file_str += '---- File {} is corrupt. Skipping.\n{}'.format(model_file, traceback.format_exc())
+                log_file_str += 'File {} is corrupt. Skipping.\n{}'.format(model_file, traceback.format_exc())
 
     def n_nearest_neighbour_inverse_distance_weights(self):
         """ Calculate N nearest neighbour inverse distance weights (and indices) of model gridcells centres 
@@ -823,10 +842,13 @@ class ExperimentInterpolation(object):
         mod_lonlat = np.column_stack((mod_x,mod_y,mod_z))
     
         # generate cKDtree
-        tree = spatial.cKDTree(mod_lonlat)
+        tree = cKDTree(mod_lonlat)
     
         # get n-neighbour nearest distances/indices (ravel form) of model gridcell centres from each observational station  
-        dists,idx = tree.query(obs_lonlat,k=int(self.n_neighbours),workers=-1)
+        if Version(scipy.__version__) < Version("1.6.0"):
+            dists,idx = tree.query(obs_lonlat,k=int(self.interp_n_neighbours))
+        else:
+            dists,idx = tree.query(obs_lonlat,k=int(self.interp_n_neighbours),workers=-1)
         
         # for n neighbours == 1, do rehsaping of array so doesn't break
         if len(dists.shape) == 1:
@@ -870,7 +892,7 @@ class ExperimentInterpolation(object):
         root_grp.set_auto_mask(True)	
 
         # file contents
-        msg = 'Inverse distance weighting ({} neighbours) interpolated '.format(self.n_neighbours)
+        msg = 'Inverse distance weighting ({} neighbours) interpolated '.format(self.interp_n_neighbours)
         msg += '{} experiment data for the component {} '.format(self.experiment_to_process, 
                                                                  self.original_speci_to_process)
         msg += 'with reference to the measurement stations in the '
@@ -1009,8 +1031,8 @@ class ExperimentInterpolation(object):
                 interp_vals = np.full(len(self.yearmonth_time), np.NaN, dtype=np.float32)
             else:
                 # get reciprocal model data at N nearest neighbours to observational station 
-                cut_model_data = self.monthly_model_data[:,self.nearest_neighbour_inds[ii,:int(self.n_neighbours)],
-                                                                                       self.nearest_neighbour_inds[ii,int(self.n_neighbours):]]
+                cut_model_data = self.monthly_model_data[:,self.nearest_neighbour_inds[ii,:int(self.interp_n_neighbours)],
+                                                                                       self.nearest_neighbour_inds[ii,int(self.interp_n_neighbours):]]
                 
                 # create mask where data == NaN or infinite
                 invalid_mask = ~np.isfinite(cut_model_data)

@@ -130,7 +130,7 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
 
     # bias plot?
     if 'bias' in plot_options:
-        bias =  True
+        bias = True
     else:
         bias = False
 

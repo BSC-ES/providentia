@@ -469,7 +469,7 @@ class MPLCanvas(FigureCanvas):
             # if only have < 2 data arrays in memory, no colocation is possible,
             # therefore set colocation to be False, and return
             invalid = False
-            if self.read_instance.data_labels == None:
+            if self.read_instance.data_labels is None:
                 invalid = True
             elif len(self.read_instance.data_labels) == 1:
                 invalid = True
@@ -3130,7 +3130,7 @@ class MPLCanvas(FigureCanvas):
                                                                     self.read_instance.end_date,
                                                                     plot_type, str(relevant_temporal_resolution))
 
-        if relevant_temporal_resolution == None:
+        if relevant_temporal_resolution is None:
             default_filename = default_filename.split('-None')[0] + '.png'
 
         options = QtWidgets.QFileDialog.Options()
