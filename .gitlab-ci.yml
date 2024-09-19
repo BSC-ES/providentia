@@ -11,5 +11,3 @@ tests:
     - coverage run -m pytest tests
     - coverage report -i -m
   coverage: '/^TOTAL\s*\d+\s+\d+\s+(\d+)/'
-  rules:
-    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
