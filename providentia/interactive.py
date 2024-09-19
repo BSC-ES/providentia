@@ -319,7 +319,7 @@ class Interactive:
         chunk_stat = None
         chunk_resolution = None
         if base_plot_type == 'timeseries':
-            if zstat:
+            if zstat is not None:
                 # get chunk statistic and resolution
                 chunk_stat = copy.deepcopy(zstat)
                 chunk_resolution = plot_type.split('-')[2].split('_')[0]
@@ -415,7 +415,7 @@ class Interactive:
             map_extent = copy.deepcopy(self.map_extent)
 
         # create figure
-        if (width) and (height):
+        if (width is not None) and (height is not None):
             fig = plt.figure(figsize=(width, height))
         else:
             print("Warning: Width and/or height have not been passed. The default values will be set.")
@@ -704,7 +704,7 @@ class Interactive:
 
         # set title
         if not title:
-            if zstat:
+            if zstat is not None:
                 if 'axis_title' in self.plot_characteristics[plot_type]:
                     title = self.plot_characteristics[plot_type]['axis_title']['label']
                     if title == '':
@@ -746,13 +746,10 @@ class Interactive:
 
         # overwrite passed xlabels and ylabels
         if title:
-            #self.plot_characteristics[plot_type]['axis_title']['label'] = title
             set_axis_title(self, relevant_ax, title, self.plot_characteristics[plot_type])
         if xlabel:
-            #self.plot_characteristics[plot_type]['xlabel']['xlabel'] = xlabel
             set_axis_label(relevant_ax, 'x', xlabel, self.plot_characteristics[plot_type])
         if ylabel:
-            #self.plot_characteristics[plot_type]['ylabel']['ylabel'] = ylabel
             set_axis_label(relevant_ax, 'y', ylabel, self.plot_characteristics[plot_type])
 
         # format plot axis/axes
@@ -1087,10 +1084,10 @@ class Interactive:
         do_filter = False
 
         # make sure keep and remove arguments are lists
-        if keep:
+        if keep is not None:
             if type(keep) == str:
                 keep = [keep]
-        if remove:
+        if remove is not None:
             if type(remove) == str:
                 remove = [remove]
 
@@ -1100,7 +1097,7 @@ class Interactive:
 
             field_index = self.representativity_menu['rangeboxes']['map_vars'].index(field)
             # ensure limit is set for field
-            if limit:
+            if limit is not None:
                 self.representativity_menu['rangeboxes']['current_lower'][field_index] = limit
             else:
                 print("Warning: When filtering by representativity field: {}, 'limit' must be passed as an argument.".format(field)) 
@@ -1111,17 +1108,17 @@ class Interactive:
             do_filter = True
 
             # if neither keep or remove are defined, filtering cannot be done
-            if (not keep) and (not remove): 
+            if (keep is None) and (remove is None): 
                 print("Warning: When filtering by a period field, 'keep' or 'remove' must be passed as arguments.")
                 return
 
-            if keep:
+            if keep is not None:
                 new_keep = copy.deepcopy(self.period_menu['checkboxes']['keep_selected'])
                 for item in keep:
                     if item not in new_keep:
                         new_keep.append(item)
                 self.period_menu['checkboxes']['keep_selected'] = new_keep
-            if remove:
+            if remove is not None:
                 new_remove = copy.deepcopy(self.period_menu['checkboxes']['remove_selected'])
                 for item in remove:
                     if item not in new_remove:
@@ -1135,14 +1132,14 @@ class Interactive:
                     do_filter = True
 
                     # if neither lower or upper are defined, filtering cannot be done
-                    if (not lower) and (not upper): 
+                    if (lower is None) and (upper is None): 
                         print("Warning: When filtering by a numeric metadata field, 'lower' or 'upper' must be passed as arguments.")
                         return
 
                     field_index = self.metadata_menu[menu_type]['rangeboxes']['labels'].index(field)
-                    if lower:
+                    if lower is not None:
                         self.metadata_menu[menu_type]['rangeboxes']['current_lower'][field_index] = lower
-                    if upper:
+                    if upper is not None:
                         self.metadata_menu[menu_type]['rangeboxes']['current_upper'][field_index] = upper           
                     if field not in self.metadata_menu[menu_type]['rangeboxes']['apply_selected']:
                         self.metadata_menu[menu_type]['rangeboxes']['apply_selected'].append(field)
@@ -1152,17 +1149,17 @@ class Interactive:
                     do_filter = True
 
                     # if neither keep or remove are defined, filtering cannot be done
-                    if (not keep) and (not remove): 
+                    if (keep is None) and (remove is None): 
                         print("Warning: When filtering by a text period field, 'keep' or 'remove' must be passed as arguments.")
                         return
 
-                    if keep:
+                    if keep is not None:
                         new_keep = copy.deepcopy(self.metadata_menu[menu_type][field]['checkboxes']['keep_selected'])
                         for item in keep:
                             if item not in new_keep:
                                 new_keep.append(item)
                         self.metadata_menu[menu_type][field]['checkboxes']['keep_selected'] = new_keep
-                    if remove:
+                    if remove is not None:
                         new_remove = copy.deepcopy(self.metadata_menu[menu_type][field]['checkboxes']['remove_selected'])
                         for item in remove:
                             if item not in new_remove:

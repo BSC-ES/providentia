@@ -15,6 +15,6 @@ def show_message(read_instance, msg, msg_offline=None, from_conf=None, deactivat
     else:
         # there are some warnings that will only be shown if we launch the dashboard
         # using a configuration file (those in filter.py, read.py and configuration.py)
-        if (from_conf is None) or (from_conf):
+        if (from_conf is None) or (from_conf is True):
             from dashboard_elements import MessageBox
             MessageBox(msg)

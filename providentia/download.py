@@ -42,7 +42,7 @@ def sighandler(*unused):
     print('\nKeyboard Interrupt. Stopping execution.')
     
     # close connection, if it exists
-    if download.ssh != None:
+    if download.ssh is not None:
         print("\nClosing ssh connection...")
         download.ssh.close()
         download.sftp.close()
@@ -183,7 +183,7 @@ class ProvidentiaDownload(object):
             
             for network, filter_species in combined_networks:
                 # change species when turn of filter species
-                if filter_species != None:
+                if filter_species is not None:
                     self.species = [filter_species]
 
                 # get the files to be downlaoded, check if they files were already downlaoded and download if not
@@ -247,7 +247,7 @@ class ProvidentiaDownload(object):
             # self.update_filetrees()
 
         # close connection, if it exists
-        if self.ssh != None:
+        if self.ssh is not None:
             self.ssh.close() 
             self.sftp.close()
 
@@ -298,21 +298,21 @@ class ProvidentiaDownload(object):
         prv_user, prv_password = None, None
 
         # if couldn't get user, ask for it
-        if self.prv_user == None:
+        if self.prv_user is None:
             prv_user = ''
             while prv_user == '':
                 prv_user = input(f"\nInsert BSC {REMOTE_MACHINE} ssh user: ")
             self.prv_user = prv_user
         
         # if couldn't get user, check if you have to ask for it
-        if self.prv_password == None:
+        if self.prv_password is None:
             # check if user needs a password
             try:
                 self.ssh.connect(self.remote_hostname, username=self.prv_user, password='placeholder')
             # if authentication error, that means that the user or and the password are wrong
             except paramiko.ssh_exception.AuthenticationException:
                 # if name was not changed, then user in .env is not valid
-                if prv_user == None:
+                if prv_user is None:
                     error = f"Authentication failed. Please, check if PRV_USER on {os.path.join(PROVIDENTIA_ROOT, '.env')} aligns with your BSC {REMOTE_MACHINE} ssh user."
                     error += "\nIf it does not, change the user to the correct one. If it does, delete the whole PRV_USER row and execute again."
                     sys.exit(error)
@@ -321,7 +321,7 @@ class ProvidentiaDownload(object):
                     self.prv_password = prv_password
         
         # if pwd or user changed, ask for credentials
-        if prv_user != None or prv_password != None:
+        if (prv_user is not None) or (prv_password is not None):
             # ask user if they want their credentials saved
             remind_txt = input("\nRemember credentials (y/n)? ")
             while remind_txt.lower() not in ['y','n']:
@@ -338,9 +338,9 @@ class ProvidentiaDownload(object):
             # create .env with the input user and/or password
             if remind:
                 with open(os.path.join(PROVIDENTIA_ROOT, ".env"),"a") as f:
-                    if prv_user != None:
+                    if prv_user is not None:
                         f.write(f"PRV_USER={self.prv_user}\n")
-                    if prv_password != None:
+                    if prv_password is not None:
                         f.write(f"PRV_PWD={self.prv_password}\n")
 
                 print(f"\nRemote machine credentials saved on {os.path.join(PROVIDENTIA_ROOT, '.env')}")
@@ -348,7 +348,7 @@ class ProvidentiaDownload(object):
         except paramiko.ssh_exception.AuthenticationException:
             error = "Authentication failed."
             # if user or password were taken from .env (did not change), tell the user to check .env
-            if prv_user == None:
+            if prv_user is None:
                 error += f" Please, check your credentials on {os.path.join(PROVIDENTIA_ROOT, '.env')}"
             sys.exit(error)
 
@@ -405,7 +405,7 @@ class ProvidentiaDownload(object):
 
     def download_nonghost_network(self, network, initial_check, files_to_download=None):
         # check if ssh exists and check if still active, connect if not
-        if self.ssh == None or self.ssh.get_transport().is_active():
+        if (self.ssh is None) or (self.ssh.get_transport().is_active()):
             self.connect() 
         
         if not initial_check:
@@ -530,7 +530,7 @@ class ProvidentiaDownload(object):
         
     def download_ghost_network_sftp(self, network, initial_check, files_to_download=None):
         # check if ssh exists and check if still active, connect if not
-        if self.ssh == None or self.ssh.get_transport().is_active():
+        if (self.ssh is None) or (self.ssh.get_transport().is_active()):
             self.connect() 
 
         if not initial_check:
@@ -814,7 +814,7 @@ class ProvidentiaDownload(object):
                                 
     def download_experiment(self, experiment, initial_check, files_to_download=None):
         # check if ssh exists and check if still active, connect if not
-        if self.ssh == None or self.ssh.get_transport().is_active():
+        if (self.ssh is None) or (self.ssh.get_transport().is_active()):
             self.connect()  
         
         if not initial_check:
@@ -1037,7 +1037,7 @@ class ProvidentiaDownload(object):
     def get_all_networks(self):
         # get user input to know which kind of network wants
         download_source = None
-        while not download_source:
+        while download_source is None:
             download_source = input("\nDo you want to download GHOST, non-GHOST or all networks? (g/n/a) ").lower()
             download_source = download_source if download_source in ["g","n","a"] else None
 
@@ -1057,7 +1057,7 @@ class ProvidentiaDownload(object):
     
     def get_all_experiments(self):
         # check if ssh exists and check if still active, connect if not
-        if self.ssh == None or self.ssh.get_transport().is_active():
+        if (self.ssh is None) or (self.ssh.get_transport().is_active()):
             self.connect()  
 
         # get directory content and format it as the experiments       

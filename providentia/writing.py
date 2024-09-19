@@ -453,7 +453,7 @@ def export_configuration(prv, cname, separator="||"):
                                'active_dashboard_plots': ",".join(str(i) for i in prv.active_dashboard_plots)
                               })
     
-    if subsection != None:
+    if subsection is not None:
 
         # QA
         if set(prv.qa_menu['checkboxes']['remove_selected']) != set(prv.qa_menu['checkboxes']['remove_default']):

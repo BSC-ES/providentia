@@ -69,7 +69,7 @@ class Plot:
         """
 
         # if data_labels are not defined, take all in memory
-        if not data_labels:
+        if data_labels is None:
             data_labels = copy.deepcopy(self.read_instance.data_labels)
 
         # add all valid defined plots to plot_characteristics
@@ -254,7 +254,7 @@ class Plot:
         """
 
         # if data_labels are not defined, take all in memory
-        if not data_labels:
+        if data_labels is None:
             data_labels = copy.deepcopy(self.read_instance.data_labels)
 
         # create legend elements
@@ -294,7 +294,7 @@ class Plot:
         """
 
         # if data_labels are not defined, or are just observations, then take all labels in memory
-        if not data_labels:
+        if data_labels is None:
             data_labels = copy.deepcopy(self.read_instance.data_labels)
         elif len(data_labels) == 1:
             if data_labels[0] == self.read_instance.observations_data_label:
@@ -696,7 +696,7 @@ class Plot:
             bias = False
 
         # get zstat information
-        if zstat:
+        if zstat is not None:
             zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat)
 
         # get valid data labels for networkspeci
@@ -732,7 +732,7 @@ class Plot:
             xticks = self.canvas_instance.selected_station_data[networkspeci][relevant_temporal_resolution]['valid_xticks']
 
             # violin plot type?
-            if not zstat:
+            if zstat is None:
 
                 # calculate medians
                 medians = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, 'Median', 
@@ -846,8 +846,8 @@ class Plot:
                     if self.read_instance.observations_data_label in cut_data_labels:
                         cut_data_labels.remove(self.read_instance.observations_data_label)
                     stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstat, 
-                                                    [self.read_instance.observations_data_label]*len(cut_data_labels), cut_data_labels, 
-                                                    period=relevant_temporal_resolution)
+                                                    [self.read_instance.observations_data_label]*len(cut_data_labels), 
+                                                    cut_data_labels, period=relevant_temporal_resolution)
                 else:
                     stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, 
                                                      zstat, cut_data_labels, [], period=relevant_temporal_resolution)
@@ -908,16 +908,16 @@ class Plot:
         cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
         # set data ranges for distribution plot grid if not set explicitly
-        if not data_range_min:
+        if data_range_min is None:
             data_range_min = self.canvas_instance.selected_station_data_min[networkspeci]
         
-        if not data_range_max:
+        if data_range_max is None:
             data_range_max = self.canvas_instance.selected_station_data_max[networkspeci]
 
         # set xgrid for calculating distribution
         # if calculating for period n_samples is set to pdf_min_samples
         # otherwise it is inferred from data (if above minimum value)
-        if violin_resolution:
+        if violin_resolution is not None:
             n_samples = plot_characteristics['pdf_min_samples']
         else:
             minmax_diff = data_range_max - data_range_min
@@ -944,7 +944,7 @@ class Plot:
                 cut_data_labels.remove(self.read_instance.observations_data_label)
 
         # if violin plot setup arrays for saving data
-        if violin_resolution:
+        if violin_resolution is not None:
             PDFs_sampled = np.full((len(cut_data_labels), len(self.canvas_instance.periodic_xticks[violin_resolution]), int(n_samples)), np.NaN, dtype=np.float32)
 
         # iterate through data labels
@@ -1018,7 +1018,7 @@ class Plot:
                 # if first data label and calculating distributions for violin plot,
                 # calculate the x_grid / data ranges per period  
                 # use min for min data range and upper inner Tukey fence for max data range
-                if (violin_resolution != None) & (data_label_ii == 0):
+                if (violin_resolution is not None) & (data_label_ii == 0):
                     period_data_range_min = []
                     period_data_range_max = []
                     period_x_grid = []
@@ -1031,7 +1031,7 @@ class Plot:
                         period_x_grid.append(np.linspace(min_data,upper_inner_fence,int(n_samples)))
                 
                 # get data (flattened and drop NaNs)
-                if violin_resolution:
+                if violin_resolution is not None:
                     kde_data_grouped = [drop_nans(group[valid_data_labels.index(data_label)].flatten()) for group in self.canvas_instance.selected_station_data[networkspeci][violin_resolution]['active_mode']]
                 else:    
                     kde_data_grouped = [drop_nans(self.canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(data_label),0,:])]
@@ -1040,7 +1040,7 @@ class Plot:
                 for period_ii, kde_data in enumerate(kde_data_grouped):
 
                     # get relevant data ranges / x_grid, for violin period distribution calculation
-                    if violin_resolution:
+                    if violin_resolution is not None:
                         data_range_min = period_data_range_min[period_ii]
                         data_range_max = period_data_range_max[period_ii]
                         x_grid = period_x_grid[period_ii]
@@ -1050,11 +1050,11 @@ class Plot:
 
                     # check if all values are equal in the dataframe
                     if kde_data.size == 0:
-                        if not violin_resolution:
+                        if violin_resolution is None:
                             print('Warning: The kernel density cannot be calculated because there are no valid values for {}.'.format(data_label))
                         continue
                     elif np.all(kde_data == kde_data[0]):
-                        if not violin_resolution:
+                        if violin_resolution is None:
                             print('Warning: The kernel density cannot be calculated because all {} values are equal.'.format(data_label))
                         continue
                     else:
@@ -1070,7 +1070,7 @@ class Plot:
                         #PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data)
                         #PDF_sampled = PDF_fit.evaluate(x_grid)
                         # save PDF for violin plot
-                        if violin_resolution:
+                        if violin_resolution is not None:
                             PDFs_sampled[data_label_ii, period_ii, :] = PDF_sampled
                         else:
                             PDF_sampled_calculated = True
@@ -1087,7 +1087,7 @@ class Plot:
                     self.track_plot_elements(data_label, 'distribution', 'plot', self.distribution_plot, bias=bias)
 
         # if have made PDFs for violin plot then return it
-        if violin_resolution:
+        if violin_resolution is not None:
             return period_x_grid, PDFs_sampled
 
     def make_scatter(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
@@ -1375,7 +1375,8 @@ class Plot:
                 if self.read_instance.observations_data_label in cut_data_labels:
                     cut_data_labels.remove(self.read_instance.observations_data_label)
                 stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, [zstat], 
-                                                [self.read_instance.observations_data_label]*len(cut_data_labels), cut_data_labels)
+                                                [self.read_instance.observations_data_label]*len(cut_data_labels), 
+                                                cut_data_labels)
             else:
                 stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, [zstat], 
                                                  cut_data_labels, [])
@@ -1549,7 +1550,8 @@ class Plot:
                 if self.read_instance.observations_data_label in cut_data_labels:
                     cut_data_labels.remove(self.read_instance.observations_data_label)
                 stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstats, 
-                                                [self.read_instance.observations_data_label]*len(cut_data_labels), cut_data_labels)
+                                                [self.read_instance.observations_data_label]*len(cut_data_labels), 
+                                                cut_data_labels)
             else:
                 stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstats, 
                                                  cut_data_labels, [])
@@ -1782,12 +1784,13 @@ class Plot:
 
         # correlation - between observations and model
         stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstat, 
-                                         [self.read_instance.observations_data_label]*len(data_labels_sans_obs), data_labels_sans_obs)
+                                         [self.read_instance.observations_data_label]*len(data_labels_sans_obs), 
+                                         data_labels_sans_obs)
         stats_calc = np.insert(stats_calc, obs_index, np.NaN)
         stats_dict[zstat] = stats_calc
         
         # get maximum stddev in dataframe (if not defined)
-        if not stddev_max:
+        if stddev_max is None:
             stddev_max = np.nanmax(stats_dict["StdDev"])
 
         # create stats dataframe
