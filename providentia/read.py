@@ -716,7 +716,7 @@ class DataReader:
             if len(set(map(len, basic_metadata_read))) != 1:
                 sys.exit('Error: Some metadata variables do not appear in all netCDF files. This should not be the case!')
 
-            # get unique station references and apply unique indices to the other variables
+            # get unique station references and apply unique indices to the other variables        
             speci_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
             self.read_instance.station_references[networkspeci] = speci_station_references
             self.read_instance.station_longitudes[networkspeci] = speci_station_longitudes[station_unique_indices]
