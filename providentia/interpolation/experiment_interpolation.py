@@ -96,7 +96,7 @@ class ExperimentInterpolation(object):
             variable_val_idx = submission_file_txt.index(variable_key+":")+1
             variable_val = submission_file_txt[variable_val_idx]
             # make sure vertical orientiation is a boolean!
-            if variable_key == "reverse_vertical_orientation":
+            if variable_key == "interp_reverse_vertical_orientation":
                 setattr(self, variable_key, ast.literal_eval(variable_val))
             else:
                 setattr(self, variable_key, variable_val)
