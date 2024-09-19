@@ -2,13 +2,13 @@
 
 (Summarize the bug encountered concisely)
 
-## Steps to reproduce
-
-(How one can reproduce the issue)
-
 ## Configuration file
 
 (If you are using the dashboard, please download the configuration file from there. Do not write the path to your configuration file, only copy and paste its content)
+
+## Report plots
+
+(If you are creating offline reports, add here your definition of report plots, e.g. `['timeseries', 'taylor-r', 'scatter']`)
 
 ## Machine
 
