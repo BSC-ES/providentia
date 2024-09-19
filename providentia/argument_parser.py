@@ -29,29 +29,21 @@ class ProvArgumentParser(object):
                                      help="returns Providentia version number and exit")
             self.parser.add_argument('--debug',
                                      help="runs Providentia in debug mode, just reserving allocation")
-            self.parser.add_argument('--interactive',
-                                     help="runs Providentia interactive mode on Jupyter notebook")
-            self.parser.add_argument('--interpolation','--interp','--interpolate', 
-                                     action='store_true',
-                                     help='runs Providentia Interpolation') 
             self.parser.add_argument('--clean',
                                      action='store_true',
                                      help='cleans all output files')
-            self.parser.add_argument("--slurm_job_id",
-                                     dest="slurm_job_id",
-                                     help="id of the interpolation sbatch job")                
-            self.parser.add_argument('--conf', '--config', 
-                                     dest="config",
-                                     help='specifies the config file to read') 
-            self.parser.add_argument('--config_dir', 
-                                     dest="config_dir",
-                                     help='specifies the configuration directory where config files are') 
             self.parser.add_argument("--section",
                                      dest="section",
                                      help="config file section to read")
             self.parser.add_argument("--ghost_version",
                                      dest="ghost_version",
                                      help="set GHOST version data to work with")
+            self.parser.add_argument('--conf', '--config', 
+                                     dest="config",
+                                     help='specifies the config file to read') 
+            self.parser.add_argument('--config_dir', 
+                                     dest="config_dir",
+                                     help='specifies the configuration directory where config files are') 
             self.parser.add_argument("--cartopy_data_dir",
                                      dest="cartopy_data_dir",
                                      help="set cartopy data directory")
@@ -60,7 +52,7 @@ class ProvArgumentParser(object):
                                      help="root directory where GHOST observations are stored")
             self.parser.add_argument("--nonghost_root",
                                      dest="nonghost_root",
-                                     help="root directory where non-GHOST observations are stored")
+                                     help="root directory where non-GHOST observations are stored")                         
             self.parser.add_argument("--exp_root",
                                      dest="exp_root",
                                      help="set experiment root data directory")
@@ -79,11 +71,19 @@ class ProvArgumentParser(object):
                                      default=False,
                                      action='store_true',
                                      help="run Providentia offline mode")
+            self.parser.add_argument('--interactive',
+                                     help="runs Providentia interactive mode on Jupyter notebook")
             self.parser.add_argument("--download", "--dl",
                                      dest="download",
                                      default=False,
                                      action='store_true',
                                      help="run Providentia download mode")
+            self.parser.add_argument('--interpolation','--interp','--interpolate', 
+                                     action='store_true',
+                                     help='runs Providentia Interpolation') 
+            self.parser.add_argument("--slurm_job_id",
+                                     dest="slurm_job_id",
+                                     help="id of the interpolation sbatch job")                
             self.parser.add_argument("--network",
                                      dest="network",
                                      help="define network to load (e.g. 'EBAS', 'EEA_AQ_eReporting'")
@@ -105,12 +105,33 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--experiments",
                                      dest="experiments",
                                      help="experiments to read")
-            self.parser.add_argument("--ensemble_options",
-                                     dest="ensemble_options",
-                                     help="ensemble options of the experiment")
             self.parser.add_argument("--domain",
                                      dest="domain",
                                      help="domain of the experiment")
+            self.parser.add_argument("--ensemble_options",
+                                     dest="ensemble_options",
+                                     help="ensemble options of the experiment")
+            self.parser.add_argument("--forecast_day",
+                                     dest="forecast_day",
+                                     help="day of the model forecast to analyse")
+            self.parser.add_argument("--qa",
+                                     dest="qa",
+                                     help="list of qa flags (numbers or text) to use to filter data")
+            self.parser.add_argument("--flags",
+                                     dest="flags",
+                                     help="list of network flags (numbers or text) to use to filter data")
+            self.parser.add_argument("--add_qa",
+                                     dest="add_qa",
+                                     help="list of qa flags (numbers or text) to add to default qa flags, used to filter data")
+            self.parser.add_argument("--subtract_qa",
+                                     dest="subtract_qa",
+                                     help="list of qa flags (numbers or text) to subtract from default qa flags, used to filter data")
+            self.parser.add_argument("--add_flags",
+                                     dest="add_flags",
+                                     help="list of network flags (numbers or text) to add to default network flags, used to filter data")
+            self.parser.add_argument("--subtract_flags",
+                                     dest="subtract_flags",
+                                     help="list of network flags (numbers or text) to subtract from default network flags, used to filter data")
             self.parser.add_argument("--temporal_colocation",
                                      dest="temporal_colocation",
                                      help="activate temporal colocation betwen observations and experiments")
@@ -138,15 +159,24 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--spatial_colocation_validation_tolerance",
                                      dest="spatial_colocation_validation_tolerance",
                                      help="set spatial colocation validation tolerance to validate station reference/station name match of stations by longitude/latitude position (in metres)")
+            self.parser.add_argument("--map_extent",
+                                     dest="map_extent",
+                                     help="map extent for plots involving any maps")
             self.parser.add_argument("--filter_species",
                                      dest="filter_species",
                                      help="filter read species by other species within a given data range")
+            self.parser.add_argument("--calibration_factor",
+                                     dest="calibration_factor",
+                                     help="factor to calibrate data")
             self.parser.add_argument("--lower_bound",
                                      dest="lower_bound",
                                      help="filter out data below this set lower bound")
             self.parser.add_argument("--upper_bound",
                                      dest="upper_bound",
                                      help="filter out data above this set upper bound")
+            self.parser.add_argument("--remove_extreme_stations",
+                                     dest="remove_extreme_stations",
+                                     help="remove extreme stations using defined statistic limits")
             self.parser.add_argument("--report_type",
                                      dest="report_type",
                                      help="define ")
@@ -162,25 +192,49 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--report_filename",
                                      dest="report_filename",
                                      help="offline report filename")
-            self.parser.add_argument("--map_extent",
-                                     dest="map_extent",
-                                     help="map extent for plots involving any maps")
-            self.parser.add_argument("--active_dashboard_plots",
-                                     dest="active_dashboard_plots",
-                                     help="active plots on dashboard upon launch")                     
-            self.parser.add_argument("--plot_characteristics_filename",
-                                     dest="plot_characteristics_filename",
-                                     help="set filename for plot characteristics")
-            self.parser.add_argument("--harmonise_stations",
-                                     dest="harmonise_stations",
-                                     help="harmonise axes limits across stations for stations report")                     
             self.parser.add_argument("--harmonise_summary",
                                      dest="harmonise_summary",
                                      help="harmonise axes limits across subsections for summary report")
-            self.parser.add_argument("--remove_extreme_stations",
-                                     dest="remove_extreme_stations",
-                                     help="remove extreme stations using defined statistic limits")
-
+            self.parser.add_argument("--harmonise_stations",
+                                     dest="harmonise_stations",
+                                     help="harmonise axes limits across stations for stations report")                     
+            self.parser.add_argument("--active_dashboard_plots",
+                                     dest="active_dashboard_plots",
+                                     help="active plots on dashboard upon launch")    
+            self.parser.add_argument("--resampling_resolution",
+                                     dest="resampling_resolution",
+                                     help="temporal resolution to resample data")
+            self.parser.add_argument("--statistic_mode",
+                                     dest="statistic_mode",
+                                     help="name of statistical mode")
+            self.parser.add_argument("--statistic_aggregation",
+                                     dest="statistic_aggregation",
+                                     help="type of statistic aggregation")
+            self.parser.add_argument("--periodic_statistic_mode",
+                                     dest="periodic_statistic_mode",
+                                     help="name of periodic statistical mode")
+            self.parser.add_argument("--periodic_statistic_aggregation",
+                                     dest="periodic_statistic_aggregation",
+                                     help="type of periodic statistic aggregation")
+            self.parser.add_argument("--timeseries_statistic_aggregation",
+                                     dest="timeseries_statistic_aggregation",
+                                     help="type of timeseries statistic aggregation")
+            self.parser.add_argument("--plot_characteristics_filename",
+                                     dest="plot_characteristics_filename",
+                                     help="set filename for plot characteristics")
+            self.parser.add_argument("--interp_n_neighbours",
+                                     dest="interp_n_neighbours",
+                                     help="number of N nearest neighbours used for interpolation")
+            self.parser.add_argument("--interp_reverse_vertical_orientation",
+                                     dest="interp_reverse_vertical_orientation",
+                                     help="reverse vertical orientation of model levels for interpolation")
+            self.parser.add_argument("--interp_chunk_size",
+                                     dest="interp_chunk_size",
+                                     help="minimum number of jobs to pack in each chunk for interpolation")
+            self.parser.add_argument("--interp_job_array_limit",
+                                     dest="interp_job_array_limit",
+                                     help="maximum number of chunks in job array for interpolation")
+ 
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)
 

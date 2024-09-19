@@ -987,7 +987,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         if (changed_plot_type != '') & (not self.block_config_bar_handling_updates):
             
             # get event origin source if not given
-            if sender:
+            if sender is not None:
                 if sender == 2:
                     event_source = self.cb_position_2
                 elif sender == 3:
@@ -1082,7 +1082,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # update plot axis for new plot type
             self.update_plot_axis(self.mpl_canvas, event_source, changed_plot_type)
 
-            # update plot if changed_plot_type != None
+            # update plot if changed_plot_type != 'None'
             if changed_plot_type != 'None':
 
                 # format axis                
@@ -1186,8 +1186,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                              changed_plot_type, 
                                              canvas_instance.plot_axes[changed_plot_type][resolution],
                                              canvas_instance.plot_characteristics[changed_plot_type], 
-                                             add_vline=True,
-                                             resolution=resolution)
+                                             add_vline=True)
                 canvas_instance.annotations[changed_plot_type][resolution] = annotation.annotation
                 canvas_instance.annotations_lock[changed_plot_type][resolution] = False
                 canvas_instance.annotations_vline[changed_plot_type][resolution] = annotation.vline

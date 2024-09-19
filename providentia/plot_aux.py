@@ -572,13 +572,12 @@ def create_chunked_timeseries(read_instance, canvas_instance, chunk_stat, chunk_
             cut_data_labels.remove(read_instance.observations_data_label)
         stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, chunk_stat, 
                                          [read_instance.observations_data_label]*len(cut_data_labels), 
-                                         cut_data_labels, chunking=True, chunk_stat=chunk_stat, 
-                                         chunk_resolution=chunk_resolution)
+                                         cut_data_labels, chunking=True, chunk_resolution=chunk_resolution)
         
     else:
         stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, 
                                          chunk_stat, cut_data_labels, [], chunking=True, 
-                                         chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)
+                                         chunk_resolution=chunk_resolution)
 
     chunk_dates = canvas_instance.selected_station_data[networkspeci]["timeseries_chunks"][chunk_resolution]['valid_xticks']
     timeseries_data = pd.DataFrame(index=chunk_dates, columns=cut_data_labels, dtype=np.float64)
