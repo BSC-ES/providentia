@@ -5,6 +5,8 @@ from pandas.testing import assert_frame_equal
 from providentia.statistics import get_z_statistic_info
 
 
+GENERATE_OUTPUT = False
+
 def read_data(inst, path):
 
     # get data in memory in xarray format
@@ -15,7 +17,8 @@ def read_data(inst, path):
         generated_output = data['nasa-aeronet_directsun_v3-lev15|od550aero_data'].values
 
     # save data, uncomment if we want to update it
-    # np.save(path, generated_output)
+    if GENERATE_OUTPUT:
+        np.save(path, generated_output)
 
     # read expected output
     expected_output = np.load(path, allow_pickle=True)
@@ -74,7 +77,8 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
             path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_bias_values.csv'
         else:
             path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_values.csv'
-        # generated_output.to_csv(path, index=False)
+        if GENERATE_OUTPUT:
+            generated_output.to_csv(path, index=False)
 
         # read expected output
         expected_output = pd.read_csv(path, keep_default_na=False)
@@ -98,7 +102,8 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
 
                 # save data, uncomment if we want to update it
                 path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_{axis_i}_{line_i}.csv'
-                # generated_output.to_csv(path, index=False)
+                if GENERATE_OUTPUT:
+                    generated_output.to_csv(path, index=False)
 
                 # read expected output
                 expected_output = pd.read_csv(path)
@@ -127,7 +132,8 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
 
         # save data, uncomment if we want to update it
         path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_values.csv'
-        # generated_output.to_csv(path, index=False)
+        if GENERATE_OUTPUT:
+            generated_output.to_csv(path, index=False)
 
         # read expected output
         expected_output = pd.read_csv(path, keep_default_na=False)
@@ -150,7 +156,8 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
 
         # save data, uncomment if we want to update it
         path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_annotations.csv'
-        # generated_output.to_csv(path, index=False)
+        if GENERATE_OUTPUT:
+            generated_output.to_csv(path, index=False)
 
         # read expected output
         expected_output = pd.read_csv(path, keep_default_na=False)
