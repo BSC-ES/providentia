@@ -1,3 +1,4 @@
+import ast
 from calendar import monthrange
 import cartopy.crs as ccrs
 import cftime
@@ -55,6 +56,8 @@ class ExperimentInterpolation(object):
     """ Class which handles interpolation of experiment data to surface observations. """
 
     def __init__(self,submit_args):
+        
+        self.log_file_str = 'STARTING INTERPOLATION\n'
 
         # set machine
         self.machine = MACHINE
@@ -92,7 +95,11 @@ class ExperimentInterpolation(object):
         for variable_key in ["ghost_version", "interp_n_neighbours", "interp_reverse_vertical_orientation", "forecast_day"]:
             variable_val_idx = submission_file_txt.index(variable_key+":")+1
             variable_val = submission_file_txt[variable_val_idx]
-            setattr(self, variable_key, variable_val)
+            # make sure vertical orientiation is a boolean!
+            if variable_key == "reverse_vertical_orientation":
+                setattr(self, variable_key, ast.literal_eval(variable_val))
+            else:
+                setattr(self, variable_key, variable_val)
 
         # set experiment paths
         self.exp_root = data_paths[MACHINE]["exp_root"]
@@ -171,8 +178,8 @@ class ExperimentInterpolation(object):
                                                         self.speci_to_process, self.yearmonth, self.ensemble_option)))
         # if have no valid model files, exit
         if len(self.model_files) == 0:
-            log_file_str += 'No valid model files in {}. Skipping month.'.format(self.yearmonth)
-            self.create_output_logfile(1)
+            self.log_file_str += 'No valid model files in {}. Skipping month.'.format(self.yearmonth)
+            self.create_output_logfile(1, self.log_file_str)
 
     def get_model_information(self):
         """ Take first valid model file in month and get grid dimension/coordinate information.
@@ -205,8 +212,8 @@ class ExperimentInterpolation(object):
             except:
                 # if have got to last file of month and that is corrupted, return from function
                 if model_file_ii == (len(self.model_files)-1):
-                    log_file_str += 'All model files corrupted in {}. Skipping month.'.format(self.yearmonth)
-                    create_output_logfile(1)
+                    self.log_file_str += 'All model files corrupted in {}. Skipping month.'.format(self.yearmonth)
+                    create_output_logfile(1, self.log_file_str)
                 # else, continue to next file in month
                 else:
                     continue 
@@ -248,26 +255,26 @@ class ExperimentInterpolation(object):
                         self.z_index = np.argmax(mod_vert_obj[:])
                 # if cannot determine a surface index, terminate process
                 else: 
-                    log_file_str += 'Cannot determine surface index in vertical dimension. Terminating process.'
-                    create_output_logfile(1)
+                    self.log_file_str += 'Cannot determine surface index in vertical dimension. Terminating process.'
+                    create_output_logfile(1, self.log_file_str)
 
             # check if species grid dimensions are named correctly, and in correct BSC standard order
             # if not terminate process
             # this is done by checking the variable names of the x, y (and z if required) dimensions
             # X dimension is valid if 'lon' is contained within name, or is == 'x'
             if ('lon' not in self.x_varname) & (self.x_varname != 'x'):
-                log_file_str += 'X dimension incorrectly named. Terminating process.'
-                create_output_logfile(1)
+                self.log_file_str += 'X dimension incorrectly named. Terminating process.'
+                create_output_logfile(1, self.log_file_str)
             # Y dimension is valid if 'lat' is contained within name, or is == 'y'
             if ('lat' not in self.y_varname) & (self.y_varname != 'y'):
-                log_file_str += 'Y dimension incorrectly named. Terminating process.'
-                create_output_logfile(1)
+                self.log_file_str += 'Y dimension incorrectly named. Terminating process.'
+                create_output_logfile(1, self.log_file_str)
             # Z dimension is valid if == 'z' or 'lev' or 'alt' or 'height'
             if self.have_vertical_dimension:
                 if ((self.z_varname != 'lev') & (self.z_varname != 'z') & (self.z_varname != 'alt')
                     & (self.z_varname != 'height')):
-                    log_file_str += 'Z dimension incorrectly named. Terminating process.'
-                    create_output_logfile(1)
+                    self.log_file_str += 'Z dimension incorrectly named. Terminating process.'
+                    create_output_logfile(1, self.log_file_str)
 
             # get instances of x/y grid dimension variables
             mod_lon_obj = self.mod_nc_root[self.x_varname]
@@ -290,12 +297,12 @@ class ExperimentInterpolation(object):
             # if not terminate process
             # longitude coordinate is valid if 'lon' is contained within name
             if ('lon' not in lon_centre_varname):
-                log_file_str += 'Longitude grid centre coordinate incorrectly named. Terminating process.'
-                create_output_logfile(1)
+                self.log_file_str += 'Longitude grid centre coordinate incorrectly named. Terminating process.'
+                create_output_logfile(1, self.log_file_str)
             # latitude coordinate is valid if 'lat' is contained within name
             if ('lat' not in lat_centre_varname):
-                log_file_str += 'Latitude grid centre coordinate incorrectly named. Terminating process.'
-                create_output_logfile(1)
+                self.log_file_str += 'Latitude grid centre coordinate incorrectly named. Terminating process.'
+                create_output_logfile(1, self.log_file_str)
 
             # get longitude and latitude grid centre values
             self.mod_lons_centre = np.float32(self.mod_nc_root[lon_centre_varname][:])
@@ -318,8 +325,8 @@ class ExperimentInterpolation(object):
                     # set variable for values reassignation later
                     self.coords_remapping = True    
                 else: 
-                    log_file_str += 'Cannot handle grid of type: {} with these coordinates. Please remap. Terminating process'.format(self.mod_grid_type)
-                    create_output_logfile(1)
+                    self.log_file_str += 'Cannot handle grid of type: {} with these coordinates. Please remap. Terminating process'.format(self.mod_grid_type)
+                    create_output_logfile(1, self.log_file_str)
 
             # break out of for loop, now that have read a valid model file in the month
             break
@@ -381,8 +388,8 @@ class ExperimentInterpolation(object):
 
         # the grid type cannot be handled, therefore terminate process
         else:
-            log_file_str += 'Cannot handle grid of type: {}. Terminating process'.format(self.mod_grid_type)
-            create_output_logfile(1)
+            self.log_file_str += 'Cannot handle grid of type: {}. Terminating process'.format(self.mod_grid_type)
+            create_output_logfile(1, self.log_file_str)
 
         # get x/y grid resolution (taken from average of increment between x/y grid centres)
         x_res = np.mean(np.diff(x_centre))
@@ -545,8 +552,8 @@ class ExperimentInterpolation(object):
                 self.conversion_factor = 1.0
                 return
             else:
-                log_file_str += "Experiment units should be 'K', but are set as '{}'".format(self.mod_speci_units)
-                create_output_logfile(1)
+                self.log_file_str += "Experiment units should be 'K', but are set as '{}'".format(self.mod_speci_units)
+                create_output_logfile(1, self.log_file_str)
 
         # unit converter module does not produce conversion factor for angular degrees, but both observational and model 
         # units should be in angular degrees (i.e. conversion factor = 1.0) 
@@ -557,9 +564,9 @@ class ExperimentInterpolation(object):
                 self.conversion_factor = 1.0
                 return
             else:
-                log_file_str += "Experiment units should be 'angular degrees', but are set as '{}'".format(
+                self.log_file_str += "Experiment units should be 'angular degrees', but are set as '{}'".format(
                     self.mod_speci_units)
-                create_output_logfile(1)
+                create_output_logfile(1, self.log_file_str)
         
         # otherwise check if the unit quantities are equal
         conv_obj = unit_converter.convert_units(obs_speci_units,obs_speci_units,1)
@@ -574,8 +581,8 @@ class ExperimentInterpolation(object):
             speci_chemical_formula = self.standard_parameter_speci['chemical_formula']
             # if cannot determine chemical formula of species, then terminate process
             if speci_chemical_formula == '':
-                log_file_str += 'Cannot determine speci chemical formula needed for unit conversion. Terminating process.'
-                create_output_logfile(1)            
+                self.log_file_str += 'Cannot determine speci chemical formula needed for unit conversion. Terminating process.'
+                create_output_logfile(1, self.log_file_str)            
             input_units ={'temperature':'K', 'pressure':'hPa', 'molar_mass':'kg mol-1', model_quantity:self.mod_speci_units}
             input_values = {'temperature':293.15, 'pressure':1013.25, 'molar_mass':unit_converter.get_molecular_mass(speci_chemical_formula), 
                                                                                                                      model_quantity:1.0}
@@ -662,9 +669,6 @@ class ExperimentInterpolation(object):
             bin_index, rmin, rmax, rho_bin = get_aeronet_model_bin(self.model_name, aeronet_bin_radius)
             bin_transform_factor = get_model_to_aeronet_bin_transform_factor(self.model_name, rmin, rmax)
         
-        # initialise string variable
-        global log_file_str
-
         # iterate and read chunked model files
         for model_ii, model_file in enumerate(self.model_files):
 
@@ -676,7 +680,7 @@ class ExperimentInterpolation(object):
 
                 # check if have time dimension in daily file, if do not, do not process file
                 if 'time' not in list(self.mod_nc_root.dimensions.keys()):
-                    log_file_str += 'File {} is corrupt. Skipping.\n'.format(model_file)
+                    self.log_file_str += 'File {} is corrupt. Skipping.\n'.format(model_file)
                     continue 
 
                 # get date from filename
@@ -783,6 +787,9 @@ class ExperimentInterpolation(object):
 
                 # get indices in yearmonth to fill with read data
                 inds_to_fill = np.isin(self.yearmonth_dt, xr_data.time.values)
+                if all(inds_to_fill) is False:
+                    self.log_file_str += 'Time in model dataset {} is not in standard format: \n {}'.format(model_file, xr_data.time.values)
+                    create_output_logfile(1, self.log_file_str)
 
                 # fill in data array
                 self.monthly_model_data[inds_to_fill,:,:] = xr_data.values
@@ -791,7 +798,7 @@ class ExperimentInterpolation(object):
                 self.mod_nc_root.close()
 
             except Exception as e:
-                log_file_str += 'File {} is corrupt. Skipping.\n{}'.format(model_file, traceback.format_exc())
+                self.log_file_str += 'File {} is corrupt. Skipping.\n{}'.format(model_file, traceback.format_exc())
 
     def n_nearest_neighbour_inverse_distance_weights(self):
         """ Calculate N nearest neighbour inverse distance weights (and indices) of model gridcells centres 
@@ -1076,7 +1083,7 @@ class ExperimentInterpolation(object):
             # give 770 permissions for file and make owner bsc32
             set_file_permissions_ownership(esarchive_netCDF_fname)
 
-def create_output_logfile(process_code):
+def create_output_logfile(process_code, log_file_str):
     """ Create a logfile for stating outcome of interpolation job'
         the filename is prefixed with a code referencing the job outcome.
         The process codes are:
@@ -1102,12 +1109,10 @@ def create_output_logfile(process_code):
     sys.exit()    
 
 if __name__ == "__main__":
+
     try:
         # time start of yearmonth interpolation
         interpolation_start = time.time()
-
-        # initialise log file string
-        log_file_str = 'STARTING INTERPOLATION\n'
 
         # get arguments passed from submittal script --> put into dict
         submit_args = {'prov_exp_code': sys.argv[1], 
@@ -1149,10 +1154,11 @@ if __name__ == "__main__":
         interpolation_time = time.time() - interpolation_start
 
         # return valid process logfile (0)
-        log_file_str += str((time.time() - interpolation_start)/60.)
-        create_output_logfile(0)
+        EI.log_file_str += str((time.time() - interpolation_start)/60.)
+        create_output_logfile(0, EI.log_file_str)
 
     # write error log file if have uncaught internal error
     except Exception as e:
-        log_file_str += str(traceback.format_exc())
-        create_output_logfile(2)
+        log_file_str = 'STARTING INTERPOLATION\n'
+        log_file_str = str(traceback.format_exc())
+        create_output_logfile(2, log_file_str)

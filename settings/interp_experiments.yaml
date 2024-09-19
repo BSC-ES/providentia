@@ -8,7 +8,6 @@
                         "a5fm", "a5fn", "a5ft", "a5g2", "a5ff", "a5gg", "a5gh", "a5gi", "a5gf", "a4vk", "a0yh", "a5c3", "a5nt", 
                         "a6pr", "a7bn", "a7bo", "a7bp", "a7by", "a7bz", "a2in", "a4xf", "a6gn", "a7ej3"],
         "paths": [
-             "/gpfs/scratch/bsc32/bsc32359/esarchive_scratch/exp/monarch/",
              "/esarchive/exp/monarch/"
         ]
     },
