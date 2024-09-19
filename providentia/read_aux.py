@@ -224,20 +224,20 @@ def read_netcdf_data(tuple_arguments):
                 if not reading_ghost:
                     # get correct variable name for .nc
                     if meta_var == 'longitude':
-                        if "longitude" not in ncdf_root.variables:
-                            meta_var_nc = 'lon'
-                        else:
+                        if "longitude" in ncdf_root.variables:
                             meta_var_nc = 'longitude'
+                        else:
+                            meta_var_nc = 'lon'
                     elif meta_var == 'latitude':
-                        if "latitude" not in ncdf_root.variables:
-                            meta_var_nc = 'lat'
-                        else:
+                        if "latitude" in ncdf_root.variables:
                             meta_var_nc = 'latitude'
-                    elif meta_var == 'altitude':
-                        if "altitude" not in ncdf_root.variables:
-                            meta_var_nc = 'alt'
                         else:
+                            meta_var_nc = 'lat'
+                    elif meta_var == 'altitude':
+                        if "altitude" in ncdf_root.variables:
                             meta_var_nc = 'altitude'
+                        else:
+                            meta_var_nc = 'alt'
                     elif meta_var == 'station_reference':
                         if 'station_reference' in ncdf_root.variables:
                             meta_var_nc = 'station_reference'
@@ -257,8 +257,6 @@ def read_netcdf_data(tuple_arguments):
                     meta_val_dtype = np.array([meta_val[0]]).dtype
 
                     # do str formatting where neccessary
-                    #if meta_var in ['station_reference', 'station_name', 'station_classification', 
-                    #                'area_classification', 'country']:
                     if meta_val_dtype not in [np.int8, np.int16, np.int32, np.int64, 
                                               np.uint8, np.uint16, np.uint32, np.uint64,
                                               np.float16, np.float32, np.float64]:
@@ -312,55 +310,74 @@ def read_netcdf_metadata(tuple_arguments):
     ncdf_root = Dataset(relevant_file)
 
     # set metadata variables to read
-    metadata_vars_to_read = ['station_reference', 'station_name', 'longitude', 'latitude', 
-                             'measurement_altitude']
+    metadata_vars_to_read = ['station_reference', 'longitude', 'latitude', 'station_name', 'measurement_altitude']
     metadata_read = []
 
     # iterate though metadata variables to read
     for meta_var in metadata_vars_to_read:
+
         # do extra work for non-GHOST data 
         if not reading_ghost:
-            # get correct variable name for .nc
-            if meta_var == 'longitude':
-                if "longitude" not in ncdf_root.variables:
-                    meta_var_nc = 'lon'
-                else:
-                    meta_var_nc = 'longitude'
-            elif meta_var == 'latitude':
-                if "latitude" not in ncdf_root.variables:
-                    meta_var_nc = 'lat'
-                else:
-                    meta_var_nc = 'latitude'
-            elif meta_var == 'altitude':
-                if "altitude" not in ncdf_root.variables:
-                    meta_var_nc = 'alt'
-                else:
-                    meta_var_nc = 'altitude'
-            elif meta_var == 'station_reference':
-                if "station_reference" not in ncdf_root.variables:
-                    meta_var_nc = 'station_code'
-                else:
-                    meta_var_nc = 'station_reference'
-            else:
-                meta_var_nc = meta_var
+        
+            # station reference
+            if meta_var == 'station_reference':
+                if 'station_reference' in ncdf_root.variables:
+                    station_reference_var = 'station_reference'
+                elif 'station_code' in ncdf_root.variables:
+                    station_reference_var = 'station_code'
+                elif 'station_name' in ncdf_root.variables:
+                    station_reference_var = 'station_name'
+                else: 
+                    print('Error: {} cannot be read because it has no station_name.'.format(relevant_files[0]))
+                    sys.exit()
 
-            # check meta variable is in netCDF, otherwise append empty list
-            if meta_var_nc not in ncdf_root.variables:
-                metadata_read.append([])
-                continue
-
-            meta_shape = ncdf_root[meta_var_nc].shape
-            meta_val = ncdf_root[meta_var_nc][:]
-            meta_val_dtype = np.array([meta_val[0]]).dtype
-
-            # some extra str formatting
-            if meta_var in ['station_reference', 'station_name']:
-
+                meta_shape = ncdf_root[station_reference_var].shape
+                meta_val = ncdf_root[station_reference_var][:]
+                meta_val_dtype = np.array([meta_val[0]]).dtype
                 if len(meta_shape) == 2:
                     if meta_val_dtype == np.dtype(object):
                         meta_val = np.array([''.join(val) for val in meta_val])
                     else:
                         meta_val = chartostring(meta_val)
+
+                # get indices of all non-NaN stations (can be NaN for some non-GHOST files)
+                non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(meta_val) if ref.lower() != 'nan'])
+                meta_val = meta_val[non_nan_station_indices]
+
+            # longitude
+            elif meta_var == 'longitude':
+                if "longitude" in ncdf_root.variables:
+                    meta_val = ncdf_root['longitude'][non_nan_station_indices]
+                else:
+                    meta_val = ncdf_root['lon'][non_nan_station_indices]
+            
+            # latitude
+            elif meta_var == 'latitude':
+                if "latitude" in ncdf_root.variables:
+                    meta_val = ncdf_root['latitude'][non_nan_station_indices]
+                else:
+                    meta_val = ncdf_root['lat'][non_nan_station_indices]
+
+            # station name
+            elif meta_var == 'station_name':
+                if "station_name" in ncdf_root.variables:
+                    meta_shape = ncdf_root['station_name'].shape
+                    meta_val = ncdf_root['station_name'][non_nan_station_indices]
+                    meta_val_dtype = np.array([meta_val[0]]).dtype
+                    if len(meta_shape) == 2:
+                        if meta_val_dtype == np.dtype(object):
+                            meta_val = np.array([''.join(val) for val in meta_val])
+                        else:
+                            meta_val = chartostring(meta_val)
+                else:
+                    meta_val = []
+
+            # measurement altitude
+            elif meta_var == 'measurement_altitude':
+                if "measurement_altitude" in ncdf_root.variables:
+                    meta_val = ncdf_root['measurement_altitude'][non_nan_station_indices]
+                else:
+                    meta_val = []
 
         # GHOST metadata
         else:

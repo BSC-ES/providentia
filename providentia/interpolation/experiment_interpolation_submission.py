@@ -43,12 +43,6 @@ class SubmitInterpolation(object):
         self.submit_dir = '{}/submit'.format(self.working_directory)
         self.interpolation_log_dir = '{}/interpolation_logs'.format(self.working_directory)
 
-        # TODO atributes that were in prov interp default but not in main one, add it at some point
-        self.reverse_vertical_orientation = False
-        self.multithreading = False
-        self.chunk_size = 16
-        self.job_array_limit = 100
-
         # initialize commandline arguments, if given
         provconf = ProvConfiguration(self, **kwargs)
 
@@ -95,9 +89,9 @@ class SubmitInterpolation(object):
         provconf.check_validity()
 
         # TODO Hardcoded
-        interp_print_variables = ['ghost_version', 'n_neighbours', 'start_date', 
-        'end_date', 'experiments', 'species', 'network', 'resolution', 'chunk_size', 'job_array_limit', 'multithreading', 
-        'reverse_vertical_orientation']
+        interp_print_variables = ['ghost_version', 'start_date', 'end_date', 'experiments', 'species', 
+        'network', 'resolution', 'forecast_day', 'interp_n_neighbours', 'interp_reverse_vertical_orientation', 
+        'interp_chunk_size', 'interp_job_array_limit']
 
         # print variables used, if all species are used print "All Species"        
         print("\nVariables used for the interpolation:\n")
@@ -161,7 +155,7 @@ class SubmitInterpolation(object):
                     break
 
             # if none of the paths are in this current machine, break
-            if not exp_dir:
+            if exp_dir is None:
                 error = f"Error: None of the experiment paths in {os.path.join('settings', 'interp_experiments.yaml')} are available in this machine ({MACHINE})."
                 sys.exit(error)
                 
@@ -526,12 +520,12 @@ class SubmitInterpolation(object):
         argument_files = []
 
         # get the CPU chunk size -- set initially as miniumum number of arguments per file 
-        N_arguments_per_file_minimum = copy.deepcopy(self.chunk_size)
-        N_arguments_per_file = copy.deepcopy(self.chunk_size)
+        N_arguments_per_file_minimum = copy.deepcopy(int(self.interp_chunk_size))
+        N_arguments_per_file = copy.deepcopy(int(self.interp_chunk_size))
         
         # divide the number of arguments by the CPU chunk size, to determine how many argument files will be needed to 
         # submit all jobs
-        N_submit_files = int(np.ceil(len(self.arguments)/self.chunk_size))
+        N_submit_files = int(np.ceil(len(self.arguments)/int(self.interp_chunk_size)))
         
         # set argument remainder as 0 initially
         argument_remainder = 0
@@ -540,13 +534,13 @@ class SubmitInterpolation(object):
         # files that can be processed simultaneously)
         # then add adjust minimum N arguments per file appropriately (i.e. split extra arguments across the maximum 
         # number of argument files evenly)        
-        if N_submit_files > self.job_array_limit:
+        if N_submit_files > int(self.interp_job_array_limit):
             # update the minimum number of arguments per file
-            N_arguments_per_file_minimum = int(np.floor(len(self.arguments)/self.job_array_limit))
+            N_arguments_per_file_minimum = int(np.floor(len(self.arguments)/int(self.interp_job_array_limit)))
             N_arguments_per_file = copy.deepcopy(N_arguments_per_file_minimum)
 
             # if the number of extra arguments does not divide equally between all files get the remainder
-            argument_remainder = int(len(self.arguments)%self.job_array_limit)
+            argument_remainder = int(len(self.arguments)%int(self.interp_job_array_limit))
             
             # if have argument remainder then update N_arguments_per_file variable to be 1 greater than minimum for 
             # first file written (and for all files thereafter until  remainder is accounted for)
@@ -556,7 +550,7 @@ class SubmitInterpolation(object):
                 argument_remainder -= 1
             
             # set N submit files as N of job array limit
-            N_submit_files = copy.deepcopy(self.job_array_limit)
+            N_submit_files = copy.deepcopy(int(self.interp_job_array_limit))
 
         # create file which will store a list of all chunked argument filenames
         greasy_file = open('{}/{}.grz'.format(self.arguments_dir, self.slurm_job_id), 'w')
@@ -635,7 +629,7 @@ class SubmitInterpolation(object):
             N_arguments = ii + 1
 
         # cap the number of simultaneously running tasks to be the defined CPU chunk size  
-        max_tasks = copy.deepcopy(self.chunk_size)
+        max_tasks = copy.deepcopy(int(self.interp_chunk_size))
 
         # if the number of arguments is > capped max tasks, then set N simultaneous tasks to be the max tasks permitted
         if N_arguments > max_tasks:
@@ -694,7 +688,7 @@ class SubmitInterpolation(object):
             N_arguments = ii + 1
 
         # cap the number of simultaneously running tasks to be the defined CPU chunk size
-        max_tasks = copy.deepcopy(self.chunk_size)
+        max_tasks = copy.deepcopy(int(self.interp_chunk_size))
 
         # if the number of arguments is > capped max tasks,
         # then set N simultaneous tasks to be the max tasks permitted

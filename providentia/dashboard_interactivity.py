@@ -248,7 +248,7 @@ def legend_picker_func(canvas_instance, event):
 
 class HoverAnnotation(object):
 
-    def __init__(self, canvas_instance, plot_type, ax, plot_characteristics, add_vline=False, resolution=None):
+    def __init__(self, canvas_instance, plot_type, ax, plot_characteristics, add_vline=False):
         
         self.canvas_instance = canvas_instance
         

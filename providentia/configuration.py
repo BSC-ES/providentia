@@ -365,10 +365,10 @@ class ProvConfiguration:
             else:
                 return []
 
-        elif key == "domain": # TODO maybe there's no need of domain because it is included on experiments
+        elif key == 'domain': # TODO maybe there's no need of domain because it is included on experiments
             # parse domain
 
-            if value != None:
+            if value is not None:
                 # treat leaving the field blank as default
                 if value == '':
                     return self.var_defaults[key]
@@ -378,10 +378,10 @@ class ProvConfiguration:
             else:
                 return []
 
-        elif key == "ensemble_options": # TODO maybe there's no need of ensemble num because it is included on experiments
+        elif key == 'ensemble_options': # TODO maybe there's no need of ensemble num because it is included on experiments
             # parse ensemble_options
 
-            if value != None:
+            if value is not None:
                 # treat leaving the field blank as default
                 if value == '':
                     return self.var_defaults[key]
@@ -587,11 +587,13 @@ class ProvConfiguration:
                 else:
                     return [value.strip()]
         
-        elif key in ['n_neighbors','statistic_mode','statistic_aggregation','periodic_statistic_mode','timeseries_statistic_aggregation']:
+        elif key in ['statistic_mode','statistic_aggregation','periodic_statistic_mode','periodic_statistic_aggregation',
+                     'timeseries_statistic_aggregation','interp_n_neighbours','interp_reverse_vertical_orientation',
+                     'interp_chunk_size','interp_job_array_limit']:
             # treat leaving the field blank as default
             if value == '':
                 return self.var_defaults[key]
-            
+
         # if no special parsing treatment for variable, simply return value
         return value
 
@@ -970,14 +972,14 @@ class ProvConfiguration:
                         error = "The format of End Date (end_date) is not correct, please change it to YYYYMMDD."
                         sys.exit(error)
 
-        # check have n_neighbours information, TODO ONLY FOR INTERPOLATION
+        # check have interp_n_neighbours information, TODO ONLY FOR INTERPOLATION
         # if offline, throw message, stating are using default instead
         # TODO CHANGE THE MESSAGE WHEN ITS DEFAULT AND WHEN ITS BECAUSE I DIDNT PUT THE NAME
-        if self.read_instance.interpolation and not self.read_instance.n_neighbours:
-            default = default_values['n_neighbours']
-            msg = "Number of neighbours (n_neighbours) was not defined in the configuration file. Using '{}' as default.".format(default)
+        if self.read_instance.interpolation and not self.read_instance.interp_n_neighbours:
+            default = default_values['interp_n_neighbours']
+            msg = "Number of neighbours (interp_n_neighbours) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.n_neighbours = default
+            self.read_instance.interp_n_neighbours = default
     
         # TODO MAYBE CHANGE THIS initialization to somewhere else or take it from another place
         # TODO and should it be provconf or no????
