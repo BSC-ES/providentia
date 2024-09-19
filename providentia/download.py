@@ -49,7 +49,7 @@ def sighandler(*unused):
 
     # delete the las downloaded nc file to avoid corrupted files
     if hasattr(download,'latest_nc_file_path'):
-        print("\nDeleting last nc file...")
+        print(f"\nDeleting last file to avoid corruption: {download.latest_nc_file_path}...")
         os.remove(download.latest_nc_file_path)
 
     # delete temp dir if necessary
@@ -245,6 +245,17 @@ class ProvidentiaDownload(object):
             # TODO delete when sure
             # update filetrees
             # self.update_filetrees()
+
+            # remove section variables from memory
+            for k in self.section_opts:
+                try:
+                    vars(self).pop(k)
+                except:
+                    pass
+
+            # reset domain and ensemble options for new section
+            self.domain = []
+            self.ensemble_options = []
 
         # close connection, if it exists
         if self.ssh is not None:
@@ -502,10 +513,10 @@ class ProvidentiaDownload(object):
                         # get the ones that are not already downloaded
                         valid_nc_files = list(filter(lambda x:os.path.join(local_dir,x) in files_to_download, valid_nc_files))
                         if not valid_nc_files:
-                            msg = "nc files already downloaded."
+                            msg = "Files were already downloaded."
                             show_message(self, msg, deactivate=initial_check)     
                             continue         
-                        valid_nc_files_iter = tqdm(valid_nc_files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading nc files ({len(valid_nc_files)})")
+                        valid_nc_files_iter = tqdm(valid_nc_files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading files ({len(valid_nc_files)})")
                     else:
                         # do not print the bar if it is the initial check
                         valid_nc_files_iter = valid_nc_files
@@ -516,10 +527,10 @@ class ProvidentiaDownload(object):
                         if initial_check:
                             initial_check_nc_files.append(local_path)
                         else:
+                            self.latest_nc_file_path = local_path
                             remote_path = os.path.join(remote_dir,nc_file)
                             self.ncfile_dl_start_time = time.time()
                             self.sftp.get(remote_path,local_path, callback=check_time)
-                            self.latest_nc_file_path = local_path
 
             return initial_check_nc_files
         
@@ -654,10 +665,10 @@ class ProvidentiaDownload(object):
                         # get the ones that are not already downloaded
                         valid_nc_files = list(filter(lambda x:os.path.join(local_dir,x) in files_to_download, valid_nc_files))
                         if not valid_nc_files:
-                            msg = "nc files already downloaded."
+                            msg = "Files were already downloaded."
                             show_message(self, msg, deactivate=initial_check)     
                             continue         
-                        valid_nc_files_iter = tqdm(valid_nc_files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading nc files ({len(valid_nc_files)})")
+                        valid_nc_files_iter = tqdm(valid_nc_files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading files ({len(valid_nc_files)})")
                     else:
                         # do not print the bar if it is the initial check
                         valid_nc_files_iter = valid_nc_files
@@ -668,10 +679,10 @@ class ProvidentiaDownload(object):
                         if initial_check:
                             initial_check_nc_files.append(local_path)
                         else:
+                            self.latest_nc_file_path = local_path
                             remote_path = os.path.join(remote_dir,nc_file)
                             self.ncfile_dl_start_time = time.time()
                             self.sftp.get(remote_path,local_path, callback=check_time)
-                            self.latest_nc_file_path = local_path
                        
             return initial_check_nc_files
 
@@ -784,7 +795,7 @@ class ProvidentiaDownload(object):
                                 # get the ones that are not already downloaded
                                 valid_nc_file_names = list(filter(lambda x:os.path.join(local_dir,x.split('/')[-1]) in files_to_download, valid_nc_file_names))
                                 if not valid_nc_file_names:
-                                    msg = "nc files already downloaded."
+                                    msg = "Files were already downloaded."
                                     show_message(self, msg, deactivate=initial_check)     
                                     continue  
                                 
@@ -794,7 +805,7 @@ class ProvidentiaDownload(object):
                             valid_nc_files.sort(key = lambda x:x.name)   
 
                             if not initial_check:    
-                                valid_nc_files_iter = tqdm(valid_nc_files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading nc files ({len(valid_nc_files)})")
+                                valid_nc_files_iter = tqdm(valid_nc_files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading files ({len(valid_nc_files)})")
                             else:
                                 # do not print the bar if it is the initial check
                                 valid_nc_files_iter = valid_nc_files
@@ -804,8 +815,8 @@ class ProvidentiaDownload(object):
                                 if initial_check:
                                     initial_check_nc_files.append(local_path)
                                 else:
-                                    tar_file.extract(member = nc_file, path = tar_dir)
                                     self.latest_nc_file_path = local_path
+                                    tar_file.extract(member = nc_file, path = tar_dir)
                 
                 # remove the temp directory
                 shutil.rmtree(os.path.dirname(os.path.dirname(temp_path)))
@@ -903,7 +914,7 @@ class ProvidentiaDownload(object):
                                 except FileNotFoundError:
                                     continue
                             
-            if valid_available_ghost_versions and check_for_ghost(network)::
+            if valid_available_ghost_versions and check_for_ghost(network):
                 msg += f" Please check one of the available versions: {', '.join(sorted(valid_available_ghost_versions))}"
             elif available_ghost_versions:
                 msg += " There are no other versions available at the moment with this configuration."
@@ -988,10 +999,10 @@ class ProvidentiaDownload(object):
                         # get the ones that are not already downloaded
                         valid_nc_files = list(filter(lambda x:os.path.join(local_dir,x) in files_to_download, valid_nc_files))
                         if not valid_nc_files:
-                            msg = "nc files already downloaded."
+                            msg = "Files were already downloaded."
                             show_message(self, msg, deactivate=initial_check)     
                             continue         
-                        valid_nc_files_iter = tqdm(valid_nc_files, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading nc files ({len(valid_nc_files)})")
+                        valid_nc_files_iter = tqdm(valid_nc_files, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading files ({len(valid_nc_files)})")
                     else:
                         # do not print the bar if it is the initial check
                         valid_nc_files_iter = valid_nc_files
@@ -1002,10 +1013,10 @@ class ProvidentiaDownload(object):
                         if initial_check:
                             initial_check_nc_files.append(local_path)
                         else:
+                            self.latest_nc_file_path = local_path
                             remote_path = os.path.join(remote_dir,nc_file)
                             self.ncfile_dl_start_time = time.time()
                             self.sftp.get(remote_path,local_path, callback=check_time) 
-                            self.latest_nc_file_path = local_path
             
             return initial_check_nc_files
 
