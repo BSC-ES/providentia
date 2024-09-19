@@ -391,7 +391,8 @@ def group_timeseries(read_instance, canvas_instance, networkspeci):
             )
 
 def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, data_labels_a, 
-                        data_labels_b, map=False, per_station=False, period=None, chunking=None, chunk_stat=None, chunk_resolution=None):
+                        data_labels_b, map=False, per_station=False, period=None, chunking=None, 
+                        chunk_resolution=None):
     """Function that calculates a statistic for data labels, either absolute or bias, 
        for different aggregation modes.
     """
@@ -464,12 +465,12 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
         else:
             indices_a = np.array([canvas_instance.selected_station_data_labels[networkspeci].index(label) for label in data_labels_a])
             # periodic grouped data
-            if period:
+            if period is not None:
                 data_array_a = [arr[indices_a] for arr in canvas_instance.selected_station_data[networkspeci][period]['active_mode']]
-            elif z_statistic_period:
+            elif z_statistic_period is not None:
                 data_array_a = [arr[indices_a] for arr in canvas_instance.selected_station_data[networkspeci][z_statistic_period]['active_mode']]
             # timeseries chunked data
-            elif chunking:
+            elif chunking is not None:
                 data_array_a = [arr[indices_a] for arr in canvas_instance.selected_station_data[networkspeci]['timeseries_chunks'][chunk_resolution]['active_mode']]
             # non-periodic grouped data
             else:
@@ -500,12 +501,12 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
             # calculate statistics
             
             # calculate statistics per periodic grouping per station
-            if period or chunking:
+            if (period is not None) or (chunking is not None):
                 z_statistic = np.array([getattr(Stats, stats_dict['function'])(group, **function_arguments) 
                                         for group in data_array_a])
 
             # calculate periodic statistic per station
-            elif z_statistic_period:
+            elif z_statistic_period is not None:
                 # if periodic statistic mode is cycle, then aggregate per periodic grouping, and then calculate stat
                 if read_instance.periodic_statistic_mode == 'Cycle':
                     # aggregation in each group, per station, by periodic statistic
@@ -544,12 +545,12 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 indices_b = np.array([canvas_instance.selected_station_data_labels[networkspeci].index(label) for label in data_labels_b])
 
                 # periodic grouped data
-                if period:
+                if period is not None:
                     data_array_b = [arr[indices_b] for arr in canvas_instance.selected_station_data[networkspeci][period]['active_mode']]
-                elif z_statistic_period:
+                elif z_statistic_period is not None:
                     data_array_b = [arr[indices_b] for arr in canvas_instance.selected_station_data[networkspeci][z_statistic_period]['active_mode']]
                 # timeseries chunked data
-                elif chunking:
+                elif chunking is not None:
                     data_array_b = [arr[indices_b] for arr in canvas_instance.selected_station_data[networkspeci]['timeseries_chunks'][chunk_resolution]['active_mode']]
                 # non-periodic grouped data
                 else:
@@ -569,14 +570,14 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 # calculate statistics for data_labels_a and data_labels_b, then subtract data_labels_b - data_labels_a
                 
                 # calculate statistics per periodic grouping per station
-                if period or chunking:
+                if (period is not None) or (chunking is not None):
                     statistic_a = np.array([getattr(Stats, stats_dict['function'])(group, **function_arguments_a) 
                                             for group in data_array_a])
                     statistic_b = np.array([getattr(Stats, stats_dict['function'])(group, **function_arguments_b) 
                                             for group in data_array_b])
                 
                 # calculate periodic statistic per station
-                elif z_statistic_period:
+                elif z_statistic_period is not None:
                     # if periodic statistic mode is cycle, then aggregate per periodic grouping, and then calculate stat
                     if read_instance.periodic_statistic_mode == 'Cycle':
                         # aggregation in each group, per station, by periodic statistic
@@ -623,7 +624,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                         elif per_station:
                             return z_statistic
                     else: 
-                        if period or chunking: 
+                        if (period is not None) or (chunking is not None): 
                             stats_calc[zstat] = np.full((len(data_array_b),len(data_labels_b)), np.NaN)
                         else:
                             stats_calc[zstat] = np.full((len(data_labels_b)), np.NaN)
@@ -635,12 +636,12 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 # calculate statistics
             
                 # calculate statistics per periodic grouping per station
-                if period or chunking:
+                if (period is not None) or (chunking is not None):
                     z_statistic = np.array([getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':group_a,'exp':group_b}})
                                             for group_a, group_b in zip(data_array_a, data_array_b)])
 
                 # calculate periodic statistic per station
-                elif z_statistic_period:
+                elif z_statistic_period is not None:
                     # if periodic statistic mode is cycle, then aggregate per periodic grouping, and then calculate stat
                     if read_instance.periodic_statistic_mode == 'Cycle':
                         # aggregation in each group, per station, by periodic statistic
@@ -1111,7 +1112,7 @@ def get_z_statistic_info(plot_type=None, zstat=None):
     """
 
     # have plot_type? Therefore need to extract zstat from plot_type name (if available)
-    if plot_type:
+    if plot_type is not None:
         # have zstat in plot_type name?
         if ('-' in plot_type) & ('-violin' not in plot_type):
             # have other options in plot_type?
@@ -1129,7 +1130,7 @@ def get_z_statistic_info(plot_type=None, zstat=None):
             zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = None, None, None, None, None
 
     # zstat not 'None'? Then get information for it            
-    if zstat:
+    if zstat is not None:
         # get base name name of zstat, dropping 'bias' suffix, and dropping period
         base_zstat = zstat.split('_bias')[0].split('-')[0]
         

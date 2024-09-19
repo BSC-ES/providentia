@@ -592,6 +592,8 @@ class DataReader:
             to get matching stations across stations.
         """
 
+        start_time = time.time()
+
         # define dictionaries for storing basic metadata across all species to read
         self.read_instance.station_references = {}
         self.read_instance.station_names = {}
@@ -641,97 +643,59 @@ class DataReader:
                     print('Warning: There is no available observational data for the filter network|species: {}. Dropping.'.format(networkspeci))
                 continue
                 
-            # get basic metadata for speci
-            # GHOST - read in parallel
-            if self.read_instance.reading_ghost:
+            # get basic metadata for speci - read in parallel
                 
-                # define arrays for storing speci metadata
-                speci_station_references = []
-                speci_station_names = []
-                speci_station_longitudes = []
-                speci_station_latitudes = []
-                speci_station_measurement_altitudes = []
+            # define arrays for storing speci metadata
+            speci_station_references = []
+            speci_station_names = []
+            speci_station_longitudes = []
+            speci_station_latitudes = []
+            speci_station_measurement_altitudes = []
 
-                # read metadata in parallel
-                tuple_arguments = []
-                for fname in relevant_files:
-                    tuple_arguments.append((fname, self.read_instance.reading_ghost))
-                pool = multiprocessing.Pool(self.read_instance.n_cpus)
-                returned_data = pool.map(read_netcdf_metadata, tuple_arguments)
-                pool.close()
-                pool.join()
+            # read metadata in parallel
+            tuple_arguments = []
+            for fname in relevant_files:
+                tuple_arguments.append((fname, self.read_instance.reading_ghost))
+            pool = multiprocessing.Pool(self.read_instance.n_cpus)
+            returned_data = pool.map(read_netcdf_metadata, tuple_arguments)
+            pool.close()
+            pool.join()
 
-                # unzip returned data
-                for returned_data_per_month in returned_data:
-                    speci_station_references = np.append(speci_station_references, returned_data_per_month[0])
-                    speci_station_names = np.append(speci_station_names, returned_data_per_month[1])
-                    speci_station_longitudes = np.append(speci_station_longitudes, returned_data_per_month[2])
-                    speci_station_latitudes = np.append(speci_station_latitudes, returned_data_per_month[3])
-                    speci_station_measurement_altitudes = np.append(speci_station_measurement_altitudes, returned_data_per_month[4])
+            # unzip returned data
+            for returned_data_per_month in returned_data:
+                speci_station_references = np.append(speci_station_references, returned_data_per_month[0])
+                speci_station_longitudes = np.append(speci_station_longitudes, returned_data_per_month[1])
+                speci_station_latitudes = np.append(speci_station_latitudes, returned_data_per_month[2])
+                speci_station_names = np.append(speci_station_names, returned_data_per_month[3])
+                speci_station_measurement_altitudes = np.append(speci_station_measurement_altitudes, returned_data_per_month[4])
 
-                speci_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
-                self.read_instance.station_references[networkspeci] = speci_station_references
-                self.read_instance.station_names[networkspeci] = speci_station_names[station_unique_indices]
-                self.read_instance.station_longitudes[networkspeci] = speci_station_longitudes[station_unique_indices]
-                self.read_instance.station_latitudes[networkspeci] = speci_station_latitudes[station_unique_indices]
-                self.read_instance.station_measurement_altitudes[networkspeci] = speci_station_measurement_altitudes[station_unique_indices]
+            # for non-GHOST data, check if station name and measurement altitude are available in files, and
+            # get list of additional variables to read that maybe available in files (must be subset of GHOST variables)
+            # also get non-GHOST measurement units
+            if not self.read_instance.reading_ghost:
 
-            # non-GHOST - take from first file (metadata will be same across time)
-            else:
-                self.read_instance.nonghost_metadata_vars_to_read = []
-            
-                ncdf_root = Dataset(relevant_files[0])
-                if 'station_reference' in ncdf_root.variables:
-                    station_reference_var = 'station_reference'
-                elif 'station_code' in ncdf_root.variables:
-                    station_reference_var = 'station_code'
-                elif 'station_name' in ncdf_root.variables:
-                    station_reference_var = 'station_name'
-                else: 
-                    error = 'Error: {} cannot be read because it has no station_name.'.format(relevant_files[0])
-                    sys.exit(error)
-                self.read_instance.nonghost_metadata_vars_to_read.append('station_reference') 
-
-                meta_shape = ncdf_root[station_reference_var].shape
-                self.read_instance.station_references[networkspeci] = ncdf_root[station_reference_var][:]
-                meta_val_dtype = np.array([self.read_instance.station_references[networkspeci][0]]).dtype
-                if len(meta_shape) == 2:
-                    if meta_val_dtype == np.dtype(object):
-                        self.read_instance.station_references[networkspeci] = np.array([''.join(val) 
-                                                                    for val in self.read_instance.station_references[networkspeci]])
-                    else:
-                        self.read_instance.station_references[networkspeci] = chartostring(self.read_instance.station_references[networkspeci])
-
-                # get indices of all non-NaN stations (can be NaN for some non-GHOST files)
-                non_nan_station_indices = np.array([ref_ii for ref_ii, ref in enumerate(self.read_instance.station_references[networkspeci]) 
-                                                    if ref.lower() != 'nan'])
-                self.read_instance.station_references[networkspeci] = self.read_instance.station_references[networkspeci][non_nan_station_indices]
+                # define base list of non-GHOST metadata variables to read
+                self.read_instance.nonghost_metadata_vars_to_read = ['station_reference','longitude','latitude']
+                basic_metadata_read = [speci_station_references, speci_station_longitudes, speci_station_latitudes]
                 
-                if "latitude" in ncdf_root.variables:
-                    self.read_instance.station_longitudes[networkspeci] = ncdf_root['longitude'][non_nan_station_indices]
-                    self.read_instance.station_latitudes[networkspeci] = ncdf_root['latitude'][non_nan_station_indices]
-                else:
-                    self.read_instance.station_longitudes[networkspeci] = ncdf_root['lon'][non_nan_station_indices]
-                    self.read_instance.station_latitudes[networkspeci] = ncdf_root['lat'][non_nan_station_indices]
-                self.read_instance.nonghost_metadata_vars_to_read.append('longitude') 
-                self.read_instance.nonghost_metadata_vars_to_read.append('latitude') 
-
-                if "station_name" in ncdf_root.variables:
-                    meta_shape = ncdf_root['station_name'].shape
-                    self.read_instance.station_names[networkspeci] = ncdf_root['station_name'][non_nan_station_indices]
-                    meta_val_dtype = np.array([self.read_instance.station_names[networkspeci][0]]).dtype
-                    if len(meta_shape) == 2:
-                        if meta_val_dtype == np.dtype(object):
-                            self.read_instance.station_names[networkspeci] = np.array([''.join(val) for val in self.read_instance.station_names[networkspeci]])
-                        else:
-                            self.read_instance.station_names[networkspeci] = chartostring(self.read_instance.station_names[networkspeci])
+                # check if station names are available in files
+                if len(speci_station_names) > 0:
                     self.read_instance.nonghost_metadata_vars_to_read.append('station_name') 
+                    basic_metadata_read.append(speci_station_names)
+                    have_station_name = True
+                else:
+                    have_station_name = False
 
-                if "measurement_altitude" in ncdf_root.variables:
-                    self.read_instance.station_measurement_altitudes[networkspeci] = ncdf_root['measurement_altitude'][non_nan_station_indices]
+                # check if measurement altitudes are available in files
+                if len(speci_station_measurement_altitudes) > 0:
                     self.read_instance.nonghost_metadata_vars_to_read.append('measurement_altitude') 
+                    basic_metadata_read.append(speci_station_measurement_altitudes)
+                    have_measurement_altitude = True
+                else:
+                    have_measurement_altitude = False
 
-                # get non-GHOST measurement units
+                # get non-GHOST measurement units (take from first relevant file)
+                ncdf_root = Dataset(relevant_files[0])
                 self.read_instance.nonghost_units[speci] = ncdf_root[speci].units
 
                 # get list of nonghost variables to read (subset of GHOST variables)
@@ -739,7 +703,28 @@ class DataReader:
                     if (ghost_metadata_var in ncdf_root.variables) & (ghost_metadata_var not in self.read_instance.nonghost_metadata_vars_to_read):
                         self.read_instance.nonghost_metadata_vars_to_read.append(ghost_metadata_var) 
 
+                # close first relevant file
                 ncdf_root.close()
+            
+            # for GHOST data, just set up some variables for checks
+            else:
+                basic_metadata_read = [speci_station_references, speci_station_longitudes, speci_station_latitudes, speci_station_names, speci_station_measurement_altitudes]
+                have_station_name = True
+                have_measurement_altitude = True
+
+            # double check that lengths of read variables are the same
+            if len(set(map(len, basic_metadata_read))) != 1:
+                sys.exit('Error: Some metadata variables do not appear in all netCDF files. This should not be the case!')
+
+            # get unique station references and apply unique indices to the other variables
+            speci_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
+            self.read_instance.station_references[networkspeci] = speci_station_references
+            self.read_instance.station_longitudes[networkspeci] = speci_station_longitudes[station_unique_indices]
+            self.read_instance.station_latitudes[networkspeci] = speci_station_latitudes[station_unique_indices]
+            if have_station_name:
+                self.read_instance.station_names[networkspeci] = speci_station_names[station_unique_indices]
+            if have_measurement_altitude:
+                self.read_instance.station_measurement_altitudes[networkspeci] = speci_station_measurement_altitudes[station_unique_indices]
 
         # if have more than 1 networkspecies (including filter networkspecies), and spatial_colocation is active,
         # then spatially colocate stations across species
@@ -747,11 +732,13 @@ class DataReader:
             # get intersecting station indices across species (handle both GHOST and non-GHOST cases)
             self.sc = SpatialColocation(self.read_instance)
 
+            # if have zero intersecting indices after spatial colocation, then deactivate spatial colocation
             if len(self.sc.intersecting_indices[self.sc.firstnetworkspeci]) == 0:
                 print("Warning: spatial_colocation is set to False, as have 0 intersecting stations across species.")
                 self.read_instance.spatial_colocation = False
-            # otherwise, iterate through networkspecies specific intersecting indices, reducing variables for only specific indices
-            else:            
+            # otherwise, iterate through networkspecies specific intersecting indices, reducing associated variables 
+            # for specific intersecting indices per networkspecies
+            else:        
                 for ns, ns_intersects in self.sc.intersecting_indices.items():
                     self.read_instance.station_references[ns] = self.read_instance.station_references[ns][ns_intersects]
                     self.read_instance.station_longitudes[ns] = self.read_instance.station_longitudes[ns][ns_intersects]
@@ -769,6 +756,8 @@ class DataReader:
             :param data_labels: Data arrays to plot
             :type data_labels: list
         """
+
+        start_time = time.time()
 
         # create arrays to share across processes (for parallel multiprocessing use)
         # this only works for numerical dtypes, i.e. not strings
