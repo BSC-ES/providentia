@@ -178,7 +178,7 @@ class ExperimentInterpolation(object):
         # if have no valid model files, exit
         if len(self.model_files) == 0:
             self.log_file_str += 'No valid model files in {}. Skipping month.'.format(self.yearmonth)
-            self.create_output_logfile(1, self.log_file_str)
+            create_output_logfile(1, self.log_file_str)
 
     def get_model_information(self):
         """ Take first valid model file in month and get grid dimension/coordinate information.
