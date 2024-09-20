@@ -53,7 +53,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Offline-reports.html">Offline reports</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Interactive-mode.html">Interactive mode</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Download</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Download</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fields">Fields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#env-file">.env file</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a></li>
@@ -94,7 +98,65 @@
 </pre></div>
 </div>
 <p>This will get the data that needs to be downloaded from your configuration file and save it into the directories specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths</span></code> for <code class="docutils literal notranslate"><span class="pre">local</span></code>.</p>
-<p>If the data is GHOST, it will be grabbed from <a class="reference external" href="https://zenodo.org/records/10637450">Zenodo</a> and for non-GHOST data, this will come from the <code class="docutils literal notranslate"><span class="pre">esarchive</span></code>.</p>
+<p>The download mode fetches all the content specified in your configuration file across all sections, similar to how it functions in offline mode.</p>
+<section id="fields">
+<h2>Fields<a class="headerlink" href="#fields" title="Link to this heading"></a></h2>
+<p>Fields work a bit different in this mode, as only the parameters below will be used, some of them without being mandatory:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Mandatory in Download Mode</p></th>
+<th class="head"><p>Mandatory in Other Modes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>network</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>species</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p>resolution</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>start_date</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p>end_date</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>experiments</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+</tr>
+<tr class="row-even"><td><p>filter_species</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+</tr>
+</tbody>
+</table>
+<p>Other important changes from the other modes are:</p>
+<ol class="arabic simple">
+<li><p><strong>Wildcard (*) keyword:</strong> If you want to download all available networks or experiments, simply use the wildcard <code class="docutils literal notranslate"><span class="pre">*</span></code> in the <code class="docutils literal notranslate"><span class="pre">networks</span></code> or <code class="docutils literal notranslate"><span class="pre">experiments</span></code> field. Be careful with this.</p></li>
+<li><p><strong>Default keyword:</strong> The keyword <code class="docutils literal notranslate"><span class="pre">default</span></code> functions the same as leaving the field empty, meaning it will retrieve all possible values for that parameter.</p></li>
+</ol>
+</section>
+<section id="env-file">
+<h2>.env file<a class="headerlink" href="#env-file" title="Link to this heading"></a></h2>
+<p>An <code class="docutils literal notranslate"><span class="pre">.env</span></code> file will appear in the Providentia root directory when using the download mode. It is designed to store specific user preferences.</p>
+<ul class="simple">
+<li><p><strong>BSC_DL_CHOICE:</strong> (values: y/n) This setting controls where GHOST network data will be downloaded from. If set to <code class="docutils literal notranslate"><span class="pre">n</span></code>, the data will be downloaded from the <a class="reference external" href="https://zenodo.org/records/10637450">Zenodo</a> webpage. If set to <code class="docutils literal notranslate"><span class="pre">y</span></code>, it will download from the remote machine <code class="docutils literal notranslate"><span class="pre">transfer1.bsc.es</span></code> by default.</p></li>
+<li><p><strong>PRV_USER:</strong> This setting specifies the username used to connect to the remote machines. It can be any valid username, e.g.:bsc000000.</p></li>
+<li><p><strong>PRV_PWD:</strong> This setting allows you to save the password needed for connecting to remote machines. If you have properly generated a SSH key, there will be no need to input a password.</p></li>
+<li><p><strong>OVERWRITE:</strong> (values: y/n) This setting determines whether to automatically overwrite (<code class="docutils literal notranslate"><span class="pre">y</span></code>) or not overwrite (<code class="docutils literal notranslate"><span class="pre">n</span></code>) any existing files in your local directories.</p></li>
+</ul>
+<p>These values can be changed directly on the <code class="docutils literal notranslate"><span class="pre">.env</span></code> file and also be updated by Providentia during the next run.</p>
+</section>
 </section>
 
 

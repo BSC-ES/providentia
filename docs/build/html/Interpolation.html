@@ -49,7 +49,12 @@
 <li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup.html">Tool setup</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modes.html">Modes</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Interpolation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Interpolation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#starting-an-interpolation">Starting an Interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#checking-output">Checking output</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#define-experiments">Define experiments</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Offline-reports.html">Offline reports</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Interactive-mode.html">Interactive mode</a></li>
@@ -88,23 +93,70 @@
              
   <section id="interpolation">
 <h1>Interpolation<a class="headerlink" href="#interpolation" title="Link to this heading"></a></h1>
-<p>Since the release of version 2.4.0 in June 2024, our old tool Providentia Interpolation has been merged into Providentia.</p>
-<p>These are some details that you need to be aware of:</p>
-<ul class="simple">
-<li><p>The old configuration files can no longer be used, instead you will be able to use the ones from Providentia to interpolate and visualise your data.</p></li>
-<li><p>The file <code class="docutils literal notranslate"><span class="pre">defined_experiments.py</span></code> has been removed and there is no need to define the full paths to the experiments anymore. However, the experiment ids need to be passed into the <code class="docutils literal notranslate"><span class="pre">/settings/experiment_names.yaml</span></code>.</p></li>
-<li><p>The code that runs the interpolation is found under the folder <code class="docutils literal notranslate"><span class="pre">interpolation</span></code>. The logs will be created there as usual.</p></li>
-</ul>
-<p>Now that you know these points, you can run the interpolation by doing:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">interpolate</span>
+<p>Starting from the release of version 2.4.0 in August 2024, our old tool Providentia Interpolation will be merged into Providentia and it will be now refered as the Interpolation mode.</p>
+<p>This mode allows users to spatially interpolate experiment output against available observational stations to be viewable in <strong>Providentia</strong>.</p>
+<p>The Interpolation mode allows to interpolate experiments against <strong>GHOST</strong> and <strong>non-GHOST</strong> observations.</p>
+<p>Contained in: <code class="docutils literal notranslate"><span class="pre">/gpfs/projects/bsc32/AC_cache/recon/exp_interp/</span></code> exists an archive of previously interpolated experiment output, depending on the version. If the experiment you want to analyse is not there, or if you have re-run the experiment, add new variables etc. then this guide will aid you in interpolating the experiment output.</p>
+<section id="starting-an-interpolation">
+<h2>Starting an Interpolation<a class="headerlink" href="#starting-an-interpolation" title="Link to this heading"></a></h2>
+<p>The interpolation has been designed to only run on the <strong>MareNostrum5/Nord3v2</strong> machines, so first the user must be logged onto either machine.</p>
+<p>To start an interpolation,  you need to add either –interp, –interpolate, or –interpolation as a launch option along with the <strong>mandatory</strong> configuration file in the command line. This will initiate the interpolation process.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">interp</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span>
 </pre></div>
 </div>
-<p>This will generate logs in different folders:</p>
-<ul class="simple">
-<li><p>Submission logs: To give information on the slurm and Greasy submissions to the HPC machines.</p></li>
-<li><p>Management logs: To inform about the interpolation overall. Most errors will appear here.</p></li>
-<li><p>Interpolation logs: To get information about individual interpolations and know how long it took to do them.</p></li>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">interpolate</span>  <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">interpolation</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span>
+</pre></div>
+</div>
+<p>Upon submission, a first job named <code class="docutils literal notranslate"><span class="pre">PRV</span></code> will start the submission process which will make a job called <code class="docutils literal notranslate"><span class="pre">PRVI</span></code> appear in the SLURM queue, shortly afterwards a job array named <code class="docutils literal notranslate"><span class="pre">PRVI_$SLURMJOBID</span></code> (containing the jobs for all the defined variable combinations) will be submitted.</p>
+<p>When all jobs have been completed (or there is a failure) the <code class="docutils literal notranslate"><span class="pre">PRVI</span></code> job will exit the queue.</p>
+<p>In terms of performance, we recommend running Providentia Interpolation in MareNostrum5.</p>
+</section>
+<section id="checking-output">
+<h2>Checking output<a class="headerlink" href="#checking-output" title="Link to this heading"></a></h2>
+<p>The code that runs the interpolation is found under the <code class="docutils literal notranslate"><span class="pre">providentia/interpolation</span></code> folder. All the logs will be created there too.</p>
+<p>To check the status/output of an interpolation job, the following log files are created on submission in different directories:</p>
+<ul>
+<li><h3 class="rubric" id="management-logs">Management logs</h3>
+<p>These logs provide an overview of the interpolation process. Most errors will appear here.</p>
+<p>Located in the <code class="docutils literal notranslate"><span class="pre">providentia/interpolation/management_logs</span></code> folder, look for an <code class="docutils literal notranslate"><span class="pre">$SLURMJOBID.out</span></code> file.</p>
+</li>
+<li><h3 class="rubric" id="submission-logs">Submission logs</h3>
+<p>These logs contain information about the Slurm and Greasy submissions to the HPC machines.</p>
+<p>Found in the <code class="docutils literal notranslate"><span class="pre">providentia/interpolation/submission_logs</span></code> folder, search for an <code class="docutils literal notranslate"><span class="pre">$SLURMJOBID.out</span></code> file.</p>
+</li>
+<li><h3 class="rubric" id="interpolation-logs">Interpolation logs</h3>
+<p>These logs give information about individual interpolations and how long it took to do them.</p>
+<p>Found in the <code class="docutils literal notranslate"><span class="pre">providentia/interpolation/interpolation_logs</span></code> folder, for each individual interpolation, new directories are created with the structure <code class="docutils literal notranslate"><span class="pre">{experiment}/{species}/{network}/{resolution}</span></code>. Inside these directories, logs for each month are stored as <code class="docutils literal notranslate"><span class="pre">{YYYYMM}_{exit_code}.out</span></code>. If successful, the exit code will be 0.</p>
+</li>
 </ul>
+<p>If the interpolation is succesful, the resulted interpolated files are stored under the directory : <code class="docutils literal notranslate"><span class="pre">/gpfs/projects/bsc32/AC_cache/recon/exp_interp/</span></code> followed by the latest version of GHOST used by the interpolation.</p>
+</section>
+<section id="define-experiments">
+<h2>Define experiments<a class="headerlink" href="#define-experiments" title="Link to this heading"></a></h2>
+<p>All the experiments that are runned in the interpolation need to be defined in <code class="docutils literal notranslate"><span class="pre">/settings/interp_experiments.yaml</span></code>.</p>
+<p>This file contains a dictionary of default relevant experiments grouped by type, in where you find the list of names of the experiments and the list of possible paths for them.</p>
+<p>If you have a new experiment to interpolate and it is located on one of the examples paths such as <code class="docutils literal notranslate"><span class="pre">/esarchive/exp/monarch/</span></code>, you only need to add it to its list of experiments.</p>
+<p>If the experiment is not located in one of the predefined paths, you will need to add the <strong>experiment type</strong>, the <strong>experiment name</strong>, and the <strong>experiment storage directory</strong> (excluding the experiment name). For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;example_experiment_type&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;experiments&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;example_experiment_name&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;paths&quot;</span><span class="p">:</span> <span class="p">[</span> 
+            <span class="s2">&quot;/example/experiment/path&quot;</span>
+        <span class="p">]</span>
+</pre></div>
+</div>
+<p>You can find this exact template at the end of the interp_experiments.yaml file.</p>
+<p>When adding a new experiment, the subdirectories inside the experiment storage directory must follow this structure: <code class="docutils literal notranslate"><span class="pre">{experiment_name}/{domain}/{resolution}/{species}</span></code>. For example: <code class="docutils literal notranslate"><span class="pre">cams61_monarch_ph3/eu/hourly/sconco3</span></code>.</p>
+<p>There can be multiple paths to the same experiments, and you can add them to the list of paths. The order is important: the first path that works on the machine will be used.</p>
+<p>There’s normally two types the location of experiment data:</p>
+<ul class="simple">
+<li><p><strong>gpfs</strong>: Accessible by the <em><strong>MareNostrum5/Nord3v2</strong></em> machines.</p></li>
+<li><p><strong>esarchive</strong>: Accessible by the <em><strong>Nord3v2</strong></em> machine.</p></li>
+</ul>
+<p>If you are using a machine that allows both types of paths, it is recommended to list your <code class="docutils literal notranslate"><span class="pre">gpfs</span></code> paths first. This is because when reading data from the <code class="docutils literal notranslate"><span class="pre">esarchive</span></code>, a major limitation on the read time is the transfer speed between the 2 machines, reading directly from the <code class="docutils literal notranslate"><span class="pre">gpfs</span></code>  directory circumvents this therefore.</p>
+</section>
 </section>
 
 

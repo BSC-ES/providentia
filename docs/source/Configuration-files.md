@@ -93,7 +93,7 @@ In the offline version, there will be a report per section. In the dashboard, yo
 
 #### Use of non-GHOST networks
 
-Providentia can be used both with GHOST and non-GHOST netCDF files. Users should add the path to their network in `settings/internal/nonghost_files.yaml`. In the configuration file, you can refer to non-GHOST files like:
+Providentia can be used both with GHOST and non-GHOST netCDF files. Users should add the path to their network in `settings/nonghost_files.yaml`. In the configuration file, you can refer to non-GHOST files like:
 
 ```
 network = port_barcelona/port-barcelona
