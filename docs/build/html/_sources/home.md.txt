@@ -28,6 +28,8 @@ Below you will find the recorded videos of the last training sessions, as well a
 
 Below you will find the presentation of the last user meetings:
 
+* 28/08/2024: [20240828_Providentia_User_Meeting.pdf](uploads/6d92c8fedad10a550ee70234cedbc41b/20240828_Providentia_User_Meeting.pdf) and [Video](https://www.youtube.com/watch?v=TCgAFlwRYZk)
+
 * 07/02/2024: [20240207_Providentia_User_Meeting.pdf](uploads/4968fb7be294610aba851ca51accf3a8/20240207_Providentia_User_Meeting.pdf) and [Video](https://www.youtube.com/watch?v=sQrILt4udOU)
 
 * 03/08/2023: [20230803_Providentia_User_Meeting.pdf](uploads/669c2041d40f265dd0f6bec07c75a4e8/20230803_Providentia_User_Meeting.pdf) and [Video](https://www.youtube.com/watch?v=2cJbp772pu0)
