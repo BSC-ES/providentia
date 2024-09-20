@@ -21,7 +21,7 @@ You can learn more about how to create your own datasets with the following tuto
 - Create monthly datasets from CSIC:
 https://earth.bsc.es/gitlab/es/NES/-/blob/master/tutorials/2.Creation/2.5.Create_Points_CSIC.ipynb
 
-Providentia will be able to find these datasets if they are saved in the directory `/esarchive/obs/`. The data path must be included in `settings/internal/nonghost_files.yaml`. As an example, the path to the data from CSIC (`/esarchive/obs/csic/csic/monthly/sconcnh3/`) correspond in this dictionary to:
+Providentia will be able to find these datasets if they are saved in the directory `/esarchive/obs/`. The data path must be included in `settings/nonghost_files.yaml`. As an example, the path to the data from CSIC (`/esarchive/obs/csic/csic/monthly/sconcnh3/`) correspond in this dictionary to:
 
 ```
 "csic/csic": {

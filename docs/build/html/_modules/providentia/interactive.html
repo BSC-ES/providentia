@@ -104,10 +104,9 @@
 <span class="kn">from</span> <span class="nn">.plot_formatting</span> <span class="kn">import</span> <span class="p">(</span><span class="n">format_plot_options</span><span class="p">,</span> <span class="n">format_axis</span><span class="p">,</span> <span class="n">set_axis_label</span><span class="p">,</span> <span class="n">set_axis_title</span><span class="p">,</span> 
                               <span class="n">harmonise_xy_lims_paradigm</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.read</span> <span class="kn">import</span> <span class="n">DataReader</span>
-<span class="kn">from</span> <span class="nn">.read_aux</span> <span class="kn">import</span> <span class="p">(</span><span class="n">get_ghost_observational_tree</span><span class="p">,</span> <span class="n">get_lower_resolutions</span><span class="p">,</span> 
-                       <span class="n">get_nonghost_observational_tree</span><span class="p">,</span> <span class="n">get_nonrelevant_temporal_resolutions</span><span class="p">,</span> 
-                       <span class="n">get_relevant_temporal_resolutions</span><span class="p">,</span> <span class="n">get_valid_experiments</span><span class="p">,</span> 
-                       <span class="n">get_valid_obs_files_in_date_range</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.read_aux</span> <span class="kn">import</span> <span class="p">(</span><span class="n">generate_file_trees</span><span class="p">,</span> <span class="n">get_lower_resolutions</span><span class="p">,</span> 
+                       <span class="n">get_nonrelevant_temporal_resolutions</span><span class="p">,</span> <span class="n">get_relevant_temporal_resolutions</span><span class="p">,</span> 
+                       <span class="n">get_valid_experiments</span><span class="p">,</span> <span class="n">get_valid_obs_files_in_date_range</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.statistics</span> <span class="kn">import</span> <span class="p">(</span><span class="n">calculate_statistic</span><span class="p">,</span> <span class="n">generate_colourbar</span><span class="p">,</span> <span class="n">generate_colourbar_detail</span><span class="p">,</span> 
                          <span class="n">get_selected_station_data</span><span class="p">,</span> <span class="n">get_z_statistic_info</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.writing</span> <span class="kn">import</span> <span class="n">export_configuration</span><span class="p">,</span> <span class="n">export_data_npz</span><span class="p">,</span> <span class="n">export_netcdf</span>
@@ -142,42 +141,28 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">basic_stats</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/basic_stats.yaml&#39;</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">expbias_stats</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/experiment_bias_stats.yaml&#39;</span><span class="p">)))</span>
 
+        <span class="c1"># load representativity information</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">representativity_info</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/internal/representativity.yaml&#39;</span><span class="p">)))</span>
+
         <span class="c1"># set configuration variables, as well as any other defined variables</span>
         <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="c1"># if configuration read was not valid then return here</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
             <span class="k">return</span>
 
-        <span class="c1"># get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded</span>
-        <span class="c1"># generate file trees</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_file_tree</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">all_observation_data</span> <span class="o">=</span> <span class="n">get_ghost_observational_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonghost_root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">nonghost_observation_data</span> <span class="o">=</span> <span class="n">get_nonghost_observational_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="c1"># load file trees</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">all_observation_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/internal/ghost_filetree.json&#39;</span><span class="p">)))</span> 
-            <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">file_error</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Error: Trying to load &#39;settings/internal/ghost_filetree.json&#39; but file does not exist. Run with the flag &#39;--gft&#39; to generate this file.&quot;</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonghost_root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">nonghost_observation_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/internal/nonghost_filetree.json&#39;</span><span class="p">)))</span>
-                <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">file_error</span><span class="p">:</span>
-                    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Error: Trying to load &#39;settings/internal/nonghost_filetree.json&#39; but file does not exist. Run with the flag &#39;--gft&#39; to generate this file.&quot;</span>
-                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="c1"># generate file trees if needed</span>
+        <span class="n">generate_file_trees</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         
-        <span class="c1"># merge GHOST and non-GHOST filetrees</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nonghost_root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">all_observation_data</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">all_observation_data</span><span class="p">,</span> <span class="o">**</span><span class="n">nonghost_observation_data</span><span class="p">}</span>
-
         <span class="c1"># initialise DataReader class</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">datareader</span> <span class="o">=</span> <span class="n">DataReader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="c1"># check for self defined plot characteristics file</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics_filename</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/plot_characteristics_interactive.yaml&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tests</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;settings/plot_characteristics_tests.yaml&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;settings/plot_characteristics_interactive.yaml&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics_templates</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics_filename</span><span class="p">))</span>
 
         <span class="c1"># initialise Plot class</span>
@@ -199,20 +184,19 @@
 
         <span class="c1"># update available experiments for selected fields</span>
         <span class="n">get_valid_experiments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)</span>
-
-        <span class="c1"># if have no experiments, force temporal colocation to be False</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span> <span class="o">=</span> <span class="kc">False</span>  
+                              <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)</span>
 
         <span class="c1"># read data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid_read</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No valid data to read&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
 
         <span class="c1"># filter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">(</span><span class="n">initialise</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># set variable to know if data is in intial state or not</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">intialised</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialised</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to read data. &quot;&quot;&quot;</span>
@@ -221,10 +205,6 @@
 
         <span class="c1"># read data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">datareader</span><span class="o">.</span><span class="n">read_setup</span><span class="p">([</span><span class="s1">&#39;reset&#39;</span><span class="p">])</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalid_read</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No valid data to read&#39;</span><span class="p">)</span>
-            <span class="k">return</span>
 
     <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to filter data. &quot;&quot;&quot;</span>
@@ -246,7 +226,7 @@
 <span class="sd">        :type initialise: boolean, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Resetting filter&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Resetting filter for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">subsection</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
    
         <span class="c1"># initialise structures to store fields        </span>
         <span class="n">init_representativity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -256,22 +236,30 @@
         <span class="c1"># update available fields</span>
         <span class="n">update_representativity_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">update_period_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># for non-GHOST delete valid station indices variables because we do not want to </span>
+        <span class="c1"># remove the stations with 0 valid measurements before the filter has been updated, </span>
+        <span class="c1"># this will happen later</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;valid_station_inds&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">reading_ghost</span><span class="p">):</span>
+            <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;valid_station_inds&#39;</span><span class="p">)</span>
+            <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;valid_station_inds_temporal_colocation&#39;</span><span class="p">)</span>
+
         <span class="n">update_metadata_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         
-        <span class="c1"># apply set fields at intialisation for filtering</span>
+        <span class="c1"># apply set fields at initalisation for filtering</span>
         <span class="k">if</span> <span class="n">initialise</span><span class="p">:</span>
             <span class="n">representativity_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="n">period_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="n">metadata_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             
-        <span class="c1">#re-filter </span>
+        <span class="c1"># re-filter </span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">()</span>
 
         <span class="c1"># set variable to know if data is in intial state or not</span>
         <span class="k">if</span> <span class="n">initialise</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">intialised</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initialised</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">intialised</span> <span class="o">=</span> <span class="kc">False</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initialised</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="Interactive.make_plot">
@@ -339,6 +327,8 @@
 <span class="sd">        :type format: int, float, optional</span>
 <span class="sd">        :return: matplotlib.axes._axes.Axes</span>
 <span class="sd">        :rtype: Plot axes</span>
+<span class="sd">        :return: List of statistics (used in statsummary)</span>
+<span class="sd">        :rtype: list</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># close any previously open figures</span>
@@ -414,7 +404,7 @@
         <span class="n">chunk_stat</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">chunk_resolution</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;timeseries&#39;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">zstat</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">zstat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># get chunk statistic and resolution</span>
                 <span class="n">chunk_stat</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">zstat</span><span class="p">)</span>
                 <span class="n">chunk_resolution</span> <span class="o">=</span> <span class="n">plot_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -510,7 +500,7 @@
             <span class="n">map_extent</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_extent</span><span class="p">)</span>
 
         <span class="c1"># create figure</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">width</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">height</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">width</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">height</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
             <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Width and/or height have not been passed. The default values will be set.&quot;</span><span class="p">)</span>
@@ -527,7 +517,7 @@
             <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">base_plot_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;periodic&#39;</span><span class="p">,</span> <span class="s1">&#39;periodic-violin&#39;</span><span class="p">]:</span>
-            <span class="n">gs</span> <span class="o">=</span> <span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpecFromSubplotSpec</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">subplot_spec</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+            <span class="n">gs</span> <span class="o">=</span> <span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpecFromSubplotSpec</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">subplot_spec</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">get_subplotspec</span><span class="p">())</span>
             <span class="n">grid_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
             <span class="n">grid_dict</span><span class="p">[</span><span class="s1">&#39;hour&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[:</span><span class="mi">46</span><span class="p">,</span> <span class="p">:])</span>
             <span class="n">grid_dict</span><span class="p">[</span><span class="s1">&#39;dayofweek&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">54</span><span class="p">:,</span> <span class="mi">64</span><span class="p">:])</span>
@@ -613,7 +603,7 @@
             <span class="n">stats_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">stats_to_plot</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
             
             <span class="c1"># fill dataframe</span>
-            <span class="n">is_initial</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">intialised</span><span class="p">)</span>
+            <span class="n">is_initial</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initialised</span><span class="p">)</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="c1"># save current subsection </span>
             <span class="n">orig_ss</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subsection</span><span class="p">)</span>
@@ -631,7 +621,7 @@
                             <span class="c1"># calculate statistic</span>
                             <span class="k">if</span> <span class="n">dl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_station_data_labels</span><span class="p">[</span><span class="n">ns</span><span class="p">]:</span>
                                 <span class="c1"># if relevant stat is expbias stat, then ensure temporal colocation is active</span>
-                                <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;statsummary&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">stp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">expbias_stats</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span><span class="p">):</span>
+                                <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;statsummary&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">stp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">expbias_stats</span><span class="p">)</span> <span class="ow">and</span> <span class="p">((</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)):</span>
                                     <span class="n">stats_per_data_label</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">NaN</span><span class="p">)</span>
                                 <span class="c1"># otherwise calculate statistic</span>
                                 <span class="k">else</span><span class="p">:</span>
@@ -650,7 +640,16 @@
                         
                         <span class="c1"># put data in dataframe</span>
                         <span class="n">stats_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">ns</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">dl</span><span class="p">)]</span> <span class="o">=</span> <span class="n">stats_per_data_label</span>
-                
+                    
+                <span class="c1"># remove subsection variables from memory (if have subsections)</span>
+                <span class="c1"># do not remove fixed section variables</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsection_opts</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixed_section_vars</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">pass</span>
+
             <span class="c1"># make plot</span>
             <span class="n">func</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">relevant_data_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> <span class="n">plot_options</span><span class="p">,</span>
                  <span class="n">statsummary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">plotting_paradigm</span><span class="o">=</span><span class="s1">&#39;summary&#39;</span><span class="p">,</span> <span class="n">stats_df</span><span class="o">=</span><span class="n">stats_df</span><span class="p">)</span>     
@@ -672,7 +671,7 @@
             <span class="n">stats_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">relevant_data_labels</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
             
             <span class="c1"># fill dataframe</span>
-            <span class="n">is_initial</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">intialised</span><span class="p">)</span>
+            <span class="n">is_initial</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initialised</span><span class="p">)</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="c1"># save current subsection </span>
             <span class="n">orig_ss</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subsection</span><span class="p">)</span>
@@ -702,6 +701,15 @@
                     <span class="c1"># put data in dataframe</span>
                     <span class="n">stats_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">ns</span><span class="p">,</span> <span class="n">ss</span><span class="p">)]</span> <span class="o">=</span> <span class="n">stat_per_data_labels</span>
 
+                <span class="c1"># remove subsection variables from memory (if have subsections)</span>
+                <span class="c1"># do not remove fixed section variables</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsection_opts</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixed_section_vars</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">pass</span>
+
             <span class="c1"># make plot</span>
             <span class="n">func</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">relevant_data_labels</span><span class="p">,</span> 
                  <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> <span class="n">plot_options</span><span class="p">,</span> <span class="n">plotting_paradigm</span><span class="o">=</span><span class="s1">&#39;summary&#39;</span><span class="p">,</span> 
@@ -714,7 +722,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">(</span><span class="n">initialise</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">()</span>
-        
+
         <span class="c1"># make timeseries plot</span>
         <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;timeseries&#39;</span><span class="p">:</span>
             <span class="n">func</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">data_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> 
@@ -727,12 +735,12 @@
                  <span class="n">plot_options</span><span class="p">,</span> <span class="n">zstat</span><span class="o">=</span><span class="n">zstat</span><span class="p">,</span> <span class="n">stddev_max</span><span class="o">=</span><span class="n">stddev_max</span><span class="p">)</span>
             
         <span class="c1"># other plots</span>
-        <span class="k">else</span><span class="p">:</span> 
+        <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="o">!=</span> <span class="s1">&#39;legend&#39;</span><span class="p">:</span> 
             <span class="n">func</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">data_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> 
                  <span class="n">plot_options</span><span class="p">)</span>
 
         <span class="c1"># get number of total available stations, and individual station information if just have 1 station</span>
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_labels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span><span class="p">:</span>
             <span class="n">station_inds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_station_inds_temporal_colocation</span><span class="p">[</span><span class="n">networkspeci</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">observations_data_label</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">station_inds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_station_inds</span><span class="p">[</span><span class="n">networkspeci</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">observations_data_label</span><span class="p">]</span>  
@@ -743,7 +751,10 @@
             <span class="n">current_lat</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">station_latitudes</span><span class="p">[</span><span class="n">networkspeci</span><span class="p">][</span><span class="n">station_ind</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
             <span class="n">current_station_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">station_names</span><span class="p">[</span><span class="n">networkspeci</span><span class="p">][</span><span class="n">station_ind</span><span class="p">]</span>
             <span class="n">current_station_reference</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">station_references</span><span class="p">[</span><span class="n">networkspeci</span><span class="p">][</span><span class="n">station_ind</span><span class="p">]</span>
-
+        <span class="k">elif</span> <span class="n">n_stations</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No valid stations for </span><span class="si">{}</span><span class="s1"> in </span><span class="si">{}</span><span class="s1"> subsection. Not making </span><span class="si">{}</span><span class="s1"> plot&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">networkspeci</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsection</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">))</span>
+            <span class="k">return</span>
+            
         <span class="c1"># set title, xlabel and ylabel for plots</span>
 
         <span class="c1"># set xlabel / ylabel</span>
@@ -778,7 +789,7 @@
 
         <span class="c1"># set title</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">title</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">zstat</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">zstat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s1">&#39;axis_title&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">]:</span>
                     <span class="n">title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s1">&#39;axis_title&#39;</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
                     <span class="k">if</span> <span class="n">title</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
@@ -820,13 +831,10 @@
 
         <span class="c1"># overwrite passed xlabels and ylabels</span>
         <span class="k">if</span> <span class="n">title</span><span class="p">:</span>
-            <span class="c1">#self.plot_characteristics[plot_type][&#39;axis_title&#39;][&#39;label&#39;] = title</span>
             <span class="n">set_axis_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">relevant_ax</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">xlabel</span><span class="p">:</span>
-            <span class="c1">#self.plot_characteristics[plot_type][&#39;xlabel&#39;][&#39;xlabel&#39;] = xlabel</span>
             <span class="n">set_axis_label</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">xlabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">ylabel</span><span class="p">:</span>
-            <span class="c1">#self.plot_characteristics[plot_type][&#39;ylabel&#39;][&#39;ylabel&#39;] = ylabel</span>
             <span class="n">set_axis_label</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">ylabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">])</span>
 
         <span class="c1"># format plot axis/axes</span>
@@ -867,7 +875,7 @@
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">ax_to_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s1">&#39;legend&#39;</span><span class="p">][</span><span class="s1">&#39;handles&#39;</span><span class="p">][</span><span class="s1">&#39;ax&#39;</span><span class="p">]</span>
                         <span class="k">except</span><span class="p">:</span>
-                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: axis to plot legend on not defined for plot type in plot_characteristics_interactive.yaml, or passed via &#39;format&#39; argument.</span><span class="se">\n</span><span class="s2">\Taking first available axis.&quot;</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: axis to plot legend on not defined for plot type in plot_characteristics_interactive.yaml, or passed via &#39;format&#39; argument.</span><span class="se">\n</span><span class="s2">Taking first available axis.&quot;</span><span class="p">)</span>
                             <span class="n">ax_to_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relevant_temporal_resolutions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                         <span class="k">if</span> <span class="n">ax_to_plot</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">relevant_temporal_resolutions</span><span class="p">:</span>
                             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: defined axis to plot legend on not available for data resolution of read data.</span><span class="se">\n</span><span class="s2">Instead, taking first available axis.&quot;</span><span class="p">)</span>
@@ -877,9 +885,11 @@
                         <span class="n">relevant_ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="o">**</span><span class="n">legend_handles</span><span class="p">)</span>
 
         <span class="c1"># make colourbar (embedded on plot axis)</span>
-        <span class="k">if</span> <span class="n">cb</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s1">&#39;cb&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">]:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">make_colourbar</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">relevant_ax</span><span class="p">,</span> <span class="n">zstat</span><span class="p">,</span> <span class="n">speci</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;cb&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">]:</span>
+            <span class="n">cb_ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_colourbar</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">relevant_ax</span><span class="p">,</span> <span class="n">zstat</span><span class="p">,</span> <span class="n">speci</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">)</span>
+            <span class="c1"># hide colourbar if requested, we still need to create it to get the correct cmap / bounds in the maps</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">cb</span><span class="p">:</span>
+                <span class="n">cb_ax</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># if save is passed then save plot and return</span>
         <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
@@ -922,7 +932,7 @@
         <span class="c1"># generate colourbar</span>
         <span class="n">generate_colourbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">[</span><span class="n">plot_ax</span><span class="p">],</span> <span class="p">[</span><span class="n">cb_ax</span><span class="p">],</span> <span class="n">stat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> <span class="n">speci</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">cb_ax</span>
     
     <span class="k">def</span> <span class="nf">make_legend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">set_obs</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to make legend.</span>
@@ -1171,10 +1181,10 @@
         <span class="n">do_filter</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1"># make sure keep and remove arguments are lists</span>
-        <span class="k">if</span> <span class="n">keep</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">keep</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">keep</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
                 <span class="n">keep</span> <span class="o">=</span> <span class="p">[</span><span class="n">keep</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">remove</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">remove</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">remove</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
                 <span class="n">remove</span> <span class="o">=</span> <span class="p">[</span><span class="n">remove</span><span class="p">]</span>
 
@@ -1184,7 +1194,7 @@
 
             <span class="n">field_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">representativity_menu</span><span class="p">[</span><span class="s1">&#39;rangeboxes&#39;</span><span class="p">][</span><span class="s1">&#39;map_vars&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
             <span class="c1"># ensure limit is set for field</span>
-            <span class="k">if</span> <span class="n">limit</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">representativity_menu</span><span class="p">[</span><span class="s1">&#39;rangeboxes&#39;</span><span class="p">][</span><span class="s1">&#39;current_lower&#39;</span><span class="p">][</span><span class="n">field_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">limit</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: When filtering by representativity field: </span><span class="si">{}</span><span class="s2">, &#39;limit&#39; must be passed as an argument.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field</span><span class="p">))</span> 
@@ -1195,17 +1205,17 @@
             <span class="n">do_filter</span> <span class="o">=</span> <span class="kc">True</span>
 
             <span class="c1"># if neither keep or remove are defined, filtering cannot be done</span>
-            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">keep</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">remove</span><span class="p">):</span> 
+            <span class="k">if</span> <span class="p">(</span><span class="n">keep</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">remove</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span> 
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: When filtering by a period field, &#39;keep&#39; or &#39;remove&#39; must be passed as arguments.&quot;</span><span class="p">)</span>
                 <span class="k">return</span>
 
-            <span class="k">if</span> <span class="n">keep</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">keep</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">new_keep</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">period_menu</span><span class="p">[</span><span class="s1">&#39;checkboxes&#39;</span><span class="p">][</span><span class="s1">&#39;keep_selected&#39;</span><span class="p">])</span>
                 <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">new_keep</span><span class="p">:</span>
                         <span class="n">new_keep</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">period_menu</span><span class="p">[</span><span class="s1">&#39;checkboxes&#39;</span><span class="p">][</span><span class="s1">&#39;keep_selected&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_keep</span>
-            <span class="k">if</span> <span class="n">remove</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">remove</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">new_remove</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">period_menu</span><span class="p">[</span><span class="s1">&#39;checkboxes&#39;</span><span class="p">][</span><span class="s1">&#39;remove_selected&#39;</span><span class="p">])</span>
                 <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">remove</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">new_remove</span><span class="p">:</span>
@@ -1219,14 +1229,14 @@
                     <span class="n">do_filter</span> <span class="o">=</span> <span class="kc">True</span>
 
                     <span class="c1"># if neither lower or upper are defined, filtering cannot be done</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">lower</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">upper</span><span class="p">):</span> 
+                    <span class="k">if</span> <span class="p">(</span><span class="n">lower</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">upper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span> 
                         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: When filtering by a numeric metadata field, &#39;lower&#39; or &#39;upper&#39; must be passed as arguments.&quot;</span><span class="p">)</span>
                         <span class="k">return</span>
 
                     <span class="n">field_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_menu</span><span class="p">[</span><span class="n">menu_type</span><span class="p">][</span><span class="s1">&#39;rangeboxes&#39;</span><span class="p">][</span><span class="s1">&#39;labels&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">lower</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">lower</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">metadata_menu</span><span class="p">[</span><span class="n">menu_type</span><span class="p">][</span><span class="s1">&#39;rangeboxes&#39;</span><span class="p">][</span><span class="s1">&#39;current_lower&#39;</span><span class="p">][</span><span class="n">field_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">lower</span>
-                    <span class="k">if</span> <span class="n">upper</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">upper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">metadata_menu</span><span class="p">[</span><span class="n">menu_type</span><span class="p">][</span><span class="s1">&#39;rangeboxes&#39;</span><span class="p">][</span><span class="s1">&#39;current_upper&#39;</span><span class="p">][</span><span class="n">field_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">upper</span>           
                     <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata_menu</span><span class="p">[</span><span class="n">menu_type</span><span class="p">][</span><span class="s1">&#39;rangeboxes&#39;</span><span class="p">][</span><span class="s1">&#39;apply_selected&#39;</span><span class="p">]:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">metadata_menu</span><span class="p">[</span><span class="n">menu_type</span><span class="p">][</span><span class="s1">&#39;rangeboxes&#39;</span><span class="p">][</span><span class="s1">&#39;apply_selected&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
@@ -1236,17 +1246,17 @@
                     <span class="n">do_filter</span> <span class="o">=</span> <span class="kc">True</span>
 
                     <span class="c1"># if neither keep or remove are defined, filtering cannot be done</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">keep</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">remove</span><span class="p">):</span> 
+                    <span class="k">if</span> <span class="p">(</span><span class="n">keep</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">remove</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span> 
                         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: When filtering by a text period field, &#39;keep&#39; or &#39;remove&#39; must be passed as arguments.&quot;</span><span class="p">)</span>
                         <span class="k">return</span>
 
-                    <span class="k">if</span> <span class="n">keep</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">keep</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">new_keep</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_menu</span><span class="p">[</span><span class="n">menu_type</span><span class="p">][</span><span class="n">field</span><span class="p">][</span><span class="s1">&#39;checkboxes&#39;</span><span class="p">][</span><span class="s1">&#39;keep_selected&#39;</span><span class="p">])</span>
                         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">:</span>
                             <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">new_keep</span><span class="p">:</span>
                                 <span class="n">new_keep</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">metadata_menu</span><span class="p">[</span><span class="n">menu_type</span><span class="p">][</span><span class="n">field</span><span class="p">][</span><span class="s1">&#39;checkboxes&#39;</span><span class="p">][</span><span class="s1">&#39;keep_selected&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_keep</span>
-                    <span class="k">if</span> <span class="n">remove</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">remove</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="n">new_remove</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata_menu</span><span class="p">[</span><span class="n">menu_type</span><span class="p">][</span><span class="n">field</span><span class="p">][</span><span class="s1">&#39;checkboxes&#39;</span><span class="p">][</span><span class="s1">&#39;remove_selected&#39;</span><span class="p">])</span>
                         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">remove</span><span class="p">:</span>
                             <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">new_remove</span><span class="p">:</span>
@@ -1304,21 +1314,28 @@
 <span class="sd">        :rtype: numpy.ndarray</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># set temporary fname for writing</span>
-        <span class="n">temporary_fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;saved_data/temp_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="c1"># for non-ghost, update networkspecies name </span>
+        <span class="c1"># (e.g. ghost_btx/ghost_btx|sconcc6h6 -&gt; ghost_btx-ghost_btx|sconcc6h6)</span>
+        <span class="c1"># this will avoid permission denied errors</span>
+        <span class="n">networkspeci</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">networkspeci</span><span class="p">:</span>
+            <span class="n">networkspeci</span> <span class="o">=</span> <span class="n">networkspeci</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
 
+        <span class="c1"># set temporary fname for writing</span>
+        <span class="n">temporary_fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;saved_data/temp_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">networkspeci</span><span class="p">))</span>
+        
         <span class="c1"># check if temporary fname already exists </span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">temporary_fname</span><span class="p">):</span>
             <span class="c1"># if so, keep iterating until find fname is new</span>
             <span class="n">invalid_fname</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">dup_count</span> <span class="o">=</span> <span class="mi">2</span>
             <span class="k">while</span> <span class="n">invalid_fname</span><span class="p">:</span>
-                <span class="n">temporary_fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;saved_data/temp_</span><span class="si">{}</span><span class="s1">_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dup_count</span><span class="p">))</span>
+                <span class="n">temporary_fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;saved_data/temp_</span><span class="si">{}</span><span class="s1">_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">networkspeci</span><span class="p">,</span> <span class="n">dup_count</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">temporary_fname</span><span class="p">):</span>
                     <span class="n">dup_count</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">invalid_fname</span> <span class="o">=</span> <span class="kc">False</span>
-
+        
         <span class="k">if</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;netCDF&#39;</span><span class="p">,</span> <span class="s1">&#39;netcdf&#39;</span><span class="p">,</span> <span class="s1">&#39;netCDF4&#39;</span><span class="p">,</span> <span class="s1">&#39;netcdf4&#39;</span><span class="p">,</span> <span class="s1">&#39;nc&#39;</span><span class="p">,</span> <span class="s1">&#39;.nc&#39;</span><span class="p">]:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">export_netcdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temporary_fname</span><span class="p">,</span> <span class="n">set_in_memory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
