@@ -5,7 +5,7 @@ from pandas.testing import assert_frame_equal
 from providentia.statistics import get_z_statistic_info
 
 
-GENERATE_OUTPUT = True
+GENERATE_OUTPUT = False
 
 def read_data(inst, path):
 
