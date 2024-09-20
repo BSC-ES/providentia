@@ -98,6 +98,10 @@ class SpatialColocation:
         if (self.read_instance.spatial_colocation_longitude_latitude) & (len(self.intersecting_indices[self.firstnetworkspeci]) != len(self.read_instance.station_references[self.firstnetworkspeci])):
             self.by_position()
 
+        # sort indices with respect to original order of station references
+        for networkspeci in self.networkspecies:
+            self.intersecting_indices[networkspeci] = np.sort(self.intersecting_indices[networkspeci])
+
     def by_station_reference(self):
 
         # for GHOST data, remove measurement method str and duplicate station number from station references
