@@ -140,6 +140,7 @@ class SpatialColocation:
 
     def by_station_name(self):
 
+        # only do check if have remaining non-intersecting indices
         if (len(self.intersecting_indices[self.firstnetworkspeci]) != len(self.read_instance.station_references[self.firstnetworkspeci])):
 
             # get intersecting station names
@@ -177,6 +178,7 @@ class SpatialColocation:
             
     def by_position(self):
         
+        # only do check if have remaining non-intersecting indices
         if (len(self.intersecting_indices[self.firstnetworkspeci]) != len(self.read_instance.station_references[self.firstnetworkspeci])):
             
             # get non-intersecting station coordinates for first speci
@@ -287,11 +289,11 @@ class SpatialColocation:
                 for networkspeci in self.non_intersecting_longitudes:
                     self.intersecting_indices[networkspeci] = np.array(np.append(self.intersecting_indices[networkspeci], pairwise_intersect_inds[networkspeci]), dtype=np.int64)
 
-        # sort intersecting indices
-        self.sort_intersecting_indices()
+            # sort intersecting indices
+            self.sort_intersecting_indices()
 
-        # get non-intersection indices
-        self.get_non_intersections()
+            # get non-intersection indices
+            self.get_non_intersections()
 
     def validate_intersections(self):
 
