@@ -326,12 +326,6 @@ elif [ "${ip}" == "84.88.185.48" ]; then
 # Local machines (Workstations, dust02 machine and personal laptops)
 else
     echo "INFO: Running on a local machine..."
-
-    # break if user wants to do interpolation in local mode
-    if $interpolation; then
-         echo "Interpolation mode only available in local. Exiting..."
-         exit 1
-    fi
     
     # load modules from conda environment
     active_env=false
@@ -356,6 +350,8 @@ else
         echo "Starting interactive jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}
         jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
+    elif $interpolation; then
+        eval "${python_command}" > providentia/interpolation/management_logs/local.out 2>&1 --slurm_job_id=local
     else
         eval "${python_command}"
     fi
