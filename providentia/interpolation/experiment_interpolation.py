@@ -31,10 +31,8 @@ MACHINE = os.environ.get('BSC_MACHINE', '')
 
 # change current working directory from submit directory 
 # to import global configuration file
-if MACHINE == "nord3":
-    working_directory = os.getcwd()[17:].split('/submit')[0]
-else:
-    working_directory = os.getcwd().split('/submit')[0]
+CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+working_directory = CURRENT_PATH.split('/submit')[0]  
 os.chdir(working_directory)
 
 # get current path and providentia root path
@@ -87,12 +85,15 @@ class ExperimentInterpolation(object):
         self.interpolation_variables = {}
         
         # from file in management_logs, get and set the arguments which were not passed as a paremeter
-        submission_file = os.path.join(PROVIDENTIA_ROOT,'providentia','interpolation','management_logs',f'{self.unique_id}.out')
+        submission_file = os.path.join(PROVIDENTIA_ROOT, 'providentia', 'interpolation', 
+                                       'management_logs',f'{self.unique_id}.out')
         with open(submission_file, 'r') as f:
             submission_file_txt = f.read().split()
 
         # get configuration variables from the management_logs
-        for variable_key in ["ghost_version", "interp_n_neighbours", "interp_reverse_vertical_orientation", "forecast_day"]:
+        for variable_key in ["ghost_version", "interp_n_neighbours", 
+                             "interp_reverse_vertical_orientation", 
+                             "forecast_day", "exp_root", "ghost_root", "nonghost_root"]:
             variable_val_idx = submission_file_txt.index(variable_key+":")+1
             variable_val = submission_file_txt[variable_val_idx]
             # make sure vertical orientiation is a boolean!
@@ -101,11 +102,8 @@ class ExperimentInterpolation(object):
             else:
                 setattr(self, variable_key, variable_val)
 
-        # set experiment paths
-        self.exp_root = data_paths[MACHINE]["exp_root"]
-
         # import GHOST standards
-        sys.path.insert(1, data_paths[self.machine]["ghost_root"] + '/GHOST_standards/{}'.format(self.ghost_version))
+        sys.path.insert(1, os.path.join(PROVIDENTIA_ROOT, 'providentia/dependencies/GHOST_standards/{}'.format(self.ghost_version)))
         from GHOST_standards import standard_parameters
         self.standard_parameters = standard_parameters
         
@@ -141,13 +139,13 @@ class ExperimentInterpolation(object):
         # get relevant observational file
         # GHOST
         if self.reading_ghost:
-            self.obs_file = glob.glob(data_paths[MACHINE]['ghost_root'] + '/{}/{}/{}/{}/{}_{}*.nc'\
+            self.obs_file = glob.glob(self.ghost_root + '/{}/{}/{}/{}/{}_{}*.nc'\
                                       .format(self.network_to_interpolate_against, self.ghost_version,
                                               self.temporal_resolution_to_output, self.original_speci_to_process,
                                               self.original_speci_to_process, self.yearmonth))[0]
         # non-GHOST
         else:
-            self.obs_file = glob.glob(data_paths[MACHINE]['nonghost_root'] + '/{}/{}/{}/{}_{}*.nc'\
+            self.obs_file = glob.glob(self.nonghost_root + '/{}/{}/{}/{}_{}*.nc'\
                 .format(self.network_to_interpolate_against, self.temporal_resolution_to_output,
                         self.original_speci_to_process, self.original_speci_to_process, self.yearmonth))[0]
            
@@ -885,11 +883,11 @@ class ExperimentInterpolation(object):
         else:
             # as it appears in PRV (e.g. nasa-aeronet/oneill_v3-lev15 -> nasa-aeronet-oneill_v3-lev15)
             network_name = self.network_to_interpolate_against.replace('/', '-')
-        output_dir = os.path.join(self.exp_root,self.ghost_version, self.prov_exp_code, 
+        output_dir = os.path.join(self.exp_root, self.ghost_version, self.prov_exp_code, 
                                   self.temporal_resolution_to_output, self.original_speci_to_process, network_name)
 
         # check if need to create any directories in path 
-        check_directory_existence(output_dir,self.exp_root)
+        check_directory_existence(output_dir, self.exp_root)
 
         # create netCDF dataset
         netCDF_fname = '{}/{}_{}.nc'.format(output_dir, self.original_speci_to_process, self.yearmonth)
@@ -1057,16 +1055,21 @@ class ExperimentInterpolation(object):
         root_grp.close() 
 
         # compress netCDF file
-        compress_process =  subprocess.Popen(['ncks', '-O', '--dfl_lvl', '1', netCDF_fname, netCDF_fname], 
-                                             stdout=subprocess.PIPE)
-        compress_status = compress_process.communicate()[0]
-        compress_return_code = compress_process.returncode
+        try:
+            compress_process = subprocess.Popen(['ncks', '-O', '--dfl_lvl', '1', netCDF_fname, netCDF_fname], 
+                                                stdout=subprocess.PIPE)
+            compress_status = compress_process.communicate()[0]
+            compress_return_code = compress_process.returncode
+        except:
+            self.log_file_str += 'NCO could not be found, please install it in your system ' 
+            self.log_file_str += 'with sudo apt install nco (Debian/Ubuntu) or brew install nco (macOS).'
     
-        # give 770 permissions for file and make owner bsc32
-        set_file_permissions_ownership(netCDF_fname)
+        # give 770 permissions for file and make owner bsc32 if machine isn't local
+        if self.machine != '':
+            set_file_permissions_ownership(netCDF_fname)
 
         # copy file to esarchive (if have access)
-        if MACHINE == 'nord3v2':
+        if self.machine == 'nord3v2':
             
             # set esarchive output dir
             esarchive_output_dir = '/esarchive/recon/prov_interp/{}'.format('/'.join(netCDF_fname.split('/exp_interp/')[1].split('/')[:-1]))
