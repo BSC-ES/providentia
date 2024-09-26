@@ -4,36 +4,40 @@
 # Copyright 2018 Barcelona Supercomputing Center - Centro Nacional de
 # Supercomputación (BSC-CNS)
 
-# This file is part of Providentia 
-
-# Providentia is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-
-# Providentia is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with Providentia. If not, see <http://www.gnu.org/licenses/>.
-
 from setuptools import find_packages
 from setuptools import setup
 from providentia import __version__
 
 REQUIREMENTS = {
-    'test': [
-        'pytest>=3.9',
-        'pytest-cov',
-        'pytest-env',
-        'pytest-flake8',
-        'pytest-html',
-        'pytest-metadata>=1.5.1',
+    'install': [
+        'jupyterlab',
+        'cartopy',
+        'matplotlib==3.9.1',
+        'netCDF4==1.6.5',
+        'numpy==1.26.4',
+        'pandas==2.2.2',
+        'pyproj==3.6.1',
+        'PyQt5==5.15.11',
+        'seaborn==0.13.2',
+        'scipy==1.12.0',
+        'ConfigArgParse==1.7',
+        'cftime==1.6.3',
+        'KDEpy==1.1.9',
+        'xarray==2024.6.0',
+        'Sphinx==7.2.6',
+        'Sphinx-rtd-theme==2.0.0',
+        'coverage==7.4.3',
+        'pytest==8.1.1',
+        'pypdf==3.4.1',
+        'bottleneck==1.3.8',
+        'tqdm==4.66.4',
+        'remotezip==0.12.3',
+        'myst-parser==3.0.1',
+        'PyYAML==6.0.1',
+        'python-dotenv==1.0.1',
+        'paramiko==3.4.0'
     ],
     'setup': [
-    #    'pytest-runner',
         'setuptools_scm',
     ],
 }
@@ -49,27 +53,28 @@ setup(
     name="providentia",
     license='GNU GPL v3',
     version=version,
-    author="Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa",
-    author_email="dene.bowdalo@bsc.es, amalia.vradi@bsc.es, alba.vilanova@bsc.es, paula.serrano@bsc.es, francesco.benincasa@bsc.es",
+    author="Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Amalia Vradi, Francesco Benincasa",
+    author_email="dene.bowdalo@bsc.es, alba.vilanova@bsc.es, paula.serrano@bsc.es, amalia.vradi@bsc.es, francesco.benincasa@bsc.es",
     packages=find_packages(),
     url="https://earth.bsc.es/gitlab/ac/Providentia",
-    keywords=['earth sciences', 'evaluation', 'verification', 'observations', 'NWP models',
-              'air quality'],
-    description="Providentia is designed to allow on-the-fly and offline analysis of experiment outputs, with respect to processed observational data.",
+    keywords=['earth sciences', 'atmospheric composition',
+              'evaluation', 'verification', 'observations', 'air quality'],
+    description="Providentia is designed to allow on-the-fly, offline and interactive analysis of experiment outputs, with respect to processed observational data.",
     long_description=long_description,
-    setup_requires=REQUIREMENTS['setup'],
-    install_requires=[
-        "matplotlib",
-        "pandas",
-        "Cartopy",
-        "numpy",
-        "netCDF4",
-        "seaborn",
-        "PyQt5",
-        "scipy",
+    long_description_content_type="text/markdown",
+    classifiers=[
+        "Programming Language :: Python :: 3.11",
+        "Operating System :: POSIX :: Linux",
+        "Operating System :: MacOS",
+        "Topic :: Scientific/Engineering :: Atmospheric Science",
+        "Intended Audience :: Science/Research",
+        "Natural Language :: English"
     ],
     package_data={'': [
         'README.md',
+        'LICENSE',
     ]},
-    #tests_require=REQUIREMENTS['test'],
+    setup_requires=REQUIREMENTS['setup'],
+    install_requires=REQUIREMENTS['install'],
+    python_requires=">=3.7",
 )
