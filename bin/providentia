@@ -329,7 +329,7 @@ else
 
     # break if user wants to do interpolation in local mode
     if $interpolation; then
-         echo "Download mode only available in local. Exiting..."
+         echo "Interpolation mode only available in local. Exiting..."
          exit 1
     fi
     
