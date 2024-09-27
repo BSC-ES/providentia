@@ -351,7 +351,8 @@ else
         export PYTHONPATH=$(pwd):${PYTHONPATH}
         jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
     elif $interpolation; then
-        eval "${python_command}" > providentia/interpolation/management_logs/local.out 2>&1 --slurm_job_id=local
+        unique_id=$(printf "%06d\n" $((RANDOM % 1000000)))
+        eval "${python_command}" > providentia/interpolation/management_logs/$unique_id.out 2>&1 --slurm_job_id=$unique_id
     else
         eval "${python_command}"
     fi

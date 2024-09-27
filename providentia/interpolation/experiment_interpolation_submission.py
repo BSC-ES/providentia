@@ -841,14 +841,13 @@ class SubmitInterpolation(object):
     
     def run_command(self, arguments):
         arguments_list = arguments.strip().split()
-        result = subprocess.run(arguments_list, capture_output=True, text=True)
-        return result.stdout, result.stderr
+        subprocess.run(arguments_list, capture_output=True, text=True)
 
     def submit_job_local(self):
 
-        with open(f'{self.arguments_dir}/local_0.txt', 'r') as file:
+        with open(f'{self.arguments_dir}/{self.slurm_job_id}_0.txt', 'r') as file:
             arguments = file.readlines()
-        with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+        with multiprocessing.Pool(processes=self.n_cpus) as pool:
             pool.map(self.run_command, arguments)
 
         # stop timer
