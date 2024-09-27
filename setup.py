@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# Copyright 2018 Barcelona Supercomputing Center - Centro Nacional de
-# Supercomputación (BSC-CNS)
 
 from setuptools import find_packages
 from setuptools import setup
-from providentia import __version__
+
+
+with open("README.md", "r") as f:
+    long_description = f.read()
+
 
 REQUIREMENTS = {
     'install': [
@@ -43,16 +43,10 @@ REQUIREMENTS = {
 }
 
 
-# Get the version number from the relevant file
-version = __version__
-
-with open("README.md", "r") as f:
-    long_description = f.read()
-
 setup(
     name="providentia",
-    license='GNU GPL v3',
-    version=version,
+    license="GNU GPL v3",
+    version="2.4.0",
     author="Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Amalia Vradi, Francesco Benincasa",
     author_email="dene.bowdalo@bsc.es, alba.vilanova@bsc.es, paula.serrano@bsc.es, amalia.vradi@bsc.es, francesco.benincasa@bsc.es",
     packages=find_packages(),
@@ -70,11 +64,11 @@ setup(
         "Intended Audience :: Science/Research",
         "Natural Language :: English"
     ],
-    package_data={'': [
-        'README.md',
-        'LICENSE',
+    package_data={"": [
+        "README.md",
+        "LICENSE",
     ]},
-    setup_requires=REQUIREMENTS['setup'],
-    install_requires=REQUIREMENTS['install'],
+    setup_requires=REQUIREMENTS["setup"],
+    install_requires=REQUIREMENTS["install"],
     python_requires=">=3.7",
 )
