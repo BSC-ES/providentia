@@ -104,10 +104,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     # config defined, section undefined
                     load_conf(self, fpath=self.config)    
                     all_sections = self.sub_opts.keys()
-                    
-                    if len(all_sections) == 1:
+
+                    # if no parent section names are found throw an error
+                    if len(all_sections) == 0:
+                        msg = "No sections were found in configuration file, make sure to name them using square brackets."
+                        sys.exit(msg)
+                    # if there is only one section, do not ask the user    
+                    elif len(all_sections) == 1:
                         okpressed = False
                         self.section = list(all_sections)[0]
+                    # ask the user for the section
                     else:
                         title = 'Sections'
                         msg = 'Select section to load'
