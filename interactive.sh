@@ -21,6 +21,4 @@ Create an SSH tunnel via terminal on your local machine:
 ssh -N -L ${port}:${node}:${port} ${user}@${bsc_hostname}.bsc.es
 "
 export PYTHONPATH=$(pwd):${PYTHONPATH}
-# DON'T USE ADDRESS BELOW.
-# DO USE TOKEN BELOW
 jupyter-lab --no-browser --port=${port} --ip=${node} --ServerApp.allow_origin="*"

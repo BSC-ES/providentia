@@ -54,7 +54,7 @@ if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--int
     fi
 else
     # define core as twelve if it is not an interpolation
-        cores="12"
+    cores="12"
     
     # define qos in every mode but interpolation
     if [ "${BSC_MACHINE}" == "mn5" ]; then
@@ -329,7 +329,7 @@ else
 
     # break if user wants to do interpolation in local mode
     if $interpolation; then
-         echo "Download mode only available in local. Exiting..."
+         echo "Interpolation mode only available in local. Exiting..."
          exit 1
     fi
     
