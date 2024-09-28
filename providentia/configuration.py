@@ -1113,8 +1113,6 @@ class ProvConfiguration:
         # TODO not needed in interpolation 
         if not self.read_instance.statistic_mode and not self.read_instance.interpolation:
             default = default_values['statistic_mode']
-            msg = "Statistic mode (statistic_mode) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.statistic_mode = default
 
         # check have statistic_aggregation information,
@@ -1123,14 +1121,10 @@ class ProvConfiguration:
         if not self.read_instance.interpolation:
             default = default_values['statistic_aggregation'][self.read_instance.statistic_mode]
             if not self.read_instance.statistic_aggregation:  
-                if self.read_instance.statistic_mode != 'Flattened':
-                    msg = "Statistic aggregation (statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
-                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                 self.read_instance.statistic_aggregation = default
             # if statistic_aggregation is defined ensure that it matches with the statistic_mode
-            elif (self.read_instance.statistic_mode == 'Flattened'):
-                    msg = "statistic_mode is set to be 'Flattened', therefore statistic_aggregation must be empty, not '{}'. Setting to be empty.".format(self.read_instance.statistic_aggregation)                
-                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            else:
+                if self.read_instance.statistic_mode == 'Flattened':
                     self.read_instance.statistic_aggregation = default
 
         # check have periodic_statistic_mode information,
@@ -1139,8 +1133,6 @@ class ProvConfiguration:
         if not self.read_instance.periodic_statistic_mode and not self.read_instance.interpolation:
             #default = 'Cycle'
             default = default_values['periodic_statistic_mode']
-            msg = "Periodic statistic mode (periodic_statistic_mode) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.periodic_statistic_mode = default
 
         # check have periodic_statistic_aggregation information,
@@ -1148,8 +1140,6 @@ class ProvConfiguration:
         # TODO not needed in interpolation 
         if not self.read_instance.periodic_statistic_aggregation and not self.read_instance.interpolation:
             default = default_values['periodic_statistic_aggregation']
-            msg = "Periodic statistic aggregation (periodic_statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.periodic_statistic_aggregation = default
 
         # check have timeseries_statistic_aggregation information,
@@ -1157,16 +1147,7 @@ class ProvConfiguration:
         # TODO not needed in interpolation 
         if not self.read_instance.timeseries_statistic_aggregation and not self.read_instance.interpolation:
             default = default_values['timeseries_statistic_aggregation']
-            msg = "Timeseries statistic aggregation (timeseries_statistic_aggregation) was not "
-            msg += "defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.timeseries_statistic_aggregation = default
-        else:
-            if ((self.read_instance.statistic_mode == 'Spatial|Temporal')
-                and (self.read_instance.timeseries_statistic_aggregation != self.read_instance.statistic_aggregation)):
-                msg = "Aggregation statistic and timeseries aggregation statistic are not "
-                msg += "the same and Spatial|Temporal mode is active."
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
         # check have correct active_dashboard_plots information, 
         # should have 4 plots if non-empty, throw error if using dashboard if not
