@@ -106,24 +106,24 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             canvas_instance.selected_station_stddev_max[networkspeci] = 0.0      
 
         # get data array for networkspeci
-        read_instance.data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][:,:,:])
+        data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][:,:,:])
 
         # temporally colocate data array
         if read_instance.temporal_colocation:
-            read_instance.data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+            data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
         
         # get selected station indices
         canvas_instance.station_inds[networkspeci] = get_station_inds(read_instance, canvas_instance, networkspeci, station_index)
 
         # get data cut for relevant stations
-        read_instance.data_array = read_instance.data_array[:,canvas_instance.station_inds[networkspeci],:]
+        data_array = data_array[:,canvas_instance.station_inds[networkspeci],:]
 
         # get NaNs in data array
-        nan_data_array = np.isnan(read_instance.data_array)
+        nan_data_array = np.isnan(data_array)
 
         # if data array has no valid data for selected stations, do not cut data array
         # data array has valid data and is not all nan?
-        if read_instance.data_array.size > 0 and not np.all(nan_data_array):
+        if data_array.size > 0 and not np.all(nan_data_array):
 
             # set metadata cut for relevant stations
             canvas_instance.selected_station_metadata[networkspeci] = read_instance.metadata_in_memory[networkspeci][canvas_instance.station_inds[networkspeci],:]
@@ -133,13 +133,12 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             canvas_instance.selected_station_data_labels[networkspeci] = list(np.array(read_instance.data_labels)[valid_data_labels_mask])
 
             # cut data array for valid data labels
-            read_instance.data_array = read_instance.data_array[valid_data_labels_mask]
+            data_array = data_array[valid_data_labels_mask]
 
             # temporally resample data array if required
             if read_instance.resampling_resolution in possible_resolutions:
                 # flatten networkspecies dimension for creation of pandas dataframe
-                data_array_reduced = read_instance.data_array.reshape(read_instance.data_array.shape[0]*read_instance.data_array.shape[1], 
-                                                                      read_instance.data_array.shape[2])
+                data_array_reduced = data_array.reshape(data_array.shape[0]*data_array.shape[1], data_array.shape[2])
                 
                 # create pandas dataframe of data array
                 data_array_df = pd.DataFrame(data_array_reduced.transpose(), index=read_instance.time_array, 
@@ -150,27 +149,27 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
 
                 # save back out as numpy array (reshaping to get back networkspecies dimension)
                 data_array_resampled = data_array_df_resampled.to_numpy().transpose()
-                read_instance.data_array = data_array_resampled.reshape(read_instance.data_array.shape[0], read_instance.data_array.shape[1],
-                                                                        data_array_resampled.shape[1])
+                data_array = data_array_resampled.reshape(data_array.shape[0], data_array.shape[1], 
+                                                          data_array_resampled.shape[1])
             else:
                 read_instance.time_index = read_instance.time_array
 
             # save timeseries array
             if len(canvas_instance.station_inds[networkspeci]) == 1:
-                canvas_instance.selected_station_data[networkspeci]['timeseries'] = read_instance.data_array[:,0,:]
+                canvas_instance.selected_station_data[networkspeci]['timeseries'] = data_array[:,0,:]
             else:
                 if (read_instance.offline) or (read_instance.interactive):
                     timeseries_stat = read_instance.timeseries_statistic_aggregation
                 else:
                     timeseries_stat = canvas_instance.timeseries_stat.currentText()
-                aggregated_data = aggregation(read_instance.data_array, timeseries_stat, axis=1)
+                aggregated_data = aggregation(data_array, timeseries_stat, axis=1)
                 canvas_instance.selected_station_data[networkspeci]['timeseries'] = aggregated_data
 
             # save data per station
             if read_instance.statistic_mode == 'Spatial|Temporal':
                 canvas_instance.selected_station_data[networkspeci]['per_station'] = canvas_instance.selected_station_data[networkspeci]['timeseries'][:,np.newaxis,:]
             elif read_instance.statistic_mode in ['Temporal|Spatial', 'Flattened']:
-                canvas_instance.selected_station_data[networkspeci]['per_station'] = read_instance.data_array
+                canvas_instance.selected_station_data[networkspeci]['per_station'] = data_array
 
             # transform timeseries to pandas dataframe
             canvas_instance.selected_station_data[networkspeci]['timeseries'] = pd.DataFrame(canvas_instance.selected_station_data[networkspeci]['timeseries'].T, 
