@@ -10,6 +10,7 @@ import cartopy.crs as ccrs
 from KDEpy import FFTKDE
 from itertools import groupby
 import matplotlib
+import matplotlib.image as mpimg
 from matplotlib.lines import Line2D
 from matplotlib.patches import Polygon
 from matplotlib.projections import PolarAxes
@@ -324,8 +325,20 @@ class Plot:
             :type plot_characteristics: dict
         """
 
-        # set header title
+        # create header page
         page = plt.figure(**plot_characteristics['figure'])
+
+        # get logo
+        logo_path = os.path.join(PROVIDENTIA_ROOT, 'assets/logoline.png')
+        logo = mpimg.imread(logo_path)
+
+        # place logo on top center
+        page_width, page_height = page.get_size_inches()
+        xo = (page_width * page.dpi) / 2 + 200
+        yo = page_height * page.dpi * 2 + 700
+        page.figimage(logo, xo=int(xo), yo=int(yo))
+
+        # set header title
         plot_characteristics['page_title']['s'] = self.read_instance.report_title 
         plot_characteristics['page_title']['transform'] = page.transFigure
         page.text(**plot_characteristics['page_title'])
