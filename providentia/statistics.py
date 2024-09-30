@@ -1,4 +1,4 @@
-""" Functions for the processing/calculation of statistics and colourbars """valid_station_inds_temporal_colocation
+""" Functions for the processing/calculation of statistics and colourbars """
 
 from calendar import monthrange
 import copy
