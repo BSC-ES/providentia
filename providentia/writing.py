@@ -84,7 +84,13 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
         # also temporally resample data if required
         if apply_filters:
             valid_station_inds = prv.valid_station_inds_temporal_colocation[networkspeci][prv.observations_data_label]
-            data_array = np.take(prv.data_in_memory_filtered[networkspeci], valid_station_inds, axis=1)
+            data_array = copy.deepcopy(prv.data_in_memory_filtered[networkspeci])
+            
+            # apply NaNs for temporal colocation
+            data_array[:, prv.temporal_colocation_nans[networkspeci]] = np.NaN
+
+            # cut data array for valid station inds
+            data_array = np.take(data_array, valid_station_inds, axis=1)
 
             # temporally resample data array if required
             if prv.resampling_resolution in possible_resolutions:
@@ -255,7 +261,13 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
         # also temporally resample data if required
         if apply_filters:
             valid_station_inds = prv.valid_station_inds_temporal_colocation[networkspeci][prv.observations_data_label]
-            data_array = np.take(prv.data_in_memory_filtered[networkspeci], valid_station_inds, axis=1)
+            data_array = copy.deepcopy(prv.data_in_memory_filtered[networkspeci])
+
+            # apply NaNs for temporal colocation
+            data_array[:, prv.temporal_colocation_nans[networkspeci]] = np.NaN
+
+            # cut data array for valid station inds
+            data_array = np.take(data_array, valid_station_inds, axis=1)
 
             # temporally resample data array if required
             if prv.resampling_resolution in possible_resolutions:
