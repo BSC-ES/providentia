@@ -614,25 +614,22 @@ class ProvConfiguration:
         config_domain = copy.deepcopy(self.read_instance.domain) 
         config_ensemble_options = copy.deepcopy(self.read_instance.ensemble_options)
 
-        # initialize id, domain and ensemble options for each of the experiments
+        # initialize experiment id, domain and ensemble options for each of the experiments
         exp_id, exp_dom, exp_ens = None, None, None
 
+        # initialize lists to hold domains/ensemble options inside the experiments
+        exp_domains_list = []
+        exp_ensemble_options_list = []
+        exp_ids_list = []
+
         # iterate through all the experiments
-        exp_domains = []
-        exp_ensemble_options = []
-        exp_ids = []
         for exp_i, split_experiment in enumerate(split_experiments):
             # get experiment name and save into list
             exp_id = split_experiment[0]
-            exp_ids.append(exp_id)
+            exp_ids_list.append(exp_id)
 
-            # if experiment is composed by more than 3 parts, break
-            if len(split_experiment) > 3:
-                error = 'Invalid experiment format, experiments have to consist of three elements maximum.'
-                sys.exit(error)
-            
             # [expID]-[domain] or [expID]-[ensembleNum] 
-            elif len(split_experiment) == 2:
+            if len(split_experiment) == 2:
                 end_experiment = split_experiment[-1]
                 
                 # [expID]-[domain]
@@ -643,7 +640,7 @@ class ProvConfiguration:
                         sys.exit(error)
 
                     exp_dom = end_experiment
-                    exp_domains.append(exp_dom)
+                    exp_domains_list.append(exp_dom)
                 # [expID]-[ensembleNum]   
                 else:
                     # other experiment goes by the format [expID]-[domain]
@@ -652,31 +649,39 @@ class ProvConfiguration:
                         sys.exit(error)
 
                     exp_ens = end_experiment
-                    exp_ensemble_options.append(exp_ens)
+                    exp_ensemble_options_list.append(exp_ens)
 
             # [expID]-[domain]-[ensembleNum]
             elif len(split_experiment) == 3:               
                 exp_dom, exp_ens = split_experiment[1], split_experiment[2]
-                exp_domains.append(exp_dom)
-                exp_ensemble_options.append(exp_ens)
+                exp_domains_list.append(exp_dom)
+                exp_ensemble_options_list.append(exp_ens)
+                        
+            # if experiment is composed by more than 3 parts, exit
+            elif len(split_experiment) > 3:
+                error = 'Invalid experiment format, experiments have to consist of three elements maximum.'
+                sys.exit(error)
 
-            # check if domain has been defined in configuration file and in experiment name
+            # throw error if domain has been defined in configuration file and in experiment name
             if exp_dom and config_domain:
-                error = f"Error: Unable to set domain/s as {', '.join(config_domain)} because "
-                error += f"experiment {self.read_instance.experiments[exp_i]} already contain the domain."
+                error = f"Error: Unable to set domain(s) as {', '.join(config_domain)} because the "
+                error += f"experiment {self.read_instance.experiments[exp_i]} already contains the domain."
                 sys.exit(error)
-            else:
-                self.read_instance.domain = exp_domains
+            # if there is no domain, fill it with the list from the experiments names
+            elif not config_domain:
+                self.read_instance.domain = exp_domains_list
             
-            # check if ensemble options has been defined in configuration file and in experiment name
+            # throw error if ensemble options has been defined in configuration file and in experiment name
             if exp_ens and config_ensemble_options:
-                error = f"Error: Unable to set ensemble option/s as {', '.join(config_ensemble_options)} because "
-                error +=  f"experiment {self.read_instance.experiments[exp_i]} already contain the ensemble option."                  
+                error = f"Error: Unable to set ensemble option(s) as {', '.join(config_ensemble_options)} because the "
+                error +=  f"experiment {self.read_instance.experiments[exp_i]} already contains the ensemble option."                  
                 sys.exit(error)
-            else:
-                self.read_instance.ensemble_options = exp_ensemble_options
-
-            self.read_instance.exp_ids = exp_ids
+            # if there is no ensemble option, fill it with the list from the experiments names
+            elif not config_ensemble_options:
+                self.read_instance.ensemble_options = exp_ensemble_options_list
+            
+            # add experiment id to the experiment ids list
+            self.read_instance.exp_ids = exp_ids_list
 
         # when there's no domain/ensemble opt passed in the config file or got from the experiment, then set the default option to true
         if not self.read_instance.domain:
@@ -1113,8 +1118,6 @@ class ProvConfiguration:
         # TODO not needed in interpolation 
         if not self.read_instance.statistic_mode and not self.read_instance.interpolation:
             default = default_values['statistic_mode']
-            msg = "Statistic mode (statistic_mode) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.statistic_mode = default
 
         # check have statistic_aggregation information,
@@ -1123,14 +1126,10 @@ class ProvConfiguration:
         if not self.read_instance.interpolation:
             default = default_values['statistic_aggregation'][self.read_instance.statistic_mode]
             if not self.read_instance.statistic_aggregation:  
-                if self.read_instance.statistic_mode != 'Flattened':
-                    msg = "Statistic aggregation (statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
-                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                 self.read_instance.statistic_aggregation = default
             # if statistic_aggregation is defined ensure that it matches with the statistic_mode
-            elif (self.read_instance.statistic_mode == 'Flattened'):
-                    msg = "statistic_mode is set to be 'Flattened', therefore statistic_aggregation must be empty, not '{}'. Setting to be empty.".format(self.read_instance.statistic_aggregation)                
-                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            else:
+                if self.read_instance.statistic_mode == 'Flattened':
                     self.read_instance.statistic_aggregation = default
 
         # check have periodic_statistic_mode information,
@@ -1139,8 +1138,6 @@ class ProvConfiguration:
         if not self.read_instance.periodic_statistic_mode and not self.read_instance.interpolation:
             #default = 'Cycle'
             default = default_values['periodic_statistic_mode']
-            msg = "Periodic statistic mode (periodic_statistic_mode) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.periodic_statistic_mode = default
 
         # check have periodic_statistic_aggregation information,
@@ -1148,8 +1145,6 @@ class ProvConfiguration:
         # TODO not needed in interpolation 
         if not self.read_instance.periodic_statistic_aggregation and not self.read_instance.interpolation:
             default = default_values['periodic_statistic_aggregation']
-            msg = "Periodic statistic aggregation (periodic_statistic_aggregation) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.periodic_statistic_aggregation = default
 
         # check have timeseries_statistic_aggregation information,
@@ -1157,16 +1152,7 @@ class ProvConfiguration:
         # TODO not needed in interpolation 
         if not self.read_instance.timeseries_statistic_aggregation and not self.read_instance.interpolation:
             default = default_values['timeseries_statistic_aggregation']
-            msg = "Timeseries statistic aggregation (timeseries_statistic_aggregation) was not "
-            msg += "defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.timeseries_statistic_aggregation = default
-        else:
-            if ((self.read_instance.statistic_mode == 'Spatial|Temporal')
-                and (self.read_instance.timeseries_statistic_aggregation != self.read_instance.statistic_aggregation)):
-                msg = "Aggregation statistic and timeseries aggregation statistic are not "
-                msg += "the same and Spatial|Temporal mode is active."
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
         # check have correct active_dashboard_plots information, 
         # should have 4 plots if non-empty, throw error if using dashboard if not
