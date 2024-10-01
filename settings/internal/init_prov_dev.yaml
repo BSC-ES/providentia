@@ -89,6 +89,16 @@
                                    'plot_characteristics_filename', 'interp_n_neighbours', 
                                    'interp_reverse_vertical_orientation', 'interp_chunk_size', 
                                    'interp_job_array_limit'],
+            'non_writing_vars': ['conf', 'config', 'config_dir', 'operating_system', 'machine', 'cartopy_data_dir', 
+                                 'available_cpus', 'n_cpus', 'ghost_root', 'nonghost_root', 'exp_root', 
+                                 'generate_file_tree', 'disable_file_tree', 'nonghost_available_resolutions', 
+                                 'nonghost_available_networks', 'offline', 'interactive', 'download', 'interpolation', 
+                                 'slurm_job_id', 'network', 'species', 'resolution', 'start_date', 'end_date',
+                                 'alias_flag', 'experiments', 'exp_ids', 'experiment_types', 'qa', 'flags', 'add_qa', 
+                                 'subtract_qa', 'add_flags', 'subtract_flags', 'temporal_colocation', 
+                                 'spatial_colocation', 'map_extent', 'filter_species', 'calibration_factor', 
+                                 'lower_bound', 'upper_bound', 'active_dashboard_plots', 'statistic_aggregation',
+                                 'plot_characteristics_filename'],
             'tests': False
 }
 
