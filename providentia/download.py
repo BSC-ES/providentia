@@ -261,6 +261,10 @@ class ProvidentiaDownload(object):
             self.domain = []
             self.ensemble_options = []
 
+        # show message in case experiments or observations were ignored
+        if self.overwritten_files_flag == True:
+            print("\nSome experiments/observations were found but were not downloaded because the OVERWRITE option is set to 'n'.")
+
         # close connection, if it exists
         if self.ssh is not None:
             self.ssh.close() 
@@ -387,7 +391,6 @@ class ProvidentiaDownload(object):
         """ Returns the files that are not already downloaded. """
         # initialise list of non-downloaded files
         not_downloaded_files = []
-        
         if nc_files_to_download:
             # get the downloaded and not downloaded files
             not_downloaded_files = list(filter(lambda x:not os.path.exists(x), nc_files_to_download))
@@ -395,6 +398,9 @@ class ProvidentiaDownload(object):
             
             # get the files that were downloaded before the execution
             downloaded_before_execution_files = list(filter(lambda x:self.prov_start_time > os.path.getctime(x), downloaded_files))
+            
+            # variable that saves whether some experiments/observations were downloaded before
+            self.overwritten_files_flag = False
 
             # if there was any file downloaded before the execution    
             if downloaded_before_execution_files:
@@ -415,6 +421,9 @@ class ProvidentiaDownload(object):
                 # downloaded before the execution as if they were never download
                 if self.overwrite_choice == 'y':
                     not_downloaded_files += downloaded_before_execution_files
+                # change overwritten files boolean to True to indicate that some files were ignored
+                else:
+                    self.overwritten_files_flag = True
 
         return not_downloaded_files
 
