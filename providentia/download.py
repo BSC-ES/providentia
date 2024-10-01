@@ -309,7 +309,6 @@ class ProvidentiaDownload(object):
         hostkeys = self.ssh.get_host_keys().add(self.remote_hostname, 'ed25519', key)
 
         # initialise temporal variables
-        remind = False
         prv_user, prv_password = None, None
 
         # if couldn't get user, ask for it
@@ -334,15 +333,6 @@ class ProvidentiaDownload(object):
                 else:
                     prv_password = getpass("Insert password: ")
                     self.prv_password = prv_password
-        
-        # if pwd or user changed, ask for credentials
-        if (prv_user is not None) or (prv_password is not None):
-            # ask user if they want their credentials saved
-            remind_txt = input("\nRemember credentials (y/n)? ")
-            while remind_txt.lower() not in ['y','n']:
-                remind_txt = input("\nRemember credentials (y/n)? ")
-
-            remind = remind_txt.lower() == 'y'
 
         # catch identification method
         try:
@@ -350,15 +340,6 @@ class ProvidentiaDownload(object):
             self.ssh.connect(self.remote_hostname, username=self.prv_user, password=self.prv_password)
             self.sftp = self.ssh.open_sftp()
             
-            # create .env with the input user and/or password
-            if remind:
-                with open(os.path.join(PROVIDENTIA_ROOT, ".env"),"a") as f:
-                    if prv_user is not None:
-                        f.write(f"PRV_USER={self.prv_user}\n")
-                    if prv_password is not None:
-                        f.write(f"PRV_PWD={self.prv_password}\n")
-
-                print(f"\nRemote machine credentials saved on {os.path.join(PROVIDENTIA_ROOT, '.env')}")
         # if credentials are invalid, throw an error
         except paramiko.ssh_exception.AuthenticationException:
             error = "Authentication failed."
@@ -366,6 +347,23 @@ class ProvidentiaDownload(object):
             if prv_user is None:
                 error += f" Please, check your credentials on {os.path.join(PROVIDENTIA_ROOT, '.env')}"
             sys.exit(error)
+
+        # if pwd or user changed, ask if user wants to remember credentials
+        if (prv_user is not None) or (prv_password is not None):
+            # ask user if they want their credentials saved
+            remind_txt = input("\nRemember credentials (y/n)? ")
+            while remind_txt.lower() not in ['y','n']:
+                remind_txt = input("\nRemember credentials (y/n)? ")
+            
+            # create .env with the input user and/or password
+            if remind_txt.lower() == 'y':
+                with open(os.path.join(PROVIDENTIA_ROOT, ".env"),"a") as f:
+                    if prv_user is not None:
+                        f.write(f"PRV_USER={self.prv_user}\n")
+                    if prv_password is not None:
+                        f.write(f"PRV_PWD={self.prv_password}\n")
+
+                print(f"\nRemote machine credentials saved on {os.path.join(PROVIDENTIA_ROOT, '.env')}")
 
     def confirm_bsc_download(self):
         # get user choice regarding bsc downloads
