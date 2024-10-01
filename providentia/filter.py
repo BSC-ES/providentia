@@ -47,7 +47,7 @@ class DataFilter:
         self.filter_extreme_stations()
         self.temporally_colocate_data()
         self.apply_calibration_factor()
-        self.get_valid_stations_after_filtering()
+        self.get_valid_stations()
 
     def reset_data_filter(self):
         """ Resets data arrays to be un-filtered"""
@@ -621,8 +621,8 @@ class DataFilter:
             for networkspeci in self.read_instance.networkspecies:
                 self.read_instance.temporal_colocation_nans[networkspeci] = np.any([obs_all_nan, exps_all_nan], axis=0)
 
-    def get_valid_stations_after_filtering(self):
-        """ Get valid station indices after all filtering has been performed.
+    def get_valid_stations(self):
+        """ Get valid station indices before and after all filtering has been performed.
             These are saved in a dictionary per network/species, per data label. 
             There is an mirror dictionary saved for the temporally colocated version of the data. 
         """
@@ -647,11 +647,11 @@ class DataFilter:
                         station_data_availability_number = np.array([])
                     else:
                         station_data_availability_number = Stats.calculate_data_avail_number(obs_data)
-                        
+
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds[networkspeci][data_label] = \
                         np.arange(len(station_data_availability_number), dtype=np.int64)[station_data_availability_number > 1]
-
+                     
                     # get colocated obs data array if have temporal colocation is active
                     obs_data[self.read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
 

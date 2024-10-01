@@ -324,6 +324,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.window_title = "Providentia"
         self.setWindowTitle(self.window_title)
 
+        # add logo as icon
+        self.setWindowIcon(QtGui.QIcon(os.path.join(PROVIDENTIA_ROOT, 'assets/logo.png')))
+
         # create parent layout to pull together a configuration bar,
         # a MPL navigation toolbar, and a MPL canvas of plots
         parent_layout = QtWidgets.QVBoxLayout()
