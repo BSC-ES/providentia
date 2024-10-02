@@ -75,6 +75,10 @@ class SubmitInterpolation(object):
                 error = f"Error: Defined section '{section}' does not exist in configuration file."
                 sys.exit(error)
         else:
+            # if no parent section names are found throw an error
+            if len(self.parent_section_names) == 0:
+                msg = "No sections were found in the configuration file, make sure to name them using square brackets."
+                sys.exit(msg)
             self.current_config = self.sub_opts[self.parent_section_names[0]]
             print(f"Taking first defined section ({self.parent_section_names[0]}) to be read.")
 
