@@ -353,6 +353,7 @@ else
     elif $interpolation; then
         unique_id=$(printf "%06d\n" $((RANDOM % 1000000)))
         eval "${python_command}" > providentia/interpolation/management_logs/$unique_id.out 2>&1 --slurm_job_id=$unique_id
+        echo "Check submission info in 'providentia/interpolation/management_logs/$unique_id.out'"
     else
         eval "${python_command}"
     fi
