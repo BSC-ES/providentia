@@ -1163,5 +1163,5 @@ if __name__ == "__main__":
     # write error log file if have uncaught internal error
     except Exception as e:
         log_file_str = 'STARTING INTERPOLATION\n'
-        log_file_str = str(traceback.format_exc())
+        log_file_str += str(traceback.format_exc())
         create_output_logfile(2, log_file_str)

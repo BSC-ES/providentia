@@ -8,8 +8,8 @@
 
        "header": {"orientation": "portrait",
                   "figure": {},
-                  "page_title": {"x": 0.5, "y": 0.9, "size": 20, "ha": "center", "va": "top", "wrap": true},
-                  "page_text": {"x": 0.5, "y": 0.82, "weight": "light", "size": 15, "ha": "center", "va": "top", 
+                  "page_title": {"x": 0.5, "y": 0.80, "size": 20, "ha": "center", "va": "top", "wrap": true},
+                  "page_text": {"x": 0.5, "y": 0.75, "weight": "light", "size": 15, "ha": "center", "va": "top", 
                                 "wrap": true}},
 
        "metadata": {"orientation": "landscape",
