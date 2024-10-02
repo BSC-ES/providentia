@@ -122,6 +122,10 @@ class ProvidentiaDownload(object):
                         sys.exit(error + '\n' + tip)
                 # if no section passed, then get all the parent sections
                 else:
+                    # if no parent section names are found throw an error
+                    if len(self.parent_section_names) == 0:
+                        msg = "No sections were found in configuration file, make sure to name them using square brackets."
+                        sys.exit(msg)
                     self.sections = self.parent_section_names
             else:
                 error = 'Error: The path to the configuration file specified in the command line does not exist.'
@@ -257,6 +261,10 @@ class ProvidentiaDownload(object):
             self.domain = []
             self.ensemble_options = []
 
+        # show message in case experiments or observations were ignored
+        if self.overwritten_files_flag == True:
+            print("\nSome experiments/observations were found but were not downloaded because the OVERWRITE option is set to 'n'.")
+
         # close connection, if it exists
         if self.ssh is not None:
             self.ssh.close() 
@@ -305,7 +313,6 @@ class ProvidentiaDownload(object):
         hostkeys = self.ssh.get_host_keys().add(self.remote_hostname, 'ed25519', key)
 
         # initialise temporal variables
-        remind = False
         prv_user, prv_password = None, None
 
         # if couldn't get user, ask for it
@@ -330,15 +337,6 @@ class ProvidentiaDownload(object):
                 else:
                     prv_password = getpass("Insert password: ")
                     self.prv_password = prv_password
-        
-        # if pwd or user changed, ask for credentials
-        if (prv_user is not None) or (prv_password is not None):
-            # ask user if they want their credentials saved
-            remind_txt = input("\nRemember credentials (y/n)? ")
-            while remind_txt.lower() not in ['y','n']:
-                remind_txt = input("\nRemember credentials (y/n)? ")
-
-            remind = remind_txt.lower() == 'y'
 
         # catch identification method
         try:
@@ -346,15 +344,6 @@ class ProvidentiaDownload(object):
             self.ssh.connect(self.remote_hostname, username=self.prv_user, password=self.prv_password)
             self.sftp = self.ssh.open_sftp()
             
-            # create .env with the input user and/or password
-            if remind:
-                with open(os.path.join(PROVIDENTIA_ROOT, ".env"),"a") as f:
-                    if prv_user is not None:
-                        f.write(f"PRV_USER={self.prv_user}\n")
-                    if prv_password is not None:
-                        f.write(f"PRV_PWD={self.prv_password}\n")
-
-                print(f"\nRemote machine credentials saved on {os.path.join(PROVIDENTIA_ROOT, '.env')}")
         # if credentials are invalid, throw an error
         except paramiko.ssh_exception.AuthenticationException:
             error = "Authentication failed."
@@ -362,6 +351,23 @@ class ProvidentiaDownload(object):
             if prv_user is None:
                 error += f" Please, check your credentials on {os.path.join(PROVIDENTIA_ROOT, '.env')}"
             sys.exit(error)
+
+        # if pwd or user changed, ask if user wants to remember credentials
+        if (prv_user is not None) or (prv_password is not None):
+            # ask user if they want their credentials saved
+            remind_txt = input("\nRemember credentials (y/n)? ")
+            while remind_txt.lower() not in ['y','n']:
+                remind_txt = input("\nRemember credentials (y/n)? ")
+            
+            # create .env with the input user and/or password
+            if remind_txt.lower() == 'y':
+                with open(os.path.join(PROVIDENTIA_ROOT, ".env"),"a") as f:
+                    if prv_user is not None:
+                        f.write(f"PRV_USER={self.prv_user}\n")
+                    if prv_password is not None:
+                        f.write(f"PRV_PWD={self.prv_password}\n")
+
+                print(f"\nRemote machine credentials saved on {os.path.join(PROVIDENTIA_ROOT, '.env')}")
 
     def confirm_bsc_download(self):
         # get user choice regarding bsc downloads
@@ -383,7 +389,6 @@ class ProvidentiaDownload(object):
         """ Returns the files that are not already downloaded. """
         # initialise list of non-downloaded files
         not_downloaded_files = []
-        
         if nc_files_to_download:
             # get the downloaded and not downloaded files
             not_downloaded_files = list(filter(lambda x:not os.path.exists(x), nc_files_to_download))
@@ -391,6 +396,9 @@ class ProvidentiaDownload(object):
             
             # get the files that were downloaded before the execution
             downloaded_before_execution_files = list(filter(lambda x:self.prov_start_time > os.path.getctime(x), downloaded_files))
+            
+            # variable that saves whether some experiments/observations were downloaded before
+            self.overwritten_files_flag = False
 
             # if there was any file downloaded before the execution    
             if downloaded_before_execution_files:
@@ -411,6 +419,9 @@ class ProvidentiaDownload(object):
                 # downloaded before the execution as if they were never download
                 if self.overwrite_choice == 'y':
                     not_downloaded_files += downloaded_before_execution_files
+                # change overwritten files boolean to True to indicate that some files were ignored
+                else:
+                    self.overwritten_files_flag = True
 
         return not_downloaded_files
 

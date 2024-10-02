@@ -3,11 +3,6 @@
 from setuptools import find_packages
 from setuptools import setup
 
-
-with open("README.md", "r") as f:
-    long_description = f.read()
-
-
 REQUIREMENTS = {
     'install': [
         'jupyterlab',
@@ -42,6 +37,8 @@ REQUIREMENTS = {
     ],
 }
 
+with open("README.md", "r") as f:
+    long_description = f.read()
 
 setup(
     name="providentia",
@@ -51,8 +48,8 @@ setup(
     author_email="dene.bowdalo@bsc.es, alba.vilanova@bsc.es, paula.serrano@bsc.es, amalia.vradi@bsc.es, francesco.benincasa@bsc.es",
     packages=find_packages(),
     url="https://earth.bsc.es/gitlab/ac/Providentia",
-    keywords=['earth sciences', 'atmospheric composition',
-              'evaluation', 'verification', 'observations', 'air quality'],
+    keywords=["earth sciences", "atmospheric composition",
+              "evaluation", "verification", "observations", "air quality"],
     description="Providentia is designed to allow on-the-fly, offline and interactive analysis of experiment outputs, with respect to processed observational data.",
     long_description=long_description,
     long_description_content_type="text/markdown",
