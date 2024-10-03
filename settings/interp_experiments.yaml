@@ -49,7 +49,6 @@
                         "cams61_monarch_ph2", "cams61_silam_ph2", "cams61_chimere_ph3", "cams61_dehm_ph3", "cams61_emep_ph3", 
                         "cams61_eurad_ph3", "cams61_lotoseuros_ph3", "cams61_match_ph3", "cams61_minni_ph3","cams61_monarch_ph3"],
         "paths": [ 
-            "/home/avilanov/data/providentia/exp_to_interp/",
             "/gpfs/scratch/bsc32/bsc032388/data/",
             "/esarchive/recon/ecmwf/cams61/"
         ]
