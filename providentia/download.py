@@ -863,10 +863,7 @@ class ProvidentiaDownload(object):
         try:
             self.sftp.stat(remote_dir)
         except FileNotFoundError:
-            if check_for_ghost(network):
-                msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment for the current GHOST version ({self.ghost_version})."
-            else:
-                msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment."
+            msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment for the current GHOST version ({self.ghost_version})."
 
             # get possible GHOST versions from the combination of GHOST_standards and the real avaibles in the experiment remote machine path
             possible_ghost_versions = set(self.sftp.listdir(self.exp_remote_path)).intersection(set(self.possible_ghost_versions))
