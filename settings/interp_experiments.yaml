@@ -53,16 +53,16 @@
             "/esarchive/recon/ecmwf/cams61/"
         ]
     },
+    "auto-caliope-urban": {
+        "experiments": ["a7n2"],
+        "paths": [
+            "/gpfs/scratch/bsc32/bsc956599/data/"
+        ]
+    },
     "example_experiment_type": {
         "experiments": ["example_experiment_name"],
         "paths": [ 
             "/example/experiment/path"
         ]
     },
-    "auto-caliope-urban": {
-        "experiments": ["a7n2"],
-        "paths": [
-            "/gpfs/scratch/bsc32/bsc956599/data/"
-        ]
-    }
 }
