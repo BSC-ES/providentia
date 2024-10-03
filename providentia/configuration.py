@@ -599,6 +599,7 @@ class ProvConfiguration:
 
     def decompose_experiments(self):
         """ Get experiment components (experiment-domain-ensemble_options) and fill the class variables with their value."""
+
         # get possible domains
         possible_domains = default_values["domain"]
 
@@ -1003,6 +1004,11 @@ class ProvConfiguration:
         # initialise possible domains
         self.default_domain = False
         self.default_ensemble_options = False
+
+        # make sure there are experiments in interpolation
+        if self.read_instance.interpolation and (len(self.read_instance.experiments) == 0):
+            msg = 'No experiments were provided in the configuration file.'
+            sys.exit("Error: " + msg)
 
         # get domain, ensemble options, experiment ids and flag to get the default values of these variables
         self.decompose_experiments()
