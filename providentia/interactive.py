@@ -954,6 +954,13 @@ class Interactive:
         # if section name provided, try and use that
         # otherwise take first defined section name
         self.sections = copy.deepcopy(self.parent_section_names)
+
+        #check if configuration file has a section title
+        if len(self.sections) == 0:
+            error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
+            print(error)
+            return False
+    
         have_section = False
         if hasattr(self, 'section'): 
             # check that section actually exists
