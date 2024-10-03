@@ -780,54 +780,38 @@ class ProvConfiguration:
         # TODO Check if i can only import one time
         from warnings_prv import show_message
 
-        self.read_instance.connect()
-
         # split full experiment
         experiment, domain, ensemble_option = full_experiment.split('-')
         
-        # accept asterisk to download all experiments
-        if experiment == '*':
-            return True, experiment
+        # all experiments pass this check because the real one is in the download mode
+        exp_found = [full_experiment]
+        
+        # connect to the remote machine
+        self.read_instance.connect()        
         
         # get all possible experiments
         exp_path = os.path.join(self.read_instance.exp_remote_path,self.read_instance.ghost_version)
         self.possible_experiments = self.read_instance.sftp.listdir(exp_path)
 
-        # initialise list of possible ghost versions
-        available_ghost_versions = []
-
         # TODO repeated code, put this into a method in the future?
         # if ensemble options is allmembers, get all the possible ensemble options
         if ensemble_option == "allmembers":
-            exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.possible_experiments))
+            exp_found = list(sorted(filter(lambda x:x.startswith(experiment+'-'+domain), self.possible_experiments)))
            
             if not exp_found:
-                # get experiment for printing
-                experiment_wng = experiment + '-' + domain
+                # initialise list of possible ghost versions
+                available_ghost_versions = []
                 
                 # search for other ghost versions
                 for ghost_version in self.read_instance.possible_ghost_versions:
                     ghost_exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.read_instance.sftp.listdir(os.path.join(self.read_instance.exp_remote_path,ghost_version))))
                     if ghost_exp_found:
                         available_ghost_versions.append(ghost_version)
-        # if it is a concrete ensemble option, then just get the experiment from the list
-        else:
-            exp_found = [full_experiment] if full_experiment in self.possible_experiments else []
 
-            # search for other ghost versions
-            if not exp_found:
-                # get experiment for printing
-                experiment_wng = full_experiment
-
-                # search for other ghost versions
-                available_ghost_versions = list(filter(lambda x:full_experiment in self.read_instance.sftp.listdir(os.path.join(self.read_instance.exp_remote_path,x)), self.read_instance.possible_ghost_versions))
-        
-        # if not found because of the ghost version, tell the user
-        if not exp_found:
-            msg = f"There is no experiment {experiment_wng} data for the current ghost version ({self.read_instance.ghost_version})." 
-            if available_ghost_versions:
-                msg += f" Please, check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                msg = f"There is no experiment {experiment}-{domain} data for the current ghost version ({self.read_instance.ghost_version})." 
+                if available_ghost_versions:
+                    msg += f" Please, check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
 
         return bool(exp_found), exp_found        
 
