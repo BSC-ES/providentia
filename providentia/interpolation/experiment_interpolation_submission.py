@@ -730,7 +730,7 @@ class SubmitInterpolation(object):
         # close submit file
         submit_file.close()
 
-    def submit_job(self):
+    def submit_job_greasy(self):
 
         # time start of interpolation jobs
         interpolation_start = time.time()
@@ -843,16 +843,17 @@ class SubmitInterpolation(object):
             if len(not_finished_tasks) > 0:
                 print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
     
-    def run_command(self, arguments):
-        arguments_list = arguments.strip().split()
+    def run_command(self, commands):
+        arguments_list = commands.strip().split()
         subprocess.run(arguments_list, capture_output=True, text=True)
 
-    def submit_job_local(self):
-
-        with open(f'{self.arguments_dir}/{self.slurm_job_id}_0.txt', 'r') as file:
-            arguments = file.readlines()
+    def submit_job_multiprocessing(self):
+        
+        # launch interpolation
+        commands = [f'python -u {CURRENT_PATH}/experiment_interpolation.py '
+                    + argument for argument in self.arguments]
         with multiprocessing.Pool(processes=self.n_cpus) as pool:
-            pool.map(self.run_command, arguments)
+            pool.map(self.run_command, commands)
 
         # stop timer
         total_time = (time.time()-self.start)/60.
@@ -895,18 +896,17 @@ def main(**kwargs):
 
     # get all unique arguments to process interpolation tasks
     SI.gather_arguments()
-    
+
     # create greasy arguments file
     SI.create_greasy_arguments_file()
 
-    # create submission script according to machine
-    if SI.machine == "nord3":
-        SI.create_lsf_submission_script()
-    if SI.machine != 'local':
-        SI.create_slurm_submission_script()
-    
     # submit interpolation jobs
-    if SI.machine != 'local':
-        SI.submit_job()
+    if SI.machine == 'local':
+        SI.submit_job_multiprocessing()
     else:
-        SI.submit_job_local()
+        # create submission script according to machine
+        if SI.machine == "nord3":
+            SI.create_lsf_submission_script()
+        else:
+            SI.create_slurm_submission_script()
+        SI.submit_job_greasy()
