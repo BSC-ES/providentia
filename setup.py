@@ -1,8 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# Copyright 2018 Barcelona Supercomputing Center - Centro Nacional de
-# Supercomputación (BSC-CNS)
 
 from setuptools import find_packages
 from setuptools import setup
