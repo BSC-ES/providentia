@@ -107,8 +107,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
                     # if no parent section names are found throw an error
                     if len(all_sections) == 0:
-                        msg = "No sections were found in the configuration file, make sure to name them using square brackets."
-                        sys.exit(msg)
+                        error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
+                        sys.exit(error)
                     # if there is only one section, do not ask the user    
                     elif len(all_sections) == 1:
                         okpressed = False
