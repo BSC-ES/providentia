@@ -404,35 +404,13 @@ class ProvConfiguration:
                     # have alternative experiment names for the legend, then parse them?
                     if ('(' in value) & (')' in value):
                         exps = [exp.strip() for exp in value.split('(')[0].strip().split(",")]
-                        exps_legend = [exp_legend.strip() for exp_legend in value.split('(')[1].split(')')[0].strip().split(",")]
+                        self.read_instance.alias = [exp_legend.strip() for exp_legend in value.split('(')[1].split(')')[0].strip().split(",")]
                     # otherwise set legend names as given experiment names in full
                     else: 
                         exps = [exp.strip() for exp in value.split(",")]
-                        exps_legend = []
-
-
-                    if exps_legend:
-                        # to set an alias is mandatory to have the same number of experiments and legends
-                        if len(exps)==len(exps_legend): 
-                            # if all experiments are full length ([expID]-[domain]-[ensembleNum]) or there's only one experiment with only one possible combination,
-                            # then they can be set as alias     
-                            if all([len(exp.split("-"))==3 for exp in exps]) or \
-                                (len(exps) == 1 and len(self.read_instance.domain) == 1 and len(self.read_instance.ensemble_options) == 1):
-                                self.read_instance.alias_flag = True
-                        
-                        # show warning if alias not possible to be set
-                        if not deactivate_warning and not self.read_instance.alias_flag:
-                            msg = "Alias could not be set."
-                            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-
-                    # set alias
-                    if self.read_instance.alias_flag:
-                        self.read_instance.alias = exps_legend
+                        self.read_instance.alias = []
 
                     return exps
-
-                    # TODO check if this was a good idea
-                    # return {exp:exp_legend for exp,exp_legend in zip(exps,exps_legend)}
 
         elif key == 'map_extent':
             # parse map extent
@@ -1028,6 +1006,21 @@ class ProvConfiguration:
             msg = "Ensemble options (ensemble_options) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.ensemble_options = default
+
+        # check if alias can be set (in case there is an alias)
+        if self.read_instance.alias:
+            # to set an alias is mandatory to have the same number of experiments and legends
+            if len(self.read_instance.experiments)==len(self.read_instance.alias): 
+                # if all experiments are full length ([expID]-[domain]-[ensembleNum]) or there's only one experiment with only one possible combination,
+                # then they can be set as alias     
+                if all([len(exp.split("-"))==3 for exp in self.read_instance.experiments]) or \
+                    (len(self.read_instance.experiments) == 1 and len(self.read_instance.domain) == 1 and len(self.read_instance.ensemble_options) == 1):
+                    self.read_instance.alias_flag = True
+            
+            # show warning if alias not possible to be set
+            if not deactivate_warning and not self.read_instance.alias_flag:
+                msg = "Experiment alias could not be set."
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
         # get correct check experiment function
         # TODO do it using heritage
