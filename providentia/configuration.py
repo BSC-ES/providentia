@@ -782,6 +782,10 @@ class ProvConfiguration:
 
         # split full experiment
         experiment, domain, ensemble_option = full_experiment.split('-')
+
+        # accept asterisk to download all experiments
+        if experiment == '*':
+            return True, experiment
         
         # all experiments pass this check because the real one is in the download mode
         exp_found = [full_experiment]
