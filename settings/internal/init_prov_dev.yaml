@@ -30,7 +30,8 @@
             'experiments': [],
             'exp_ids' : [], # TODO remove if changed 
             'domain': null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
-            'ensemble_options': null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
+            'ensemble_options' : null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
+            'interpolated' : True, # from download mode
             'forecast_day': 1,
             'experiment_types': [], # TODO remove if changed # interpolation
             'qa': null,
