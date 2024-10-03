@@ -334,7 +334,7 @@ class Plot:
 
         # place logo on top center
         page_width, page_height = page.get_size_inches()
-        xo = (page_width * page.dpi) / 2 + 200
+        xo = (page_width * page.dpi) / 2 + 500
         yo = page_height * page.dpi * 2 + 700
         page.figimage(logo, xo=int(xo), yo=int(yo))
 

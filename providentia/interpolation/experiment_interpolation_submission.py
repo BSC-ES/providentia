@@ -8,6 +8,7 @@ import sys
 import time
 from pydoc import locate
 import numpy as np
+import multiprocessing
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
 
@@ -93,9 +94,11 @@ class SubmitInterpolation(object):
         provconf.check_validity()
 
         # TODO Hardcoded
-        interp_print_variables = ['ghost_version', 'start_date', 'end_date', 'experiments', 'species', 
-        'network', 'resolution', 'forecast_day', 'interp_n_neighbours', 'interp_reverse_vertical_orientation', 
-        'interp_chunk_size', 'interp_job_array_limit']
+        interp_print_variables = ['ghost_version', 'start_date', 'end_date', 'experiments', 
+                                  'species', 'network', 'resolution', 'forecast_day', 
+                                  'interp_n_neighbours', 'interp_reverse_vertical_orientation', 
+                                  'interp_chunk_size', 'interp_job_array_limit', 'exp_root', 
+                                  'ghost_root', 'nonghost_root']
 
         # print variables used, if all species are used print "All Species"        
         print("\nVariables used for the interpolation:\n")
@@ -305,14 +308,14 @@ class SubmitInterpolation(object):
                             # GHOST
                             if self.reading_ghost:
                                 obs_files = np.sort(glob.glob(
-                                    data_paths[self.machine]['ghost_root'] + '/{}/{}/{}/{}/{}*.nc'.format(
+                                    self.ghost_root + '/{}/{}/{}/{}/{}*.nc'.format(
                                         network_to_interpolate_against, self.ghost_version, 
                                         temporal_resolution_to_output, original_speci_to_process, 
                                         original_speci_to_process)))
                             # non-GHOST
                             else:
                                 obs_files = np.sort(glob.glob(
-                                    data_paths[self.machine]['nonghost_root'] + '/{}/{}/{}/{}*.nc'.format(
+                                    self.nonghost_root + '/{}/{}/{}/{}*.nc'.format(
                                         network_to_interpolate_against, temporal_resolution_to_output,
                                         original_speci_to_process, original_speci_to_process)))
 
@@ -727,7 +730,7 @@ class SubmitInterpolation(object):
         # close submit file
         submit_file.close()
 
-    def submit_job(self):
+    def submit_job_greasy(self):
 
         # time start of interpolation jobs
         interpolation_start = time.time()
@@ -829,7 +832,7 @@ class SubmitInterpolation(object):
             queue_time = interpolation_time - process_time
             overhead_time = total_time - interpolation_time
             print('\nALL {} INTERPOLATION TASKS COMPLETED SUCCESSFULLY IN {:.2f} MINUTES\n'
-                  '({:.2f} MINUTES PROCESING, {:.2f} MINUTES QUEUING, {:.2f} MINUTES ON OVERHEADS)'.
+                  '({:.2f} MINUTES PROCESSING, {:.2f} MINUTES QUEUING, {:.2f} MINUTES ON OVERHEADS)'.
                   format(len(self.output_log_roots), total_time, process_time, queue_time, overhead_time))
         else:
             print('\n{}/{} INTERPOLATION TASKS FINISHED SUCCESSFULLY IN {:.2f} MINUTES'.format(
@@ -839,6 +842,52 @@ class SubmitInterpolation(object):
                 print('THE FOLLOWING INTERPOLATION TASKS FAILED: {}'.format(failed_tasks))
             if len(not_finished_tasks) > 0:
                 print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
+    
+    def run_command(self, commands):
+        arguments_list = commands.strip().split()
+        subprocess.run(arguments_list, capture_output=True, text=True)
+
+    def submit_job_multiprocessing(self):
+        
+        # launch interpolation
+        commands = [f'python -u {CURRENT_PATH}/experiment_interpolation.py '
+                    + argument for argument in self.arguments]
+        with multiprocessing.Pool(processes=self.n_cpus) as pool:
+            pool.map(self.run_command, commands)
+
+        # stop timer
+        total_time = (time.time()-self.start)/60.
+
+        # if no more jobs in the squeue, then now check the outcome of all the jobs
+        # if any jobs have failed/not finished, write them out to file
+        failed_tasks=[]
+        not_finished_tasks=[]
+        for output_log_root in self.output_log_roots:
+            output_log_file = glob.glob('{}_*'.format(output_log_root))
+            # have an output log file? (i.e. job has finished)
+            if len(output_log_file) > 0:
+                output_log_file = output_log_file[0]
+                process_code = int(output_log_file.split('_')[-1].split('.out')[0])
+                # if process code is not 0, job failed
+                if process_code != 0:
+                    failed_tasks.append(output_log_file)
+            # no output log file, therefore append to not finished list
+            else:
+                not_finished_tasks.append(output_log_root)
+
+        # have 0 failed/non-finished tasks?
+        if (len(failed_tasks) == 0) & (len(not_finished_tasks) == 0):
+            print('\nALL {} INTERPOLATION TASKS COMPLETED SUCCESSFULLY IN {:.2f} MINUTES\n'.
+                  format(len(self.output_log_roots), total_time))
+        else:
+            print('\n{}/{} INTERPOLATION TASKS FINISHED SUCCESSFULLY IN {:.2f} MINUTES'.format(
+                  len(self.output_log_roots)-(len(not_finished_tasks)+len(failed_tasks)), len(self.output_log_roots), 
+                  total_time))
+            if len(failed_tasks) > 0:
+                print('THE FOLLOWING INTERPOLATION TASKS FAILED: {}'.format(failed_tasks))
+            if len(not_finished_tasks) > 0:
+                print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
+    
 
 def main(**kwargs):
 
@@ -847,15 +896,17 @@ def main(**kwargs):
 
     # get all unique arguments to process interpolation tasks
     SI.gather_arguments()
-    
+
     # create greasy arguments file
     SI.create_greasy_arguments_file()
 
-    # create submission script according to machine
-    if SI.machine == "nord3":
-        SI.create_lsf_submission_script()
-    else:
-        SI.create_slurm_submission_script()
-    
     # submit interpolation jobs
-    SI.submit_job()
+    if SI.machine == 'local':
+        SI.submit_job_multiprocessing()
+    else:
+        # create submission script according to machine
+        if SI.machine == "nord3":
+            SI.create_lsf_submission_script()
+        else:
+            SI.create_slurm_submission_script()
+        SI.submit_job_greasy()
