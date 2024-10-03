@@ -711,7 +711,7 @@ class ProvConfiguration:
         # remove possible ghost versions if they are not really in the directories
         possible_ghost_versions = list(set(os.listdir(self.read_instance.exp_root)) & set(self.read_instance.possible_ghost_versions))
 
-        # if allmembers, get all the possible ensemble options
+        # if ensemble options is allmembers, get all the possible ensemble options
         if ensemble_option == "allmembers":
             exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.possible_experiments))
            
@@ -721,6 +721,7 @@ class ProvConfiguration:
                     ghost_exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), os.listdir(os.path.join(self.read_instance.exp_root,ghost_version))))
                     if ghost_exp_found:
                         available_ghost_versions.append(ghost_version)
+        # if it is a concrete ensemble option, then just get the experiment from the list
         else:
             exp_found = [full_experiment] if full_experiment in self.possible_experiments else []
 
@@ -743,15 +744,21 @@ class ProvConfiguration:
         # TODO Check if i can only import one time
         from warnings_prv import show_message
 
-        """ Checks if experiment, domain and ensemble option combination works for interpolation.
+        """ Checks if experiment, domain and ensemble option combination works 
+        for interpolation or the download of non interpolated experiments
         Returns if experiment if valid and the experiment type (if there is one) """
         
-        # get experiment type and specific directory 
-        # TODO think about what to do about experiment type 
-        # puede que haga una lista con el experiment type para asi no tener que importar de nuevo
-        # split full experiment
-        experiment, domain, ensemble_option = full_experiment.split('-')
-
+        # get the splitted experiment
+        experiment_split = full_experiment.split('-')
+        
+        # experiment, domain and ensemble_option
+        if len(experiment_split) == 3:
+            experiment, domain, ensemble_option = experiment_split
+        # experiment, domain
+        else:
+            experiment, domain = experiment_split
+        
+        # search if the experiment id is in the interp_experiments file
         experiment_exists = False
         for experiment_type, experiment_dict in interp_experiments.items():
             if experiment in experiment_dict["experiments"]:
@@ -774,52 +781,42 @@ class ProvConfiguration:
         # TODO Check if i can only import one time
         from warnings_prv import show_message
 
-        self.read_instance.connect()
-
         # split full experiment
         experiment, domain, ensemble_option = full_experiment.split('-')
-        
+
         # accept asterisk to download all experiments
         if experiment == '*':
             return True, experiment
+        
+        # all experiments pass this check because the real one is in the download mode
+        exp_found = [full_experiment]
+        
+        # connect to the remote machine
+        self.read_instance.connect()        
         
         # get all possible experiments
         exp_path = os.path.join(self.read_instance.exp_remote_path,self.read_instance.ghost_version)
         self.possible_experiments = self.read_instance.sftp.listdir(exp_path)
 
-        # initialise list of possible ghost versions
-        available_ghost_versions = []
-
-        # if allmembers, get all the possible ensemble options
+        # TODO repeated code, put this into a method in the future?
+        # if ensemble options is allmembers, get all the possible ensemble options
         if ensemble_option == "allmembers":
-            exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.possible_experiments))
+            exp_found = list(sorted(filter(lambda x:x.startswith(experiment+'-'+domain), self.possible_experiments)))
            
             if not exp_found:
-                # get experiment for printing
-                experiment_wng = experiment + '-' + domain
+                # initialise list of possible ghost versions
+                available_ghost_versions = []
                 
                 # search for other ghost versions
                 for ghost_version in self.read_instance.possible_ghost_versions:
                     ghost_exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.read_instance.sftp.listdir(os.path.join(self.read_instance.exp_remote_path,ghost_version))))
                     if ghost_exp_found:
                         available_ghost_versions.append(ghost_version)
-        else:
-            exp_found = [full_experiment] if full_experiment in self.possible_experiments else []
 
-            # search for other ghost versions
-            if not exp_found:
-                # get experiment for printing
-                experiment_wng = full_experiment
-
-                # search for other ghost versions
-                available_ghost_versions = list(filter(lambda x:full_experiment in self.read_instance.sftp.listdir(os.path.join(self.read_instance.exp_remote_path,x)), self.read_instance.possible_ghost_versions))
-        
-        # if not found because of the ghost version, tell the user
-        if not exp_found:
-            msg = f"There is no experiment {experiment_wng} data for the current ghost version ({self.read_instance.ghost_version})." 
-            if available_ghost_versions:
-                msg += f" Please, check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+                msg = f"There is no experiment {experiment}-{domain} data for the current ghost version ({self.read_instance.ghost_version})." 
+                if available_ghost_versions:
+                    msg += f" Please, check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
 
         return bool(exp_found), exp_found        
 
@@ -1037,7 +1034,8 @@ class ProvConfiguration:
 
         # get correct check experiment function
         # TODO do it using heritage
-        if self.read_instance.interpolation:
+        # if the current mode is interpolation or the experiment i want to download is not interpolated
+        if self.read_instance.interpolation or (self.read_instance.download and self.read_instance.interpolated is False):
             check_experiment_fun = self.check_experiment_interpolation
         elif self.read_instance.download:
             check_experiment_fun = self.check_experiment_download
@@ -1053,7 +1051,6 @@ class ProvConfiguration:
         correct_experiments = {}
 
         # join experiments
-        # TODO I think the concept of having the same variable with two different types of values is kind of a bad idea
         for exp_i, experiment in enumerate(self.read_instance.exp_ids):
             # experiment, domain, ensemble_options
             if self.combined_domain and self.combined_ensemble_options:
@@ -1069,6 +1066,10 @@ class ProvConfiguration:
                 # experiment-domain-ensemble_options
                 else:
                     final_experiments.append(f'{experiment}-{self.read_instance.domain[exp_i]}-{self.read_instance.ensemble_options[exp_i]}')
+        
+        # if its a download of non interpolated experiments, the ensemble option is not needed
+        if self.read_instance.download and not self.read_instance.interpolated:
+            final_experiments = list({exp.split("-")[0] + "-" + exp.split("-")[1] for exp in final_experiments})
 
         for exp_i, experiment in enumerate(final_experiments):
             # TODO change boolean name

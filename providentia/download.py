@@ -153,6 +153,9 @@ class ProvidentiaDownload(object):
         # initialise boolean thath indicates whether remote machine changed 
         self.switched_remote = False
 
+        # variable that saves whether some experiments/observations were downloaded before
+        self.overwritten_files_flag = False
+
     def run(self):
         for section_ind, section in enumerate(self.sections):
             # update for new section parameters
@@ -396,9 +399,6 @@ class ProvidentiaDownload(object):
             
             # get the files that were downloaded before the execution
             downloaded_before_execution_files = list(filter(lambda x:self.prov_start_time > os.path.getctime(x), downloaded_files))
-            
-            # variable that saves whether some experiments/observations were downloaded before
-            self.overwritten_files_flag = False
 
             # if there was any file downloaded before the execution    
             if downloaded_before_execution_files:
@@ -863,10 +863,7 @@ class ProvidentiaDownload(object):
         try:
             self.sftp.stat(remote_dir)
         except FileNotFoundError:
-            if check_for_ghost(network):
-                msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment for the current GHOST version ({self.ghost_version})."
-            else:
-                msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment."
+            msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment for the current GHOST version ({self.ghost_version})."
 
             # get possible GHOST versions from the combination of GHOST_standards and the real avaibles in the experiment remote machine path
             possible_ghost_versions = set(self.sftp.listdir(self.exp_remote_path)).intersection(set(self.possible_ghost_versions))
