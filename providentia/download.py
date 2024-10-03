@@ -153,6 +153,9 @@ class ProvidentiaDownload(object):
         # initialise boolean thath indicates whether remote machine changed 
         self.switched_remote = False
 
+        # variable that saves whether some experiments/observations were downloaded before
+        self.overwritten_files_flag = False
+
     def run(self):
         for section_ind, section in enumerate(self.sections):
             # update for new section parameters
@@ -396,9 +399,6 @@ class ProvidentiaDownload(object):
             
             # get the files that were downloaded before the execution
             downloaded_before_execution_files = list(filter(lambda x:self.prov_start_time > os.path.getctime(x), downloaded_files))
-            
-            # variable that saves whether some experiments/observations were downloaded before
-            self.overwritten_files_flag = False
 
             # if there was any file downloaded before the execution    
             if downloaded_before_execution_files:
