@@ -122,8 +122,8 @@ class ProvidentiaOffline:
 
         # if no parent section names are found throw an error
         if len(self.parent_section_names) == 0:
-            msg = "No sections were found in the configuration file, make sure to name them using square brackets."
-            sys.exit(msg)
+            error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
+            sys.exit(error)
 
         # iterate through configuration sections
         for section_ind, (filename, section) in enumerate(zip(self.filenames, self.parent_section_names)):

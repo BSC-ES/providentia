@@ -124,8 +124,8 @@ class ProvidentiaDownload(object):
                 else:
                     # if no parent section names are found throw an error
                     if len(self.parent_section_names) == 0:
-                        msg = "No sections were found in configuration file, make sure to name them using square brackets."
-                        sys.exit(msg)
+                        error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
+                        error.exit(error)
                     self.sections = self.parent_section_names
             else:
                 error = 'Error: The path to the configuration file specified in the command line does not exist.'
