@@ -705,25 +705,25 @@ class ExperimentInterpolation(object):
                         file_time_dt = file_time_dt.astype('datetime64[ns]')
                         file_time_dt = pd.to_datetime([t for t in file_time_dt])
 
+                # get file start and end datetime
+                if len(file_date) == 6:
+                    chunk_type = 'monthly'
+                    start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), day=1, hour=0,
+                                                      minute=0)
+                    end_file_dt = start_file_dt + relativedelta.relativedelta(months=1)
+                elif len(file_date) == 8:
+                    chunk_type = 'daily'
+                    start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), 
+                                                      day=int(file_date[6:8]), hour=0, minute=0)
+                    end_file_dt = start_file_dt + datetime.timedelta(days=1)
+                elif len(file_date) == 10:
+                    chunk_type = 'daily'
+                    start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), 
+                                                      day=int(file_date[6:8]), hour=int(file_date[8:10]), minute=0)
+                    end_file_dt = start_file_dt + datetime.timedelta(days=1)
+
                 # for forecast runs, get timesteps for corresponding forecast day
                 if self.forecast:
-                    # get file start and end datetime
-                    if len(file_date) == 6:
-                        chunk_type = 'monthly'
-                        start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), day=1, hour=0,
-                                                          minute=0)
-                        end_file_dt = start_file_dt + relativedelta.relativedelta(months=1)
-                    elif len(file_date) == 8:
-                        chunk_type = 'daily'
-                        start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), 
-                                                          day=int(file_date[6:8]), hour=0, minute=0)
-                        end_file_dt = start_file_dt + datetime.timedelta(days=1)
-                    elif len(file_date) == 10:
-                        chunk_type = 'daily'
-                        start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), 
-                                                          day=int(file_date[6:8]), hour=int(file_date[8:10]), minute=0)
-                        end_file_dt = start_file_dt + datetime.timedelta(days=1)
-
                     # get indices of file time inside yearmonth, and for the appropriate forecast day
                     if chunk_type == 'daily':
                         # get forecast start_dt and end_dt
@@ -742,18 +742,6 @@ class ExperimentInterpolation(object):
 
                 # for non-forecast runs, get all timesteps
                 else:
-                    # get file start and end datetime
-                    if len(file_date) == 6:
-                        chunk_type = 'monthly'
-                        start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), day=1, hour=0,
-                                                          minute=0)
-                        end_file_dt = start_file_dt + relativedelta.relativedelta(months=1)
-                    elif len(file_date) == 8:
-                        chunk_type = 'daily'
-                        start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), 
-                                                          day=int(file_date[6:8]), hour=0, minute=0)
-                        end_file_dt = start_file_dt + datetime.timedelta(days=1)
-                    
                     # get indices of file time inside yearmonth
                     valid_file_time_inds = np.where((file_time_dt >= start_month_dt) & (file_time_dt < end_month_dt))[0]
 
