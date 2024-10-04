@@ -11,6 +11,7 @@
             'ghost_root': '',
             'nonghost_root': '',
             'exp_root': '',
+            'exp_to_interp_root': '',
             'generate_file_tree': False,
             'disable_file_tree': False,
             'nonghost_available_resolutions': null,
