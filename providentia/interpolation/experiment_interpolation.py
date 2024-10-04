@@ -120,8 +120,10 @@ class ExperimentInterpolation(object):
         # get experiment type and specific directories
         for experiment_type, experiment_dict in interp_experiments.items():
             if self.experiment_to_process in experiment_dict["experiments"]:
-                exp_dir_list = experiment_dict["paths"]
                 break
+
+        # get experiment specific directories list
+        exp_dir_list = experiment_dict["paths"]
 
         # take first functional directory 
         exp_dir = None      
