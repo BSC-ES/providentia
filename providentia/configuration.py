@@ -165,6 +165,13 @@ class ProvConfiguration:
                 exp_root = data_paths[MACHINE]["exp_root"]
                 return os.path.expanduser(exp_root[0])+exp_root[1:]
             
+        elif key == 'exp_to_interp_root':
+            # TODO use this when moving the non interpolated exps from one machine to another
+            # TODO remove the "local"
+            if value == '':
+                exp_root = data_paths["local"]["exp_to_interp_root"]
+                return os.path.expanduser(exp_root[0])+exp_root[1:]
+            
         elif key == 'ghost_version':
             # parse GHOST version
 
