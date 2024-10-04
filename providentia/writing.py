@@ -601,6 +601,10 @@ def export_configuration(prv, cname, separator="||"):
         period_r = " remove: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['remove_selected']) + separator
         options['section']['period'] = period_k + period_r
     
+    # if no data was loaded, there won't be any maximum nor minimum value
+    if prv.le_minimum_value.text() is '' and  prv.le_minimum_value.text() is '':
+        raise Exception("No data available for writing. Please click on READ before trying to save any file.") 
+    
     # bounds
     if np.float32(prv.le_minimum_value.text()) != \
             np.float32(prv.parameter_dictionary[prv.species[0]]['extreme_lower_limit']):
