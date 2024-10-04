@@ -28,6 +28,7 @@
             'observations_data_label': 'observations',
             'alias_flag': False,
             'experiments': [],
+            'alias' : [],
             'exp_ids' : [], # TODO remove if changed 
             'domain': null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
             'ensemble_options' : null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
