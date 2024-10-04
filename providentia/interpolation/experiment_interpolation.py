@@ -93,11 +93,12 @@ class ExperimentInterpolation(object):
         # get configuration variables from the management_logs
         for variable_key in ["ghost_version", "interp_n_neighbours", 
                              "interp_reverse_vertical_orientation", 
-                             "forecast_day", "exp_root", "ghost_root", "nonghost_root"]:
+                             "forecast_day", "exp_root", "ghost_root", 
+                             "nonghost_root", "forecast"]:
             variable_val_idx = submission_file_txt.index(variable_key+":")+1
             variable_val = submission_file_txt[variable_val_idx]
             # make sure vertical orientiation is a boolean!
-            if variable_key == "interp_reverse_vertical_orientation":
+            if variable_key in ["interp_reverse_vertical_orientation", "forecast"]:
                 setattr(self, variable_key, ast.literal_eval(variable_val))
             else:
                 setattr(self, variable_key, variable_val)
@@ -685,24 +686,7 @@ class ExperimentInterpolation(object):
 
                 # get date from filename
                 file_date = model_file.split('_')[-1][:-3]                
-
-                # get file start and end datetime
-                if len(file_date) == 6:
-                    chunk_type = 'monthly'
-                    start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), day=1, hour=0,
-                                                      minute=0)
-                    end_file_dt = start_file_dt + relativedelta.relativedelta(months=1)
-                elif len(file_date) == 8:
-                    chunk_type = 'daily'
-                    start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), 
-                                                      day=int(file_date[6:8]), hour=0, minute=0)
-                    end_file_dt = start_file_dt + datetime.timedelta(days=1)
-                elif len(file_date) == 10:
-                    chunk_type = 'daily'
-                    start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), 
-                                                      day=int(file_date[6:8]), hour=int(file_date[8:10]), minute=0)
-                    end_file_dt = start_file_dt + datetime.timedelta(days=1)
-
+                
                 # get file time (handle monthly resolution data differently to hourly/daily
                 # as num2date does not support 'months since' units)
                 file_time = self.mod_nc_root['time'][:] 
@@ -723,22 +707,46 @@ class ExperimentInterpolation(object):
                         file_time_dt = file_time_dt.astype('datetime64[ns]')
                         file_time_dt = pd.to_datetime([t for t in file_time_dt])
 
-                # get indices of file time inside yearmonth, and for the appropriate forecast day
-                if chunk_type == 'daily':
-                    # get forecast start_dt and end_dt
-                    forecast_start_dt = start_file_dt + datetime.timedelta(days=(int(self.forecast_day) - 1))
-                    forecast_end_dt = end_file_dt + datetime.timedelta(days=(int(self.forecast_day) - 1))
-                    # get indices of file time inside join of yearmonth and forecast day
-                    valid_file_time_inds = np.where((file_time_dt >= start_month_dt) & (file_time_dt < end_month_dt) & (file_time_dt >= forecast_start_dt) & (file_time_dt < forecast_end_dt))[0]
-                elif chunk_type == 'monthly':
-                    # cannot have monthly file which has forecast data, so if wanting forecast data for day > 1,
-                    # throw an error
-                    if int(self.forecast_day) > 1:
-                        log_file_str += 'File {} is monthly, so does not contain data for forcast day {}. Terminating process.'.format(model_file,self.forecast_day)
-                        create_output_logfile(1)
+                # get file start and end datetime
+                if len(file_date) == 6:
+                    chunk_type = 'monthly'
+                    start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), day=1, hour=0,
+                                                      minute=0)
+                    end_file_dt = start_file_dt + relativedelta.relativedelta(months=1)
+                elif len(file_date) == 8:
+                    chunk_type = 'daily'
+                    start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), 
+                                                      day=int(file_date[6:8]), hour=0, minute=0)
+                    end_file_dt = start_file_dt + datetime.timedelta(days=1)
+                elif len(file_date) == 10:
+                    chunk_type = 'daily'
+                    start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), 
+                                                      day=int(file_date[6:8]), hour=int(file_date[8:10]), minute=0)
+                    end_file_dt = start_file_dt + datetime.timedelta(days=1)
+
+                # for forecast runs, get timesteps for corresponding forecast day
+                if self.forecast:
+                    # get indices of file time inside yearmonth, and for the appropriate forecast day
+                    if chunk_type == 'daily':
+                        # get forecast start_dt and end_dt
+                        forecast_start_dt = start_file_dt + datetime.timedelta(days=(int(self.forecast_day) - 1))
+                        forecast_end_dt = end_file_dt + datetime.timedelta(days=(int(self.forecast_day) - 1))
+                        # get indices of file time inside join of yearmonth and forecast day
+                        valid_file_time_inds = np.where((file_time_dt >= start_month_dt) & (file_time_dt < end_month_dt) & (file_time_dt >= forecast_start_dt) & (file_time_dt < forecast_end_dt))[0]
+                    elif chunk_type == 'monthly':
+                        # cannot have monthly file which has forecast data, so if wanting forecast data for day > 1,
+                        # throw an error
+                        if int(self.forecast_day) > 1:
+                            log_file_str += 'File {} is monthly, so does not contain data for forcast day {}. Terminating process.'.format(model_file,self.forecast_day)
+                            create_output_logfile(1)
+                        # get indices of file time inside yearmonth
+                        valid_file_time_inds = np.where((file_time_dt >= start_month_dt) & (file_time_dt < end_month_dt))[0]
+
+                # for non-forecast runs, get all timesteps
+                else:
                     # get indices of file time inside yearmonth
                     valid_file_time_inds = np.where((file_time_dt >= start_month_dt) & (file_time_dt < end_month_dt))[0]
-                
+
                 # cut file time dt for only valid times
                 file_time_dt = file_time_dt[valid_file_time_inds]
 

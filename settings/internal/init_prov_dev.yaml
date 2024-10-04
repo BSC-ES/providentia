@@ -33,6 +33,7 @@
             'domain': null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
             'ensemble_options' : null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
             'interpolated' : True, # from download mode
+            'forecast': True,
             'forecast_day': 1,
             'experiment_types': [], # TODO remove if changed # interpolation
             'qa': null,
@@ -81,7 +82,7 @@
                                    'nonghost_available_resolutions', 'nonghost_available_networks', 'offline', 
                                    'interactive', 'download', 'interpolation', 'slurm_job_id', 'network', 'species', 
                                    'resolution', 'start_date', 'end_date', 'observations_data_label', 'alias_flag', 
-                                   'experiments', 'domain', 'ensemble_options', 'forecast_day', 'experiment_types', 
+                                   'experiments', 'domain', 'ensemble_options', 'forecast', 'forecast_day', 'experiment_types', 
                                    'temporal_colocation', 'spatial_colocation', 'spatial_colocation_tolerance', 
                                    'spatial_colocation_station_reference', 'spatial_colocation_station_name', 
                                    'spatial_colocation_longitude_latitude',  'spatial_colocation_measurement_altitude',
