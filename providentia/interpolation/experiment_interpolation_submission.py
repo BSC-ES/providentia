@@ -95,7 +95,7 @@ class SubmitInterpolation(object):
 
         # TODO Hardcoded
         interp_print_variables = ['ghost_version', 'start_date', 'end_date', 'experiments', 
-                                  'species', 'network', 'resolution', 'forecast_day', 
+                                  'species', 'network', 'resolution', 'forecast', 'forecast_day', 
                                   'interp_n_neighbours', 'interp_reverse_vertical_orientation', 
                                   'interp_chunk_size', 'interp_job_array_limit', 'exp_root', 
                                   'ghost_root', 'nonghost_root']
