@@ -117,6 +117,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--forecast_day",
                                      dest="forecast_day",
                                      help="day of the model forecast to analyse")
+            self.parser.add_argument("--forecast",
+                                     dest="forecast",
+                                     help="indicates if data comes from forecast")
             self.parser.add_argument("--qa",
                                      dest="qa",
                                      help="list of qa flags (numbers or text) to use to filter data")
