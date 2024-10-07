@@ -571,7 +571,18 @@ class ProvConfiguration:
             # treat leaving the field blank as default
             if value == '':
                 return self.var_defaults[key]
-
+            
+        elif key == 'interp_multiprocessing':
+            
+            # for local runs, always use multiprocessing
+            if MACHINE == 'local':
+                return True
+            # for HPC machines, get preference
+            else:
+                # treat leaving the field blank as default
+                if value == '':
+                    return self.var_defaults[key]       
+            
         # if no special parsing treatment for variable, simply return value
         return value
 
