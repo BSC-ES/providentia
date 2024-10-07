@@ -666,7 +666,7 @@ class SubmitInterpolation(object):
             submit_file.write("\n")
         else:
             submit_file.write("\n")
-            submit_file.write("source {}/load_modules.sh\n".format(self.working_directory))
+            submit_file.write("source {}/bin/load_modules.sh\n".format(self.working_directory))
         submit_file.write("export GREASY_NWORKERS=$SLURM_NPROCS\n") 
         submit_file.write("export GREASY_LOGFILE={}/{}_$SLURM_ARRAY_TASK_ID.log\n".format(self.submit_dir, 
                                                                                           self.slurm_job_id))
@@ -719,7 +719,7 @@ class SubmitInterpolation(object):
         submit_file.write("#BSUB -eo /dev/null\n")
         submit_file.write("\n")
 
-        submit_file.write("source {}/load_modules.sh\n".format(self.working_directory))
+        submit_file.write("source {}/bin/load_modules.sh\n".format(self.working_directory))
         submit_file.write("export GREASY_NWORKERS=$LSB_DJOB_NUMPROC\n")
         submit_file.write("export GREASY_LOGFILE={}/{}_$LSB_JOBINDEX.log\n".format(self.submit_dir, self.slurm_job_id))
         submit_file.write("arguments_store={}/{}.grz\n".format(self.arguments_dir, self.slurm_job_id))

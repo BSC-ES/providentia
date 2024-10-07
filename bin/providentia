@@ -125,14 +125,14 @@ account_option="--account=bsc32"
 queue_option="--qos=$queue"
 memory_option="--mem=$mem"
 constraint_option="--constraint=$constraint"
-load_command="source load_modules.sh"
+load_command="source bin/load_modules.sh"
 python_command="python3 -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
 interactive_alloc_command="sbatch -t $time -c $cores -J $jobname"
 script_dir=$(dirname $(realpath $(dirname $0)))
 
 # use clean mode and exit
 if [[ $PARSED =~ "--clean" ]]; then
-    bash clean_output.sh
+    bash bin/clean_output.sh
     exit 0
 fi
 
@@ -230,9 +230,9 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
             echo "Check 'interactive.out' for information on how to connect to session."
             
             if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
-                eval "${interactive_alloc_command} ${account_option} ${queue_option} interactive.sh"
+                eval "${interactive_alloc_command} ${account_option} ${queue_option} bin/interactive.sh"
             else
-                eval "${interactive_alloc_command} ${account_option} ${constraint_option} ${queue_option} interactive.sh"
+                eval "${interactive_alloc_command} ${account_option} ${constraint_option} ${queue_option} bin/interactive.sh"
             fi
 
         elif $debug; then
@@ -274,9 +274,9 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
         echo "Check 'interactive.out' for information on how to connect to session."
         eval "${load_command}"
         if [[ "${constraint}" == "lowmem" ]]; then
-            eval "${interactive_alloc_command} ${queue_option} interactive.sh"
+            eval "${interactive_alloc_command} ${queue_option} bin/interactive.sh"
         else
-            eval "${interactive_alloc_command} ${constraint_option} ${queue_option} interactive.sh"
+            eval "${interactive_alloc_command} ${constraint_option} ${queue_option} bin/interactive.sh"
         fi
 
     elif $debug; then
