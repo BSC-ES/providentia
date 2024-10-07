@@ -237,6 +237,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--interp_job_array_limit",
                                      dest="interp_job_array_limit",
                                      help="maximum number of chunks in job array for interpolation")
+            self.parser.add_argument("--interp_multiprocessing",
+                                     dest="interp_multiprocessing",
+                                     help="use multiprocessing instead of greasy to interpolate in HPC machines")
  
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)

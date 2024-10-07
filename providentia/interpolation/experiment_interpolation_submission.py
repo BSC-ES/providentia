@@ -98,7 +98,7 @@ class SubmitInterpolation(object):
                                   'species', 'network', 'resolution', 'forecast', 'forecast_day', 
                                   'interp_n_neighbours', 'interp_reverse_vertical_orientation', 
                                   'interp_chunk_size', 'interp_job_array_limit', 'exp_root', 
-                                  'ghost_root', 'nonghost_root']
+                                  'ghost_root', 'nonghost_root', 'interp_multiprocessing']
 
         # print variables used, if all species are used print "All Species"        
         print("\nVariables used for the interpolation:\n")
@@ -901,7 +901,7 @@ def main(**kwargs):
     SI.create_greasy_arguments_file()
 
     # submit interpolation jobs
-    if SI.machine == 'local':
+    if SI.interp_multiprocessing:
         SI.submit_job_multiprocessing()
     else:
         # create submission script according to machine
