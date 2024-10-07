@@ -249,7 +249,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
             echo "Loading dependencies..."
             eval "${load_command}"
             jobid=$(eval "sbatch ${account_option} ${queue_option} bin/experiment_interpolation_submit_mn5.sh $OTHEROPTS | awk '{print \$4}'")
-            echo "Check submission info in 'providentia/interpolation/management_logs/$jobid.out'"
+            echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
 
         else
             if $debugexec; then
@@ -294,7 +294,7 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
             echo "Loading dependencies..."
             eval "${load_command}"
             jobid=$(eval "sbatch ${account_option} ${queue_option} bin/experiment_interpolation_submit.sh $OTHEROPTS | awk '{print \$4}'")
-            echo "Check submission info in 'providentia/interpolation/management_logs/$jobid.out'"
+            echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
 
     else
         if $debugexec; then
@@ -352,8 +352,8 @@ else
         jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
     elif $interpolation; then
         unique_id=$(printf "%06d\n" $((RANDOM % 1000000)))
-        echo "Check submission info in 'providentia/interpolation/management_logs/$unique_id.out'"
-        eval "${python_command}" > providentia/interpolation/management_logs/$unique_id.out 2>&1 --slurm_job_id=$unique_id
+        echo "Check submission info in 'logs/interpolation/management_logs/$unique_id.out'"
+        eval "${python_command}" > logs/interpolation/management_logs/$unique_id.out 2>&1 --slurm_job_id=$unique_id
     else
         eval "${python_command}"
     fi
