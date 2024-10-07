@@ -29,12 +29,6 @@ from aux import (check_for_ghost, findMiddle, check_directory_existence, set_fil
 
 MACHINE = os.environ.get('BSC_MACHINE', '')
 
-# change current working directory from submit directory 
-# to import global configuration file
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-working_directory = CURRENT_PATH.split('/submit')[0]  
-os.chdir(working_directory)
-
 # get current path and providentia root path
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
@@ -85,8 +79,8 @@ class ExperimentInterpolation(object):
         self.interpolation_variables = {}
         
         # from file in management_logs, get and set the arguments which were not passed as a paremeter
-        submission_file = os.path.join(PROVIDENTIA_ROOT, 'providentia', 'interpolation', 
-                                       'management_logs',f'{self.unique_id}.out')
+        submission_file = os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/management_logs',
+                                       f'{self.unique_id}.out')
         with open(submission_file, 'r') as f:
             submission_file_txt = f.read().split()
 
@@ -1105,7 +1099,7 @@ def create_output_logfile(process_code, log_file_str):
         :param process_code: interpolation outcome code
         :type process_code: int
     """
-    output_logfile_dir = (f"{working_directory}/interpolation_logs/"
+    output_logfile_dir = (f"{os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs/')}"
     f"{submit_args['prov_exp_code']}/"
     f"{submit_args['original_speci_to_process']}/"
     f"{submit_args['network_to_interpolate_against']}/"
