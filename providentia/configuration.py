@@ -67,6 +67,12 @@ class ProvConfiguration:
         # import show_mesage from warnings
         sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia'))
         from warnings_prv import show_message
+        
+        # make sure we don't pass strings instead of booleans for true and false
+        if value == 'true':
+            value = True
+        elif value == 'false':
+            value = False
 
         # when the value is default then it is as if it was a blank value
         if value == 'default':
