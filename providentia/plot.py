@@ -4,6 +4,7 @@ import copy
 import json
 import os
 import sys
+import yaml
 
 import cartopy
 import cartopy.crs as ccrs
@@ -25,8 +26,9 @@ import seaborn as sns
 from .dashboard_interactivity import HoverAnnotation
 from .statistics import boxplot_inner_fences, calculate_statistic, get_z_statistic_info, get_z_statistic_type
 from .read_aux import drop_nans
-from .plot_aux import (create_chunked_timeseries, get_multispecies_aliases, get_taylor_diagram_ghelper_info, 
-                       kde_fft, merge_cells, periodic_labels, periodic_xticks, round_decimal_places, temp_axis_dict)
+from .plot_aux import (create_chunked_timeseries, compute_fairmode_MQI, get_multispecies_aliases, 
+                       get_taylor_diagram_ghelper_info, kde_fft, merge_cells, periodic_labels, 
+                       periodic_xticks, plot_fairmode, round_decimal_places, temp_axis_dict)
 
 # speed up transformations in cartopy
 pyproj.set_use_global_context()
@@ -1947,24 +1949,101 @@ class Plot:
     def make_fairmode_target(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         
         # add target
-        circle = plt.Circle((0, 0), 1, color='green', fill=True, alpha=0.5)
+        circle = plt.Circle((0, 0), 1, color='lightgray', fill=True, alpha=0.5)
         relevant_axis.add_patch(circle)
 
-        # add text in the center top inside the plot
-        relevant_axis.text(0.5, 0.98, plot_characteristics['texts']['top'], fontsize=10, ha='center', 
-                           va='top', transform=relevant_axis.transAxes)
+        # add a black circle with radius 1 (continuous line)
+        black_circle = plt.Circle((0, 0), 1, color='black', fill=False, linestyle='-')
+        relevant_axis.add_patch(black_circle)
 
-        # add text in the center bottom inside the plot
-        relevant_axis.text(0.5, 0.02, plot_characteristics['texts']['bottom'], fontsize=10, ha='center', 
-                           va='bottom', transform=relevant_axis.transAxes)
+        # add a black circle with radius 0.5 (dotted line)
+        dotted_circle = plt.Circle((0, 0), 0.5, color='black', fill=False, linestyle='--')
+        relevant_axis.add_patch(dotted_circle)
 
-        # add text in the left center inside the plot
-        relevant_axis.text(0.02, 0.5, plot_characteristics['texts']['left'], fontsize=10, ha='left', 
-                           va='center', transform=relevant_axis.transAxes)
+        # add text in the sides
+        relevant_axis.text(**plot_characteristics['auxiliar']['sides']['top'], transform=relevant_axis.transAxes)
+        relevant_axis.text(**plot_characteristics['auxiliar']['sides']['bottom'], transform=relevant_axis.transAxes)
+        relevant_axis.text(**plot_characteristics['auxiliar']['sides']['left'], transform=relevant_axis.transAxes)
+        relevant_axis.text(**plot_characteristics['auxiliar']['sides']['right'], transform=relevant_axis.transAxes)
 
-        # add text in the right center inside the plot
-        relevant_axis.text(0.98, 0.5, plot_characteristics['texts']['right'], fontsize=10, ha='right', 
-                           va='center', transform=relevant_axis.transAxes)
+        # get data for fairmode
+        fairmode_settings = yaml.safe_load(
+            open(os.path.join(PROVIDENTIA_ROOT, 
+                              'settings/internal/fairmode.yaml')))
+
+        speci = networkspeci.split('|')[1]
+        u_95r_RV = fairmode_settings[speci]['u_95r_RV']
+        RV = fairmode_settings[speci]['RV']
+        alpha = fairmode_settings[speci]['alpha']
+        percentile = fairmode_settings[speci]['percentile']
+        
+        # get valid data labels for networkspeci
+        valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
+
+        # cut data_labels for those in valid data labels
+        cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+
+        # get observations data (flattened)
+        observations_data = self.canvas_instance.selected_station_data[networkspeci]['per_station'][0,:,:]
+
+        # iterate through data labels
+        for data_label_idx, data_label in enumerate(cut_data_labels):
+
+            # continue for observations data label
+            if data_label == self.read_instance.observations_data_label:
+                continue
+
+            # get experiment data (flattened)
+            experiment_data = self.canvas_instance.selected_station_data[networkspeci]['per_station'][valid_data_labels.index(data_label),:,:]
+            
+            # calculate MQI for the current station
+            x_points = []
+            y_points = []
+            station_references = self.canvas_instance.selected_station_metadata[networkspeci][
+                                 'station_reference'][:, 0]
+            n_stations = len(station_references)
+            mqi_array = np.full(n_stations, np.nan)
+            for station_idx, station in enumerate(station_references):
+
+                st_observations_data = observations_data[station_idx, :]
+                st_experiment_data = experiment_data[station_idx, :]
+                
+                mqi = compute_fairmode_MQI(st_observations_data, st_experiment_data, 
+                                           u_95r_RV, RV, alpha)
+                x, y, r, t1, t2, t3, h = plot_fairmode(st_observations_data, st_experiment_data, 
+                                                       u_95r_RV, RV, alpha, percentile)
+                x = np.abs(x)
+
+                if r > 0:
+                    x *= -1
+
+                x_points.append(x)
+                y_points.append(y)
+                mqi_array[station_idx] = mqi
+
+            mqi_sorted = sorted(mqi_array[~np.isnan(mqi_array)])
+            i_90 = int(0.9 * len(mqi_sorted)) - 1
+            MQI90 = mqi_sorted[i_90]
+            MQI90_formatted = f"{MQI90:.2f}"
+
+            # plot data
+            for i, (x, y,  mqi) in enumerate(zip(x_points, y_points, mqi_array)):
+                relevant_axis.scatter(x, y, color='none', marker='s', s=50, 
+                                      edgecolor=self.read_instance.plotting_params[data_label]['colour'], 
+                                      linewidth=1.5)
+            
+            # append MQI for box
+            analysis_text = f"MQI₉₀ ({data_label}) = {MQI90_formatted}"
+
+            # determine box color based on MQI90 value
+            box_color = (plot_characteristics['auxiliar']['MQI90']['positive'] 
+                         if MQI90 > 1 else plot_characteristics['auxiliar']['MQI90']['negative'])
+
+            # add the formatted text with a colored box
+            relevant_axis.text(2.2, 1.5-data_label_idx/2, analysis_text, verticalalignment='center', 
+                               fontsize=plot_characteristics['auxiliar']['MQI90']['fontsize'], 
+                               color=box_color, bbox=dict(facecolor='none', edgecolor=box_color, 
+                                                          boxstyle='round,pad=0.2'))
 
 
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
