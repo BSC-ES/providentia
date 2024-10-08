@@ -1944,6 +1944,11 @@ class Plot:
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
                 self.track_plot_elements(data_label, 'taylor', 'plot', self.taylor_plot, bias=False)
 
+    def make_fairmode_target(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
+        
+        circle = plt.Circle((0, 0), 1, color='green', fill=True, alpha=0.5)
+        relevant_axis.add_patch(circle)
+
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """ Function that tracks plotted lines and collections
             that will be removed/added when picking up legend elements on dashboard.
