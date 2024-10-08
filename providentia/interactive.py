@@ -309,7 +309,7 @@ class Interactive:
 
         # get zstat for required plots
         base_plot_type_split = base_plot_type.split('-')
-        if (len(base_plot_type_split) > 1) & (base_plot_type != 'periodic-violin'):
+        if (len(base_plot_type_split) > 1) & (base_plot_type not in ['periodic-violin', 'fairmode-target']):
             base_plot_type = base_plot_type_split[0]
             zstat = base_plot_type_split[1]
         else:
@@ -453,6 +453,8 @@ class Interactive:
         # get plotting function
         if base_plot_type == 'statsummary':
             func = getattr(self.plot, 'make_table')
+        elif base_plot_type == 'fairmode-target':
+            func = getattr(self.plot, 'make_fairmode_target')
         elif base_plot_type != 'legend':
             func = getattr(self.plot, 'make_{}'.format(base_plot_type.split('-')[0]))
          

@@ -1586,8 +1586,11 @@ class ProvidentiaOffline:
                     if ylabel != '':
                         set_axis_label(relevant_axis, 'y', ylabel, self.plot_characteristics[plot_type])
 
-                # get plotting function                
-                func = getattr(self.plot, 'make_{}'.format(base_plot_type.split('-')[0]))
+                # get plotting function
+                if base_plot_type == 'fairmode-target':
+                    func = getattr(self.plot, 'make_fairmode_target')
+                else:
+                    func = getattr(self.plot, 'make_{}'.format(base_plot_type.split('-')[0]))
 
                 if base_plot_type == 'periodic':
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
