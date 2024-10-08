@@ -1946,8 +1946,26 @@ class Plot:
 
     def make_fairmode_target(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         
+        # add target
         circle = plt.Circle((0, 0), 1, color='green', fill=True, alpha=0.5)
         relevant_axis.add_patch(circle)
+
+        # add text in the center top inside the plot
+        relevant_axis.text(0.5, 0.98, plot_characteristics['texts']['top'], fontsize=10, ha='center', 
+                           va='top', transform=relevant_axis.transAxes)
+
+        # add text in the center bottom inside the plot
+        relevant_axis.text(0.5, 0.02, plot_characteristics['texts']['bottom'], fontsize=10, ha='center', 
+                           va='bottom', transform=relevant_axis.transAxes)
+
+        # add text in the left center inside the plot
+        relevant_axis.text(0.02, 0.5, plot_characteristics['texts']['left'], fontsize=10, ha='left', 
+                           va='center', transform=relevant_axis.transAxes)
+
+        # add text in the right center inside the plot
+        relevant_axis.text(0.98, 0.5, plot_characteristics['texts']['right'], fontsize=10, ha='right', 
+                           va='center', transform=relevant_axis.transAxes)
+
 
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """ Function that tracks plotted lines and collections
