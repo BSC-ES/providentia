@@ -1031,8 +1031,10 @@
       "grid": { "axis": "both", "color": "lightgrey", "alpha": 0.8 },
       "remove_spines": ["top", "right"],
       "axis_title": { "label": "", "fontsize": 16, "loc": "center" },
-      "xlabel": { "xlabel": "r'CRMSE / $\beta R M S_U$'", "fontsize": 16 },
-      "ylabel": { "ylabel": "r'Mean Bias / $\beta R M S_U$'", "fontsize": 16 },
+      "xlabel": { "xlabel": "CRMSE / pending", "fontsize": 16 },
+      "ylabel": { "ylabel": "Mean Bias / pending", "fontsize": 16 },
+      "xlim": [-2, 2],
+      "ylim": [-2, 2],
       "xtick_params":
         {
           "labelsize": 14,
@@ -1091,11 +1093,13 @@
           "alpha": 1,
           "zorder": 100,
         },
-      "round_decimal_places": { "title": 2 },
+      "round_decimal_places": { "title": 2, "x": 2, "y": 2 },
       "equal_aspect": true,
       "markersize_npoints_threshold": 200,
       "markersize": { "standard": 1.1, "few_points": 4.0 },
       "plot": { "marker": "o", "linestyle": "None", "markersize": "" },
       "plot_options": ["annotate"],
+      "xticks": [-2, -1, 0,  1, 2],
+      "yticks": [-2, -1, 0,  1, 2]
     },
 }
