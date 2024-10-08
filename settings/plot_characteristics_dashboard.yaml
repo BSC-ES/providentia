@@ -975,8 +975,8 @@
       "grid": { "axis": "both", "color": "lightgrey", "alpha": 0.8 },
       "remove_spines": ["top", "right"],
       "axis_title": { "label": "", "fontsize": 8.5, "loc": "center" },
-      "xlabel": { "xlabel": "CRMSE / pending", "fontsize": 8 },
-      "ylabel": { "ylabel": "Mean Bias / pending", "fontsize": 8 },
+      "xlabel": { "xlabel": "CRMSE / BETA*RMSu", "fontsize": 8 },
+      "ylabel": { "ylabel": "Mean Bias / BETA*RMSu", "fontsize": 8 },
       "xlim": [-2, 2],
       "ylim": [-2, 2],
       "xtick_params":
@@ -1031,12 +1031,48 @@
       "plot_options": ["annotate"],
       "xticks": [-2, -1, 0, 1, 2],
       "yticks": [-2, -1, 0, 1, 2],
-      "texts":
+      "auxiliar":
         {
-          "left": "R",
-          "right": "SD",
-          "top": "Mean bias > 0",
-          "bottom": "Mean bias < 0",
+          "MQI90": { "positive": "red", "negative": "green", "fontsize": 8 },
+          "sides":
+            {
+              "top":
+                {
+                  "x": 0.5,
+                  "y": 0.98,
+                  "s": "Mean bias > 0",
+                  "va": "top",
+                  "ha": "center",
+                  "fontsize": 8,
+                },
+              "bottom":
+                {
+                  "x": 0.5,
+                  "y": 0.02,
+                  "s": "Mean bias < 0",
+                  "va": "bottom",
+                  "ha": "center",
+                  "fontsize": 8,
+                },
+              "left":
+                {
+                  "x": 0.02,
+                  "y": 0.5,
+                  "s": "R",
+                  "va": "center",
+                  "ha": "left",
+                  "fontsize": 8,
+                },
+              "right":
+                {
+                  "x": 0.98,
+                  "y": 0.5,
+                  "s": "SD",
+                  "va": "center",
+                  "ha": "right",
+                  "fontsize": 8,
+                },
+            },
         },
     },
 }
