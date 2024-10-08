@@ -1254,6 +1254,10 @@ class ProvidentiaDownload(object):
         for nc_file in nc_files:
             if ".nc" in nc_file:
                 ym = nc_file.split("_")[-1].split(".nc")[0]
+                # TODO not permanent, I have to check other possible formats
+                # if the date is not before the .nc, then it is not valid
+                if not ym.isnumeric():
+                    continue
                 # from yyyymm to yyyymmdd
                 if len(ym) == 6:
                     ym = '{}01'.format(ym)
