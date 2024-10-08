@@ -94,11 +94,12 @@ class MPLCanvas(FigureCanvas):
         # define all possible plots
         self.all_plots = ['legend', 'map', 'timeseries', 'periodic-violin', 'periodic', 
                           'metadata', 'distribution', 'scatter', 'statsummary', 'boxplot',
-                          'taylor']
+                          'taylor', 'fairmode-target']
 
         # define all possible plots in layout options
         self.layout_options = ['None', 'boxplot', 'distribution', 'metadata', 'periodic', 
-                               'periodic-violin', 'scatter', 'statsummary', 'timeseries', 'taylor']
+                               'periodic-violin', 'scatter', 'statsummary', 'timeseries', 'taylor', 
+                               'fairmode-target']
 
         # parse active dashboard plot string        
         if isinstance(self.read_instance.active_dashboard_plots, str):
@@ -707,6 +708,8 @@ class MPLCanvas(FigureCanvas):
                 # get plotting function for specific plot
                 if plot_type == 'statsummary':
                     func = getattr(self.plot, 'make_table')
+                elif plot_type == 'fairmode-target':
+                    func = getattr(self.plot, 'make_fairmode_target')
                 else:
                     func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
 
@@ -835,7 +838,9 @@ class MPLCanvas(FigureCanvas):
                 self.reset_ax_navigation_toolbar_stack(ax)
 
                 # update plot options
-                self.update_plot_options(plot_types=[plot_type])
+                # TODO: remove condition
+                if plot_type != 'fairmode-target':
+                    self.update_plot_options(plot_types=[plot_type])
 
     def update_associated_active_dashboard_plots(self):
         """ Function that updates all plots associated with selected stations on map. """
@@ -2700,6 +2705,8 @@ class MPLCanvas(FigureCanvas):
                                 # get plotting function for specific plot
                                 if plot_type == 'statsummary':
                                     func = getattr(self.plot, 'make_table')
+                                elif plot_type == 'fairmode-target':
+                                    func = getattr(self.plot, 'make_fairmode_target')
                                 else:
                                     func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
 
@@ -2774,6 +2781,8 @@ class MPLCanvas(FigureCanvas):
                                 # get plotting function for specific plot
                                 if plot_type == 'statsummary':
                                     func = getattr(self.plot, 'make_table')
+                                elif plot_type == 'fairmode-target':
+                                    func = getattr(self.plot, 'make_fairmode_target')
                                 else:
                                     func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
 
