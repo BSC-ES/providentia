@@ -1099,7 +1099,14 @@
       "markersize": { "standard": 1.1, "few_points": 4.0 },
       "plot": { "marker": "o", "linestyle": "None", "markersize": "" },
       "plot_options": ["annotate"],
-      "xticks": [-2, -1, 0,  1, 2],
-      "yticks": [-2, -1, 0,  1, 2]
+      "xticks": [-2, -1, 0, 1, 2],
+      "yticks": [-2, -1, 0, 1, 2],
+      "texts":
+        {
+          "left": "R",
+          "right": "SD",
+          "top": "Mean bias > 0",
+          "bottom": "Mean bias < 0",
+        },
     },
 }
