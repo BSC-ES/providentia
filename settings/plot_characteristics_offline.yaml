@@ -1098,8 +1098,8 @@
           "y": 0.98,
         },
       "axis_title": { "label": "", "fontsize": 8 },
-      "xlabel": { "xlabel": "CRMSE / BETA*RMSu", "fontsize": 8 },
-      "ylabel": { "ylabel": "Mean Bias / BETA*RMSu", "fontsize": 8 },
+      "xlabel": { "xlabel": "CRMSE / β·RMSᵤ", "fontsize": 8 },
+      "ylabel": { "ylabel": "Mean Bias / β·RMSᵤ", "fontsize": 8 },
       "xlim": [-2, 2],
       "ylim": [-2, 2],
       "xtick_params":
@@ -1195,7 +1195,7 @@
                   "linestyle": "--",
                 },
             },
-          "MQI90": { "fontsize": 8 },
+          "MQI90": { "positive": "red", "negative": "green", "fontsize": 8 },
           "sides":
             {
               "top":

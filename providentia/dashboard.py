@@ -196,6 +196,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.move.connect(self.get_geometry)
         
         # show delayed warnings
+        time.sleep(0.1)
         self.delay = False
         for msg in self.delayed_warnings:
             show_message(self, msg)
