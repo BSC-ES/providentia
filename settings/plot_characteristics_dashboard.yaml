@@ -1025,14 +1025,39 @@
         },
       "round_decimal_places": { "title": 2, "x": 2, "y": 2 },
       "equal_aspect": true,
-      "markersize_npoints_threshold": 200,
-      "markersize": { "standard": 1.1, "few_points": 4.0 },
-      "plot": { "marker": "o", "linestyle": "None", "markersize": "" },
+      "plot": { "color": "None", "marker": "s", "s": 50, "linewidth": 1.5 },
       "plot_options": ["annotate"],
       "xticks": [-2, -1, 0, 1, 2],
       "yticks": [-2, -1, 0, 1, 2],
       "auxiliar":
         {
+          "circle":
+            {
+              "main":
+                {
+                  "xy": [0, 0],
+                  "radius": 1,
+                  "color": "lightgray",
+                  "fill": true,
+                  "alpha": 0.5,
+                },
+              "big_circle":
+                {
+                  "xy": [0, 0],
+                  "radius": 1,
+                  "color": "black",
+                  "fill": false,
+                  "linestyle": "-",
+                },
+              "small_circle":
+                {
+                  "xy": [0, 0],
+                  "radius": 0.5,
+                  "color": "black",
+                  "fill": false,
+                  "linestyle": "--",
+                },
+            },
           "MQI90": { "positive": "red", "negative": "green", "fontsize": 8 },
           "sides":
             {
