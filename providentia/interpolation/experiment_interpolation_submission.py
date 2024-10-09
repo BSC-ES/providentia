@@ -10,7 +10,7 @@ from pydoc import locate
 import numpy as np
 import multiprocessing
 
-MACHINE = os.environ.get('BSC_MACHINE', '')
+MACHINE = os.environ.get('BSC_MACHINE', 'local')
 
 # get current path and providentia root path
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -38,11 +38,11 @@ class SubmitInterpolation(object):
         self.start = time.time()
 
         # define current working directory and
-        # arguments/submit/interpolation log subdirectories
+        # arguments/greasy/interpolation log subdirectories
         self.working_directory = CURRENT_PATH     
-        self.arguments_dir = '{}/arguments'.format(self.working_directory)
-        self.submit_dir = '{}/submit'.format(self.working_directory)
-        self.interpolation_log_dir = '{}/interpolation_logs'.format(self.working_directory)
+        self.arguments_dir = os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/arguments')
+        self.submit_dir = os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/greasy_logs')
+        self.interpolation_log_dir = os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs')
 
         # initialize commandline arguments, if given
         provconf = ProvConfiguration(self, **kwargs)
@@ -98,7 +98,7 @@ class SubmitInterpolation(object):
                                   'species', 'network', 'resolution', 'forecast', 'forecast_day', 
                                   'interp_n_neighbours', 'interp_reverse_vertical_orientation', 
                                   'interp_chunk_size', 'interp_job_array_limit', 'exp_root', 
-                                  'ghost_root', 'nonghost_root']
+                                  'ghost_root', 'nonghost_root', 'interp_multiprocessing']
 
         # print variables used, if all species are used print "All Species"        
         print("\nVariables used for the interpolation:\n")
@@ -666,7 +666,7 @@ class SubmitInterpolation(object):
             submit_file.write("\n")
         else:
             submit_file.write("\n")
-            submit_file.write("source {}/load_modules.sh\n".format(self.working_directory))
+            submit_file.write("source {}/bin/load_modules.sh\n".format(PROVIDENTIA_ROOT))
         submit_file.write("export GREASY_NWORKERS=$SLURM_NPROCS\n") 
         submit_file.write("export GREASY_LOGFILE={}/{}_$SLURM_ARRAY_TASK_ID.log\n".format(self.submit_dir, 
                                                                                           self.slurm_job_id))
@@ -719,7 +719,7 @@ class SubmitInterpolation(object):
         submit_file.write("#BSUB -eo /dev/null\n")
         submit_file.write("\n")
 
-        submit_file.write("source {}/load_modules.sh\n".format(self.working_directory))
+        submit_file.write("source {}/bin/load_modules.sh\n".format(PROVIDENTIA_ROOT))
         submit_file.write("export GREASY_NWORKERS=$LSB_DJOB_NUMPROC\n")
         submit_file.write("export GREASY_LOGFILE={}/{}_$LSB_JOBINDEX.log\n".format(self.submit_dir, self.slurm_job_id))
         submit_file.write("arguments_store={}/{}.grz\n".format(self.arguments_dir, self.slurm_job_id))
@@ -901,7 +901,7 @@ def main(**kwargs):
     SI.create_greasy_arguments_file()
 
     # submit interpolation jobs
-    if SI.machine == 'local':
+    if SI.interp_multiprocessing:
         SI.submit_job_multiprocessing()
     else:
         # create submission script according to machine
