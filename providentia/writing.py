@@ -503,7 +503,11 @@ def export_configuration(prv, cname, separator="||"):
         :separator: delimiter for keep/remove fields
         :type separator: str
     """
-
+    
+    # if no data was loaded, there won't be any maximum nor minimum value
+    if prv.le_minimum_value.text() is '' and  prv.le_minimum_value.text() is '':
+        raise Exception("Error: No data available for writing. Please click on READ before trying to save any file.")
+    
     # load initialisation defaults
     init_defaults = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'init_prov_dev.yaml')))
     # load variable defaults
@@ -600,10 +604,6 @@ def export_configuration(prv, cname, separator="||"):
         period_k = "keep: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['keep_selected']) + separator
         period_r = " remove: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['remove_selected']) + separator
         options['section']['period'] = period_k + period_r
-    
-    # if no data was loaded, there won't be any maximum nor minimum value
-    if prv.le_minimum_value.text() is '' and  prv.le_minimum_value.text() is '':
-        raise Exception("No data available for writing. Please click on READ before trying to save any file.") 
     
     # bounds
     if np.float32(prv.le_minimum_value.text()) != \
