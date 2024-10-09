@@ -67,6 +67,12 @@ class ProvConfiguration:
         # import show_mesage from warnings
         sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia'))
         from warnings_prv import show_message
+        
+        # make sure we don't pass strings instead of booleans for true and false
+        if value == 'true':
+            value = True
+        elif value == 'false':
+            value = False
 
         # when the value is default then it is as if it was a blank value
         if value == 'default':
@@ -571,7 +577,18 @@ class ProvConfiguration:
             # treat leaving the field blank as default
             if value == '':
                 return self.var_defaults[key]
-
+            
+        elif key == 'interp_multiprocessing':
+            
+            # for local runs, always use multiprocessing
+            if MACHINE == 'local':
+                return True
+            # for HPC machines, get preference
+            else:
+                # treat leaving the field blank as default
+                if value == '':
+                    return self.var_defaults[key]       
+            
         # if no special parsing treatment for variable, simply return value
         return value
 
