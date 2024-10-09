@@ -1178,7 +1178,7 @@
                   "fill": true,
                   "alpha": 0.5,
                 },
-              "big_circle":
+              "big":
                 {
                   "xy": [0, 0],
                   "radius": 1,
@@ -1186,7 +1186,7 @@
                   "fill": false,
                   "linestyle": "-",
                 },
-              "small_circle":
+              "small":
                 {
                   "xy": [0, 0],
                   "radius": 0.5,
