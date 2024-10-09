@@ -734,15 +734,8 @@ class ProvConfiguration:
         Returns if experiment if valid and the experiment type (if there is one) """
         
         # get the splitted experiment
-        experiment_split = full_experiment.split('-')
-        
-        # experiment, domain and ensemble_option
-        if len(experiment_split) == 3:
-            experiment, domain, ensemble_option = experiment_split
-        # experiment, domain
-        else:
-            experiment, domain = experiment_split
-        
+        experiment, domain, ensemble_option = full_experiment.split('-')
+
         # search if the experiment id is in the interp_experiments file
         experiment_exists = False
         for experiment_type, experiment_dict in interp_experiments.items():
@@ -1009,7 +1002,7 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         # TODO maybe think this a bit better, if i dont pass it it should check better if i already passed it in experiments and so
         if self.read_instance.experiments and self.default_ensemble_options:
-            if self.read_instance.interpolation:
+            if self.read_instance.interpolation or (self.read_instance.download and self.read_instance.interpolated is False):
                 default = ["000"]
             else:
                 default = default_values['ensemble_options']
@@ -1066,10 +1059,6 @@ class ProvConfiguration:
                 # experiment-domain-ensemble_options
                 else:
                     final_experiments.append(f'{experiment}-{self.read_instance.domain[exp_i]}-{self.read_instance.ensemble_options[exp_i]}')
-        
-        # if its a download of non interpolated experiments, the ensemble option is not needed
-        if self.read_instance.download and not self.read_instance.interpolated:
-            final_experiments = list({exp.split("-")[0] + "-" + exp.split("-")[1] for exp in final_experiments})
 
         for exp_i, experiment in enumerate(final_experiments):
             # TODO change boolean name
