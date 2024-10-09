@@ -483,3 +483,58 @@ class ExpBias(object):
             obs_max = np.nanmax(obs, axis=-1)
             exp_max = np.nanmax(exp, axis=-1)
             return ((exp_max - obs_max) / obs_max) * 100.0
+
+    @staticmethod
+    def calculate_fairmode_mqi(obs, exp, u_95r_RV, RV, alpha):
+        
+        beta = 2
+        wok = np.where(np.isfinite(obs + exp) == True)[0]
+
+        if len(wok) != 0:
+            obs, exp = obs[wok], exp[wok]
+            rms_u = u_95r_RV * np.sqrt((1 - alpha ** 2) * 
+                                       (np.nanmean(obs) ** 2 
+                                        + np.nanstd(obs) ** 2) 
+                                        + (alpha * RV) ** 2)
+            rmse = np.sqrt(np.nanmean((obs - exp) ** 2))
+            mqi = rmse / (beta * rms_u)
+            return (mqi)
+        else:
+            return (np.NaN)
+        
+    @staticmethod
+    def calculate_plot_fairmode(obs, exp, u_95r_RV, RV, alpha, percentile):
+
+        beta = 2
+        wok = np.where(np.isfinite(obs + exp) == True)[0]
+
+        if len(wok) != 0:
+            # Remove missing data
+            obs, exp = obs[wok], exp[wok]
+
+            bias = np.mean(exp) - np.mean(obs)
+            rmsu = u_95r_RV * np.sqrt((1 - alpha ** 2) * (np.nanmean(obs) ** 2 + np.nanstd(obs) ** 2) + (alpha * RV) ** 2)
+
+            m_perc = np.percentile(exp, percentile)
+            o_perc = np.percentile(obs, percentile)
+
+            t_bias = bias / (beta * rmsu)
+            t_R = (1 - scipy.stats.pearsonr(obs, exp)[0]) / ((0.5 * (beta ** 2) * rmsu * rmsu) / (np.nanstd(obs) * np.nanstd(exp)))
+            t_sd = ((np.nanstd(exp) - np.nanstd(obs))) / (beta * rmsu)
+            hiper = (m_perc - o_perc) / (
+                        beta * u_95r_RV * np.sqrt((1 - alpha ** 2) * np.nanmean(obs) ** 2 + (alpha * RV) ** 2))
+
+            x = np.sqrt(
+                np.mean(((np.array(exp) - np.mean(exp)) - (np.array(obs) - np.mean(obs))) ** 2)
+            ) / (beta * u_95r_RV * np.sqrt((1 - alpha ** 2) * (np.nanmean(obs) ** 2 + np.nanstd(obs) ** 2) + (alpha * RV) ** 2))
+            
+            # CRMSE/BETA*RMSu
+            y = bias / (beta * rmsu)
+            
+            # BIAS/BETA*RMSu
+            ratio = np.abs((np.nanstd(exp) - np.nanstd(obs))) / (
+                        np.nanstd(obs) * np.sqrt(2 * (1 - scipy.stats.pearsonr(obs, exp)[0])))
+
+            return (x, y, ratio, t_bias, t_R, t_sd, hiper)
+        else:
+            return (np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan)

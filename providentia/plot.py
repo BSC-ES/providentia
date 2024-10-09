@@ -23,12 +23,14 @@ import pandas as pd
 import pyproj
 import seaborn as sns
 
+from .calculate import ExpBias, Stats
 from .dashboard_interactivity import HoverAnnotation
 from .statistics import boxplot_inner_fences, calculate_statistic, get_z_statistic_info, get_z_statistic_type
 from .read_aux import drop_nans
-from .plot_aux import (create_chunked_timeseries, compute_fairmode_MQI, get_multispecies_aliases, 
+from .plot_aux import (create_chunked_timeseries, get_multispecies_aliases, 
                        get_taylor_diagram_ghelper_info, kde_fft, merge_cells, periodic_labels, 
-                       periodic_xticks, plot_fairmode, round_decimal_places, temp_axis_dict)
+                       periodic_xticks, round_decimal_places, temp_axis_dict)
+
 
 # speed up transformations in cartopy
 pyproj.set_use_global_context()
@@ -2010,10 +2012,10 @@ class Plot:
                 st_observations_data = observations_data[station_idx, :]
                 st_experiment_data = experiment_data[station_idx, :]
                 
-                mqi = compute_fairmode_MQI(st_observations_data, st_experiment_data, 
-                                           u_95r_RV, RV, alpha)
-                x, y, r, t1, t2, t3, h = plot_fairmode(st_observations_data, st_experiment_data, 
-                                                       u_95r_RV, RV, alpha, percentile)
+                mqi = ExpBias.calculate_fairmode_mqi(st_observations_data, st_experiment_data, 
+                                                     u_95r_RV, RV, alpha)
+                x, y, r, t1, t2, t3, h = ExpBias.calculate_plot_fairmode(st_observations_data, st_experiment_data, 
+                                                                         u_95r_RV, RV, alpha, percentile)
                 x = np.abs(x)
 
                 if r > 0:
@@ -2042,14 +2044,9 @@ class Plot:
             analysis_text += f"MQI₉₀ = {MQI90_formatted}\n"
             analysis_text += f'{len(bad_stations)} stations with MQI > 1'
 
-            # determine box color based on MQI90 value
-            box_color = (plot_characteristics['auxiliar']['MQI90']['positive'] 
-                         if MQI90 > 1 else plot_characteristics['auxiliar']['MQI90']['negative'])
-
             # add the formatted text with a colored box
             relevant_axis.text(2.2, 1.5-data_label_idx/2, analysis_text, verticalalignment='center', 
-                               fontsize=plot_characteristics['auxiliar']['MQI90']['fontsize'], 
-                               color=box_color)
+                               fontsize=plot_characteristics['auxiliar']['MQI90']['fontsize'])
 
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """ Function that tracks plotted lines and collections
