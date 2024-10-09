@@ -202,10 +202,11 @@ class ExperimentInterpolation(object):
                 # get x/y grid dimension variable names
                 grid_dimensions = mod_speci_obj.dimensions
 
-            except:
+            except Exception as e:
                 # if have got to last file of month and that is corrupted, return from function
                 if model_file_ii == (len(self.model_files)-1):
-                    self.log_file_str += 'All model files corrupted in {}. Skipping month.'.format(self.yearmonth)
+                    self.log_file_str += 'All model files corrupted in {}. Skipping month. \n'.format(self.yearmonth)
+                    self.log_file_str += 'Error: {}'.format(e)
                     create_output_logfile(1, self.log_file_str)
                 # else, continue to next file in month
                 else:
