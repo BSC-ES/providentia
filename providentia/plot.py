@@ -1971,13 +1971,16 @@ class Plot:
         # get data for fairmode
         fairmode_settings = yaml.safe_load(
             open(os.path.join(PROVIDENTIA_ROOT, 
-                              'settings/internal/fairmode.yaml')))
+                              'settings/fairmode.yaml')))
 
         speci = networkspeci.split('|')[1]
-        u_95r_RV = fairmode_settings[speci]['u_95r_RV']
-        RV = fairmode_settings[speci]['RV']
-        alpha = fairmode_settings[speci]['alpha']
-        percentile = fairmode_settings[speci]['percentile']
+        speci_settings = fairmode_settings[speci]
+        u_95r_RV = speci_settings['u_95r_RV']
+        RV = speci_settings['RV']
+        alpha = speci_settings['alpha']
+        percentile = speci_settings['percentile']
+        beta = speci_settings['beta']
+        coverage = speci_settings['coverage']
         
         # get valid data labels for networkspeci
         valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
@@ -1985,8 +1988,16 @@ class Plot:
         # cut data_labels for those in valid data labels
         cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
-        # get observations data (flattened)
+        # get observations data
         observations_data = self.canvas_instance.selected_station_data[networkspeci]['per_station'][0,:,:]
+
+        # TODO: Resample to daily for PM, calculate MDA8 for ozone, add flag to make sure resolution is hourly
+        # TODO: Make sure days with less than 75% coverage are nan (avoid NO2)
+
+        # drop stations that have a coverage of less than coverage
+        obs_representativity = Stats.calculate_data_avail_fraction(observations_data)
+        valid_station_idxs = obs_representativity >= coverage
+        observations_data = observations_data[valid_station_idxs, :]
 
         # iterate through data labels
         for data_label_idx, data_label in enumerate(cut_data_labels):
@@ -1995,14 +2006,16 @@ class Plot:
             if data_label == self.read_instance.observations_data_label:
                 continue
 
-            # get experiment data (flattened)
-            experiment_data = self.canvas_instance.selected_station_data[networkspeci]['per_station'][valid_data_labels.index(data_label),:,:]
-            
+            # get experiment data
+            experiment_data = self.canvas_instance.selected_station_data[networkspeci]['per_station'][valid_data_labels.index(data_label),valid_station_idxs,:]
+
             # calculate MQI for the current station
             x_points = []
             y_points = []
             labels = []
             bad_stations = []
+
+            # TODO: Get first station that is not nan, not first month always
             station_references = self.canvas_instance.selected_station_metadata[networkspeci][
                                  'station_reference'][:, 0]
             n_stations = len(station_references)
@@ -2012,14 +2025,8 @@ class Plot:
                 st_observations_data = observations_data[station_idx, :]
                 st_experiment_data = experiment_data[station_idx, :]
                 
-                mqi = ExpBias.calculate_fairmode_mqi(st_observations_data, st_experiment_data, 
-                                                     u_95r_RV, RV, alpha)
-                x, y, r, t1, t2, t3, h = ExpBias.calculate_plot_fairmode(st_observations_data, st_experiment_data, 
-                                                                         u_95r_RV, RV, alpha, percentile)
-                x = np.abs(x)
-
-                if r > 0:
-                    x *= -1
+                x, y, mqi = ExpBias.calculate_fairmode_target_stats(st_observations_data, st_experiment_data, 
+                                                                    u_95r_RV, RV, alpha, beta)
 
                 x_points.append(x)
                 y_points.append(y)

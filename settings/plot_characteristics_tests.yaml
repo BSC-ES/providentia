@@ -1031,8 +1031,8 @@
       "grid": { "axis": "both", "color": "lightgrey", "alpha": 0.8 },
       "remove_spines": ["top", "right"],
       "axis_title": { "label": "", "fontsize": 16, "loc": "center" },
-      "xlabel": { "xlabel": "CRMSE / BETA*RMSu", "fontsize": 16 },
-      "ylabel": { "ylabel": "Mean Bias / BETA*RMSu", "fontsize": 16 },
+      "xlabel": { "xlabel": "CRMSE / β·RMSᵤ", "fontsize": 16 },
+      "ylabel": { "ylabel": "Mean Bias / β·RMSᵤ", "fontsize": 16 },
       "xlim": [-2, 2],
       "ylim": [-2, 2],
       "xtick_params":
