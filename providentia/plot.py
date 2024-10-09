@@ -1999,6 +1999,8 @@ class Plot:
             # calculate MQI for the current station
             x_points = []
             y_points = []
+            labels = []
+            bad_stations = []
             station_references = self.canvas_instance.selected_station_metadata[networkspeci][
                                  'station_reference'][:, 0]
             n_stations = len(station_references)
@@ -2020,6 +2022,7 @@ class Plot:
                 x_points.append(x)
                 y_points.append(y)
                 mqi_array[station_idx] = mqi
+                labels.append(station)
 
             mqi_sorted = sorted(mqi_array[~np.isnan(mqi_array)])
             i_90 = int(0.9 * len(mqi_sorted)) - 1
@@ -2027,13 +2030,17 @@ class Plot:
             MQI90_formatted = f"{MQI90:.2f}"
 
             # plot data
-            for i, (x, y,  mqi) in enumerate(zip(x_points, y_points, mqi_array)):
+            for i, (x, y, label, mqi) in enumerate(zip(x_points, y_points, labels, mqi_array)):
                 relevant_axis.scatter(x, y, color='none', marker='s', s=50, 
                                       edgecolor=self.read_instance.plotting_params[data_label]['colour'], 
                                       linewidth=1.5)
-            
+                if mqi > 1:
+                    bad_stations.append(label)
+
             # append MQI for box
-            analysis_text = f"MQI₉₀ ({data_label}) = {MQI90_formatted}"
+            analysis_text = f"{data_label}\n"
+            analysis_text += f"MQI₉₀ = {MQI90_formatted}\n"
+            analysis_text += f'{len(bad_stations)} stations with MQI > 1'
 
             # determine box color based on MQI90 value
             box_color = (plot_characteristics['auxiliar']['MQI90']['positive'] 
@@ -2042,9 +2049,7 @@ class Plot:
             # add the formatted text with a colored box
             relevant_axis.text(2.2, 1.5-data_label_idx/2, analysis_text, verticalalignment='center', 
                                fontsize=plot_characteristics['auxiliar']['MQI90']['fontsize'], 
-                               color=box_color, bbox=dict(facecolor='none', edgecolor=box_color, 
-                                                          boxstyle='round,pad=0.2'))
-
+                               color=box_color)
 
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """ Function that tracks plotted lines and collections
