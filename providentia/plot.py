@@ -1951,16 +1951,16 @@ class Plot:
     def make_fairmode_target(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         
         # add target
-        circle = plt.Circle((0, 0), 1, color='lightgray', fill=True, alpha=0.5)
-        relevant_axis.add_patch(circle)
+        main_circle = plt.Circle(**plot_characteristics['auxiliar']['circle']['main'])
+        relevant_axis.add_patch(main_circle)
 
         # add a black circle with radius 1 (continuous line)
-        black_circle = plt.Circle((0, 0), 1, color='black', fill=False, linestyle='-')
-        relevant_axis.add_patch(black_circle)
+        big_circle = plt.Circle(**plot_characteristics['auxiliar']['circle']['big'])
+        relevant_axis.add_patch(big_circle)
 
         # add a black circle with radius 0.5 (dotted line)
-        dotted_circle = plt.Circle((0, 0), 0.5, color='black', fill=False, linestyle='--')
-        relevant_axis.add_patch(dotted_circle)
+        small_circle = plt.Circle(**plot_characteristics['auxiliar']['circle']['small'])
+        relevant_axis.add_patch(small_circle)
 
         # add text in the sides
         relevant_axis.text(**plot_characteristics['auxiliar']['sides']['top'], transform=relevant_axis.transAxes)
@@ -2033,9 +2033,8 @@ class Plot:
 
             # plot data
             for i, (x, y, label, mqi) in enumerate(zip(x_points, y_points, labels, mqi_array)):
-                relevant_axis.scatter(x, y, color='none', marker='s', s=50, 
-                                      edgecolor=self.read_instance.plotting_params[data_label]['colour'], 
-                                      linewidth=1.5)
+                relevant_axis.scatter(x, y, edgecolor=self.read_instance.plotting_params[data_label]['colour'], 
+                                      **plot_characteristics['plot'])
                 if mqi > 1:
                     bad_stations.append(label)
 
