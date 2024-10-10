@@ -1164,8 +1164,8 @@
       "equal_aspect": true,
       "plot": { "color": "None", "marker": "s", "s": 50, "linewidth": 1.5 },
       "plot_options": ["annotate"],
-      "xticks": [-2, -1, 0, 1, 2],
-      "yticks": [-2, -1, 0, 1, 2],
+      "xticks": {"ticks": [-2, -1, 0, 1, 2], "labels": [2, 1, 0, 1, 2]},
+      "yticks": {"ticks": [-2, -1, 0, 1, 2], "labels": [-2, -1, 0, 1, 2]},
       "auxiliar":
         {
           "circle":
