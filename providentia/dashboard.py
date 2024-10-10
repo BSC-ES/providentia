@@ -251,6 +251,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 menu_plot_type = menu_button.objectName().split('_menu')[0]
                 if plot_type == 'periodic-violin':
                     plot_type = 'periodic_violin'
+                elif plot_type == 'fairmode-target':
+                    plot_type = 'fairmode_target'
 
                 # proceed once have objects for plot type
                 if plot_type == menu_plot_type:
@@ -1071,6 +1073,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                         save_button.hide()
                         if previous_plot_type == 'periodic-violin':
                             previous_plot_type = 'periodic_violin'
+                        elif previous_plot_type == 'fairmode-target':
+                            previous_plot_type = 'fairmode_target'
                         for element in getattr(self.mpl_canvas, previous_plot_type + '_elements'):
                             if isinstance(element, dict):
                                 for sub_element in element.values():
