@@ -838,9 +838,19 @@ class MPLCanvas(FigureCanvas):
                 self.reset_ax_navigation_toolbar_stack(ax)
 
                 # update plot options
-                # TODO: remove condition
+                # TODO: remove condition when I have menu
                 if plot_type != 'fairmode-target':
                     self.update_plot_options(plot_types=[plot_type])
+
+    def get_plot_type_position(self, plot_type):
+        """ Function that returns numeric position of plot type within the dashboard
+        """
+        position_vars = [self.read_instance.position_2, self.read_instance.position_3, 
+                         self.read_instance.position_4, self.read_instance.position_5]
+        positions = [2, 3, 4, 5]
+        for position, position_var in zip(positions, position_vars):
+            if plot_type == position_var:
+                return position
 
     def update_associated_active_dashboard_plots(self):
         """ Function that updates all plots associated with selected stations on map. """
@@ -868,16 +878,19 @@ class MPLCanvas(FigureCanvas):
 
                     #plot_start = time.time()
 
+                    # get numeric position of plot type in dashboard
+                    plot_type_position = self.get_plot_type_position(plot_type)
+
                     # if there are no temporal resolutions (only yearly), skip periodic plots
                     if ((plot_type in ['periodic', 'periodic-violin']) and 
                         (not self.read_instance.relevant_temporal_resolutions)):
                         msg = 'It is not possible to make periodic plots using annual resolution data.'
                         show_message(self.read_instance, msg)
-                        self.read_instance.handle_layout_update('None', sender=plot_type_ii+2) 
+                        self.read_instance.handle_layout_update('None', sender=plot_type_position) 
                         continue
                     
                     # if temporal colocation is turned off or there are no experiments, skip scatter plot
-                    if plot_type in ['scatter', 'taylor']:
+                    if plot_type in ['scatter', 'taylor', 'fairmode-target']:
                         if ((not self.read_instance.temporal_colocation) 
                             or ((self.read_instance.temporal_colocation) and (len(self.read_instance.data_labels) == 1))):
                             if (not self.read_instance.temporal_colocation):
@@ -885,7 +898,7 @@ class MPLCanvas(FigureCanvas):
                             else:
                                 msg = f'It is not possible to make {plot_type} plots without loading experiments.'
                             show_message(self.read_instance, msg)
-                            self.read_instance.handle_layout_update('None', sender=plot_type_ii+2)
+                            self.read_instance.handle_layout_update('None', sender=plot_type_position)
                             continue
 
                     # update plot
@@ -1512,7 +1525,7 @@ class MPLCanvas(FigureCanvas):
             elif plot_type == 'statsummary':
                 self.remove_axis_objects(ax_to_remove.tables)
 
-            elif plot_type in ['taylor', 'boxplot', 'scatter']:
+            elif plot_type in ['taylor', 'boxplot', 'scatter', 'fairmode-target']:
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
                     self.remove_axis_objects(objects)
 

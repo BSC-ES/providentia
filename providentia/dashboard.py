@@ -969,6 +969,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             
             elif event_source == self.cb_species:
                 self.selected_species = changed_param
+                if (('fairmode-target' in self.mpl_canvas.layout_options) and 
+                    (self.selected_species not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5'])):
+                    self.mpl_canvas.layout_options.remove('fairmode-target')
+                    self.update_layout_fields(self.mpl_canvas)
 
             elif event_source == self.cb_statistic_mode:
                 self.selected_statistic_mode = changed_param
@@ -1053,7 +1057,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     ax.remove()
                 self.active_dashboard_plots.remove(previous_plot_type)
 
-                #hide qt elements for previous plot type
+                # hide qt elements for previous plot type
                 for menu_button, save_button, element in zip(self.mpl_canvas.menu_buttons, 
                                                              self.mpl_canvas.save_buttons, 
                                                              self.mpl_canvas.elements):
