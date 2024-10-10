@@ -56,6 +56,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--exp_root",
                                      dest="exp_root",
                                      help="set experiment root data directory")
+            self.parser.add_argument("--exp_to_interp_root",
+                                     dest="exp_to_interp_root",
+                                     help="set experiment to interpolate root data directory")
             self.parser.add_argument("--generate_file_tree", '--gft',
                                      dest="generate_file_tree",
                                      default=False,
