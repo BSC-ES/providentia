@@ -1968,6 +1968,14 @@ class Plot:
         relevant_axis.text(**plot_characteristics['auxiliar']['sides']['left'], transform=relevant_axis.transAxes)
         relevant_axis.text(**plot_characteristics['auxiliar']['sides']['right'], transform=relevant_axis.transAxes)
 
+        # add diagonal lines (y = x and y = -x)
+        xmin = np.min(plot_characteristics['xticks']['ticks'])
+        xmax = np.max(plot_characteristics['xticks']['ticks'])
+        ymin = np.min(plot_characteristics['yticks']['ticks'])
+        ymax = np.max(plot_characteristics['yticks']['ticks'])
+        relevant_axis.plot([xmin, xmax], [ymin, ymax], **plot_characteristics['auxiliar']['crosses']['increasing'])
+        relevant_axis.plot([xmin, xmax], [ymax, ymin], **plot_characteristics['auxiliar']['crosses']['decreasing'])
+
         # get data for fairmode
         fairmode_settings = yaml.safe_load(
             open(os.path.join(PROVIDENTIA_ROOT, 
@@ -1978,7 +1986,6 @@ class Plot:
         u_95r_RV = speci_settings['u_95r_RV']
         RV = speci_settings['RV']
         alpha = speci_settings['alpha']
-        percentile = speci_settings['percentile']
         beta = speci_settings['beta']
         coverage = speci_settings['coverage']
         
@@ -1999,8 +2006,21 @@ class Plot:
         valid_station_idxs = obs_representativity >= coverage
         observations_data = observations_data[valid_station_idxs, :]
 
+        # TODO: Get first station that is not nan, not first month always
+        station_references = self.canvas_instance.selected_station_metadata[networkspeci][
+                                'station_reference'][valid_station_idxs, 0]
+        n_stations = len(station_references)
+        
+        # initialise annotation text
+        if 'annotate' in plot_options:
+            annotate_text = f"α={alpha}\n"
+            annotate_text += f"β={beta}\n"
+            annotate_text += f"RV={RV}\n"
+            annotate_text += f"U₉₅,ᵣᴿⱽ={u_95r_RV}\n\n\n"
+            annotate_text += f"{n_stations} stations with\ncoverage above {coverage}%\n\n\n"
+        
         # iterate through data labels
-        for data_label_idx, data_label in enumerate(cut_data_labels):
+        for data_label in cut_data_labels:
 
             # continue for observations data label
             if data_label == self.read_instance.observations_data_label:
@@ -2015,10 +2035,7 @@ class Plot:
             labels = []
             bad_stations = []
 
-            # TODO: Get first station that is not nan, not first month always
-            station_references = self.canvas_instance.selected_station_metadata[networkspeci][
-                                 'station_reference'][valid_station_idxs, 0]
-            n_stations = len(station_references)
+            # get FAIRMODE statistics per station
             mqi_array = np.full(n_stations, np.nan)
             for station_idx, station in enumerate(station_references):
                 st_observations_data = observations_data[station_idx, :]
@@ -2040,22 +2057,32 @@ class Plot:
                     bad_stations.append(label)
 
             if 'annotate' in plot_options:
-                
+
                 # calculate MQI90
                 mqi_sorted = sorted(mqi_array[~np.isnan(mqi_array)])
                 i_90 = int(0.9 * len(mqi_sorted)) - 1
                 MQI90 = mqi_sorted[i_90]
                 MQI90_formatted = f"{MQI90:.2f}"
 
-                # show MQI90
-                analysis_text = f"{data_label}\n"
-                analysis_text += f"MQI₉₀ = {MQI90_formatted}\n"
-                analysis_text += f'{len(bad_stations)} stations with MQI > 1'
+                # add MQI90
+                annotate_text += f"{data_label}\n"
+                annotate_text += f"MQI₉₀ = {MQI90_formatted}\n"
 
-                # add the formatted text with a colored box
-                relevant_axis.text(2.2, 1.5-data_label_idx/2, analysis_text, verticalalignment='center', 
-                                fontsize=plot_characteristics['auxiliar']['MQI90']['fontsize'])
+                # add bad stations
+                if len(bad_stations) == 1:
+                    stations_name = 'station'
+                else:
+                    stations_name = 'stations'
+                annotate_text += f'{len(bad_stations)} {stations_name} with MQI > 1'
+                if len(bad_stations) > 0:
+                    annotate_text += f': {bad_stations}'
+                if data_label != cut_data_labels[-1]:
+                    annotate_text += '\n\n'
 
+        # add annotation text
+        if 'annotate' in plot_options:
+            relevant_axis.text(2.2, 0, annotate_text, **plot_characteristics['annotate_text'])
+            
         # update axis labels
         relevant_axis.set_xticks(**plot_characteristics['xticks'])
         relevant_axis.set_yticks(**plot_characteristics['yticks'])
