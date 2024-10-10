@@ -885,29 +885,19 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
     
-        # TODO: For Taylor diagrams, replace this piece of code for the one below when we stop using Matplotlib 3.3
         # remove plot types that need active temporal colocation and experiments data
         if Version(matplotlib.__version__) < Version("3.8"):
             if 'taylor' in canvas_instance.layout_options:
                 canvas_instance.layout_options.remove('taylor')
         else:
-            for plot_type in ['scatter', 'taylor']:
+            for plot_type in ['scatter', 'taylor', 'fairmode-target']:
                 if ((not self.temporal_colocation) 
                     or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
                     if plot_type in canvas_instance.layout_options:
                         canvas_instance.layout_options.remove(plot_type)
                 else:
                     if plot_type not in canvas_instance.layout_options:
-                        canvas_instance.layout_options.append(plot_type)   
-
-        for plot_type in ['scatter']:
-            if ((not self.temporal_colocation) 
-                or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
-                if plot_type in canvas_instance.layout_options:
-                    canvas_instance.layout_options.remove(plot_type)
-            else:
-                if plot_type not in canvas_instance.layout_options:
-                    canvas_instance.layout_options.append(plot_type)          
+                        canvas_instance.layout_options.append(plot_type)       
  
         # order alphabetically
         layout_options = sorted(canvas_instance.layout_options)
