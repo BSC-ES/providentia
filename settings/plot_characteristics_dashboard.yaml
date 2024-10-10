@@ -1005,30 +1005,12 @@
           "labelright": false,
           "labelleft": true,
         },
-      "annotate_stats": ["MQI"],
-      "annotate_text":
-        {
-          "s": "",
-          "loc": "upper left",
-          "fontsize": 8,
-          "n_stations": false,
-          "exp_labels": true,
-          "color": "",
-          "round_decimal_places": 2,
-        },
-      "annotate_bbox":
-        {
-          "facecolor": "white",
-          "edgecolor": "gainsboro",
-          "alpha": 1,
-          "zorder": 100,
-        },
       "round_decimal_places": { "title": 2, "x": 2, "y": 2 },
       "equal_aspect": true,
       "plot": { "color": "None", "marker": "s", "s": 50, "linewidth": 1.5 },
-      "plot_options": ["annotate"],
-      "xticks": {"ticks": [-2, -1, 0, 1, 2], "labels": [2, 1, 0, 1, 2]},
-      "yticks": {"ticks": [-2, -1, 0, 1, 2], "labels": [-2, -1, 0, 1, 2]},
+      "xticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [2, 1, 0, 1, 2] },
+      "yticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [-2, -1, 0, 1, 2] },
+      "annotate_text": { "fontsize": 8, "verticalalignment": "center" },
       "auxiliar":
         {
           "circle":
@@ -1058,7 +1040,13 @@
                   "linestyle": "--",
                 },
             },
-          "MQI90": { "positive": "red", "negative": "green", "fontsize": 8 },
+          "crosses":
+            {
+              "increasing":
+                { "linewidth": 0.5, "color": "grey", "linestyle": "-" },
+              "decreasing":
+                { "linewidth": 0.5, "color": "grey", "linestyle": "-" },
+            },
           "sides":
             {
               "top":
@@ -1099,5 +1087,6 @@
                 },
             },
         },
+      "plot_options": ["individual", "annotate"],
     },
 }
