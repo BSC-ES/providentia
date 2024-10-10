@@ -56,6 +56,6 @@
                   "scatter_threshold", "boxplot_threshold", "distribution_threshold",
                   "taylor-r2", "taylor-r"],
     
-    "debug": ["fairmode-target"]
+    "debug": ["fairmode-target_annotate", "fairmode-target"]
 
 }
