@@ -1495,15 +1495,15 @@ class ProvidentiaOffline:
 
             for data_labels in iter_data_labels:
 
-                if type(data_labels) != list:
-                    data_labels = [data_labels]
-
                 # skip individual plots if we have no data for a specific label
                 if 'individual' in plot_options:
                     if data_labels not in self.selected_station_data_labels[networkspeci]:
                         print(f'Warning: {plot_type} cannot be created because there is no available data.')
                         return plot_indices
 
+                if type(data_labels) != list:
+                    data_labels = [data_labels]
+                    
                 # get relevant axis to plot on
                 if plotting_paradigm == 'summary':
                     if 'individual' in plot_options:
