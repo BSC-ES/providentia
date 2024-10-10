@@ -14,7 +14,7 @@ import pandas as pd
 from itertools import compress
 import ast
 
-MACHINE = os.environ.get('BSC_MACHINE', '')
+MACHINE = os.environ.get('BSC_MACHINE', 'local')
 
 # get current path and providentia root path
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -170,7 +170,15 @@ class ProvConfiguration:
             if value == '':
                 exp_root = data_paths[MACHINE]["exp_root"]
                 return os.path.expanduser(exp_root[0])+exp_root[1:]
-            
+
+        elif key == 'exp_to_interp_root':
+            # define experiment root data directory
+            # set experiment root data directory if left undefined
+            if value == '':
+                exp_to_interp_root = data_paths[MACHINE]["exp_to_interp_root"]
+                if exp_to_interp_root != '': 
+                    return os.path.expanduser(exp_to_interp_root[0])+exp_to_interp_root[1:]       
+        
         elif key == 'ghost_version':
             # parse GHOST version
 
@@ -573,21 +581,10 @@ class ProvConfiguration:
         
         elif key in ['statistic_mode','statistic_aggregation','periodic_statistic_mode','periodic_statistic_aggregation',
                      'timeseries_statistic_aggregation','interp_n_neighbours','interp_reverse_vertical_orientation',
-                     'interp_chunk_size','interp_job_array_limit']:
+                     'interp_chunk_size','interp_job_array_limit', 'interp_multiprocessing']:
             # treat leaving the field blank as default
             if value == '':
                 return self.var_defaults[key]
-            
-        elif key == 'interp_multiprocessing':
-            
-            # for local runs, always use multiprocessing
-            if MACHINE == 'local':
-                return True
-            # for HPC machines, get preference
-            else:
-                # treat leaving the field blank as default
-                if value == '':
-                    return self.var_defaults[key]       
             
         # if no special parsing treatment for variable, simply return value
         return value
@@ -755,17 +752,34 @@ class ProvConfiguration:
         
         # search if the experiment id is in the interp_experiments file
         experiment_exists = False
-        for experiment_type, experiment_dict in interp_experiments.items():
-            if experiment in experiment_dict["experiments"]:
+        
+        # if local machine, get directory from data_paths
+        if MACHINE == 'local':
+            exp_to_interp_root = data_paths['local']['exp_to_interp_root']
+            exp_to_interp_root = os.path.expanduser(exp_to_interp_root[0])+exp_to_interp_root[1:]
+            exp_to_interp_path = os.path.join(exp_to_interp_root, experiment)
+            if os.path.exists(exp_to_interp_path):
                 experiment_exists = True
-                break
+        else:
+            for experiment_type, experiment_dict in interp_experiments.items():
+                if experiment in experiment_dict["experiments"]:
+                    experiment_exists = True
+                    break
         
         # if experiment id is not defined, exit
         if not experiment_exists:
-            msg = f"Cannot find the experiment ID '{experiment}' in '{os.path.join('settings', 'interp_experiments.yaml')}'. Please add it to the file."
+            if MACHINE == 'local':  
+                msg = f"Cannot find the experiment ID '{experiment}' in '{exp_to_interp_root}'."
+            else:
+                msg = f"Cannot find the experiment ID '{experiment}' in '{os.path.join('settings', 'interp_experiments.yaml')}'. Please add it to the file."
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
         else:
-            self.read_instance.experiment_types.append(experiment_type)
+            # append experiment name in local since we do not differentiate between types
+            # and we won't use this variable to get the paths
+            if MACHINE == 'local':  
+                self.read_instance.experiment_types.append(experiment)
+            else:
+                self.read_instance.experiment_types.append(experiment_type)
 
         return experiment_exists, [full_experiment]
     
@@ -852,7 +866,7 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         # in download mode is allowed to not have network, so continue
         if not self.read_instance.network and not self.read_instance.download:
-            #default = ['GHOST']
+            # default = ['GHOST']
             if self.read_instance.interpolation:
                 default = self.read_instance.ghost_available_networks
             else:
@@ -1403,6 +1417,11 @@ class ProvConfiguration:
                     # update symbols next to values
                     self.read_instance.filter_species[networkspeci][networkspeci_limit_ii] = [lower_limit, upper_limit, 
                                                                                               filter_species_fill_value]
+
+        if (MACHINE == 'local') and (not self.read_instance.interp_multiprocessing):
+            msg = 'During interpolation multiprocessing must be turned on for local runs, activating.'
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            self.read_instance.interp_multiprocessing = True
 
 def read_conf(fpath=None):
     """ Read configuration files. """

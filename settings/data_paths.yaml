@@ -2,48 +2,56 @@
     "local": {
         "ghost_root": "~/data/providentia/obs/ghost", 
         "nonghost_root": "~/data/providentia/obs/nonghost", 
-        "exp_root": "~/data/providentia/exp"
+        "exp_root": "~/data/providentia/exp",
+        "exp_to_interp_root": "~/data/providentia/exp_to_interp"
     },
     
     "mn5": {
         "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
         "nonghost_root": "/gpfs/projects/bsc32/AC_cache/obs/nonghost",
-        "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp"
+        "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp",
+        "exp_to_interp_root": ""
     },
     
     "storage5": {
         "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
         "nonghost_root": "/gpfs/archive/bsc32/esarchive/obs",
-        "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp"
+        "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp",
+        "exp_to_interp_root": ""
     },
 
     "nord3v2": {
         "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
         "nonghost_root": "/esarchive/obs",
-        "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp"
+        "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp",
+        "exp_to_interp_root": ""
     },
 
     "amd": {
         "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
         "nonghost_root": "/gpfs/projects/bsc32/AC_cache/obs/nonghost",
-        "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp"
+        "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp",
+        "exp_to_interp_root": ""
     },
 
     "hub": {
         "ghost_root": "/esarchive/obs/ghost",
         "nonghost_root": "/esarchive/obs",
-        "exp_root": "/esarchive/recon/prov_interp"
+        "exp_root": "/esarchive/recon/prov_interp",
+        "exp_to_interp_root": ""
     },
 
     "workstation": {
         "ghost_root": "/esarchive/obs/ghost",
         "nonghost_root": "/esarchive/obs",
-        "exp_root": "/esarchive/recon/prov_interp"
+        "exp_root": "/esarchive/recon/prov_interp",
+        "exp_to_interp_root": ""
     },
 
     "dust": {
         "ghost_root": "/esarchive/obs/ghost",
         "nonghost_root": "/esarchive/obs",
-        "exp_root": "/esarchive/recon/prov_interp"
+        "exp_root": "/esarchive/recon/prov_interp",
+        "exp_to_interp_root": ""
     }
 }
