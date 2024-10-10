@@ -2017,11 +2017,10 @@ class Plot:
 
             # TODO: Get first station that is not nan, not first month always
             station_references = self.canvas_instance.selected_station_metadata[networkspeci][
-                                 'station_reference'][:, 0]
+                                 'station_reference'][valid_station_idxs, 0]
             n_stations = len(station_references)
             mqi_array = np.full(n_stations, np.nan)
             for station_idx, station in enumerate(station_references):
-
                 st_observations_data = observations_data[station_idx, :]
                 st_experiment_data = experiment_data[station_idx, :]
                 
