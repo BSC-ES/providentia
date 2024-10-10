@@ -46,7 +46,12 @@ class SettingsMenu(object):
 
                 # Add options as items to options combobox
                 if element_name == 'options':
-                    plot_type_corr = 'periodic-violin' if plot_type == 'periodic_violin' else plot_type
+                    if plot_type == 'periodic_violin':
+                        plot_type_corr = 'periodic-violin'
+                    elif plot_type == 'fairmode_target':
+                        plot_type_corr = 'fairmode-target'
+                    else:
+                        plot_type_corr = plot_type
                     element.addItems(self.canvas_instance.plot_characteristics[plot_type_corr]['plot_options']) 
                 
                 # Apply common properties

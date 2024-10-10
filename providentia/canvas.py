@@ -166,6 +166,8 @@ class MPLCanvas(FigureCanvas):
                 menu_plot_type = menu_button.objectName().split('_menu')[0]
                 if plot_type == 'periodic-violin':
                     plot_type = 'periodic_violin'
+                elif plot_type == 'fairmode-target':
+                    plot_type = 'fairmode_target'
                 # proceed once have objects for plot type
                 if plot_type == menu_plot_type:
                     menu_button.show()
@@ -1559,6 +1561,8 @@ class MPLCanvas(FigureCanvas):
             checked_options = self.current_plot_options[plot_type]
             if plot_type == 'periodic-violin':
                 plot_type = 'periodic_violin'
+            elif plot_type == 'fairmode-target':
+                plot_type = 'fairmode_target'
             cb_options = getattr(self, plot_type + '_options')
 
             # uncheck all options
@@ -2159,6 +2163,22 @@ class MPLCanvas(FigureCanvas):
                                                 'linewidth_sl': [self.scatter_regression_linewidth_sl]
                                                }
 
+        # FAIRMODE TARGET PLOT SETTINGS MENU #
+        # create fairmode target settings menu
+        self.fairmode_target_menu = SettingsMenu(plot_type='fairmode_target', canvas_instance=self)
+        self.fairmode_target_options = self.fairmode_target_menu.checkable_comboboxes['options']
+        self.fairmode_target_elements = self.fairmode_target_menu.get_elements()
+
+        # get sliders and update values
+        self.fairmode_target_markersize_sl = self.fairmode_target_menu.sliders['markersize_sl']
+        self.fairmode_target_markersize_sl.setMaximum(int(self.plot_characteristics['fairmode-target']['plot']['markersize']*10))
+        self.fairmode_target_markersize_sl.setValue(int(self.plot_characteristics['fairmode-target']['plot']['markersize']))
+
+        # get fairmode target interactive dictionary
+        self.interactive_elements['fairmode_target'] = {'hidden': True,
+                                                        'markersize_sl': [self.fairmode_target_markersize_sl],
+                                                       }
+        
         # STATSUMMARY PLOT SETTINGS MENU #
         # create statsummary settings menu
         self.statsummary_menu = SettingsMenu(plot_type='statsummary', canvas_instance=self)
@@ -2212,6 +2232,8 @@ class MPLCanvas(FigureCanvas):
         for plot_type in settings_dict.keys():
             if plot_type == 'periodic-violin':
                 plot_type = 'periodic_violin'
+            elif plot_type == 'fairmode-target':
+                plot_type = 'fairmode_target'
             self.menu_buttons.append(getattr(self, plot_type + '_menu').buttons['settings_button'])
             self.save_buttons.append(getattr(self, plot_type + '_menu').buttons['save_button'])
             self.elements.append(getattr(self, plot_type + '_elements'))
@@ -2278,6 +2300,8 @@ class MPLCanvas(FigureCanvas):
         # correct perodic-violin name
         if key == 'periodic_violin':
             key = 'periodic-violin'
+        elif key == 'fairmode_target':
+            key = 'fairmode-target'
             
         self.update_markersize(self.plot_axes[key], key, markersize, event_source)
 
@@ -2359,6 +2383,8 @@ class MPLCanvas(FigureCanvas):
             # correct perodic-violin name
             if plot_type_alt == 'periodic_violin':
                 plot_type = 'periodic-violin'
+            elif plot_type_alt == 'fairmode_target':
+                plot_type = 'fairmode-target'
             else:
                 plot_type = copy.deepcopy(plot_type_alt)
 
@@ -2896,7 +2922,7 @@ class MPLCanvas(FigureCanvas):
         """ Update markers size for each plot type. """
         
         # set markersize
-        if plot_type in ['timeseries', 'periodic', 'scatter', 'periodic-violin', 'taylor']:
+        if plot_type in ['timeseries', 'periodic', 'scatter', 'periodic-violin', 'taylor', 'fairmode-target']:
             
             if isinstance(ax, dict):
                 for sub_ax in ax.values():
@@ -2912,7 +2938,7 @@ class MPLCanvas(FigureCanvas):
 
             # update characteristics per plot type
             # this is made to keep the changes when selecting stations with lasso
-            if plot_type in ['timeseries', 'periodic', 'scatter', 'taylor']:
+            if plot_type in ['timeseries', 'periodic', 'scatter', 'taylor', 'fairmode-target']:
                 self.plot_characteristics[plot_type]['plot']['markersize'] = markersize
             elif plot_type == 'periodic-violin':
                 self.plot_characteristics[plot_type]['plot']['median']['markersize'] = markersize
@@ -3171,7 +3197,9 @@ class MPLCanvas(FigureCanvas):
         plot_type = event_source.objectName().split('_save')[0]
         if plot_type == 'periodic_violin':
             plot_type = 'periodic-violin'
-        
+        elif plot_type == 'fairmode_target':
+            plot_type = 'fairmode-target'
+
         # set extent expansion
         for i, position in enumerate([self.read_instance.position_1, 
                                       self.read_instance.position_2, 

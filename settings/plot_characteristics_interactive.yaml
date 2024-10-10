@@ -1121,6 +1121,6 @@
                 },
             },
         },
-      "plot_options": ["individual", "annotate"],
+      "plot_options": ["annotate"],
     },
 }
