@@ -728,11 +728,6 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
             if map_extent:
                 set_map_extent(canvas_instance, ax_to_format, map_extent)
 
-        # FAIRMODE target plot specific formatting
-        elif base_plot_type == 'fairmode-target':
-            ax_to_format.set_xticks(plot_characteristics['xticks'])
-            ax_to_format.set_yticks(plot_characteristics['yticks'])
-
 def get_no_margin_lim(ax, lim):
     """ Get true limits of plot area (with no margins)
 
