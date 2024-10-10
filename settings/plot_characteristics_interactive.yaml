@@ -1041,7 +1041,7 @@
         },
       "round_decimal_places": { "title": 2, "x": 2, "y": 2 },
       "equal_aspect": true,
-      "plot": { "color": "None", "marker": "s", "s": 50, "linewidth": 1.5 },
+      "plot": { "marker": "s", "markersize": 5, "markerfacecolor": "None", "linewidth": 1.5 },
       "xticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [2, 1, 0, 1, 2] },
       "yticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [-2, -1, 0, 1, 2] },
       "annotate_text": { "fontsize": 8, "verticalalignment": "center" },

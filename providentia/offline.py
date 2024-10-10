@@ -393,6 +393,13 @@ class ProvidentiaOffline:
                     else:
                         base_plot_type = plot_type.split('_')[0] 
 
+                    # warning for fairmode plots if species aren't PM2.5, PM10 NO2 or O3
+                    if (base_plot_type == 'fairmode-target'):
+                        speci = networkspeci.split('|')[1]
+                        if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
+                            print(f'Warning: Fairmode target plot cannot be created for {speci}.')
+                            continue
+
                     # get relevant paradigm pages to harmonise axes limits for
                     paradigm_pages = {'summary':[], 'station':[]}
                     if (self.report_summary) & (self.report_stations):
