@@ -2033,11 +2033,6 @@ class Plot:
                 mqi_array[station_idx] = mqi
                 labels.append(station)
 
-            mqi_sorted = sorted(mqi_array[~np.isnan(mqi_array)])
-            i_90 = int(0.9 * len(mqi_sorted)) - 1
-            MQI90 = mqi_sorted[i_90]
-            MQI90_formatted = f"{MQI90:.2f}"
-
             # plot data
             for i, (x, y, label, mqi) in enumerate(zip(x_points, y_points, labels, mqi_array)):
                 relevant_axis.scatter(x, y, edgecolor=self.read_instance.plotting_params[data_label]['colour'], 
@@ -2045,15 +2040,27 @@ class Plot:
                 if mqi > 1:
                     bad_stations.append(label)
 
-            # append MQI for box
-            analysis_text = f"{data_label}\n"
-            analysis_text += f"MQI₉₀ = {MQI90_formatted}\n"
-            analysis_text += f'{len(bad_stations)} stations with MQI > 1'
+            if 'annotate' in plot_options:
+                
+                # calculate MQI90
+                mqi_sorted = sorted(mqi_array[~np.isnan(mqi_array)])
+                i_90 = int(0.9 * len(mqi_sorted)) - 1
+                MQI90 = mqi_sorted[i_90]
+                MQI90_formatted = f"{MQI90:.2f}"
 
-            # add the formatted text with a colored box
-            relevant_axis.text(2.2, 1.5-data_label_idx/2, analysis_text, verticalalignment='center', 
-                               fontsize=plot_characteristics['auxiliar']['MQI90']['fontsize'])
+                # show MQI90
+                analysis_text = f"{data_label}\n"
+                analysis_text += f"MQI₉₀ = {MQI90_formatted}\n"
+                analysis_text += f'{len(bad_stations)} stations with MQI > 1'
 
+                # add the formatted text with a colored box
+                relevant_axis.text(2.2, 1.5-data_label_idx/2, analysis_text, verticalalignment='center', 
+                                fontsize=plot_characteristics['auxiliar']['MQI90']['fontsize'])
+
+        # update axis labels
+        relevant_axis.set_xticks(**plot_characteristics['xticks'])
+        relevant_axis.set_yticks(**plot_characteristics['yticks'])
+        
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """ Function that tracks plotted lines and collections
             that will be removed/added when picking up legend elements on dashboard.
