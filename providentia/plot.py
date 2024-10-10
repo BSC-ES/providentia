@@ -2051,10 +2051,14 @@ class Plot:
 
             # plot data
             for i, (x, y, label, mqi) in enumerate(zip(x_points, y_points, labels, mqi_array)):
-                relevant_axis.scatter(x, y, edgecolor=self.read_instance.plotting_params[data_label]['colour'], 
-                                      **plot_characteristics['plot'])
+                self.fairmode_plot = relevant_axis.plot(x, y, markeredgecolor=self.read_instance.plotting_params[data_label]['colour'], 
+                                                         **plot_characteristics['plot'])
                 if mqi > 1:
                     bad_stations.append(label)
+
+                # track plot elements if using dashboard 
+                if (not self.read_instance.offline) and (not self.read_instance.interactive):
+                    self.track_plot_elements(data_label, 'fairmode-target', 'plot', self.fairmode_plot, bias=False)
 
             if 'annotate' in plot_options:
 
