@@ -525,7 +525,7 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
 
         # annotation
         if 'annotate' in plot_options:
-            if base_plot_type not in ['heatmap', 'fairmode-target']:
+            if base_plot_type not in ['heatmap']:
                 annotation(canvas_instance, read_instance, relevant_ax, networkspeci, 
                            relevant_data_labels[relevant_ax_ii], base_plot_type, 
                            canvas_instance.plot_characteristics[plot_type],
