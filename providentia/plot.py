@@ -2067,28 +2067,35 @@ class Plot:
                 x, y, mqi = ExpBias.calculate_fairmode_target_stats(st_observations_data, st_experiment_data, 
                                                                     u_95r_RV, RV, alpha, beta)
 
-                if station != np.nan:
-                    x_points.append(x)
-                    y_points.append(y)
-                    mqi_array[station_idx] = mqi
-                    stations.append(station)
-                    area_classifications.append(area_classification)
+                x_points.append(x)
+                y_points.append(y)
+                mqi_array[station_idx] = mqi
+                stations.append(station)
+                area_classifications.append(area_classification)
+                if mqi > 1:
+                    bad_stations.append(station)
 
             # plot data
-            for x, y, station, mqi, area_classification in (zip(
-                x_points, y_points, stations, mqi_array, area_classifications)):
+            for x, y, area_classification in (zip(x_points, y_points, area_classifications)):
                 if area_classification not in plot_characteristics['area_classification']['markers']:
                     marker = 'h'
                 else:
                     marker = plot_characteristics['area_classification']['markers'][area_classification]
-                self.fairmode_plot = relevant_axis.plot(x, y, markeredgecolor=self.read_instance.plotting_params[data_label]['colour'], 
-                                                        marker=marker, **plot_characteristics['plot'])
-                if mqi > 1:
-                    bad_stations.append(station)
+                relevant_axis.plot(x, y, markeredgecolor=self.read_instance.plotting_params[data_label]['colour'], 
+                                   marker=marker, **plot_characteristics['plot'])
+            
 
-                # track plot elements if using dashboard 
-                if (not self.read_instance.offline) and (not self.read_instance.interactive):
-                    self.track_plot_elements(data_label, 'fairmode-target', 'plot', self.fairmode_plot, bias=False)
+            # we need to create the plot point by point to be able to set the marker
+            # depending on the area classification since Matplotlib doesn't have a way to 
+            # set different markers at the same time
+            # we add this invisible line to be able to hover on all points and get annotations
+            # we make it invisible since data has already been plotted
+            self.fairmode_target_plot = relevant_axis.plot(x_points, y_points)
+            self.fairmode_target_plot[0].set_visible(False)
+
+            # track plot elements if using dashboard 
+            if (not self.read_instance.offline) and (not self.read_instance.interactive):
+                self.track_plot_elements(data_label, 'fairmode-target', 'plot', self.fairmode_target_plot, bias=False)
 
             # calculate MQI90
             mqi_sorted = sorted(mqi_array[~np.isnan(mqi_array)])
