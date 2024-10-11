@@ -840,9 +840,7 @@ class MPLCanvas(FigureCanvas):
                 self.reset_ax_navigation_toolbar_stack(ax)
 
                 # update plot options
-                # TODO: remove condition when I have menu
-                if plot_type != 'fairmode-target':
-                    self.update_plot_options(plot_types=[plot_type])
+                self.update_plot_options(plot_types=[plot_type])
 
     def get_plot_type_position(self, plot_type):
         """ Function that returns numeric position of plot type within the dashboard
