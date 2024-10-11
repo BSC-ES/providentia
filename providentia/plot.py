@@ -1977,11 +1977,10 @@ class Plot:
         relevant_axis.plot([xmin, xmax], [ymin, ymax], **plot_characteristics['auxiliar']['crosses']['increasing'])
         relevant_axis.plot([xmin, xmax], [ymax, ymin], **plot_characteristics['auxiliar']['crosses']['decreasing'])
 
-        # get data for fairmode
+        # get settings for FAIRMODE target plot
         fairmode_settings = yaml.safe_load(
             open(os.path.join(PROVIDENTIA_ROOT, 
                               'settings/fairmode.yaml')))
-
         speci = networkspeci.split('|')[1]
         speci_settings = fairmode_settings[speci]
         u_95r_RV = speci_settings['u_95r_RV']
@@ -2006,6 +2005,11 @@ class Plot:
         obs_representativity = Stats.calculate_data_avail_fraction(observations_data)
         valid_station_idxs = obs_representativity >= coverage
         observations_data = observations_data[valid_station_idxs, :]
+       
+        # calculate FAIRMODE plot if there is observational data
+        # there might be no data if coverage for all stations is less than desired
+        if observations_data.shape[0] == 0:
+            return
 
         # get station references without nans
         # if for all timesteps it is nan, set nan as station reference
@@ -2084,7 +2088,6 @@ class Plot:
                 relevant_axis.plot(x, y, markeredgecolor=self.read_instance.plotting_params[data_label]['colour'], 
                                    marker=marker, **plot_characteristics['plot'])
             
-
             # we need to create the plot point by point to be able to set the marker
             # depending on the area classification since Matplotlib doesn't have a way to 
             # set different markers at the same time
