@@ -293,14 +293,14 @@ class HoverAnnotation(object):
         return None
 
     def hover_annotation(self, event, plot_type):
-        """ Function that annotates on hover in timeseries, scatter, distribution and taylor plots.
+        """ Function that annotates on hover in timeseries, scatter, distribution, taylor and FAIRMODE target plots.
         """
 
         # activate hover over plot
         if (plot_type in self.canvas_instance.read_instance.active_dashboard_plots):
             if event.inaxes == self.canvas_instance.plot_axes[plot_type]:
-
-                if ((hasattr(self.canvas_instance.plot, plot_type + '_plot')) 
+                search_plot = 'fairmode_target' if plot_type == 'fairmode-target' else plot_type
+                if ((hasattr(self.canvas_instance.plot, search_plot + '_plot')) 
                     and (plot_type in self.canvas_instance.plot_elements)
                     and (self.canvas_instance.annotations_lock[plot_type] == False)):
 
@@ -332,7 +332,7 @@ class HoverAnnotation(object):
                     
                     if is_contained:
                         # update annotation if hovered
-                        func = getattr(self, 'update_' + plot_type + '_annotation')
+                        func = getattr(self, 'update_' + search_plot + '_annotation')
                         func(annotation_index)
                         self.annotation.set_visible(True)
                         if hasattr(self, 'vline'):
@@ -450,7 +450,7 @@ class HoverAnnotation(object):
                 if data_label not in self.canvas_instance.plot_elements['scatter'][self.canvas_instance.plot_elements['scatter']['active']].keys():
                     continue
 
-                # retrieve time and concentration
+                # retrieve concentrations in x and y axis
                 line = self.canvas_instance.plot_elements['scatter'][self.canvas_instance.plot_elements['scatter']['active']][data_label]['plot'][0]
                 concentration_x = line.get_xdata()[annotation_index['ind'][0]]
                 concentration_y = line.get_ydata()[annotation_index['ind'][0]]
@@ -478,6 +478,44 @@ class HoverAnnotation(object):
 
         return None
 
+    def update_fairmode_target_annotation(self, annotation_index):
+
+        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
+
+            # for annotate data label
+            if data_label == self.annotate_data_label:
+                # do not annotate if plot is cleared
+                if data_label not in self.canvas_instance.plot_elements['fairmode-target'][self.canvas_instance.plot_elements['fairmode-target']['active']].keys():
+                    continue
+
+                # retrieve CRMSE / β·RMSᵤ and Mean Bias / β·RMSᵤ
+                line = self.canvas_instance.plot_elements['fairmode-target'][self.canvas_instance.plot_elements['fairmode-target']['active']][data_label]['plot'][0]
+                x = line.get_xdata()[annotation_index['ind'][0]]
+                y = line.get_ydata()[annotation_index['ind'][0]]
+
+                # update location
+                self.annotation.xy = (x, y)
+
+                # update bbox position
+                if x > self.x_middle['fairmode-target']:
+                    self.annotation.set_x(-10)
+                    self.annotation.set_ha('right')
+                else:
+                    self.annotation.set_x(10)
+                    self.annotation.set_ha('left')
+
+                # create annotation text
+                # experiment label
+                text_label = copy.deepcopy(data_label)
+                # observations label
+                text_label += ('\n{0}: {1:.{2}f}').format('CRMSE / β·RMSᵤ', x, self.round_decimal_places)
+                # experiment label
+                text_label += ('\n{0}: {1:.{2}f}').format('Mean Bias / β·RMSᵤ', y, self.round_decimal_places)
+
+        self.annotation.set_text(text_label)
+
+        return None
+    
     def update_distribution_annotation(self, annotation_index):
         """ Update annotation for each distribution point that is hovered. """
         
