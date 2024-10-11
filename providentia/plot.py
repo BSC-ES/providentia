@@ -2032,12 +2032,11 @@ class Plot:
             valid_station_area_classifications.append(first_valid_station_area_classification)
 
         # initialise annotation text
-        if 'annotate' in plot_options:
-            annotate_text = f"α={alpha}\n"
-            annotate_text += f"β={beta}\n"
-            annotate_text += f"RV={RV}\n"
-            annotate_text += f"U₉₅,ᵣᴿⱽ={u_95r_RV}\n\n\n"
-            annotate_text += f"{n_stations} stations with\ncoverage above {coverage}%\n\n\n"
+        self.faimode_target_annotate_text = f"α={alpha}\n"
+        self.faimode_target_annotate_text += f"β={beta}\n"
+        self.faimode_target_annotate_text += f"RV={RV}\n"
+        self.faimode_target_annotate_text += f"U₉₅,ᵣᴿⱽ={u_95r_RV}\n\n\n"
+        self.faimode_target_annotate_text += f"{n_stations} stations with\ncoverage above {coverage}%\n\n\n"
         
         # iterate through data labels
         for data_label in cut_data_labels:
@@ -2091,33 +2090,27 @@ class Plot:
                 if (not self.read_instance.offline) and (not self.read_instance.interactive):
                     self.track_plot_elements(data_label, 'fairmode-target', 'plot', self.fairmode_plot, bias=False)
 
-            if 'annotate' in plot_options:
+            # calculate MQI90
+            mqi_sorted = sorted(mqi_array[~np.isnan(mqi_array)])
+            i_90 = int(0.9 * len(mqi_sorted)) - 1
+            MQI90 = mqi_sorted[i_90]
+            MQI90_formatted = f"{MQI90:.2f}"
 
-                # calculate MQI90
-                mqi_sorted = sorted(mqi_array[~np.isnan(mqi_array)])
-                i_90 = int(0.9 * len(mqi_sorted)) - 1
-                MQI90 = mqi_sorted[i_90]
-                MQI90_formatted = f"{MQI90:.2f}"
+            # add MQI90
+            self.faimode_target_annotate_text += f"{data_label}\n"
+            self.faimode_target_annotate_text += f"MQI₉₀ = {MQI90_formatted}\n"
 
-                # add MQI90
-                annotate_text += f"{data_label}\n"
-                annotate_text += f"MQI₉₀ = {MQI90_formatted}\n"
+            # add bad stations
+            if len(bad_stations) == 1:
+                stations_name = 'station'
+            else:
+                stations_name = 'stations'
+            self.faimode_target_annotate_text += f'{len(bad_stations)} {stations_name} with MQI > 1'
+            if len(bad_stations) > 0:
+                self.faimode_target_annotate_text += f': {bad_stations}'
+            if data_label != cut_data_labels[-1]:
+                self.faimode_target_annotate_text += '\n\n'
 
-                # add bad stations
-                if len(bad_stations) == 1:
-                    stations_name = 'station'
-                else:
-                    stations_name = 'stations'
-                annotate_text += f'{len(bad_stations)} {stations_name} with MQI > 1'
-                if len(bad_stations) > 0:
-                    annotate_text += f': {bad_stations}'
-                if data_label != cut_data_labels[-1]:
-                    annotate_text += '\n\n'
-
-        # add annotation text
-        if 'annotate' in plot_options:
-            relevant_axis.text(2.2, 0, annotate_text, **plot_characteristics['annotate_text'])
-            
         # update axis labels
         relevant_axis.set_xticks(**plot_characteristics['xticks'])
         relevant_axis.set_yticks(**plot_characteristics['yticks'])
