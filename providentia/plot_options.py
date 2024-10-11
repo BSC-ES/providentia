@@ -255,6 +255,7 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
 
     # add annotation text
     if base_plot_type == 'fairmode-target':
+        bias = False
         if hasattr(canvas_instance.plot, 'faimode_target_annotate_text'):
             str_to_annotate = canvas_instance.plot.faimode_target_annotate_text
             colours = canvas_instance.plot.faimode_target_annotate_colour
