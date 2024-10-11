@@ -1,7 +1,7 @@
 {
   "sconco3": {
     "u_95r_RV": 0.18, 
-    "RV": 120, # ug/m3
+    "RV": 60.12, # nmol mol-1 equivalent to 120 in ug/m3
     "alpha": 0.79,
     "percentile": 92.9,
     "beta": 2,
@@ -9,7 +9,7 @@
   },
   "sconcno2": {
     "u_95r_RV": 0.42, 
-    "RV": 200, # ug/m3
+    "RV": 104.55, # nmol mol-1 equivalent to 200 in ug/m3
     "alpha": 0.20,
     "percentile": 99.8,
     "beta": 2,
