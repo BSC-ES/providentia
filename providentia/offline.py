@@ -393,13 +393,6 @@ class ProvidentiaOffline:
                     else:
                         base_plot_type = plot_type.split('_')[0] 
 
-                    # warning for fairmode plots if species aren't PM2.5, PM10 NO2 or O3
-                    if (base_plot_type == 'fairmode-target'):
-                        speci = networkspeci.split('|')[1]
-                        if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
-                            print(f'Warning: Fairmode target plot cannot be created for {speci}.')
-                            continue
-
                     # get relevant paradigm pages to harmonise axes limits for
                     paradigm_pages = {'summary':[], 'station':[]}
                     if (self.report_summary) & (self.report_stations):
@@ -977,7 +970,7 @@ class ProvidentiaOffline:
 
         # iterate through plots to make
         for plot_type in summary_plots_to_make:
-            
+
             # get zstat information from plot_type
             zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type)
             
@@ -989,6 +982,13 @@ class ProvidentiaOffline:
 
             # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
             plot_options = plot_type.split('_')[1:]
+
+            # warning for fairmode plots if species aren't PM2.5, PM10, NO2 or O3
+            if (base_plot_type == 'fairmode-target'):
+                speci = networkspeci.split('|')[1]
+                if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
+                    print(f'Warning: Fairmode target summary plot cannot be created for {speci}.')
+                    continue
 
             # for timeseries chunking
             chunk_stat = None
@@ -1129,6 +1129,13 @@ class ProvidentiaOffline:
                 
                 # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
                 plot_options = plot_type.split('_')[1:]
+
+                # warning for fairmode plots if species aren't PM2.5, PM10, NO2 or O3
+                if (base_plot_type == 'fairmode-target'):
+                    speci = networkspeci.split('|')[1]
+                    if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
+                        print(f'Warning: Fairmode target station plot cannot be created for {speci} in {self.current_station_name}.')
+                        continue
 
                 # for timeseries chunking
                 chunk_stat = None
