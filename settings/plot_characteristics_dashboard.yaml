@@ -1032,7 +1032,14 @@
         },
       "xticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [2, 1, 0, 1, 2] },
       "yticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [-2, -1, 0, 1, 2] },
-      "annotate_text": { "fontsize": 8, "verticalalignment": "center" },
+      "annotate_text":
+        { "x": 2.2, "y": 0, "fontsize": 8, "verticalalignment": "center" },
+      "annotate_options": [
+          "parameters",
+          "MQI90",
+          "covered_stations",
+          "N_bad_stations",
+        ], # "bad_stations"
       "auxiliar":
         {
           "circle":

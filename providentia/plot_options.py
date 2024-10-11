@@ -344,7 +344,7 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
     if len(str_to_annotate) != 0:
         # add annotation to plot
         if base_plot_type == 'fairmode-target':
-            text = relevant_axis.text(2.2, 0, str_to_annotate, **plot_characteristics['annotate_text'])
+            text = relevant_axis.text(s=str_to_annotate, **plot_characteristics['annotate_text'])
             
             # track plot elements if using dashboard 
             if (not read_instance.offline) and (not read_instance.interactive):
