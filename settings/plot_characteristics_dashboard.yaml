@@ -191,7 +191,6 @@
       "annotate_text":
         {
           "s": "",
-          "loc": "upper left",
           "fontsize": 8,
           "n_stations": false,
           "exp_labels": true,
@@ -199,6 +198,7 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
+      "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
         {
           "facecolor": "white",
@@ -276,7 +276,6 @@
       "annotate_text":
         {
           "s": "",
-          "loc": "upper right",
           "fontsize": 8,
           "n_stations": true,
           "exp_labels": true,
@@ -284,6 +283,7 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
+      "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
         {
           "facecolor": "white",
@@ -369,7 +369,6 @@
       "annotate_text":
         {
           "s": "",
-          "loc": "upper right",
           "fontsize": 8,
           "n_stations": false,
           "exp_labels": true,
@@ -377,6 +376,7 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
+      "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
         {
           "facecolor": "white",
@@ -442,7 +442,6 @@
       "annotate_text":
         {
           "s": "",
-          "loc": "upper right",
           "fontsize": 8,
           "n_stations": false,
           "color": "",
@@ -450,6 +449,7 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
+      "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
         {
           "facecolor": "white",
@@ -538,7 +538,6 @@
       "annotate_text":
         {
           "s": "",
-          "loc": "upper right",
           "fontsize": 8,
           "n_stations": false,
           "exp_labels": true,
@@ -546,6 +545,7 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
+      "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
         {
           "facecolor": "white",
@@ -633,7 +633,6 @@
       "annotate_text":
         {
           "s": "",
-          "loc": "upper left",
           "fontsize": 8,
           "n_stations": false,
           "exp_labels": true,
@@ -641,6 +640,7 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
+      "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
         {
           "facecolor": "white",
@@ -703,7 +703,6 @@
       "annotate_text":
         {
           "s": "",
-          "loc": "upper left",
           "fontsize": 8,
           "n_stations": false,
           "exp_labels": true,
@@ -711,6 +710,7 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
+      "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
         {
           "facecolor": "white",
@@ -934,7 +934,6 @@
       "annotate_text":
         {
           "s": "",
-          "loc": "upper left",
           "fontsize": 8,
           "n_stations": false,
           "exp_labels": true,
@@ -942,6 +941,7 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
+      "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
         {
           "facecolor": "white",
@@ -1041,13 +1041,15 @@
       "xticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [2, 1, 0, 1, 2] },
       "yticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [-2, -1, 0, 1, 2] },
       "annotate_text": { "fontsize": 8, "round_decimal_places": 2, "sep": -5 },
+      "annotate_offset":
+        { "loc": "center right", "bbox_to_anchor": [1.45, 0.5] },
+      "annotate_bbox": { "edgecolor": "white" },
       "annotate_options": [
           "parameters",
           "MQI90",
           "covered_stations",
           "N_bad_stations",
         ], # "bad_stations"
-      "annotate_bbox": { "edgecolor": "white" },
       "auxiliar":
         {
           "circle":
