@@ -23,6 +23,7 @@ CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
 expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
+fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
 
 
 def get_selected_station_data(read_instance, canvas_instance, networkspecies, 
@@ -1202,3 +1203,23 @@ def exceedance_lim(networkspeci):
         return exceedance_limits[speci]
     else:
         return np.NaN
+
+
+def get_fairmode_data(canvas_instance, networkspeci):
+
+    # get coverage from settings
+    speci_settings = fairmode_settings[networkspeci.split('|')[1]]
+    coverage = speci_settings['coverage']
+    
+    # get observations data
+    observations_data = canvas_instance.selected_station_data[networkspeci]['per_station'][0,:,:]
+
+    # TODO: Resample to daily for PM, calculate MDA8 for ozone, add flag to make sure resolution is hourly
+    # TODO: Make sure days with less than 75% coverage are nan (avoid NO2)
+
+    # drop stations that have a coverage of less than coverage
+    obs_representativity = Stats.calculate_data_avail_fraction(observations_data)
+    valid_station_idxs = obs_representativity >= coverage
+    observations_data = observations_data[valid_station_idxs, :]
+    
+    return observations_data, valid_station_idxs

@@ -26,7 +26,7 @@ import seaborn as sns
 
 from .calculate import ExpBias, Stats
 from .dashboard_interactivity import HoverAnnotation
-from .statistics import boxplot_inner_fences, calculate_statistic, get_z_statistic_info, get_z_statistic_type
+from .statistics import boxplot_inner_fences, calculate_statistic, get_fairmode_data, get_z_statistic_info, get_z_statistic_type
 from .read_aux import drop_nans
 from .plot_aux import (create_chunked_timeseries, get_multispecies_aliases, 
                        get_taylor_diagram_ghelper_info, kde_fft, merge_cells, periodic_labels, 
@@ -38,6 +38,8 @@ pyproj.set_use_global_context()
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
+
 
 class Plot:
     """ Class that makes plots and handles plot configuration options when defined. """
@@ -1949,8 +1951,21 @@ class Plot:
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
                 self.track_plot_elements(data_label, 'taylor', 'plot', self.taylor_plot, bias=False)
 
+        return True
+    
     def make_fairmode_target(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         
+        # get observations data and valid indices
+        observations_data, valid_station_idxs = get_fairmode_data(self.canvas_instance, networkspeci)
+
+        # get settings
+        speci = networkspeci.split('|')[1]
+        u_95r_RV = fairmode_settings[speci]['u_95r_RV']
+        RV = fairmode_settings[speci]['RV']
+        alpha = fairmode_settings[speci]['alpha']
+        beta = fairmode_settings[speci]['beta']
+        coverage = fairmode_settings[speci]['coverage']
+
         # add target
         main_circle = plt.Circle(**plot_characteristics['auxiliar']['circle']['main'])
         relevant_axis.add_patch(main_circle)
@@ -1976,40 +1991,6 @@ class Plot:
         ymax = np.max(plot_characteristics['yticks']['ticks'])
         relevant_axis.plot([xmin, xmax], [ymin, ymax], **plot_characteristics['auxiliar']['crosses']['increasing'])
         relevant_axis.plot([xmin, xmax], [ymax, ymin], **plot_characteristics['auxiliar']['crosses']['decreasing'])
-
-        # get settings for FAIRMODE target plot
-        fairmode_settings = yaml.safe_load(
-            open(os.path.join(PROVIDENTIA_ROOT, 
-                              'settings/fairmode.yaml')))
-        speci = networkspeci.split('|')[1]
-        speci_settings = fairmode_settings[speci]
-        u_95r_RV = speci_settings['u_95r_RV']
-        RV = speci_settings['RV']
-        alpha = speci_settings['alpha']
-        beta = speci_settings['beta']
-        coverage = speci_settings['coverage']
-        
-        # get valid data labels for networkspeci
-        valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
-
-        # cut data_labels for those in valid data labels
-        cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
-
-        # get observations data
-        observations_data = self.canvas_instance.selected_station_data[networkspeci]['per_station'][0,:,:]
-
-        # TODO: Resample to daily for PM, calculate MDA8 for ozone, add flag to make sure resolution is hourly
-        # TODO: Make sure days with less than 75% coverage are nan (avoid NO2)
-
-        # drop stations that have a coverage of less than coverage
-        obs_representativity = Stats.calculate_data_avail_fraction(observations_data)
-        valid_station_idxs = obs_representativity >= coverage
-        observations_data = observations_data[valid_station_idxs, :]
-       
-        # calculate FAIRMODE plot if there is observational data
-        # there might be no data if coverage for all stations is less than desired
-        if observations_data.shape[0] == 0:
-            return
 
         # get station references without nans
         # if for all timesteps it is nan, set nan as station reference
@@ -2042,6 +2023,12 @@ class Plot:
         self.faimode_target_annotate_text += f"U₉₅,ᵣᴿⱽ={u_95r_RV}\n\n\n"
         self.faimode_target_annotate_text += f"{n_stations} stations with\ncoverage above {coverage}%\n\n\n"
         
+        # get valid data labels for networkspeci
+        valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
+
+        # cut data_labels for those in valid data labels
+        cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+
         # iterate through data labels
         for data_label in cut_data_labels:
 
