@@ -1144,7 +1144,29 @@
         },
       "round_decimal_places": { "title": 2, "x": 2, "y": 2 },
       "equal_aspect": true,
-      "plot": { "marker": "s", "markersize": 5, "markerfacecolor": "None", "linewidth": 1.5 },
+      "plot":
+        { "markersize": 5, "markerfacecolor": "None", "linestyle": "None" },
+      "area_classification":
+        {
+          "markers":
+            {
+              "urban": "s",
+              "urban-centre": "v",
+              "urban-suburban": "^",
+              "rural": "o",
+              "rural-near_city": "p",
+              "rural-regional": "*",
+              "rural-remote": "x",
+            },
+          "plot":
+            {
+              "markersize": 5,
+              "markerfacecolor": "None",
+              "linestyle": "None",
+              "color": "grey",
+            },
+          "legend": { "loc": "upper left", "fontsize": 8 },
+        },
       "xticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [2, 1, 0, 1, 2] },
       "yticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [-2, -1, 0, 1, 2] },
       "annotate_text": { "fontsize": 8, "verticalalignment": "center" },
