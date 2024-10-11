@@ -2114,7 +2114,8 @@ class Plot:
                 stations_name = 'stations'
             self.faimode_target_annotate_text += f'{len(bad_stations)} {stations_name} with MQI > 1'
             if len(bad_stations) > 0:
-                self.faimode_target_annotate_text += f': {bad_stations}'
+                formatted_stations = "\n".join(station.replace('_', '') for station in bad_stations)
+                self.faimode_target_annotate_text += f':\n{formatted_stations}'
             if data_label != cut_data_labels[-1]:
                 self.faimode_target_annotate_text += '\n\n'
 
