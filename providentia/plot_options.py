@@ -250,10 +250,13 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
         :type plot_z_statistic_sign: str
     """
 
+    # initialise list of strs to annotate
+    str_to_annotate = []
 
     # add annotation text
     if base_plot_type == 'fairmode-target':
-        str_to_annotate = canvas_instance.plot.faimode_target_annotate_text
+        if hasattr(canvas_instance.plot, 'faimode_target_annotate_text'):
+            str_to_annotate = canvas_instance.plot.faimode_target_annotate_text
     else:
         # get stats wished to be annotated
         stats = plot_characteristics['annotate_stats']
@@ -265,8 +268,7 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
             show_message(read_instance, msg=msg_dashboard, msg_offline=msg_offline)
             return
 
-        # initialise list of strs to annotate, and colours of annotations
-        str_to_annotate = []
+        # initialise colours of annotations
         colours = [] 
 
         # get valid data labels for networkspeci
