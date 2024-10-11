@@ -12,6 +12,7 @@ from KDEpy import FFTKDE
 from itertools import groupby
 import matplotlib
 import matplotlib.image as mpimg
+import matplotlib.lines as mlines
 from matplotlib.lines import Line2D
 from matplotlib.patches import Polygon
 from matplotlib.projections import PolarAxes
@@ -2006,11 +2007,30 @@ class Plot:
         valid_station_idxs = obs_representativity >= coverage
         observations_data = observations_data[valid_station_idxs, :]
 
-        # TODO: Get first station that is not nan, not first month always
+        # get station references without nans
+        # if for all timesteps it is nan, set nan as station reference
         station_references = self.canvas_instance.selected_station_metadata[networkspeci][
-                                'station_reference'][valid_station_idxs, 0]
-        n_stations = len(station_references)
-        
+                                'station_reference'][valid_station_idxs, :]
+        valid_station_references = []
+        for station_reference in station_references:
+            first_valid_station_reference = next((
+                reference for reference in station_reference 
+                if reference == reference), 'nan')
+            valid_station_references.append(first_valid_station_reference)
+
+        n_stations = len(valid_station_references)
+
+        # get station area classification without nans
+        # if for all timesteps it is nan, set nan as station reference
+        station_area_classifications = self.canvas_instance.selected_station_metadata[networkspeci][
+                                        'area_classification'][valid_station_idxs, :]
+        valid_station_area_classifications = []
+        for station_area_classification in station_area_classifications:
+            first_valid_station_area_classification = next((
+                classification for classification in station_area_classification 
+                if classification == classification), 'nan')
+            valid_station_area_classifications.append(first_valid_station_area_classification)
+
         # initialise annotation text
         if 'annotate' in plot_options:
             annotate_text = f"α={alpha}\n"
@@ -2032,29 +2052,40 @@ class Plot:
             # calculate MQI for the current station
             x_points = []
             y_points = []
-            labels = []
+            stations = []
             bad_stations = []
+            area_classifications = []
 
             # get FAIRMODE statistics per station
             mqi_array = np.full(n_stations, np.nan)
-            for station_idx, station in enumerate(station_references):
+         
+            for station_idx, (station, area_classification) in enumerate(
+                zip(valid_station_references, valid_station_area_classifications)):
+
                 st_observations_data = observations_data[station_idx, :]
                 st_experiment_data = experiment_data[station_idx, :]
                 
                 x, y, mqi = ExpBias.calculate_fairmode_target_stats(st_observations_data, st_experiment_data, 
                                                                     u_95r_RV, RV, alpha, beta)
 
-                x_points.append(x)
-                y_points.append(y)
-                mqi_array[station_idx] = mqi
-                labels.append(station)
+                if station != np.nan:
+                    x_points.append(x)
+                    y_points.append(y)
+                    mqi_array[station_idx] = mqi
+                    stations.append(station)
+                    area_classifications.append(area_classification)
 
             # plot data
-            for i, (x, y, label, mqi) in enumerate(zip(x_points, y_points, labels, mqi_array)):
+            for x, y, station, mqi, area_classification in (zip(
+                x_points, y_points, stations, mqi_array, area_classifications)):
+                if area_classification not in plot_characteristics['area_classification']['markers']:
+                    marker = 'h'
+                else:
+                    marker = plot_characteristics['area_classification']['markers'][area_classification]
                 self.fairmode_plot = relevant_axis.plot(x, y, markeredgecolor=self.read_instance.plotting_params[data_label]['colour'], 
-                                                         **plot_characteristics['plot'])
+                                                        marker=marker, **plot_characteristics['plot'])
                 if mqi > 1:
-                    bad_stations.append(label)
+                    bad_stations.append(station)
 
                 # track plot elements if using dashboard 
                 if (not self.read_instance.offline) and (not self.read_instance.interactive):
@@ -2090,7 +2121,21 @@ class Plot:
         # update axis labels
         relevant_axis.set_xticks(**plot_characteristics['xticks'])
         relevant_axis.set_yticks(**plot_characteristics['yticks'])
-        
+
+        # create legend
+        legend_elements = []
+        for area_classification in np.unique(area_classifications):
+            if area_classification not in plot_characteristics['area_classification']['markers']:
+                marker = 'h'
+            else:
+                marker = plot_characteristics['area_classification']['markers'][area_classification]
+            legend_element = mlines.Line2D([], [], marker=marker, 
+                                           label=area_classification, 
+                                           **plot_characteristics['area_classification']['plot'])
+            legend_elements.append(legend_element)
+        relevant_axis.legend(handles=legend_elements, 
+                             **plot_characteristics['area_classification']['legend'])
+
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """ Function that tracks plotted lines and collections
             that will be removed/added when picking up legend elements on dashboard.
