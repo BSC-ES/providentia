@@ -197,6 +197,7 @@
           "exp_labels": true,
           "color": "",
           "round_decimal_places": 2,
+          "sep": 1,
         },
       "annotate_bbox":
         {
@@ -281,6 +282,7 @@
           "exp_labels": true,
           "color": "",
           "round_decimal_places": 2,
+          "sep": 1,
         },
       "annotate_bbox":
         {
@@ -373,6 +375,7 @@
           "exp_labels": true,
           "color": "",
           "round_decimal_places": 2,
+          "sep": 1,
         },
       "annotate_bbox":
         {
@@ -445,6 +448,7 @@
           "color": "",
           "exp_labels": true,
           "round_decimal_places": 2,
+          "sep": 1,
         },
       "annotate_bbox":
         {
@@ -540,6 +544,7 @@
           "exp_labels": true,
           "color": "",
           "round_decimal_places": 2,
+          "sep": 1,
         },
       "annotate_bbox":
         {
@@ -634,6 +639,7 @@
           "exp_labels": true,
           "color": "",
           "round_decimal_places": 2,
+          "sep": 1,
         },
       "annotate_bbox":
         {
@@ -703,6 +709,7 @@
           "exp_labels": true,
           "color": "",
           "round_decimal_places": 2,
+          "sep": 1,
         },
       "annotate_bbox":
         {
@@ -933,6 +940,7 @@
           "exp_labels": true,
           "color": "",
           "round_decimal_places": 2,
+          "sep": 1,
         },
       "annotate_bbox":
         {
@@ -976,7 +984,7 @@
       "remove_spines": ["top", "right"],
       "axis_title": { "label": "", "fontsize": 8.5, "loc": "center" },
       "xlabel": { "xlabel": "CRMSE / β·RMSᵤ", "fontsize": 8 },
-      "ylabel": { "ylabel": "Mean Bias / β·RMSᵤ", "fontsize": 8 },
+      "ylabel": { "ylabel": "MB / β·RMSᵤ", "fontsize": 8 },
       "xlim": [-2, 2],
       "ylim": [-2, 2],
       "xtick_params":
@@ -1032,14 +1040,14 @@
         },
       "xticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [2, 1, 0, 1, 2] },
       "yticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [-2, -1, 0, 1, 2] },
-      "annotate_text":
-        { "x": 2.2, "y": 0, "fontsize": 8, "verticalalignment": "center" },
+      "annotate_text": { "fontsize": 8, "round_decimal_places": 2, "sep": -5 },
       "annotate_options": [
           "parameters",
           "MQI90",
           "covered_stations",
           "N_bad_stations",
         ], # "bad_stations"
+      "annotate_bbox": { "edgecolor": "white" },
       "auxiliar":
         {
           "circle":
@@ -1082,7 +1090,7 @@
                 {
                   "x": 0.5,
                   "y": 0.98,
-                  "s": "Mean bias > 0",
+                  "s": "MB > 0",
                   "va": "top",
                   "ha": "center",
                   "fontsize": 8,
@@ -1091,7 +1099,7 @@
                 {
                   "x": 0.5,
                   "y": 0.02,
-                  "s": "Mean bias < 0",
+                  "s": "MB < 0",
                   "va": "bottom",
                   "ha": "center",
                   "fontsize": 8,
@@ -1100,7 +1108,7 @@
                 {
                   "x": 0.02,
                   "y": 0.5,
-                  "s": "R",
+                  "s": "r",
                   "va": "center",
                   "ha": "left",
                   "fontsize": 8,
@@ -1109,7 +1117,7 @@
                 {
                   "x": 0.98,
                   "y": 0.5,
-                  "s": "SD",
+                  "s": "StdDev",
                   "va": "center",
                   "ha": "right",
                   "fontsize": 8,
