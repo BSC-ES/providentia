@@ -1218,8 +1218,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                 lambda event: annotation.hover_periodic_annotation(event, changed_plot_type))
             
-        elif changed_plot_type in ['timeseries', 'scatter', 'distribution']:
-
+        elif changed_plot_type in ['timeseries', 'scatter', 'distribution', 'fairmode-target']:
+            
             # add vertical line to timeseries and distribution plots
             if changed_plot_type in ['timeseries', 'distribution']:
                 add_vline = True

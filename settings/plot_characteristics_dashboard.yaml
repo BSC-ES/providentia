@@ -1110,5 +1110,30 @@
             },
         },
       "plot_options": ["annotate"],
+      "marker_annotate":
+        {
+          "xytext": [0, 0],
+          "textcoords": "offset points",
+          "size": 8,
+          "ha": "left",
+          "va": "center",
+          "zorder": 100,
+        },
+      "marker_annotate_bbox":
+        {
+          "boxstyle": "round",
+          "linewidth": 0.5,
+          "facecolor": "white",
+          "edgecolor": "#757575",
+        },
+      "marker_annotate_arrowprops":
+        {
+          "frac": 1,
+          "headwidth": 10,
+          "shrink": 0.1,
+          "color": "#757575",
+          "edgecolor": "#5e5e5e",
+        },
+      "marker_annotate_text": { "round_decimal_places": 2 },
     },
 }
