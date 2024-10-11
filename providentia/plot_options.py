@@ -257,6 +257,7 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
     if base_plot_type == 'fairmode-target':
         if hasattr(canvas_instance.plot, 'faimode_target_annotate_text'):
             str_to_annotate = canvas_instance.plot.faimode_target_annotate_text
+            colours = canvas_instance.plot.faimode_target_annotate_colour
     else:
         # get stats wished to be annotated
         stats = plot_characteristics['annotate_stats']
@@ -343,27 +344,22 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
     
     if len(str_to_annotate) != 0:
         # add annotation to plot
-        if base_plot_type == 'fairmode-target':
-            text = relevant_axis.text(s=str_to_annotate, **plot_characteristics['annotate_text'])
-            
-            # track plot elements if using dashboard 
-            if (not read_instance.offline) and (not read_instance.interactive):
-                canvas_instance.plot.track_plot_elements('ALL', base_plot_type, 'annotate', [text], bias=False)
-        else:
-            # see loc options at https://matplotlib.org/3.1.0/api/offsetbox_api.html
-            lines = [TextArea(line, textprops=dict(color=colour, 
-                                                size=plot_characteristics['annotate_text']['fontsize'])) 
-                    for line, colour in zip(str_to_annotate, colours)]
-            bbox = AnchoredOffsetbox(child=VPacker(children=lines, align='left', pad=0, sep=1),
-                                    loc=plot_characteristics['annotate_text']['loc'],
-                                    bbox_transform=relevant_axis.transAxes)
+        lines = [TextArea(line, textprops=dict(color=colour, 
+                                               size=plot_characteristics['annotate_text']['fontsize'])) 
+                 for line, colour in zip(str_to_annotate, colours)]
+        bbox = AnchoredOffsetbox(child=VPacker(children=lines, align='left', pad=0, 
+                                               sep=plot_characteristics['annotate_text']['sep']),
+                                 bbox_transform=relevant_axis.transAxes, 
+                                 **plot_characteristics['annotate_offset'])
+        # set zorder for plots that have the annotation box on top of the plot
+        if base_plot_type != 'fairmode-target':
             bbox.zorder = plot_characteristics['annotate_bbox']['zorder']
-            bbox.patch.set(**plot_characteristics['annotate_bbox'])
-            relevant_axis.add_artist(bbox)
+        bbox.patch.set(**plot_characteristics['annotate_bbox'])
+        relevant_axis.add_artist(bbox)
 
-            # track plot elements if using dashboard 
-            if (not read_instance.offline) and (not read_instance.interactive):
-                canvas_instance.plot.track_plot_elements('ALL', base_plot_type, 'annotate', [bbox], bias=bias)
+        # track plot elements if using dashboard 
+        if (not read_instance.offline) and (not read_instance.interactive):
+            canvas_instance.plot.track_plot_elements('ALL', base_plot_type, 'annotate', [bbox], bias=bias)
     else:
         msg = '{} could not be annotated'.format(base_plot_type)
         show_message(read_instance, msg)
