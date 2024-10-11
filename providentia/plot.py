@@ -2017,15 +2017,18 @@ class Plot:
             valid_station_area_classifications.append(first_valid_station_area_classification)
 
         # initialise annotation text
-        self.faimode_target_annotate_text = ""
+        self.faimode_target_annotate_text = []
+        self.faimode_target_annotate_colour = []
         if "parameters" in plot_characteristics['annotate_options']:
-            self.faimode_target_annotate_text += f"α={alpha}"
-            self.faimode_target_annotate_text += f"\nβ={beta}"
-            self.faimode_target_annotate_text += f"\nRV={RV}"
-            self.faimode_target_annotate_text += f"\nU₉₅,ᵣᴿⱽ={u_95r_RV}"
+            self.faimode_target_annotate_text.append(f"α={alpha}")
+            self.faimode_target_annotate_text.append(f"\nβ={beta}")
+            self.faimode_target_annotate_text.append(f"\nRV={RV}")
+            self.faimode_target_annotate_text.append(f"\nU₉₅,ᵣᴿⱽ={u_95r_RV}")
+            self.faimode_target_annotate_colour.extend(['black']*4)
         if "covered_stations" in plot_characteristics['annotate_options']:
-            self.faimode_target_annotate_text += f"\n\n{n_stations} stations with\ncoverage above {coverage}%"
-        
+            self.faimode_target_annotate_text.append(f"\n\n{n_stations} stations with\ncoverage above {coverage}%")
+            self.faimode_target_annotate_colour.append('black')
+
         # get valid data labels for networkspeci
         valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
 
@@ -2091,14 +2094,21 @@ class Plot:
                 self.track_plot_elements(data_label, 'fairmode-target', 'plot', self.fairmode_target_plot, bias=False)
 
             # add MQI90
-            self.faimode_target_annotate_text += f"\n\n{data_label}"
+            self.faimode_target_annotate_text.append(f"\n\n{data_label}")
+            self.faimode_target_annotate_colour.append('black')
             if "MQI90" in plot_characteristics['annotate_options']:
                 # calculate MQI90
                 mqi_sorted = sorted(mqi_array[~np.isnan(mqi_array)])
                 i_90 = int(0.9 * len(mqi_sorted)) - 1
                 MQI90 = mqi_sorted[i_90]
-                MQI90_formatted = f"{MQI90:.2f}"
-                self.faimode_target_annotate_text += f"\nMQI₉₀ = {MQI90_formatted}"
+                MQI90_formatted = '{0:.{1}f}'.format(
+                    MQI90, plot_characteristics['annotate_text']['round_decimal_places'])
+                self.faimode_target_annotate_text.append(f"\nMQI₉₀ = {MQI90_formatted}")
+                if MQI90 > 1:
+                    mqi_color = 'red'
+                else:
+                    mqi_color = 'green'
+                self.faimode_target_annotate_colour.append(mqi_color)
 
             # add bad stations
             if "N_bad_stations" in plot_characteristics['annotate_options']:
@@ -2106,16 +2116,19 @@ class Plot:
                     stations_name = 'station'
                 else:
                     stations_name = 'stations'
-                self.faimode_target_annotate_text += f'\n{len(bad_stations)} {stations_name} with MQI > 1'
+                self.faimode_target_annotate_text.append(f'\n{len(bad_stations)} {stations_name} with MQI > 1')
+                self.faimode_target_annotate_colour.append('black')
             if 'bad_stations' in plot_characteristics['annotate_options']:
                 if (len(bad_stations) > 0):
                     formatted_stations = "\n".join(station.replace('_', '') for station in bad_stations)
-                    self.faimode_target_annotate_text += f':\n{formatted_stations}'
+                    self.faimode_target_annotate_text.append(f':\n{formatted_stations}')
+                    self.faimode_target_annotate_colour.append('black')
                 if data_label != cut_data_labels[-1]:
                     self.faimode_target_annotate_text += '\n\n'
+                    self.faimode_target_annotate_colour.append('black')
 
-        # strip empty characters from start and end
-        self.faimode_target_annotate_text = self.faimode_target_annotate_text.strip() 
+        # strip empty characters from start
+        self.faimode_target_annotate_text[0] = self.faimode_target_annotate_text[0].strip() 
 
         # update axis labels
         relevant_axis.set_xticks(**plot_characteristics['xticks'])
