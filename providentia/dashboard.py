@@ -1067,6 +1067,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     menu_plot_type = menu_button.objectName().split('_menu')[0]
                     if menu_plot_type == 'periodic_violin':
                         menu_plot_type = 'periodic-violin'
+                    elif menu_plot_type == 'fairmode-target':
+                        menu_plot_type = 'fairmode_target'
 
                     if previous_plot_type == menu_plot_type:
                         menu_button.hide()
