@@ -27,21 +27,11 @@ from aux import (check_for_ghost, findMiddle, check_directory_existence, set_fil
                  get_aeronet_bin_radius_from_bin_variable, get_aeronet_model_bin, 
                  get_model_to_aeronet_bin_transform_factor)
 
-MACHINE = os.environ.get('BSC_MACHINE', '')
-
-# change current working directory from submit directory 
-# to import global configuration file
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-working_directory = CURRENT_PATH.split('/submit')[0]  
-os.chdir(working_directory)
+MACHINE = os.environ.get('BSC_MACHINE', 'local')
 
 # get current path and providentia root path
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
-
-# load the default values jsonsdefault_values
-# load the data_paths for the different machines and the default values jsons
-data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'data_paths.yaml')))
 
 # load the defined experiments paths and agrupations jsons
 interp_experiments = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
@@ -56,9 +46,6 @@ class ExperimentInterpolation(object):
     def __init__(self,submit_args):
         
         self.log_file_str = 'STARTING INTERPOLATION\n'
-
-        # set machine
-        self.machine = MACHINE
 
         # set variables from input keywords
         self.model_temporal_resolution            = submit_args['model_temporal_resolution']
@@ -85,16 +72,16 @@ class ExperimentInterpolation(object):
         self.interpolation_variables = {}
         
         # from file in management_logs, get and set the arguments which were not passed as a paremeter
-        submission_file = os.path.join(PROVIDENTIA_ROOT, 'providentia', 'interpolation', 
-                                       'management_logs',f'{self.unique_id}.out')
+        submission_file = os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/management_logs',
+                                       f'{self.unique_id}.out')
         with open(submission_file, 'r') as f:
             submission_file_txt = f.read().split()
 
         # get configuration variables from the management_logs
         for variable_key in ["ghost_version", "interp_n_neighbours", 
                              "interp_reverse_vertical_orientation", 
-                             "forecast_day", "exp_root", "ghost_root", 
-                             "nonghost_root", "forecast"]:
+                             "forecast_day", "exp_root", "ghost_root",
+                             "exp_to_interp_root", "nonghost_root", "forecast"]:
             variable_val_idx = submission_file_txt.index(variable_key+":")+1
             variable_val = submission_file_txt[variable_val_idx]
             # make sure vertical orientiation is a boolean!
@@ -118,23 +105,29 @@ class ExperimentInterpolation(object):
         self.GHOST_speci_lower_limit = self.standard_parameter_speci['extreme_lower_limit']
         self.GHOST_speci_upper_limit = self.standard_parameter_speci['extreme_upper_limit']
 
-        # get experiment type and specific directories
-        for experiment_type, experiment_dict in interp_experiments.items():
-            if self.experiment_to_process in experiment_dict["experiments"]:
-                break
+        exp_dir = None
+        # if local machine, get directory from data_paths
+        if MACHINE == 'local':  
+            exp_to_interp_path = os.path.join(self.exp_to_interp_root, self.experiment_to_process)
+            if os.path.exists(exp_to_interp_path):
+                exp_dir = exp_to_interp_path
+            
+        # for HPC machines
+        else:
+            # get experiment type and specific directories
+            for experiment_type, experiment_dict in interp_experiments.items():
+                if self.experiment_to_process in experiment_dict["experiments"]:
+                    exp_dir_list = experiment_dict["paths"]
+                    break
 
-        # get experiment specific directories list
-        exp_dir_list = experiment_dict["paths"]
+            # take first functional directory 
+            for temp_exp_dir in exp_dir_list:
+                if os.path.exists(temp_exp_dir):
+                    exp_dir = temp_exp_dir
+                    break
 
-        # take first functional directory 
-        exp_dir = None      
-        for temp_exp_dir in exp_dir_list:
-            if os.path.exists(temp_exp_dir):
-                exp_dir = temp_exp_dir
-                break
-
-        # add file to directory path
-        exp_dir += f"{self.experiment_to_process}/" 
+            # add file to directory path
+            exp_dir += f"{self.experiment_to_process}/" 
 
         # define if network is in GHOST format
         self.reading_ghost = check_for_ghost(self.network_to_interpolate_against)
@@ -210,10 +203,11 @@ class ExperimentInterpolation(object):
                 # get x/y grid dimension variable names
                 grid_dimensions = mod_speci_obj.dimensions
 
-            except:
+            except Exception as e:
                 # if have got to last file of month and that is corrupted, return from function
                 if model_file_ii == (len(self.model_files)-1):
-                    self.log_file_str += 'All model files corrupted in {}. Skipping month.'.format(self.yearmonth)
+                    self.log_file_str += 'All model files corrupted in {}. Skipping month. \n'.format(self.yearmonth)
+                    self.log_file_str += 'Error: {}'.format(e)
                     create_output_logfile(1, self.log_file_str)
                 # else, continue to next file in month
                 else:
@@ -1075,11 +1069,11 @@ class ExperimentInterpolation(object):
             self.log_file_str += 'with sudo apt install nco (Debian/Ubuntu) or brew install nco (macOS).'
     
         # give 770 permissions for file and make owner bsc32 if machine isn't local
-        if self.machine != '':
+        if MACHINE != '':
             set_file_permissions_ownership(netCDF_fname)
 
         # copy file to esarchive (if have access)
-        if self.machine == 'nord3v2':
+        if MACHINE == 'nord3v2':
             
             # set esarchive output dir
             esarchive_output_dir = '/esarchive/recon/prov_interp/{}'.format('/'.join(netCDF_fname.split('/exp_interp/')[1].split('/')[:-1]))
@@ -1107,7 +1101,7 @@ def create_output_logfile(process_code, log_file_str):
         :param process_code: interpolation outcome code
         :type process_code: int
     """
-    output_logfile_dir = (f"{working_directory}/interpolation_logs/"
+    output_logfile_dir = (f"{os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs/')}"
     f"{submit_args['prov_exp_code']}/"
     f"{submit_args['original_speci_to_process']}/"
     f"{submit_args['network_to_interpolate_against']}/"
