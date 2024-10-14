@@ -1205,21 +1205,45 @@ def exceedance_lim(networkspeci):
         return np.NaN
 
 
-def get_fairmode_data(canvas_instance, networkspeci):
-
-    # get coverage from settings
-    speci_settings = fairmode_settings[networkspeci.split('|')[1]]
-    coverage = speci_settings['coverage']
+def get_fairmode_data(canvas_instance, read_instance, networkspeci):
     
-    # get observations data
-    observations_data = canvas_instance.selected_station_data[networkspeci]['per_station'][0,:,:]
+    # get data per station
+    data_array = canvas_instance.selected_station_data[networkspeci]['per_station']
+    print('Initial', data_array.shape)
+    
+    # filter by requested coverage
+    speci = networkspeci.split('|')[1]
+    speci_settings = fairmode_settings[speci]
+    coverage = speci_settings['coverage']
+    obs_representativity = Stats.calculate_data_avail_fraction(data_array[0, :, :])
+    valid_station_idxs = obs_representativity >= coverage
+    data_array = data_array[:, valid_station_idxs, :]
 
-    # TODO: Resample to daily for PM, calculate MDA8 for ozone, add flag to make sure resolution is hourly
+    print('After coverage', data_array.shape)
+
     # TODO: Make sure days with less than 75% coverage are nan (avoid NO2)
 
-    # drop stations that have a coverage of less than coverage
-    obs_representativity = Stats.calculate_data_avail_fraction(observations_data)
-    valid_station_idxs = obs_representativity >= coverage
-    observations_data = observations_data[valid_station_idxs, :]
-    
-    return observations_data, valid_station_idxs
+    # resample to daily for PM2.5 and PM10
+    if speci in ['pm2p5', 'pm10']:
+        # flatten networkspecies dimension for creation of pandas dataframe
+        data_array_reduced = data_array.reshape(data_array.shape[0]*data_array.shape[1], data_array.shape[2])
+        
+        # create pandas dataframe of data array
+        data_array_df = pd.DataFrame(data_array_reduced.transpose(), index=read_instance.time_array, 
+                                        columns=np.arange(data_array_reduced.shape[0]), dtype=np.float32)
+        # resample data array
+        data_array_df_resampled = data_array_df.resample('D', axis=0).mean()
+        read_instance.time_index = data_array_df_resampled.index
+
+        # save back out as numpy array (reshaping to get back networkspecies dimension)
+        data_array_resampled = data_array_df_resampled.to_numpy().transpose()
+        data_array = data_array_resampled.reshape(data_array.shape[0], data_array.shape[1], 
+                                                  data_array_resampled.shape[1])
+    # calculate MDA8 for ozone
+    elif speci in ['sconco3']:
+        pass
+        # data_array = Stats.calculate_mda8(data_array)
+        
+    print('After resampling', data_array.shape)
+
+    return data_array, valid_station_idxs

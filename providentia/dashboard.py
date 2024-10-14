@@ -971,8 +971,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             
             elif event_source == self.cb_species:
                 self.selected_species = changed_param
-                if (('fairmode-target' in self.mpl_canvas.layout_options) and 
-                    (self.selected_species not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5'])):
+                if (('fairmode-target' in self.mpl_canvas.layout_options)
+                    and ((self.selected_species not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5'])
+                    or (self.selected_resolution != 'hourly'))):
                     self.mpl_canvas.layout_options.remove('fairmode-target')
                     self.update_layout_fields(self.mpl_canvas)
 

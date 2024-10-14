@@ -26,7 +26,8 @@ import seaborn as sns
 
 from .calculate import ExpBias, Stats
 from .dashboard_interactivity import HoverAnnotation
-from .statistics import boxplot_inner_fences, calculate_statistic, get_fairmode_data, get_z_statistic_info, get_z_statistic_type
+from .statistics import (boxplot_inner_fences, calculate_statistic,
+                        get_fairmode_data, get_z_statistic_info, get_z_statistic_type)
 from .read_aux import drop_nans, get_valid_metadata
 from .plot_aux import (create_chunked_timeseries, get_multispecies_aliases, 
                        get_taylor_diagram_ghelper_info, kde_fft, merge_cells, periodic_labels, 
@@ -1955,8 +1956,9 @@ class Plot:
     
     def make_fairmode_target(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         
-        # get observations data and valid indices
-        observations_data, valid_station_idxs = get_fairmode_data(self.canvas_instance, networkspeci)
+        # resample to daily for PM10 and PM2.5, get MDA8 for ozone, filter by coverage
+        data, valid_station_idxs = get_fairmode_data(self.canvas_instance, self.read_instance, networkspeci)
+        observations_data = data[0, :, :]
 
         # get settings
         speci = networkspeci.split('|')[1]
@@ -2030,8 +2032,8 @@ class Plot:
                 continue
 
             # get experiment data
-            experiment_data = self.canvas_instance.selected_station_data[networkspeci]['per_station'][valid_data_labels.index(data_label),valid_station_idxs,:]
-
+            experiment_data = data[valid_data_labels.index(data_label), :, :]
+            
             # calculate MQI for the current station
             x_points = []
             y_points = []
