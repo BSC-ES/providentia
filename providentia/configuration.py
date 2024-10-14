@@ -736,6 +736,10 @@ class ProvConfiguration:
         # get the splitted experiment
         experiment, domain, ensemble_option = full_experiment.split('-')
 
+        # accept asterisk to download all experiments
+        if experiment == '*':
+            return True, experiment
+        
         # search if the experiment id is in the interp_experiments file
         experiment_exists = False
         for experiment_type, experiment_dict in interp_experiments.items():
@@ -1002,7 +1006,7 @@ class ProvConfiguration:
         # if offline, throw message, stating are using default instead
         # TODO maybe think this a bit better, if i dont pass it it should check better if i already passed it in experiments and so
         if self.read_instance.experiments and self.default_ensemble_options:
-            if self.read_instance.interpolation or (self.read_instance.download and self.read_instance.interpolated is False):
+            if self.read_instance.interpolation:
                 default = ["000"]
             else:
                 default = default_values['ensemble_options']
