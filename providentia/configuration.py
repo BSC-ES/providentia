@@ -204,6 +204,9 @@ class ProvConfiguration:
             self.read_instance.parameter_dictionary = dict()
             for _, param_dict in standard_parameters.items():
                 self.read_instance.parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
+
+            # get available species
+            self.read_instance.available_species = list(self.read_instance.parameter_dictionary.keys())
             
             # get standard metadata dictionary
             self.read_instance.standard_metadata = get_standard_metadata({'standard_units': ''})
@@ -877,7 +880,7 @@ class ProvConfiguration:
         # in download mode is allowed to not pass any species, so continue
         if (not self.read_instance.species and not self.read_instance.download and not self.read_instance.interpolation):
             if self.read_instance.interpolation:
-                default = [self.standard_parameters[param]['bsc_parameter_name'] for param in self.standard_parameters.keys()] 
+                default = self.read_instance.available_species
             else:
                 default = default_values['species']
             msg = "Species (species) was not defined in the configuration file. Using '{}' as default.".format(default)
@@ -1223,8 +1226,8 @@ class ProvConfiguration:
         self.read_instance.species = copy.deepcopy(new_species)
 
         # get species and filter species which are not on the current ghost version
-        invalid_species = set(self.read_instance.species) - set(self.read_instance.parameter_dictionary.keys())
-        invalid_filter_species = set(map(lambda x:x.split('|')[1], self.read_instance.filter_species)) - set(self.read_instance.parameter_dictionary.keys())                          
+        invalid_species = set(self.read_instance.species) - set(self.read_instance.available_species)
+        invalid_filter_species = set(map(lambda x:x.split('|')[1], self.read_instance.filter_species)) - set(self.read_instance.available_species)                          
         
         # check species, remove the ones that are not on the ghost version       
         if invalid_species:                                                            
