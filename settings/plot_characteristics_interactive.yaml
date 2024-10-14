@@ -301,7 +301,7 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
-        "annotate_offset": { "loc": "upper left" },
+      "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
         {
           "facecolor": "white",
@@ -394,7 +394,7 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
-        "annotate_offset": { "loc": "upper left" },
+      "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
         {
           "facecolor": "white",
@@ -465,7 +465,7 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
-        "annotate_offset": { "loc": "upper left" },
+      "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
         {
           "facecolor": "white",
@@ -558,7 +558,7 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
-        "annotate_offset": { "loc": "upper left" },
+      "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
         {
           "facecolor": "white",
@@ -637,7 +637,7 @@
               "ncol": 5,
               "borderaxespad": 0,
               "fontsize": 10.0,
-              "bbox_to_anchor": [1.55, 1]
+              "bbox_to_anchor": [1.55, 1],
             },
           "handles": { "markersize": 10.5, "marker": "o", "color": "white" },
         },
@@ -652,7 +652,7 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
-        "annotate_offset": { "loc": "upper left" },
+      "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
         {
           "facecolor": "white",
@@ -708,7 +708,7 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
-        "annotate_offset": { "loc": "upper left" },
+      "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
         {
           "facecolor": "white",
@@ -939,7 +939,7 @@
               "ncol": 5,
               "borderaxespad": 0,
               "fontsize": 11.0,
-              "bbox_to_anchor": [1.5, 1]
+              "bbox_to_anchor": [1.5, 1],
             },
           "handles": { "markersize": 11, "marker": "o", "color": "white" },
         },
@@ -978,7 +978,7 @@
           "round_decimal_places": 2,
           "sep": 1,
         },
-        "annotate_offset": { "loc": "upper left" },
+      "annotate_offset": { "loc": "upper left" },
       "annotate_bbox":
         {
           "facecolor": "white",
@@ -1044,7 +1044,7 @@
               "handletextpad": 0,
               "ncol": 5,
               "borderaxespad": 0,
-              "fontsize": 10.0
+              "fontsize": 10.0,
             },
           "handles": { "markersize": 10.5, "marker": "o", "color": "white" },
         },
@@ -1052,9 +1052,9 @@
       "equal_aspect": true,
       "plot":
         { "markersize": 5, "markerfacecolor": "None", "linestyle": "None" },
-      "area_classification":
-        {
-          "markers":
+      "markers": {
+          "type": "area", # area, station
+          "area_classification":
             {
               "urban": "s",
               "urban-centre": "v",
@@ -1063,6 +1063,13 @@
               "rural-near_city": "p",
               "rural-regional": "*",
               "rural-remote": "x",
+            },
+          "station_classification":
+            {
+              "background": "s",
+              "point_source": "v",
+              "point_source-industrial": "^",
+              "point_source-traffic": "o",
             },
           "plot":
             {
@@ -1084,7 +1091,7 @@
           "MQI90",
           "covered_stations",
           "N_bad_stations",
-        ], # "bad_stations"
+        ], # parameters, MQI90, covered_stations, N_bad_stations bad_stations
       "auxiliar":
         {
           "circle":

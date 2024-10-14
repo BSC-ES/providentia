@@ -504,6 +504,7 @@ class MPLCanvas(FigureCanvas):
             self.handle_statsummary_cycle_update()
             self.handle_statsummary_periodic_aggregation_update()
             self.handle_statsummary_periodic_mode_update()
+            self.handle_fairmode_target_classification_update()
 
             # self.handle_taylor_correlation_statistic_update()
             self.read_instance.block_MPL_canvas_updates = False
@@ -1439,6 +1440,35 @@ class MPLCanvas(FigureCanvas):
 
         return None
     
+    def handle_fairmode_target_classification_update(self):
+
+        if not self.read_instance.block_config_bar_handling_updates:
+
+            # update mouse cursor to a waiting cursor
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
+            # set variable that blocks configuration bar handling updates until all changes
+            # to the classification combobox are made
+            self.read_instance.block_config_bar_handling_updates = True
+
+            # update classification type
+            self.plot_characteristics['fairmode-target']['markers']['type'] = self.fairmode_target_classification.currentText()
+            
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # update FAIRMODE target plot
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.update_associated_active_dashboard_plot('fairmode-target')
+
+            # draw changes
+            self.figure.canvas.draw_idle()
+
+            # restore mouse cursor to normal
+            QtWidgets.QApplication.restoreOverrideCursor()
+
+        return None
+    
     def remove_axis_objects(self, ax_elements, elements_to_skip=None, types_to_remove=None):
         """ Remove objects (artists, lines, collections, patches) from axis. """
         
@@ -1512,7 +1542,8 @@ class MPLCanvas(FigureCanvas):
                     self.remove_axis_objects(objects, elements_to_skip=self.annotations_vline['periodic'].values())
 
             elif plot_type == 'periodic-violin':
-                for objects in [ax_to_remove.lines, ax_to_remove.artists, ax_to_remove.collections]:
+                for objects in [ax_to_remove.lines, ax_to_remove.artists, 
+                                ax_to_remove.collections]:
                     self.remove_axis_objects(objects, elements_to_skip=self.annotations_vline['periodic-violin'].values())
 
             elif plot_type == 'metadata':
@@ -1525,8 +1556,13 @@ class MPLCanvas(FigureCanvas):
             elif plot_type == 'statsummary':
                 self.remove_axis_objects(ax_to_remove.tables)
 
-            elif plot_type in ['taylor', 'boxplot', 'scatter', 'fairmode-target']:
+            elif plot_type in ['taylor', 'boxplot', 'scatter']:
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
+                    self.remove_axis_objects(objects)
+
+            elif plot_type == 'fairmode-target':
+                for objects in [ax_to_remove.lines, ax_to_remove.artists, 
+                                ax_to_remove.patches, ax_to_remove.texts]:
                     self.remove_axis_objects(objects)
 
         # remove tracked plot elements
@@ -2166,7 +2202,9 @@ class MPLCanvas(FigureCanvas):
         self.fairmode_target_menu = SettingsMenu(plot_type='fairmode_target', canvas_instance=self)
         self.fairmode_target_options = self.fairmode_target_menu.checkable_comboboxes['options']
         self.fairmode_target_elements = self.fairmode_target_menu.get_elements()
-
+        self.fairmode_target_classification = self.fairmode_target_menu.comboboxes['classification']
+        self.fairmode_target_classification.addItems(['Area', 'Station'])
+       
         # get sliders and update values
         self.fairmode_target_markersize_sl = self.fairmode_target_menu.sliders['markersize_sl']
         self.fairmode_target_markersize_sl.setMaximum(int(self.plot_characteristics['fairmode-target']['plot']['markersize']*10))
