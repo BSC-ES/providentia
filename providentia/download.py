@@ -184,57 +184,59 @@ class ProvidentiaDownload(object):
             # from here generate control if user stopped execution
             signal.signal(signal.SIGINT, sighandler)
 
-            # combine all networks and species combinations to download (for network and filter species)
-            combined_networks = [(network, None) for network in self.network] + \
-                                [(network_specie.split('|')[0], network_specie.split('|')[1]) for network_specie in self.filter_species]
-            
-            # save main species
-            main_species = copy.deepcopy(self.species)
-            
-            for network, filter_species in combined_networks:
-                # change species when turn of filter species
-                if filter_species is not None:
-                    self.species = [filter_species]
-
-                # get the files to be downlaoded, check if they files were already downlaoded and download if not
-                # download from the remote machine
-                if self.bsc_download_choice == 'y':
-                    # GHOST
-                    if check_for_ghost(network):
-                        initial_check_nc_files = self.download_ghost_network_sftp(network, initial_check=True)
-                        files_to_download = self.select_files_to_download(initial_check_nc_files)
-                        if not initial_check_nc_files or files_to_download:
-                            self.download_ghost_network_sftp(network, initial_check=False, files_to_download=files_to_download)
-                    # non-GHOST
-                    else:
-                        initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
-                        files_to_download = self.select_files_to_download(initial_check_nc_files)
-                        if not initial_check_nc_files or files_to_download:
-                            self.download_nonghost_network(network, initial_check=False, files_to_download=files_to_download)
-
-                # download from the zenodo webpage
-                elif self.bsc_download_choice == 'n':
-                    # GHOST
-                    if check_for_ghost(network):
-                        initial_check_nc_files = self.download_ghost_network_zenodo(network, initial_check=True)
-                        files_to_download = self.select_files_to_download(initial_check_nc_files)
-                        if not initial_check_nc_files or files_to_download:
-                            self.download_ghost_network_zenodo(network, initial_check=False, files_to_download=files_to_download)
-                    # non-GHOST
-                    else:
-                        error = f"Error: It is not possible to download files from the non-GHOST network {network} from the zenodo webpage."
-                        sys.exit(error)
+            # networks
+            if self.network:
+                # combine all networks and species combinations to download (for network and filter species)
+                combined_networks = [(network, None) for network in self.network] + \
+                                    [(network_specie.split('|')[0], network_specie.split('|')[1]) for network_specie in self.filter_species]
                 
-                # download option invalid
-                else:
-                    error = "Error: Download option not valid, check your .env file."
-                    sys.exit(error)
+                # save main species
+                main_species = copy.deepcopy(self.species)
+                
+                # download network observations with species and filter_species
+                for network, filter_species in combined_networks:
+                    # change species when turn of filter species
+                    if filter_species is not None:
+                        self.species = [filter_species]
 
-            # get orignal species back
-            self.species = main_species
+                    # get the files to be downlaoded, check if they files were already downlaoded and download if not
+                    # download from the remote machine
+                    if self.bsc_download_choice == 'y':
+                        # GHOST
+                        if check_for_ghost(network):
+                            initial_check_nc_files = self.download_ghost_network_sftp(network, initial_check=True)
+                            files_to_download = self.select_files_to_download(initial_check_nc_files)
+                            if not initial_check_nc_files or files_to_download:
+                                self.download_ghost_network_sftp(network, initial_check=False, files_to_download=files_to_download)
+                        # non-GHOST
+                        else:
+                            initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
+                            files_to_download = self.select_files_to_download(initial_check_nc_files)
+                            if not initial_check_nc_files or files_to_download:
+                                self.download_nonghost_network(network, initial_check=False, files_to_download=files_to_download)
+
+                    # download from the zenodo webpage
+                    elif self.bsc_download_choice == 'n':
+                        # GHOST
+                        if check_for_ghost(network):
+                            initial_check_nc_files = self.download_ghost_network_zenodo(network, initial_check=True)
+                            files_to_download = self.select_files_to_download(initial_check_nc_files)
+                            if not initial_check_nc_files or files_to_download:
+                                self.download_ghost_network_zenodo(network, initial_check=False, files_to_download=files_to_download)
+                        # non-GHOST
+                        else:
+                            error = f"Error: It is not possible to download files from the non-GHOST network {network} from the zenodo webpage."
+                            sys.exit(error)
+                    
+                    # download option invalid
+                    else:
+                        error = "Error: Download option not valid, check your .env file."
+                        sys.exit(error)
+
+                # get orignal species back
+                self.species = main_species
 
             # when one of those symbols is passed, get all experiments
-            # TODO check this when merging with the interpolation
             if self.experiments == {'*': '*'}:
                 self.get_all_experiments()
 
@@ -474,7 +476,7 @@ class ProvidentiaDownload(object):
         sftp_resolutions = self.resolution if self.resolution else set(self.sftp.listdir(os.path.join(self.nonghost_remote_obs_path,network))).intersection(self.nonghost_available_resolutions)
         for resolution in sftp_resolutions:
             try:
-                sftp_species  = self.species if self.species else self.sftp.listdir(os.path.join(self.nonghost_remote_obs_path,network,resolution))
+                sftp_species = self.species if self.species else set(self.sftp.listdir(os.path.join(self.nonghost_remote_obs_path,network,resolution))).intersection(self.available_species)
             except FileNotFoundError:
                 msg = f"There is no data available in {REMOTE_MACHINE} for {network} network at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
@@ -620,7 +622,7 @@ class ProvidentiaDownload(object):
         sftp_resolutions = self.resolution if self.resolution else set(self.sftp.listdir(remote_dir)).intersection(self.ghost_available_resolutions)
         for resolution in sftp_resolutions:
             try:
-                sftp_species  = self.species if self.species else self.sftp.listdir(os.path.join(remote_dir,resolution))
+                sftp_species = self.species if self.species else set(self.sftp.listdir(os.path.join(remote_dir,resolution))).intersection(self.available_species)
             except FileNotFoundError:
                 msg = f"There is no data available in {REMOTE_MACHINE} for {network} network at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
@@ -931,7 +933,7 @@ class ProvidentiaDownload(object):
         sftp_resolutions = self.resolution if self.resolution else set(self.sftp.listdir(remote_dir)).intersection(self.nonghost_available_resolutions)
         for resolution in sftp_resolutions:
             try:
-                sftp_species  = self.species if self.species else self.sftp.listdir(os.path.join(remote_dir,resolution))
+                sftp_species = self.species if self.species else set(self.sftp.listdir(os.path.join(remote_dir,resolution))).intersection(self.available_species)
             except FileNotFoundError:
                 msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
@@ -1092,8 +1094,9 @@ class ProvidentiaDownload(object):
         # iterate through the resolutions
         for resolution in sftp_resolutions:
             try:
-                # TODO not possible to do here because in the case theres none it would be with the wrong mapping
-                sftp_species  = self.species if self.species else self.sftp.listdir(os.path.join(remote_dir,resolution))
+                # get available species ("normal" and mapped)
+                available_species = self.available_species+[spec[0] for spec in mapping_species.values()]
+                sftp_species = self.species if self.species else set(self.sftp.listdir(os.path.join(remote_dir,resolution))).intersection(available_species)
             except FileNotFoundError:
                 msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
@@ -1101,10 +1104,33 @@ class ProvidentiaDownload(object):
 
             # iterate through the species
             for speci_to_process in sftp_species: 
-                # change species name to the species to map
-                if speci_to_process in mapping_species:
-                    for speci_to_map in mapping_species[speci_to_process]:
-                        res_spec_dir.append(os.path.join(remote_dir,resolution,speci_to_map))
+                # initialize boolean that saves whether species was found
+                species_exists = False
+                species = speci_to_process
+                # first try with the original species
+                try:
+                    self.sftp.stat(os.path.join(remote_dir,resolution,species))
+                    species_exists = True
+                # if there are none, try with the mapped species
+                except FileNotFoundError:
+                    # change species name to the species to map
+                    if speci_to_process in mapping_species:
+                        for species in mapping_species[speci_to_process]:
+                            try:
+                                self.sftp.stat(os.path.join(remote_dir,resolution,species))
+                                species_exists = True
+                                break
+                            except FileNotFoundError:
+                                pass
+                
+                # if no species were found, then show the message
+                if species_exists is False:
+                    msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain for {species} species at {resolution} resolution"
+                    show_message(self, msg, deactivate=initial_check)
+                    continue
+
+                # add to the path with the resolution and species combination to the list
+                res_spec_dir.append(os.path.join(remote_dir,resolution,species))
                         
         # print the species, resolution and experiment combinations that are going to be downloaded
         if res_spec_dir:
