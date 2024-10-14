@@ -27,7 +27,7 @@ import seaborn as sns
 from .calculate import ExpBias, Stats
 from .dashboard_interactivity import HoverAnnotation
 from .statistics import boxplot_inner_fences, calculate_statistic, get_fairmode_data, get_z_statistic_info, get_z_statistic_type
-from .read_aux import drop_nans
+from .read_aux import drop_nans, get_valid_metadata
 from .plot_aux import (create_chunked_timeseries, get_multispecies_aliases, 
                        get_taylor_diagram_ghelper_info, kde_fft, merge_cells, periodic_labels, 
                        periodic_xticks, round_decimal_places, temp_axis_dict)
@@ -1992,29 +1992,16 @@ class Plot:
         relevant_axis.plot([xmin, xmax], [ymin, ymax], **plot_characteristics['auxiliar']['crosses']['increasing'])
         relevant_axis.plot([xmin, xmax], [ymax, ymin], **plot_characteristics['auxiliar']['crosses']['decreasing'])
 
-        # get station references without nans
-        # if for all timesteps it is nan, set nan as station reference
-        station_references = self.canvas_instance.selected_station_metadata[networkspeci][
-                                'station_reference'][valid_station_idxs, :]
-        valid_station_references = []
-        for station_reference in station_references:
-            first_valid_station_reference = next((
-                reference for reference in station_reference 
-                if reference == reference), 'nan')
-            valid_station_references.append(first_valid_station_reference)
+        # get metadata without nans
+        valid_station_references = get_valid_metadata(self, 'station_reference', 
+                                                      valid_station_idxs, networkspeci)
+        valid_station_area_classifications = get_valid_metadata(self, 'area_classification', 
+                                                                valid_station_idxs, networkspeci)
+        valid_station_station_classifications = get_valid_metadata(self, 'station_classification', 
+                                                                   valid_station_idxs, networkspeci)
 
+        # get number of stations
         n_stations = len(valid_station_references)
-
-        # get station area classification without nans
-        # if for all timesteps it is nan, set nan as station reference
-        station_area_classifications = self.canvas_instance.selected_station_metadata[networkspeci][
-                                        'area_classification'][valid_station_idxs, :]
-        valid_station_area_classifications = []
-        for station_area_classification in station_area_classifications:
-            first_valid_station_area_classification = next((
-                classification for classification in station_area_classification 
-                if classification == classification), 'nan')
-            valid_station_area_classifications.append(first_valid_station_area_classification)
 
         # initialise annotation text
         self.faimode_target_annotate_text = []
@@ -2051,12 +2038,15 @@ class Plot:
             stations = []
             bad_stations = []
             area_classifications = []
+            station_classifications = []
 
             # get FAIRMODE statistics per station
             mqi_array = np.full(n_stations, np.nan)
          
-            for station_idx, (station, area_classification) in enumerate(
-                zip(valid_station_references, valid_station_area_classifications)):
+            for station_idx, (station, area_classification, station_classification) in enumerate(
+                zip(valid_station_references, 
+                    valid_station_area_classifications, 
+                    valid_station_station_classifications)):
 
                 st_observations_data = observations_data[station_idx, :]
                 st_experiment_data = experiment_data[station_idx, :]
@@ -2069,15 +2059,18 @@ class Plot:
                 mqi_array[station_idx] = mqi
                 stations.append(station)
                 area_classifications.append(area_classification)
+                station_classifications.append(station_classification)
                 if mqi > 1:
                     bad_stations.append(station)
 
             # plot data
-            for x, y, area_classification in (zip(x_points, y_points, area_classifications)):
-                if area_classification not in plot_characteristics['area_classification']['markers']:
+            classification_type = plot_characteristics['markers']['type'].lower()
+            classifications = area_classifications if classification_type == 'area' else station_classifications
+            for x, y, classification in (zip(x_points, y_points, classifications)):
+                if classification not in plot_characteristics['markers'][f'{classification_type}_classification']:
                     marker = 'h'
                 else:
-                    marker = plot_characteristics['area_classification']['markers'][area_classification]
+                    marker = plot_characteristics['markers'][f'{classification_type}_classification'][classification]
                 relevant_axis.plot(x, y, markeredgecolor=self.read_instance.plotting_params[data_label]['colour'], 
                                    marker=marker, **plot_characteristics['plot'])
             
@@ -2132,17 +2125,17 @@ class Plot:
 
         # create legend
         legend_elements = []
-        for area_classification in np.unique(area_classifications):
-            if area_classification not in plot_characteristics['area_classification']['markers']:
+        for classification in np.unique(classifications):
+            if classification not in plot_characteristics['markers'][f'{classification_type}_classification']:
                 marker = 'h'
             else:
-                marker = plot_characteristics['area_classification']['markers'][area_classification]
+                marker = plot_characteristics['markers'][f'{classification_type}_classification'][classification]
             legend_element = mlines.Line2D([], [], marker=marker, 
-                                           label=area_classification, 
-                                           **plot_characteristics['area_classification']['plot'])
+                                           label=classification, 
+                                           **plot_characteristics['markers']['plot'])
             legend_elements.append(legend_element)
         relevant_axis.legend(handles=legend_elements, 
-                             **plot_characteristics['area_classification']['legend'])
+                             **plot_characteristics['markers']['legend'])
 
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """ Function that tracks plotted lines and collections

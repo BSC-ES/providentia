@@ -1017,9 +1017,9 @@
       "equal_aspect": true,
       "plot":
         { "markersize": 5, "markerfacecolor": "None", "linestyle": "None" },
-      "area_classification":
-        {
-          "markers":
+      "markers": {
+          "type": "area", # area, station
+          "area_classification":
             {
               "urban": "s",
               "urban-centre": "v",
@@ -1028,6 +1028,13 @@
               "rural-near_city": "p",
               "rural-regional": "*",
               "rural-remote": "x",
+            },
+          "station_classification":
+            {
+              "background": "s",
+              "point_source": "v",
+              "point_source-industrial": "^",
+              "point_source-traffic": "o",
             },
           "plot":
             {
@@ -1049,7 +1056,7 @@
           "MQI90",
           "covered_stations",
           "N_bad_stations",
-        ], # "bad_stations"
+        ], # parameters, MQI90, covered_stations, N_bad_stations bad_stations
       "auxiliar":
         {
           "circle":
