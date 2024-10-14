@@ -686,7 +686,7 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
                 ax_to_format.set_xticks(plot_characteristics['xticks'])
                 ax_to_format.set_xticklabels([canvas_instance.temporal_axis_mapping_dict['short'][relevant_temporal_resolution][xtick] for xtick
                                               in canvas_instance.periodic_xticks[relevant_temporal_resolution]])
-        # map specific formatting
+        
         elif base_plot_type == 'map':
 
             CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -727,6 +727,12 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
             # set map extent (if wanted)
             if map_extent:
                 set_map_extent(canvas_instance, ax_to_format, map_extent)
+
+        elif base_plot_type == 'fairmode-target':
+
+            # update axis labels
+            ax_to_format.set_xticks(**plot_characteristics['xticks'])
+            ax_to_format.set_yticks(**plot_characteristics['yticks'])
 
 def get_no_margin_lim(ax, lim):
     """ Get true limits of plot area (with no margins)
