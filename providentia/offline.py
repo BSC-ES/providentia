@@ -30,7 +30,8 @@ from .read import DataReader
 from .read_aux import (generate_file_trees, get_lower_resolutions, 
                        get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
                        get_valid_experiments, get_valid_obs_files_in_date_range)
-from .statistics import calculate_statistic, get_fairmode_data, generate_colourbar, get_selected_station_data, get_z_statistic_info
+from .statistics import (calculate_statistic, get_fairmode_data,
+                         generate_colourbar, get_selected_station_data, get_z_statistic_info)
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
@@ -1022,7 +1023,12 @@ class ProvidentiaOffline:
                 if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
                     print(f'Warning: Fairmode target summary plot cannot be created for {speci}.')
                     continue
-                observations_data, _ = get_fairmode_data(self, networkspeci)
+                if self.resolution != 'hourly':
+                    print('Warning: Fairmode target summary plot can only be created if the resolution is hourly.')
+                    continue
+                data, _ = get_fairmode_data(self, self, networkspeci)
+                observations_data = data[0, :, :]
+
                 # skip stations without observational data
                 if observations_data.shape[0] == 0:
                     print(f'No data after filtering by coverage for {speci}.')
@@ -1199,7 +1205,12 @@ class ProvidentiaOffline:
                     if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
                         print(f'Warning: Fairmode target station plot cannot be created for {speci} in {self.current_station_name}.')
                         continue
-                    observations_data, _ = get_fairmode_data(self, networkspeci)
+                    if self.resolution != 'hourly':
+                        print('Warning: Fairmode target station plot can only be created if the resolution is hourly.')
+                        continue
+                    data, _ = get_fairmode_data(self, self, networkspeci)
+                    observations_data = data[0, :, :]
+
                     # skip stations without observational data
                     if observations_data.shape[0] == 0:
                         print(f'No data after filtering by coverage for {speci} in {self.current_station_name}.')
