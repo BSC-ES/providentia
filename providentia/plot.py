@@ -2130,10 +2130,6 @@ class Plot:
         # strip empty characters from start
         self.faimode_target_annotate_text[0] = self.faimode_target_annotate_text[0].strip() 
 
-        # update axis labels
-        relevant_axis.set_xticks(**plot_characteristics['xticks'])
-        relevant_axis.set_yticks(**plot_characteristics['yticks'])
-
         # create legend
         legend_elements = []
         for area_classification in np.unique(area_classifications):

@@ -764,14 +764,13 @@ class Interactive:
                             chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)                         
 
         # handle harmonisation of axes
-        if base_plot_type not in ['legend', 'metadata', 'map', 'taylor']:
-            if base_plot_type == 'scatter':
-                harmonise_xy_lims_paradigm(self, self, relevant_ax, base_plot_type, 
-                                           self.plot_characteristics[plot_type], plot_options, relim=True)
-            else:
-                harmonise_xy_lims_paradigm(self, self, relevant_ax, base_plot_type, 
-                                           self.plot_characteristics[plot_type], plot_options, relim=True, 
-                                           autoscale=True)
+        if base_plot_type == 'scatter':
+            harmonise_xy_lims_paradigm(self, self, relevant_ax, base_plot_type, 
+                                        self.plot_characteristics[plot_type], plot_options, relim=True)
+        elif base_plot_type not in ['legend', 'metadata', 'map', 'taylor', 'fairmode-target']:
+            harmonise_xy_lims_paradigm(self, self, relevant_ax, base_plot_type, 
+                                        self.plot_characteristics[plot_type], plot_options, relim=True, 
+                                        autoscale=True)
 
         # make legend (embedded on plot axis)
         if (legend) & (base_plot_type != 'legend'):
@@ -799,7 +798,10 @@ class Interactive:
                             ax_to_plot = self.relevant_temporal_resolutions[0]
                         relevant_ax[ax_to_plot].legend(**legend_handles)
                     else:
-                        relevant_ax.legend(**legend_handles)
+                        if base_plot_type == 'fairmode-target':
+                            print("Warning: Data labels legend cannot be plotted, create single legend using make_plot function.")
+                        else:
+                            relevant_ax.legend(**legend_handles)
 
         # make colourbar (embedded on plot axis)
         if 'cb' in self.plot_characteristics[plot_type]:
