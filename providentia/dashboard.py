@@ -1484,6 +1484,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.mpl_canvas.handle_statsummary_periodic_aggregation_update()
             self.mpl_canvas.handle_statsummary_periodic_mode_update()
 
+            # update fairmode target combobox
+            self.mpl_canvas.handle_fairmode_target_classification_update()
+
             # unselect all/intersect/extent checkboxes
             self.mpl_canvas.unselect_map_checkboxes()
 

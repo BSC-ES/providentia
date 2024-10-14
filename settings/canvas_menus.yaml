@@ -1157,7 +1157,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 130],
+          "size": [250, 180],
           "relative_position": [-230, 25],
         },
 
@@ -1190,11 +1190,29 @@
           "function": "update_markersize_func",
         },
 
+      "classification_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_label",
+          "size": [230, 20],
+          "relative_position": [-220, 100],
+          "text": "Classification type",
+        },
+
+      "classification":
+        {
+          "element_type": "combobox",
+          "formatting_dict": "combobox_menu",
+          "fixed_width": 105,
+          "relative_position": [-220, 125],
+          "function": "handle_fairmode_target_classification_update",
+        },
+
       "options_label":
         {
           "element_type": "label",
           "size": [230, 20],
-          "relative_position": [-220, 100],
+          "relative_position": [-220, 150],
           "text": "Options",
         },
 
@@ -1203,7 +1221,7 @@
           "element_type": "checkable_combobox",
           "formatting_dict": "checkable_combobox_menu",
           "size": [230, 20],
-          "relative_position": [-220, 125],
+          "relative_position": [-220, 175],
           "object_name": "fairmode_target_options",
           "function": "update_plot_option",
         },
