@@ -584,7 +584,7 @@
 
   "scatter":
     {
-      "figsize": [7.5, 7.5],
+      "figsize": [5, 5],
       "subplots_adjust":
         {
           "left": 0.0,
@@ -596,13 +596,13 @@
         },
       "grid": { "axis": "both", "color": "lightgrey", "alpha": 0.8 },
       "remove_spines": ["top", "right"],
-      "axis_title": { "label": "", "fontsize": 16, "loc": "center" },
+      "axis_title": { "label": "", "fontsize": 13, "loc": "center", "pad": 10 },
       "xlabel":
-        { "xlabel": "Observations [measurement_units]", "fontsize": 16 },
-      "ylabel": { "ylabel": "Experiment [measurement_units]", "fontsize": 16 },
+        { "xlabel": "Observations [measurement_units]", "fontsize": 12 },
+      "ylabel": { "ylabel": "Experiment [measurement_units]", "fontsize": 12 },
       "xtick_params":
         {
-          "labelsize": 14,
+          "labelsize": 10,
           "which": "both",
           "bottom": true,
           "top": false,
@@ -615,7 +615,7 @@
         },
       "ytick_params":
         {
-          "labelsize": 14,
+          "labelsize": 10,
           "which": "both",
           "bottom": true,
           "top": false,
@@ -634,17 +634,18 @@
               "columnspacing": 0.5,
               "frameon": false,
               "handletextpad": 0,
-              "ncol": 4,
+              "ncol": 5,
               "borderaxespad": 0,
-              "fontsize": 14.0,
+              "fontsize": 10.0,
+              "bbox_to_anchor": [1.55, 1]
             },
-          "handles": { "markersize": 14, "marker": "o", "color": "white" },
+          "handles": { "markersize": 10.5, "marker": "o", "color": "white" },
         },
       "annotate_stats": ["r2", "RMSE"],
       "annotate_text":
         {
           "s": "",
-          "fontsize": 13,
+          "fontsize": 10,
           "n_stations": false,
           "exp_labels": true,
           "color": "",
@@ -911,7 +912,7 @@
 
   "taylor":
     {
-      "figsize": [9, 9],
+      "figsize": [5, 5],
       "subplots_adjust":
         {
           "left": 0.0,
@@ -922,11 +923,11 @@
           "wspace": 0.0,
         },
       "grid": { "axis": "both", "color": "lightgrey", "alpha": 0.8 },
-      "axis_title": { "label": "", "fontsize": 16, "loc": "center" },
-      "xylabel": { "fontsize": 16 },
-      "rlabel": { "fontsize": 16 },
-      "xytick_params": { "fontsize": 14 },
-      "rtick_params": { "fontsize": 14 },
+      "axis_title": { "label": "", "fontsize": 13, "loc": "center", "pad": 10 },
+      "xylabel": { "fontsize": 10 },
+      "rlabel": { "fontsize": 10 },
+      "xytick_params": { "fontsize": 10 },
+      "rtick_params": { "fontsize": 10 },
       "legend":
         {
           "plot":
@@ -937,9 +938,10 @@
               "handletextpad": 0,
               "ncol": 5,
               "borderaxespad": 0,
-              "fontsize": 14.0,
+              "fontsize": 11.0,
+              "bbox_to_anchor": [1.5, 1]
             },
-          "handles": { "markersize": 14, "marker": "o", "color": "white" },
+          "handles": { "markersize": 11, "marker": "o", "color": "white" },
         },
       "srange": [0, 1.5],
       "rlocs":
@@ -950,7 +952,7 @@
         },
       "contours":
         {
-          "levels": { "number": 5, "fontsize": 7 },
+          "levels": { "number": 5, "fontsize": 9 },
           "style":
             {
               "obs":
@@ -990,7 +992,7 @@
 
   "fairmode-target":
     {
-      "figsize": [7.5, 7.5],
+      "figsize": [5, 5],
       "subplots_adjust":
         {
           "left": 0.0,
@@ -1001,15 +1003,14 @@
           "wspace": 0.0,
         },
       "grid": { "axis": "both", "color": "lightgrey", "alpha": 0.8 },
-      "remove_spines": ["top", "right"],
-      "axis_title": { "label": "", "fontsize": 16, "loc": "center" },
-      "xlabel": { "xlabel": "CRMSE / β·RMSᵤ", "fontsize": 16 },
-      "ylabel": { "ylabel": "MB / β·RMSᵤ", "fontsize": 16 },
+      "axis_title": { "label": "", "fontsize": 13, "loc": "center", "pad": 10 },
+      "xlabel": { "xlabel": "CRMSE / β·RMSᵤ", "fontsize": 12 },
+      "ylabel": { "ylabel": "MB / β·RMSᵤ", "fontsize": 12 },
       "xlim": [-2, 2],
       "ylim": [-2, 2],
       "xtick_params":
         {
-          "labelsize": 14,
+          "labelsize": 12,
           "which": "both",
           "bottom": true,
           "top": false,
@@ -1022,7 +1023,7 @@
         },
       "ytick_params":
         {
-          "labelsize": 14,
+          "labelsize": 12,
           "which": "both",
           "bottom": true,
           "top": false,
@@ -1041,11 +1042,11 @@
               "columnspacing": 0.5,
               "frameon": false,
               "handletextpad": 0,
-              "ncol": 4,
+              "ncol": 5,
               "borderaxespad": 0,
-              "fontsize": 14.0,
+              "fontsize": 10.0
             },
-          "handles": { "markersize": 14, "marker": "o", "color": "white" },
+          "handles": { "markersize": 10.5, "marker": "o", "color": "white" },
         },
       "round_decimal_places": { "title": 2, "x": 2, "y": 2 },
       "equal_aspect": true,
@@ -1070,11 +1071,11 @@
               "linestyle": "None",
               "color": "grey",
             },
-          "legend": { "loc": "upper left", "fontsize": 8 },
+          "legend": { "loc": "upper left", "fontsize": 10 },
         },
       "xticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [2, 1, 0, 1, 2] },
       "yticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [-2, -1, 0, 1, 2] },
-      "annotate_text": { "fontsize": 8, "round_decimal_places": 2, "sep": -5 },
+      "annotate_text": { "fontsize": 10, "round_decimal_places": 2, "sep": -5 },
       "annotate_offset":
         { "loc": "center right", "bbox_to_anchor": [1.45, 0.5] },
       "annotate_bbox": { "edgecolor": "white" },
@@ -1129,7 +1130,7 @@
                   "s": "MB > 0",
                   "va": "top",
                   "ha": "center",
-                  "fontsize": 8,
+                  "fontsize": 10,
                 },
               "bottom":
                 {
@@ -1138,7 +1139,7 @@
                   "s": "MB < 0",
                   "va": "bottom",
                   "ha": "center",
-                  "fontsize": 8,
+                  "fontsize": 10,
                 },
               "left":
                 {
@@ -1147,7 +1148,7 @@
                   "s": "r",
                   "va": "center",
                   "ha": "left",
-                  "fontsize": 8,
+                  "fontsize": 10,
                 },
               "right":
                 {
@@ -1156,7 +1157,7 @@
                   "s": "StdDev",
                   "va": "center",
                   "ha": "right",
-                  "fontsize": 8,
+                  "fontsize": 10,
                 },
             },
         },
