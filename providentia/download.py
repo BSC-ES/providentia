@@ -24,7 +24,6 @@ from getpass import getpass
 from .configuration import ProvConfiguration, load_conf
 from .read_aux import check_for_ghost
 from .warnings_prv import show_message
-from .interpolation.mapping_species import mapping_species
 # TODO delete when sure
 # from .read_aux import get_ghost_observational_tree, get_nonghost_observational_tree
 
@@ -32,10 +31,10 @@ CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 REMOTE_MACHINE = "storage5"
 
+# load the defined experiments paths, agrupations yaml and mapping species
 data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
-
-# load the defined experiments paths and agrupations yaml
 interp_experiments = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
+mapping_species =  yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 
 def check_time(size, file_size):
     if (time.time() - download.ncfile_dl_start_time) > download.timeoutLimit:
@@ -552,11 +551,6 @@ class ProvidentiaDownload(object):
 
             return initial_check_nc_files
         
-        # tell the user if not valid resolution specie date combinations
-        else:
-            msg = "There are no available observations to be downloaded."
-            show_message(self, msg, deactivate=initial_check)
-        
     def download_ghost_network_sftp(self, network, initial_check, files_to_download=None):
         # check if ssh exists and check if still active, connect if not
         if (self.ssh is None) or (self.ssh.get_transport().is_active()):
@@ -703,11 +697,6 @@ class ProvidentiaDownload(object):
                             self.sftp.get(remote_path,local_path, callback=check_time)
                        
             return initial_check_nc_files
-
-        # tell the user if not valid resolution specie date combinations
-        else:
-            msg = "There are no available observations to be downloaded."
-            show_message(self, msg, deactivate=initial_check)
 
     def download_ghost_network_zenodo(self, network, initial_check, files_to_download=None):
         if not initial_check:
@@ -1035,11 +1024,6 @@ class ProvidentiaDownload(object):
             
             return initial_check_nc_files
 
-        # tell the user if not valid resolution specie date combinations
-        else:
-            msg = "There are no available observations to be downloaded."
-            show_message(self, msg, deactivate=initial_check)
-            
     def download_non_interpolated_experiments(self, experiment, initial_check, files_to_download=None):
         # check if ssh exists and check if still active, connect if not
         if (self.ssh is None) or (self.ssh.get_transport().is_active()):
