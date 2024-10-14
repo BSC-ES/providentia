@@ -10,7 +10,7 @@ from pydoc import locate
 import numpy as np
 import multiprocessing
 
-MACHINE = os.environ.get('BSC_MACHINE', '')
+MACHINE = os.environ.get('BSC_MACHINE', 'local')
 
 # get current path and providentia root path
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -20,14 +20,11 @@ sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia', 'interpolation'))
 sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia'))
 
 from aux import get_aeronet_bin_radius_from_bin_variable, get_model_bin_radii, check_for_ghost
-from mapping_species import mapping_species
 from configuration import ProvConfiguration, load_conf
 
-# load the data_paths for the different machines and the default values jsons
-data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'data_paths.yaml')))
-
-# load the defined experiments paths and agrupations jsons
+# load the defined experiments and species yamls
 interp_experiments = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
+mapping_species =  yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 
 class SubmitInterpolation(object):
     """ Class that handles the interpolation submission. """
@@ -38,11 +35,11 @@ class SubmitInterpolation(object):
         self.start = time.time()
 
         # define current working directory and
-        # arguments/submit/interpolation log subdirectories
+        # arguments/greasy/interpolation log subdirectories
         self.working_directory = CURRENT_PATH     
-        self.arguments_dir = '{}/arguments'.format(self.working_directory)
-        self.submit_dir = '{}/submit'.format(self.working_directory)
-        self.interpolation_log_dir = '{}/interpolation_logs'.format(self.working_directory)
+        self.arguments_dir = os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/arguments')
+        self.submit_dir = os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/greasy_logs')
+        self.interpolation_log_dir = os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs')
 
         # initialize commandline arguments, if given
         provconf = ProvConfiguration(self, **kwargs)
@@ -98,7 +95,7 @@ class SubmitInterpolation(object):
                                   'species', 'network', 'resolution', 'forecast', 'forecast_day', 
                                   'interp_n_neighbours', 'interp_reverse_vertical_orientation', 
                                   'interp_chunk_size', 'interp_job_array_limit', 'exp_root', 
-                                  'ghost_root', 'nonghost_root']
+                                  'ghost_root', 'nonghost_root', 'exp_to_interp_root', 'interp_multiprocessing']
 
         # print variables used, if all species are used print "All Species"        
         print("\nVariables used for the interpolation:\n")
@@ -114,7 +111,7 @@ class SubmitInterpolation(object):
                         print(f" - {exp}")
 
         # define the QOS (Quality of Service) used to manage jobs on the SLURM system
-        if self.machine == 'mn5':
+        if MACHINE == 'mn5':
             self.qos = 'gp_bsces'
         else:
             self.qos = 'bsc_es'
@@ -151,23 +148,33 @@ class SubmitInterpolation(object):
             obs_files_dates = []
             exp_files_dates = []
 
-            # get experiment specific directories list
-            exp_dir_list = interp_experiments[experiment_type]["paths"]
-
-            # take first functional directory 
-            exp_dir = None      
-            for temp_exp_dir in exp_dir_list:
-                if os.path.exists(os.path.join(temp_exp_dir,experiment_to_process)):
-                    exp_dir = temp_exp_dir
-                    break
-
-            # if none of the paths are in this current machine, break
-            if exp_dir is None:
-                error = f"Error: None of the experiment paths in {os.path.join('settings', 'interp_experiments.yaml')} are available in this machine ({MACHINE})."
-                sys.exit(error)
+            exp_dir = None
+            # if local machine, get directory from data_paths
+            if MACHINE == 'local':  
+                exp_to_interp_path = os.path.join(self.exp_to_interp_root, experiment_to_process)
+                if os.path.exists(exp_to_interp_path):
+                    exp_dir = exp_to_interp_path
                 
-            # add file to directory path
-            exp_dir += f"{experiment_to_process}/"
+                # if none of the paths are in this current machine, break
+                if exp_dir is None:
+                    error = f"Error: None of the experiment paths in {self.exp_to_interp_root} are available in this machine ({MACHINE})."
+                    sys.exit(error)
+            # for HPC machines
+            else:
+                # get experiment type and specific directories
+                exp_dir_list = interp_experiments[experiment_type]["paths"]
+                for temp_exp_dir in exp_dir_list:
+                    if os.path.exists(os.path.join(temp_exp_dir,experiment_to_process)):
+                        exp_dir = temp_exp_dir
+                        break
+
+                # take first functional directory 
+                if exp_dir is None:
+                    error = f"Error: None of the experiment paths in {os.path.join('settings', 'interp_experiments.yaml')} are available in this machine ({MACHINE})."
+                    sys.exit(error)
+                
+                # add file to directory path
+                exp_dir += f"{experiment_to_process}/"
 
             # get model bin edges
             r_edges, rho_bins = get_model_bin_radii(experiment_type)
@@ -659,14 +666,14 @@ class SubmitInterpolation(object):
         submit_file.write("#SBATCH --qos={}\n".format(self.qos))
         # submit_file.write("#SBATCH --output=/dev/null\n") # decomment when debugging
         # submit_file.write("#SBATCH --error=/dev/null\n")
-        if self.machine == 'mn5': # TODO when checking if debug works check this
+        if MACHINE == 'mn5': # TODO when checking if debug works check this
             submit_file.write("#SBATCH --account=bsc32\n")  
             submit_file.write("#SBATCH --ntasks-per-node={}\n".format(n_simultaneous_tasks))
             submit_file.write("#SBATCH --cpus-per-task=1\n")
             submit_file.write("\n")
         else:
             submit_file.write("\n")
-            submit_file.write("source {}/load_modules.sh\n".format(self.working_directory))
+            submit_file.write("source {}/bin/load_modules.sh\n".format(PROVIDENTIA_ROOT))
         submit_file.write("export GREASY_NWORKERS=$SLURM_NPROCS\n") 
         submit_file.write("export GREASY_LOGFILE={}/{}_$SLURM_ARRAY_TASK_ID.log\n".format(self.submit_dir, 
                                                                                           self.slurm_job_id))
@@ -719,7 +726,7 @@ class SubmitInterpolation(object):
         submit_file.write("#BSUB -eo /dev/null\n")
         submit_file.write("\n")
 
-        submit_file.write("source {}/load_modules.sh\n".format(self.working_directory))
+        submit_file.write("source {}/bin/load_modules.sh\n".format(PROVIDENTIA_ROOT))
         submit_file.write("export GREASY_NWORKERS=$LSB_DJOB_NUMPROC\n")
         submit_file.write("export GREASY_LOGFILE={}/{}_$LSB_JOBINDEX.log\n".format(self.submit_dir, self.slurm_job_id))
         submit_file.write("arguments_store={}/{}.grz\n".format(self.arguments_dir, self.slurm_job_id))
@@ -739,7 +746,7 @@ class SubmitInterpolation(object):
         submit_complete = False
         while submit_complete == False:
 
-            if self.machine == "nord3":
+            if MACHINE == "nord3":
                 submit_process = subprocess.Popen(['bsub'], stdout=subprocess.PIPE,
                                               stdin=open('{}/{}'.format(self.submit_dir, self.job_fname), 'r'))
             else:
@@ -764,7 +771,7 @@ class SubmitInterpolation(object):
         job_entered = False 
 
         while all_tasks_finished == False:
-            if self.machine == "nord3":
+            if MACHINE == "nord3":
                 # cmd = ['bjobs', '-noheader', '-J', 'PRVI_{}[1]'.format(self.slurm_job_id)]
                 cmd = ['bjobs', '-noheader']
             else:
@@ -774,10 +781,10 @@ class SubmitInterpolation(object):
             n_jobs_in_queue = len(squeue_status.split('\n')[:-1])
             # if number of jobs in queue > 0, then sleep for 10
             # seconds and then check again how many jobs there are in queue
-            if (self.machine in ('nord3v2', 'amd', 'mn5')) and (n_jobs_in_queue > 0):
+            if (MACHINE in ('nord3v2', 'amd', 'mn5')) and (n_jobs_in_queue > 0):
                 time.sleep(10)
                 continue
-            elif self.machine == 'nord3':
+            elif MACHINE == 'nord3':
                 # has submitted jobs entered the queue?
                 if self.slurm_job_id[1:] in squeue_status.split('\n')[1:][0]:
                     job_entered = True
@@ -901,12 +908,16 @@ def main(**kwargs):
     SI.create_greasy_arguments_file()
 
     # submit interpolation jobs
-    if SI.machine == 'local':
+    if SI.interp_multiprocessing:
         SI.submit_job_multiprocessing()
     else:
-        # create submission script according to machine
-        if SI.machine == "nord3":
-            SI.create_lsf_submission_script()
+        if SI.machine == 'local':
+            error = 'Error: It is not possible to interpolate locally without using multiprocessing.'
+            sys.exit(error)
         else:
-            SI.create_slurm_submission_script()
-        SI.submit_job_greasy()
+            # create submission script according to machine
+            if SI.machine == "nord3":
+                SI.create_lsf_submission_script()
+            else:
+                SI.create_slurm_submission_script()
+            SI.submit_job_greasy()

@@ -69,6 +69,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # load representativity information
         self.representativity_info = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
 
+        # save warnings that appear next in to show them after the UI is initialised
+        self.delay = True
+        self.delayed_warnings = []
+
         # initialise default configuration variables
         # modified by commandline arguments, if given
         provconf = ProvConfiguration(self, **kwargs)
@@ -190,6 +194,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # setup callback events upon resizing/moving of Providentia window
         self.resized.connect(self.get_geometry)
         self.move.connect(self.get_geometry)
+        
+        # show delayed warnings
+        self.delay = False
+        for msg in self.delayed_warnings:
+            show_message(self, msg)
 
     def resizeEvent(self, event):
         """ Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry. """
