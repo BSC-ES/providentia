@@ -16,5 +16,8 @@ def show_message(read_instance, msg, msg_offline=None, from_conf=None, deactivat
         # there are some warnings that will only be shown if we launch the dashboard
         # using a configuration file (those in filter.py, read.py and configuration.py)
         if (from_conf is None) or (from_conf is True):
-            from dashboard_elements import MessageBox
-            MessageBox(msg)
+            if not read_instance.delay:
+                from dashboard_elements import MessageBox
+                MessageBox(msg)
+            else:
+                read_instance.delayed_warnings.append(msg)
