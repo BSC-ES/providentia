@@ -315,6 +315,10 @@ class Interactive:
         else:
             zstat = None
 
+        # get networkspeci to plot (for non-multispecies plots), taking first one preferentially
+        networkspeci = self.networkspecies[0]
+        speci = networkspeci.split('|')[-1]
+
         # for timeseries chunking
         chunk_stat = None
         chunk_resolution = None
@@ -383,6 +387,15 @@ class Interactive:
             print(msg)
             return
         
+        # do not make FAIRMODE target plot if species not in list or resolution not hourly
+        if base_plot_type == 'fairmode-target':
+            if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
+                print(f'Warning: Fairmode target plot cannot be created for {speci} in {self.current_station_name}.')
+                return
+            if self.resolution != 'hourly':
+                print('Warning: Fairmode target plot can only be created if the resolution is hourly.')
+                return
+            
         # get data labels for plot
         if len(data_labels) == 0:
             data_labels = copy.deepcopy(self.data_labels)
@@ -464,10 +477,6 @@ class Interactive:
             relevant_data_labels = list(self.experiments.values())
         else:
             relevant_data_labels = copy.deepcopy(data_labels)
-
-        # get networkspeci to plot (for non-multispecies plots), taking first one preferentially
-        networkspeci = self.networkspecies[0]
-        speci = networkspeci.split('|')[-1]
 
         # if multispecies is active then use all networkspecies, otherwise take first
         if 'multispecies' in plot_options:
