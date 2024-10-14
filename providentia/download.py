@@ -173,8 +173,8 @@ class ProvidentiaDownload(object):
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             self.provconf.check_validity(deactivate_warning=True)
 
-            # if networks is none, raise error
-            if not self.network:
+            # if networks is none and is not the non interpolated mode, raise error
+            if not self.network and self.interpolated is True:
                 error = "Error: No networks were passed."
                 sys.exit(error)
             
@@ -1158,7 +1158,7 @@ class ProvidentiaDownload(object):
                         if format == (0,1):
                             # when there is no ensemble option in the name only allmembers and 000 are valid
                             if ensemble_options == '000' or ensemble_options == 'allmembers':
-                                nc_files = list(filter(lambda x:x.split("_")[0] == species,nc_files))
+                                nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
                             else:
                                 msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble_options} ensemble option."
                                 show_message(self, msg, deactivate=initial_check)
@@ -1199,7 +1199,7 @@ class ProvidentiaDownload(object):
                 # download the valid resolution specie date combinations
                 else:
                     # create local directory (always with experiments on the new format)
-                    local_dir = os.path.join(self.exp_to_interp_root,experiment,domain,resolution,species)
+                    local_dir = os.path.join(self.exp_to_interp_root,exp_id,domain,resolution,species)
                     
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
@@ -1229,7 +1229,7 @@ class ProvidentiaDownload(object):
                             self.latest_nc_file_path = local_path
                             remote_path = os.path.join(remote_dir,nc_file)
                             self.ncfile_dl_start_time = time.time()
-                            self.sftp.get(remote_path,local_path, callback=check_time) 
+                            self.sftp.get(remote_path,local_path,callback=check_time) 
             
             return initial_check_nc_files
 
@@ -1284,8 +1284,23 @@ class ProvidentiaDownload(object):
         if (self.ssh is None) or (self.ssh.get_transport().is_active()):
             self.connect()  
 
-        # get directory content and format it as the experiments       
-        experiment_list = self.sftp.listdir(os.path.join(self.exp_remote_path,self.ghost_version))
+        # download all interpolated experiments
+        if self.interpolated is True:
+            # get directory content and format it as the experiments       
+            experiment_list = self.sftp.listdir(os.path.join(self.exp_remote_path,self.ghost_version))
+        # download all non interpolated experiments
+        else:
+            # get all the experiments id
+            experiments = []
+            for experiment_dict in interp_experiments.values():
+                experiments += experiment_dict["experiments"]
+            # get all the domain and ensemble options combinations 
+            experiment_list = []
+            # TODO hardcoded
+            for domain in ["ip", "d03", "d01", "regional", "eu", "reg", "ex", "bcn", "cat", "d02", "global","regional_i01", "regional_i02", "regional_i03"]:
+                for exp in experiments:
+                    experiment_list.append(exp+"-"+domain+"-allmembers")
+
         self.experiments = dict(zip(experiment_list,experiment_list))
 
     def get_valid_nc_files_in_date_range(self, nc_files):
