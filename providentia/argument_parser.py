@@ -58,7 +58,7 @@ class ProvArgumentParser(object):
                                      help="set experiment root data directory")
             self.parser.add_argument("--exp_to_interp_root",
                                      dest="exp_to_interp_root",
-                                     help="set experiment to interp root data directory for local mode")
+                                     help="set experiment to interpolate root data directory")
             self.parser.add_argument("--generate_file_tree", '--gft',
                                      dest="generate_file_tree",
                                      default=False,
@@ -240,6 +240,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--interp_job_array_limit",
                                      dest="interp_job_array_limit",
                                      help="maximum number of chunks in job array for interpolation")
+            self.parser.add_argument("--interp_multiprocessing",
+                                     dest="interp_multiprocessing",
+                                     help="use multiprocessing instead of greasy to interpolate in HPC machines")
  
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)

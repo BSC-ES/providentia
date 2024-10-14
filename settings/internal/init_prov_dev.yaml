@@ -29,6 +29,7 @@
             'observations_data_label': 'observations',
             'alias_flag': False,
             'experiments': [],
+            'alias' : [],
             'exp_ids' : [], # TODO remove if changed 
             'domain': null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
             'ensemble_options' : null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
@@ -76,9 +77,10 @@
             'interp_reverse_vertical_orientation': False,
             'interp_chunk_size': 16,
             'interp_job_array_limit': 100, 
+            'interp_multiprocessing': False,
             'fixed_section_vars': ['ghost_version', 'conf', 'config', 'config_dir', 'operating_system', 'machine',
                                    'cartopy_data_dir', 'available_cpus', 'n_cpus', 'ghost_root', 'nonghost_root', 
-                                   'exp_root', 'generate_file_tree', 'disable_file_tree', 
+                                   'exp_root', 'exp_to_interp_root', 'generate_file_tree', 'disable_file_tree', 
                                    'nonghost_available_resolutions', 'nonghost_available_networks', 'offline', 
                                    'interactive', 'download', 'interpolation', 'slurm_job_id', 'network', 'species', 
                                    'resolution', 'start_date', 'end_date', 'observations_data_label', 'alias_flag', 
@@ -91,9 +93,9 @@
                                    'report_filename', 'harmonise_summary', 'harmonise_stations', 
                                    'plot_characteristics_filename', 'interp_n_neighbours', 
                                    'interp_reverse_vertical_orientation', 'interp_chunk_size', 
-                                   'interp_job_array_limit'],
+                                   'interp_job_array_limit', 'interp_multiprocessing'],
             'non_writing_vars': ['conf', 'config', 'config_dir', 'operating_system', 'machine', 'cartopy_data_dir', 
-                                 'available_cpus', 'n_cpus', 'ghost_root', 'nonghost_root', 'exp_root', 
+                                 'available_cpus', 'n_cpus', 'ghost_root', 'nonghost_root', 'exp_root', 'exp_to_interp_root',
                                  'generate_file_tree', 'disable_file_tree', 'nonghost_available_resolutions', 
                                  'nonghost_available_networks', 'offline', 'interactive', 'download', 'interpolation', 
                                  'slurm_job_id', 'network', 'species', 'resolution', 'start_date', 'end_date',
