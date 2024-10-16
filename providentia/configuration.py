@@ -869,7 +869,7 @@ class ProvConfiguration:
         # check have network information, 
         # if offline, throw message, stating are using default instead
         # in download mode is allowed to not have network, so continue
-        if not self.read_instance.network and not self.read_instance.download:
+        if not self.read_instance.network:
             # default = ['GHOST']
             if self.read_instance.interpolation:
                 default = self.read_instance.ghost_available_networks
