@@ -24,8 +24,6 @@ from getpass import getpass
 from .configuration import ProvConfiguration, load_conf
 from .read_aux import check_for_ghost
 from .warnings_prv import show_message
-# TODO delete when sure
-# from .read_aux import get_ghost_observational_tree, get_nonghost_observational_tree
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
@@ -60,9 +58,6 @@ def sighandler(*unused):
     if os.path.exists(temp_dir):
         print(f"\nDeleting {temp_dir}")
         shutil.rmtree(temp_dir)
-    
-    # TODO delete when sure
-    # download.update_filetrees()
     
     print("\nExiting...")
     sys.exit()
@@ -256,10 +251,6 @@ class ProvidentiaDownload(object):
                 else:
                     error = f"Error: It is not possible to download experiments from the zenodo webpage."
                     sys.exit(error)
-
-            # TODO delete when sure
-            # update filetrees
-            # self.update_filetrees()
 
             # remove section variables from memory
             for k in self.section_opts:
@@ -1356,12 +1347,6 @@ class ProvidentiaDownload(object):
                     valid_nc_files.append(nc_file)
                     
         return valid_nc_files        
-
-    # TODO: delete when sure
-    # def update_filetrees(self):
-    #     print('\nUpdating filetrees...')
-    #     get_ghost_observational_tree(download)
-    #     get_nonghost_observational_tree(download)
         
 def main(**kwargs):
     """ Main function when running download function. """
