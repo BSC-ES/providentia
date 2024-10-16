@@ -193,6 +193,9 @@ class ProvConfiguration:
             from GHOST_standards import standard_QA_name_to_QA_code
             from GHOST_standards import standard_networks
             from GHOST_standards import standard_temporal_resolutions
+
+            # get ghost_version list
+            self.read_instance.possible_ghost_versions = os.listdir(os.path.join(CURRENT_PATH,'dependencies', 'GHOST_standards'))
             
             # get GHOST networks
             self.read_instance.ghost_available_networks = list(standard_networks.keys())
@@ -753,8 +756,9 @@ class ProvConfiguration:
         # search if the experiment id is in the interp_experiments file
         experiment_exists = False
         
-        # if local machine, get directory from data_paths
-        if MACHINE == 'local':
+        # if we are doing the interpolation from the local machine, get directory from data_paths
+        if MACHINE == 'local' and self.read_instance.interpolation:
+            # get the path to the non interpolated experiments
             exp_to_interp_root = data_paths['local']['exp_to_interp_root']
             exp_to_interp_root = os.path.expanduser(exp_to_interp_root[0])+exp_to_interp_root[1:]
             exp_to_interp_path = os.path.join(exp_to_interp_root, experiment)
@@ -768,7 +772,7 @@ class ProvConfiguration:
         
         # if experiment id is not defined, exit
         if not experiment_exists:
-            if MACHINE == 'local':  
+            if MACHINE == 'local' and self.read_instance.interpolation:
                 msg = f"Cannot find the experiment ID '{experiment}' in '{exp_to_interp_root}'."
             else:
                 msg = f"Cannot find the experiment ID '{experiment}' in '{os.path.join('settings', 'interp_experiments.yaml')}'. Please add it to the file."
@@ -776,7 +780,7 @@ class ProvConfiguration:
         else:
             # append experiment name in local since we do not differentiate between types
             # and we won't use this variable to get the paths
-            if MACHINE == 'local':  
+            if MACHINE == 'local' and self.read_instance.interpolation:
                 self.read_instance.experiment_types.append(experiment)
             else:
                 self.read_instance.experiment_types.append(experiment_type)
@@ -1065,9 +1069,6 @@ class ProvConfiguration:
             check_experiment_fun = self.check_experiment_download
         else:
             check_experiment_fun = self.check_experiment
-
-        # get ghost_version list
-        self.read_instance.possible_ghost_versions = os.listdir(os.path.join(CURRENT_PATH,'dependencies', 'GHOST_standards'))
 
         # temp dictionary to store experiments
         # TODO change names
