@@ -128,7 +128,7 @@ class ProvidentiaDownload(object):
                     # if no parent section names are found throw an error
                     if len(self.parent_section_names) == 0:
                         error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
-                        error.exit(error)
+                        sys.exit(error)
                     self.sections = self.parent_section_names
             else:
                 error = 'Error: The path to the configuration file specified in the command line does not exist.'
@@ -509,7 +509,8 @@ class ProvidentiaDownload(object):
                     msg = f"There is no data available in {REMOTE_MACHINE} for {network} network for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
-
+                
+                # get the nc files in the date range
                 valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
 
                 # warning if network + species + resolution + date range combination gets no matching results       
@@ -656,7 +657,8 @@ class ProvidentiaDownload(object):
                     msg = f"There is no data available in {REMOTE_MACHINE} for {network} network for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
-
+                
+                # get the nc files in the date range
                 valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
 
                 # warning if network + species + resolution + date range combination gets no matching results       
@@ -980,7 +982,8 @@ class ProvidentiaDownload(object):
                     msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment for {species} species {network} network at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
-                        
+
+                # get the nc files in the date range       
                 valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
 
                 # warning if experiment + species + resolution + network + date range combination gets no matching results       
@@ -1041,6 +1044,10 @@ class ProvidentiaDownload(object):
 
         # get experiment id and the domain
         exp_id, domain, ensemble_options = experiment.split("-")
+
+        # get stat if it is an ensemble statistic
+        if ensemble_options.startswith("stat_"): 
+            stat = ensemble_options.split("_",1)[-1]
 
         # get experiment type
         for experiment_type, experiment_dict in interp_experiments.items():
@@ -1109,7 +1116,14 @@ class ProvidentiaDownload(object):
                 species = speci_to_process
                 # first try with the original species
                 try:
-                    self.sftp.stat(os.path.join(remote_dir,resolution,species))
+                    # if it is an ensemble member
+                    if not ensemble_options.startswith("stat_"):
+                        res_spec = os.path.join(remote_dir,resolution,species)
+                    # if it is an ensemble statistic
+                    else:
+                        res_spec = os.path.join(remote_dir,resolution,"ensemble-stats",species+"_"+stat)
+  
+                    self.sftp.stat(res_spec)
                     species_exists = True
                 # if there are none, try with the mapped species
                 except FileNotFoundError:
@@ -1117,7 +1131,14 @@ class ProvidentiaDownload(object):
                     if speci_to_process in mapping_species:
                         for species in mapping_species[speci_to_process]:
                             try:
-                                self.sftp.stat(os.path.join(remote_dir,resolution,species))
+                                # if it is an ensemble member
+                                if not ensemble_options.startswith("stat_"):
+                                    res_spec = os.path.join(remote_dir,resolution,species)
+                                # if it is an ensemble statistic
+                                else:
+                                    res_spec = os.path.join(remote_dir,resolution,"ensemble-stats",species+"_"+stat)
+  
+                                self.sftp.stat(res_spec)  
                                 species_exists = True
                                 break
                             except FileNotFoundError:
@@ -1129,8 +1150,8 @@ class ProvidentiaDownload(object):
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
-                # add to the path with the resolution and species combination to the list
-                res_spec_dir.append(os.path.join(remote_dir,resolution,species))
+                # add the path with the resolution and species combination to the list
+                res_spec_dir.append(res_spec)
                         
         # print the species, resolution and experiment combinations that are going to be downloaded
         if res_spec_dir:
@@ -1146,58 +1167,60 @@ class ProvidentiaDownload(object):
                 if not initial_check:
                     local_path = remote_dir.split('/',7)[-1]
                     print(f"\n  - {os.path.join(self.exp_to_interp_root,local_path)}")
-            
-                species = remote_dir.split('/')[-1]
-                resolution = remote_dir.split('/')[-2]
-                domain = remote_dir.split('/')[-3]
-                
-                # get nc files if directory is found
-                try:
-                    nc_files = self.sftp.listdir(remote_dir)
-                    if nc_files:
-                        # identify format of the directory
-                        # the format is a tuple of how many - and how many _ are there
-                        # the directory format is choosen by popularity
-                        formats_list = [(file.count("-"), file.count("_")) for file in nc_files]
-                        number_of_formats_dict = {format: formats_list.count(format) for format in set(formats_list)}
-                        format = max(number_of_formats_dict, key=number_of_formats_dict.get)
-                        
-                        # filter and get only the files that follow the format
-                        nc_files = list(filter(lambda x:(x.count("-"),x.count("_")) == format,nc_files))
-                        # example: od550du_2019040212.nc (0,1)
-                        if format == (0,1):
-                            # when there is no ensemble option in the name only allmembers and 000 are valid
-                            if ensemble_options == '000' or ensemble_options == 'allmembers':
-                                nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
+                         
+                # get nc files
+                nc_files = self.sftp.listdir(remote_dir)
+
+                if nc_files:
+                        # if it is an ensemble member
+                        if not ensemble_options.startswith("stat_"):
+                            # get the domain, resolution and species from the path
+                            domain, resolution, species = remote_dir.split('/')[-3:]
+
+                            # identify format of the directory
+                            # the format is a tuple of how many - and how many _ are there
+                            # the directory format is choosen by popularity
+                            formats_list = [(file.count("-"), file.count("_")) for file in nc_files]
+                            number_of_formats_dict = {format: formats_list.count(format) for format in set(formats_list)}
+                            format = max(number_of_formats_dict, key=number_of_formats_dict.get)
+                            
+                            # filter and get only the files that follow the format
+                            nc_files = list(filter(lambda x:(x.count("-"),x.count("_")) == format,nc_files))
+                            
+                            # example: od550du_2019040212.nc (0,1)
+                            if format == (0,1):
+                                # when there is no ensemble option in the name only allmembers and 000 are valid
+                                if ensemble_options == '000' or ensemble_options == 'allmembers':
+                                    nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
+                                else:
+                                    msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble_options} ensemble option."
+                                    show_message(self, msg, deactivate=initial_check)
+                                    continue
+                            # example: od550du-000_2021020812.nc (1,1)
+                            elif format == (1,1):
+                                # filter by ensemble option in case that ensemble option is not allmembers
+                                if ensemble_options != 'allmembers':
+                                    nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble_options,nc_files))
+                                # if there is no options with the ensemble option, tell the user
+                                if nc_files is []:
+                                    msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble_options} ensemble option."
+                                    show_message(self, msg, deactivate=initial_check)
+                                    continue
                             else:
-                                msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble_options} ensemble option."
-                                show_message(self, msg, deactivate=initial_check)
-                                continue
-                        # example: od550du-000_2021020812.nc (1,1)
-                        elif format == (1,1):
-                            # filter by ensemble option in case that ensemble option is not allmembers
-                            # TODO check if with 000 should be download too, if its not, then change default to allmembers again
-                            if ensemble_options != 'allmembers':
-                                nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble_options,nc_files))
-                            # if there is no options with the ensemble option, tell the user
-                            if nc_files is []:
-                                msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble_options} ensemble option."
-                                show_message(self, msg, deactivate=initial_check)
-                                continue
-                        else:
-                            # TODO delete this
-                            error = "NEW FORMAT", nc_files
-                            sys.exit(error)
-                    else:
-                        # TODO maybe delete
-                        msg = "No data in the directory"
-                        show_message(self, msg, deactivate=initial_check)
-                        continue
-                except FileNotFoundError:
-                    msg = f"There is no data available in {REMOTE_MACHINE} for {experiment} experiment for {species} species at {resolution} resolution"
-                    show_message(self, msg, deactivate=initial_check)
-                    continue
+                                # TODO delete this in the future
+                                error = "It is not possible to download this nc file type yet. Please, contact the developers.", nc_files
+                                sys.exit(error)
                         
+                        # if it is an ensemble statistic
+                        else:
+                            # get the domain, resolution and species from the path
+                            domain, resolution, _, species = remote_dir.split('/')[-4:]
+                            species = species.split("_",1)[0]
+
+                            # filter the nc files to only get the ones that have the correct species and stats
+                            nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == stat, nc_files))
+                
+                # get the nc files in the date range        
                 valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
 
                 # warning if experiment + species + resolution + network + date range combination gets no matching results       
@@ -1208,8 +1231,12 @@ class ProvidentiaDownload(object):
 
                 # download the valid resolution specie date combinations
                 else:
-                    # create local directory (always with experiments on the new format)
-                    local_dir = os.path.join(self.exp_to_interp_root,exp_id,domain,resolution,species)
+                    # create local directory 
+                    # if it is an ensemble member
+                    if not ensemble_options.startswith("stat_"):
+                        local_dir = os.path.join(self.exp_to_interp_root,exp_id,domain,resolution,species)
+                    else:
+                        local_dir = os.path.join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+stat)
                     
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
@@ -1317,7 +1344,7 @@ class ProvidentiaDownload(object):
         valid_nc_files = []
         for nc_file in sorted(nc_files):
             if ".nc" in nc_file:
-                ym = nc_file.split("_")[-1].split(".nc")[0]
+                ym = nc_file[:-3].split("_")[1]
                 # from yyyymm to yyyymmdd
                 if len(ym) == 6:
                     ym = '{}01'.format(ym)
