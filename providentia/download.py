@@ -173,7 +173,7 @@ class ProvidentiaDownload(object):
                 sys.exit(error)
             
             # when one of those symbols is passed, get all networks
-            if self.network == ["*"] or self.network == ["default"]:
+            if self.network == ["*"]:
                 self.get_all_networks()
 
             # from here generate control if user stopped execution
