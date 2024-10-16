@@ -245,7 +245,7 @@ class ProvidentiaDownload(object):
             if self.experiments:
                 if self.bsc_download_choice == 'y':
                     # get function to download experiment depending on the configuration file field
-                    self.download_experiment_fun = self.download_experiment if self.interpolated is True else self.download_non_interpolated_experiments
+                    self.download_experiment_fun = self.download_experiment if self.interpolated is True else self.download_non_interpolated_experiment
                     # iterate the experiments download
                     for experiment in self.experiments.keys():
                         initial_check_nc_files = self.download_experiment_fun(experiment, initial_check=True)
@@ -1026,7 +1026,7 @@ class ProvidentiaDownload(object):
             
             return initial_check_nc_files
 
-    def download_non_interpolated_experiments(self, experiment, initial_check, files_to_download=None):
+    def download_non_interpolated_experiment(self, experiment, initial_check, files_to_download=None):
         # check if ssh exists and check if still active, connect if not
         if (self.ssh is None) or (self.ssh.get_transport().is_active()):
             self.connect()  
