@@ -20,11 +20,11 @@ sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia', 'interpolation'))
 sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia'))
 
 from aux import get_aeronet_bin_radius_from_bin_variable, get_model_bin_radii, check_for_ghost
-from mapping_species import mapping_species
 from configuration import ProvConfiguration, load_conf
 
-# load the defined experiments paths and agrupations jsons
+# load the defined experiments and species yamls
 interp_experiments = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
+mapping_species =  yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 
 class SubmitInterpolation(object):
     """ Class that handles the interpolation submission. """

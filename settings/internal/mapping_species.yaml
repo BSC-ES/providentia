@@ -1,0 +1,98 @@
+sconco3:
+  - vmro3
+sconcno:
+  - vmrno
+sconcno2:
+  - vmrno2
+sconcso2:
+  - vmrso2
+sconcco:
+  - vmrco
+sconcch4:
+  - vmrch4
+sconcc2h4:
+  - vmrc2h4
+sconcc2h6:
+  - vmrc2h6
+sconcc3h6:
+  - vmrc3h6
+sconcc3h8:
+  - vmrc3h8
+sconcisop:
+  - vmrisop
+sconcc6h6:
+  - vmrc6h6
+sconcc7h8:
+  - vmrc7h8
+sconcc10h16:
+  - vmrc10h16
+sconcnmvoc:
+  - vmrnmvoc
+sconcvoc:
+  - vmrvoc
+sconnmhc:
+  - vmrnmhc
+sconchc:
+  - vmrhc
+sconcnh3:
+  - vmrnh3
+sconchno3:
+  - vmrhno3
+sconcpan:
+  - vmrpan
+sconchcho:
+  - vmrhcho
+sconchcl:
+  - vmrhcl
+sconchf:
+  - vmrhf
+sconch2s:
+  - vmrh2s
+od500aerocoarse:
+  - od550ducoarse
+od550aero:
+  - od550du
+vconcaerobin1:
+  - loaddu
+vconcaerobin2:
+  - loaddu
+vconcaerobin3:
+  - loaddu
+vconcaerobin4:
+  - loaddu
+vconcaerobin5:
+  - loaddu
+vconcaerobin6:
+  - loaddu
+vconcaerobin7:
+  - loaddu
+vconcaerobin8:
+  - loaddu
+vconcaerobin9:
+  - loaddu
+vconcaerobin10:
+  - loaddu
+vconcaerobin11:
+  - loaddu
+vconcaerobin12:
+  - loaddu
+vconcaerobin13:
+  - loaddu
+vconcaerobin14:
+  - loaddu
+vconcaerobin15:
+  - loaddu
+vconcaerobin16:
+  - loaddu
+vconcaerobin17:
+  - loaddu
+vconcaerobin18:
+  - loaddu
+vconcaerobin19:
+  - loaddu
+vconcaerobin20:
+  - loaddu
+vconcaerobin21:
+  - loaddu
+vconcaerobin22:
+  - loaddu
