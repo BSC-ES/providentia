@@ -1211,6 +1211,9 @@ def get_fairmode_data(canvas_instance, read_instance, networkspeci):
     data_array = canvas_instance.selected_station_data[networkspeci]['per_station']
     print('Initial', data_array.shape)
     
+    # TODO: Make sure days with less than 75% coverage are nan
+    # If a day has less than 75% of data, make whole day nan
+
     # filter by requested coverage
     speci = networkspeci.split('|')[1]
     speci_settings = fairmode_settings[speci]
@@ -1220,8 +1223,6 @@ def get_fairmode_data(canvas_instance, read_instance, networkspeci):
     data_array = data_array[:, valid_station_idxs, :]
 
     print('After coverage', data_array.shape)
-
-    # TODO: Make sure days with less than 75% coverage are nan (avoid NO2)
 
     # resample to daily for PM2.5 and PM10
     if speci in ['pm2p5', 'pm10']:
@@ -1241,8 +1242,8 @@ def get_fairmode_data(canvas_instance, read_instance, networkspeci):
                                                   data_array_resampled.shape[1])
     # calculate MDA8 for ozone
     elif speci in ['sconco3']:
-        pass
-        # data_array = Stats.calculate_mda8(data_array)
+        #data_array = Stats.calculate_mda8(data_array)
+        print(data_array.shape)
         
     print('After resampling', data_array.shape)
 
