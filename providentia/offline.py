@@ -1027,7 +1027,7 @@ class ProvidentiaOffline:
                     or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
                     print('Warning: Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).')
                     continue
-                data, _ = get_fairmode_data(self, self, networkspeci, self.resolution)
+                data, _ = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
                 observations_data = data[0, :, :]
 
                 # skip stations without observational data
@@ -1210,7 +1210,7 @@ class ProvidentiaOffline:
                         or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
                         print('Warning: Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).')
                         continue
-                    data, _ = get_fairmode_data(self, self, networkspeci, self.resolution)
+                    data, _ = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
                     observations_data = data[0, :, :]
 
                     # skip stations without observational data
