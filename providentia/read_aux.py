@@ -875,3 +875,20 @@ def generate_file_trees(instance, force=False):
     # merge GHOST and non-GHOST filetrees
     if instance.nonghost_root is not None:
         instance.all_observation_data = {**instance.all_observation_data, **nonghost_observation_data}
+
+
+def get_valid_metadata(read_instance, variable, valid_station_idxs, networkspeci):
+    """ Get metadata without nans from the data for each timestep
+        If for all timesteps the metadata is nan, set nan as valid metadata
+    """
+
+    stations_metadata = read_instance.canvas_instance.selected_station_metadata[networkspeci][
+                            variable][valid_station_idxs, :]
+    valid_metadata = []
+    for station_metadata in  stations_metadata:
+        first_valid_station_metadata = next((
+            value for value in station_metadata 
+            if value == value), 'nan')
+        valid_metadata.append(first_valid_station_metadata)
+
+    return valid_metadata
