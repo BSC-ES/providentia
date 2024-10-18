@@ -250,100 +250,111 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
         :type plot_z_statistic_sign: str
     """
 
-    # get stats wished to be annotated
-    stats = plot_characteristics['annotate_stats']
-    
-    # if no stats defined, then return
-    if len(stats) == 0:
-        msg_dashboard = 'No annotation statistics are defined for {} in plot_characteristics_dashboard.yaml.'.format(base_plot_type)
-        msg_offline = 'No annotation statistics are defined for {} in plot_characteristics_offline.yaml.'.format(base_plot_type)
-        show_message(read_instance, msg=msg_dashboard, msg_offline=msg_offline)
-        return
-
-    # initialise list of strs to annotate, and colours of annotations
+    # initialise list of strs to annotate
     str_to_annotate = []
-    colours = []
 
-    # get valid data labels for networkspeci
-    valid_data_labels = canvas_instance.selected_station_data_labels[networkspeci]
-
-    # cut data_labels for those in valid data labels
-    cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
-
-    # bias plot? Then do not plot obs annotation label
-    if 'bias' in plot_options:
-        bias = True
-        if read_instance.observations_data_label in cut_data_labels:
-            cut_data_labels.remove(read_instance.observations_data_label)
-    else:
+    # add annotation text
+    if base_plot_type == 'fairmode-target':
         bias = False
+        if hasattr(canvas_instance.plot, 'faimode_target_annotate_text'):
+            str_to_annotate = canvas_instance.plot.faimode_target_annotate_text
+            colours = canvas_instance.plot.faimode_target_annotate_colour
+    else:
+        # get stats wished to be annotated
+        stats = plot_characteristics['annotate_stats']
+        
+        # if no stats defined, then return
+        if len(stats) == 0:
+            msg_dashboard = 'No annotation statistics are defined for {} in plot_characteristics_dashboard.yaml.'.format(base_plot_type)
+            msg_offline = 'No annotation statistics are defined for {} in plot_characteristics_offline.yaml.'.format(base_plot_type)
+            show_message(read_instance, msg=msg_dashboard, msg_offline=msg_offline)
+            return
 
-    # making plot for a bias stat? Then do not plot obs annotation label
-    if plot_z_statistic_sign == 'bias':
-        if read_instance.observations_data_label in cut_data_labels:
-            cut_data_labels.remove(read_instance.observations_data_label)
+        # initialise colours of annotations
+        colours = [] 
 
-    # avoid plotting stats for observations data for scatter plots
-    if base_plot_type == 'scatter':
-        if read_instance.observations_data_label in cut_data_labels:
-            cut_data_labels.remove(read_instance.observations_data_label)
+        # get valid data labels for networkspeci
+        valid_data_labels = canvas_instance.selected_station_data_labels[networkspeci]
 
-    # generate annotation str to plot
+        # cut data_labels for those in valid data labels
+        cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
-    # show number of stations if defined
-    if plot_characteristics['annotate_text']['n_stations']:
-        colours.append('black')
-        str_to_annotate.append('Stations: ' + str(len(canvas_instance.station_inds[networkspeci])))
-
-    # generate annotation line by line (one line per data label, for all stats)
-    for data_label_ii, data_label in enumerate(cut_data_labels):
-
-        # get colour for data label
-        colours.append(read_instance.plotting_params[data_label]['colour'])
-
-        # iterate through stats to calculate
-        stats_annotate = []
-        for zstat in stats:
-
-            # get zstat information
-            zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat)
-
-            # calculate stats
-            if (bias) or (plot_z_statistic_sign == 'bias') or (z_statistic_sign == 'bias'):
-                if data_label != read_instance.observations_data_label:
-                    stat_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, zstat, 
-                                                    [read_instance.observations_data_label], [data_label])
-                # skip bias stats for observations
-                else:
-                    continue
-            else:
-                stat_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, zstat, 
-                                                [data_label], [])
-
-            # format annotation line
-            stats_annotate.append("{0}: {1:.{2}f}".format(zstat, stat_calc[0],
-                                                          plot_characteristics['annotate_text']['round_decimal_places'])) 
-
-        # append annotation line
-        if (plot_characteristics['annotate_text']['exp_labels']):
-            str_to_append = data_label + ' | ' + ', '.join(stats_annotate)
+        # bias plot? Then do not plot obs annotation label
+        if 'bias' in plot_options:
+            bias = True
+            if read_instance.observations_data_label in cut_data_labels:
+                cut_data_labels.remove(read_instance.observations_data_label)
         else:
-            str_to_append = ', '.join(stats_annotate)
-        str_to_annotate.append(str_to_append)
+            bias = False
 
+        # making plot for a bias stat? Then do not plot obs annotation label
+        if plot_z_statistic_sign == 'bias':
+            if read_instance.observations_data_label in cut_data_labels:
+                cut_data_labels.remove(read_instance.observations_data_label)
+
+        # avoid plotting stats for observations data for scatter plots
+        if base_plot_type == 'scatter':
+            if read_instance.observations_data_label in cut_data_labels:
+                cut_data_labels.remove(read_instance.observations_data_label)
+
+        # generate annotation str to plot
+
+        # show number of stations if defined
+        if plot_characteristics['annotate_text']['n_stations']:
+            colours.append('black')
+            str_to_annotate.append('Stations: ' + str(len(canvas_instance.station_inds[networkspeci])))
+
+        # generate annotation line by line (one line per data label, for all stats)
+        for data_label_ii, data_label in enumerate(cut_data_labels):
+
+            # get colour for data label
+            colours.append(read_instance.plotting_params[data_label]['colour'])
+
+            # iterate through stats to calculate
+            stats_annotate = []
+            for zstat in stats:
+
+                # get zstat information
+                zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat)
+
+                # calculate stats
+                if (bias) or (plot_z_statistic_sign == 'bias') or (z_statistic_sign == 'bias'):
+                    if data_label != read_instance.observations_data_label:
+                        stat_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, zstat, 
+                                                        [read_instance.observations_data_label], [data_label])
+                    # skip bias stats for observations
+                    else:
+                        continue
+                else:
+                    stat_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, zstat, 
+                                                    [data_label], [])
+
+                # format annotation line
+                stats_annotate.append("{0}: {1:.{2}f}".format(zstat, stat_calc[0],
+                                                            plot_characteristics['annotate_text']['round_decimal_places'])) 
+
+            # append annotation line
+            if (plot_characteristics['annotate_text']['exp_labels']):
+                str_to_append = data_label + ' | ' + ', '.join(stats_annotate)
+            else:
+                str_to_append = ', '.join(stats_annotate)
+            str_to_annotate.append(str_to_append)
+
+            if plot_characteristics['annotate_text']['color'] != "":
+                colours = [plot_characteristics['annotate_text']['color']]*len(cut_data_labels)
+    
     if len(str_to_annotate) != 0:
-        if plot_characteristics['annotate_text']['color'] != "":
-            colours = [plot_characteristics['annotate_text']['color']]*len(cut_data_labels)
-
         # add annotation to plot
-        # see loc options at https://matplotlib.org/3.1.0/api/offsetbox_api.html
         lines = [TextArea(line, textprops=dict(color=colour, 
                                                size=plot_characteristics['annotate_text']['fontsize'])) 
                  for line, colour in zip(str_to_annotate, colours)]
-        bbox = AnchoredOffsetbox(child=VPacker(children=lines, align='left', pad=0, sep=1),
-                                 loc=plot_characteristics['annotate_text']['loc'],
-                                 bbox_transform=relevant_axis.transAxes)
-        bbox.zorder = plot_characteristics['annotate_bbox']['zorder']
+        bbox = AnchoredOffsetbox(child=VPacker(children=lines, align='left', pad=0, 
+                                               sep=plot_characteristics['annotate_text']['sep']),
+                                 bbox_transform=relevant_axis.transAxes, 
+                                 **plot_characteristics['annotate_offset'])
+        # set zorder for plots that have the annotation box on top of the plot
+        if base_plot_type != 'fairmode-target':
+            bbox.zorder = plot_characteristics['annotate_bbox']['zorder']
         bbox.patch.set(**plot_characteristics['annotate_bbox'])
         relevant_axis.add_artist(bbox)
 
