@@ -4,6 +4,7 @@ import copy
 import json
 import os
 import sys
+import yaml
 
 import cartopy
 import cartopy.crs as ccrs
@@ -11,6 +12,7 @@ from KDEpy import FFTKDE
 from itertools import groupby
 import matplotlib
 import matplotlib.image as mpimg
+import matplotlib.lines as mlines
 from matplotlib.lines import Line2D
 from matplotlib.patches import Polygon
 from matplotlib.projections import PolarAxes
@@ -22,17 +24,23 @@ import pandas as pd
 import pyproj
 import seaborn as sns
 
+from .calculate import ExpBias, Stats
 from .dashboard_interactivity import HoverAnnotation
-from .statistics import boxplot_inner_fences, calculate_statistic, get_z_statistic_info, get_z_statistic_type
-from .read_aux import drop_nans
-from .plot_aux import (create_chunked_timeseries, get_multispecies_aliases, get_taylor_diagram_ghelper_info, 
-                       kde_fft, merge_cells, periodic_labels, periodic_xticks, round_decimal_places, temp_axis_dict)
+from .statistics import (boxplot_inner_fences, calculate_statistic,
+                         get_fairmode_data, get_z_statistic_info, get_z_statistic_type)
+from .read_aux import drop_nans, get_valid_metadata
+from .plot_aux import (create_chunked_timeseries, get_multispecies_aliases, 
+                       get_taylor_diagram_ghelper_info, kde_fft, merge_cells, periodic_labels, 
+                       periodic_xticks, round_decimal_places, temp_axis_dict)
+
 
 # speed up transformations in cartopy
 pyproj.set_use_global_context()
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
+
 
 class Plot:
     """ Class that makes plots and handles plot configuration options when defined. """
@@ -184,13 +192,13 @@ class Plot:
                         print(f'Warning: {plot_type} cannot be created as {invalid_plot_options} plot options are not valid.')
                         valid_plot_type = False
 
-                    # warning for scatter plot if the temporal colocation is not active 
-                    elif ('scatter' == base_plot_type) & (not self.read_instance.temporal_colocation):
+                    # warning for scatter, taylor and fairmode plots if the temporal colocation is not active 
+                    elif (base_plot_type in ['scatter', 'taylor', 'fairmode-target']) & (not self.read_instance.temporal_colocation):
                         print(f'Warning: {plot_type} cannot be created as temporal colocation is not active.')
                         valid_plot_type = False
 
-                    # warning for scatter plot if have no experiments
-                    elif ('scatter' == base_plot_type) & (len(data_labels) == 1):
+                    # warning for scatter, taylor and fairmode plots if have no experiments
+                    elif (base_plot_type in ['scatter', 'taylor', 'fairmode-target']) & (len(data_labels) == 1):
                         print(f'Warning: No experiments defined, so {plot_type} cannot be created.')
                         valid_plot_type = False
 
@@ -1943,6 +1951,191 @@ class Plot:
             # track plot elements if using dashboard 
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
                 self.track_plot_elements(data_label, 'taylor', 'plot', self.taylor_plot, bias=False)
+
+        return True
+    
+    def make_fairmode_target(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
+        
+        # resample to daily for PM10 and PM2.5, get MDA8 for ozone, filter by coverage
+        data, valid_station_idxs = get_fairmode_data(self.canvas_instance, self.read_instance, networkspeci,
+                                                     self.read_instance.resolution)
+        observations_data = data[0, :, :]
+
+        # get settings
+        speci = networkspeci.split('|')[1]
+        u_95r_RV = fairmode_settings[speci]['u_95r_RV']
+        RV = fairmode_settings[speci]['RV']
+        alpha = fairmode_settings[speci]['alpha']
+        beta = fairmode_settings[speci]['beta']
+        coverage = fairmode_settings[speci]['coverage']
+
+        # add target
+        main_circle = plt.Circle(**plot_characteristics['auxiliar']['circle']['main'])
+        relevant_axis.add_patch(main_circle)
+
+        # add a black circle with radius 1 (continuous line)
+        big_circle = plt.Circle(**plot_characteristics['auxiliar']['circle']['big'])
+        relevant_axis.add_patch(big_circle)
+
+        # add a black circle with radius 0.5 (dotted line)
+        small_circle = plt.Circle(**plot_characteristics['auxiliar']['circle']['small'])
+        relevant_axis.add_patch(small_circle)
+
+        # add text in the sides
+        relevant_axis.text(**plot_characteristics['auxiliar']['sides']['top'], transform=relevant_axis.transAxes)
+        relevant_axis.text(**plot_characteristics['auxiliar']['sides']['bottom'], transform=relevant_axis.transAxes)
+        relevant_axis.text(**plot_characteristics['auxiliar']['sides']['left'], transform=relevant_axis.transAxes)
+        relevant_axis.text(**plot_characteristics['auxiliar']['sides']['right'], transform=relevant_axis.transAxes)
+
+        # add diagonal lines (y = x and y = -x)
+        xmin = np.min(plot_characteristics['xticks']['ticks'])
+        xmax = np.max(plot_characteristics['xticks']['ticks'])
+        ymin = np.min(plot_characteristics['yticks']['ticks'])
+        ymax = np.max(plot_characteristics['yticks']['ticks'])
+        relevant_axis.plot([xmin, xmax], [ymin, ymax], **plot_characteristics['auxiliar']['crosses']['increasing'])
+        relevant_axis.plot([xmin, xmax], [ymax, ymin], **plot_characteristics['auxiliar']['crosses']['decreasing'])
+
+        # get metadata without nans
+        classification_type = plot_characteristics['markers']['type'].lower()
+        valid_station_references = get_valid_metadata(self, 'station_reference', 
+                                                      valid_station_idxs, networkspeci)
+        try:
+            valid_station_classifications = get_valid_metadata(self, f'{classification_type}_classification', 
+                                                            valid_station_idxs, networkspeci)
+        except:
+            valid_station_classifications = np.full(len(valid_station_references), np.NaN, dtype=np.float32)
+            print(f'Data for {classification_type}_classification is not available and will not be shown in the legend')
+
+        # get number of stations
+        n_stations = len(valid_station_references)
+
+        # initialise annotation text
+        self.faimode_target_annotate_text = []
+        self.faimode_target_annotate_colour = []
+        if "parameters" in plot_characteristics['annotate_options']:
+            self.faimode_target_annotate_text.append(f"α={alpha}")
+            self.faimode_target_annotate_text.append(f"\nβ={beta}")
+            self.faimode_target_annotate_text.append(f"\nRV={RV}")
+            self.faimode_target_annotate_text.append(f"\nU₉₅,ᵣᴿⱽ={u_95r_RV}")
+            self.faimode_target_annotate_colour.extend(['black']*4)
+        if "covered_stations" in plot_characteristics['annotate_options']:
+            self.faimode_target_annotate_text.append(f"\n\n{n_stations} stations with\ncoverage above {coverage}%")
+            self.faimode_target_annotate_colour.append('black')
+
+        # get valid data labels for networkspeci
+        valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
+
+        # cut data_labels for those in valid data labels
+        cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+
+        # iterate through data labels
+        for data_label in cut_data_labels:
+
+            # continue for observations data label
+            if data_label == self.read_instance.observations_data_label:
+                continue
+
+            # get experiment data
+            experiment_data = data[valid_data_labels.index(data_label), :, :]
+            
+            # calculate MQI for the current station
+            x_points = []
+            y_points = []
+            stations = []
+            bad_stations = []
+            classifications = []
+
+            # get FAIRMODE statistics per station
+            mqi_array = np.full(n_stations, np.nan)
+         
+            for station_idx, (station, classification) in enumerate(
+                zip(valid_station_references, valid_station_classifications)):
+
+                st_observations_data = observations_data[station_idx, :]
+                st_experiment_data = experiment_data[station_idx, :]
+                
+                x, y, mqi = ExpBias.calculate_fairmode_target_stats(st_observations_data, st_experiment_data, 
+                                                                    u_95r_RV, RV, alpha, beta)
+
+                x_points.append(x)
+                y_points.append(y)
+                mqi_array[station_idx] = mqi
+                stations.append(station)
+                classifications.append(classification)
+                if mqi > 1:
+                    bad_stations.append(station)
+
+            # plot data
+            for x, y, classification in (zip(x_points, y_points, classifications)):
+                if classification not in plot_characteristics['markers'][f'{classification_type}_classification']:
+                    marker = 'h'
+                else:
+                    marker = plot_characteristics['markers'][f'{classification_type}_classification'][classification]
+                relevant_axis.plot(x, y, markeredgecolor=self.read_instance.plotting_params[data_label]['colour'], 
+                                   marker=marker, **plot_characteristics['plot'])
+            
+            # we need to create the plot point by point to be able to set the marker
+            # depending on the area classification since Matplotlib doesn't have a way to 
+            # set different markers at the same time
+            # we add this invisible line to be able to hover on all points and get annotations
+            # we make it invisible since data has already been plotted
+            self.fairmode_target_plot = relevant_axis.plot(x_points, y_points)
+            self.fairmode_target_plot[0].set_visible(False)
+
+            # track plot elements if using dashboard 
+            if (not self.read_instance.offline) and (not self.read_instance.interactive):
+                self.track_plot_elements(data_label, 'fairmode-target', 'plot', self.fairmode_target_plot, bias=False)
+
+            # add MQI90
+            self.faimode_target_annotate_text.append(f"\n\n{data_label}")
+            self.faimode_target_annotate_colour.append('black')
+            if "MQI90" in plot_characteristics['annotate_options']:
+                # calculate MQI90
+                mqi_sorted = sorted(mqi_array[~np.isnan(mqi_array)])
+                i_90 = int(0.9 * len(mqi_sorted)) - 1
+                MQI90 = mqi_sorted[i_90]
+                MQI90_formatted = '{0:.{1}f}'.format(
+                    MQI90, plot_characteristics['annotate_text']['round_decimal_places'])
+                self.faimode_target_annotate_text.append(f"\nMQI₉₀ = {MQI90_formatted}")
+                if MQI90 > 1:
+                    mqi_color = 'red'
+                else:
+                    mqi_color = 'green'
+                self.faimode_target_annotate_colour.append(mqi_color)
+
+            # add bad stations
+            if "N_bad_stations" in plot_characteristics['annotate_options']:
+                if len(bad_stations) == 1:
+                    stations_name = 'station'
+                else:
+                    stations_name = 'stations'
+                self.faimode_target_annotate_text.append(f'\n{len(bad_stations)} {stations_name} with MQI > 1')
+                self.faimode_target_annotate_colour.append('black')
+            if 'bad_stations' in plot_characteristics['annotate_options']:
+                if (len(bad_stations) > 0):
+                    formatted_stations = "\n".join(station.replace('_', '') for station in bad_stations)
+                    self.faimode_target_annotate_text.append(f':\n{formatted_stations}')
+                    self.faimode_target_annotate_colour.append('black')
+                if data_label != cut_data_labels[-1]:
+                    self.faimode_target_annotate_text += '\n\n'
+                    self.faimode_target_annotate_colour.append('black')
+
+        # strip empty characters from start
+        self.faimode_target_annotate_text[0] = self.faimode_target_annotate_text[0].strip() 
+
+        # create legend
+        legend_elements = []
+        for classification in np.unique(classifications):
+            if classification not in plot_characteristics['markers'][f'{classification_type}_classification']:
+                marker = 'h'
+            else:
+                marker = plot_characteristics['markers'][f'{classification_type}_classification'][classification]
+            legend_element = mlines.Line2D([], [], marker=marker, 
+                                           label=classification, 
+                                           **plot_characteristics['markers']['plot'])
+            legend_elements.append(legend_element)
+        relevant_axis.legend(handles=legend_elements, 
+                             **plot_characteristics['markers']['legend'])
 
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """ Function that tracks plotted lines and collections

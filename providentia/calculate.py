@@ -211,6 +211,17 @@ class Stats(object):
             mda8 = np.nanmax(mda8_arr, axis=-1)
             return mda8
 
+    @staticmethod
+    def calculate_rms_u(data, u_95r_RV, RV, alpha):
+        if data.size == 0:
+            return np.NaN
+        else:
+            rms_u = u_95r_RV * np.sqrt(
+                (1 - alpha ** 2) * (Stats.calculate_mean(data) ** 2 
+                + Stats.calculate_standard_deviation(data) ** 2) 
+                + (alpha * RV) ** 2)
+            return rms_u
+
 class ExpBias(object):
 
     @staticmethod
@@ -419,6 +430,16 @@ class ExpBias(object):
             return rmse
 
     @staticmethod
+    def calculate_crmse(obs, exp):
+        if obs.size == 0:
+            return np.NaN
+        else:
+            crmse = np.sqrt(
+                np.mean(((exp - np.mean(exp)) - (obs - np.mean(obs))) ** 2)
+            )
+            return crmse
+    
+    @staticmethod
     def calculate_r(obs, exp):
         """ Calculate the Pearson correlation coefficient (r) between observations and experiment
             The Pearson correlation coefficient measures the linear relationship between two datasets.
@@ -483,3 +504,61 @@ class ExpBias(object):
             obs_max = np.nanmax(obs, axis=-1)
             exp_max = np.nanmax(exp, axis=-1)
             return ((exp_max - obs_max) / obs_max) * 100.0
+
+    @staticmethod
+    def calculate_fairmode_target_stats(obs, exp, u_95r_RV, RV, alpha, beta, type='assessment'):
+        """ Calculate FAIRMODE statistics for target plot
+            See here: https://fairmode.jrc.ec.europa.eu/document/fairmode/WG1/Guidance_MQO_Bench_vs3.3_20220519.pdf
+
+        Parameters
+        ----------
+        obs : numpy.ndarray
+            Observations data
+        exp : numpy.ndarray
+            Experiment data
+        u_95r_RV : float
+            Uncertainty around the reference value
+        RV : float
+            Reference value
+        alpha : float
+            Uncertainty parameter
+        beta : float
+            Proportionality coefficient
+        """
+
+        is_finite = np.isfinite(obs+exp)
+
+        if np.any(is_finite):
+
+            # remove missing data
+            obs, exp = obs[is_finite], exp[is_finite]
+
+            # calculate RMSu (root mean squared uncertainty)
+            rms_u = Stats.calculate_rms_u(obs, u_95r_RV, RV, alpha)
+            
+            # calculate x-axis values (CRMSE/BETA*RMSu)
+            crmse = ExpBias.calculate_crmse(obs, exp)
+            x = crmse / (beta * rms_u)
+            
+            # calculate y-axis values (Mean Bias/BETA*RMSu)
+            bias = ExpBias.calculate_mb(obs, exp)
+            y = bias / (beta * rms_u)
+            
+            # calculate ratio
+            ratio = np.abs(
+                (Stats.calculate_standard_deviation(exp) - Stats.calculate_standard_deviation(obs))) / (
+                    Stats.calculate_standard_deviation(obs) * np.sqrt(2 * (1 - ExpBias.calculate_r(obs, exp))))
+            
+            # For ratios larger than one the σ error dominates and 
+            # the station is represented on the right, whereas the reverse
+            # applies for values smaller than one
+            if ratio < 1:
+                x *= -1
+
+            # calculate Modeling Quality Indicator (MQI)
+            rmse = ExpBias.calculate_rmse(obs, exp)
+            mqi = rmse / (beta * rms_u)
+
+            return x, y, mqi
+        else:
+            return np.NaN, np.NaN, np.NaN
