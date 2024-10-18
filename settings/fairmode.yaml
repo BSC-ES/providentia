@@ -1,0 +1,34 @@
+{
+  "sconco3": {
+    "u_95r_RV": 0.18, 
+    "RV": 60.12, # nmol mol-1 equivalent to 120 in ug/m3
+    "alpha": 0.79,
+    "percentile": 92.9,
+    "beta": 2,
+    "coverage": 75
+  },
+  "sconcno2": {
+    "u_95r_RV": 0.42, 
+    "RV": 104.55, # nmol mol-1 equivalent to 200 in ug/m3
+    "alpha": 0.20,
+    "percentile": 99.8,
+    "beta": 2,
+    "coverage": 75
+  },
+  "pm2p5": {
+    "u_95r_RV": 0.63, 
+    "RV": 25, # ug/m3
+    "alpha": 0.50,
+    "percentile": 90.1,
+    "beta": 2,
+    "coverage": 75
+  },
+  "pm10": {
+    "u_95r_RV": 0.49, 
+    "RV": 50, # ug/m3
+    "alpha": 0.25,
+    "percentile": 90.1,
+    "beta": 2,
+    "coverage": 75
+  }
+}
