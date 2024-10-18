@@ -23,6 +23,7 @@ CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
 expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
+fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
 
 
 def get_selected_station_data(read_instance, canvas_instance, networkspecies, 
@@ -1113,7 +1114,7 @@ def get_z_statistic_info(plot_type=None, zstat=None):
     # have plot_type? Therefore need to extract zstat from plot_type name (if available)
     if plot_type is not None:
         # have zstat in plot_type name?
-        if ('-' in plot_type) & ('-violin' not in plot_type):
+        if ('-' in plot_type) & ('-violin' not in plot_type) & ('-target' not in plot_type):
             # have other options in plot_type?
             if '_' in plot_type:
                 # bias plot or not (if so, add bias to zstat)
@@ -1202,3 +1203,50 @@ def exceedance_lim(networkspeci):
         return exceedance_limits[speci]
     else:
         return np.NaN
+
+
+def get_fairmode_data(canvas_instance, read_instance, networkspeci, resolution):
+    
+    # get data per station
+    data_array = canvas_instance.selected_station_data[networkspeci]['per_station']
+    print('Initial', data_array.shape)
+    
+    # TODO: Make sure days with less than 75% coverage are nan
+    # If a day has less than 75% of data, make whole day nan
+
+    # filter by requested coverage
+    speci = networkspeci.split('|')[1]
+    speci_settings = fairmode_settings[speci]
+    coverage = speci_settings['coverage']
+    obs_representativity = Stats.calculate_data_avail_fraction(data_array[0, :, :])
+    valid_station_idxs = obs_representativity >= coverage
+    data_array = data_array[:, valid_station_idxs, :]
+
+    print('After coverage', data_array.shape)
+
+    # resample to daily for PM2.5 and PM10
+    if resolution == 'hourly':
+        if speci in ['pm2p5', 'pm10']:
+            # flatten networkspecies dimension for creation of pandas dataframe
+            data_array_reduced = data_array.reshape(data_array.shape[0]*data_array.shape[1], data_array.shape[2])
+            
+            # create pandas dataframe of data array
+            data_array_df = pd.DataFrame(data_array_reduced.transpose(), index=read_instance.time_array, 
+                                            columns=np.arange(data_array_reduced.shape[0]), dtype=np.float32)
+            # resample data array
+            data_array_df_resampled = data_array_df.resample('D', axis=0).mean()
+            read_instance.time_index = data_array_df_resampled.index
+
+            # save back out as numpy array (reshaping to get back networkspecies dimension)
+            data_array_resampled = data_array_df_resampled.to_numpy().transpose()
+            data_array = data_array_resampled.reshape(data_array.shape[0], data_array.shape[1], 
+                                                    data_array_resampled.shape[1])
+        # calculate MDA8 for ozone
+        elif speci in ['sconco3']:
+            # TODO: Calculate MDA8
+            #data_array = Stats.calculate_mda8(data_array)
+            print(data_array.shape)
+        
+    print('After resampling', data_array.shape)
+
+    return data_array, valid_station_idxs
