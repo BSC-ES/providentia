@@ -27,7 +27,7 @@ import seaborn as sns
 from .calculate import ExpBias, Stats
 from .dashboard_interactivity import HoverAnnotation
 from .statistics import (boxplot_inner_fences, calculate_statistic,
-                        get_fairmode_data, get_z_statistic_info, get_z_statistic_type)
+                         get_fairmode_data, get_z_statistic_info, get_z_statistic_type)
 from .read_aux import drop_nans, get_valid_metadata
 from .plot_aux import (create_chunked_timeseries, get_multispecies_aliases, 
                        get_taylor_diagram_ghelper_info, kde_fft, merge_cells, periodic_labels, 
@@ -1957,7 +1957,8 @@ class Plot:
     def make_fairmode_target(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         
         # resample to daily for PM10 and PM2.5, get MDA8 for ozone, filter by coverage
-        data, valid_station_idxs = get_fairmode_data(self.canvas_instance, self.read_instance, networkspeci)
+        data, valid_station_idxs = get_fairmode_data(self.canvas_instance, self.read_instance, networkspeci,
+                                                     self.read_instance.resolution)
         observations_data = data[0, :, :]
 
         # get settings
@@ -1995,12 +1996,15 @@ class Plot:
         relevant_axis.plot([xmin, xmax], [ymax, ymin], **plot_characteristics['auxiliar']['crosses']['decreasing'])
 
         # get metadata without nans
+        classification_type = plot_characteristics['markers']['type'].lower()
         valid_station_references = get_valid_metadata(self, 'station_reference', 
                                                       valid_station_idxs, networkspeci)
-        valid_station_area_classifications = get_valid_metadata(self, 'area_classification', 
-                                                                valid_station_idxs, networkspeci)
-        valid_station_station_classifications = get_valid_metadata(self, 'station_classification', 
-                                                                   valid_station_idxs, networkspeci)
+        try:
+            valid_station_classifications = get_valid_metadata(self, f'{classification_type}_classification', 
+                                                            valid_station_idxs, networkspeci)
+        except:
+            valid_station_classifications = np.full(len(valid_station_references), np.NaN, dtype=np.float32)
+            print(f'Data for {classification_type}_classification is not available and will not be shown in the legend')
 
         # get number of stations
         n_stations = len(valid_station_references)
@@ -2039,16 +2043,13 @@ class Plot:
             y_points = []
             stations = []
             bad_stations = []
-            area_classifications = []
-            station_classifications = []
+            classifications = []
 
             # get FAIRMODE statistics per station
             mqi_array = np.full(n_stations, np.nan)
          
-            for station_idx, (station, area_classification, station_classification) in enumerate(
-                zip(valid_station_references, 
-                    valid_station_area_classifications, 
-                    valid_station_station_classifications)):
+            for station_idx, (station, classification) in enumerate(
+                zip(valid_station_references, valid_station_classifications)):
 
                 st_observations_data = observations_data[station_idx, :]
                 st_experiment_data = experiment_data[station_idx, :]
@@ -2060,14 +2061,11 @@ class Plot:
                 y_points.append(y)
                 mqi_array[station_idx] = mqi
                 stations.append(station)
-                area_classifications.append(area_classification)
-                station_classifications.append(station_classification)
+                classifications.append(classification)
                 if mqi > 1:
                     bad_stations.append(station)
 
             # plot data
-            classification_type = plot_characteristics['markers']['type'].lower()
-            classifications = area_classifications if classification_type == 'area' else station_classifications
             for x, y, classification in (zip(x_points, y_points, classifications)):
                 if classification not in plot_characteristics['markers'][f'{classification_type}_classification']:
                     marker = 'h'
