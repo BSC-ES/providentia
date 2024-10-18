@@ -1205,7 +1205,7 @@ def exceedance_lim(networkspeci):
         return np.NaN
 
 
-def get_fairmode_data(canvas_instance, read_instance, networkspeci):
+def get_fairmode_data(canvas_instance, read_instance, networkspeci, resolution):
     
     # get data per station
     data_array = canvas_instance.selected_station_data[networkspeci]['per_station']
@@ -1225,25 +1225,27 @@ def get_fairmode_data(canvas_instance, read_instance, networkspeci):
     print('After coverage', data_array.shape)
 
     # resample to daily for PM2.5 and PM10
-    if speci in ['pm2p5', 'pm10']:
-        # flatten networkspecies dimension for creation of pandas dataframe
-        data_array_reduced = data_array.reshape(data_array.shape[0]*data_array.shape[1], data_array.shape[2])
-        
-        # create pandas dataframe of data array
-        data_array_df = pd.DataFrame(data_array_reduced.transpose(), index=read_instance.time_array, 
-                                        columns=np.arange(data_array_reduced.shape[0]), dtype=np.float32)
-        # resample data array
-        data_array_df_resampled = data_array_df.resample('D', axis=0).mean()
-        read_instance.time_index = data_array_df_resampled.index
+    if resolution == 'hourly':
+        if speci in ['pm2p5', 'pm10']:
+            # flatten networkspecies dimension for creation of pandas dataframe
+            data_array_reduced = data_array.reshape(data_array.shape[0]*data_array.shape[1], data_array.shape[2])
+            
+            # create pandas dataframe of data array
+            data_array_df = pd.DataFrame(data_array_reduced.transpose(), index=read_instance.time_array, 
+                                            columns=np.arange(data_array_reduced.shape[0]), dtype=np.float32)
+            # resample data array
+            data_array_df_resampled = data_array_df.resample('D', axis=0).mean()
+            read_instance.time_index = data_array_df_resampled.index
 
-        # save back out as numpy array (reshaping to get back networkspecies dimension)
-        data_array_resampled = data_array_df_resampled.to_numpy().transpose()
-        data_array = data_array_resampled.reshape(data_array.shape[0], data_array.shape[1], 
-                                                  data_array_resampled.shape[1])
-    # calculate MDA8 for ozone
-    elif speci in ['sconco3']:
-        #data_array = Stats.calculate_mda8(data_array)
-        print(data_array.shape)
+            # save back out as numpy array (reshaping to get back networkspecies dimension)
+            data_array_resampled = data_array_df_resampled.to_numpy().transpose()
+            data_array = data_array_resampled.reshape(data_array.shape[0], data_array.shape[1], 
+                                                    data_array_resampled.shape[1])
+        # calculate MDA8 for ozone
+        elif speci in ['sconco3']:
+            # TODO: Calculate MDA8
+            #data_array = Stats.calculate_mda8(data_array)
+            print(data_array.shape)
         
     print('After resampling', data_array.shape)
 
