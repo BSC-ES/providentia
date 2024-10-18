@@ -309,11 +309,15 @@ class Interactive:
 
         # get zstat for required plots
         base_plot_type_split = base_plot_type.split('-')
-        if (len(base_plot_type_split) > 1) & (base_plot_type != 'periodic-violin'):
+        if (len(base_plot_type_split) > 1) & (base_plot_type not in ['periodic-violin', 'fairmode-target']):
             base_plot_type = base_plot_type_split[0]
             zstat = base_plot_type_split[1]
         else:
             zstat = None
+
+        # get networkspeci to plot (for non-multispecies plots), taking first one preferentially
+        networkspeci = self.networkspecies[0]
+        speci = networkspeci.split('|')[-1]
 
         # for timeseries chunking
         chunk_stat = None
@@ -383,6 +387,16 @@ class Interactive:
             print(msg)
             return
         
+        # do not make FAIRMODE target plot if species not in list or resolution not hourly
+        if base_plot_type == 'fairmode-target':
+            if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
+                print(f'Warning: Fairmode target plot cannot be created for {speci} in {self.current_station_name}.')
+                return
+            if ((speci in ['sconco3', 'sconcno2'] and self.resolution != 'hourly') 
+                or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
+                print('Warning: Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).')
+                return
+            
         # get data labels for plot
         if len(data_labels) == 0:
             data_labels = copy.deepcopy(self.data_labels)
@@ -453,6 +467,8 @@ class Interactive:
         # get plotting function
         if base_plot_type == 'statsummary':
             func = getattr(self.plot, 'make_table')
+        elif base_plot_type == 'fairmode-target':
+            func = getattr(self.plot, 'make_fairmode_target')
         elif base_plot_type != 'legend':
             func = getattr(self.plot, 'make_{}'.format(base_plot_type.split('-')[0]))
          
@@ -462,10 +478,6 @@ class Interactive:
             relevant_data_labels = list(self.experiments.values())
         else:
             relevant_data_labels = copy.deepcopy(data_labels)
-
-        # get networkspeci to plot (for non-multispecies plots), taking first one preferentially
-        networkspeci = self.networkspecies[0]
-        speci = networkspeci.split('|')[-1]
 
         # if multispecies is active then use all networkspecies, otherwise take first
         if 'multispecies' in plot_options:
@@ -762,14 +774,13 @@ class Interactive:
                             chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)                         
 
         # handle harmonisation of axes
-        if base_plot_type not in ['legend', 'metadata', 'map', 'taylor']:
-            if base_plot_type == 'scatter':
-                harmonise_xy_lims_paradigm(self, self, relevant_ax, base_plot_type, 
-                                           self.plot_characteristics[plot_type], plot_options, relim=True)
-            else:
-                harmonise_xy_lims_paradigm(self, self, relevant_ax, base_plot_type, 
-                                           self.plot_characteristics[plot_type], plot_options, relim=True, 
-                                           autoscale=True)
+        if base_plot_type == 'scatter':
+            harmonise_xy_lims_paradigm(self, self, relevant_ax, base_plot_type, 
+                                        self.plot_characteristics[plot_type], plot_options, relim=True)
+        elif base_plot_type not in ['legend', 'metadata', 'map', 'taylor', 'fairmode-target']:
+            harmonise_xy_lims_paradigm(self, self, relevant_ax, base_plot_type, 
+                                        self.plot_characteristics[plot_type], plot_options, relim=True, 
+                                        autoscale=True)
 
         # make legend (embedded on plot axis)
         if (legend) & (base_plot_type != 'legend'):
@@ -797,7 +808,10 @@ class Interactive:
                             ax_to_plot = self.relevant_temporal_resolutions[0]
                         relevant_ax[ax_to_plot].legend(**legend_handles)
                     else:
-                        relevant_ax.legend(**legend_handles)
+                        if base_plot_type == 'fairmode-target':
+                            print("Warning: Data labels legend cannot be plotted, create single legend using make_plot function.")
+                        else:
+                            relevant_ax.legend(**legend_handles)
 
         # make colourbar (embedded on plot axis)
         if 'cb' in self.plot_characteristics[plot_type]:

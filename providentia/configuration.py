@@ -1418,7 +1418,7 @@ class ProvConfiguration:
                     self.read_instance.filter_species[networkspeci][networkspeci_limit_ii] = [lower_limit, upper_limit, 
                                                                                               filter_species_fill_value]
 
-        if (MACHINE == 'local') and (not self.read_instance.interp_multiprocessing):
+        if (MACHINE == 'local') and (not self.read_instance.interp_multiprocessing) and (self.read_instance.interpolation):
             msg = 'During interpolation multiprocessing must be turned on for local runs, activating.'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.interp_multiprocessing = True
