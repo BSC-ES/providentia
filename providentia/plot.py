@@ -625,6 +625,7 @@ class Plot:
             chunk_resolution = None if chunk_resolution == 'None' else chunk_resolution
         
         # chunk timeseries
+        print(chunk_stat, chunk_resolution)
         if (chunk_stat is not None) and (chunk_resolution is not None):
             timeseries_data = create_chunked_timeseries(self.read_instance, self.canvas_instance, chunk_stat, 
                                                         chunk_resolution, networkspeci, cut_data_labels, bias)
@@ -1956,9 +1957,11 @@ class Plot:
     
     def make_fairmode_target(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         
-        # resample to daily for PM10 and PM2.5, get MDA8 for ozone, filter by coverage
+        # resample to daily for PM10 and PM2.5 if data is hourly
+        # get MDA8 for ozone if data is hourly
+        # finally filter by coverage
         data, valid_station_idxs = get_fairmode_data(self.canvas_instance, self.read_instance, networkspeci,
-                                                     self.read_instance.resolution)
+                                                     self.read_instance.resolution, data_labels)
         observations_data = data[0, :, :]
 
         # get settings
