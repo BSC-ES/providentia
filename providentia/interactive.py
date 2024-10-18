@@ -392,8 +392,9 @@ class Interactive:
             if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
                 print(f'Warning: Fairmode target plot cannot be created for {speci} in {self.current_station_name}.')
                 return
-            if self.resolution != 'hourly':
-                print('Warning: Fairmode target plot can only be created if the resolution is hourly.')
+            if ((speci in ['sconco3', 'sconcno2'] and self.resolution != 'hourly') 
+                or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
+                print('Warning: Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).')
                 return
             
         # get data labels for plot
