@@ -705,7 +705,7 @@ class ProvidentiaDownload(object):
 
         # if not valid network, next
         if network not in self.zenodo_ghost_available_networks:
-            msg = f"There is no data available in {REMOTE_MACHINE} for {network} network."
+            msg = f"There is no data available in Zenodo for {network} network."
             show_message(self, msg, deactivate=initial_check)
             return
 
@@ -737,7 +737,7 @@ class ProvidentiaDownload(object):
             if not res_spec_dir_tail:
                 print_spec = f'{",".join(self.species)} species' if self.species else ""
                 print_res = f'at {",".join(self.resolution)} resolutions' if self.resolution else ""
-                msg = f"There is no data available in {REMOTE_MACHINE} for {network} network {print_spec} {print_res}"
+                msg = f"There is no data available in Zenodo for {network} network {print_spec} {print_res}"
                 show_message(self, msg, deactivate=initial_check)
 
             # check if there's any possible combination with user's network, resolution and species
@@ -783,7 +783,7 @@ class ProvidentiaDownload(object):
                         if not valid_nc_file_names:
                             print_spec = f'{",".join(self.species)} species' if self.species else ""
                             print_res = f'at {",".join(self.resolution)} resolutions' if self.resolution else ""
-                            msg = f"There is no data available in {REMOTE_MACHINE} from {self.start_date} to {self.end_date} for {network} network {print_spec} {print_res}"
+                            msg = f"There is no data available in Zenodo from {self.start_date} to {self.end_date} for {network} network {print_spec} {print_res}"
                             show_message(self, msg, deactivate=initial_check)
                             continue
                         # download the valid resolution specie date combinations
