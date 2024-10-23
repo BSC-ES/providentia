@@ -1205,7 +1205,8 @@ def exceedance_lim(networkspeci):
         return np.NaN
 
 
-def get_fairmode_data(canvas_instance, read_instance, networkspeci, resolution):
+def get_fairmode_data(canvas_instance, read_instance, networkspeci, resolution, 
+                      data_labels):
     
     # get data per station
     data_array = canvas_instance.selected_station_data[networkspeci]['per_station']
@@ -1243,9 +1244,20 @@ def get_fairmode_data(canvas_instance, read_instance, networkspeci, resolution):
                                                     data_array_resampled.shape[1])
         # calculate MDA8 for ozone
         elif speci in ['sconco3']:
+
+            # get valid data labels for networkspeci
+            valid_data_labels = canvas_instance.selected_station_data_labels[networkspeci]
+
+            # cut data_labels for those in valid data labels
+            cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
+
             # TODO: Calculate MDA8
-            #data_array = Stats.calculate_mda8(data_array)
-            print(data_array.shape)
+            stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, 
+                                             'MDA8', cut_data_labels, [], chunking=True, 
+                                             chunk_resolution='daily')
+            
+            
+            print(stats_calc.shape)
         
     print('After resampling', data_array.shape)
 

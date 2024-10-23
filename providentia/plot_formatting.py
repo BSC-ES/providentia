@@ -60,14 +60,26 @@ def set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type):
         ax.set_ylim(axmin, axmax)
     elif ("xlim" not in plot_characteristics) and ("ylim" in plot_characteristics):
         # set xlim as ylim if ylim is passed
-        ax.set_xlim(plot_characteristics["ylim"])
+        if isinstance(plot_characteristics["ylim"], dict):
+            ax.set_xlim(**plot_characteristics["ylim"])
+        else:
+            ax.set_xlim(plot_characteristics["ylim"])
     elif ("xlim" in plot_characteristics) and ("ylim" not in plot_characteristics):
         # set ylim as ylim if xlim is passed
-        ax.set_ylim(plot_characteristics["xlim"])
+        if isinstance(plot_characteristics["xlim"], dict):
+            ax.set_ylim(**plot_characteristics["xlim"])
+        else:
+            ax.set_ylim(plot_characteristics["xlim"])
     elif ("xlim" in plot_characteristics) and ("ylim" in plot_characteristics):
         # set both limits
-        ax.set_xlim(plot_characteristics["xlim"])
-        ax.set_ylim(plot_characteristics["ylim"])
+        if isinstance(plot_characteristics["xlim"], dict):
+            ax.set_xlim(**plot_characteristics["xlim"])
+        else:
+            ax.set_xlim(plot_characteristics["xlim"])
+        if isinstance(plot_characteristics["ylim"], dict):
+            ax.set_ylim(**plot_characteristics["ylim"])
+        else:
+            ax.set_ylim(plot_characteristics["ylim"])
 
     return None
 
@@ -206,7 +218,10 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
         # set xlim
         if ((set_xlim) and ('equal_aspect' not in plot_characteristics) and
            (base_plot_type not in ['timeseries', 'boxplot', 'periodic', 'periodic-violin'])):
-            ax.set_xlim(**xlim)
+            if isinstance(xlim, dict):
+                ax.set_xlim(**xlim)
+            else:
+                ax.set_xlim(xlim)
 
         # get ylim
         if ax_ii == 0:
@@ -232,7 +247,10 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
 
         # set ylim
         if (set_ylim) and ('equal_aspect' not in plot_characteristics):
-            ax.set_ylim(**ylim)
+            if isinstance(ylim, dict):
+                ax.set_ylim(**ylim)
+            else:
+                ax.set_ylim(ylim)
         
     # get minimum and maximum from all axes and set limits for periodic plots
     if base_plot_type in ['periodic', 'periodic-violin']:
@@ -258,7 +276,10 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
         elif 'xlim' in plot_characteristics:
             xlim = plot_characteristics['xlim']
             for temporal_resolution, sub_ax in zip(mapped_resolutions_active, relevant_axs_active):
-                sub_ax.set_xlim(**xlim)
+                if isinstance(xlim, dict):
+                    sub_ax.set_xlim(**xlim)
+                else:
+                    sub_ax.set_xlim(xlim)
 
         # if harmonisation is off, and ylim not manually set, 
         # ensure harmonisation is at least done for a plot across resolutions
@@ -635,11 +656,17 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
 
         # set xlim?
         if 'xlim' in plot_characteristics_vars:
-            ax_to_format.set_xlim(plot_characteristics['xlim'])
+            if isinstance(plot_characteristics['xlim'], dict):
+                ax_to_format.set_xlim(**plot_characteristics['xlim'])
+            else:
+                ax_to_format.set_xlim(plot_characteristics['xlim'])
 
         # set ylim? 
         if 'ylim' in plot_characteristics_vars:
-            ax_to_format.set_ylim(plot_characteristics['ylim'])
+            if isinstance(plot_characteristics['ylim'], dict):
+                ax_to_format.set_ylim(**plot_characteristics['ylim'])
+            else:
+                ax_to_format.set_ylim(plot_characteristics['ylim'])
 
         # add gridlines (x and y)?
         if 'grid' in plot_characteristics_vars:
