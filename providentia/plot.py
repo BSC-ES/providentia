@@ -625,7 +625,6 @@ class Plot:
             chunk_resolution = None if chunk_resolution == 'None' else chunk_resolution
         
         # chunk timeseries
-        print(chunk_stat, chunk_resolution)
         if (chunk_stat is not None) and (chunk_resolution is not None):
             timeseries_data = create_chunked_timeseries(self.read_instance, self.canvas_instance, chunk_stat, 
                                                         chunk_resolution, networkspeci, cut_data_labels, bias)
