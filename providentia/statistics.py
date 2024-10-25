@@ -1114,7 +1114,7 @@ def get_z_statistic_info(plot_type=None, zstat=None):
     # have plot_type? Therefore need to extract zstat from plot_type name (if available)
     if plot_type is not None:
         # have zstat in plot_type name?
-        if ('-' in plot_type) & ('-violin' not in plot_type) & ('-target' not in plot_type):
+        if ('-' in plot_type) & ('-violin' not in plot_type) & ('-target' not in plot_type) & ('-statsummary' not in plot_type):
             # have other options in plot_type?
             if '_' in plot_type:
                 # bias plot or not (if so, add bias to zstat)
