@@ -2056,7 +2056,7 @@ class Plot:
                 st_observations_data = observations_data[station_idx, :]
                 st_experiment_data = experiment_data[station_idx, :]
                 
-                x, y, mqi = ExpBias.calculate_fairmode_target_stats(st_observations_data, st_experiment_data, 
+                x, y, mqi = ExpBias.calculate_fairmode_stats(st_observations_data, st_experiment_data, 
                                                                     u_95r_RV, RV, alpha, beta)
 
                 x_points.append(x)

@@ -506,7 +506,7 @@ class ExpBias(object):
             return ((exp_max - obs_max) / obs_max) * 100.0
 
     @staticmethod
-    def calculate_fairmode_target_stats(obs, exp, u_95r_RV, RV, alpha, beta, type='assessment'):
+    def calculate_fairmode_stats(obs, exp, u_95r_RV, RV, alpha, beta, type='assessment'):
         """ Calculate FAIRMODE statistics for target plot
             See here: https://fairmode.jrc.ec.europa.eu/document/fairmode/WG1/Guidance_MQO_Bench_vs3.3_20220519.pdf
 
@@ -535,30 +535,61 @@ class ExpBias(object):
 
             # calculate RMSu (root mean squared uncertainty)
             rms_u = Stats.calculate_rms_u(obs, u_95r_RV, RV, alpha)
-            
-            # calculate x-axis values (CRMSE/BETA*RMSu)
-            crmse = ExpBias.calculate_crmse(obs, exp)
-            x = crmse / (beta * rms_u)
-            
-            # calculate y-axis values (Mean Bias/BETA*RMSu)
+
+            # calculate Mean Bias
             bias = ExpBias.calculate_mb(obs, exp)
-            y = bias / (beta * rms_u)
             
-            # calculate ratio
-            ratio = np.abs(
-                (Stats.calculate_standard_deviation(exp) - Stats.calculate_standard_deviation(obs))) / (
-                    Stats.calculate_standard_deviation(obs) * np.sqrt(2 * (1 - ExpBias.calculate_r(obs, exp))))
+            # fairmode target plot
+            if type == 'assesment':
+                        
+                # calculate x-axis values (CRMSE/BETA*RMSu)
+                crmse = ExpBias.calculate_crmse(obs, exp)
+                x = crmse / (beta * rms_u)
+                
+                # calculate y-axis values (Mean Bias/BETA*RMSu)
+                y = bias / (beta * rms_u)
+                
+                # calculate ratio
+                ratio = np.abs(
+                    (Stats.calculate_standard_deviation(exp) - Stats.calculate_standard_deviation(obs))) / (
+                        Stats.calculate_standard_deviation(obs) * np.sqrt(2 * (1 - ExpBias.calculate_r(obs, exp))))
+                
+                # For ratios larger than one the σ error dominates and 
+                # the station is represented on the right, whereas the reverse
+                # applies for values smaller than one
+                if ratio < 1:
+                    x *= -1
+
+                # calculate Modeling Quality Indicator (MQI)
+                rmse = ExpBias.calculate_rmse(obs, exp)
+                mqi = rmse / (beta * rms_u)
+
+                return x, y, mqi
             
-            # For ratios larger than one the σ error dominates and 
-            # the station is represented on the right, whereas the reverse
-            # applies for values smaller than one
-            if ratio < 1:
-                x *= -1
+            # fairmode summarystats plot
+            elif type == 'summary':
+                
+                # calculate Observation and Experiment Percentile
+                obs_perc = Stats.calculate_percentile(obs)
+                exp_perc = Stats.calculate_percentile(exp)
 
-            # calculate Modeling Quality Indicator (MQI)
-            rmse = ExpBias.calculate_rmse(obs, exp)
-            mqi = rmse / (beta * rms_u)
+                # calculate Temporal Statistic for Bias
+                t_bias = bias / (beta * rms_u)
+                
+                # calculate Temporal Statistic for Correlation
+                t_R = (1 - ExpBias.calculate_r(obs, exp)) / ((0.5 * (beta ** 2) * rms_u ** 2) / (Stats.calculate_standard_deviation(obs) * Stats.calculate_standard_deviation(exp)))
+                
+                # calculate Temporal Statistic for Standard Deviation
+                t_sd = (np.abs(Stats.calculate_standard_deviation(exp) - Stats.calculate_standard_deviation(obs))) / (beta * rms_u)
 
-            return x, y, mqi
+                # calculate Uncertainty
+                U = u_95r_RV * np.sqrt((1 - alpha ** 2) * (Stats.calculate_mean(obs) ** 2 + Stats.calculate_standard_deviation(obs)) + alpha ** 2 * RV ** 2 )
+                
+                # calculate High Percentile
+                h_perc = np.abs(exp_perc - obs_perc) / (beta * U)
+                
+                return t_bias, t_R, t_sd, h_perc
+
         else:
             return np.NaN, np.NaN, np.NaN
+        
