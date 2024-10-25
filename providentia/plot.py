@@ -193,12 +193,12 @@ class Plot:
                         valid_plot_type = False
 
                     # warning for scatter, taylor and fairmode plots if the temporal colocation is not active 
-                    elif (base_plot_type in ['scatter', 'taylor', 'fairmode-target']) & (not self.read_instance.temporal_colocation):
+                    elif (base_plot_type in ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']) & (not self.read_instance.temporal_colocation):
                         print(f'Warning: {plot_type} cannot be created as temporal colocation is not active.')
                         valid_plot_type = False
 
                     # warning for scatter, taylor and fairmode plots if have no experiments
-                    elif (base_plot_type in ['scatter', 'taylor', 'fairmode-target']) & (len(data_labels) == 1):
+                    elif (base_plot_type in ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']) & (len(data_labels) == 1):
                         print(f'Warning: No experiments defined, so {plot_type} cannot be created.')
                         valid_plot_type = False
 
