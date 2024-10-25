@@ -634,7 +634,7 @@ class ProvidentiaOffline:
             else:
                 if plotting_paradigm == 'summary':
                     if 'individual' in plot_options:
-                        if (base_plot_type in ['scatter', 'fairmode-target']) or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
+                        if (base_plot_type in ['scatter', 'fairmode-target', 'fairmode-statsummary']) or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
                             n_plots_per_plot_type = len(self.subsections) * \
                                                     (len(self.data_labels) - 1)
                         else:
@@ -644,7 +644,7 @@ class ProvidentiaOffline:
                         n_plots_per_plot_type = len(self.subsections) 
                 elif plotting_paradigm == 'station':
                     if 'individual' in plot_options:
-                        if (base_plot_type in ['scatter', 'fairmode-target']) or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
+                        if (base_plot_type in ['scatter', 'fairmode-target', 'fairmode-statsummary']) or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
                             n_plots_per_plot_type = self.n_stations * \
                                                     (len(self.data_labels) - 1) 
                         else:
@@ -763,7 +763,7 @@ class ProvidentiaOffline:
 
                 # make legend?
                 if 'legend' in plot_characteristics_vars:
-                    if (base_plot_type in ['scatter', 'fairmode-target']) or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
+                    if (base_plot_type in ['scatter', 'fairmode-target', 'fairmode-statsummary']) or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
                         set_obs = False
                     else:
                         set_obs = True
@@ -1017,7 +1017,7 @@ class ProvidentiaOffline:
                                           or (networkspeci != self.networkspecies[-1])):
                     continue
 
-            if base_plot_type == 'fairmode-target':
+            if base_plot_type in ['fairmode-target', 'fairmode-statsummary']:
                 # warning for fairmode plots if species aren't PM2.5, PM10, NO2 or O3
                 speci = networkspeci.split('|')[1]
                 if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
@@ -1200,7 +1200,7 @@ class ProvidentiaOffline:
                     else:
                         continue
 
-                if base_plot_type == 'fairmode-target':
+                if base_plot_type in ['fairmode-target', 'fairmode-statsummary']:
                     # warning for fairmode plots if species aren't PM2.5, PM10, NO2 or O3
                     speci = networkspeci.split('|')[1]
                     if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
@@ -1382,7 +1382,7 @@ class ProvidentiaOffline:
 
         # determine if have some data to plot
         plot_validity = False
-        if ((base_plot_type in ['scatter', 'fairmode-target']) or ('bias' in plot_options) or 
+        if ((base_plot_type in ['scatter', 'fairmode-target', 'fairmode-statsummary']) or ('bias' in plot_options) or 
             (z_statistic_sign == 'bias')):
             data_labels_to_test = copy.deepcopy(data_labels_sans_obs)
         else:
@@ -1544,7 +1544,7 @@ class ProvidentiaOffline:
                 # get relevant axis to plot on
                 if plotting_paradigm == 'summary':
                     if 'individual' in plot_options:
-                        if ((base_plot_type in ['scatter', 'fairmode-target']) or ('bias' in plot_options) or 
+                        if ((base_plot_type in ['scatter', 'fairmode-target', 'fairmode-statsummary']) or ('bias' in plot_options) or 
                             (z_statistic_sign == 'bias')):
                                 axis_ind = (current_plot_ind + self.subsection_ind + (len(self.experiments) - 1) * self.subsection_ind)
                         else:
@@ -1553,7 +1553,7 @@ class ProvidentiaOffline:
                         axis_ind = self.subsection_ind
                 elif plotting_paradigm == 'station':
                     if 'individual' in plot_options:
-                        if ((base_plot_type in ['scatter', 'fairmode-target']) or ('bias' in plot_options) or 
+                        if ((base_plot_type in ['scatter', 'fairmode-target', 'fairmode-statsummary']) or ('bias' in plot_options) or 
                             (z_statistic_sign == 'bias')):
                             axis_ind = (current_plot_ind + self.station_ind + (len(self.experiments) - 1) * self.station_ind)
                         else:
@@ -1624,8 +1624,8 @@ class ProvidentiaOffline:
                         set_axis_label(relevant_axis, 'y', ylabel, self.plot_characteristics[plot_type])
 
                 # get plotting function
-                if base_plot_type == 'fairmode-target':
-                    func = getattr(self.plot, 'make_fairmode_target')
+                if base_plot_type in ['fairmode-target', 'fairmode-statsummary']:
+                    func = getattr(self.plot, 'make_{}'.format(base_plot_type.replace('-','_')))
                 else:
                     func = getattr(self.plot, 'make_{}'.format(base_plot_type.split('-')[0]))
 
