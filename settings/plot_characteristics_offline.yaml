@@ -1273,4 +1273,256 @@
         },
       "plot_options": ["individual", "annotate"],
     },
+
+  "fairmode-statsummary":
+    {
+      "orientation": "portrait",
+      "figure": { "ncols": 1, "nrows": 2 },
+      "grid": { "axis": "both", "color": "lightgrey", "alpha": 0.8 },
+      "page_title":
+        {
+          "t": "Fairmode target",
+          "fontsize": 13,
+          "ha": "left",
+          "x": 0.05,
+          "y": 0.98,
+        },
+      "axis_title": { "label": "", "fontsize": 8 },
+      "xlabel": { "xlabel": "CRMSE / β·RMSᵤ", "fontsize": 8 },
+      "ylabel": { "ylabel": "MB / β·RMSᵤ", "fontsize": 8 },
+      "xlim": [-2, 2],
+      "ylim": [-2, 2],
+      "xtick_params":
+        {
+          "labelsize": 7,
+          "which": "both",
+          "bottom": true,
+          "top": false,
+          "right": false,
+          "left": true,
+          "labelbottom": true,
+          "labeltop": false,
+          "labelright": false,
+          "labelleft": true,
+        },
+      "ytick_params":
+        {
+          "labelsize": 7,
+          "which": "both",
+          "bottom": true,
+          "top": false,
+          "right": false,
+          "left": true,
+          "labelbottom": true,
+          "labeltop": false,
+          "labelright": false,
+          "labelleft": true,
+        },
+      "legend":
+        {
+          "plot":
+            {
+              "loc": "upper right",
+              "columnspacing": 0.5,
+              "frameon": false,
+              "handletextpad": 0,
+              "ncol": 4,
+              "borderaxespad": 0,
+              "fontsize": 10,
+            },
+          "handles": { "markersize": 10, "marker": "o", "color": "white" },
+        },
+      "round_decimal_places": { "title": 2, "x": 2, "y": 2 },
+      "equal_aspect": true,
+      "plot":
+        { "markersize": 5, "markerfacecolor": "None", "linestyle": "None" },
+      "markers": {
+          "type": "area", # area, station
+          "area_classification":
+            {
+              "urban": "s",
+              "urban-centre": "v",
+              "urban-suburban": "^",
+              "rural": "o",
+              "rural-near_city": "p",
+              "rural-regional": "*",
+              "rural-remote": "x",
+            },
+          "station_classification":
+            {
+              "background": "s",
+              "point_source": "v",
+              "point_source-industrial": "^",
+              "point_source-traffic": "o",
+            },
+          "plot":
+            {
+              "markersize": 5,
+              "markerfacecolor": "None",
+              "linestyle": "None",
+              "color": "grey",
+            },
+          "legend": { "loc": "upper left", "fontsize": 8 },
+        },
+      "xticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [2, 1, 0, 1, 2] },
+      "yticks": { "ticks": [-2, -1, 0, 1, 2], "labels": [-2, -1, 0, 1, 2] },
+      "annotate_text": { "fontsize": 8, "round_decimal_places": 2, "sep": -5 },
+      "annotate_offset":
+        { "loc": "center right", "bbox_to_anchor": [1.45, 0.5] },
+      "annotate_bbox": { "edgecolor": "white" },
+      "annotate_options": [
+          "parameters",
+          "MQI90",
+          "covered_stations",
+          "N_bad_stations",
+        ], # parameters, MQI90, covered_stations, N_bad_stations bad_stations
+      "auxiliar":
+        {
+          "subplots":{
+            "observed mean":{
+                "title":"Observed\nmean",
+                "x_axis_limits":[0,
+                100],
+                "units":"μgm⁻³",
+                "left_dashed_zone_linestyle" : 'none'
+            },
+            "observed exceedances":{
+                "title":"Observed\nexceedences\n(> exceedance_value ugm⁻³)",
+                "x_axis_limits":[0,
+                100],
+                "units":"days",
+                "left_dashed_zone_linestyle" : 'none'
+            },
+            "temporal bias":{
+                "title":"Bias Norm",
+                "x_axis_limits":[-2,
+                2],
+                "range_style":"orange-green-orange",
+                "left_dashed_zone_linestyle" : [10, [8, 5]]
+            },
+            "temporal correlation":{
+                "title":"1-R Norm",
+                "x_axis_limits":[0,
+                2],
+                "range_style":"green-orange",
+                "left_dashed_zone_linestyle" : 'none'
+            },
+            "temporal std":{
+                "title":"StDev Norm",
+                "x_axis_limits":[-2,
+                2],
+                "range_style":"orange-green-orange",
+                "left_dashed_zone_linestyle" : [10, [8, 5]]
+            },
+            "temporal highest percentile":{
+                "title":"Hperc Norm",
+                "x_axis_limits":[-2,
+                2],
+                "range_style":"green",
+                "left_dashed_zone_linestyle" : [10, [8, 5]]
+            },
+            "averaged spatial correlation":{
+                "title":"1-R Norm",
+                "x_axis_limits":[0,
+                2],
+                "range_style":"green-orange",
+                "left_dashed_zone_linestyle" : 'none'
+            },
+            "averaged standard deviation":{
+                "title":"StDev Norm",
+                "x_axis_limits":[-2,
+                2],
+                "range_style":"orange-green-orange",
+                "left_dashed_zone_linestyle" : [10, [8, 5]]
+            }
+          },
+          "range_style":{
+            "green":{
+                "spans":[
+                  [-1,
+                  1]
+                ],
+                "colors":[
+                  "#4cff00"
+                ]
+            },
+            "green-orange":{
+                "spans":[
+                  [0,
+                  0.5],
+                  [0.5,
+                  1]
+                ],
+                "colors":[
+                  "#4cff00",
+                  "#fea400"
+                ]
+            },
+            "orange-green-orange":{
+                "spans":[
+                  [-1,
+                  -0.75],
+                  [-0.75,
+                  0.75],
+                  [0.75,
+                  1]
+                ],
+                "colors":[
+                  "#fea400",
+                  "#4cff00",
+                  "#fea400"
+                ]
+            }
+          },
+          "title":{
+            "t":"Placeholder",
+            "fontsize":12,
+            "va":"center"
+          },
+          "left-description":{
+            "x": -0.02,
+            "y": 0.05,
+            "s":"--------space--------    ----------------------time----------------------    ----observations----",
+            "va":"bottom",
+            "ha":"center",
+            "rotation":"vertical",
+            "fontsize":10
+          },
+          "subplot_parameters":{
+        "nrows": 8,
+        "ncols": 4,
+        "figsize": [11, 6],
+        "gridspec_kw": {
+            "width_ratios": [1, 16, 1, 1],
+            "wspace": 0
+        }
+    }
+          ,
+          "row_title":{
+            "position":[-1.3,
+            0.5],
+            "fontsize":10,
+            "va":"center",
+            "ha":"center",
+          },
+          "units": {
+            "position": [-0.3, -0.45], 
+            "fontsize": 9
+          },
+          "right_dot": {
+            "zorder" : 5,
+            "s" : 100,
+            "x" : 0,
+            "y" : 0
+          },
+          "right_dot_colors":{
+            "green": '#4cff00', 
+            "red": '#ff0000'
+            },
+          "station_dots" :  {
+            "marker": "o",
+            "color": "#1111ff"}
+      },
+      "plot_options": [],
+    }
 }
