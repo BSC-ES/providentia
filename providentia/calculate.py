@@ -506,7 +506,7 @@ class ExpBias(object):
             return ((exp_max - obs_max) / obs_max) * 100.0
 
     @staticmethod
-    def calculate_fairmode_stats(obs, exp, u_95r_RV, RV, alpha, beta, type='assessment'):
+    def calculate_fairmode_stats(obs, exp, u_95r_RV, RV, alpha, beta, exc_threshold, plot, type='assessment'):
         """ Calculate FAIRMODE statistics for target plot
             See here: https://fairmode.jrc.ec.europa.eu/document/fairmode/WG1/Guidance_MQO_Bench_vs3.3_20220519.pdf
 
@@ -524,6 +524,10 @@ class ExpBias(object):
             Uncertainty parameter
         beta : float
             Proportionality coefficient
+        exc_threshold : int
+            Threshold used to calculate the exceedances
+        plot : str
+            Differenciates between fairmode target and statsummary
         """
 
         is_finite = np.isfinite(obs+exp)
@@ -540,7 +544,7 @@ class ExpBias(object):
             bias = ExpBias.calculate_mb(obs, exp)
             
             # fairmode target plot
-            if type == 'assesment':
+            if plot == 'target':
                         
                 # calculate x-axis values (CRMSE/BETA*RMSu)
                 crmse = ExpBias.calculate_crmse(obs, exp)
@@ -567,7 +571,13 @@ class ExpBias(object):
                 return x, y, mqi
             
             # fairmode summarystats plot
-            elif type == 'summary':
+            elif plot == 'summary':
+
+                # calculate exceedance
+                exc = Stats.calculate_exceedances(obs,exc_threshold)
+
+                # calculate mean
+                mean = Stats.calculate_mean(obs)
                 
                 # calculate Observation and Experiment Percentile
                 obs_perc = Stats.calculate_percentile(obs)
@@ -583,12 +593,12 @@ class ExpBias(object):
                 t_sd = (np.abs(Stats.calculate_standard_deviation(exp) - Stats.calculate_standard_deviation(obs))) / (beta * rms_u)
 
                 # calculate Uncertainty
-                U = u_95r_RV * np.sqrt((1 - alpha ** 2) * (Stats.calculate_mean(obs) ** 2 + Stats.calculate_standard_deviation(obs)) + alpha ** 2 * RV ** 2 )
+                U = u_95r_RV * np.sqrt((1 - alpha ** 2) * Stats.calculate_mean(obs) ** 2 + alpha ** 2 * RV ** 2)
                 
                 # calculate High Percentile
                 h_perc = np.abs(exp_perc - obs_perc) / (beta * U)
                 
-                return t_bias, t_R, t_sd, h_perc
+                return exc, mean, t_bias, t_R, t_sd, h_perc
 
         else:
             return np.NaN, np.NaN, np.NaN
