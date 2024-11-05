@@ -19,7 +19,7 @@ PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
 sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia', 'interpolation'))
 sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia'))
 
-from aux import get_aeronet_bin_radius_from_bin_variable, get_model_bin_radii, check_for_ghost
+from aux_interp import get_aeronet_bin_radius_from_bin_variable, get_model_bin_radii, check_for_ghost
 from configuration import ProvConfiguration, load_conf
 
 # load the defined experiments and species yamls
