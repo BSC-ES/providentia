@@ -15,13 +15,13 @@ from providentia.auxiliar import CURRENT_PATH, join
 MACHINE = os.environ.get('BSC_MACHINE', 'local')
 
 # get current path and providentia root path
-PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
+PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
 sys.path.append(join(PROVIDENTIA_ROOT, 'providentia', 'interpolation'))
 sys.path.append(join(PROVIDENTIA_ROOT, 'providentia'))
 
-from aux_interp import get_aeronet_bin_radius_from_bin_variable, get_model_bin_radii, check_for_ghost
-from configuration import ProvConfiguration, load_conf
+from providentia.interpolation.aux_interp import get_aeronet_bin_radius_from_bin_variable, get_model_bin_radii, check_for_ghost
+from providentia.configuration import ProvConfiguration, load_conf
 
 # load the defined experiments and species yamls
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
@@ -503,7 +503,7 @@ class SubmitInterpolation(object):
                         msg += f'Experiment data between {self.start_date} and {self.end_date} cannot be found.'
                     else:
                         msg += f'Experiment files: {exp_files}\n'
-                        msg += f'Experiment dates: {exp_files_dates}'
+                        msg += f'Experiment dates: {exp_files_dates}\n'
                         if len(obs_files) == 0:
                             msg += f'Observational data between {self.start_date} and {self.end_date} cannot be found.'
                         else:
