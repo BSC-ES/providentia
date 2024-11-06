@@ -165,8 +165,9 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
     # get lower and upper limits across all relevant axes
     for ax in relevant_axs_active:
         if 'equal_aspect' in plot_characteristics:
-            set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type)
-            continue
+            if plot_characteristics['equal_aspect']:
+                set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type)
+                continue
         else:
             ax.set_aspect('auto')
 
