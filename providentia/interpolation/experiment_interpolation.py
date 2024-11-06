@@ -27,10 +27,11 @@ from aux_interp import (check_for_ghost, findMiddle, check_directory_existence, 
                  get_aeronet_bin_radius_from_bin_variable, get_aeronet_model_bin, 
                  get_model_to_aeronet_bin_transform_factor)
 
+from auxiliar import CURRENT_PATH
+
 MACHINE = os.environ.get('BSC_MACHINE', 'local')
 
 # get current path and providentia root path
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
 
 # load the defined experiments paths and agrupations jsons

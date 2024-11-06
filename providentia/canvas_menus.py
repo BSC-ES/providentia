@@ -11,7 +11,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from .dashboard_elements import CheckableComboBox, ComboBox
 from .dashboard_elements import set_formatting
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+from auxiliar import CURRENT_PATH
+
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 settings_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/canvas_menus.yaml')))
 # get operating system specific formatting

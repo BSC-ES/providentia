@@ -19,7 +19,8 @@ from .calculate import Stats, ExpBias
 from .read_aux import (drop_nans, get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
                        get_frequency_code, get_lower_resolutions)
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+from auxiliar import CURRENT_PATH
+
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
 expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
