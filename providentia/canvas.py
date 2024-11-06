@@ -37,7 +37,7 @@ from .read_aux import get_lower_resolutions
 from .statistics import *
 from .warnings_prv import show_message
 
-from auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH
 
 # make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')
