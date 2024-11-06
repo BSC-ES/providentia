@@ -19,7 +19,7 @@ from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_
 from .spatial_colocation import SpatialColocation
 from .warnings_prv import show_message
 
-from providentia.auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH, join
 
 class DataReader:
 
@@ -243,7 +243,7 @@ class DataReader:
             # non-GHOST
             if not self.read_instance.reading_ghost:
                 # import unit converter
-                sys.path.insert(1, os.path.join(CURRENT_PATH, 'dependencies/unit-converter'))
+                sys.path.insert(1, join(CURRENT_PATH, 'dependencies/unit-converter'))
                 import unit_converter
 
                 # convert non-GHOST units to standard format

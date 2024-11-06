@@ -39,7 +39,7 @@ from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, gene
 from .toolbar import NavigationToolbar
 from .warnings_prv import show_message
 
-from providentia.auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH, join
 
 # set proper scaling
 os.environ["QT_ENABLE_HIGHDPI_SCALING"]   = "1"
@@ -64,11 +64,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         super(ProvidentiaMainWindow, self).__init__()
 
         # load statistical yamls
-        self.basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
-        self.expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
+        self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
+        self.expbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
 
         # load representativity information
-        self.representativity_info = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
+        self.representativity_info = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
 
         # save warnings that appear next in to show them after the UI is initialised
         self.delay = True
@@ -87,8 +87,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             if os.path.exists(self.config):
                 read_conf = True
             else:
-                if os.path.exists(os.path.join(self.config_dir, self.config)):
-                    self.config = os.path.join(self.config_dir, self.config)
+                if os.path.exists(join(self.config_dir, self.config)):
+                    self.config = join(self.config_dir, self.config)
                     read_conf = True
 
             if read_conf:
@@ -152,16 +152,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # get operating system specific formatting
         if self.operating_system == 'Mac':
-            self.formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_mac.yaml')))
+            self.formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_mac.yaml')))
         elif self.operating_system == 'Linux':
-            self.formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_linux.yaml')))
+            self.formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_linux.yaml')))
         elif self.operating_system == 'Windows':
-            self.formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_windows.yaml')))
+            self.formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_windows.yaml')))
 
         # load characteristics per plot type
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
-            self.plot_characteristics_filename = os.path.join(
+            self.plot_characteristics_filename = join(
                 PROVIDENTIA_ROOT, 'settings/plot_characteristics_dashboard.yaml')
         self.plot_characteristics_templates = yaml.safe_load(open(self.plot_characteristics_filename))
 
@@ -338,7 +338,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.setWindowTitle(self.window_title)
 
         # add logo as icon
-        self.setWindowIcon(QtGui.QIcon(os.path.join(PROVIDENTIA_ROOT, 'assets/logo.png')))
+        self.setWindowIcon(QtGui.QIcon(join(PROVIDENTIA_ROOT, 'assets/logo.png')))
 
         # create parent layout to pull together a configuration bar,
         # a MPL navigation toolbar, and a MPL canvas of plots
@@ -1586,7 +1586,7 @@ def main(**kwargs):
 
     # explicitely set colour palette to avoid issues with dark modes (e.g. on Mac)
     p = q_app.palette()
-    dcp = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/dashboard_colour_palette.yaml')))
+    dcp = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/dashboard_colour_palette.yaml')))
     p.setColor(QtGui.QPalette.Dark, QtGui.QColor(*dcp['Dark']))
     p.setColor(QtGui.QPalette.Light, QtGui.QColor(*dcp['Light']))
     p.setColor(QtGui.QPalette.Window, QtGui.QColor(*dcp['Window']))

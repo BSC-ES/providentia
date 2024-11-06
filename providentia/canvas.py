@@ -37,7 +37,7 @@ from .read_aux import get_lower_resolutions
 from .statistics import *
 from .warnings_prv import show_message
 
-from providentia.auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH, join
 
 # make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')
@@ -47,7 +47,7 @@ register_matplotlib_converters()
 mplstyle.use('fast')
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-settings_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/canvas_menus.yaml')))
+settings_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/canvas_menus.yaml')))
 
 
 class MPLCanvas(FigureCanvas):

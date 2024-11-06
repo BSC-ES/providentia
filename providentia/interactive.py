@@ -33,7 +33,7 @@ from .statistics import (calculate_statistic, generate_colourbar, generate_colou
                          get_selected_station_data, get_z_statistic_info)
 from .writing import export_configuration, export_data_npz, export_netcdf
 
-from providentia.auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH, join
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
@@ -59,11 +59,11 @@ class Interactive:
         self.kwargs['interactive'] = True
 
         # load statistical yamls
-        self.basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
-        self.expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
+        self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
+        self.expbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
 
         # load representativity information
-        self.representativity_info = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
+        self.representativity_info = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
 
         # set configuration variables, as well as any other defined variables
         valid_config = self.set_config(**self.kwargs)
@@ -83,7 +83,7 @@ class Interactive:
                 path = 'settings/plot_characteristics_tests.yaml'
             else:
                 path = 'settings/plot_characteristics_interactive.yaml'
-            self.plot_characteristics_filename = os.path.join(PROVIDENTIA_ROOT, path)
+            self.plot_characteristics_filename = join(PROVIDENTIA_ROOT, path)
         self.plot_characteristics_templates = yaml.safe_load(open(self.plot_characteristics_filename))
 
         # initialise Plot class
@@ -825,7 +825,7 @@ class Interactive:
         if save:
             # if save is boolean then auto generate fname
             if type(save) == bool:
-                figure_fname = os.path.join(PROVIDENTIA_ROOT, 'plots/{}.png'.format(plot_type))
+                figure_fname = join(PROVIDENTIA_ROOT, 'plots/{}.png'.format(plot_type))
             else:
                 figure_fname = copy.deepcopy(save)
             print('Saving {} figure to {}'.format(plot_type, figure_fname))
@@ -950,8 +950,8 @@ class Interactive:
             if os.path.exists(self.config):
                 read_conf = True
             else:
-                if os.path.exists(os.path.join(self.config_dir, self.config)):
-                    self.config = os.path.join(self.config_dir, self.config)
+                if os.path.exists(join(self.config_dir, self.config)):
+                    self.config = join(self.config_dir, self.config)
                     read_conf = True
             if read_conf:
                 load_conf(self, self.config)
@@ -1208,7 +1208,7 @@ class Interactive:
         # set fname if not provided
         if fname == '':
             date_str = datetime.datetime.today().strftime('%Y%m%d_%H%M')
-            fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/PRV_{}'.format(date_str))
+            fname = join(PROVIDENTIA_ROOT, 'saved_data/PRV_{}'.format(date_str))
 
         if format in ['conf','config','.conf']:
             fname = '{}.conf'.format(fname)
@@ -1241,7 +1241,7 @@ class Interactive:
             networkspeci = networkspeci.replace('/', '-')
 
         # set temporary fname for writing
-        temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp_{}'.format(networkspeci))
+        temporary_fname = join(PROVIDENTIA_ROOT, 'saved_data/temp_{}'.format(networkspeci))
         
         # check if temporary fname already exists 
         if os.path.isfile(temporary_fname):
@@ -1249,7 +1249,7 @@ class Interactive:
             invalid_fname = True
             dup_count = 2
             while invalid_fname:
-                temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp_{}_{}'.format(networkspeci, dup_count))
+                temporary_fname = join(PROVIDENTIA_ROOT, 'saved_data/temp_{}_{}'.format(networkspeci, dup_count))
                 if os.path.isfile(temporary_fname):
                     dup_count += 1
                 else:

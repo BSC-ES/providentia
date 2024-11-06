@@ -16,7 +16,7 @@ import numpy as np
 from packaging.version import Version
 import pandas as pd
 
-from providentia.auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH, join
 
 # initialise dictionary for storing pointers to shared memory variables in read step 
 shared_memory_vars = {}
@@ -530,7 +530,7 @@ def get_ghost_observational_tree(instance):
                     ghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
 
     # save file tree out to yaml
-    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(instance.ghost_version)), 'w') as json_file:
+    with open(join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(instance.ghost_version)), 'w') as json_file:
         json.dump(ghost_observation_data, json_file, indent=4)
 
     return ghost_observation_data
@@ -599,7 +599,7 @@ def get_nonghost_observational_tree(instance):
                     nonghost_observation_data[network][resolution][matrix][speci] = file_yearmonths
         
     # save file tree out to yaml
-    with open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json'), 'w') as json_file:
+    with open(join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json'), 'w') as json_file:
         json.dump(nonghost_observation_data, json_file, indent=4)
 
     return nonghost_observation_data
@@ -685,7 +685,7 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
 
     # get all different experiment names (from providentia-interpolation output dir)
     available_experiments = []
-    if os.path.exists(os.path.join(instance.exp_root,instance.ghost_version)):
+    if os.path.exists(join(instance.exp_root,instance.ghost_version)):
         available_experiments = os.listdir('%s/%s' % (instance.exp_root, instance.ghost_version))
 
     # create dictionary to store available experiment data
@@ -862,13 +862,13 @@ def generate_file_trees(instance, force=False):
     # load file trees
     else:
         try:
-            instance.all_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(instance.ghost_version)))) 
+            instance.all_observation_data = json.load(open(join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(instance.ghost_version)))) 
         except FileNotFoundError as file_error:
             msg = "Error: Trying to load 'settings/internal/ghost_filetree_{}.json' but file does not exist. Run with the flag '--gft' to generate this file.".format(instance.ghost_version)
             sys.exit(msg)
         if instance.nonghost_root is not None:
             try:
-                nonghost_observation_data = json.load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json')))
+                nonghost_observation_data = json.load(open(join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json')))
             except FileNotFoundError as file_error:
                 msg = "Error: Trying to load 'settings/internal/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
                 sys.exit(msg)
