@@ -39,6 +39,8 @@ from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, gene
 from .toolbar import NavigationToolbar
 from .warnings_prv import show_message
 
+from auxiliar import CURRENT_PATH
+
 # set proper scaling
 os.environ["QT_ENABLE_HIGHDPI_SCALING"]   = "1"
 os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
@@ -47,7 +49,6 @@ os.environ["QT_FONT_DPI"] = "96"
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 class ProvidentiaMainWindow(QtWidgets.QWidget):
