@@ -10,10 +10,11 @@ from pydoc import locate
 import numpy as np
 import multiprocessing
 
+from auxiliar import CURRENT_PATH
+
 MACHINE = os.environ.get('BSC_MACHINE', 'local')
 
 # get current path and providentia root path
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
 
 sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia', 'interpolation'))

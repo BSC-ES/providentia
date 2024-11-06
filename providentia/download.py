@@ -25,7 +25,8 @@ from .configuration import ProvConfiguration, load_conf
 from .read_aux import check_for_ghost
 from .warnings_prv import show_message
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+from auxiliar import CURRENT_PATH
+
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 REMOTE_MACHINE = "storage5"
 

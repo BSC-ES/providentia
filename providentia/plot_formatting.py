@@ -19,6 +19,8 @@ from .plot_aux import get_land_polygon_resolution, set_map_extent
 from .plot_options import annotation, experiment_domain, linear_regression, log_axes, smooth, threshold
 from .statistics import get_z_statistic_info
 
+from auxiliar import CURRENT_PATH
+
 Image.MAX_IMAGE_PIXELS = None
 
 def set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type):
@@ -715,8 +717,6 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
                                               in canvas_instance.periodic_xticks[relevant_temporal_resolution]])
         
         elif base_plot_type == 'map':
-
-            CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
             # set map background
 
