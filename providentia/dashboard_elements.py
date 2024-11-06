@@ -11,7 +11,7 @@ import numpy as np
 from PyQt5 import QtCore, QtWidgets, QtGui
 from textwrap import wrap
 
-from auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 # get operating system specific formatting

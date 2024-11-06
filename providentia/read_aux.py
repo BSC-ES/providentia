@@ -16,7 +16,7 @@ import numpy as np
 from packaging.version import Version
 import pandas as pd
 
-from auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH
 
 # initialise dictionary for storing pointers to shared memory variables in read step 
 shared_memory_vars = {}
