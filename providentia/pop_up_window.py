@@ -14,17 +14,17 @@ from .read_aux import get_default_qa
 from .dashboard_elements import set_formatting, wrap_tooltip_text
 from .warnings_prv import show_message
 
-from providentia.auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH, join
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 # get operating system specific formatting
 operating_system = platform.system()
 if operating_system == 'Darwin':
-    formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_mac.yaml')))
+    formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_mac.yaml')))
 elif operating_system == 'Linux':
-    formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_linux.yaml')))
+    formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_linux.yaml')))
 elif operating_system in ['Windows','MINGW32_NT','MINGW64_NT']:
-    formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_windows.yaml')))
+    formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_windows.yaml')))
 
 
 class PopUpWindow(QtWidgets.QWidget):
