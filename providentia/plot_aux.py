@@ -21,7 +21,8 @@ from scipy.sparse import coo_matrix
 import seaborn as sns
 from .statistics import calculate_statistic, get_z_statistic_sign
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+from auxiliar import CURRENT_PATH
+
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 def get_multispecies_aliases(networkspecies):

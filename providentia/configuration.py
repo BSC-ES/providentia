@@ -14,10 +14,11 @@ import pandas as pd
 from itertools import compress
 import ast
 
+from auxiliar import CURRENT_PATH
+
 MACHINE = os.environ.get('BSC_MACHINE', 'local')
 
 # get current path and providentia root path
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'data_paths.yaml')))
 default_values = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_defaults.yaml')))
