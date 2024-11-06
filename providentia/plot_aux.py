@@ -5,6 +5,7 @@ import sys
 import os
 import math
 import json
+import scipy
 import yaml
 
 import matplotlib as mpl

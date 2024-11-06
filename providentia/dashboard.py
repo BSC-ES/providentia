@@ -196,6 +196,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.move.connect(self.get_geometry)
         
         # show delayed warnings
+        time.sleep(0.1)
         self.delay = False
         for msg in self.delayed_warnings:
             show_message(self, msg)
@@ -250,6 +251,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 menu_plot_type = menu_button.objectName().split('_menu')[0]
                 if plot_type == 'periodic-violin':
                     plot_type = 'periodic_violin'
+                elif plot_type == 'fairmode-target':
+                    plot_type = 'fairmode_target'
 
                 # proceed once have objects for plot type
                 if plot_type == menu_plot_type:
@@ -884,29 +887,19 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
     
-        # TODO: For Taylor diagrams, replace this piece of code for the one below when we stop using Matplotlib 3.3
         # remove plot types that need active temporal colocation and experiments data
         if Version(matplotlib.__version__) < Version("3.8"):
             if 'taylor' in canvas_instance.layout_options:
                 canvas_instance.layout_options.remove('taylor')
         else:
-            for plot_type in ['scatter', 'taylor']:
+            for plot_type in ['scatter', 'taylor', 'fairmode-target']:
                 if ((not self.temporal_colocation) 
                     or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
                     if plot_type in canvas_instance.layout_options:
                         canvas_instance.layout_options.remove(plot_type)
                 else:
                     if plot_type not in canvas_instance.layout_options:
-                        canvas_instance.layout_options.append(plot_type)   
-
-        for plot_type in ['scatter']:
-            if ((not self.temporal_colocation) 
-                or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
-                if plot_type in canvas_instance.layout_options:
-                    canvas_instance.layout_options.remove(plot_type)
-            else:
-                if plot_type not in canvas_instance.layout_options:
-                    canvas_instance.layout_options.append(plot_type)          
+                        canvas_instance.layout_options.append(plot_type)       
  
         # order alphabetically
         layout_options = sorted(canvas_instance.layout_options)
@@ -978,6 +971,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             
             elif event_source == self.cb_species:
                 self.selected_species = changed_param
+                if (('fairmode-target' in self.mpl_canvas.layout_options)
+                    and ((self.selected_species not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5'])
+                    or (self.selected_resolution != 'hourly'))):
+                    self.mpl_canvas.layout_options.remove('fairmode-target')
+                    self.update_layout_fields(self.mpl_canvas)
 
             elif event_source == self.cb_statistic_mode:
                 self.selected_statistic_mode = changed_param
@@ -1062,7 +1060,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     ax.remove()
                 self.active_dashboard_plots.remove(previous_plot_type)
 
-                #hide qt elements for previous plot type
+                # hide qt elements for previous plot type
                 for menu_button, save_button, element in zip(self.mpl_canvas.menu_buttons, 
                                                              self.mpl_canvas.save_buttons, 
                                                              self.mpl_canvas.elements):
@@ -1070,12 +1068,16 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     menu_plot_type = menu_button.objectName().split('_menu')[0]
                     if menu_plot_type == 'periodic_violin':
                         menu_plot_type = 'periodic-violin'
+                    elif menu_plot_type == 'fairmode-target':
+                        menu_plot_type = 'fairmode_target'
 
                     if previous_plot_type == menu_plot_type:
                         menu_button.hide()
                         save_button.hide()
                         if previous_plot_type == 'periodic-violin':
                             previous_plot_type = 'periodic_violin'
+                        elif previous_plot_type == 'fairmode-target':
+                            previous_plot_type = 'fairmode_target'
                         for element in getattr(self.mpl_canvas, previous_plot_type + '_elements'):
                             if isinstance(element, dict):
                                 for sub_element in element.values():
@@ -1217,8 +1219,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                 lambda event: annotation.hover_periodic_annotation(event, changed_plot_type))
             
-        elif changed_plot_type in ['timeseries', 'scatter', 'distribution']:
-
+        elif changed_plot_type in ['timeseries', 'scatter', 'distribution', 'fairmode-target']:
+            
             # add vertical line to timeseries and distribution plots
             if changed_plot_type in ['timeseries', 'distribution']:
                 add_vline = True
@@ -1482,6 +1484,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.mpl_canvas.handle_statsummary_cycle_update()
             self.mpl_canvas.handle_statsummary_periodic_aggregation_update()
             self.mpl_canvas.handle_statsummary_periodic_mode_update()
+
+            # update fairmode target combobox
+            self.mpl_canvas.handle_fairmode_target_classification_update()
 
             # unselect all/intersect/extent checkboxes
             self.mpl_canvas.unselect_map_checkboxes()

@@ -94,11 +94,12 @@ class MPLCanvas(FigureCanvas):
         # define all possible plots
         self.all_plots = ['legend', 'map', 'timeseries', 'periodic-violin', 'periodic', 
                           'metadata', 'distribution', 'scatter', 'statsummary', 'boxplot',
-                          'taylor']
+                          'taylor', 'fairmode-target']
 
         # define all possible plots in layout options
         self.layout_options = ['None', 'boxplot', 'distribution', 'metadata', 'periodic', 
-                               'periodic-violin', 'scatter', 'statsummary', 'timeseries', 'taylor']
+                               'periodic-violin', 'scatter', 'statsummary', 'timeseries', 'taylor', 
+                               'fairmode-target']
 
         # parse active dashboard plot string        
         if isinstance(self.read_instance.active_dashboard_plots, str):
@@ -165,6 +166,8 @@ class MPLCanvas(FigureCanvas):
                 menu_plot_type = menu_button.objectName().split('_menu')[0]
                 if plot_type == 'periodic-violin':
                     plot_type = 'periodic_violin'
+                elif plot_type == 'fairmode-target':
+                    plot_type = 'fairmode_target'
                 # proceed once have objects for plot type
                 if plot_type == menu_plot_type:
                     menu_button.show()
@@ -501,6 +504,7 @@ class MPLCanvas(FigureCanvas):
             self.handle_statsummary_cycle_update()
             self.handle_statsummary_periodic_aggregation_update()
             self.handle_statsummary_periodic_mode_update()
+            self.handle_fairmode_target_classification_update()
 
             # self.handle_taylor_correlation_statistic_update()
             self.read_instance.block_MPL_canvas_updates = False
@@ -707,6 +711,8 @@ class MPLCanvas(FigureCanvas):
                 # get plotting function for specific plot
                 if plot_type == 'statsummary':
                     func = getattr(self.plot, 'make_table')
+                elif plot_type == 'fairmode-target':
+                    func = getattr(self.plot, 'make_fairmode_target')
                 else:
                     func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
 
@@ -837,6 +843,16 @@ class MPLCanvas(FigureCanvas):
                 # update plot options
                 self.update_plot_options(plot_types=[plot_type])
 
+    def get_plot_type_position(self, plot_type):
+        """ Function that returns numeric position of plot type within the dashboard
+        """
+        position_vars = [self.read_instance.position_2, self.read_instance.position_3, 
+                         self.read_instance.position_4, self.read_instance.position_5]
+        positions = [2, 3, 4, 5]
+        for position, position_var in zip(positions, position_vars):
+            if plot_type == position_var:
+                return position
+
     def update_associated_active_dashboard_plots(self):
         """ Function that updates all plots associated with selected stations on map. """
 
@@ -863,16 +879,19 @@ class MPLCanvas(FigureCanvas):
 
                     #plot_start = time.time()
 
+                    # get numeric position of plot type in dashboard
+                    plot_type_position = self.get_plot_type_position(plot_type)
+
                     # if there are no temporal resolutions (only yearly), skip periodic plots
                     if ((plot_type in ['periodic', 'periodic-violin']) and 
                         (not self.read_instance.relevant_temporal_resolutions)):
                         msg = 'It is not possible to make periodic plots using annual resolution data.'
                         show_message(self.read_instance, msg)
-                        self.read_instance.handle_layout_update('None', sender=plot_type_ii+2) 
+                        self.read_instance.handle_layout_update('None', sender=plot_type_position) 
                         continue
                     
                     # if temporal colocation is turned off or there are no experiments, skip scatter plot
-                    if plot_type in ['scatter', 'taylor']:
+                    if plot_type in ['scatter', 'taylor', 'fairmode-target']:
                         if ((not self.read_instance.temporal_colocation) 
                             or ((self.read_instance.temporal_colocation) and (len(self.read_instance.data_labels) == 1))):
                             if (not self.read_instance.temporal_colocation):
@@ -880,7 +899,7 @@ class MPLCanvas(FigureCanvas):
                             else:
                                 msg = f'It is not possible to make {plot_type} plots without loading experiments.'
                             show_message(self.read_instance, msg)
-                            self.read_instance.handle_layout_update('None', sender=plot_type_ii+2)
+                            self.read_instance.handle_layout_update('None', sender=plot_type_position)
                             continue
 
                     # update plot
@@ -1421,6 +1440,35 @@ class MPLCanvas(FigureCanvas):
 
         return None
     
+    def handle_fairmode_target_classification_update(self):
+
+        if not self.read_instance.block_config_bar_handling_updates:
+
+            # update mouse cursor to a waiting cursor
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
+            # set variable that blocks configuration bar handling updates until all changes
+            # to the classification combobox are made
+            self.read_instance.block_config_bar_handling_updates = True
+
+            # update classification type
+            self.plot_characteristics['fairmode-target']['markers']['type'] = self.fairmode_target_classification.currentText()
+            
+            # allow handling updates to the configuration bar again
+            self.read_instance.block_config_bar_handling_updates = False
+
+            # update FAIRMODE target plot
+            if not self.read_instance.block_MPL_canvas_updates:
+                self.update_associated_active_dashboard_plot('fairmode-target')
+
+            # draw changes
+            self.figure.canvas.draw_idle()
+
+            # restore mouse cursor to normal
+            QtWidgets.QApplication.restoreOverrideCursor()
+
+        return None
+    
     def remove_axis_objects(self, ax_elements, elements_to_skip=None, types_to_remove=None):
         """ Remove objects (artists, lines, collections, patches) from axis. """
         
@@ -1494,7 +1542,8 @@ class MPLCanvas(FigureCanvas):
                     self.remove_axis_objects(objects, elements_to_skip=self.annotations_vline['periodic'].values())
 
             elif plot_type == 'periodic-violin':
-                for objects in [ax_to_remove.lines, ax_to_remove.artists, ax_to_remove.collections]:
+                for objects in [ax_to_remove.lines, ax_to_remove.artists, 
+                                ax_to_remove.collections]:
                     self.remove_axis_objects(objects, elements_to_skip=self.annotations_vline['periodic-violin'].values())
 
             elif plot_type == 'metadata':
@@ -1509,6 +1558,11 @@ class MPLCanvas(FigureCanvas):
 
             elif plot_type in ['taylor', 'boxplot', 'scatter']:
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
+                    self.remove_axis_objects(objects)
+
+            elif plot_type == 'fairmode-target':
+                for objects in [ax_to_remove.lines, ax_to_remove.artists, 
+                                ax_to_remove.patches, ax_to_remove.texts]:
                     self.remove_axis_objects(objects)
 
         # remove tracked plot elements
@@ -1541,6 +1595,8 @@ class MPLCanvas(FigureCanvas):
             checked_options = self.current_plot_options[plot_type]
             if plot_type == 'periodic-violin':
                 plot_type = 'periodic_violin'
+            elif plot_type == 'fairmode-target':
+                plot_type = 'fairmode_target'
             cb_options = getattr(self, plot_type + '_options')
 
             # uncheck all options
@@ -2141,6 +2197,24 @@ class MPLCanvas(FigureCanvas):
                                                 'linewidth_sl': [self.scatter_regression_linewidth_sl]
                                                }
 
+        # FAIRMODE TARGET PLOT SETTINGS MENU #
+        # create fairmode target settings menu
+        self.fairmode_target_menu = SettingsMenu(plot_type='fairmode_target', canvas_instance=self)
+        self.fairmode_target_options = self.fairmode_target_menu.checkable_comboboxes['options']
+        self.fairmode_target_elements = self.fairmode_target_menu.get_elements()
+        self.fairmode_target_classification = self.fairmode_target_menu.comboboxes['classification']
+        self.fairmode_target_classification.addItems(['Area', 'Station'])
+       
+        # get sliders and update values
+        self.fairmode_target_markersize_sl = self.fairmode_target_menu.sliders['markersize_sl']
+        self.fairmode_target_markersize_sl.setMaximum(int(self.plot_characteristics['fairmode-target']['plot']['markersize']*10))
+        self.fairmode_target_markersize_sl.setValue(int(self.plot_characteristics['fairmode-target']['plot']['markersize']))
+
+        # get fairmode target interactive dictionary
+        self.interactive_elements['fairmode_target'] = {'hidden': True,
+                                                        'markersize_sl': [self.fairmode_target_markersize_sl],
+                                                       }
+        
         # STATSUMMARY PLOT SETTINGS MENU #
         # create statsummary settings menu
         self.statsummary_menu = SettingsMenu(plot_type='statsummary', canvas_instance=self)
@@ -2194,6 +2268,8 @@ class MPLCanvas(FigureCanvas):
         for plot_type in settings_dict.keys():
             if plot_type == 'periodic-violin':
                 plot_type = 'periodic_violin'
+            elif plot_type == 'fairmode-target':
+                plot_type = 'fairmode_target'
             self.menu_buttons.append(getattr(self, plot_type + '_menu').buttons['settings_button'])
             self.save_buttons.append(getattr(self, plot_type + '_menu').buttons['save_button'])
             self.elements.append(getattr(self, plot_type + '_elements'))
@@ -2260,6 +2336,8 @@ class MPLCanvas(FigureCanvas):
         # correct perodic-violin name
         if key == 'periodic_violin':
             key = 'periodic-violin'
+        elif key == 'fairmode_target':
+            key = 'fairmode-target'
             
         self.update_markersize(self.plot_axes[key], key, markersize, event_source)
 
@@ -2341,6 +2419,8 @@ class MPLCanvas(FigureCanvas):
             # correct perodic-violin name
             if plot_type_alt == 'periodic_violin':
                 plot_type = 'periodic-violin'
+            elif plot_type_alt == 'fairmode_target':
+                plot_type = 'fairmode-target'
             else:
                 plot_type = copy.deepcopy(plot_type_alt)
 
@@ -2700,6 +2780,8 @@ class MPLCanvas(FigureCanvas):
                                 # get plotting function for specific plot
                                 if plot_type == 'statsummary':
                                     func = getattr(self.plot, 'make_table')
+                                elif plot_type == 'fairmode-target':
+                                    func = getattr(self.plot, 'make_fairmode_target')
                                 else:
                                     func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
 
@@ -2774,6 +2856,8 @@ class MPLCanvas(FigureCanvas):
                                 # get plotting function for specific plot
                                 if plot_type == 'statsummary':
                                     func = getattr(self.plot, 'make_table')
+                                elif plot_type == 'fairmode-target':
+                                    func = getattr(self.plot, 'make_fairmode_target')
                                 else:
                                     func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
 
@@ -2874,7 +2958,7 @@ class MPLCanvas(FigureCanvas):
         """ Update markers size for each plot type. """
         
         # set markersize
-        if plot_type in ['timeseries', 'periodic', 'scatter', 'periodic-violin', 'taylor']:
+        if plot_type in ['timeseries', 'periodic', 'scatter', 'periodic-violin', 'taylor', 'fairmode-target']:
             
             if isinstance(ax, dict):
                 for sub_ax in ax.values():
@@ -2890,7 +2974,7 @@ class MPLCanvas(FigureCanvas):
 
             # update characteristics per plot type
             # this is made to keep the changes when selecting stations with lasso
-            if plot_type in ['timeseries', 'periodic', 'scatter', 'taylor']:
+            if plot_type in ['timeseries', 'periodic', 'scatter', 'taylor', 'fairmode-target']:
                 self.plot_characteristics[plot_type]['plot']['markersize'] = markersize
             elif plot_type == 'periodic-violin':
                 self.plot_characteristics[plot_type]['plot']['median']['markersize'] = markersize
@@ -3149,7 +3233,9 @@ class MPLCanvas(FigureCanvas):
         plot_type = event_source.objectName().split('_save')[0]
         if plot_type == 'periodic_violin':
             plot_type = 'periodic-violin'
-        
+        elif plot_type == 'fairmode_target':
+            plot_type = 'fairmode-target'
+
         # set extent expansion
         for i, position in enumerate([self.read_instance.position_1, 
                                       self.read_instance.position_2, 
