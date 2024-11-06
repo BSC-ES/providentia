@@ -14,7 +14,7 @@ import xarray as xr
 from .configuration import write_conf
 from .dashboard_elements import InputDialog
 
-from auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH
 
 # get current path and providentia root path
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])

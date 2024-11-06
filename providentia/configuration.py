@@ -14,7 +14,7 @@ import pandas as pd
 from itertools import compress
 import ast
 
-from auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH
 
 MACHINE = os.environ.get('BSC_MACHINE', 'local')
 
