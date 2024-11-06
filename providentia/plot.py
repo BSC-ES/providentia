@@ -33,11 +33,11 @@ from .plot_aux import (create_chunked_timeseries, get_multispecies_aliases,
                        get_taylor_diagram_ghelper_info, kde_fft, merge_cells, periodic_labels, 
                        periodic_xticks, round_decimal_places, temp_axis_dict)
 
+from auxiliar import CURRENT_PATH
 
 # speed up transformations in cartopy
 pyproj.set_use_global_context()
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
 

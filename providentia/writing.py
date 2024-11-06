@@ -14,8 +14,9 @@ import xarray as xr
 from .configuration import write_conf
 from .dashboard_elements import InputDialog
 
+from auxiliar import CURRENT_PATH
+
 # get current path and providentia root path
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 # define possible temporal resolutions

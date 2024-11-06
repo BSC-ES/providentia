@@ -11,7 +11,8 @@ import numpy as np
 from PyQt5 import QtCore, QtWidgets, QtGui
 from textwrap import wrap
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+from auxiliar import CURRENT_PATH
+
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 # get operating system specific formatting
 operating_system = platform.system()
