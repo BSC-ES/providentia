@@ -21,7 +21,7 @@ from scipy.sparse import coo_matrix
 import seaborn as sns
 from .statistics import calculate_statistic, get_z_statistic_sign
 
-from auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 

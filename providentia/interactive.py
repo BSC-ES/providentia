@@ -33,7 +33,7 @@ from .statistics import (calculate_statistic, generate_colourbar, generate_colou
                          get_selected_station_data, get_z_statistic_info)
 from .writing import export_configuration, export_data_npz, export_netcdf
 
-from auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 

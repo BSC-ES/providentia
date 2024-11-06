@@ -15,7 +15,7 @@ from .configuration import split_options
 from .statistics import get_z_statistic_info, exceedance_lim
 from .warnings_prv import show_message
 
-from auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
