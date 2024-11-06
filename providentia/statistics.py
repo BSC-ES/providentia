@@ -19,12 +19,12 @@ from .calculate import Stats, ExpBias
 from .read_aux import (drop_nans, get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
                        get_frequency_code, get_lower_resolutions)
 
-from providentia.auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH, join
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
-expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
-fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
+basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
+expbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
+fairmode_settings = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
 
 
 def get_selected_station_data(read_instance, canvas_instance, networkspecies, 
@@ -989,7 +989,7 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
     norm = matplotlib.colors.Normalize(vmin=z_vmin, vmax=z_vmax)
 
     # get color palettes
-    color_palettes = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/color_palettes.yaml')))
+    color_palettes = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/color_palettes.yaml')))
 
     # get cmap (handling discrete cases)
     if z_vmin != z_vmax:
@@ -1197,7 +1197,7 @@ def exceedance_lim(networkspeci):
     # get speci
     speci = networkspeci.split('|')[1]
 
-    exceedance_limits = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/exceedances.yaml')))
+    exceedance_limits = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/exceedances.yaml')))
     if networkspeci in exceedance_limits:
         return exceedance_limits[networkspeci]
     elif speci in exceedance_limits:
