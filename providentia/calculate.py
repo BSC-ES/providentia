@@ -593,7 +593,7 @@ class ExpBias(object):
                 t_sd = (np.abs(Stats.calculate_standard_deviation(exp) - Stats.calculate_standard_deviation(obs))) / (beta * rms_u)
 
                 # calculate Uncertainty
-                U = u_95r_RV * np.sqrt((1 - alpha ** 2) * Stats.calculate_mean(obs) ** 2 + alpha ** 2 * RV ** 2)
+                U = u_95r_RV * np.sqrt((1 - alpha ** 2) * obs_perc ** 2 + alpha ** 2 * RV ** 2)
                 
                 # calculate High Percentile
                 h_perc = np.abs(exp_perc - obs_perc) / (beta * U)
