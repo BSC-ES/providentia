@@ -14,7 +14,7 @@ from .read_aux import get_default_qa
 from .dashboard_elements import set_formatting, wrap_tooltip_text
 from .warnings_prv import show_message
 
-from auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 # get operating system specific formatting

@@ -10,7 +10,7 @@ from pydoc import locate
 import numpy as np
 import multiprocessing
 
-from auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH
 
 MACHINE = os.environ.get('BSC_MACHINE', 'local')
 

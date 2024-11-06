@@ -39,7 +39,7 @@ from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, gene
 from .toolbar import NavigationToolbar
 from .warnings_prv import show_message
 
-from auxiliar import CURRENT_PATH
+from providentia.auxiliar import CURRENT_PATH
 
 # set proper scaling
 os.environ["QT_ENABLE_HIGHDPI_SCALING"]   = "1"
