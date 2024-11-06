@@ -10,6 +10,7 @@ import matplotlib
 import matplotlib as mpl 
 import matplotlib.pyplot as plt
 from matplotlib.dates import num2date
+from matplotlib import ticker
 import numpy as np
 from packaging.version import Version
 import pandas as pd
@@ -20,21 +21,25 @@ from .statistics import get_z_statistic_info
 
 Image.MAX_IMAGE_PIXELS = None
 
-def set_equal_axes(ax, plot_options, plot_characteristics):
+def set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type):
     """ Set equal aspect and limits (useful for scatter plots). 
 
         :param ax: axis to set equal axes
         :type ax: object
         :param plot_options: active plot options 
         :type plot_options: list
+        :param plot_characteristics: Plot characteristics  
+        :type plot_characteristics: dict
+        :param base_plot_type: Plot type, without statistical information
+        :type base_plot_type: str
     """
 
     # set equal aspect
     ax.set_aspect(aspect='equal', adjustable='box')
 
-    if len(ax.lines) == 0:
+    if len(ax.lines) == 0 and base_plot_type == 'scatter':
         return None
-
+    
     if ("xlim" not in plot_characteristics) and ("ylim" not in plot_characteristics):
         # get min and max values for axes from plotted data
         xmin, xmax = get_data_lims(ax, 'xlim', plot_options)
@@ -55,10 +60,26 @@ def set_equal_axes(ax, plot_options, plot_characteristics):
         ax.set_ylim(axmin, axmax)
     elif ("xlim" not in plot_characteristics) and ("ylim" in plot_characteristics):
         # set xlim as ylim if ylim is passed
-        ax.set_xlim(plot_characteristics["ylim"])
+        if isinstance(plot_characteristics["ylim"], dict):
+            ax.set_xlim(**plot_characteristics["ylim"])
+        else:
+            ax.set_xlim(plot_characteristics["ylim"])
     elif ("xlim" in plot_characteristics) and ("ylim" not in plot_characteristics):
         # set ylim as ylim if xlim is passed
-        ax.set_ylim(plot_characteristics["xlim"])
+        if isinstance(plot_characteristics["xlim"], dict):
+            ax.set_ylim(**plot_characteristics["xlim"])
+        else:
+            ax.set_ylim(plot_characteristics["xlim"])
+    elif ("xlim" in plot_characteristics) and ("ylim" in plot_characteristics):
+        # set both limits
+        if isinstance(plot_characteristics["xlim"], dict):
+            ax.set_xlim(**plot_characteristics["xlim"])
+        else:
+            ax.set_xlim(plot_characteristics["xlim"])
+        if isinstance(plot_characteristics["ylim"], dict):
+            ax.set_ylim(**plot_characteristics["ylim"])
+        else:
+            ax.set_ylim(plot_characteristics["ylim"])
 
     return None
 
@@ -141,9 +162,9 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
 
     # get lower and upper limits across all relevant axes
     for ax in relevant_axs_active:
-
         if 'equal_aspect' in plot_characteristics:
-            set_equal_axes(ax, plot_options, plot_characteristics)
+            set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type)
+            continue
         else:
             ax.set_aspect('auto')
 
@@ -197,7 +218,10 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
         # set xlim
         if ((set_xlim) and ('equal_aspect' not in plot_characteristics) and
            (base_plot_type not in ['timeseries', 'boxplot', 'periodic', 'periodic-violin'])):
-            ax.set_xlim(**xlim)
+            if isinstance(xlim, dict):
+                ax.set_xlim(**xlim)
+            else:
+                ax.set_xlim(xlim)
 
         # get ylim
         if ax_ii == 0:
@@ -223,7 +247,10 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
 
         # set ylim
         if (set_ylim) and ('equal_aspect' not in plot_characteristics):
-            ax.set_ylim(**ylim)
+            if isinstance(ylim, dict):
+                ax.set_ylim(**ylim)
+            else:
+                ax.set_ylim(ylim)
         
     # get minimum and maximum from all axes and set limits for periodic plots
     if base_plot_type in ['periodic', 'periodic-violin']:
@@ -249,7 +276,10 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
         elif 'xlim' in plot_characteristics:
             xlim = plot_characteristics['xlim']
             for temporal_resolution, sub_ax in zip(mapped_resolutions_active, relevant_axs_active):
-                sub_ax.set_xlim(**xlim)
+                if isinstance(xlim, dict):
+                    sub_ax.set_xlim(**xlim)
+                else:
+                    sub_ax.set_xlim(xlim)
 
         # if harmonisation is off, and ylim not manually set, 
         # ensure harmonisation is at least done for a plot across resolutions
@@ -626,11 +656,17 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
 
         # set xlim?
         if 'xlim' in plot_characteristics_vars:
-            ax_to_format.set_xlim(plot_characteristics['xlim'])
+            if isinstance(plot_characteristics['xlim'], dict):
+                ax_to_format.set_xlim(**plot_characteristics['xlim'])
+            else:
+                ax_to_format.set_xlim(plot_characteristics['xlim'])
 
         # set ylim? 
         if 'ylim' in plot_characteristics_vars:
-            ax_to_format.set_ylim(plot_characteristics['ylim'])
+            if isinstance(plot_characteristics['ylim'], dict):
+                ax_to_format.set_ylim(**plot_characteristics['ylim'])
+            else:
+                ax_to_format.set_ylim(plot_characteristics['ylim'])
 
         # add gridlines (x and y)?
         if 'grid' in plot_characteristics_vars:
@@ -677,7 +713,7 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
                 ax_to_format.set_xticks(plot_characteristics['xticks'])
                 ax_to_format.set_xticklabels([canvas_instance.temporal_axis_mapping_dict['short'][relevant_temporal_resolution][xtick] for xtick
                                               in canvas_instance.periodic_xticks[relevant_temporal_resolution]])
-        # map specific formatting
+        
         elif base_plot_type == 'map':
 
             CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -719,6 +755,11 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
             if map_extent:
                 set_map_extent(canvas_instance, ax_to_format, map_extent)
 
+        elif base_plot_type == 'fairmode-target':
+
+            # update axis labels
+            ax_to_format.set_xticks(**plot_characteristics['xticks'])
+            ax_to_format.set_yticks(**plot_characteristics['yticks'])
 
 def get_no_margin_lim(ax, lim):
     """ Get true limits of plot area (with no margins)
