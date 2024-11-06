@@ -193,6 +193,9 @@ class ProvConfiguration:
             from GHOST_standards import standard_QA_name_to_QA_code
             from GHOST_standards import standard_networks
             from GHOST_standards import standard_temporal_resolutions
+
+            # get ghost_version list
+            self.read_instance.possible_ghost_versions = os.listdir(os.path.join(CURRENT_PATH,'dependencies', 'GHOST_standards'))
             
             # get GHOST networks
             self.read_instance.ghost_available_networks = list(standard_networks.keys())
@@ -204,6 +207,9 @@ class ProvConfiguration:
             self.read_instance.parameter_dictionary = dict()
             for _, param_dict in standard_parameters.items():
                 self.read_instance.parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
+
+            # get available species
+            self.read_instance.available_species = list(self.read_instance.parameter_dictionary.keys())
             
             # get standard metadata dictionary
             self.read_instance.standard_metadata = get_standard_metadata({'standard_units': ''})
@@ -741,20 +747,18 @@ class ProvConfiguration:
         Returns if experiment if valid and the experiment type (if there is one) """
         
         # get the splitted experiment
-        experiment_split = full_experiment.split('-')
-        
-        # experiment, domain and ensemble_option
-        if len(experiment_split) == 3:
-            experiment, domain, ensemble_option = experiment_split
-        # experiment, domain
-        else:
-            experiment, domain = experiment_split
+        experiment, domain, ensemble_option = full_experiment.split('-')
+
+        # accept asterisk to download all experiments
+        if experiment == '*':
+            return True, experiment
         
         # search if the experiment id is in the interp_experiments file
         experiment_exists = False
         
-        # if local machine, get directory from data_paths
-        if MACHINE == 'local':
+        # if we are doing the interpolation from the local machine, get directory from data_paths
+        if MACHINE == 'local' and self.read_instance.interpolation:
+            # get the path to the non interpolated experiments
             exp_to_interp_root = data_paths['local']['exp_to_interp_root']
             exp_to_interp_root = os.path.expanduser(exp_to_interp_root[0])+exp_to_interp_root[1:]
             exp_to_interp_path = os.path.join(exp_to_interp_root, experiment)
@@ -768,7 +772,7 @@ class ProvConfiguration:
         
         # if experiment id is not defined, exit
         if not experiment_exists:
-            if MACHINE == 'local':  
+            if MACHINE == 'local' and self.read_instance.interpolation:
                 msg = f"Cannot find the experiment ID '{experiment}' in '{exp_to_interp_root}'."
             else:
                 msg = f"Cannot find the experiment ID '{experiment}' in '{os.path.join('settings', 'interp_experiments.yaml')}'. Please add it to the file."
@@ -776,7 +780,7 @@ class ProvConfiguration:
         else:
             # append experiment name in local since we do not differentiate between types
             # and we won't use this variable to get the paths
-            if MACHINE == 'local':  
+            if MACHINE == 'local' and self.read_instance.interpolation:
                 self.read_instance.experiment_types.append(experiment)
             else:
                 self.read_instance.experiment_types.append(experiment_type)
@@ -865,7 +869,7 @@ class ProvConfiguration:
         # check have network information, 
         # if offline, throw message, stating are using default instead
         # in download mode is allowed to not have network, so continue
-        if not self.read_instance.network and not self.read_instance.download:
+        if not self.read_instance.network and not (self.read_instance.download and not self.read_instance.interpolated):
             # default = ['GHOST']
             if self.read_instance.interpolation:
                 default = self.read_instance.ghost_available_networks
@@ -880,7 +884,7 @@ class ProvConfiguration:
         # in download mode is allowed to not pass any species, so continue
         if (not self.read_instance.species and not self.read_instance.download and not self.read_instance.interpolation):
             if self.read_instance.interpolation:
-                default = [self.standard_parameters[param]['bsc_parameter_name'] for param in self.standard_parameters.keys()] 
+                default = self.read_instance.available_species
             else:
                 default = default_values['species']
             msg = "Species (species) was not defined in the configuration file. Using '{}' as default.".format(default)
@@ -1066,44 +1070,41 @@ class ProvConfiguration:
         else:
             check_experiment_fun = self.check_experiment
 
-        # get ghost_version list
-        self.read_instance.possible_ghost_versions = os.listdir(os.path.join(CURRENT_PATH,'dependencies', 'GHOST_standards'))
-
         # temp dictionary to store experiments
         # TODO change names
         final_experiments = []
         correct_experiments = {}
 
-        # join experiments
-        for exp_i, experiment in enumerate(self.read_instance.exp_ids):
-            # experiment, domain, ensemble_options
-            if self.combined_domain and self.combined_ensemble_options:
-                final_experiments += [f'{experiment}-{domain}-{ens_opt}' for domain in self.read_instance.domain for ens_opt in self.read_instance.ensemble_options]
-            else:
-                if self.combined_domain or self.combined_ensemble_options:
-                    # experiment-ensemble_options, domain
-                    if self.combined_domain:
-                        final_experiments += [f'{experiment}-{domain}-{self.read_instance.ensemble_options[exp_i]}' for domain in self.read_instance.domain]
-                    # experiment-domain, ensemble_options 
-                    else:
-                        final_experiments += [f'{experiment}-{self.read_instance.domain[exp_i]}-{ens_opt}' for ens_opt in self.read_instance.ensemble_options]
-                # experiment-domain-ensemble_options
-                else:
-                    final_experiments.append(f'{experiment}-{self.read_instance.domain[exp_i]}-{self.read_instance.ensemble_options[exp_i]}')
         
-        # if its a download of non interpolated experiments, the ensemble option is not needed
-        if self.read_instance.download and not self.read_instance.interpolated:
-            final_experiments = list({exp.split("-")[0] + "-" + exp.split("-")[1] for exp in final_experiments})
-
-        for exp_i, experiment in enumerate(final_experiments):
-            # TODO change boolean name
-            exp_is_valid, valid_exp_list = check_experiment_fun(experiment, deactivate_warning)
-            if exp_is_valid:
-                for valid_exp in valid_exp_list:
-                    if self.read_instance.alias_flag:
-                        correct_experiments[valid_exp] = self.read_instance.alias[exp_i]
+        # TODO keep the check only in download or configuration
+        # in case of zenodo download don't even check
+        if not (self.read_instance.download and self.read_instance.bsc_download_choice == "n"): 
+            # join experiments
+            for exp_i, experiment in enumerate(self.read_instance.exp_ids):
+                # experiment, domain, ensemble_options
+                if self.combined_domain and self.combined_ensemble_options:
+                    final_experiments += [f'{experiment}-{domain}-{ens_opt}' for domain in self.read_instance.domain for ens_opt in self.read_instance.ensemble_options]
+                else:
+                    if self.combined_domain or self.combined_ensemble_options:
+                        # experiment-ensemble_options, domain
+                        if self.combined_domain:
+                            final_experiments += [f'{experiment}-{domain}-{self.read_instance.ensemble_options[exp_i]}' for domain in self.read_instance.domain]
+                        # experiment-domain, ensemble_options 
+                        else:
+                            final_experiments += [f'{experiment}-{self.read_instance.domain[exp_i]}-{ens_opt}' for ens_opt in self.read_instance.ensemble_options]
+                    # experiment-domain-ensemble_options
                     else:
-                        correct_experiments[valid_exp] = valid_exp
+                        final_experiments.append(f'{experiment}-{self.read_instance.domain[exp_i]}-{self.read_instance.ensemble_options[exp_i]}')
+
+            for exp_i, experiment in enumerate(final_experiments):
+                # TODO change boolean name
+                exp_is_valid, valid_exp_list = check_experiment_fun(experiment, deactivate_warning)
+                if exp_is_valid:
+                    for valid_exp in valid_exp_list:
+                        if self.read_instance.alias_flag:
+                            correct_experiments[valid_exp] = self.read_instance.alias[exp_i]
+                        else:
+                            correct_experiments[valid_exp] = valid_exp
         
         # if experiments were passed and there's no valid experiment, show warning
         if self.read_instance.experiments != [] and correct_experiments == {}:
@@ -1230,8 +1231,8 @@ class ProvConfiguration:
         self.read_instance.species = copy.deepcopy(new_species)
 
         # get species and filter species which are not on the current ghost version
-        invalid_species = set(self.read_instance.species) - set(self.read_instance.parameter_dictionary.keys())
-        invalid_filter_species = set(map(lambda x:x.split('|')[1], self.read_instance.filter_species)) - set(self.read_instance.parameter_dictionary.keys())                          
+        invalid_species = set(self.read_instance.species) - set(self.read_instance.available_species)
+        invalid_filter_species = set(map(lambda x:x.split('|')[1], self.read_instance.filter_species)) - set(self.read_instance.available_species)                          
         
         # check species, remove the ones that are not on the ghost version       
         if invalid_species:                                                            
@@ -1418,7 +1419,7 @@ class ProvConfiguration:
                     self.read_instance.filter_species[networkspeci][networkspeci_limit_ii] = [lower_limit, upper_limit, 
                                                                                               filter_species_fill_value]
 
-        if (MACHINE == 'local') and (not self.read_instance.interp_multiprocessing):
+        if (MACHINE == 'local') and (not self.read_instance.interp_multiprocessing) and (self.read_instance.interpolation):
             msg = 'During interpolation multiprocessing must be turned on for local runs, activating.'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.interp_multiprocessing = True
