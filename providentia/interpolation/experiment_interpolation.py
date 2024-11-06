@@ -23,7 +23,7 @@ import scipy
 from scipy.spatial import cKDTree
 from shapely.geometry import Polygon, Point
 import xarray as xr
-from aux import (check_for_ghost, findMiddle, check_directory_existence, set_file_permissions_ownership,
+from aux_interp import (check_for_ghost, findMiddle, check_directory_existence, set_file_permissions_ownership,
                  get_aeronet_bin_radius_from_bin_variable, get_aeronet_model_bin, 
                  get_model_to_aeronet_bin_transform_factor)
 
