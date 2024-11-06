@@ -738,7 +738,16 @@ class ProvidentiaOffline:
                                 # hide annotations
                                 for annotation in annotations:
                                     annotation.set_visible(False)
+                        
+                        # setup fairmode summary stats plot type gridspec
+                        elif base_plot_type == 'fairmode-statsummary':
+                            gs = gridspec.GridSpec(8, 4)
+                            grid_list = np.reshape(np.array([[fig.add_subplot(gs[i, j]) for j in range(4)] for i in range(8)]),(8, 4))
+                            self.plot_dictionary[page_n]['axs'].append({'handle':grid_list, 'data_labels':[]})
 
+                            # format axis 
+                            format_axis(self, self, grid_list, base_plot_type, plot_characteristics)
+                        
                         # rest of plot types
                         else:
                             
@@ -1571,6 +1580,8 @@ class ProvidentiaOffline:
                         if relevant_temporal_resolution == 'hour':
                             axis_title = sub_ax.get_title()
                             break
+                elif isinstance(relevant_axis, np.ndarray):
+                    axis_title = relevant_axis[0,0].get_title()
                 else:
                     axis_title = relevant_axis.get_title()
 
@@ -1581,6 +1592,9 @@ class ProvidentiaOffline:
                             axis_xlabel = 'NaN'
                             axis_ylabel = sub_ax.get_ylabel()
                             break
+                elif isinstance(relevant_axis, np.ndarray):
+                    axis_xlabel = ""
+                    axis_ylabel = ""
                 else:
                     axis_xlabel = relevant_axis.get_xlabel()
                     axis_ylabel = relevant_axis.get_ylabel()
@@ -1686,6 +1700,11 @@ class ProvidentiaOffline:
                         # hide annotations
                         for annotation in annotations:
                             annotation.set_visible(True)
+                elif base_plot_type == "fairmode-statsummary":
+                    for i in range(8):
+                        for j in range(4):
+                            relevant_axis[i,j].axis('on')
+                            relevant_axis[i,j].set_visible(True)
                 else:
                     relevant_axis.axis('on')
                     relevant_axis.set_visible(True)
@@ -1886,6 +1905,11 @@ class ProvidentiaOffline:
                     for relevant_temporal_resolution in self.relevant_temporal_resolutions:
                         relevant_axs.append(ax['handle'][relevant_temporal_resolution])
                         relevant_data_labels.append(ax['data_labels'])
+            elif base_plot_type == 'fairmode-statsummary':
+                for i in range(8):
+                    for j in range(4):
+                        relevant_axs.append(self.plot_dictionary[relevant_page]['axs']['handle'][i,j])
+                        relevant_data_labels.append(self.plot_dictionary[relevant_page]['axs']['data_labels'][i,j])
             else:
                 for ax in self.plot_dictionary[relevant_page]['axs']:
                     relevant_axs.append(ax['handle'])
