@@ -2213,82 +2213,79 @@ class Plot:
                 h_perc_list.append(h_perc)
         
             # plot data
-            # configure the figure and axes
-            fig, ax = plt.subplots(**plot_characteristics["auxiliar"]["subplot_parameters"])
-
             # join all statistics in one list
             statistics_list = [exceedances, means, t_biases, t_R_list, t_sd_list, h_perc_list]
 
             # apply configuration to each row
-            for i, (plot_dict, data) in enumerate(zip(plot_characteristics["auxiliar"]["subplots"].values(),statistics_list)):
+            for i, (plot_dict, fairmode_data) in enumerate(zip(plot_characteristics["auxiliar"]["subplots"].values(),statistics_list)):
                 # remove axis from the dot on right side and initialize dot color
-                ax[i, 3].set_axis_off()
+                relevant_axis[i, 3].set_axis_off()
                 # dot_color = "white"
                 
                 # add units to the first two rows
                 if 'units' in plot_dict:
-                    ax[i, 3].text(*plot_characteristics["auxiliar"]["units"]["position"], plot_dict['units'], fontsize=plot_characteristics["auxiliar"]["units"]["fontsize"])
+                    relevant_axis[i, 3].text(*plot_characteristics["auxiliar"]["units"]["position"], plot_dict['units'], fontsize=plot_characteristics["auxiliar"]["units"]["fontsize"])
                 
                 # configure color of the row and the dot on the right for rows 3 to 8
                 if 'range_style' in plot_dict:
                     # get the dictionary with the style of the row and its range
                     range_style_dict = plot_characteristics["auxiliar"]["range_style"][plot_dict['range_style']]
                     for span, color in zip(range_style_dict["spans"],range_style_dict["colors"]):
-                        ax[i, 1].axvspan(*span, color=color, lw=0)
+                        relevant_axis[i, 1].axvspan(*span, color=color, lw=0)
 
                     # get the lowest and highest number on the range
                     min_span = range_style_dict["spans"][0][0]
                     max_span = range_style_dict["spans"][-1][-1]
                     
                     # get the color of the dot on the right
-                    arr = np.array(data)[~np.isnan(data)]
+                    arr = np.array(fairmode_data)[~np.isnan(fairmode_data)]
                     correct_arr = arr[(arr >= min_span) & (arr <= max_span)]
                     dot_color = plot_characteristics["auxiliar"]["right_dot_colors"]["green"] if len(correct_arr)/len(arr) >= .9 else plot_characteristics["auxiliar"]["right_dot_colors"]['red']
                     
                     # plot dot on the right
-                    ax[i, 3].scatter(**plot_characteristics["auxiliar"]["right_dot"], color=dot_color, edgecolor=dot_color)
+                    relevant_axis[i, 3].scatter(**plot_characteristics["auxiliar"]["right_dot"], color=dot_color, edgecolor=dot_color)
 
                 # plot stations as blue dots
-                ax[i, 1].plot(data, np.zeros_like(data), plot_characteristics["auxiliar"]["station_dots"]["marker"], 
+                relevant_axis[i, 1].plot(fairmode_data, np.zeros_like(fairmode_data), plot_characteristics["auxiliar"]["station_dots"]["marker"], 
                             color=plot_characteristics["auxiliar"]["station_dots"]["color"])
                 
                 # remove y axis ticks
                 for j in range(3):
-                    ax[i, j].set_yticks([])
+                    relevant_axis[i, j].set_yticks([])
                 
                 # get the x axis limit for the current row
                 x_limit = plot_dict['x_axis_limits']
 
                 # set x axis limits
-                ax[i, 1].set_xlim(*x_limit)
+                relevant_axis[i, 1].set_xlim(*x_limit)
                 
                 # get the equivalent proportion for the dashed zones
                 num = (x_limit[1] - x_limit[0]) / 16
                 
                 # configure right dashed zone
                 # set right dashed zone x axis limits
-                ax[i, 2].set_xlim(x_limit[1], x_limit[1] + num)
+                relevant_axis[i, 2].set_xlim(x_limit[1], x_limit[1] + num)
                 
                 # remove vertical lines separating middle and right dashed zone
-                ax[i, 2].spines['left'].set_linestyle('none')
+                relevant_axis[i, 2].spines['left'].set_linestyle('none')
                 
                 # change the linestyle to dashed
                 for side in ['bottom', 'top', 'right']:
-                    ax[i, 2].spines[side].set_linestyle((10, (8, 5)))
+                    relevant_axis[i, 2].spines[side].set_linestyle((10, (8, 5)))
                     
                 # remove x ticks from the right dashed zone
-                ax[i, 2].set_xticks([])
+                relevant_axis[i, 2].set_xticks([])
                 
                 # add the dots that fall into the right dashed zone
-                ax[i, 2].plot(data, np.zeros_like(data), plot_characteristics["auxiliar"]["station_dots"]["marker"], 
+                relevant_axis[i, 2].plot(fairmode_data, np.zeros_like(fairmode_data), plot_characteristics["auxiliar"]["station_dots"]["marker"], 
                             color=plot_characteristics["auxiliar"]["station_dots"]["color"])
 
                 # configure left dashed zone
                 # set right dashed zone x axis limits
-                ax[i, 0].set_xlim(x_limit[0] - num, x_limit[0])
+                relevant_axis[i, 0].set_xlim(x_limit[0] - num, x_limit[0])
                 
                 # remove x ticks from the left dashed zone
-                ax[i, 0].set_xticks([])
+                relevant_axis[i, 0].set_xticks([])
                 
                 # define left zone line style (can be dashed or no left zone)
                 left_dashed_zone_linestyle = plot_dict['left_dashed_zone_linestyle']
@@ -2298,27 +2295,25 @@ class Plot:
                     # convert to tuple [x,[x,x]] because yaml does not return python tuples
                     left_dashed_zone_linestyle = (left_dashed_zone_linestyle[0],tuple(left_dashed_zone_linestyle[1]))
                     # remove vertical line separating middle and left dashed zone
-                    ax[i, 1].spines['left'].set_linestyle('none')
+                    relevant_axis[i, 1].spines['left'].set_linestyle('none')
                     # add the dots that fall into the left dashed zone 
-                    ax[i, 0].plot(data, np.zeros_like(data), plot_characteristics["auxiliar"]["station_dots"]["marker"], 
+                    relevant_axis[i, 0].plot(fairmode_data, np.zeros_like(fairmode_data), plot_characteristics["auxiliar"]["station_dots"]["marker"], 
                                 color=plot_characteristics["auxiliar"]["station_dots"]["color"])
                 
                 # change the linestyle to dashed or remove the dashed zone
                 for side in ['bottom', 'top', 'left']:
-                    ax[i, 0].spines[side].set_linestyle(left_dashed_zone_linestyle)
+                    relevant_axis[i, 0].spines[side].set_linestyle(left_dashed_zone_linestyle)
 
                 # add row title
-                ax[i, 0].text(*plot_characteristics["auxiliar"]["row_title"]["position"], plot_dict["title"], 
-                            **plot_characteristics["auxiliar"]["row_title"], transform=ax[i, 0].transAxes)
+                relevant_axis[i, 0].text(*plot_characteristics["auxiliar"]["row_title"]["position"], plot_dict["title"], 
+                            **plot_characteristics["auxiliar"]["row_title"], transform=relevant_axis[i, 0].transAxes)
 
                 # add the title
-                plt.suptitle(**plot_characteristics["auxiliar"]["title"])
+                # plt.suptitle(**plot_characteristics["auxiliar"]["title"])
 
                 # add the classifications
-                fig.text(**plot_characteristics["auxiliar"]["left-description"])
+                # fig.text(**plot_characteristics["auxiliar"]["left-description"])
 
-                plt.tight_layout()
-                plt.show()
 
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """ Function that tracks plotted lines and collections

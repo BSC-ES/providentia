@@ -1277,21 +1277,22 @@
   "fairmode-statsummary":
     {
       "orientation": "portrait",
-      "figure": { "ncols": 1, "nrows": 2 },
+      "figure": {
+        "nrows": 1,
+        "ncols": 2,
+    },
       "grid": { "axis": "both", "color": "lightgrey", "alpha": 0.8 },
       "page_title":
         {
-          "t": "Fairmode target",
-          "fontsize": 13,
+          "t": "Fairmode statsummary",
+          "fontsize": 12,
           "ha": "left",
           "x": 0.05,
           "y": 0.98,
         },
       "axis_title": { "label": "", "fontsize": 8 },
-      "xlabel": { "xlabel": "CRMSE / β·RMSᵤ", "fontsize": 8 },
-      "ylabel": { "ylabel": "MB / β·RMSᵤ", "fontsize": 8 },
-      "xlim": [-2, 2],
-      "ylim": [-2, 2],
+      "xlabel": { "xlabel": "", "fontsize": 8 },
+      "ylabel": { "ylabel": "", "fontsize": 8 },
       "xtick_params":
         {
           "labelsize": 7,
@@ -1333,7 +1334,6 @@
           "handles": { "markersize": 10, "marker": "o", "color": "white" },
         },
       "round_decimal_places": { "title": 2, "x": 2, "y": 2 },
-      "equal_aspect": true,
       "plot":
         { "markersize": 5, "markerfacecolor": "None", "linestyle": "None" },
       "markers": {
@@ -1474,11 +1474,6 @@
                 ]
             }
           },
-          "title":{
-            "t":"Placeholder",
-            "fontsize":12,
-            "va":"center"
-          },
           "left-description":{
             "x": -0.02,
             "y": 0.05,
@@ -1488,16 +1483,6 @@
             "rotation":"vertical",
             "fontsize":10
           },
-          "subplot_parameters":{
-        "nrows": 8,
-        "ncols": 4,
-        "figsize": [11, 6],
-        "gridspec_kw": {
-            "width_ratios": [1, 16, 1, 1],
-            "wspace": 0
-        }
-    }
-          ,
           "row_title":{
             "position":[-1.3,
             0.5],
