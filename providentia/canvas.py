@@ -1563,7 +1563,7 @@ class MPLCanvas(FigureCanvas):
             elif plot_type == 'fairmode-target':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists, 
                                 ax_to_remove.patches, ax_to_remove.texts]:
-                    self.remove_axis_objects(objects)
+                    self.remove_axis_objects(objects, elements_to_skip=[self.annotations['fairmode-target']])
 
         # remove tracked plot elements
         if plot_type in self.plot_elements:
