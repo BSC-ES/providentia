@@ -598,7 +598,7 @@ class ExpBias(object):
                 # calculate High Percentile
                 h_perc = np.abs(exp_perc - obs_perc) / (beta * U)
                 
-                return exc, mean, t_bias, t_R, t_sd, h_perc
+                return mean, exc, t_bias, t_R, t_sd, h_perc
 
         else:
             return np.NaN, np.NaN, np.NaN
