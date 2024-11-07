@@ -875,7 +875,7 @@ class MPLCanvas(FigureCanvas):
                                           networkspecies=[self.read_instance.networkspeci])
 
                 # iterate through active_dashboard_plots
-                for plot_type_ii, plot_type in enumerate(self.read_instance.active_dashboard_plots):
+                for plot_type in self.read_instance.active_dashboard_plots:
 
                     #plot_start = time.time()
 
@@ -901,7 +901,21 @@ class MPLCanvas(FigureCanvas):
                             show_message(self.read_instance, msg)
                             self.read_instance.handle_layout_update('None', sender=plot_type_position)
                             continue
-
+                    
+                    if plot_type == 'fairmode-target':
+                        speci = self.read_instance.networkspeci.split('|')[1]
+                        if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
+                            msg = f'Warning: Fairmode target plot cannot be created for {speci}.'
+                            show_message(self.read_instance, msg)
+                            self.read_instance.handle_layout_update('None', sender=plot_type_position)
+                            continue
+                        if ((speci in ['sconco3', 'sconcno2'] and self.read_instance.resolution != 'hourly') 
+                            or (speci in ['pm10', 'pm2p5'] and (self.read_instance.resolution not in ['hourly', 'daily']))):
+                            msg = 'Warning: Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
+                            show_message(self.read_instance, msg)
+                            self.read_instance.handle_layout_update('None', sender=plot_type_position)
+                            continue
+                
                     # update plot
                     self.update_associated_active_dashboard_plot(plot_type)
 
