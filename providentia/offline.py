@@ -35,6 +35,8 @@ from .statistics import (calculate_statistic, get_fairmode_data,
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
+
 
 class ProvidentiaOffline:
     """ Class to create Providentia offline reports. """
@@ -1664,7 +1666,11 @@ class ProvidentiaOffline:
                                                                                   self.plot_characteristics[plot_type]['round_decimal_places']['title'],
                                                                                   self.current_lat,
                                                                                   self.plot_characteristics[plot_type]['round_decimal_places']['title'])
-                            
+                    
+                    if base_plot_type == 'fairmode-target':
+                        speci = networkspeci.split('|')[1]
+                        axis_title_label += '\n{}'.format(fairmode_settings[speci]['title'])
+
                     # set title
                     set_axis_title(self, relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
