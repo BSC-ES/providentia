@@ -35,6 +35,7 @@ from .writing import export_configuration, export_data_npz, export_netcdf
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
 
 # do not print deprecated warnings
 import warnings
@@ -390,7 +391,7 @@ class Interactive:
         # do not make FAIRMODE target plot if species not in list or resolution not hourly
         if base_plot_type == 'fairmode-target':
             if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
-                print(f'Warning: Fairmode target plot cannot be created for {speci} in {self.current_station_name}.')
+                print(f'Warning: Fairmode target plot cannot be created for {speci}.')
                 return
             if ((speci in ['sconco3', 'sconcno2'] and self.resolution != 'hourly') 
                 or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
@@ -755,6 +756,10 @@ class Interactive:
                                                                        self.plot_characteristics[plot_type]['round_decimal_places']['title'])
                         else:
                             title = '{} stations'.format(n_stations)
+
+                    if base_plot_type == 'fairmode-target':
+                        speci = networkspeci.split('|')[1]
+                        title += '\n{}'.format(fairmode_settings[speci]['title'])
 
         # overwrite passed xlabels and ylabels
         if title:

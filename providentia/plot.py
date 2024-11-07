@@ -32,7 +32,7 @@ from .read_aux import drop_nans, get_valid_metadata
 from .plot_aux import (create_chunked_timeseries, get_multispecies_aliases, 
                        get_taylor_diagram_ghelper_info, kde_fft, merge_cells, periodic_labels, 
                        periodic_xticks, round_decimal_places, temp_axis_dict)
-
+from .plot_formatting import set_axis_title
 
 # speed up transformations in cartopy
 pyproj.set_use_global_context()
@@ -2138,6 +2138,11 @@ class Plot:
             legend_elements.append(legend_element)
         relevant_axis.legend(handles=legend_elements, 
                              **plot_characteristics['markers']['legend'])
+
+
+        # add title if using dashboard 
+        if (not self.read_instance.offline) and (not self.read_instance.interactive):
+            set_axis_title(self.read_instance, relevant_axis, fairmode_settings[speci]['title'], plot_characteristics)
 
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """ Function that tracks plotted lines and collections
