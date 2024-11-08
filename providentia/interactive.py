@@ -30,7 +30,7 @@ from .read_aux import (generate_file_trees, get_lower_resolutions,
                        get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
                        get_valid_experiments, get_valid_obs_files_in_date_range)
 from .statistics import (calculate_statistic, generate_colourbar, generate_colourbar_detail, 
-                         get_selected_station_data, get_z_statistic_info)
+                         get_fairmode_data, get_selected_station_data, get_z_statistic_info)
 from .writing import export_configuration, export_data_npz, export_netcdf
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -398,6 +398,12 @@ class Interactive:
                 print('Warning: Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).')
                 return
             
+            # skip making plot if there is no valid data
+            data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
+            if not any(valid_station_idxs):
+                print(f'No data after filtering by coverage for {speci}.')
+                return
+
         # get data labels for plot
         if len(data_labels) == 0:
             data_labels = copy.deepcopy(self.data_labels)
