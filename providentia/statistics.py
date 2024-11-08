@@ -1209,17 +1209,30 @@ def exceedance_lim(networkspeci):
 def get_fairmode_data(canvas_instance, read_instance, networkspeci, resolution, 
                       data_labels):
     
+    # get coverage
+    speci = networkspeci.split('|')[1]
+    coverage = fairmode_settings[speci]['coverage']
+
     # get data per station
     data_array = canvas_instance.selected_station_data[networkspeci]['per_station']
-    print('Initial', data_array.shape)
-    
-    # TODO: Make sure days with less than 75% coverage are nan
-    # If a day has less than 75% of data, make whole day nan
+
+    # make sure days with less than 75% coverage are nan
+    if resolution == 'hourly':
+        # reshape data to count the hourly nans per day
+        num_days = data_array.shape[-1] // 24
+        
+        daily_data = data_array.reshape(data_array.shape[0], data_array.shape[1], num_days, 24)  
+        non_nan_count = np.count_nonzero(~np.isnan(daily_data), axis=-1)
+
+        # get days that need to be nan because there are at least 25% of the hours per day that are nan
+        threshold = (coverage / 100) * 24 # 18 hours out of 24 for 75% coverage
+        days_to_nan = non_nan_count < threshold
+
+        # convert days with less than 75% coverage to nan
+        days_to_nan_expanded = np.repeat(days_to_nan, 24, axis=-1)
+        data_array[days_to_nan_expanded] = np.nan
 
     # get indices of valid stations
-    speci = networkspeci.split('|')[1]
-    speci_settings = fairmode_settings[speci]
-    coverage = speci_settings['coverage']
     obs_representativity = Stats.calculate_data_avail_fraction(data_array[0, :, :])
     valid_station_idxs = obs_representativity >= coverage
 
@@ -1257,7 +1270,5 @@ def get_fairmode_data(canvas_instance, read_instance, networkspeci, resolution,
     
     # filter by valid stations
     data_array = data_array[:, valid_station_idxs, :]
-
-    print('After resampling', data_array.shape)
 
     return data_array, valid_station_idxs
