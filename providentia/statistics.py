@@ -392,7 +392,7 @@ def group_timeseries(read_instance, canvas_instance, networkspeci):
 
 def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, data_labels_a, 
                         data_labels_b, map=False, per_station=False, period=None, chunking=None, 
-                        chunk_resolution=None):
+                        chunk_resolution=None, ignore_mode=False):
     """Function that calculates a statistic for data labels, either absolute or bias, 
        for different aggregation modes.
     """
@@ -683,10 +683,11 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
         # otherwise, save desired statistic for specific statistical calculation mode 
         else:
-            if (read_instance.statistic_mode == 'Temporal|Spatial') and (base_zstat != 'NStations'):
-                z_statistic = aggregation(z_statistic, read_instance.statistic_aggregation,axis=-1)
-            elif read_instance.statistic_mode in ['Flattened', 'Spatial|Temporal']:
-                z_statistic = np.squeeze(z_statistic, axis=-1)
+            if not ignore_mode:
+                if (read_instance.statistic_mode == 'Temporal|Spatial') and (base_zstat != 'NStations'):
+                    z_statistic = aggregation(z_statistic, read_instance.statistic_aggregation,axis=-1)
+                elif read_instance.statistic_mode in ['Flattened', 'Spatial|Temporal']:
+                    z_statistic = np.squeeze(z_statistic, axis=-1)
             stats_calc[zstat] = z_statistic
 
     # return statistics calculated (if just one statistic then remove dict)
@@ -1208,22 +1209,32 @@ def exceedance_lim(networkspeci):
 def get_fairmode_data(canvas_instance, read_instance, networkspeci, resolution, 
                       data_labels):
     
+    # get coverage
+    speci = networkspeci.split('|')[1]
+    coverage = fairmode_settings[speci]['coverage']
+
     # get data per station
     data_array = canvas_instance.selected_station_data[networkspeci]['per_station']
-    print('Initial', data_array.shape)
-    
-    # TODO: Make sure days with less than 75% coverage are nan
-    # If a day has less than 75% of data, make whole day nan
 
-    # filter by requested coverage
-    speci = networkspeci.split('|')[1]
-    speci_settings = fairmode_settings[speci]
-    coverage = speci_settings['coverage']
+    # make sure days with less than 75% coverage are nan
+    if resolution == 'hourly':
+        # reshape data to count the hourly nans per day
+        num_days = data_array.shape[-1] // 24
+        
+        daily_data = data_array.reshape(data_array.shape[0], data_array.shape[1], num_days, 24)  
+        non_nan_count = np.count_nonzero(~np.isnan(daily_data), axis=-1)
+
+        # get days that need to be nan because there are at least 25% of the hours per day that are nan
+        threshold = (coverage / 100) * 24 # 18 hours out of 24 for 75% coverage
+        days_to_nan = non_nan_count < threshold
+
+        # convert days with less than 75% coverage to nan
+        days_to_nan_expanded = np.repeat(days_to_nan, 24, axis=-1)
+        data_array[days_to_nan_expanded] = np.nan
+
+    # get indices of valid stations
     obs_representativity = Stats.calculate_data_avail_fraction(data_array[0, :, :])
     valid_station_idxs = obs_representativity >= coverage
-    data_array = data_array[:, valid_station_idxs, :]
-
-    print('After coverage', data_array.shape)
 
     # resample to daily for PM2.5 and PM10
     if resolution == 'hourly':
@@ -1233,7 +1244,7 @@ def get_fairmode_data(canvas_instance, read_instance, networkspeci, resolution,
             
             # create pandas dataframe of data array
             data_array_df = pd.DataFrame(data_array_reduced.transpose(), index=read_instance.time_array, 
-                                            columns=np.arange(data_array_reduced.shape[0]), dtype=np.float32)
+                                         columns=np.arange(data_array_reduced.shape[0]), dtype=np.float32)
             # resample data array
             data_array_df_resampled = data_array_df.resample('D', axis=0).mean()
             read_instance.time_index = data_array_df_resampled.index
@@ -1241,7 +1252,7 @@ def get_fairmode_data(canvas_instance, read_instance, networkspeci, resolution,
             # save back out as numpy array (reshaping to get back networkspecies dimension)
             data_array_resampled = data_array_df_resampled.to_numpy().transpose()
             data_array = data_array_resampled.reshape(data_array.shape[0], data_array.shape[1], 
-                                                    data_array_resampled.shape[1])
+                                                      data_array_resampled.shape[1])
         # calculate MDA8 for ozone
         elif speci in ['sconco3']:
 
@@ -1251,14 +1262,13 @@ def get_fairmode_data(canvas_instance, read_instance, networkspeci, resolution,
             # cut data_labels for those in valid data labels
             cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
-            # TODO: Calculate MDA8
+            # calculate MDA8
             stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, 
                                              'MDA8', cut_data_labels, [], chunking=True, 
-                                             chunk_resolution='daily')
-            
-            
-            print(stats_calc.shape)
-        
-    print('After resampling', data_array.shape)
+                                             chunk_resolution='daily', ignore_mode=True)
+            data_array = np.transpose(stats_calc, (1, 2, 0))
+    
+    # filter by valid stations
+    data_array = data_array[:, valid_station_idxs, :]
 
     return data_array, valid_station_idxs
