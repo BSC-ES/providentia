@@ -1029,11 +1029,10 @@ class ProvidentiaOffline:
                     or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
                     print('Warning: Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).')
                     continue
-                data, _ = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
-                observations_data = data[0, :, :]
 
-                # skip stations without observational data
-                if observations_data.shape[0] == 0:
+                # skip making plot if there is no valid data
+                data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
+                if not any(valid_station_idxs):
                     print(f'No data after filtering by coverage for {speci}.')
                     continue
 
@@ -1212,11 +1211,10 @@ class ProvidentiaOffline:
                         or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
                         print('Warning: Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).')
                         continue
-                    data, _ = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
-                    observations_data = data[0, :, :]
 
-                    # skip stations without observational data
-                    if observations_data.shape[0] == 0:
+                    # skip making plot if there is no valid data
+                    data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
+                    if not any(valid_station_idxs):
                         print(f'No data after filtering by coverage for {speci} in {self.current_station_name}.')
                         continue
 
