@@ -14,8 +14,9 @@ import xarray as xr
 from .configuration import write_conf
 from .dashboard_elements import InputDialog
 
+from providentia.auxiliar import CURRENT_PATH, join
+
 # get current path and providentia root path
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 # define possible temporal resolutions
@@ -509,11 +510,11 @@ def export_configuration(prv, cname, separator="||"):
         raise Exception("Error: No data available for writing. Please click on READ before trying to save any file.")
     
     # load initialisation defaults
-    init_defaults = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'init_prov_dev.yaml')))
+    init_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'init_prov_dev.yaml')))
     # load variable defaults
-    var_defaults = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_defaults.yaml')))
+    var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_defaults.yaml')))
     # load modifiable variable defaults
-    modifiable_var_defaults = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'init_prov.yaml')))
+    modifiable_var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'init_prov.yaml')))
     # merge defaults
     merged_defaults = init_defaults.copy()
     merged_defaults.update(var_defaults)
@@ -642,7 +643,7 @@ def export_configuration(prv, cname, separator="||"):
                                'active_dashboard_plots': ",".join(str(i) for i in prv.active_dashboard_plots)})
 
     # plot_characteristics_filename
-    if ((prv.plot_characteristics_filename != os.path.join(PROVIDENTIA_ROOT, 'settings/plot_characteristics_dashboard.yaml')) &
+    if ((prv.plot_characteristics_filename != join(PROVIDENTIA_ROOT, 'settings/plot_characteristics_dashboard.yaml')) &
        (prv.plot_characteristics_filename != '')):
         options['section'].update({'plot_characteristics_filename': prv.plot_characteristics_filename})
 

@@ -23,21 +23,22 @@ import scipy
 from scipy.spatial import cKDTree
 from shapely.geometry import Polygon, Point
 import xarray as xr
-from aux_interp import (check_for_ghost, findMiddle, check_directory_existence, set_file_permissions_ownership,
+from providentia.interpolation.aux_interp import (check_for_ghost, findMiddle, check_directory_existence, set_file_permissions_ownership,
                  get_aeronet_bin_radius_from_bin_variable, get_aeronet_model_bin, 
                  get_model_to_aeronet_bin_transform_factor)
+
+from providentia.auxiliar import CURRENT_PATH, join
 
 MACHINE = os.environ.get('BSC_MACHINE', 'local')
 
 # get current path and providentia root path
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
+PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
 # load the defined experiments paths and agrupations jsons
-interp_experiments = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
+interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 
 # add unit-converter submodule to python load path
-sys.path.append(os.path.join(PROVIDENTIA_ROOT,'providentia','dependencies','unit-converter'))
+sys.path.append(join(PROVIDENTIA_ROOT,'providentia','dependencies','unit-converter'))
 import unit_converter
 
 class ExperimentInterpolation(object):
@@ -72,7 +73,7 @@ class ExperimentInterpolation(object):
         self.interpolation_variables = {}
         
         # from file in management_logs, get and set the arguments which were not passed as a paremeter
-        submission_file = os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/management_logs',
+        submission_file = join(PROVIDENTIA_ROOT, 'logs/interpolation/management_logs',
                                        f'{self.unique_id}.out')
         with open(submission_file, 'r') as f:
             submission_file_txt = f.read().split()
@@ -91,7 +92,7 @@ class ExperimentInterpolation(object):
                 setattr(self, variable_key, variable_val)
 
         # import GHOST standards
-        sys.path.insert(1, os.path.join(PROVIDENTIA_ROOT, 'providentia/dependencies/GHOST_standards/{}'.format(self.ghost_version)))
+        sys.path.insert(1, join(PROVIDENTIA_ROOT, 'providentia/dependencies/GHOST_standards/{}'.format(self.ghost_version)))
         from GHOST_standards import standard_parameters
         self.standard_parameters = standard_parameters
         
@@ -108,7 +109,7 @@ class ExperimentInterpolation(object):
         exp_dir = None
         # if local machine, get directory from data_paths
         if MACHINE == 'local':  
-            exp_to_interp_path = os.path.join(self.exp_to_interp_root, self.experiment_to_process)
+            exp_to_interp_path = join(self.exp_to_interp_root, self.experiment_to_process)
             if os.path.exists(exp_to_interp_path):
                 exp_dir = exp_to_interp_path
             
@@ -887,7 +888,7 @@ class ExperimentInterpolation(object):
         else:
             # as it appears in PRV (e.g. nasa-aeronet/oneill_v3-lev15 -> nasa-aeronet-oneill_v3-lev15)
             network_name = self.network_to_interpolate_against.replace('/', '-')
-        output_dir = os.path.join(self.exp_root, self.ghost_version, self.prov_exp_code, 
+        output_dir = join(self.exp_root, self.ghost_version, self.prov_exp_code, 
                                   self.temporal_resolution_to_output, self.original_speci_to_process, network_name)
 
         # check if need to create any directories in path 
@@ -1101,7 +1102,7 @@ def create_output_logfile(process_code, log_file_str):
         :param process_code: interpolation outcome code
         :type process_code: int
     """
-    output_logfile_dir = (f"{os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs/')}"
+    output_logfile_dir = (f"{join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs/')}"
     f"{submit_args['prov_exp_code']}/"
     f"{submit_args['original_speci_to_process']}/"
     f"{submit_args['network_to_interpolate_against']}/"
