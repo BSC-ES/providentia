@@ -36,6 +36,8 @@ from .statistics import (calculate_statistic, get_fairmode_data,
 from providentia.auxiliar import CURRENT_PATH, join
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
+
 
 class ProvidentiaOffline:
     """ Class to create Providentia offline reports. """
@@ -1028,11 +1030,10 @@ class ProvidentiaOffline:
                     or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
                     print('Warning: Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).')
                     continue
-                data, _ = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
-                observations_data = data[0, :, :]
 
-                # skip stations without observational data
-                if observations_data.shape[0] == 0:
+                # skip making plot if there is no valid data
+                data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
+                if not any(valid_station_idxs):
                     print(f'No data after filtering by coverage for {speci}.')
                     continue
 
@@ -1211,11 +1212,10 @@ class ProvidentiaOffline:
                         or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
                         print('Warning: Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).')
                         continue
-                    data, _ = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
-                    observations_data = data[0, :, :]
 
-                    # skip stations without observational data
-                    if observations_data.shape[0] == 0:
+                    # skip making plot if there is no valid data
+                    data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
+                    if not any(valid_station_idxs):
                         print(f'No data after filtering by coverage for {speci} in {self.current_station_name}.')
                         continue
 
@@ -1665,7 +1665,11 @@ class ProvidentiaOffline:
                                                                                   self.plot_characteristics[plot_type]['round_decimal_places']['title'],
                                                                                   self.current_lat,
                                                                                   self.plot_characteristics[plot_type]['round_decimal_places']['title'])
-                            
+                    
+                    if base_plot_type == 'fairmode-target':
+                        speci = networkspeci.split('|')[1]
+                        axis_title_label += '\n{}'.format(fairmode_settings[speci]['title'])
+
                     # set title
                     set_axis_title(self, relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
