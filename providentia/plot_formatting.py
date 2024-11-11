@@ -335,22 +335,30 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
     # get minimum and maximum from all axes and set limits for timeseries
     elif base_plot_type == 'timeseries':
         if (plot_characteristics['xtick_alteration']['define']) and (xlim):
-        
+            
+            # get left and right
+            if isinstance(xlim, dict):
+                left = xlim['left']
+                right = xlim['right']
+            else:
+                left = xlim[0]
+                right = xlim[1]
+
             # get steps for all data labels
-            steps = pd.date_range(xlim['left'], xlim['right'], freq=read_instance.active_frequency_code)
+            steps = pd.date_range(left, right, freq=read_instance.active_frequency_code)
 
             # get number of months and days
-            n_months = (12*(xlim['right'].year - xlim['left'].year) + (xlim['right'].month - xlim['left'].month))
-            n_days = (xlim['right'] - xlim['left']).days
+            n_months = (12*(right.year - left.year) + (right.month - left.month))
+            n_days = (right - left).days
 
             # get months that are complete
-            months_start = pd.date_range(xlim['left'], xlim['right'], freq='MS')
+            months_start = pd.date_range(left, right, freq='MS')
             if Version(matplotlib.__version__) < Version("3.9"):
-                months_end = pd.date_range(xlim['left'], xlim['right'], freq='M')
+                months_end = pd.date_range(left, right, freq='M')
             else:
-                months_end = pd.date_range(xlim['left'], xlim['right'], freq='ME')
+                months_end = pd.date_range(left, right, freq='ME')
             if months_start.size > 1:
-                if (xlim['right'] - months_end[-1]).days >= 1:
+                if (right - months_end[-1]).days >= 1:
                     months = months_start[:-1]
                 else:
                     months = months_start
@@ -377,12 +385,12 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             # transform to numpy.datetime64
             if not isinstance(xticks[0], np.datetime64):
                 xticks = [x.to_datetime64() for x in xticks]
-            if not isinstance(xlim['right'], np.datetime64):
-                xlim = {'left':xlim['left'], 'right':np.datetime64(xlim['right'])}
+            if not isinstance(right, np.datetime64):
+                xlim = {'left': left, 'right': np.datetime64(right)}
 
             # add last step to xticks
-            if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != xlim['right']):
-                xticks = np.append(xticks, xlim['right'])
+            if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != right):
+                xticks = np.append(xticks, right)
 
             # set modified xticks
             for ax in relevant_axs_active:
