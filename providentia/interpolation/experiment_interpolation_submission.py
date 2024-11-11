@@ -10,21 +10,22 @@ from pydoc import locate
 import numpy as np
 import multiprocessing
 
+from providentia.auxiliar import CURRENT_PATH, join
+
 MACHINE = os.environ.get('BSC_MACHINE', 'local')
 
 # get current path and providentia root path
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
+PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
-sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia', 'interpolation'))
-sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia'))
+sys.path.append(join(PROVIDENTIA_ROOT, 'providentia', 'interpolation'))
+sys.path.append(join(PROVIDENTIA_ROOT, 'providentia'))
 
-from aux_interp import get_aeronet_bin_radius_from_bin_variable, get_model_bin_radii, check_for_ghost
-from configuration import ProvConfiguration, load_conf
+from providentia.interpolation.aux_interp import get_aeronet_bin_radius_from_bin_variable, get_model_bin_radii, check_for_ghost
+from providentia.configuration import ProvConfiguration, load_conf
 
 # load the defined experiments and species yamls
-interp_experiments = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
-mapping_species =  yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
+interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
+mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 
 class SubmitInterpolation(object):
     """ Class that handles the interpolation submission. """
@@ -37,9 +38,9 @@ class SubmitInterpolation(object):
         # define current working directory and
         # arguments/greasy/interpolation log subdirectories
         self.working_directory = CURRENT_PATH     
-        self.arguments_dir = os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/arguments')
-        self.submit_dir = os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/greasy_logs')
-        self.interpolation_log_dir = os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs')
+        self.arguments_dir = join(PROVIDENTIA_ROOT, 'logs/interpolation/arguments')
+        self.submit_dir = join(PROVIDENTIA_ROOT, 'logs/interpolation/greasy_logs')
+        self.interpolation_log_dir = join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs')
 
         # initialize commandline arguments, if given
         provconf = ProvConfiguration(self, **kwargs)
@@ -50,8 +51,8 @@ class SubmitInterpolation(object):
             if os.path.exists(self.config):
                 read_conf = True
             else: 
-                if os.path.exists(os.path.join(self.config_dir, self.config)):
-                    self.config = os.path.join(self.config_dir, self.config)
+                if os.path.exists(join(self.config_dir, self.config)):
+                    self.config = join(self.config_dir, self.config)
                     read_conf = True
             if read_conf:
                 load_conf(self, self.config)
@@ -117,7 +118,7 @@ class SubmitInterpolation(object):
             self.qos = 'bsc_es'
 
         # import unit converter
-        sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia', 'dependencies','unit-converter'))
+        sys.path.append(join(PROVIDENTIA_ROOT, 'providentia', 'dependencies','unit-converter'))
         import unit_converter
 
     def gather_arguments(self):
@@ -151,7 +152,7 @@ class SubmitInterpolation(object):
             exp_dir = None
             # if local machine, get directory from data_paths
             if MACHINE == 'local':  
-                exp_to_interp_path = os.path.join(self.exp_to_interp_root, experiment_to_process)
+                exp_to_interp_path = join(self.exp_to_interp_root, experiment_to_process)
                 if os.path.exists(exp_to_interp_path):
                     exp_dir = exp_to_interp_path
                 
@@ -164,13 +165,13 @@ class SubmitInterpolation(object):
                 # get experiment type and specific directories
                 exp_dir_list = interp_experiments[experiment_type]["paths"]
                 for temp_exp_dir in exp_dir_list:
-                    if os.path.exists(os.path.join(temp_exp_dir,experiment_to_process)):
+                    if os.path.exists(join(temp_exp_dir,experiment_to_process)):
                         exp_dir = temp_exp_dir
                         break
 
                 # take first functional directory 
                 if exp_dir is None:
-                    error = f"Error: None of the experiment paths in {os.path.join('settings', 'interp_experiments.yaml')} are available in this machine ({MACHINE})."
+                    error = f"Error: None of the experiment paths in {join('settings', 'interp_experiments.yaml')} are available in this machine ({MACHINE})."
                     sys.exit(error)
                 
                 # add file to directory path
@@ -502,7 +503,7 @@ class SubmitInterpolation(object):
                         msg += f'Experiment data between {self.start_date} and {self.end_date} cannot be found.'
                     else:
                         msg += f'Experiment files: {exp_files}\n'
-                        msg += f'Experiment dates: {exp_files_dates}'
+                        msg += f'Experiment dates: {exp_files_dates}\n'
                         if len(obs_files) == 0:
                             msg += f'Observational data between {self.start_date} and {self.end_date} cannot be found.'
                         else:
