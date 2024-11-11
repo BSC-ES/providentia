@@ -126,6 +126,19 @@ class NavigationToolbar(NavigationToolbar2QT):
                     print(e)
                     show_message(self.read_instance, msg)
 
+    def save_figure(self):
+        """ Method inherited from qt save_figure that controls
+            the image creation.
+        """
+        if self.read_instance.le_minimum_value.text() == '' and self.read_instance.le_minimum_value.text() == '':
+            # control that data was read
+            msg = 'The figure could not be created. Read the data first.'
+            show_message(self.read_instance, msg)
+            return
+        
+        # inherit from qt
+        super().save_figure(self)
+
     def conf_dialogs(self):
         """ Pop window for selecting configuration file. If file selcted, pops an
             input dialog for the user to select which section wants to load. Calls

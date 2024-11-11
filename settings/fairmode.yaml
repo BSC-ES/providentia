@@ -5,7 +5,8 @@
     "alpha": 0.79,
     "percentile": 92.9,
     "beta": 2,
-    "coverage": 75
+    "coverage": 75,
+    "title": "Surface ozone 8h moving average daily maximum"
   },
   "sconcno2": {
     "u_95r_RV": 0.42, 
@@ -13,7 +14,8 @@
     "alpha": 0.20,
     "percentile": 99.8,
     "beta": 2,
-    "coverage": 75
+    "coverage": 75,
+    "title": "Surface nitrogen dioxide hourly mean"
   },
   "pm2p5": {
     "u_95r_RV": 0.63, 
@@ -21,7 +23,8 @@
     "alpha": 0.50,
     "percentile": 90.1,
     "beta": 2,
-    "coverage": 75
+    "coverage": 75,
+    "title": "Surface PM2.5 aerosol daily mean"
   },
   "pm10": {
     "u_95r_RV": 0.49, 
@@ -29,6 +32,7 @@
     "alpha": 0.25,
     "percentile": 90.1,
     "beta": 2,
-    "coverage": 75
+    "coverage": 75,
+    "title": "Surface PM10 aerosol daily mean"
   }
 }
