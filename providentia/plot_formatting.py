@@ -19,6 +19,8 @@ from .plot_aux import get_land_polygon_resolution, set_map_extent
 from .plot_options import annotation, experiment_domain, linear_regression, log_axes, smooth, threshold
 from .statistics import get_z_statistic_info
 
+from providentia.auxiliar import CURRENT_PATH, join
+
 Image.MAX_IMAGE_PIXELS = None
 
 def set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type):
@@ -717,8 +719,6 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
         
         elif base_plot_type == 'map':
 
-            CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-
             # set map background
 
             # providentia default background
@@ -735,7 +735,7 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
             # other type of map background
             else:
                 # check file for background exists
-                background_fname = os.path.join(CURRENT_PATH, "resources/{}.png".format(plot_characteristics['background']))
+                background_fname = join(CURRENT_PATH, "resources/{}.png".format(plot_characteristics['background']))
                 if os.path.isfile(background_fname):
                     img = plt.imread(background_fname)
                     img_extent = (-180, 180, -90, 90)

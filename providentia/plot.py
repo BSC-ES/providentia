@@ -34,13 +34,13 @@ from .plot_aux import (create_chunked_timeseries, get_multispecies_aliases,
                        periodic_xticks, round_decimal_places, temp_axis_dict)
 from .plot_formatting import set_axis_title
 from .warnings_prv import show_message
+from providentia.auxiliar import CURRENT_PATH, join
 
 # speed up transformations in cartopy
 pyproj.set_use_global_context()
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
+fairmode_settings = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
 
 
 class Plot:
@@ -338,7 +338,7 @@ class Plot:
         page = plt.figure(**plot_characteristics['figure'])
 
         # get logo
-        logo_path = os.path.join(PROVIDENTIA_ROOT, 'assets/logoline.png')
+        logo_path = join(PROVIDENTIA_ROOT, 'assets/logoline.png')
         logo = mpimg.imread(logo_path)
 
         # place logo on top center
