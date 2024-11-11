@@ -20,8 +20,8 @@ PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 sys.path.append(join(PROVIDENTIA_ROOT, 'providentia', 'interpolation'))
 sys.path.append(join(PROVIDENTIA_ROOT, 'providentia'))
 
-from providentia.interpolation.aux_interp import get_aeronet_bin_radius_from_bin_variable, get_model_bin_radii, check_for_ghost
-from providentia.configuration import ProvConfiguration, load_conf
+from interpolation.aux_interp import get_aeronet_bin_radius_from_bin_variable, get_model_bin_radii, check_for_ghost
+from configuration import ProvConfiguration, load_conf
 
 # load the defined experiments and species yamls
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
@@ -595,7 +595,7 @@ class SubmitInterpolation(object):
                 str_to_write = str_to_write.replace(ch,'\{}'.format(ch))
         
             # write arguments str to current file
-            arguments_file.write('python -u {}/experiment_interpolation.py {}\n'.format(self.working_directory, 
+            arguments_file.write('python -u {}/interpolation/experiment_interpolation.py {}\n'.format(self.working_directory, 
                                                                                         str_to_write))
 
             # iterate n lines written    
@@ -858,7 +858,7 @@ class SubmitInterpolation(object):
     def submit_job_multiprocessing(self):
         
         # launch interpolation
-        commands = [f'python -u {CURRENT_PATH}/experiment_interpolation.py '
+        commands = [f'python -u {self.working_directory}/interpolation/experiment_interpolation.py '
                     + argument for argument in self.arguments]
         with multiprocessing.Pool(processes=self.n_cpus) as pool:
             pool.map(self.run_command, commands)
