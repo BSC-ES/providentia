@@ -21,6 +21,40 @@ if [[ $? -ne 4 ]]; then
     exit 1
 fi
 
+# get OS
+#Mac OS X platform        
+if [ "$(uname)" == "Darwin" ]; then
+    OS="Mac"        
+#GNU/Linux platform
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    OS="Linux"
+# Windows platform
+elif [ "$(expr substr $(uname -s) 1 10)" == "Windows" ] || [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ] || [ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]; then
+    OS="Windows"
+else
+    echo "The OS cannot be detected. Exiting."
+    exit 1
+fi
+
+# initialize conda in windows
+if [ "${OS}" == "Windows" ] ; then 
+    CONDA_PATH="$HOME/anaconda3"
+
+    __conda_setup="$("$CONDA_PATH/condabin/conda" 'shell.bash' 'hook' 2> /dev/null)"
+    
+    if [ $? -eq 0 ]; then
+        eval "$__conda_setup"
+        echo "Conda initialized successfully"
+    else
+        if [ -f "$CONDA_PATH/etc/profile.d/conda.sh" ]; then
+            . "$CONDA_PATH/etc/profile.d/conda.sh"
+        else
+            export PATH="$CONDA_PATH/condabin:$PATH"
+        fi
+    fi
+    unset __conda_setup
+fi
+
 # bash strict mode: see http://redsymbol.net/articles/unofficial-bash-strict-mode/ for info
 set -eo pipefail
 IFS=$'\n\t'
@@ -70,20 +104,6 @@ export SLURM_EXPORT_ENV=ALL
 # workaround to stop driver conflict issue 
 #export QT_QPA_PLATFORM_PLUGIN_PATH=/gpfs/home/bsc/${USER}/.conda/envs/providentia-env/lib/python3.9/site-packages/PyQt5/Qt5/plugins
 
-# get OS
-#Mac OS X platform        
-if [ "$(uname)" == "Darwin" ]; then
-    OS="Mac"        
-#GNU/Linux platform
-elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-    OS="Linux"
-# Windows platform
-elif [ "$(expr substr $(uname -s) 1 10)" == "Windows" ] || [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ] || [ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]; then
-    OS="Windows"
-else
-    echo "The OS cannot be detected. Exiting."
-    exit 1
-fi
 
 # update key arguments for job submission
 OTHEROPTS=""
@@ -126,9 +146,15 @@ queue_option="--qos=$queue"
 memory_option="--mem=$mem"
 constraint_option="--constraint=$constraint"
 load_command="source bin/load_modules.sh"
-python_command="python3 -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
 interactive_alloc_command="sbatch -t $time -c $cores -J $jobname"
 script_dir=$(dirname $(realpath $(dirname $0)))
+
+# use python 3 if not in windows
+if [[ "${OS}" =~ "Windows" ]] ; then 
+    python_ver="3"
+fi
+
+python_command="python$python_ver -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
 
 # use clean mode and exit
 if [[ $PARSED =~ "--clean" ]]; then

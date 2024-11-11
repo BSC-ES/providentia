@@ -21,7 +21,8 @@ from scipy.sparse import coo_matrix
 import seaborn as sns
 from .statistics import calculate_statistic, get_z_statistic_sign
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+from providentia.auxiliar import CURRENT_PATH, join
+
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 def get_multispecies_aliases(networkspecies):
@@ -157,7 +158,7 @@ def update_plotting_parameters(instance):
     # generate a list of RGB tuples for number of experiments there are
     sns.reset_orig()
     color_palette = instance.plot_characteristics_templates['general']['legend_color_palette']
-    color_palettes = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/color_palettes.yaml')))
+    color_palettes = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/color_palettes.yaml')))
     if color_palette in color_palettes.keys():
         if (len(instance.data_labels) - 1) > len(color_palettes[color_palette]):
             msg = "Error: The number of experiments and palette colors should be equal. "
