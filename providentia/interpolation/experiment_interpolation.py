@@ -668,6 +668,7 @@ class ExperimentInterpolation(object):
             bin_transform_factor = get_model_to_aeronet_bin_transform_factor(self.model_name, rmin, rmax)
         
         # iterate and read chunked model files
+        failed_files = 0
         for model_ii, model_file in enumerate(self.model_files):
 
             # put model file read in try/except to catch corrupt model files
@@ -679,11 +680,15 @@ class ExperimentInterpolation(object):
                 # check if have time dimension in daily file, if do not, do not process file
                 if 'time' not in list(self.mod_nc_root.dimensions.keys()):
                     self.log_file_str += 'File {} is corrupt. Skipping.\n'.format(model_file)
+                    failed_files += 1
                     continue 
 
                 # get date from filename
-                file_date = model_file.split('_')[-1][:-3]                
-                
+                if not self.ensemble_member:
+                    file_date = model_file.replace('_' + self.ensemble_option, '').split('_')[-1][:-3]
+                else:
+                    file_date = model_file.split('_')[-1][:-3]                
+
                 # get file time (handle monthly resolution data differently to hourly/daily
                 # as num2date does not support 'months since' units)
                 file_time = self.mod_nc_root['time'][:] 
@@ -720,6 +725,10 @@ class ExperimentInterpolation(object):
                     start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), 
                                                       day=int(file_date[6:8]), hour=int(file_date[8:10]), minute=0)
                     end_file_dt = start_file_dt + datetime.timedelta(days=1)
+                else:
+                    self.log_file_str += 'Resolution could not be detected in {}, check the date in the filename as now it shows as "{}".\n'.format(model_file, file_date)
+                    failed_files += 1
+                    continue
 
                 # for forecast runs, get timesteps for corresponding forecast day
                 if self.forecast:
@@ -794,7 +803,8 @@ class ExperimentInterpolation(object):
                 inds_to_fill = np.isin(self.yearmonth_dt, xr_data.time.values)
                 if not any(inds_to_fill):
                     self.log_file_str += 'Time in model dataset {} is not in standard format: \n {}'.format(model_file, xr_data.time.values)
-                    create_output_logfile(1, self.log_file_str)
+                    failed_files += 1
+                    continue
 
                 # fill in data array
                 self.monthly_model_data[inds_to_fill,:,:] = xr_data.values
@@ -804,6 +814,11 @@ class ExperimentInterpolation(object):
 
             except Exception as e:
                 self.log_file_str += 'File {} is corrupt. Skipping.\n{}'.format(model_file, traceback.format_exc())
+                failed_files += 1
+
+        if failed_files == len(self.model_files):
+            self.log_file_str += 'No model dataset could be interpolated.'
+            create_output_logfile(1, self.log_file_str)
 
     def n_nearest_neighbour_inverse_distance_weights(self):
         """ Calculate N nearest neighbour inverse distance weights (and indices) of model gridcells centres 
