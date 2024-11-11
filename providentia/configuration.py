@@ -14,15 +14,16 @@ import pandas as pd
 from itertools import compress
 import ast
 
+from providentia.auxiliar import CURRENT_PATH, join
+
 MACHINE = os.environ.get('BSC_MACHINE', 'local')
 
 # get current path and providentia root path
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'data_paths.yaml')))
-default_values = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_defaults.yaml')))
-multispecies_map = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
-interp_experiments = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
+data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'data_paths.yaml')))
+default_values = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_defaults.yaml')))
+multispecies_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
+interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 
 # set MACHINE to be the hub, workstation or local machine
 if MACHINE not in ['nord3v2', 'mn5']:
@@ -41,7 +42,7 @@ def parse_path(dir, f):
     if os.path.isabs(f):
         return f
     else:
-        return os.path.join(dir, f)
+        return join(dir, f)
 
 class ProvConfiguration:
     """ Class that handles the configuration parameters definitions. """
@@ -51,9 +52,9 @@ class ProvConfiguration:
         self.read_instance = read_instance 
         
         # set variable defaults
-        self.var_defaults = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'init_prov_dev.yaml')))
-        self.var_defaults['config_dir'] = os.path.join(PROVIDENTIA_ROOT, self.var_defaults['config_dir'])
-        modifiable_var_defaults = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'init_prov.yaml')))
+        self.var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'init_prov_dev.yaml')))
+        self.var_defaults['config_dir'] = join(PROVIDENTIA_ROOT, self.var_defaults['config_dir'])
+        modifiable_var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'init_prov.yaml')))
         self.var_defaults.update(modifiable_var_defaults)
 
         # if variable is given by command line, set that value, otherwise set as default value 
@@ -65,7 +66,7 @@ class ProvConfiguration:
         """ Parse a parameter. """
         
         # import show_mesage from warnings
-        sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia'))
+        sys.path.append(join(PROVIDENTIA_ROOT, 'providentia'))
         from warnings_prv import show_message
         
         # make sure we don't pass strings instead of booleans for true and false
@@ -184,7 +185,7 @@ class ProvConfiguration:
 
             # import GHOST standards 
             sys.path = [path for path in sys.path if 'dependencies/GHOST_standards/' not in path]            
-            sys.path.insert(1, os.path.join(CURRENT_PATH, 'dependencies/GHOST_standards/{}'.format(value)))
+            sys.path.insert(1, join(CURRENT_PATH, 'dependencies/GHOST_standards/{}'.format(value)))
             if 'GHOST_standards' in sys.modules:
                 del sys.modules['GHOST_standards']
             from GHOST_standards import standard_parameters
@@ -195,7 +196,7 @@ class ProvConfiguration:
             from GHOST_standards import standard_temporal_resolutions
 
             # get ghost_version list
-            self.read_instance.possible_ghost_versions = os.listdir(os.path.join(CURRENT_PATH,'dependencies', 'GHOST_standards'))
+            self.read_instance.possible_ghost_versions = os.listdir(join(CURRENT_PATH,'dependencies', 'GHOST_standards'))
             
             # get GHOST networks
             self.read_instance.ghost_available_networks = list(standard_networks.keys())
@@ -700,7 +701,7 @@ class ProvConfiguration:
         experiment, domain, ensemble_option = full_experiment.split('-')
         
         # get all possible experiments
-        exp_path = os.path.join(self.read_instance.exp_root,self.read_instance.ghost_version)
+        exp_path = join(self.read_instance.exp_root,self.read_instance.ghost_version)
         self.possible_experiments = [] if not os.path.exists(exp_path) else os.listdir(exp_path)
 
         # initialise list of possible ghost versions
@@ -716,7 +717,7 @@ class ProvConfiguration:
             # search for other ghost versions
             if not exp_found:
                 for ghost_version in possible_ghost_versions:
-                    ghost_exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), os.listdir(os.path.join(self.read_instance.exp_root,ghost_version))))
+                    ghost_exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), os.listdir(join(self.read_instance.exp_root,ghost_version))))
                     if ghost_exp_found:
                         available_ghost_versions.append(ghost_version)
         # if it is a concrete ensemble option, then just get the experiment from the list
@@ -725,7 +726,7 @@ class ProvConfiguration:
 
             # search for other ghost versions
             if not exp_found:
-                available_ghost_versions = list(filter(lambda x:full_experiment in os.listdir(os.path.join(self.read_instance.exp_root,x)), possible_ghost_versions))
+                available_ghost_versions = list(filter(lambda x:full_experiment in os.listdir(join(self.read_instance.exp_root,x)), possible_ghost_versions))
         
         # if not found because of the ghost version, tell the user
         if available_ghost_versions and ('/' not in self.read_instance.network[0]):
@@ -761,7 +762,7 @@ class ProvConfiguration:
             # get the path to the non interpolated experiments
             exp_to_interp_root = data_paths['local']['exp_to_interp_root']
             exp_to_interp_root = os.path.expanduser(exp_to_interp_root[0])+exp_to_interp_root[1:]
-            exp_to_interp_path = os.path.join(exp_to_interp_root, experiment)
+            exp_to_interp_path = join(exp_to_interp_root, experiment)
             if os.path.exists(exp_to_interp_path):
                 experiment_exists = True
         else:
@@ -775,7 +776,7 @@ class ProvConfiguration:
             if MACHINE == 'local' and self.read_instance.interpolation:
                 msg = f"Cannot find the experiment ID '{experiment}' in '{exp_to_interp_root}'."
             else:
-                msg = f"Cannot find the experiment ID '{experiment}' in '{os.path.join('settings', 'interp_experiments.yaml')}'. Please add it to the file."
+                msg = f"Cannot find the experiment ID '{experiment}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file."
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
         else:
             # append experiment name in local since we do not differentiate between types
@@ -801,14 +802,14 @@ class ProvConfiguration:
         if experiment == '*':
             return True, experiment
         
-        # all experiments pass this check because the real one is in the download mode
+        # all experiments pass this check because the real one is in the remote machine
         exp_found = [full_experiment]
         
         # connect to the remote machine
         self.read_instance.connect()        
         
         # get all possible experiments
-        exp_path = os.path.join(self.read_instance.exp_remote_path,self.read_instance.ghost_version)
+        exp_path = join(self.read_instance.exp_remote_path,self.read_instance.ghost_version)
         self.possible_experiments = self.read_instance.sftp.listdir(exp_path)
 
         # TODO repeated code, put this into a method in the future?
@@ -822,7 +823,7 @@ class ProvConfiguration:
                 
                 # search for other ghost versions
                 for ghost_version in self.read_instance.possible_ghost_versions:
-                    ghost_exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.read_instance.sftp.listdir(os.path.join(self.read_instance.exp_remote_path,ghost_version))))
+                    ghost_exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.read_instance.sftp.listdir(join(self.read_instance.exp_remote_path,ghost_version))))
                     if ghost_exp_found:
                         available_ghost_versions.append(ghost_version)
 
@@ -1637,7 +1638,7 @@ def load_conf(self, fpath=None):
     """ Load existing configurations from file
         for running offline Providentia.
     """
-    sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia'))
+    sys.path.append(join(PROVIDENTIA_ROOT, 'providentia'))
     from configuration import read_conf
 
     if fpath is None:

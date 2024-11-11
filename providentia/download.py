@@ -25,14 +25,15 @@ from .configuration import ProvConfiguration, load_conf
 from .read_aux import check_for_ghost
 from .warnings_prv import show_message
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+from providentia.auxiliar import CURRENT_PATH, join
+
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 REMOTE_MACHINE = "storage5"
 
 # load the defined experiments paths, agrupations yaml and mapping species
-data_paths = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
-interp_experiments = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
-mapping_species =  yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
+data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
+interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
+mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 
 def check_time(size, file_size):
     if (time.time() - download.ncfile_dl_start_time) > download.timeoutLimit:
@@ -54,7 +55,7 @@ def sighandler(*unused):
         os.remove(download.latest_nc_file_path)
 
     # delete temp dir if necessary
-    temp_dir = os.path.join(download.ghost_root,'.temp')
+    temp_dir = join(download.ghost_root,'.temp')
     if os.path.exists(temp_dir):
         print(f"\nDeleting {temp_dir}")
         shutil.rmtree(temp_dir)
@@ -79,7 +80,7 @@ class ProvidentiaDownload(object):
         # self.remote_hostname, REMOTE_MACHINE = "glogin4.bsc.es", "mn5" 
 
         # get ssh user and password 
-        env = dotenv_values(os.path.join(PROVIDENTIA_ROOT, ".env"))
+        env = dotenv_values(join(PROVIDENTIA_ROOT, ".env"))
 
         # get ssh user and password 
         self.prv_user = env.get("PRV_USER")
@@ -102,8 +103,8 @@ class ProvidentiaDownload(object):
             if os.path.exists(self.config):
                 read_conf = True
             else: 
-                if os.path.exists(os.path.join(self.config_dir, self.config)):
-                    self.config = os.path.join(self.config_dir, self.config)
+                if os.path.exists(join(self.config_dir, self.config)):
+                    self.config = join(self.config_dir, self.config)
                     read_conf = True
             if read_conf:
                 load_conf(self, self.config)
@@ -333,7 +334,7 @@ class ProvidentiaDownload(object):
             except paramiko.ssh_exception.AuthenticationException:
                 # if name was not changed, then user in .env is not valid
                 if prv_user is None:
-                    error = f"Authentication failed. Please, check if PRV_USER on {os.path.join(PROVIDENTIA_ROOT, '.env')} aligns with your BSC {REMOTE_MACHINE} ssh user."
+                    error = f"Authentication failed. Please, check if PRV_USER on {join(PROVIDENTIA_ROOT, '.env')} aligns with your BSC {REMOTE_MACHINE} ssh user."
                     error += "\nIf it does not, change the user to the correct one. If it does, delete the whole PRV_USER row and execute again."
                     sys.exit(error)
                 else:
@@ -351,7 +352,7 @@ class ProvidentiaDownload(object):
             error = "Authentication failed."
             # if user or password were taken from .env (did not change), tell the user to check .env
             if prv_user is None:
-                error += f" Please, check your credentials on {os.path.join(PROVIDENTIA_ROOT, '.env')}"
+                error += f" Please, check your credentials on {join(PROVIDENTIA_ROOT, '.env')}"
             sys.exit(error)
 
         # if pwd or user changed, ask if user wants to remember credentials
@@ -363,13 +364,13 @@ class ProvidentiaDownload(object):
             
             # create .env with the input user and/or password
             if remind_txt.lower() == 'y':
-                with open(os.path.join(PROVIDENTIA_ROOT, ".env"),"a") as f:
+                with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
                     if prv_user is not None:
                         f.write(f"PRV_USER={self.prv_user}\n")
                     if prv_password is not None:
                         f.write(f"PRV_PWD={self.prv_password}\n")
 
-                print(f"\nRemote machine credentials saved on {os.path.join(PROVIDENTIA_ROOT, '.env')}")
+                print(f"\nRemote machine credentials saved on {join(PROVIDENTIA_ROOT, '.env')}")
 
     def confirm_bsc_download(self):
         # get user choice regarding bsc downloads
@@ -382,10 +383,10 @@ class ProvidentiaDownload(object):
             remind_txt = input("\nDo you want to remember your decision (y/n)? ").lower() 
         
         if remind_txt == 'y':
-            with open(os.path.join(PROVIDENTIA_ROOT, ".env"),"a") as f:
+            with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
                 f.write(f"BSC_DL_CHOICE={self.bsc_download_choice}\n")
             
-            print(f"\nBSC download choice saved on {os.path.join(PROVIDENTIA_ROOT, '.env')}")
+            print(f"\nBSC download choice saved on {join(PROVIDENTIA_ROOT, '.env')}")
                     
     def select_files_to_download(self, nc_files_to_download):
         """ Returns the files that are not already downloaded. """
@@ -412,7 +413,7 @@ class ProvidentiaDownload(object):
                         remind_txt = input("\nDo you want to remember your decision for future downloads (y/n)? ").lower() 
                     # save the decision
                     if remind_txt == 'y':
-                        with open(os.path.join(PROVIDENTIA_ROOT, ".env"),"a") as f:
+                        with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
                             f.write(f"OVERWRITE={self.overwrite_choice}\n")
                 # if user wants to overwrite then add the the files that were 
                 # downloaded before the execution as if they were never download
@@ -437,7 +438,7 @@ class ProvidentiaDownload(object):
         # if not valid network, check if user put the network on init_prov 
         # TODO Move to configuration.py
         if network not in self.nonghost_available_networks:
-            msg = f"The {network} network could not be found on {os.path.join(PROVIDENTIA_ROOT,'settings','init_prov.yaml')} nonghost_available_networks list."
+            msg = f"The {network} network could not be found on {join(PROVIDENTIA_ROOT,'settings','init_prov.yaml')} nonghost_available_networks list."
             msg += "\nPlease, add the network to the list and execute again."
             show_message(self, msg, deactivate=initial_check)
             return
@@ -445,7 +446,7 @@ class ProvidentiaDownload(object):
         # check if nonghost network exists in directory
         # TODO: Change this to somewhere in configuration, the one up too
         try:
-            self.sftp.stat(os.path.join(self.nonghost_remote_obs_path,network))
+            self.sftp.stat(join(self.nonghost_remote_obs_path,network))
         except FileNotFoundError:
             msg = f"There is no data available in {REMOTE_MACHINE} for {network} network."
             show_message(self, msg, deactivate=initial_check)
@@ -456,7 +457,7 @@ class ProvidentiaDownload(object):
         not_available_resolutions = set(self.resolution) - set(self.nonghost_available_resolutions)
         if not_available_resolutions:
             available_resolutions = set(self.resolution) - not_available_resolutions
-            msg = f"The resolution/s {', '.join(not_available_resolutions)} could not be found on {os.path.join(PROVIDENTIA_ROOT,'settings','init_prov.yaml')} nonghost_available_resolutions list."
+            msg = f"The resolution/s {', '.join(not_available_resolutions)} could not be found on {join(PROVIDENTIA_ROOT,'settings','init_prov.yaml')} nonghost_available_resolutions list."
             msg += "\nPlease, add the necessary resolutions to the list and execute again."
             show_message(self, msg, deactivate=initial_check)
             return
@@ -464,16 +465,16 @@ class ProvidentiaDownload(object):
         # get resolution and species combinations
         res_spec_dir = []
 
-        sftp_resolutions = self.resolution if self.resolution else set(self.sftp.listdir(os.path.join(self.nonghost_remote_obs_path,network))).intersection(self.nonghost_available_resolutions)
+        sftp_resolutions = self.resolution if self.resolution else set(self.sftp.listdir(join(self.nonghost_remote_obs_path,network))).intersection(self.nonghost_available_resolutions)
         for resolution in sftp_resolutions:
             try:
-                sftp_species = self.species if self.species else set(self.sftp.listdir(os.path.join(self.nonghost_remote_obs_path,network,resolution))).intersection(self.available_species)
+                sftp_species = self.species if self.species else set(self.sftp.listdir(join(self.nonghost_remote_obs_path,network,resolution))).intersection(self.available_species)
             except FileNotFoundError:
                 msg = f"There is no data available in {REMOTE_MACHINE} for {network} network at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species: 
-                res_spec_dir.append(os.path.join(self.nonghost_remote_obs_path,network,resolution,species))
+                res_spec_dir.append(join(self.nonghost_remote_obs_path,network,resolution,species))
         
         if res_spec_dir:
             
@@ -486,7 +487,7 @@ class ProvidentiaDownload(object):
             # get all the nc files in the date range within the specie and resolution combination
             for remote_dir in res_spec_dir:
 
-                local_dir = os.path.join(self.nonghost_root,remote_dir.split('/',6)[-1])
+                local_dir = join(self.nonghost_root,remote_dir.split('/',6)[-1])
                 species = remote_dir.split('/')[-1]
                 resolution = remote_dir.split('/')[-2]
 
@@ -522,7 +523,7 @@ class ProvidentiaDownload(object):
 
                     if not initial_check:
                         # get the ones that are not already downloaded
-                        valid_nc_files = list(filter(lambda x:os.path.join(local_dir,x) in files_to_download, valid_nc_files))
+                        valid_nc_files = list(filter(lambda x:join(local_dir,x) in files_to_download, valid_nc_files))
                         if not valid_nc_files:
                             msg = "Files were already downloaded."
                             show_message(self, msg, deactivate=initial_check)     
@@ -534,12 +535,12 @@ class ProvidentiaDownload(object):
 
                     # download each individual nc file using sftp protocol
                     for nc_file in valid_nc_files_iter:
-                        local_path = os.path.join(local_dir,nc_file)
+                        local_path = join(local_dir,nc_file)
                         if initial_check:
                             initial_check_nc_files.append(local_path)
                         else:
                             self.latest_nc_file_path = local_path
-                            remote_path = os.path.join(remote_dir,nc_file)
+                            remote_path = join(remote_dir,nc_file)
                             self.ncfile_dl_start_time = time.time()
                             self.sftp.get(remote_path,local_path, callback=check_time)
 
@@ -562,10 +563,10 @@ class ProvidentiaDownload(object):
             return 
         
         # if not valid combination of GHOST version and network, next 
-        elif self.ghost_version not in self.sftp.listdir(os.path.join(self.ghost_remote_obs_path,network)):
+        elif self.ghost_version not in self.sftp.listdir(join(self.ghost_remote_obs_path,network)):
             msg = f"There is no data available in {REMOTE_MACHINE} for {network} network for the current ghost version ({self.ghost_version})."
             
-            available_ghost_versions = set(self.sftp.listdir(os.path.join(self.ghost_remote_obs_path,network))).intersection(self.possible_ghost_versions)
+            available_ghost_versions = set(self.sftp.listdir(join(self.ghost_remote_obs_path,network))).intersection(self.possible_ghost_versions)
 
             # list that saves the GHOST versions with valid nc files
             valid_available_ghost_versions = []
@@ -574,13 +575,13 @@ class ProvidentiaDownload(object):
             if available_ghost_versions:
                 # iterate the different GHOST versions
                 for possible_ghost_version in available_ghost_versions:
-                    remote_dir_ghost_version = os.path.join(self.ghost_remote_obs_path, network, possible_ghost_version)
+                    remote_dir_ghost_version = join(self.ghost_remote_obs_path, network, possible_ghost_version)
                     
                     # iterate the different resolutions
                     sftp_resolutions = self.resolution if self.resolution else set(self.sftp.listdir(remote_dir_ghost_version)).intersection(self.ghost_available_resolutions)
                     for resolution in sftp_resolutions:
                         try:
-                            species_list = self.species if self.species else self.sftp.listdir(os.path.join(remote_dir_ghost_version, resolution))
+                            species_list = self.species if self.species else self.sftp.listdir(join(remote_dir_ghost_version, resolution))
                         except FileNotFoundError:
                             continue
 
@@ -588,7 +589,7 @@ class ProvidentiaDownload(object):
                         for species in species_list:
                             # look for valid nc files in the date range
                             try:
-                                nc_files = self.sftp.listdir(os.path.join(remote_dir_ghost_version, resolution, species))
+                                nc_files = self.sftp.listdir(join(remote_dir_ghost_version, resolution, species))
                                 valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
                                 if valid_nc_files:
                                     valid_available_ghost_versions.append(possible_ghost_version)
@@ -609,18 +610,18 @@ class ProvidentiaDownload(object):
         # get resolution and species combinations
         res_spec_dir = []
 
-        remote_dir = os.path.join(self.ghost_remote_obs_path,network,self.ghost_version)
+        remote_dir = join(self.ghost_remote_obs_path,network,self.ghost_version)
 
         sftp_resolutions = self.resolution if self.resolution else set(self.sftp.listdir(remote_dir)).intersection(self.ghost_available_resolutions)
         for resolution in sftp_resolutions:
             try:
-                sftp_species = self.species if self.species else set(self.sftp.listdir(os.path.join(remote_dir,resolution))).intersection(self.available_species)
+                sftp_species = self.species if self.species else set(self.sftp.listdir(join(remote_dir,resolution))).intersection(self.available_species)
             except FileNotFoundError:
                 msg = f"There is no data available in {REMOTE_MACHINE} for {network} network at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species: 
-                res_spec_dir.append(os.path.join(remote_dir,resolution,species))
+                res_spec_dir.append(join(remote_dir,resolution,species))
         
         # print the species, resolution and network combinations that are going to be downloaded
         if res_spec_dir:            
@@ -634,7 +635,7 @@ class ProvidentiaDownload(object):
             # get all the nc files in the date range within the specie and resolution combination
             for remote_dir in res_spec_dir:
 
-                local_dir = os.path.join(self.ghost_root,remote_dir.split('/',7)[-1])
+                local_dir = join(self.ghost_root,remote_dir.split('/',7)[-1])
                 species = remote_dir.split('/')[-1]
                 resolution = remote_dir.split('/')[-2]
 
@@ -670,7 +671,7 @@ class ProvidentiaDownload(object):
 
                     if not initial_check:
                         # get the ones that are not already downloaded
-                        valid_nc_files = list(filter(lambda x:os.path.join(local_dir,x) in files_to_download, valid_nc_files))
+                        valid_nc_files = list(filter(lambda x:join(local_dir,x) in files_to_download, valid_nc_files))
                         if not valid_nc_files:
                             msg = "Files were already downloaded."
                             show_message(self, msg, deactivate=initial_check)     
@@ -682,12 +683,12 @@ class ProvidentiaDownload(object):
 
                     # download each individual nc file using sftp protocol
                     for nc_file in valid_nc_files_iter:
-                        local_path = os.path.join(local_dir,nc_file)
+                        local_path = join(local_dir,nc_file)
                         if initial_check:
                             initial_check_nc_files.append(local_path)
                         else:
                             self.latest_nc_file_path = local_path
-                            remote_path = os.path.join(remote_dir,nc_file)
+                            remote_path = join(remote_dir,nc_file)
                             self.ncfile_dl_start_time = time.time()
                             self.sftp.get(remote_path,local_path, callback=check_time)
                        
@@ -756,22 +757,22 @@ class ProvidentiaDownload(object):
                 for remote_dir_tail in res_spec_dir_tail:
                     resolution, specie = remote_dir_tail.split("/")[1:]
                     specie = specie[:-7]
-                    local_dir = os.path.join(self.ghost_root,network,last_ghost_version,resolution,specie)
+                    local_dir = join(self.ghost_root,network,last_ghost_version,resolution,specie)
 
                     #  print the species, resolution and network combinations that are going to be downloaded
                     if not initial_check:
                         print(f"\n  - {local_dir}")
 
                     # create temporal dir to store the middle tar file with its directories
-                    temp_dir = os.path.join(self.ghost_root,'.temp')
+                    temp_dir = join(self.ghost_root,'.temp')
                     if not os.path.exists(temp_dir):
                         os.mkdir(temp_dir)
 
                     zip.extract(remote_dir_tail,temp_dir)
                     
                     # get path and the name of the directory of the tar file
-                    tar_path = os.path.join(self.ghost_root, network, str(last_ghost_version), *remote_dir_tail.split("/")[1:])
-                    temp_path = os.path.join(temp_dir,remote_dir_tail)
+                    tar_path = join(self.ghost_root, network, str(last_ghost_version), *remote_dir_tail.split("/")[1:])
+                    temp_path = join(temp_dir,remote_dir_tail)
 
                     # extract nc file from tar file
                     with tarfile.open(temp_path) as tar_file:
@@ -795,7 +796,7 @@ class ProvidentiaDownload(object):
                             
                             if not initial_check:
                                 # get the ones that are not already downloaded
-                                valid_nc_file_names = list(filter(lambda x:os.path.join(local_dir,x.split('/')[-1]) in files_to_download, valid_nc_file_names))
+                                valid_nc_file_names = list(filter(lambda x:join(local_dir,x.split('/')[-1]) in files_to_download, valid_nc_file_names))
                                 if not valid_nc_file_names:
                                     msg = "Files were already downloaded."
                                     show_message(self, msg, deactivate=initial_check)     
@@ -813,7 +814,7 @@ class ProvidentiaDownload(object):
                                 valid_nc_files_iter = valid_nc_files
 
                             for nc_file in valid_nc_files_iter:
-                                local_path = os.path.join(tar_dir,nc_file.name)
+                                local_path = join(tar_dir,nc_file.name)
                                 if initial_check:
                                     initial_check_nc_files.append(local_path)
                                 else:
@@ -848,7 +849,7 @@ class ProvidentiaDownload(object):
         experiment = experiment_old if self.ghost_version in ["1.2", "1.3", "1.3.1"] else experiment_new
 
         # get remote directory
-        remote_dir = os.path.join(self.exp_remote_path,self.ghost_version,experiment)
+        remote_dir = join(self.exp_remote_path,self.ghost_version,experiment)
 
         # check if experiment exists
         try:
@@ -865,7 +866,7 @@ class ProvidentiaDownload(object):
             for possible_ghost_version in possible_ghost_versions:
                 try:
                     # get experiment path depending on the GHOST version
-                    remote_dir_ghost_version = os.path.join(self.exp_remote_path, possible_ghost_version, experiment_old if possible_ghost_version in ["1.2", "1.3", "1.3.1"] else experiment_new)
+                    remote_dir_ghost_version = join(self.exp_remote_path, possible_ghost_version, experiment_old if possible_ghost_version in ["1.2", "1.3", "1.3.1"] else experiment_new)
                     
                     # check if directory exists
                     self.sftp.stat(remote_dir_ghost_version)
@@ -884,20 +885,20 @@ class ProvidentiaDownload(object):
 
                 # iterate the different GHOST versions
                 for possible_ghost_version in available_ghost_versions:
-                    remote_dir_ghost_version = os.path.join(self.exp_remote_path, possible_ghost_version, experiment_old if possible_ghost_version in ["1.2", "1.3", "1.3.1"] else experiment_new)
+                    remote_dir_ghost_version = join(self.exp_remote_path, possible_ghost_version, experiment_old if possible_ghost_version in ["1.2", "1.3", "1.3.1"] else experiment_new)
                     
                     # iterate the different resolutions
                     sftp_resolutions = self.resolution if self.resolution else set(self.sftp.listdir(remote_dir)).intersection(self.nonghost_available_resolutions)
                     for resolution in sftp_resolutions:                        
                         try:
-                            species_list = self.species if self.species else self.sftp.listdir(os.path.join(remote_dir_ghost_version, resolution))
+                            species_list = self.species if self.species else self.sftp.listdir(join(remote_dir_ghost_version, resolution))
                         except FileNotFoundError:
                             continue
                         
                         # iterate the different species
                         for species in species_list:
                             try:
-                                network_list = self.network if self.network else self.sftp.listdir(os.path.join(remote_dir_ghost_version, resolution, species))
+                                network_list = self.network if self.network else self.sftp.listdir(join(remote_dir_ghost_version, resolution, species))
                             except FileNotFoundError:
                                 continue
                             
@@ -905,7 +906,7 @@ class ProvidentiaDownload(object):
                             for network in network_list:
                                 # look for valid nc files in the date range
                                 try:
-                                    nc_files = self.sftp.listdir(os.path.join(remote_dir_ghost_version, resolution, species, network))
+                                    nc_files = self.sftp.listdir(join(remote_dir_ghost_version, resolution, species, network))
                                     valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
                                     if valid_nc_files:
                                         valid_available_ghost_versions.append(possible_ghost_version)
@@ -926,14 +927,14 @@ class ProvidentiaDownload(object):
         sftp_resolutions = self.resolution if self.resolution else set(self.sftp.listdir(remote_dir)).intersection(self.nonghost_available_resolutions)
         for resolution in sftp_resolutions:
             try:
-                sftp_species = self.species if self.species else set(self.sftp.listdir(os.path.join(remote_dir,resolution))).intersection(self.available_species)
+                sftp_species = self.species if self.species else set(self.sftp.listdir(join(remote_dir,resolution))).intersection(self.available_species)
             except FileNotFoundError:
                 msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species: 
                 try:
-                    sftp_network = self.network if self.network else self.sftp.listdir(os.path.join(remote_dir,resolution,species))
+                    sftp_network = self.network if self.network else self.sftp.listdir(join(remote_dir,resolution,species))
                 except FileNotFoundError:
                     msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
@@ -942,7 +943,7 @@ class ProvidentiaDownload(object):
                     # if network is nonghost, change the slashes to dashes
                     if not check_for_ghost(network):
                         network = network.replace("/", "-")
-                    res_spec_dir.append(os.path.join(remote_dir,resolution,species,network))
+                    res_spec_dir.append(join(remote_dir,resolution,species,network))
         
         # print the species, resolution and experiment combinations that are going to be downloaded
         if res_spec_dir:
@@ -958,9 +959,9 @@ class ProvidentiaDownload(object):
                 if not initial_check:
                     local_path = remote_dir.split('/',7)[-1]
                     if self.ghost_version in ["1.2", "1.3", "1.3.1"]:
-                        print(f"\n  - {os.path.join(self.exp_root,self.ghost_version,'-'.join(local_path.split('/')[1:4]),*local_path.split('/')[4:])}")
+                        print(f"\n  - {join(self.exp_root,self.ghost_version,'-'.join(local_path.split('/')[1:4]),*local_path.split('/')[4:])}")
                     else:
-                        print(f"\n  - {os.path.join(self.exp_root,local_path)}")
+                        print(f"\n  - {join(self.exp_root,local_path)}")
             
                 network = remote_dir.split('/')[-1]
                 species = remote_dir.split('/')[-2]
@@ -986,7 +987,7 @@ class ProvidentiaDownload(object):
                 # download the valid resolution specie date combinations
                 else:
                     # create local directory (always with experiments on the new format)
-                    local_dir = os.path.join(self.exp_root,self.ghost_version,experiment_new,resolution,species,network)
+                    local_dir = join(self.exp_root,self.ghost_version,experiment_new,resolution,species,network)
                     
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
@@ -997,7 +998,7 @@ class ProvidentiaDownload(object):
 
                     if not initial_check:
                         # get the ones that are not already downloaded
-                        valid_nc_files = list(filter(lambda x:os.path.join(local_dir,x) in files_to_download, valid_nc_files))
+                        valid_nc_files = list(filter(lambda x:join(local_dir,x) in files_to_download, valid_nc_files))
                         if not valid_nc_files:
                             msg = "Files were already downloaded."
                             show_message(self, msg, deactivate=initial_check)     
@@ -1009,12 +1010,12 @@ class ProvidentiaDownload(object):
 
                     # download each individual nc file using sftp protocol
                     for nc_file in valid_nc_files_iter:
-                        local_path = os.path.join(local_dir,nc_file)
+                        local_path = join(local_dir,nc_file)
                         if initial_check:
                             initial_check_nc_files.append(local_path)
                         else:
                             self.latest_nc_file_path = local_path
-                            remote_path = os.path.join(remote_dir,nc_file)
+                            remote_path = join(remote_dir,nc_file)
                             self.ncfile_dl_start_time = time.time()
                             self.sftp.get(remote_path,local_path, callback=check_time) 
             
@@ -1053,7 +1054,7 @@ class ProvidentiaDownload(object):
         for exp_dir in exp_dir_list:
             # esarchive in transfer5 is located inside gpfs
             if "/esarchive/" == exp_dir[:11]:
-                exp_dir = os.path.join("/gpfs/archive/bsc32/",exp_dir[1:])
+                exp_dir = join("/gpfs/archive/bsc32/",exp_dir[1:])
             # check if directory exists in the remote machine
             try:
                 self.sftp.stat(exp_dir)
@@ -1064,14 +1065,14 @@ class ProvidentiaDownload(object):
 
         # if none of the paths are in this current machine, break
         if not exp_dir_functional_list:
-            msg = f"None of the paths specified in {os.path.join('settings', 'interp_experiments.yaml')} are available on the remote machine ({REMOTE_MACHINE})."
+            msg = f"None of the paths specified in {join('settings', 'interp_experiments.yaml')} are available on the remote machine ({REMOTE_MACHINE})."
             show_message(self, msg, deactivate=initial_check)
             return
         
         # take first functional directory  
         remote_dir = None
         for exp_dir in exp_dir_functional_list:
-            temp_remote_dir = os.path.join(exp_dir,exp_id,domain)
+            temp_remote_dir = join(exp_dir,exp_id,domain)
             # check if remote experiment and domain directories exist in the remote machine
             try:
                 self.sftp.stat(temp_remote_dir)
@@ -1082,7 +1083,7 @@ class ProvidentiaDownload(object):
         
         # if the experiment-domain combination is possible, break
         if remote_dir is None:
-            msg = f"There is no data available for the {exp_id} experiment with the {domain} domain in none of the paths specified in {os.path.join('settings', 'interp_experiments.yaml')} in the remote machine ({REMOTE_MACHINE})."
+            msg = f"There is no data available for the {exp_id} experiment with the {domain} domain in none of the paths specified in {join('settings', 'interp_experiments.yaml')} in the remote machine ({REMOTE_MACHINE})."
             show_message(self, msg, deactivate=initial_check)
             return
 
@@ -1094,7 +1095,7 @@ class ProvidentiaDownload(object):
             try:
                 # get available species ("normal" and mapped)
                 available_species = self.available_species+[spec[0] for spec in mapping_species.values()]
-                sftp_species = self.species if self.species else set(self.sftp.listdir(os.path.join(remote_dir,resolution))).intersection(available_species)
+                sftp_species = self.species if self.species else set(self.sftp.listdir(join(remote_dir,resolution))).intersection(available_species)
             except FileNotFoundError:
                 msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
@@ -1109,10 +1110,10 @@ class ProvidentiaDownload(object):
                 try:
                     # if it is an ensemble member
                     if not ensemble_options.startswith("stat_"):
-                        res_spec = os.path.join(remote_dir,resolution,species)
+                        res_spec = join(remote_dir,resolution,species)
                     # if it is an ensemble statistic
                     else:
-                        res_spec = os.path.join(remote_dir,resolution,"ensemble-stats",species+"_"+stat)
+                        res_spec = join(remote_dir,resolution,"ensemble-stats",species+"_"+stat)
   
                     self.sftp.stat(res_spec)
                     species_exists = True
@@ -1124,10 +1125,10 @@ class ProvidentiaDownload(object):
                             try:
                                 # if it is an ensemble member
                                 if not ensemble_options.startswith("stat_"):
-                                    res_spec = os.path.join(remote_dir,resolution,species)
+                                    res_spec = join(remote_dir,resolution,species)
                                 # if it is an ensemble statistic
                                 else:
-                                    res_spec = os.path.join(remote_dir,resolution,"ensemble-stats",species+"_"+stat)
+                                    res_spec = join(remote_dir,resolution,"ensemble-stats",species+"_"+stat)
   
                                 self.sftp.stat(res_spec)  
                                 species_exists = True
@@ -1157,7 +1158,7 @@ class ProvidentiaDownload(object):
             for remote_dir in res_spec_dir:
                 if not initial_check:
                     local_path = remote_dir.split('/',7)[-1]
-                    print(f"\n  - {os.path.join(self.exp_to_interp_root,local_path)}")
+                    print(f"\n  - {join(self.exp_to_interp_root,local_path)}")
                          
                 # get nc files
                 nc_files = self.sftp.listdir(remote_dir)
@@ -1225,9 +1226,9 @@ class ProvidentiaDownload(object):
                     # create local directory 
                     # if it is an ensemble member
                     if not ensemble_options.startswith("stat_"):
-                        local_dir = os.path.join(self.exp_to_interp_root,exp_id,domain,resolution,species)
+                        local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,species)
                     else:
-                        local_dir = os.path.join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+stat)
+                        local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+stat)
                     
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
@@ -1238,7 +1239,7 @@ class ProvidentiaDownload(object):
 
                     if not initial_check:
                         # get the ones that are not already downloaded
-                        valid_nc_files = list(filter(lambda x:os.path.join(local_dir,x) in files_to_download, valid_nc_files))
+                        valid_nc_files = list(filter(lambda x:join(local_dir,x) in files_to_download, valid_nc_files))
                         if not valid_nc_files:
                             msg = "Files were already downloaded."
                             show_message(self, msg, deactivate=initial_check)     
@@ -1250,12 +1251,12 @@ class ProvidentiaDownload(object):
 
                     # download each individual nc file using sftp protocol
                     for nc_file in valid_nc_files_iter:
-                        local_path = os.path.join(local_dir,nc_file)
+                        local_path = join(local_dir,nc_file)
                         if initial_check:
                             initial_check_nc_files.append(local_path)
                         else:
                             self.latest_nc_file_path = local_path
-                            remote_path = os.path.join(remote_dir,nc_file)
+                            remote_path = join(remote_dir,nc_file)
                             self.ncfile_dl_start_time = time.time()
                             self.sftp.get(remote_path,local_path,callback=check_time) 
             
@@ -1315,7 +1316,7 @@ class ProvidentiaDownload(object):
         # download all interpolated experiments
         if self.interpolated is True:
             # get directory content and format it as the experiments       
-            experiment_list = self.sftp.listdir(os.path.join(self.exp_remote_path,self.ghost_version))
+            experiment_list = self.sftp.listdir(join(self.exp_remote_path,self.ghost_version))
         # download all non interpolated experiments
         else:
             # get all the experiments id

@@ -11,17 +11,18 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from .dashboard_elements import CheckableComboBox, ComboBox
 from .dashboard_elements import set_formatting
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+from providentia.auxiliar import CURRENT_PATH, join
+
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-settings_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/canvas_menus.yaml')))
+settings_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/canvas_menus.yaml')))
 # get operating system specific formatting
 operating_system = platform.system()
 if operating_system == 'Darwin':
-    formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_mac.yaml')))
+    formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_mac.yaml')))
 elif operating_system == 'Linux':
-    formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_linux.yaml')))
+    formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_linux.yaml')))
 elif operating_system in ['Windows','MINGW32_NT','MINGW64_NT']:
-    formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_windows.yaml')))
+    formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_windows.yaml')))
 
 class SettingsMenu(object):
 
@@ -98,7 +99,7 @@ class SettingsMenu(object):
 
         button = set_formatting(QtWidgets.QPushButton(self.canvas_instance), 
                                                       formatting_dict[element_settings['formatting_dict']])
-        button.setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, element_settings['path'])))
+        button.setIcon(QtGui.QIcon(join(CURRENT_PATH, element_settings['path'])))
         button.setIconSize(QtCore.QSize(element_settings['size'][0], element_settings['size'][1]))
         button.clicked.connect(partial(self.connect, element_settings['function']))
         

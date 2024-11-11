@@ -33,7 +33,8 @@ from .read_aux import (generate_file_trees, get_lower_resolutions,
 from .statistics import (calculate_statistic, get_fairmode_data,
                          generate_colourbar, get_selected_station_data, get_z_statistic_info)
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+from providentia.auxiliar import CURRENT_PATH, join
+
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
 
@@ -48,11 +49,11 @@ class ProvidentiaOffline:
         print("Starting Providentia offline...")
 
         # load statistical yamls
-        self.basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
-        self.expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
+        self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
+        self.expbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
 
         # load representativity information
-        self.representativity_info = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
+        self.representativity_info = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
@@ -67,8 +68,8 @@ class ProvidentiaOffline:
             if os.path.exists(self.config):
                 read_conf = True
             else: 
-                if os.path.exists(os.path.join(self.config_dir, self.config)):
-                    self.config = os.path.join(self.config_dir, self.config)
+                if os.path.exists(join(self.config_dir, self.config)):
+                    self.config = join(self.config_dir, self.config)
                     read_conf = True
             if read_conf:
                 load_conf(self, self.config)
@@ -81,7 +82,7 @@ class ProvidentiaOffline:
             sys.exit(error)
 
         # load report plot presets
-        self.report_plots = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/report_plots.yaml')))
+        self.report_plots = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/report_plots.yaml')))
 
         # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
         # if have filetree flags, then these overwrite any defaults
@@ -164,7 +165,7 @@ class ProvidentiaOffline:
 
             # check for self defined plot characteristics file
             if self.plot_characteristics_filename == '':
-                self.plot_characteristics_filename = os.path.join(PROVIDENTIA_ROOT, 'settings/plot_characteristics_offline.yaml')
+                self.plot_characteristics_filename = join(PROVIDENTIA_ROOT, 'settings/plot_characteristics_offline.yaml')
             self.plot_characteristics_templates = yaml.safe_load(open(self.plot_characteristics_filename))
             self.plot_characteristics = {}
 
@@ -293,7 +294,7 @@ class ProvidentiaOffline:
             if os.path.isdir(os.path.dirname(filename)):
                 reports_path = filename
         else:
-            reports_path = (os.path.join(PROVIDENTIA_ROOT, 'reports/')) + filename
+            reports_path = (join(PROVIDENTIA_ROOT, 'reports/')) + filename
 
         # create reports folder
         if not os.path.exists(os.path.dirname(reports_path)):

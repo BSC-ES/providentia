@@ -151,16 +151,12 @@ def check_directory_existence(directory_tree_str, directories_not_to_test=None):
 
                 # if not, create it
                 os.system("mkdir {}".format(alt_directory_str_to_test))
-
-                
-                
+                    
                 # give 770 permissions to directory
                 os.system("chmod 770 {}".format(alt_directory_str_to_test))
                 
                 # make group owner bsc32
                 os.system("chgrp bsc32 {}".format(alt_directory_str_to_test))
-            os.system("mkdir /gpfs/scratch/bsc32/bsc032388/Providentia/logs/interpolation/arguments/pip")
-            os.system("touch /gpfs/scratch/bsc32/bsc032388/Providentia/logs/interpolation/arguments/pip")
 
 def set_file_permissions_ownership(file_str):
     """ Set 770 permissions for a newly written file and also ensure group owner is bsc32.
