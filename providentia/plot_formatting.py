@@ -386,7 +386,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             if not isinstance(xticks[0], np.datetime64):
                 xticks = [x.to_datetime64() for x in xticks]
             if not isinstance(right, np.datetime64):
-                xlim = {'left': left, 'right': np.datetime64(right)}
+                right = np.datetime64(right)
 
             # add last step to xticks
             if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != right):
