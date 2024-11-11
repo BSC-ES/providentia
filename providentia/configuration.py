@@ -1076,7 +1076,6 @@ class ProvConfiguration:
         final_experiments = []
         correct_experiments = {}
 
-        
         # TODO keep the check only in download or configuration
         # in case of zenodo download don't even check
         if not (self.read_instance.download and self.read_instance.bsc_download_choice == "n"): 

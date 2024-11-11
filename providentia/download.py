@@ -65,19 +65,11 @@ def sighandler(*unused):
 
 class ProvidentiaDownload(object):
     def __init__(self, **kwargs):
-        # TODO move some of these variables to configuration.py
-        # initialise zenodo url
-        self.ghost_url = 'https://zenodo.org/records/10637450'
-
         # get providentia start time
         self.prov_start_time = time.time()
 
         # initialise remote hostname
         self.remote_hostname = "transfer1.bsc.es"
-
-        # in case transfer broke
-        # global REMOTE_MACHINE
-        # self.remote_hostname, REMOTE_MACHINE = "glogin4.bsc.es", "mn5" 
 
         # get ssh user and password 
         env = dotenv_values(join(PROVIDENTIA_ROOT, ".env"))
@@ -133,18 +125,6 @@ class ProvidentiaDownload(object):
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
             sys.exit(error)
 
-        # create empty directories for all the paths if they don't exist
-        for path in [self.nonghost_root,self.ghost_root,self.exp_root,self.exp_to_interp_root]:
-            if not os.path.exists(path):
-                try:
-                    os.makedirs(path)
-                except PermissionError as error:
-                    os.system(f"sudo mkdir -p {path}")
-                    os.system(f"sudo chmod o+w {path}")
-
-        # initialise type of download
-        if not self.bsc_download_choice:
-            self.confirm_bsc_download()
 
         # initialise ssh 
         self.ssh = None
@@ -154,6 +134,26 @@ class ProvidentiaDownload(object):
 
         # variable that saves whether some experiments/observations were downloaded before
         self.overwritten_files_flag = False
+
+        # initialize the necessary things in local
+        if self.machine == "local":
+
+            # TODO move some of these variables to configuration.py
+            # initialise zenodo url
+            self.ghost_url = 'https://zenodo.org/records/10637450'
+
+            # create empty directories for all the paths if they don't exist
+            for path in [self.nonghost_root,self.ghost_root,self.exp_root,self.exp_to_interp_root]:
+                if not os.path.exists(path):
+                    try:
+                        os.makedirs(path)
+                    except PermissionError as error:
+                        os.system(f"sudo mkdir -p {path}")
+                        os.system(f"sudo chmod o+w {path}")
+
+            # initialise type of download
+            if not self.bsc_download_choice:
+                self.confirm_bsc_download()
 
     def run(self):
         for section_ind, section in enumerate(self.sections):
@@ -168,90 +168,114 @@ class ProvidentiaDownload(object):
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             self.provconf.check_validity(deactivate_warning=True)
 
-            # if networks is none and is not the non interpolated mode, raise error
-            if not self.network and self.interpolated is True:
-                error = "Error: No networks were passed."
-                sys.exit(error)
-            
-            # when one of those symbols is passed, get all networks
-            if self.network == ["*"]:
-                self.get_all_networks()
-
             # from here generate control if user stopped execution
             signal.signal(signal.SIGINT, sighandler)
 
-            # networks
-            if self.network:
-                # combine all networks and species combinations to download (for network and filter species)
-                combined_networks = [(network, None) for network in self.network] + \
-                                    [(network_specie.split('|')[0], network_specie.split('|')[1]) for network_specie in self.filter_species]
-                
-                # save main species
-                main_species = copy.deepcopy(self.species)
-                
-                # download network observations with species and filter_species
-                for network, filter_species in combined_networks:
-                    # change species when turn of filter species
-                    if filter_species is not None:
-                        self.species = [filter_species]
-
-                    # get the files to be downlaoded, check if they files were already downlaoded and download if not
-                    # download from the remote machine
-                    if self.bsc_download_choice == 'y':
-                        # GHOST
-                        if check_for_ghost(network):
-                            initial_check_nc_files = self.download_ghost_network_sftp(network, initial_check=True)
-                            files_to_download = self.select_files_to_download(initial_check_nc_files)
-                            if not initial_check_nc_files or files_to_download:
-                                self.download_ghost_network_sftp(network, initial_check=False, files_to_download=files_to_download)
-                        # non-GHOST
-                        else:
-                            initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
-                            files_to_download = self.select_files_to_download(initial_check_nc_files)
-                            if not initial_check_nc_files or files_to_download:
-                                self.download_nonghost_network(network, initial_check=False, files_to_download=files_to_download)
-
-                    # download from the zenodo webpage
-                    elif self.bsc_download_choice == 'n':
-                        # GHOST
-                        if check_for_ghost(network):
-                            initial_check_nc_files = self.download_ghost_network_zenodo(network, initial_check=True)
-                            files_to_download = self.select_files_to_download(initial_check_nc_files)
-                            if not initial_check_nc_files or files_to_download:
-                                self.download_ghost_network_zenodo(network, initial_check=False, files_to_download=files_to_download)
-                        # non-GHOST
-                        else:
-                            error = f"Error: It is not possible to download files from the non-GHOST network {network} from the zenodo webpage."
-                            sys.exit(error)
-                    
-                    # download option invalid
-                    else:
-                        error = "Error: Download option not valid, check your .env file."
-                        sys.exit(error)
-
-                # get orignal species back
-                self.species = main_species
-
-            # when one of those symbols is passed, get all experiments
-            if self.experiments == {'*': '*'}:
-                self.get_all_experiments()
-
-            # experiment
-            # download from the remote machine
-            if self.experiments:
-                if self.bsc_download_choice == 'y':
-                    # get function to download experiment depending on the configuration file field
-                    self.download_experiment_fun = self.download_experiment if self.interpolated is True else self.download_non_interpolated_experiment
-                    # iterate the experiments download
-                    for experiment in self.experiments.keys():
-                        initial_check_nc_files = self.download_experiment_fun(experiment, initial_check=True)
-                        files_to_download = self.select_files_to_download(initial_check_nc_files)
-                        if not initial_check_nc_files or files_to_download:
-                            self.download_experiment_fun(experiment, initial_check=False, files_to_download=files_to_download)
-                # download from the zenodo webpage
+            # in the case of doing the download in mn5, check if the experiment has the interpolated tag as False
+            if self.machine == "mn5":
+                # if the tag is True, show a warning an skip the section
+                if self.interpolated is True:
+                    msg = f"Nothing from the {self.section} section was downloaded, change the interpolated field to 'False'"
+                    show_message(self, msg)
+                    continue
+                # if it is False, start the download
                 else:
-                    error = f"Error: It is not possible to download experiments from the zenodo webpage."
+                    # when one of those symbols is passed, get all experiments
+                    if self.experiments == {'*': '*'}:
+                        self.get_all_experiments()
+
+                    # download from the remote machine
+                    if self.experiments:
+                        # iterate the experiments download
+                        for experiment in self.experiments.keys():
+                            initial_check_nc_files = self.download_non_interpolated_experiment(experiment, initial_check=True)
+                            files_to_download = self.select_files_to_download(initial_check_nc_files)
+                            if not initial_check_nc_files or files_to_download:
+                                self.download_non_interpolated_experiment(experiment, initial_check=False, files_to_download=files_to_download)
+            
+            # in local continue as normally
+            else:
+                # if networks is none and is not the non interpolated mode, raise error
+                if not self.network and self.interpolated is True:
+                    error = "Error: No networks were passed."
                     sys.exit(error)
+                
+                # when one of those symbols is passed, get all networks
+                if self.network == ["*"]:
+                    self.get_all_networks()
+
+                # networks
+                if self.network:
+                    # combine all networks and species combinations to download (for network and filter species)
+                    combined_networks = [(network, None) for network in self.network] + \
+                                        [(network_specie.split('|')[0], network_specie.split('|')[1]) for network_specie in self.filter_species]
+                    
+                    # save main species
+                    main_species = copy.deepcopy(self.species)
+                    
+                    # download network observations with species and filter_species
+                    for network, filter_species in combined_networks:
+                        # change species when turn of filter species
+                        if filter_species is not None:
+                            self.species = [filter_species]
+
+                        # get the files to be downlaoded, check if they files were already downlaoded and download if not
+                        # download from the remote machine
+                        if self.bsc_download_choice == 'y':
+                            # GHOST
+                            if check_for_ghost(network):
+                                initial_check_nc_files = self.download_ghost_network_sftp(network, initial_check=True)
+                                files_to_download = self.select_files_to_download(initial_check_nc_files)
+                                if not initial_check_nc_files or files_to_download:
+                                    self.download_ghost_network_sftp(network, initial_check=False, files_to_download=files_to_download)
+                            # non-GHOST
+                            else:
+                                initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
+                                files_to_download = self.select_files_to_download(initial_check_nc_files)
+                                if not initial_check_nc_files or files_to_download:
+                                    self.download_nonghost_network(network, initial_check=False, files_to_download=files_to_download)
+
+                        # download from the zenodo webpage
+                        elif self.bsc_download_choice == 'n':
+                            # GHOST
+                            if check_for_ghost(network):
+                                initial_check_nc_files = self.download_ghost_network_zenodo(network, initial_check=True)
+                                files_to_download = self.select_files_to_download(initial_check_nc_files)
+                                if not initial_check_nc_files or files_to_download:
+                                    self.download_ghost_network_zenodo(network, initial_check=False, files_to_download=files_to_download)
+                            # non-GHOST
+                            else:
+                                error = f"Error: It is not possible to download files from the non-GHOST network {network} from the zenodo webpage."
+                                sys.exit(error)
+                        
+                        # download option invalid
+                        else:
+                            error = "Error: Download option not valid, check your .env file."
+                            sys.exit(error)
+
+                    # get orignal species back
+                    self.species = main_species
+
+                # when one of those symbols is passed, get all experiments
+                if self.experiments == {'*': '*'}:
+                    self.get_all_experiments()
+
+                # experiment
+                # download from the remote machine
+                if self.experiments:
+                    if self.bsc_download_choice == 'y':
+                        # get function to download experiment depending on the configuration file field
+                        self.download_experiment_fun = self.download_experiment if self.interpolated is True else self.download_non_interpolated_experiment
+                        # iterate the experiments download
+                        for experiment in self.experiments.keys():
+                            initial_check_nc_files = self.download_experiment_fun(experiment, initial_check=True)
+                            files_to_download = self.select_files_to_download(initial_check_nc_files)
+                            if not initial_check_nc_files or files_to_download:
+                                self.download_experiment_fun(experiment, initial_check=False, files_to_download=files_to_download)
+                    # download from the zenodo webpage
+                    else:
+                        error = f"Error: It is not possible to download experiments from the zenodo webpage."
+                        sys.exit(error)
 
             # remove section variables from memory
             for k in self.section_opts:
@@ -284,6 +308,10 @@ class ProvidentiaDownload(object):
 
         # get public remote machine public key and add it to ssh object
         _, output = subprocess.getstatusoutput(f"ssh-keyscan -t ed25519 {self.remote_hostname}")
+
+        ed25519_key = output.split()[-1].encode()
+        print(output, output.split()[-1].encode())
+        key = paramiko.Ed25519Key(data=decodebytes(ed25519_key))
         
         # encode the output public key if possible
         try:
