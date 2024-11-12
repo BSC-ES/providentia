@@ -853,13 +853,15 @@ class SubmitInterpolation(object):
     
     def run_command(self, commands):
         arguments_list = commands.strip().split()
-        subprocess.run(arguments_list, capture_output=True, text=True)
+        result = subprocess.run(arguments_list, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"Error: {result.stderr}")
 
     def submit_job_multiprocessing(self):
         
         # launch interpolation
-        commands = [f'python -u {self.working_directory}/interpolation/experiment_interpolation.py '
-                    + argument for argument in self.arguments]
+        commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(
+            self.working_directory, argument) for argument in self.arguments]
         with multiprocessing.Pool(processes=self.n_cpus) as pool:
             pool.map(self.run_command, commands)
 
