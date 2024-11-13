@@ -66,10 +66,7 @@ class ExperimentInterpolation(object):
         self.month = self.yearmonth[4:]
 
         # determine if ensemble option is member or emsemble stat
-        if self.ensemble_option.isdigit():
-            self.ensemble_member = True
-        else:
-            self.ensemble_member = False
+        self.ensemble_member = self.ensemble_option.isdigit()
 
         # dictionary to save utilized interpolation variables
         self.interpolation_variables = {}
