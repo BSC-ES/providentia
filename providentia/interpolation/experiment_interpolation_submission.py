@@ -331,12 +331,15 @@ class SubmitInterpolation(object):
                             if len(obs_files) == 0:
                                 continue
                             
+                            # determine if ensemble option is member or emsemble stat
+                            ensemble_member = ensemble_option.isdigit()
+
                             # check if ensemble option is ensemble stat and get all relevant experiment files
-                            if 'stat_' in ensemble_option:
+                            if not ensemble_member:
                                 ensemble_stat = True
                                 exp_files_all = np.sort(glob.glob('{}/{}/{}/ensemble-stats/{}_{}/{}*{}.nc'.format(
                                     exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
-                                    ensemble_option[5:], speci_to_process, ensemble_option[5:])))
+                                    ensemble_option, speci_to_process, ensemble_option)))
                             else:
                                 ensemble_stat = False
                                 exp_files_all = np.sort(glob.glob('{}/{}/{}/{}/{}*.nc'.format(
@@ -352,7 +355,7 @@ class SubmitInterpolation(object):
 
                             # ensemble stat?
                             if ensemble_stat:
-                                available_ensemble_options = [ensemble_option[5:]]    
+                                available_ensemble_options = [ensemble_option]    
 
                             # not ensemble stat?
                             else:                                
