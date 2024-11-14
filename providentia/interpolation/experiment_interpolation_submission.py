@@ -326,12 +326,15 @@ class SubmitInterpolation(object):
                             if len(obs_files) == 0:
                                 continue
                             
+                            # determine if ensemble option is member or emsemble stat
+                            ensemble_member = ensemble_option.isdigit()
+
                             # check if ensemble option is ensemble stat and get all relevant experiment files
-                            if 'stat_' in ensemble_option:
+                            if not ensemble_member:
                                 ensemble_stat = True
                                 exp_files_all = np.sort(glob.glob('{}/{}/{}/ensemble-stats/{}_{}/{}*{}.nc'.format(
                                     exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
-                                    ensemble_option[5:], speci_to_process, ensemble_option[5:])))
+                                    ensemble_option, speci_to_process, ensemble_option)))
                             else:
                                 ensemble_stat = False
                                 exp_files_all = np.sort(glob.glob('{}/{}/{}/{}/{}*.nc'.format(
@@ -347,7 +350,7 @@ class SubmitInterpolation(object):
 
                             # ensemble stat?
                             if ensemble_stat:
-                                available_ensemble_options = [ensemble_option[5:]]    
+                                available_ensemble_options = [ensemble_option]    
 
                             # not ensemble stat?
                             else:                                
@@ -848,13 +851,15 @@ class SubmitInterpolation(object):
     
     def run_command(self, commands):
         arguments_list = commands.strip().split()
-        subprocess.run(arguments_list, capture_output=True, text=True)
+        result = subprocess.run(arguments_list, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"Error: {result.stderr}")
 
     def submit_job_multiprocessing(self):
         
         # launch interpolation
-        commands = [f'python -u {self.working_directory}/interpolation/experiment_interpolation.py '
-                    + argument for argument in self.arguments]
+        commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(
+            self.working_directory, argument) for argument in self.arguments]
         with multiprocessing.Pool(processes=self.n_cpus) as pool:
             pool.map(self.run_command, commands)
 
@@ -903,17 +908,32 @@ def main(**kwargs):
     # create greasy arguments file
     SI.create_greasy_arguments_file()
 
+    # check if Greasy is installed
+    is_greasy_installed = False
+    try:
+        result = subprocess.run(
+            ['greasy', '-V'],
+            stdout=subprocess.PIPE,
+            text=True
+        )
+        if 'greasy' in result.stdout:
+            is_greasy_installed = True
+    except:
+        pass
+
     # submit interpolation jobs
     if SI.interp_multiprocessing:
+        print('Using multiprocessing to manage the job submission.')
         SI.submit_job_multiprocessing()
     else:
-        if SI.machine == 'local':
-            error = 'Error: It is not possible to interpolate locally without using multiprocessing.'
-            sys.exit(error)
-        else:
+        if is_greasy_installed:
+            print('Using Greasy to manage the job submission.')
             # create submission script according to machine
             if SI.machine == "nord3":
                 SI.create_lsf_submission_script()
             else:
                 SI.create_slurm_submission_script()
             SI.submit_job_greasy()
+        else:
+            print('Using multiprocessing to manage the job submission.')
+            SI.submit_job_multiprocessing()
