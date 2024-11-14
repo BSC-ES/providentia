@@ -13,6 +13,7 @@ from base64 import decodebytes
 import signal
 import copy
 import time
+import shutil
 
 # urlparse
 from tqdm import tqdm
@@ -68,9 +69,6 @@ class ProvidentiaDownload(object):
         # get providentia start time
         self.prov_start_time = time.time()
 
-        # initialise remote hostname
-        self.remote_hostname = "transfer1.bsc.es"
-
         # get ssh user and password 
         env = dotenv_values(join(PROVIDENTIA_ROOT, ".env"))
 
@@ -125,13 +123,6 @@ class ProvidentiaDownload(object):
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
             sys.exit(error)
 
-
-        # initialise ssh 
-        self.ssh = None
-
-        # initialise boolean thath indicates whether remote machine changed 
-        self.switched_remote = False
-
         # variable that saves whether some experiments/observations were downloaded before
         self.overwritten_files_flag = False
 
@@ -141,6 +132,9 @@ class ProvidentiaDownload(object):
             # TODO move some of these variables to configuration.py
             # initialise zenodo url
             self.ghost_url = 'https://zenodo.org/records/10637450'
+
+            # initialise remote hostname
+            self.remote_hostname = "transfer1.bsc.es"
 
             # create empty directories for all the paths if they don't exist
             for path in [self.nonghost_root,self.ghost_root,self.exp_root,self.exp_to_interp_root]:
@@ -154,6 +148,12 @@ class ProvidentiaDownload(object):
             # initialise type of download
             if not self.bsc_download_choice:
                 self.confirm_bsc_download()
+
+            # initialise ssh 
+            self.ssh = None
+
+            # initialise boolean thath indicates whether remote machine changed 
+            self.switched_remote = False
 
     def run(self):
         for section_ind, section in enumerate(self.sections):
@@ -172,10 +172,11 @@ class ProvidentiaDownload(object):
             signal.signal(signal.SIGINT, sighandler)
 
             # in the case of doing the download in mn5, check if the experiment has the interpolated tag as False
-            if self.machine == "mn5":
+            # TODO add nored3v2 in the future
+            if self.machine in ["storage5"]:
                 # if the tag is True, show a warning an skip the section
                 if self.interpolated is True:
-                    msg = f"Nothing from the {self.section} section was downloaded, change the interpolated field to 'False'"
+                    msg = f"Nothing from the {self.section} section was copied to gpfs, change the interpolated field to 'False'."
                     show_message(self, msg)
                     continue
                 # if it is False, start the download
@@ -188,10 +189,10 @@ class ProvidentiaDownload(object):
                     if self.experiments:
                         # iterate the experiments download
                         for experiment in self.experiments.keys():
-                            initial_check_nc_files = self.download_non_interpolated_experiment(experiment, initial_check=True)
+                            initial_check_nc_files = self.copy_non_interpolated_experiment(experiment, initial_check=True)
                             files_to_download = self.select_files_to_download(initial_check_nc_files)
                             if not initial_check_nc_files or files_to_download:
-                                self.download_non_interpolated_experiment(experiment, initial_check=False, files_to_download=files_to_download)
+                                self.copy_non_interpolated_experiment(experiment, initial_check=False, files_to_copy=files_to_download)
             
             # in local continue as normally
             else:
@@ -292,10 +293,11 @@ class ProvidentiaDownload(object):
         if self.overwritten_files_flag == True:
             print("\nSome experiments/observations were found but were not downloaded because the OVERWRITE option is set to 'n'.")
 
-        # close connection, if it exists
-        if self.ssh is not None:
-            self.ssh.close() 
-            self.sftp.close()
+        if self.machine == "local":
+            # close connection, if it exists
+            if self.ssh is not None:
+                self.ssh.close() 
+                self.sftp.close()
 
     def connect(self):
         # declare that we are using the remote machine
@@ -1293,6 +1295,236 @@ class ProvidentiaDownload(object):
         # tell the user if not valid resolution specie date combinations
         else:
             msg = "There are no available observations to be downloaded."
+            show_message(self, msg, deactivate=initial_check)
+            
+    def copy_non_interpolated_experiment(self, experiment, initial_check, files_to_copy=None):
+        if not initial_check:
+            # print current experiment
+            print('\n'+'-'*40)
+            print(f"\nCopying {experiment} non-interpolated experiment data from esarchive to gpfs...")
+            
+        # get resolution and species combinations
+        res_spec_dir = []
+
+        # get experiment id and the domain
+        exp_id, domain, ensemble_options = experiment.split("-")
+
+        # get stat if it is an ensemble statistic
+        if ensemble_options.startswith("stat_"): 
+            stat = ensemble_options.split("_",1)[-1]
+
+        # get experiment type
+        for experiment_type, experiment_dict in interp_experiments.items():
+            if exp_id in experiment_dict["experiments"]:
+                break
+        
+        # get experiment specific directories list
+        exp_dir_list = experiment_dict["paths"]
+
+        # take all functional directories
+        exp_dir_functional_list = []    
+        for exp_dir in exp_dir_list:
+            # make sure that it comes from esarchive
+            if "/esarchive/" in exp_dir:
+                # esarchive in transfer5 is located inside gpfs
+                if "/esarchive/" == exp_dir[:11]:
+                    exp_dir = join("/gpfs/archive/bsc32/",exp_dir[1:])
+                # check if directory exists in esarchive
+                if os.path.exists(exp_dir):
+                    exp_dir_functional_list.append(exp_dir) 
+                    break     
+            
+        # if none of the paths are in this current machine, break
+        if not exp_dir_functional_list:
+            msg = f"None of the paths specified in {join('settings', 'interp_experiments.yaml')} are available on esarchive."
+            show_message(self, msg, deactivate=initial_check)
+            return
+        
+        # take first functional directory  
+        esarchive_dir = None
+        for exp_dir in exp_dir_functional_list:
+            temp_esarchive_dir = join(exp_dir,exp_id,domain)
+            # check if experiment and domain directories exist in esarchive machine
+            if os.path.exists(temp_esarchive_dir): 
+                esarchive_dir = temp_esarchive_dir
+                break
+        
+        # if the experiment-domain combination is possible, break
+        if esarchive_dir is None:
+            msg = f"There is no data available for the {exp_id} experiment with the {domain} domain in none of the paths specified in {join('settings', 'interp_experiments.yaml')} in esarchive."
+            show_message(self, msg, deactivate=initial_check)
+            return
+
+        # get all the resolutions available in the esarchive directory
+        sftp_resolutions = self.resolution if self.resolution else set(os.listdir(esarchive_dir)).intersection(self.nonghost_available_resolutions)
+
+        # iterate through the resolutions
+        for resolution in sftp_resolutions:
+            try:
+                # get available species ("normal" and mapped)
+                available_species = self.available_species+[spec[0] for spec in mapping_species.values()]
+                sftp_species = self.species if self.species else set(os.listdir(join(esarchive_dir,resolution))).intersection(available_species)
+            except FileNotFoundError:
+                msg = f"There is no data available in esarchive for the {exp_id} experiment with the {domain} domain at {resolution} resolution"
+                show_message(self, msg, deactivate=initial_check)
+                continue
+
+            # iterate through the species
+            for speci_to_process in sftp_species: 
+                # initialize boolean that saves whether species was found
+                species_exists = False
+                species = speci_to_process
+
+                # if it is an ensemble member
+                if not ensemble_options.startswith("stat_"):
+                    res_spec = join(esarchive_dir,resolution,species)
+                # if it is an ensemble statistic
+                else:
+                    res_spec = join(esarchive_dir,resolution,"ensemble-stats",species+"_"+stat)
+  
+                species_exists = os.path.exists(res_spec)
+                # if there are none, try with the mapped species
+                if species_exists is False:
+                    # change species name to the species to map
+                    if speci_to_process in mapping_species:
+                        for species in mapping_species[speci_to_process]:
+                            # if it is an ensemble member
+                            if not ensemble_options.startswith("stat_"):
+                                res_spec = join(esarchive_dir,resolution,species)
+                            # if it is an ensemble statistic
+                            else:
+                                res_spec = join(esarchive_dir,resolution,"ensemble-stats",species+"_"+stat)
+  
+                            species_exists = os.path.exists(res_spec)
+                
+                # if no species were found, then show the message
+                if species_exists is False:
+                    msg = f"There is no data available in esarchive for the {exp_id} experiment with the {domain} domain for {species} species at {resolution} resolution"
+                    show_message(self, msg, deactivate=initial_check)
+                    continue
+
+                # add the path with the resolution and species combination to the list
+                res_spec_dir.append(res_spec)
+                        
+        # print the species, resolution and experiment combinations that are going to be copied
+        if res_spec_dir:
+
+            # initialise list with all the nc files to be copied
+            initial_check_nc_files = []
+
+            if not initial_check:
+                print(f"\n{experiment} experiment data to copy ({len(res_spec_dir)}):")
+            
+            # get all the nc files in the date range
+            for esarchive_dir in res_spec_dir:
+                if not initial_check:
+                    gpfs_path = esarchive_dir.split('/',7)[-1]
+                    print(f"\n  - {join(self.exp_to_interp_root,gpfs_path)}")
+                         
+                # get nc files
+                nc_files = os.listdir(esarchive_dir)
+
+                if nc_files:
+                        # if it is an ensemble member
+                        if not ensemble_options.startswith("stat_"):
+                            # get the domain, resolution and species from the path
+                            domain, resolution, species = esarchive_dir.split('/')[-3:]
+
+                            # identify format of the directory
+                            # the format is a tuple of how many - and how many _ are there
+                            # the directory format is choosen by popularity
+                            formats_list = [(file.count("-"), file.count("_")) for file in nc_files]
+                            number_of_formats_dict = {format: formats_list.count(format) for format in set(formats_list)}
+                            format = max(number_of_formats_dict, key=number_of_formats_dict.get)
+                            
+                            # filter and get only the files that follow the format
+                            nc_files = list(filter(lambda x:(x.count("-"),x.count("_")) == format,nc_files))
+                            
+                            # example: od550du_2019040212.nc (0,1)
+                            if format == (0,1):
+                                # when there is no ensemble option in the name only allmembers and 000 are valid
+                                if ensemble_options == '000' or ensemble_options == 'allmembers':
+                                    nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
+                                else:
+                                    msg = f"There is no data available in esarchive for the {exp_id} experiment with the {domain} domain with the {ensemble_options} ensemble option."
+                                    show_message(self, msg, deactivate=initial_check)
+                                    continue
+                            # example: od550du-000_2021020812.nc (1,1)
+                            elif format == (1,1):
+                                # filter by ensemble option in case that ensemble option is not allmembers
+                                if ensemble_options != 'allmembers':
+                                    nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble_options,nc_files))
+                                # if there is no options with the ensemble option, tell the user
+                                if nc_files is []:
+                                    msg = f"There is no data available in esarchive for the {exp_id} experiment with the {domain} domain with the {ensemble_options} ensemble option."
+                                    show_message(self, msg, deactivate=initial_check)
+                                    continue
+                            else:
+                                # TODO delete this in the future
+                                error = "It is not possible to copy this nc file type yet. Please, contact the developers.", nc_files
+                                sys.exit(error)
+                        
+                        # if it is an ensemble statistic
+                        else:
+                            # get the domain, resolution and species from the path
+                            domain, resolution, _, species = esarchive_dir.split('/')[-4:]
+                            species = species.split("_",1)[0]
+
+                            # filter the nc files to only get the ones that have the correct species and stats
+                            nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == stat, nc_files))
+                
+                # get the nc files in the date range        
+                valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
+
+                # warning if experiment + species + resolution + network + date range combination gets no matching results       
+                if not valid_nc_files:                 
+                    msg = f"There is no data available in esarchive from {self.start_date} to {self.end_date} for {experiment} experiment {species} species at {resolution} resolution"
+                    show_message(self, msg, deactivate=initial_check)
+                    continue
+
+                # copy the valid resolution specie date combinations
+                else:
+                    # if it is an ensemble member
+                    if not ensemble_options.startswith("stat_"):
+                        gpfs_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,species)
+                    else:
+                        gpfs_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+stat)
+                    
+                    # create directories if they don't exist
+                    if not os.path.exists(gpfs_dir):
+                        os.makedirs(gpfs_dir) 
+
+                    # sort nc_files
+                    valid_nc_files.sort() 
+
+                    if not initial_check:
+                        # get the ones that are not already copied
+                        valid_nc_files = list(filter(lambda x:join(gpfs_dir,x) in files_to_copy, valid_nc_files))
+                        if not valid_nc_files:
+                            msg = "Files were already copy."
+                            show_message(self, msg, deactivate=initial_check)     
+                            continue         
+                        valid_nc_files_iter = tqdm(valid_nc_files, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Copying files from esarchive to gpfs ({len(valid_nc_files)})")
+                    else:
+                        # do not print the bar if it is the initial check
+                        valid_nc_files_iter = valid_nc_files
+
+                    # copy each individual nc file using sftp protocol
+                    for nc_file in valid_nc_files_iter:
+                        gpfs_path = join(gpfs_dir,nc_file)
+                        if initial_check:
+                            initial_check_nc_files.append(gpfs_path)
+                        else:
+                            self.latest_nc_file_path = gpfs_path
+                            esarchive_path = join(esarchive_dir, nc_file)
+                            self.ncfile_dl_start_time = time.time()
+                            shutil.copy(esarchive_path, gpfs_path) 
+            
+            return initial_check_nc_files
+
+        # tell the user if not valid resolution specie date combinations
+        else:
+            msg = "There are no available observations to be copied."
             show_message(self, msg, deactivate=initial_check)
             
     def fetch_zenodo_networks(self):
