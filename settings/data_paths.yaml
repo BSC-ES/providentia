@@ -10,7 +10,7 @@
         "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
         "nonghost_root": "/gpfs/projects/bsc32/AC_cache/obs/nonghost",
         "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp",
-        "exp_to_interp_root": ""
+        "exp_to_interp_root": "/gpfs/projects/bsc32/AC_cache/exp"
     },
     
     "storage5": {
@@ -24,7 +24,7 @@
         "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
         "nonghost_root": "/esarchive/obs",
         "exp_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp",
-        "exp_to_interp_root": ""
+        "exp_to_interp_root": "/gpfs/projects/bsc32/AC_cache/exp"
     },
 
     "amd": {
