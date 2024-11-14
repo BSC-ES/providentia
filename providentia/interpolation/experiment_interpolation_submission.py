@@ -913,17 +913,32 @@ def main(**kwargs):
     # create greasy arguments file
     SI.create_greasy_arguments_file()
 
+    # check if Greasy is installed
+    is_greasy_installed = False
+    try:
+        result = subprocess.run(
+            ['greasy', '-V'],
+            stdout=subprocess.PIPE,
+            text=True
+        )
+        if 'greasy' in result.stdout:
+            is_greasy_installed = True
+    except:
+        pass
+
     # submit interpolation jobs
     if SI.interp_multiprocessing:
+        print('Using multiprocessing to manage the job submission.')
         SI.submit_job_multiprocessing()
     else:
-        if SI.machine == 'local':
-            error = 'Error: It is not possible to interpolate locally without using multiprocessing.'
-            sys.exit(error)
-        else:
+        if is_greasy_installed:
+            print('Using Greasy to manage the job submission.')
             # create submission script according to machine
             if SI.machine == "nord3":
                 SI.create_lsf_submission_script()
             else:
                 SI.create_slurm_submission_script()
             SI.submit_job_greasy()
+        else:
+            print('Using multiprocessing to manage the job submission.')
+            SI.submit_job_multiprocessing()
