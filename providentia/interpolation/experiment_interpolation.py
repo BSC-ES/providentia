@@ -109,15 +109,9 @@ class ExperimentInterpolation(object):
         self.GHOST_speci_upper_limit = self.standard_parameter_speci['extreme_upper_limit']
 
         exp_dir = None
-        # if local machine, get directory from data_paths
-        if MACHINE == 'local':  
-            exp_to_interp_path = join(self.exp_to_interp_root, self.experiment_to_process)
-            if os.path.exists(exp_to_interp_path):
-                exp_dir = exp_to_interp_path
-            
-        # for HPC machines
-        else:
-            # get experiment type and specific directories
+         # for HPC machines, search in interp_experiments
+        if MACHINE != "local":
+           # get experiment type and specific directories
             for experiment_type, experiment_dict in interp_experiments.items():
                 if self.experiment_to_process in experiment_dict["experiments"]:
                     exp_dir_list = experiment_dict["paths"]
@@ -126,11 +120,14 @@ class ExperimentInterpolation(object):
             # take first functional directory 
             for temp_exp_dir in exp_dir_list:
                 if os.path.exists(temp_exp_dir):
-                    exp_dir = temp_exp_dir
+                    exp_dir = join(temp_exp_dir, self.experiment_to_process)
                     break
 
-            # add file to directory path
-            exp_dir += f"{self.experiment_to_process}/" 
+        # if local machine or if not exp_dir, get directory from data_paths
+        if exp_dir is None: 
+            exp_to_interp_path = join(self.exp_to_interp_root, self.experiment_to_process)
+            if os.path.exists(exp_to_interp_path):
+                exp_dir = exp_to_interp_path
 
         # define if network is in GHOST format
         self.reading_ghost = check_for_ghost(self.network_to_interpolate_against)
