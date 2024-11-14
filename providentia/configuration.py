@@ -31,6 +31,8 @@ if MACHINE not in ['nord3v2', 'mn5']:
     ip = socket.gethostbyname(socket.gethostname())
     if "bscearth" in hostname:
         MACHINE = "workstation"
+    elif "transfer" in hostname:
+        MACHINE = "storage5"
     elif "bscesdust02.bsc.es" in hostname:
         MACHINE = "dust"
     elif ip == "84.88.185.48":
