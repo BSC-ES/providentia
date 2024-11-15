@@ -9,7 +9,7 @@ To download data you just need to add `--download` to your command:
 
 This will get the data that needs to be downloaded from your configuration file and save it into the directories specified in `settings/data_paths` for `local`.
 
-The download mode fetches all the content specified in your configuration file across all sections, similar to how it functions in offline mode.
+The download mode fetches all the content specified in your configuration file across all sections, similar to how it functions in the reports.
 
 ## Fields
 
