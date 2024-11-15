@@ -16,7 +16,7 @@ Namely, these are:
 | constraint | Memory constraint. | medmem (to use nodes with 64GB of memory) |
 | version | Print version of Providentia. | |
 | debug | Start [debug mode](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Interactive-mode#starting-a-jupyter-notebook). | |
-| interactive | Start [interactive mode](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Run-the-tool#running-the-tool-on-a-bsc-machine). | |
+| interactive | Open a Jupyter notebook to [use Providentia as a library](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Run-the-tool#running-the-tool-on-a-bsc-machine). | |
 | conf | Configuration file path. | |
 | config | Configuration file path. | |
 | config_dir | Path to all configuration files. | |
@@ -26,7 +26,7 @@ Namely, these are:
 | generate_file_tree | Generate file tree to update data directories | |
 | file_tree | Generate file tree to update data directories | |
 | gft | Generate file tree to update data directories | |
-| offline | Start [offline reports](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Run-the-tool#generate-an-offline-report). | |
+| offline | Start [reports](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Run-the-tool#generate-a-report). | |
 | network | Network you want to load observations from. Can be multiple (e.g. `CAPMoN, EBAS`). Adding a wild card (\*) is going to expand to certain variables (vconc* → vconc1, vconc2, etc.). | EBAS |
 | species | Species to load. Can be multiple (e.g. `sconco3, sconcno2`). | sconco3 |
 | resolution | Temporal resolution of the observations you want to load (e.g. `3hourly`). | hourly |
@@ -41,7 +41,7 @@ Namely, these are:
 | report_type | Type of report to generate that defines which plots the report will contain, from the options given in `report_plots.yaml`. | standard |
 | report_summary | Boolean variable to set if you wish to make specific plots for each station in subsection.  | True |
 | report_stations | Boolean variable to set if you wish to make summary plots across station subsection. | False |
-| report_title | The header in the first page of the report (as in the PDF). | Providentia Offline Report |
+| report_title | The header in the first page of the report (as in the PDF). | Providentia Report |
 | report_filename | The filename of the report or the path to create the report (as in the PDF). | PROVIDENTIA_Report |
 | map_extent | Set the map plot extents with the syntax: minimum longitude, maximum longitude, minimum latitude, maximum latitude. | |
 | active_dashboard_plots | Plots that will be active in the dashboard once it is launched (e.g. `timeseries, periodic-violin, scatter, distribution`). | timeseries, statsummary, distribution, periodic |
