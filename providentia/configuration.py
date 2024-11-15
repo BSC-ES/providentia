@@ -408,7 +408,7 @@ class ProvConfiguration:
                     return self.var_defaults[key]
                 # split list, if only one ensemble_options, then creates list of one element
                 # if it is a number, then make it 3 digits, if not it stays as it is
-                ensemble_opts = [opt.strip().zfill(3) for opt in str(value).split(",")]  
+                ensemble_opts = [opt.strip().zfill(3) if opt.isdigit() else opt for opt in str(value).split(",")]  
                 return ensemble_opts
             else:
                 return []
