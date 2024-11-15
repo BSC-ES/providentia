@@ -269,10 +269,22 @@
 <td><p>✗</p></td>
 <td><p>Resolution you want to resample your data to. Options: <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">monthly</span></code>, <code class="docutils literal notranslate"><span class="pre">annual</span></code>.</p></td>
 </tr>
+<tr class="row-odd"><td><p>forecast</p></td>
+<td><p>✗</p></td>
+<td><p>Indicates if data comes from forecast, this affects how the timesteps are taken in the interpolation.</p></td>
+</tr>
+<tr class="row-even"><td><p>forecast_day</p></td>
+<td><p>✗</p></td>
+<td><p>Day of the model forecast to analyse.</p></td>
+</tr>
+<tr class="row-odd"><td><p>interp_multiprocessing</p></td>
+<td><p>✗</p></td>
+<td><p>Use multiprocessing instead of greasy to interpolate in HPC machines.</p></td>
+</tr>
 </tbody>
 </table>
 <p>Defining a list of experiments is optional since the user might only want to check the observations data.</p>
-<p>In the offline version, there will be a report per section. In the dashboard, you will only be able to load one section or subsection at a time.</p>
+<p>In the reports, a report will be created per section. In the dashboard and using Providentia as a library, you will only be able to load one section or subsection at a time.</p>
 <section id="use-of-non-ghost-networks">
 <h4>Use of non-GHOST networks<a class="headerlink" href="#use-of-non-ghost-networks" title="Link to this heading"></a></h4>
 <p>Providentia can be used both with GHOST and non-GHOST netCDF files. Users should add the path to their network in <code class="docutils literal notranslate"><span class="pre">settings/nonghost_files.yaml</span></code>. In the configuration file, you can refer to non-GHOST files like:</p>
