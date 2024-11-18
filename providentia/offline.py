@@ -1530,8 +1530,14 @@ class ProvidentiaOffline:
                 else:
                     chunk_stat = None
                     chunk_resolution = None
-
+            
             for data_labels in iter_data_labels:
+
+                # skip observations
+                if ((data_labels == self.observations_data_label) 
+                    and ((base_plot_type in ['scatter', 'fairmode-target']) or ('bias' in plot_options) or 
+                    (z_statistic_sign == 'bias'))):
+                    continue
 
                 # skip individual plots if we have no data for a specific label
                 if 'individual' in plot_options:
