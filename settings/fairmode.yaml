@@ -6,7 +6,7 @@
     "percentile": 92.9,
     "beta": 2,
     "coverage": 75,
-    "exc_threshold": 120
+    "exc_threshold": 60.12
   },
   "sconcno2": {
     "u_95r_RV": 0.42, 
@@ -15,7 +15,7 @@
     "percentile": 99.8,
     "beta": 2,
     "coverage": 75,
-    "exc_threshold": 200
+    "exc_threshold": 104.55
   },
   "pm2p5": {
     "u_95r_RV": 0.63, 
@@ -23,8 +23,7 @@
     "alpha": 0.50,
     "percentile": 90.1,
     "beta": 2,
-    "coverage": 75,
-    "exc_threshold": 50
+    "coverage": 75
   },
   "pm10": {
     "u_95r_RV": 0.49, 
