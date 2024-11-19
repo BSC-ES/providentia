@@ -471,7 +471,7 @@ class ProvidentiaOffline:
                         if (((plotting_paradigm == 'summary') and (self.harmonise_summary))
                             or ((plotting_paradigm == 'station') and (self.harmonise_stations))):
                             harmonise = True 
-                        if (base_plot_type not in ['map', 'heatmap', 'table', 'taylor']): 
+                        if (base_plot_type not in ['map', 'heatmap', 'table', 'taylor', 'fairmode-statsummary']): 
                             if base_plot_type == 'scatter':
                                 harmonise_xy_lims_paradigm(self, self, relevant_axs, base_plot_type, 
                                                            self.plot_characteristics[plot_type], plot_options, 
@@ -480,7 +480,6 @@ class ProvidentiaOffline:
                                 harmonise_xy_lims_paradigm(self, self, relevant_axs, base_plot_type,
                                                            self.plot_characteristics[plot_type], plot_options, 
                                                            relim=True, autoscale=True, harmonise=harmonise)
-                        
                         # update variable to reflect some formatting was performed
                         did_formatting = True
 
@@ -637,6 +636,7 @@ class ProvidentiaOffline:
                         if (base_plot_type in ['scatter', 'fairmode-target', 'fairmode-statsummary']) or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
                             n_plots_per_plot_type = len(self.subsections) * \
                                                     (len(self.data_labels) - 1)
+
                         else:
                             n_plots_per_plot_type = len(self.subsections) * \
                                                     len(self.data_labels)
@@ -741,7 +741,7 @@ class ProvidentiaOffline:
                         
                         # setup fairmode summary stats plot type gridspec
                         elif base_plot_type == 'fairmode-statsummary':
-                            gs = gridspec.GridSpec(8, 4)
+                            gs = gridspec.GridSpec(8, 4, **plot_characteristics["gridspec_kw"])
                             grid_list = np.reshape(np.array([[fig.add_subplot(gs[i, j]) for j in range(4)] for i in range(8)]),(8, 4))
                             self.plot_dictionary[page_n]['axs'].append({'handle':grid_list, 'data_labels':[]})
 
@@ -1540,6 +1540,7 @@ class ProvidentiaOffline:
                     chunk_resolution = None
 
             for data_labels in iter_data_labels:
+                print("data labels", data_labels,iter_data_labels)
 
                 # skip individual plots if we have no data for a specific label
                 if 'individual' in plot_options:
@@ -1551,6 +1552,7 @@ class ProvidentiaOffline:
                     data_labels = [data_labels]
                     
                 # get relevant axis to plot on
+                print(plotting_paradigm)
                 if plotting_paradigm == 'summary':
                     if 'individual' in plot_options:
                         if ((base_plot_type in ['scatter', 'fairmode-target', 'fairmode-statsummary']) or ('bias' in plot_options) or 
@@ -1700,6 +1702,7 @@ class ProvidentiaOffline:
                         # hide annotations
                         for annotation in annotations:
                             annotation.set_visible(True)
+                
                 elif base_plot_type == "fairmode-statsummary":
                     for i in range(8):
                         for j in range(4):
@@ -1906,10 +1909,11 @@ class ProvidentiaOffline:
                         relevant_axs.append(ax['handle'][relevant_temporal_resolution])
                         relevant_data_labels.append(ax['data_labels'])
             elif base_plot_type == 'fairmode-statsummary':
-                for i in range(8):
-                    for j in range(4):
-                        relevant_axs.append(self.plot_dictionary[relevant_page]['axs']['handle'][i,j])
-                        relevant_data_labels.append(self.plot_dictionary[relevant_page]['axs']['data_labels'][i,j])
+                for ax in self.plot_dictionary[relevant_page]['axs']:
+                    for i in range(8):
+                        for j in range(4):
+                            relevant_axs.append(ax['handle'][i,j])
+                    relevant_data_labels.append(ax['data_labels'])
             else:
                 for ax in self.plot_dictionary[relevant_page]['axs']:
                     relevant_axs.append(ax['handle'])
