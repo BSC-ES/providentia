@@ -2154,7 +2154,6 @@ class Plot:
         RV = fairmode_settings[speci]['RV']
         alpha = fairmode_settings[speci]['alpha']
         beta = fairmode_settings[speci]['beta']
-        coverage = fairmode_settings[speci]['coverage']
         exc_threshold = fairmode_settings[speci]['exc_threshold']
       
         # get metadata without nans
@@ -2168,9 +2167,6 @@ class Plot:
             valid_station_classifications = np.full(len(valid_station_references), np.NaN, dtype=np.float32)
             print(f'Data for {classification_type}_classification is not available and will not be shown in the legend')
 
-        # get number of stations
-        n_stations = len(valid_station_references)
-
         # get valid data labels for networkspeci
         valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
 
@@ -2179,7 +2175,6 @@ class Plot:
 
         # iterate through data labels
         for data_label in cut_data_labels:
-
             # continue for observations data label
             if data_label == self.read_instance.observations_data_label:
                 continue
@@ -2196,8 +2191,7 @@ class Plot:
             h_perc_list = []
 
          
-            for station_idx, (station, classification) in enumerate(
-                zip(valid_station_references, valid_station_classifications)):
+            for station_idx, (station, classification) in enumerate(zip(valid_station_references, valid_station_classifications)):
 
                 st_observations_data = observations_data[station_idx, :]
                 st_experiment_data = experiment_data[station_idx, :]
@@ -2219,7 +2213,11 @@ class Plot:
             # apply configuration to each row
             for i, (plot_dict, fairmode_data) in enumerate(zip(plot_characteristics["auxiliar"]["subplots"].values(),statistics_list)):
                 # remove axis from the dot on right side
-                relevant_axis[i, 3].set_axis_off()
+                relevant_axis[i, 3].set_xticks([])
+
+                # remove the axis of the dot
+                for side in ['bottom', 'top', 'left', 'right']:
+                    relevant_axis[i, 3].spines[side].set_linestyle('none')                  
                 
                 # add units to the first two rows
                 if 'units' in plot_dict:
@@ -2243,10 +2241,11 @@ class Plot:
                     # plot dot on the right
                     relevant_axis[i, 3].scatter(**plot_characteristics["auxiliar"]["right_dot"], color=dot_color, edgecolor=dot_color)
 
-                # y axis
+                # y axis / grid
                 # remove y axis ticks
-                for j in range(3):
+                for j in range(4):
                     relevant_axis[i, j].set_yticks([])
+                    relevant_axis[i, j].grid(False)
 
                 # x axis
                 # get the x axis limit for the current row
@@ -2272,7 +2271,7 @@ class Plot:
                 if np.any(right_zone_mask):
                     # plot it in the middle of the right dashed zone
                     relevant_axis[i, 2].plot(0, 0, plot_characteristics["auxiliar"]["station_dots"]["marker"], 
-                                color=plot_characteristics["auxiliar"]["station_dots"]["color"])
+                                color=self.read_instance.plotting_params[data_label]['colour'])
                     # remove it from the data plotted in the middle zone
                     fairmode_data = fairmode_data[~right_zone_mask] if isinstance(fairmode_data,np.ndarray) else np.array([])
          
@@ -2285,8 +2284,9 @@ class Plot:
                 if left_dashed_zone_linestyle != 'none':
                     # convert to tuple [x,[x,x]] because yaml does not return python tuples
                     left_dashed_zone_linestyle = (left_dashed_zone_linestyle[0],tuple(left_dashed_zone_linestyle[1]))
-                    # remove vertical line separating middle and left dashed zone
+                    # remove vertical lines separating middle and left dashed zone
                     relevant_axis[i, 1].spines['left'].set_linestyle('none')
+                    relevant_axis[i, 0].spines['right'].set_linestyle('none')
                 # change the linestyle to dashed or remove the dashed zone
                 for side in ['bottom', 'top', 'left']:
                     relevant_axis[i, 0].spines[side].set_linestyle(left_dashed_zone_linestyle)
@@ -2302,13 +2302,13 @@ class Plot:
                     if np.any(left_zone_mask):
                         # plot it in the middle of the left dashed zone
                         relevant_axis[i, 0].plot(0, 0, plot_characteristics["auxiliar"]["station_dots"]["marker"], 
-                                    color=plot_characteristics["auxiliar"]["station_dots"]["color"])
+                                    color=self.read_instance.plotting_params[data_label]['colour'])
                         # remove it from the data plotted in the middle zone
                         fairmode_data = fairmode_data[~left_zone_mask] if isinstance(fairmode_data,np.ndarray) else np.array([])
 
                 # plot stations as blue dots
                 relevant_axis[i, 1].plot(fairmode_data, np.zeros_like(fairmode_data), plot_characteristics["auxiliar"]["station_dots"]["marker"], 
-                            color=plot_characteristics["auxiliar"]["station_dots"]["color"])
+                            color=self.read_instance.plotting_params[data_label]['colour'])
                 
                 # add row title
                 relevant_axis[i, 0].text(*plot_characteristics["auxiliar"]["row_title"]["position"], plot_dict["title"], 
@@ -2316,9 +2316,14 @@ class Plot:
                     
             # add the title
             # plt.suptitle(**plot_characteristics["auxiliar"]["title"])
-
-            # add the classifications
-            # fig.text(**plot_characteristics["auxiliar"]["left-description"])
+            
+            # add the classifications on the left of the plot
+            if Version(matplotlib.__version__) >= Version("3.3"):
+                relevant_axis[7, 0].annotate(text=plot_characteristics["auxiliar"]["left-description-text"],
+                                        **plot_characteristics["auxiliar"]["left-description"])
+            else:
+                relevant_axis[7, 0].annotate(s=plot_characteristics["auxiliar"]["left-description-text"],  
+                                            **plot_characteristics["auxiliar"]["left-description"])  
 
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """ Function that tracks plotted lines and collections
