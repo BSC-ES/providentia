@@ -11,6 +11,7 @@ from matplotlib.widgets import _SelectorWidget
 import numpy as np
 from packaging.version import Version
 import pandas as pd
+from PyQt5.QtWidgets import QToolTip
 
 from .plot_aux import get_map_extent
 from .plot_formatting import harmonise_xy_lims_paradigm
@@ -203,15 +204,10 @@ def legend_picker_func(canvas_instance, event):
                         # get active (absolute / bias)
                         active = canvas_instance.plot_elements[plot_type]['active']
 
-                        #print(plot_type, active, visible)
-
                         # change visibility of plot elements (if data label in plot elements dictionary)
                         if data_label in canvas_instance.plot_elements[plot_type][active]:
                             for element_type in canvas_instance.plot_elements[plot_type][active][data_label]:
                                 for plot_element in canvas_instance.plot_elements[plot_type][active][data_label][element_type]:
-                                    #if plot_type == 'periodic':
-                                        #print(plot_element)
-
                                     if visible:
                                         plot_element.set_visible(True)
                                     else:
@@ -835,14 +831,15 @@ class HoverAnnotation(object):
                 if is_contained:
                     # update annotation if hovered
                     self.update_map_annotation(annotation_index)
-                    self.annotation.set_visible(True)
+                    #self.annotation.set_visible(True)
                 else:
                     # hide annotation if not hovered
-                    if self.annotation.get_visible():
-                        self.annotation.set_visible(False)
+                    #if self.annotation.get_visible():
+                    #    self.annotation.set_visible(False)
+                    QToolTip.hideText()
 
                 # draw changes
-                self.canvas_instance.figure.canvas.draw_idle()
+                #self.canvas_instance.figure.canvas.draw_idle()
 
         return None
 
@@ -856,18 +853,18 @@ class HoverAnnotation(object):
         station_value = self.canvas_instance.z_statistic[annotation_index['ind'][0]]
 
         # update location
-        self.annotation.xy = station_location
+        #self.annotation.xy = station_location
 
         # update bbox position
-        self.canvas_instance.read_instance.map_extent = get_map_extent(self.canvas_instance)
-        lat_min = self.canvas_instance.read_instance.map_extent[2]
-        lat_max = self.canvas_instance.read_instance.map_extent[3]
-        if station_location[1] > ((lat_max + lat_min) / 2):
-            self.annotation.set_y(-10)
-            self.annotation.set_va('top')
-        else:
-            self.annotation.set_y(10)
-            self.annotation.set_va('bottom')
+        #self.canvas_instance.read_instance.map_extent = get_map_extent(self.canvas_instance)
+        #lat_min = self.canvas_instance.read_instance.map_extent[2]
+        #lat_max = self.canvas_instance.read_instance.map_extent[3]
+        #if station_location[1] > ((lat_max + lat_min) / 2):
+        #    self.annotation.set_y(-10)
+        #    self.annotation.set_va('top')
+        #else:
+        #    self.annotation.set_y(10)
+        #    self.annotation.set_va('bottom')
 
         # create annotation text
         text_label = ('Station: {0}\n').format(station_name)
@@ -875,7 +872,8 @@ class HoverAnnotation(object):
         text_label += ('Longitude: {0:.2f}\n').format(station_location[0])
         text_label += ('Latitude: {0:.2f}\n').format(station_location[1])
         text_label += ('{0}: {1:.{2}f}').format(self.canvas_instance.map_z_stat.currentText(), station_value, self.round_decimal_places)
-        self.annotation.set_text(text_label)
+        #self.annotation.set_text(text_label)
+        self.canvas_instance.figure.canvas.setToolTip(text_label)
 
         return None
        
