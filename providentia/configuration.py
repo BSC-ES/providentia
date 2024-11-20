@@ -406,8 +406,25 @@ class ProvConfiguration:
                 # treat leaving the field blank as default
                 if value == '':
                     return self.var_defaults[key]
+
                 # split list, if only one ensemble_options, then creates list of one element
-                # if it is a number, then make it 3 digits, if not it stays as it is
+                ensemble_opts = []
+                for opt in str(value).split(","):
+                    # if it is a number, then make it 3 digits, if not it stays as it is
+                    if opt.isdigit():
+                        opt = opt.strip().zfill(3)
+                    # check that it does not start with stat
+                    elif opt.startswith('stat'):
+                        error = error = "Error: ensemble option cannot start with 'stat'.\n" \
+                        "For ensemble statistics, simply define them based on the stat name provided in the filename, such as:\n" \
+                        "   · 'av' for ensemble average\n" \
+                        "   · 'av_an' for ensemble analysis average"
+                        sys.exit(error)
+                    
+                    ensemble_opts.append(opt)
+                    
+
+
                 ensemble_opts = [opt.strip().zfill(3) if opt.isdigit() else opt for opt in str(value).split(",")]  
                 return ensemble_opts
             else:
@@ -649,12 +666,32 @@ class ProvConfiguration:
                         sys.exit(error)
 
                     exp_ens = end_experiment
+                    # if it is a number, then make it 3 digits, if not it stays as it is
+                    if exp_ens.isdigit():
+                        exp_ens = exp_ens.strip().zfill(3)
+                    # check that it does not start with stat
+                    elif exp_ens.startswith('stat'):
+                            error = error = f"Error: ensemble option {exp_ens} cannot start with 'stat'.\n" \
+                            "For ensemble statistics, simply define them based on the stat name provided in the filename, such as:\n" \
+                            "   · 'av' for ensemble average\n" \
+                            "   · 'av_an' for ensemble analysis average"
+                            sys.exit(error)
                     exp_ensemble_options_list.append(exp_ens)
 
             # [expID]-[domain]-[ensembleNum]
             elif len(split_experiment) == 3:               
                 exp_dom, exp_ens = split_experiment[1], split_experiment[2]
                 exp_domains_list.append(exp_dom)
+                # if it is a number, then make it 3 digits, if not it stays as it is
+                if exp_ens.isdigit():
+                    exp_ens = exp_ens.strip().zfill(3)
+                # check that it does not start with stat
+                elif exp_ens.startswith('stat'):
+                        error = error = f"Error: ensemble option {exp_ens} cannot start with 'stat'.\n" \
+                        "For ensemble statistics, simply define them based on the stat name provided in the filename, such as:\n" \
+                        "   · 'av' for ensemble average\n" \
+                        "   · 'av_an' for ensemble analysis average"
+                        sys.exit(error)
                 exp_ensemble_options_list.append(exp_ens)
                         
             # if experiment is composed by more than 3 parts, exit
