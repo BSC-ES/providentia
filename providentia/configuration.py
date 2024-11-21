@@ -567,27 +567,6 @@ class ProvConfiguration:
             if isinstance(value, str):
                 return value.strip()
 
-        elif key == 'plot_characteristics_filename':
-            # parse plot characteristics filename
-    
-            if isinstance(value, str):
-                if value != "":
-                    # various paths were provided
-                    if "," in value:
-                        if ("dashboard:" in value) and ((not self.read_instance.offline) and (not self.read_instance.interactive)):
-                            return value.split("dashboard:")[1].split(',')[0]
-                        elif ("offline:" in value) and (self.read_instance.offline):
-                            return value.split("offline:")[1].split(',')[0]
-                        elif ("interactive:" in value) and (self.read_instance.interactive):
-                            return value.split("interactive:")[1].split(',')[0]
-                        else:
-                            msg = 'It is necessary to include the words dashboard, offline or interactive to set different plot characteristics filenames, as in: '
-                            msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.yaml, offline:/path/plot_characteristics_offline.yaml.'
-                            sys.exit(msg)
-                    # one path was provided
-                    else:
-                        return value
-
         elif key == 'calibration_factor':
             # parse calibration factor
 

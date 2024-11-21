@@ -39,7 +39,7 @@ from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, gene
 from .toolbar import NavigationToolbar
 from .warnings_prv import show_message
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 
 # set proper scaling
 os.environ["QT_ENABLE_HIGHDPI_SCALING"]   = "1"
@@ -162,14 +162,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
             self.plot_characteristics_filename = join(
-                PROVIDENTIA_ROOT, 'settings/plot_characteristics_dashboard.yaml')
-        self.plot_characteristics_templates = yaml.safe_load(open(self.plot_characteristics_filename))
-
-        # error when using wrong custom plot characteristics path to launch dashboard
-        if 'header' in self.plot_characteristics_templates.keys():
-            msg = 'It is not possible to use the offline plot characteristics path to launch the dashboard. Consider adding another path to plot_characteristics_filename, as in: '
-            msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.yaml, offline:/path/plot_characteristics_offline.yaml.'
-            sys.exit(msg)
+                PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')
+        plot_characteristics = yaml.safe_load(open(self.plot_characteristics_filename))
+        self.plot_characteristics_templates = expand_plot_characteristics(plot_characteristics, 'dashboard')
 
         # arguments are only local
         self.full_window_geometry = None
