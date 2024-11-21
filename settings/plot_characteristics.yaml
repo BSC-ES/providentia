@@ -8,28 +8,26 @@
         { "linewidth": 1, "linestyle": "--", "fill": false, "zorder": 2 },
       "dashboard":
         {
-          {
-            "gridspec_ncols": 100,
-            "gridspec_nrows": 100,
-            "gridspec_format":
-              {
-                "left": 0.01,
-                "right": 0.985,
-                "top": 0.99,
-                "bottom": 0.06,
-                "wspace": 0.00,
-                "hspace": 0.00,
-              },
-            "lasso": { "alpha": 0.5, "color": "hotpink", "linewidth": 1 },
-            "settings_menu":
-              {
-                "position_1": { "x": 750, "y": 5 },
-                "position_2": { "x": 1800, "y": 105 },
-                "position_3": { "x": 580, "y": 530 },
-                "position_4": { "x": 1190, "y": 530 },
-                "position_5": { "x": 1800, "y": 530 },
-              },
-          },
+          "gridspec_ncols": 100,
+          "gridspec_nrows": 100,
+          "gridspec_format":
+            {
+              "left": 0.01,
+              "right": 0.985,
+              "top": 0.99,
+              "bottom": 0.06,
+              "wspace": 0.00,
+              "hspace": 0.00,
+            },
+          "lasso": { "alpha": 0.5, "color": "hotpink", "linewidth": 1 },
+          "settings_menu":
+            {
+              "position_1": { "x": 750, "y": 5 },
+              "position_2": { "x": 1800, "y": 105 },
+              "position_3": { "x": 580, "y": 530 },
+              "position_4": { "x": 1190, "y": 530 },
+              "position_5": { "x": 1800, "y": 530 },
+            },
         },
       "offline":
         {
@@ -229,31 +227,29 @@
         },
       "offline":
         {
-          {
-            "orientation": "landscape",
-            "figure": { "ncols": 2, "nrows": 2 },
-            "page_title":
-              {
-                "t": "Metadata",
-                "fontsize": 13,
-                "ha": "left",
-                "x": 0.05,
-                "y": 0.98,
-              },
-            "subplots_adjust":
-              {
-                "left": 0.05,
-                "right": 0.98,
-                "top": 0.85,
-                "bottom": 0.02,
-                "hspace": 0.1,
-                "wspace": 0.03,
-              },
-            "var_spacing": 2,
-            "axis_title": { "fontsize": 12 },
-            "plot": { "fontsize": 11 },
-            "plot_options": [],
-          },
+          "orientation": "landscape",
+          "figure": { "ncols": 2, "nrows": 2 },
+          "page_title":
+            {
+              "t": "Metadata",
+              "fontsize": 13,
+              "ha": "left",
+              "x": 0.05,
+              "y": 0.98,
+            },
+          "subplots_adjust":
+            {
+              "left": 0.05,
+              "right": 0.98,
+              "top": 0.85,
+              "bottom": 0.02,
+              "hspace": 0.1,
+              "wspace": 0.03,
+            },
+          "var_spacing": 2,
+          "axis_title": { "fontsize": 12 },
+          "plot": { "fontsize": 11 },
+          "plot_options": [],
         },
       "interactive":
         {
@@ -354,47 +350,39 @@
         },
       "offline":
         {
-          {
-            "orientation": "landscape",
-            "figure": { "ncols": 2, "nrows": 2 },
-            "page_title":
-              {
-                "t": "Map",
-                "fontsize": 13,
-                "ha": "left",
-                "x": 0.05,
-                "y": 0.98,
-              },
-            "axis_title": { "fontsize": 8 },
-            "subplots_adjust":
-              {
-                "left": 0.02,
-                "right": 0.98,
-                "top": 0.85,
-                "bottom": 0.02,
-                "hspace": 0.14,
-                "wspace": 0.05,
-              },
-            "cb":
-              {
-                "position": [0.45, 0.95, 0.52, 0.04],
-                "vmin_absolute": "",
-                "vmax_absolute": "",
-                "vmin_bias": "",
-                "vmax_bias": "",
-                "cmap_absolute": "",
-                "cmap_bias": "",
-                "n_ticks": 8,
-                "orientation": "horizontal",
-                "discrete": true,
-                "n_discrete": 15,
-              },
-            "cb_label": { "label": "", "fontsize": 8 },
-            "cb_tick_params": { "labelsize": 8 },
-            "annotate_text": { "fontsize": 6 },
-            "plot": { "s": "" },
-            "plot_options": ["bias", "obs", "annotate", "domain"],
-          },
+          "orientation": "landscape",
+          "figure": { "ncols": 2, "nrows": 2 },
+          "page_title":
+            { "t": "Map", "fontsize": 13, "ha": "left", "x": 0.05, "y": 0.98 },
+          "axis_title": { "fontsize": 8 },
+          "subplots_adjust":
+            {
+              "left": 0.02,
+              "right": 0.98,
+              "top": 0.85,
+              "bottom": 0.02,
+              "hspace": 0.14,
+              "wspace": 0.05,
+            },
+          "cb":
+            {
+              "position": [0.45, 0.95, 0.52, 0.04],
+              "vmin_absolute": "",
+              "vmax_absolute": "",
+              "vmin_bias": "",
+              "vmax_bias": "",
+              "cmap_absolute": "",
+              "cmap_bias": "",
+              "n_ticks": 8,
+              "orientation": "horizontal",
+              "discrete": true,
+              "n_discrete": 15,
+            },
+          "cb_label": { "label": "", "fontsize": 8 },
+          "cb_tick_params": { "labelsize": 8 },
+          "annotate_text": { "fontsize": 6 },
+          "plot": { "s": "" },
+          "plot_options": ["bias", "obs", "annotate", "domain"],
         },
       "interactive":
         {
@@ -525,8 +513,6 @@
           "annotate_text": { "fontsize": 8 },
           "smooth": { "format": { "linewidth": 1.0 } },
           "plot": { "markersize": 2 },
-          "plot_options":
-            ["annotate", "bias", "logy", "smooth", "hidedata", "threshold"],
           "marker_annotate":
             {
               "xytext": [0, 0],
@@ -554,6 +540,8 @@
           "marker_annotate_vline":
             { "color": "#757575", "linewidth": 0.5, "linestyle": "--" },
           "marker_annotate_text": { "round_decimal_places": 2 },
+          "plot_options":
+            ["annotate", "bias", "logy", "smooth", "hidedata", "threshold"],
         },
       "offline":
         {
@@ -647,6 +635,7 @@
             },
           "xtick_alteration": { "n_slices": 4 },
           "annotate_text": { "fontsize": 13 },
+          "smooth": { "format": { "linewidth": 0.5 } },
           "markersize_npoints_threshold": 200,
           "markersize": { "standard": 2.1, "few_points": 4.0 },
           "plot": { "markersize": "" },
@@ -671,7 +660,15 @@
           "zorder": 100,
         },
       "annotate_offset": { "loc": "upper left" },
-      "annotate_text": { "fontsize": 8 },
+      "annotate_text":
+        {
+          "s": "",
+          "n_stations": false,
+          "exp_labels": true,
+          "color": "",
+          "round_decimal_places": 2,
+          "sep": 1,
+        },
       "label":
         {
           "xy": [0, 1],
@@ -870,6 +867,15 @@
               "median": { "marker": "o", "markersize": 3, "linewidth": 0.5 },
             },
           "plot_options": ["annotate", "logy", "threshold"],
+          "marker_annotate":
+            {
+              "xytext": [0, 0],
+              "textcoords": "offset points",
+              "size": 8,
+              "ha": "left",
+              "va": "center",
+              "zorder": 100,
+            },
           "marker_annotate_bbox":
             {
               "boxstyle": "round",
