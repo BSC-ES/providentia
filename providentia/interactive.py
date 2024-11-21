@@ -33,7 +33,7 @@ from .statistics import (calculate_statistic, generate_colourbar, generate_colou
                          get_fairmode_data, get_selected_station_data, get_z_statistic_info)
 from .writing import export_configuration, export_data_npz, export_netcdf
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
@@ -81,11 +81,12 @@ class Interactive:
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
             if self.tests:
-                path = 'settings/plot_characteristics_tests.yaml'
+                mode = 'tests'
             else:
-                path = 'settings/plot_characteristics_interactive.yaml'
-            self.plot_characteristics_filename = join(PROVIDENTIA_ROOT, path)
-        self.plot_characteristics_templates = yaml.safe_load(open(self.plot_characteristics_filename))
+                mode = 'interactive'
+            self.plot_characteristics_filename = join(PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')
+        plot_characteristics = yaml.safe_load(open(self.plot_characteristics_filename))
+        self.plot_characteristics_templates = expand_plot_characteristics(plot_characteristics, mode)
 
         # initialise Plot class
         self.plot = Plot(read_instance=self, canvas_instance=self)
@@ -813,7 +814,7 @@ class Interactive:
                         try:
                             ax_to_plot = self.plot_characteristics[plot_type]['legend']['handles']['ax']
                         except:
-                            print("Warning: axis to plot legend on not defined for plot type in plot_characteristics_interactive.yaml, or passed via 'format' argument.\nTaking first available axis.")
+                            print("Warning: axis to plot legend on not defined for plot type in plot_characteristics.yaml, or passed via 'format' argument.\nTaking first available axis.")
                             ax_to_plot = self.relevant_temporal_resolutions[0]
                         if ax_to_plot not in self.relevant_temporal_resolutions:
                             print("Warning: defined axis to plot legend on not available for data resolution of read data.\nInstead, taking first available axis.")
@@ -892,7 +893,7 @@ class Interactive:
         elif 'legend' in self.plot_characteristics[plot_type]:
             legend_characteristics = self.plot_characteristics[plot_type]['legend']
         else:
-            print("Warning: 'legend' not defined for plot type in plot_characteristics_interactive.yaml")
+            print("Warning: 'legend' not defined for plot type in plot_characteristics.yaml")
             return
 
         legend_handles = self.plot.make_legend_handles(legend_characteristics, data_labels=data_labels, set_obs=set_obs)
