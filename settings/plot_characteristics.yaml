@@ -1219,7 +1219,6 @@
       "1:1_line": { "color": "lightgrey", "linewidth": 1, "linestyle": "--" },
       "1:2_line": { "color": "lightgrey", "linewidth": 1, "linestyle": "--" },
       "2:1_line": { "color": "lightgrey", "linewidth": 1, "linestyle": "--" },
-      "max_points": 100000,
       "equal_aspect": true,
       "threshold_line":
         { "linestyle": "--", "linewidth": 1.0, "color": "red", "zorder": 0 },
@@ -1297,6 +1296,7 @@
               "edgecolor": "#5e5e5e",
             },
           "marker_annotate_text": { "round_decimal_places": 2 },
+          "max_points": 100000,
         },
       "offline":
         {
@@ -1342,6 +1342,7 @@
           "markersize_npoints_threshold": 200,
           "markersize": { "standard": 1.1, "few_points": 4.0 },
           "plot": { "markersize": "" },
+          "max_points": 100000,
         },
       "interactive":
         {
@@ -1380,6 +1381,7 @@
           "markersize_npoints_threshold": 200,
           "markersize": { "standard": 1.1, "few_points": 4.0 },
           "plot": { "markersize": "" },
+          "max_points": 100000,
         },
       "tests":
         {
