@@ -80,13 +80,13 @@ class MPLCanvas(FigureCanvas):
         self.plot = Plot(read_instance=self.read_instance, canvas_instance=self)
 
         # initialise annotations
-        self.annotations = dict()
-        self.annotations_lock = dict()
-        self.annotations_vline = dict()
-        for plot_type in ['periodic', 'periodic-violin']:
-            self.annotations[plot_type] = dict()
-            self.annotations_lock[plot_type] = dict()
-            self.annotations_vline[plot_type] = dict()
+        #self.annotations = dict()
+        #self.annotations_lock = dict()
+        #self.annotations_vline = dict()
+        #for plot_type in ['periodic', 'periodic-violin']:
+            #self.annotations[plot_type] = dict()
+            #self.annotations_lock[plot_type] = dict()
+            #self.annotations_vline[plot_type] = dict()
 
         # setup gridding of canvas
         self.gridspec = gridspec.GridSpec(self.gridspec_nrows, self.gridspec_ncols)
@@ -157,7 +157,6 @@ class MPLCanvas(FigureCanvas):
 
         # create rest of plot axes (default: timeseries, statsummary, distribution, periodic)
         # also show plot type buttons
-        self.annotation_elements = []
         for position, plot_type in enumerate(self.read_instance.active_dashboard_plots):
             
             # update plot axis
@@ -193,11 +192,10 @@ class MPLCanvas(FigureCanvas):
         self.lasso_active = False
         self.station_pick = self.figure.canvas.mpl_connect('button_press_event', self.station_select)
 
-        # setup station annotations
-        self.annotations['map'] = HoverAnnotation(self, 'map', self.plot_axes['map'], self.plot_characteristics['map'])
-        self.map_annotation_disconnect = False
-        self.map_annotation_event = self.figure.canvas.mpl_connect('motion_notify_event', 
-            self.annotations['map'].hover_map_annotation)
+        # setup canvas annotations
+        self.canvas_annotation = HoverAnnotation(self)
+        self.canvas_annotation_event = self.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                      self.canvas_annotation.hover_annotation)
 
         # setup zoom on scroll wheel on map
         self.zoom_map_event = self.figure.canvas.mpl_connect('scroll_event', lambda event: zoom_map_func(self, event))
@@ -845,6 +843,7 @@ class MPLCanvas(FigureCanvas):
                 # update plot options, except for plots with no options in dashboard
                 if plot_type not in ['metadata', 'fairmode-statsummary']:
                     self.update_plot_options(plot_types=[plot_type])
+
 
     def get_plot_type_position(self, plot_type):
         """ Function that returns numeric position of plot type within the dashboard
@@ -1562,23 +1561,27 @@ class MPLCanvas(FigureCanvas):
 
             elif plot_type == 'timeseries':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
-                    self.remove_axis_objects(objects, elements_to_skip=[self.annotations_vline['timeseries']])
+                    #self.remove_axis_objects(objects, elements_to_skip=[self.annotations_vline['timeseries']])
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'periodic':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
-                    self.remove_axis_objects(objects, elements_to_skip=self.annotations_vline['periodic'].values())
+                    #self.remove_axis_objects(objects, elements_to_skip=self.annotations_vline['periodic'].values())
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'periodic-violin':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists, 
                                 ax_to_remove.collections]:
-                    self.remove_axis_objects(objects, elements_to_skip=self.annotations_vline['periodic-violin'].values())
+                    #self.remove_axis_objects(objects, elements_to_skip=self.annotations_vline['periodic-violin'].values())
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'metadata':
                 self.remove_axis_objects(ax_to_remove.texts)
 
             elif plot_type == 'distribution':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
-                    self.remove_axis_objects(objects, elements_to_skip=[self.annotations_vline['distribution']])
+                    #self.remove_axis_objects(objects, elements_to_skip=[self.annotations_vline['distribution']])
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'statsummary':
                 self.remove_axis_objects(ax_to_remove.tables)
@@ -1590,7 +1593,8 @@ class MPLCanvas(FigureCanvas):
             elif plot_type == 'fairmode-target':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists, 
                                 ax_to_remove.patches, ax_to_remove.texts]:
-                    self.remove_axis_objects(objects, elements_to_skip=[self.annotations['fairmode-target']])
+                    #self.remove_axis_objects(objects, elements_to_skip=[self.annotations['fairmode-target']])
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'fairmode-statsummary':
                 self.remove_axis_objects(ax_to_remove.lines)
@@ -1600,14 +1604,6 @@ class MPLCanvas(FigureCanvas):
             self.plot_elements[plot_type]['absolute'] = {}
             if 'bias' in self.plot_elements[plot_type]:
                 del self.plot_elements[plot_type]['bias']
-
-        # hide annotation boxes and lines
-        for element in self.annotation_elements:
-            if isinstance(element, dict):
-                for val in element.values():
-                    val.set_visible(False)
-            else:
-                element.set_visible(False)
 
         return None
 
@@ -1705,6 +1701,8 @@ class MPLCanvas(FigureCanvas):
 
             # draw changes
             self.figure.canvas.draw_idle()
+
+            
 
         return None
 
@@ -2054,25 +2052,25 @@ class MPLCanvas(FigureCanvas):
 
         # LAYOUT OPTIONS #
         # add position 2 plot selector
-        self.read_instance.cb_position_2 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_2 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['menu_combobox'])
         self.read_instance.cb_position_2.setToolTip('Select plot type in top right position')
         self.read_instance.cb_position_2.currentTextChanged.connect(self.read_instance.handle_layout_update)
         # self.read_instance.cb_position_2.hide()
 
         # add position 3 plot selector
-        self.read_instance.cb_position_3 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_3 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['menu_combobox'])
         self.read_instance.cb_position_3.setToolTip('Select plot type in bottom left position')
         self.read_instance.cb_position_3.currentTextChanged.connect(self.read_instance.handle_layout_update)
         # self.read_instance.cb_position_3.hide()
 
         # add position 4 plot selector
-        self.read_instance.cb_position_4 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_4 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['menu_combobox'])
         self.read_instance.cb_position_4.setToolTip('Select plot type in bottom centre position')
         self.read_instance.cb_position_4.currentTextChanged.connect(self.read_instance.handle_layout_update)
         # self.read_instance.cb_position_4.hide()
 
         # add position 5 plot selector
-        self.read_instance.cb_position_5 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_5 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['menu_combobox'])
         self.read_instance.cb_position_5.setToolTip('Select plot type in bottom right position')
         self.read_instance.cb_position_5.currentTextChanged.connect(self.read_instance.handle_layout_update)
         # self.read_instance.cb_position_5.hide()
@@ -3145,16 +3143,12 @@ class MPLCanvas(FigureCanvas):
         if isinstance(ax, dict):
             for sub_ax in ax.values():
                 for line in sub_ax.lines:
-                    if line not in self.annotation_elements:
-                        line.set_linewidth(linewidth)
+                    line.set_linewidth(linewidth)
         else:
             for line in ax.lines:
-                if line not in self.annotation_elements:
-                    if (((plot_type == 'scatter') and ((list(line.get_xdata()) == [0, 0.5])
-                        or (list(line.get_xdata()) == [0, 1])))):
-                        continue
-                    else:
-                        line.set_linewidth(linewidth)
+                if (((plot_type == 'scatter') and ((list(line.get_xdata()) == [0, 0.5])
+                    or (list(line.get_xdata()) == [0, 1])))):
+                    continue
                 else:
                     line.set_linewidth(linewidth)
 

@@ -1946,19 +1946,19 @@ class Plot:
         self.taylor_polar_relevant_axis.plot(ref_x, ref_y, **plot_characteristics['contours']['style']['obs'])
 
         # set up annotations
-        if (not self.read_instance.offline) and (not self.read_instance.interactive):
-            # create annotation on hover
-            annotation = HoverAnnotation(self.canvas_instance, 
-                                        'taylor', 
-                                        self.taylor_polar_relevant_axis,
-                                        plot_characteristics, 
-                                        add_vline=False)
-            self.canvas_instance.annotations['taylor'] = annotation.annotation
-            self.canvas_instance.annotations_lock['taylor'] = False
+        #if (not self.read_instance.offline) and (not self.read_instance.interactive):
+        #    # create annotation on hover
+        #    annotation = HoverAnnotation(self.canvas_instance, 
+        #                               'taylor', 
+        #                                self.taylor_polar_relevant_axis,
+        #                                plot_characteristics, 
+        #                                add_vline=False)
+        #    #self.canvas_instance.annotations['taylor'] = annotation.annotation
+        #    self.canvas_instance.annotations_lock['taylor'] = False
 
-            # connect axis to hover function
-            self.canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
-                lambda event: annotation.hover_annotation(event, 'taylor'))
+        #    # connect axis to hover function
+        #    self.canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+        #        lambda event: annotation.hover_annotation(event, 'taylor'))
 
         # add models
         for data_label, stddev, corr_stat in zip(stats_df.index, 
