@@ -219,7 +219,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         """ Update current geometry of main Providentia window and buttons. """
 
         # get geometry of full window
-        self.full_window_geometry = copy.deepcopy(self.geometry())
+        #self.full_window_geometry = copy.deepcopy(self.geometry())
+        self.full_window_geometry = copy.deepcopy(self.frameGeometry())
 
         # update geometry of qt elements
         self.update_qt_elements_geometry(resize=True)
@@ -345,10 +346,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         parent_layout.setSpacing(0)
         parent_layout.setContentsMargins(0, 0, 0, 0)
 
-        # define stylesheet for tooltips
-        self.setStyleSheet("QToolTip { font: %spt %s}" % (self.formatting_dict['tooltip']['font']['size'],
-                                                          self.formatting_dict['tooltip']['font']['style']))
-
         # setup configuration bar with combo boxes, input boxes and buttons
         # use a gridded layout to place objects
         config_bar = QtWidgets.QGridLayout()
@@ -365,100 +362,100 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # define all configuration box objects (labels, comboboxes etc.)
         # data selection section
         self.lb_data_selection = set_formatting(QtWidgets.QLabel(self, text="Data Selection"),
-                                                self.formatting_dict['title_menu'])
+                                                self.formatting_dict['menu_title'])
         self.lb_data_selection.setToolTip('Setup configuration of data to read into memory')
-        self.cb_network = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_network = set_formatting(ComboBox(self), self.formatting_dict['menu_combobox'])
         self.cb_network.setToolTip('Select providing observational data network. '
                                    'Names starting with * indicate non-GHOST datasets')
-        self.cb_resolution = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_resolution = set_formatting(ComboBox(self), self.formatting_dict['menu_combobox'])
         self.cb_resolution.setToolTip('Select temporal resolution of data')
-        self.cb_matrix = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_matrix = set_formatting(ComboBox(self), self.formatting_dict['menu_combobox'])
         self.cb_matrix.setToolTip('Select data matrix')
-        self.cb_species = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_species = set_formatting(ComboBox(self), self.formatting_dict['menu_combobox'])
         self.cb_species.setToolTip('Select species')
-        self.le_start_date = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['lineedit_menu'])
+        self.le_start_date = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['menu_lineedit'])
         self.le_start_date.setToolTip('Set data start date: YYYYMMDD')
-        self.le_end_date = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['lineedit_menu'])
+        self.le_end_date = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['menu_lineedit'])
         self.le_end_date.setToolTip('Set data end date: YYYYMMDD')
-        self.bu_QA = set_formatting(QtWidgets.QPushButton('QA', self), self.formatting_dict['button_menu'])
+        self.bu_QA = set_formatting(QtWidgets.QPushButton('QA', self), self.formatting_dict['menu_button'])
         self.bu_QA.setToolTip('Select standardised quality assurance flags to filter by')
-        self.bu_flags = set_formatting(QtWidgets.QPushButton('FLAGS', self), self.formatting_dict['button_menu'])
+        self.bu_flags = set_formatting(QtWidgets.QPushButton('FLAGS', self), self.formatting_dict['menu_button'])
         self.bu_flags.setToolTip('Select standardised data reporter provided flags to filter by')
-        self.bu_experiments = set_formatting(QtWidgets.QPushButton('EXPS', self), self.formatting_dict['button_menu'])
+        self.bu_experiments = set_formatting(QtWidgets.QPushButton('EXPS', self), self.formatting_dict['menu_button'])
         self.bu_experiments.setToolTip('Select experiment/s data to read')
-        self.bu_multispecies = set_formatting(QtWidgets.QPushButton('MULTI', self), self.formatting_dict['button_menu'])
+        self.bu_multispecies = set_formatting(QtWidgets.QPushButton('MULTI', self), self.formatting_dict['menu_button'])
         self.bu_multispecies.setToolTip('Select data to filter by')
-        self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), self.formatting_dict['button_menu'])
-        self.bu_read.setStyleSheet("color: green;")
+        self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), self.formatting_dict['menu_button'],
+                                      extra_arguments={'color': 'green'})
         self.bu_read.setToolTip('Read selected configuration of data into memory')
         self.vertical_splitter_1 = QVLine()
         self.vertical_splitter_1.setMaximumWidth(20)
 
         # filters section
-        self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text="Filters"), self.formatting_dict['title_menu'])
+        self.lb_data_filter = set_formatting(QtWidgets.QLabel(self, text="Filters"), self.formatting_dict['menu_title'])
         self.lb_data_filter.setToolTip('Select criteria to filter data by')
-        self.bu_rep = set_formatting(QtWidgets.QPushButton('% REP', self), self.formatting_dict['button_menu'])
+        self.bu_rep = set_formatting(QtWidgets.QPushButton('% REP', self), self.formatting_dict['menu_button'])
         self.bu_rep.setToolTip('Select % desired representativity in data across '
                                'whole record and for specific temporal periods')
-        self.bu_meta = set_formatting(QtWidgets.QPushButton('META', self), self.formatting_dict['button_menu'])
+        self.bu_meta = set_formatting(QtWidgets.QPushButton('META', self), self.formatting_dict['menu_button'])
         self.bu_meta.setToolTip('Select metadata to filter by')
-        self.bu_reset = set_formatting(QtWidgets.QPushButton('RESET', self), self.formatting_dict['button_menu'])
+        self.bu_reset = set_formatting(QtWidgets.QPushButton('RESET', self), self.formatting_dict['menu_button'],
+                                       extra_arguments={'color': 'red'})
         self.bu_reset.setToolTip('Reset filter fields to initial values')
-        self.bu_reset.setStyleSheet("color: red;")
-        self.bu_period = set_formatting(QtWidgets.QPushButton('PERIOD', self), self.formatting_dict['button_menu'])
+        self.bu_period = set_formatting(QtWidgets.QPushButton('PERIOD', self), self.formatting_dict['menu_button'])
         self.bu_period.setToolTip('Select data in specific periods')
-        self.bu_filter = set_formatting(QtWidgets.QPushButton('FILTER', self), self.formatting_dict['button_menu'])
-        self.bu_filter.setStyleSheet("color: blue;")
+        self.bu_filter = set_formatting(QtWidgets.QPushButton('FILTER', self), self.formatting_dict['menu_button'],
+                                        extra_arguments={'color': 'blue'})
         self.bu_filter.setToolTip('Filter data')
-        self.lb_data_bounds = set_formatting(QtWidgets.QLabel(self, text="Bounds"), self.formatting_dict['label_menu'])
+        self.lb_data_bounds = set_formatting(QtWidgets.QLabel(self, text="Bounds"), self.formatting_dict['menu_label'])
         self.lb_data_bounds.setToolTip('Set lower/upper bounds of data')
-        self.le_minimum_value = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['lineedit_menu'])
+        self.le_minimum_value = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['menu_lineedit'])
         self.le_minimum_value.setToolTip('Set lower bound of data')
-        self.le_maximum_value = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['lineedit_menu'])
+        self.le_maximum_value = set_formatting(QtWidgets.QLineEdit(self), self.formatting_dict['menu_lineedit'])
         self.le_maximum_value.setToolTip('Set upper bound of data')
         self.vertical_splitter_2 = QVLine()
         self.vertical_splitter_2.setMaximumWidth(20)
 
         # statistical calculation section
         self.lb_statistic = set_formatting(QtWidgets.QLabel(self, text="Statistics"),
-                                             self.formatting_dict['title_menu'])
+                                             self.formatting_dict['menu_title'])
         self.lb_statistic.setToolTip('Select the type of statistical calculation')
-        self.lb_statistic_mode = set_formatting(QtWidgets.QLabel(self, text="Mode"), self.formatting_dict['label_menu'])
+        self.lb_statistic_mode = set_formatting(QtWidgets.QLabel(self, text="Mode"), self.formatting_dict['menu_label'])
         self.lb_statistic_mode.setToolTip('Select statistical calculation mode')
-        self.cb_statistic_mode = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_statistic_mode = set_formatting(ComboBox(self), self.formatting_dict['menu_combobox'])
         self.cb_statistic_mode.setToolTip('Select statistical calculation mode')
-        self.lb_statistic_aggregation = set_formatting(QtWidgets.QLabel(self, text="Aggregation"), self.formatting_dict['label_menu'])
+        self.lb_statistic_aggregation = set_formatting(QtWidgets.QLabel(self, text="Aggregation"), self.formatting_dict['menu_label'])
         self.lb_statistic_aggregation.setToolTip('Select statistic for spatial aggregation')
-        self.cb_statistic_aggregation = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_statistic_aggregation = set_formatting(ComboBox(self), self.formatting_dict['menu_combobox'])
         self.cb_statistic_aggregation.setToolTip('Select statistic for spatial aggregation')
         self.vertical_splitter_3 = QVLine()
         self.vertical_splitter_3.setMaximumWidth(20)
         
         # colocation section
-        self.lb_colocate = set_formatting(QtWidgets.QLabel(self, text="Colocation"), self.formatting_dict['title_menu'])
+        self.lb_colocate = set_formatting(QtWidgets.QLabel(self, text="Colocation"), self.formatting_dict['menu_title'])
         self.lb_colocate.setToolTip('Set colocation')
-        self.ch_colocate = set_formatting(QtWidgets.QCheckBox("Temporal"), self.formatting_dict['checkbox_menu'])
+        self.ch_colocate = set_formatting(QtWidgets.QCheckBox("Temporal"), self.formatting_dict['menu_checkbox'])
         self.ch_colocate.setToolTip('Temporally colocate observational/experiment data')
         self.vertical_splitter_4 = QVLine()
         self.vertical_splitter_4.setMaximumWidth(20)
 
         # resampling section
-        self.lb_resampling = set_formatting(QtWidgets.QLabel(self, text="Resampling"), self.formatting_dict['title_menu'])
+        self.lb_resampling = set_formatting(QtWidgets.QLabel(self, text="Resampling"), self.formatting_dict['menu_title'])
         self.lb_resampling.setToolTip('Set resampling options')
-        self.cb_resampling_resolution = set_formatting(ComboBox(self), self.formatting_dict['combobox_menu'])
+        self.cb_resampling_resolution = set_formatting(ComboBox(self), self.formatting_dict['menu_combobox'])
         self.cb_resampling_resolution.setToolTip('Select temporal resolution to resample the data to')
         self.vertical_splitter_5 = QVLine()
         self.vertical_splitter_5.setMaximumWidth(20)
 
         # station selection section
         self.lb_station_selection = set_formatting(QtWidgets.QLabel(self, text="Site Selection"),
-                                                   self.formatting_dict['title_menu'])
+                                                   self.formatting_dict['menu_title'])
         self.lb_station_selection.setToolTip('Select stations')
-        self.ch_select_all = set_formatting(QtWidgets.QCheckBox("All"), self.formatting_dict['checkbox_menu'])
+        self.ch_select_all = set_formatting(QtWidgets.QCheckBox("All"), self.formatting_dict['menu_checkbox'])
         self.ch_select_all.setToolTip('Select all stations')
-        self.ch_intersect = set_formatting(QtWidgets.QCheckBox("Intersect"), self.formatting_dict['checkbox_menu'])
+        self.ch_intersect = set_formatting(QtWidgets.QCheckBox("Intersect"), self.formatting_dict['menu_checkbox'])
         self.ch_intersect.setToolTip('Select stations that intersect with all loaded model domains')
-        self.ch_extent = set_formatting(QtWidgets.QCheckBox("Extent"), self.formatting_dict['checkbox_menu'])
+        self.ch_extent = set_formatting(QtWidgets.QCheckBox("Extent"), self.formatting_dict['menu_checkbox'])
         self.ch_extent.setToolTip('Select stations that are within the map extent')
 
         # position objects on gridded configuration bar
@@ -1226,53 +1223,53 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.plot_axes[changed_plot_type] = [canvas_instance.figure.add_subplot(inner_gs[i, j]) for i in range(nrows) for j in range(ncols)]
 
         # setup annotations
-        if changed_plot_type in ['periodic', 'periodic-violin']:
+        #if changed_plot_type in ['periodic', 'periodic-violin']:
             # create annotation on hover
-            for resolution in canvas_instance.plot_axes[changed_plot_type].keys():
-                annotation = HoverAnnotation(canvas_instance, 
-                                             changed_plot_type, 
-                                             canvas_instance.plot_axes[changed_plot_type][resolution],
-                                             canvas_instance.plot_characteristics[changed_plot_type], 
-                                             add_vline=True)
-                canvas_instance.annotations[changed_plot_type][resolution] = annotation.annotation
-                canvas_instance.annotations_lock[changed_plot_type][resolution] = False
-                canvas_instance.annotations_vline[changed_plot_type][resolution] = annotation.vline
+            #for resolution in canvas_instance.plot_axes[changed_plot_type].keys():
+                #annotation = HoverAnnotation(canvas_instance, 
+                #                             changed_plot_type, 
+                #                             canvas_instance.plot_axes[changed_plot_type][resolution],
+                #                             canvas_instance.plot_characteristics[changed_plot_type], 
+                #                             add_vline=True)
+                #canvas_instance.annotations[changed_plot_type][resolution] = annotation.annotation
+                #canvas_instance.annotations_lock[changed_plot_type][resolution] = False
+                #canvas_instance.annotations_vline[changed_plot_type][resolution] = annotation.vline
             
                 # connect axis to xlim change on zoom
-                canvas_instance.plot_axes[changed_plot_type][resolution].callbacks.connect(
-                    'xlim_changed', lambda event: annotation.update_x_middle(event, changed_plot_type))
+                #canvas_instance.plot_axes[changed_plot_type][resolution].callbacks.connect(
+                #    'xlim_changed', lambda event: annotation.update_x_middle(event, changed_plot_type))
             
             # connect axis to hover function
-            canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
-                lambda event: annotation.hover_periodic_annotation(event, changed_plot_type))
+            #canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+            #    lambda event: annotation.hover_periodic_annotation(event, changed_plot_type))
             
-        elif changed_plot_type in ['timeseries', 'scatter', 'distribution', 'fairmode-target']:
+        #elif changed_plot_type in ['timeseries', 'scatter', 'distribution', 'fairmode-target']:
             
             # add vertical line to timeseries and distribution plots
-            if changed_plot_type in ['timeseries', 'distribution']:
-                add_vline = True
-            else:
-                add_vline = False
+        #    if changed_plot_type in ['timeseries', 'distribution']:
+        #        add_vline = True
+        #    else:
+        #        add_vline = False
 
             # create annotation on hover
-            annotation = HoverAnnotation(canvas_instance, 
-                                         changed_plot_type, 
-                                         canvas_instance.plot_axes[changed_plot_type],
-                                         canvas_instance.plot_characteristics[changed_plot_type], 
-                                         add_vline=add_vline)
-            canvas_instance.annotations[changed_plot_type] = annotation.annotation
-            canvas_instance.annotations_lock[changed_plot_type] = False
-            if add_vline:
-                canvas_instance.annotations_vline[changed_plot_type] = annotation.vline
+        #    annotation = HoverAnnotation(canvas_instance, 
+        #                                 changed_plot_type, 
+        #                                 canvas_instance.plot_axes[changed_plot_type],
+        #                                 canvas_instance.plot_characteristics[changed_plot_type], 
+        #                                 add_vline=add_vline)
+        #    #canvas_instance.annotations[changed_plot_type] = annotation.annotation
+        #    canvas_instance.annotations_lock[changed_plot_type] = False
+            #if add_vline:
+            #    canvas_instance.annotations_vline[changed_plot_type] = annotation.vline
 
             # connect axis to xlim change on zoom
-            canvas_instance.plot_axes[changed_plot_type].callbacks.connect(
-                'xlim_changed', lambda event: annotation.update_x_middle(event, changed_plot_type))
+            #canvas_instance.plot_axes[changed_plot_type].callbacks.connect(
+            #    'xlim_changed', lambda event: annotation.update_x_middle(event, changed_plot_type))
             
             # connect axis to hover function
-            canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
-                lambda event: annotation.hover_annotation(event, changed_plot_type))
-        
+        #    canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+        #        lambda event: annotation.hover_annotation(event, changed_plot_type))
+
     def handle_data_selection_update(self):
         """ Function which handles update of data selection
             and MPL canvas upon pressing of READ button.
@@ -1579,9 +1576,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         """ Disable button related only to ghost data. """
         
         # change background-color to indicate that it's nonusable
-        self.bu_flags.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
-        self.bu_QA.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
-        self.bu_period.setStyleSheet("""QPushButton:disabled {background-color:#DCDCDC;}""")
+        self.bu_flags = set_formatting(self.bu_flags, self.formatting_dict['menu_button_disabled'], disabled=True)
+        self.bu_QA = set_formatting(self.bu_QA, self.formatting_dict['menu_button_disabled'], disabled=True)
+        self.bu_period = set_formatting(self.bu_period, self.formatting_dict['menu_button_disabled'], disabled=True)
         
         # disable buttons
         self.bu_flags.setEnabled(False)
