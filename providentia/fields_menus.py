@@ -16,7 +16,7 @@ def init_flags(instance):
     # do not have object instance already?
     # if not, create it
     if not hasattr(instance, 'flag_menu'):
-        instance.flag_menu = {'window_title':'FLAGS', 
+        instance.flag_menu = {'window_title':'Network QA Flags', 
                               'page_title':'Select standardised data reporter provided flags to filter by', 
                               'checkboxes':{}}
         instance.flag_menu['select_buttons'] = ['all', 'clear', 'default']
@@ -39,7 +39,7 @@ def init_qa(instance):
     # do not have object instance already?
     # if not, create it
     if not hasattr(instance, 'qa_menu'):
-        instance.qa_menu = {'window_title':'QA', 
+        instance.qa_menu = {'window_title':'GHOST QA Flags', 
                             'page_title':'Select standardised quality assurance flags to filter by', 
                             'checkboxes':{}}
         instance.qa_menu['select_buttons'] = ['all', 'clear', 'default']
@@ -88,7 +88,7 @@ def init_experiments(instance):
     # do not have object instance already?
     # if not, create it
     if not hasattr(instance, 'experiments_menu'):
-        instance.experiments_menu = {'window_title': 'EXPERIMENTS', 
+        instance.experiments_menu = {'window_title': 'Experiments', 
                                      'page_title': 'Select Experiment/s', 
                                      'checkboxes':{}}
         instance.experiments_menu['select_buttons'] = ['all', 'clear']
@@ -110,7 +110,7 @@ def init_multispecies(instance):
     # do not have object instance already?
     # if not, create it
     if not hasattr(instance, 'multispecies_menu'):
-        instance.multispecies_menu = {'window_title': 'MULTISPECIES', 
+        instance.multispecies_menu = {'window_title': 'Multispecies Filtering', 
                                       'page_title': 'Select Network/s and Specie/s to Filter by',
                                       'multispecies': {},
                                      }
@@ -137,7 +137,7 @@ def init_representativity(instance):
     # do not have object instance already?
     # if not, create it
     if not hasattr(instance, 'representativity_menu'):
-        instance.representativity_menu = {'window_title': '% DATA REPRESENTATIVITY', 
+        instance.representativity_menu = {'window_title': '% Data Representativity', 
                                           'page_title': 'Select Minimum Required % Data Representativity', 
                                           'rangeboxes':{}}
     
@@ -160,7 +160,7 @@ def init_period(instance):
     # do not have object instance already?
     # if not, create it
     if not hasattr(instance, 'period_menu'):
-        instance.period_menu = {'window_title': 'DATA PERIOD', 
+        instance.period_menu = {'window_title': 'Data Period', 
                                 'page_title': 'Select Data Periods', 
                                 'checkboxes':{}}
     
@@ -186,7 +186,7 @@ def init_metadata(instance):
                                    'GLOBALLY GRIDDED CLASSIFICATIONS': 'Filter stations by globally gridded classifications',
                                    'MEASUREMENT PROCESS INFORMATION': 'Filter stations by measurement process information'}
             
-        instance.metadata_menu = {'window_title': 'METADATA', 
+        instance.metadata_menu = {'window_title': 'Metadata', 
                                   'page_title': 'Select metadata type to filter stations by',
                                   'navigation_buttons': {}}
 
