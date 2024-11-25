@@ -72,10 +72,11 @@ def linear_regression(canvas_instance, read_instance, relevant_axis, networkspec
     # if so subset arrays
     subset = False
     data_array_size = observations_data.size
-    if data_array_size > plot_characteristics['max_points']:
-        subset = True
-        inds_subset = np.random.choice(data_array_size, size=plot_characteristics['max_points'], replace=False)
-        observations_data = observations_data[inds_subset]
+    if 'max_points' in plot_characteristics:
+        if data_array_size > plot_characteristics['max_points']:
+            subset = True
+            inds_subset = np.random.choice(data_array_size, size=plot_characteristics['max_points'], replace=False)
+            observations_data = observations_data[inds_subset]
 
     # iterate through experiment data, making regression line to observations
     for data_label in cut_data_labels:
