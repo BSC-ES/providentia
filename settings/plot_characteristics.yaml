@@ -1794,9 +1794,6 @@
   "statsummary":
     {
       "remove_spines": ["top", "right", "left", "bottom"],
-      "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
-      "experiment_bias":
-        ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
       "round_decimal_places": { "title": 2, "table": 2 },
       "cell_pad_rowlabel": 0.03,
       "cell_colours": true,
@@ -1830,6 +1827,9 @@
       "plot_options": ["bias", "multispecies"],
       "dashboard":
         {
+          "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
+          "experiment_bias":
+            ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "cell_height": 1.3,
           "fontsize": 7,
@@ -1843,6 +1843,9 @@
         },
       "offline":
         {
+          "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
+          "experiment_bias":
+            ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
           "orientation": "portrait",
           "figure": { "ncols": 1, "nrows": 1 },
           "page_title":
@@ -1884,6 +1887,9 @@
         },
       "interactive":
         {
+          "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
+          "experiment_bias":
+            ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
           "figsize": [13, 7],
           "subplots_adjust":
             {
@@ -1907,7 +1913,6 @@
         },
       "tests":
         {
-          "figsize": [13, 7],
           "basic":
             [
               "Mean",
@@ -1947,8 +1952,15 @@
               "r2",
               "UPA",
             ],
+          "figsize": [13, 7],
           "plot":
-            { "loc": "upper left", "colLoc": "center", "cellLoc": "center" },
+            {
+              "loc": "center left",
+              "rowLoc": "right",
+              "colLoc": "center",
+              "cellLoc": "center",
+            },
+          "plot_options": ["bias", "multispecies"],
         },
     },
   "taylor":
