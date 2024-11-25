@@ -189,11 +189,6 @@ class NavigationToolbar(NavigationToolbar2QT):
             self.mode = _Mode.LASSO
             self.canvas_instance.lasso_active = True
 
-            # disconnect map annotation event
-            if not self.canvas_instance.map_annotation_disconnect:
-                self.canvas_instance.figure.canvas.mpl_disconnect(self.canvas_instance.map_annotation_event)
-                self.canvas_instance.map_annotation_disconnect = True
-
             # connect lasso event
             if ((Version(matplotlib.__version__) < Version("3.2")) or
                (self.read_instance.machine in ['nord3v2', 'mn5', 'nord4'])):
@@ -208,18 +203,15 @@ class NavigationToolbar(NavigationToolbar2QT):
             if self.canvas_instance.figure.canvas.widgetlock.isowner(self):
                 self.canvas_instance.figure.canvas.widgetlock.release(self)
 
+            # ensure lasso is initialised correctly by forcing a draw
+            self.canvas_instance.figure.canvas.draw_idle()
+
         # otherwise, deactivate lasso event
         else:
 
             # update mode
             self.mode = _Mode.NONE
             self.canvas_instance.lasso_active = False
-            
-            # reconnect map annotation event
-            if self.canvas_instance.map_annotation_disconnect:
-                self.canvas_instance.map_annotation_event = self.canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
-                    self.canvas_instance.annotations['map'].hover_map_annotation)
-                self.canvas_instance.map_annotation_disconnect = False
 
             # disconnect lasso event
             self.canvas_instance.lasso_event.disconnect_events()
