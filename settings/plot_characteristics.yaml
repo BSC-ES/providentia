@@ -428,6 +428,7 @@
           "annotate_text": { "fontsize": 13 },
           "plot": { "s": "" },
         },
+      "tests": { "figsize": [14, 7], "plot": { "s": "" } },
     },
   "timeseries":
     {
@@ -990,7 +991,36 @@
               "median": { "marker": "o", "markersize": 6, "linewidth": 1.0 },
             },
         },
-      "tests": { "figsize": [13, 7] },
+      "tests":
+        {
+          "figsize": [13, 7],
+          "legend":
+            {
+              "plot":
+                {
+                  "loc": "upper right",
+                  "columnspacing": 0.5,
+                  "frameon": false,
+                  "handletextpad": 0,
+                  "ncol": 5,
+                  "borderaxespad": 0,
+                  "fontsize": 14.0,
+                },
+              "handles":
+                {
+                  "markersize": 14,
+                  "marker": "o",
+                  "color": "white",
+                  "ax": "hour",
+                },
+            },
+          "annotate_text": { "fontsize": 13 },
+          "plot":
+            {
+              "violin": { "linewidth": 1.0 },
+              "median": { "marker": "o", "markersize": 6, "linewidth": 1.0 },
+            },
+        },
     },
   "distribution":
     {
@@ -1157,7 +1187,12 @@
           "annotate_text": { "fontsize": 13 },
           "plot": { "linewidth": 2 },
         },
-      "tests": { "figsize": [13, 7], "plot": { "linewidth": 1 } },
+      "tests":
+        {
+          "figsize": [13, 7],
+          "plot": { "linewidth": 1 },
+          "annotate_text": { "fontsize": 13 },
+        },
     },
   "scatter":
     {
@@ -1615,7 +1650,18 @@
                 { "fontsize": 16, "fontstyle": "italic", "color": "black" },
             },
         },
-      "tests": { "figsize": [13, 7] },
+      "tests":
+        {
+          "figsize": [13, 7],
+          "cb": { "position": [0.05, 0.00, 0.9, 0.05] },
+          "xticklabels": { "rotation": 0, "fontsize": 16 },
+          "yticklabels": { "rotation": 0, "fontsize": 16 },
+          "plot":
+            {
+              "annot_kws":
+                { "fontsize": 16, "fontstyle": "italic", "color": "black" },
+            },
+        },
     },
   "table":
     {
@@ -1733,7 +1779,17 @@
               "cellLoc": "center",
             },
         },
-      "tests": { "figsize": [13, 7] },
+      "tests":
+        {
+          "figsize": [13, 7],
+          "plot":
+            {
+              "loc": "center left",
+              "rowLoc": "right",
+              "colLoc": "center",
+              "cellLoc": "center",
+            },
+        },
     },
   "statsummary":
     {
@@ -2056,7 +2112,15 @@
           "annotate_text": { "fontsize": 13 },
           "plot": { "marker": "o", "linestyle": "None" },
         },
-      "tests": { "figsize": [5, 5] },
+      "tests":
+        {
+          "figsize": [5, 5],
+          "xylabel": { "fontsize": 10 },
+          "rlabel": { "fontsize": 10 },
+          "xytick_params": { "fontsize": 10 },
+          "rtick_params": { "fontsize": 10 },
+          "annotate_text": { "fontsize": 13 },
+        },
     },
   "fairmode-target":
     {
