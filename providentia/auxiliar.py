@@ -27,7 +27,12 @@ def expand_plot_characteristics(plot_characteristics, mode):
             for key, value in section_data[mode].items():
                 # if it already exists (under general settings), update values
                 if key in section_data.keys():
-                    section_data[key].update(value)
+                    # if it is a dict, use update to merge old and new dicts
+                    if isinstance(key, dict):
+                        section_data[key].update(value)
+                    # if it is a list, extend list removing duplicates
+                    elif isinstance(key, list):
+                        section_data[key] = list(set(section_data[key] + value))
                 # if it doesn't exist, create new key
                 else:
                     section_data[key] = value
