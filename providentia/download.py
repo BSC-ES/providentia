@@ -17,7 +17,6 @@ import shutil
 
 # urlparse
 from tqdm import tqdm
-from remotezip import RemoteZip
 import tarfile
 from datetime import datetime, timedelta
 from getpass import getpass
@@ -173,7 +172,7 @@ class ProvidentiaDownload(object):
 
             # in the case of doing the download in mn5, check if the experiment has the interpolated tag as False
             # TODO add nored3v2 in the future
-            if self.machine in ["storage5"]:
+            if self.machine in ["storage5","nord3v2"]:
                 # if the tag is True, show a warning an skip the section
                 if self.interpolated is True:
                     msg = f"Nothing from the {self.section} section was copied to gpfs, change the interpolated field to 'False'."
@@ -725,6 +724,9 @@ class ProvidentiaDownload(object):
             return initial_check_nc_files
 
     def download_ghost_network_zenodo(self, network, initial_check, files_to_download=None):
+        # import remotezip
+        from remotezip import RemoteZip
+        
         if not initial_check:
             # print current_network
             print('\n'+'-'*40)
@@ -1327,7 +1329,7 @@ class ProvidentiaDownload(object):
             # make sure that it comes from esarchive
             if "/esarchive/" in exp_dir:
                 # esarchive in transfer5 is located inside gpfs
-                if "/esarchive/" == exp_dir[:11]:
+                if "/esarchive/" == exp_dir[:11] and self.machine == "storage5":
                     exp_dir = join("/gpfs/archive/bsc32/",exp_dir[1:])
                 # check if directory exists in esarchive
                 if os.path.exists(exp_dir):
@@ -1349,7 +1351,7 @@ class ProvidentiaDownload(object):
                 esarchive_dir = temp_esarchive_dir
                 break
         
-        # if the experiment-domain combination is possible, break
+        # if the experiment-domain combination is not possible, break
         if esarchive_dir is None:
             msg = f"There is no data available for the {exp_id} experiment with the {domain} domain in none of the paths specified in {join('settings', 'interp_experiments.yaml')} in esarchive."
             show_message(self, msg, deactivate=initial_check)
@@ -1418,8 +1420,7 @@ class ProvidentiaDownload(object):
             # get all the nc files in the date range
             for esarchive_dir in res_spec_dir:
                 if not initial_check:
-                    gpfs_path = esarchive_dir.split('/',7)[-1]
-                    print(f"\n  - {join(self.exp_to_interp_root,gpfs_path)}")
+                    print(f"\n  - {join(self.exp_to_interp_root,'/'.join(esarchive_dir.split('/')[-4:]))}, source: {esarchive_dir}")
                          
                 # get nc files
                 nc_files = os.listdir(esarchive_dir)
@@ -1494,6 +1495,12 @@ class ProvidentiaDownload(object):
                     if not os.path.exists(gpfs_dir):
                         os.makedirs(gpfs_dir) 
 
+                    # give to each directory 770 permissions and make group owner bsc32 
+                    temp_gpfs_dir = gpfs_dir
+                    for i in range(4):
+                        os.system(f"chmod 770 {temp_gpfs_dir}; chgrp bsc32 {temp_gpfs_dir}")
+                        temp_gpfs_dir = os.path.dirname(temp_gpfs_dir)
+
                     # sort nc_files
                     valid_nc_files.sort() 
 
@@ -1501,7 +1508,7 @@ class ProvidentiaDownload(object):
                         # get the ones that are not already copied
                         valid_nc_files = list(filter(lambda x:join(gpfs_dir,x) in files_to_copy, valid_nc_files))
                         if not valid_nc_files:
-                            msg = "Files were already copy."
+                            msg = "Files were already copied."
                             show_message(self, msg, deactivate=initial_check)     
                             continue         
                         valid_nc_files_iter = tqdm(valid_nc_files, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Copying files from esarchive to gpfs ({len(valid_nc_files)})")
@@ -1518,7 +1525,10 @@ class ProvidentiaDownload(object):
                             self.latest_nc_file_path = gpfs_path
                             esarchive_path = join(esarchive_dir, nc_file)
                             self.ncfile_dl_start_time = time.time()
-                            shutil.copy(esarchive_path, gpfs_path) 
+                            shutil.copy(esarchive_path, gpfs_path)
+
+                            # give to each file 770 permissions to directory and make group owner bsc32
+                            os.system(f"chmod 770 {gpfs_path}; chgrp bsc32 {gpfs_path}")
             
             return initial_check_nc_files
 

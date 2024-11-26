@@ -72,8 +72,7 @@ class ExperimentInterpolation(object):
         self.interpolation_variables = {}
         
         # from file in management_logs, get and set the arguments which were not passed as a paremeter
-        submission_file = join(PROVIDENTIA_ROOT, 'logs/interpolation/management_logs',
-                                       f'{self.unique_id}.out')
+        submission_file = join(PROVIDENTIA_ROOT, 'logs/interpolation/management_logs',f'{self.unique_id}.out')
         with open(submission_file, 'r') as f:
             submission_file_txt = f.read().split()
 
@@ -106,7 +105,7 @@ class ExperimentInterpolation(object):
         self.GHOST_speci_upper_limit = self.standard_parameter_speci['extreme_upper_limit']
 
         exp_dir = None
-         # for HPC machines, search in interp_experiments
+        # for HPC machines, search in interp_experiments
         if MACHINE != "local":
            # get experiment type and specific directories
             for experiment_type, experiment_dict in interp_experiments.items():
