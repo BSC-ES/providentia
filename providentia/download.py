@@ -192,6 +192,9 @@ class ProvidentiaDownload(object):
                             files_to_download = self.select_files_to_download(initial_check_nc_files)
                             if not initial_check_nc_files or files_to_download:
                                 self.copy_non_interpolated_experiment(experiment, initial_check=False, files_to_copy=files_to_download)
+                    else:
+                        error = "Error: No experiments available to be downloaded."
+                        sys.exit(error)
             
             # in local continue as normally
             else:
@@ -1623,5 +1626,6 @@ def main(**kwargs):
     """ Main function when running download function. """
     # initialise break blocker
     global download  
+    print("holacaracola")
     download = ProvidentiaDownload(**kwargs)
     download.run()

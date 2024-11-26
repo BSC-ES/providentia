@@ -698,7 +698,7 @@ class ProvConfiguration:
         # TODO Check if i can only import one time
         from warnings_prv import show_message
 
-        """ Check individual experiment and get list of options."""
+        """ Check individual experiment and get list of options. """
         # split full experiment
         experiment, domain, ensemble_option = full_experiment.split('-')
         
@@ -785,6 +785,7 @@ class ProvConfiguration:
         else:
             # append experiment name in local since we do not differentiate between types
             # and we won't use this variable to get the paths
+            # TODO check this
             if MACHINE == 'local' and self.read_instance.interpolation:
                 self.read_instance.experiment_types.append(experiment)
             else:
