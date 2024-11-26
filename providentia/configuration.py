@@ -762,7 +762,8 @@ class ProvConfiguration:
         msg = ""
 
         # for HPC machines, search in interp_experiments
-        if self.read_instance.machine != "local":
+        # if it's local interpolation, don't enter
+        if not (self.read_instance.machine == "local" and self.read_instance.interpolation is True):
             for experiment_type, experiment_dict in interp_experiments.items():
                 if experiment in experiment_dict["experiments"]:
                     experiment_exists = True
@@ -770,8 +771,9 @@ class ProvConfiguration:
             
             msg += f"Cannot find the experiment ID '{experiment}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
 
-        # get directory from data_paths if it doesn't exists in the interp_experiments file
-        if experiment_exists is False and self.read_instance.interpolation:
+        # get directory from data_paths if it doesn't exists in the interp_experiments file 
+        # if executed from the hpc machines and want to do a download, don't enter
+        if experiment_exists is False and not (self.read_instance.machine != "local" and self.read_instance.download is True):
             # get the path to the non interpolated experiments
             exp_to_interp_path = join(self.read_instance.exp_to_interp_root, experiment)
             if os.path.exists(exp_to_interp_path):
