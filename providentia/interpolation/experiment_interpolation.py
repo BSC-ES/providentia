@@ -107,7 +107,7 @@ class ExperimentInterpolation(object):
         exp_dir = None
         # for HPC machines, search in interp_experiments
         if MACHINE != "local":
-           # get experiment type and specific directories
+            # get experiment type and specific directories
             for experiment_type, experiment_dict in interp_experiments.items():
                 if self.experiment_to_process in experiment_dict["experiments"]:
                     # take first functional directory 
