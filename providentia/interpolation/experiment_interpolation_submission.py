@@ -153,8 +153,9 @@ class SubmitInterpolation(object):
                 # get experiment type and specific directories
                 exp_dir_list = interp_experiments[experiment_type]["paths"]
                 for temp_exp_dir in exp_dir_list:
-                    if os.path.exists(join(temp_exp_dir, experiment_to_process)):
-                        exp_dir = join(temp_exp_dir, experiment_to_process)
+                    temp_exp_dir = join(temp_exp_dir, experiment_to_process)
+                    if os.path.exists(temp_exp_dir):
+                        exp_dir = temp_exp_dir
                         break
                 
                 error += f"None of the experiment paths in {self.exp_to_interp_root} are available in this machine ({self.machine}). "

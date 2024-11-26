@@ -32,7 +32,9 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
         GEOS/3.7.2-foss-2019b-Python-3.7.4 \
         GSL/2.6-GCC-8.3.0 \
         NCO/4.9.2-foss-2019b \
-        greasy/2.2.3 
+        greasy/2.2.3 \
+        tqdm/4.41.1-foss-2019b-Python-3.7.4 \
+        python-dotenv/0.21.1-foss-2019b-Python-3.7.4
 
 # Hub
 elif [ "${ip}" == "84.88.185.48" ]; then

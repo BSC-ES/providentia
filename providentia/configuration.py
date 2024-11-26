@@ -757,28 +757,30 @@ class ProvConfiguration:
             return True, experiment
         
         # search if the experiment id is in the interp_experiments file
+        # initialize experiment search variables
         experiment_exists = False
-        
-        # if we are doing the interpolation from the local machine, get directory from data_paths
-        if MACHINE == 'local' and self.read_instance.interpolation:
-            # get the path to the non interpolated experiments
-            exp_to_interp_root = data_paths['local']['exp_to_interp_root']
-            exp_to_interp_root = os.path.expanduser(exp_to_interp_root[0])+exp_to_interp_root[1:]
-            exp_to_interp_path = join(exp_to_interp_root, experiment)
-            if os.path.exists(exp_to_interp_path):
-                experiment_exists = True
-        else:
+        msg = ""
+
+        # for HPC machines, search in interp_experiments
+        if self.read_instance.machine != "local":
             for experiment_type, experiment_dict in interp_experiments.items():
                 if experiment in experiment_dict["experiments"]:
                     experiment_exists = True
                     break
+            
+            msg += f"Cannot find the experiment ID '{experiment}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
+
+        # get directory from data_paths if it doesn't exists in the interp_experiments file
+        if experiment_exists is False and self.read_instance.interpolation:
+            # get the path to the non interpolated experiments
+            exp_to_interp_path = join(self.read_instance.exp_to_interp_root, experiment)
+            if os.path.exists(exp_to_interp_path):
+                experiment_exists = True
+            
+            msg += f"Cannot find the experiment ID '{experiment}' in '{self.read_instance.exp_to_interp_root}'."
         
-        # if experiment id is not defined, exit
-        if not experiment_exists:
-            if MACHINE == 'local' and self.read_instance.interpolation:
-                msg = f"Cannot find the experiment ID '{experiment}' in '{exp_to_interp_root}'."
-            else:
-                msg = f"Cannot find the experiment ID '{experiment}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file."
+        # if experiment does not exist, exit
+        if experiment_exists is False:
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
         else:
             # append experiment name in local since we do not differentiate between types
@@ -960,7 +962,7 @@ class ProvConfiguration:
                         msg = "Start date (start_date) was defined as YYYYMMDD, changing it to YYYYMM. Using '{}'.".format(self.read_instance.start_date)
                         show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     else:
-                        error = "Format of Start date (start_date) not correct, please change it to YYYYMM."
+                        error = "Error: Format of Start date (start_date) not correct, please change it to YYYYMM."
                         sys.exit(error)
             else:
                 if len_start_date != 8:
@@ -969,7 +971,7 @@ class ProvConfiguration:
                         msg = "Start date (start_date) was defined as YYYYMM, changing it to YYYYMMDD. Using '{}'.".format(self.read_instance.start_date)
                         show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     else:
-                        error = "The format of Start date (start_date) is not correct, please change it to YYYYMMDD."
+                        error = "Error: The format of Start date (start_date) is not correct, please change it to YYYYMMDD."
                         sys.exit(error)
 
         # check end_date  format, TODO START DATE IS DIFFERENT IN INTERPOLATION (check in the refactoring)
@@ -991,7 +993,7 @@ class ProvConfiguration:
                         msg = "End Date (end_date) was defined as YYYYMMDD, changing it to YYYYMM. Using '{}'.".format(self.read_instance.end_date)
                         show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     else:
-                        error = "Format of End Date (end_date) not correct, please change it to YYYYMM."
+                        error = "Error: Format of End Date (end_date) not correct, please change it to YYYYMM."
                         sys.exit(error)
             else:
                 if len_end_date != 8:
@@ -1000,7 +1002,7 @@ class ProvConfiguration:
                         msg = "End Date (end_date) was defined as YYYYMM, changing it to YYYYMMDD. Using '{}'.".format(self.read_instance.end_date)
                         show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     else:
-                        error = "The format of End Date (end_date) is not correct, please change it to YYYYMMDD."
+                        error = "Error: The format of End Date (end_date) is not correct, please change it to YYYYMMDD."
                         sys.exit(error)
 
         # check have interp_n_neighbours information, TODO ONLY FOR INTERPOLATION
@@ -1020,8 +1022,8 @@ class ProvConfiguration:
 
         # make sure there are experiments in interpolation
         if self.read_instance.interpolation and (len(self.read_instance.experiments) == 0):
-            msg = 'No experiments were provided in the configuration file.'
-            sys.exit("Error: " + msg)
+            error = 'Error: No experiments were provided in the configuration file.'
+            sys.exit(error)
 
         # get domain, ensemble options, experiment ids and flag to get the default values of these variables
         self.decompose_experiments()
