@@ -132,7 +132,7 @@ class SubmitInterpolation(object):
         last_arguments = None
 
         # iterate through desired experiment IDs and its types
-        for (exp_dom_ens, alias), experiment_type in zip(self.experiments.items(), self.experiment_types):
+        for exp_dom_ens, alias in self.experiments.items():
             
             experiment_to_process, grid_type, ensemble_option = exp_dom_ens.split("-") 
 
@@ -151,11 +151,14 @@ class SubmitInterpolation(object):
             # for HPC machines, search in interp_experiments
             if self.machine != "local":
                 # get experiment type and specific directories
-                exp_dir_list = interp_experiments[experiment_type]["paths"]
-                for temp_exp_dir in exp_dir_list:
-                    temp_exp_dir = join(temp_exp_dir, experiment_to_process)
-                    if os.path.exists(temp_exp_dir):
-                        exp_dir = temp_exp_dir
+                for experiment_type, experiment_dict in interp_experiments.items():
+                    if self.experiment_to_process in experiment_dict["experiments"]:
+                        # take first functional directory 
+                        for temp_exp_dir in experiment_dict["paths"]:
+                            temp_exp_dir = join(temp_exp_dir, experiment_to_process)
+                            if os.path.exists(temp_exp_dir):
+                                exp_dir = temp_exp_dir
+                                break
                         break
                 
                 error += f"None of the experiment paths in {self.exp_to_interp_root} are available in this machine ({self.machine}). "
