@@ -221,7 +221,7 @@ fi
 
 # if download mode is executed from the remote machines, exit
 if $download; then
-    if [[ "${BSC_MACHINE}" == "mn5" || "${BSC_MACHINE}" == "nord3v2" || "${BSC_MACHINE}" == "84.88.185.48" ]]; then
+    if [[ "${BSC_MACHINE}" == "mn5" || "${BSC_MACHINE}" == "84.88.185.48" ]]; then
         echo "Download mode not available in $BSC_MACHINE. Exiting..."
         exit 1
     fi
