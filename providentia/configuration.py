@@ -782,14 +782,6 @@ class ProvConfiguration:
         # if experiment does not exist, exit
         if experiment_exists is False:
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-        else:
-            # append experiment name in local since we do not differentiate between types
-            # and we won't use this variable to get the paths
-            # TODO check this
-            if MACHINE == 'local' and self.read_instance.interpolation:
-                self.read_instance.experiment_types.append(experiment)
-            else:
-                self.read_instance.experiment_types.append(experiment_type)
 
         return experiment_exists, [full_experiment]
     
