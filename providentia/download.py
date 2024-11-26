@@ -44,10 +44,11 @@ def sighandler(*unused):
     print('\nKeyboard Interrupt. Stopping execution.')
     
     # close connection, if it exists
-    if download.ssh is not None:
+    if hasattr(download, 'ssh') and download.ssh is not None:
         print("\nClosing ssh connection...")
         download.ssh.close()
-        download.sftp.close()
+        if hasattr(download, 'sftp'):
+            download.sftp.close()
 
     # delete the las downloaded nc file to avoid corrupted files
     if hasattr(download,'latest_nc_file_path'):
@@ -314,7 +315,6 @@ class ProvidentiaDownload(object):
         _, output = subprocess.getstatusoutput(f"ssh-keyscan -t ed25519 {self.remote_hostname}")
 
         ed25519_key = output.split()[-1].encode()
-        print(output, output.split()[-1].encode())
         key = paramiko.Ed25519Key(data=decodebytes(ed25519_key))
         
         # encode the output public key if possible
@@ -1094,7 +1094,6 @@ class ProvidentiaDownload(object):
             try:
                 self.sftp.stat(exp_dir)
                 exp_dir_functional_list.append(exp_dir)      
-                break
             except FileNotFoundError:
                 pass
 
@@ -1336,8 +1335,7 @@ class ProvidentiaDownload(object):
                     exp_dir = join("/gpfs/archive/bsc32/",exp_dir[1:])
                 # check if directory exists in esarchive
                 if os.path.exists(exp_dir):
-                    exp_dir_functional_list.append(exp_dir) 
-                    break     
+                    exp_dir_functional_list.append(exp_dir)     
             
         # if none of the paths are in this current machine, break
         if not exp_dir_functional_list:
