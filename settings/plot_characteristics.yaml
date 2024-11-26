@@ -2393,5 +2393,6 @@
           "plot": { "markersize": 5 },
           "annotate_text": { "fontsize": 10 },
         },
+      "tests": { "figsize": [5, 5], "annotate_text": { "fontsize": 10 } },
     },
 }
