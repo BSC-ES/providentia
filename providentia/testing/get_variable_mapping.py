@@ -2,7 +2,7 @@ import yaml
 from variable_mapping import variable_mapping
 
 result = {
-    value['preferred_term'].replace('"', ''): key[2]
+    value['preferred_term'].replace('"', ''): {'var': key[2], 'units': key[0]}
     for key, value in variable_mapping.items()
 }
 
