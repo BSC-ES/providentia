@@ -36,7 +36,6 @@
             'interpolated' : True, # from download mode
             'forecast': True,
             'forecast_day': 1,
-            'experiment_types': [], # TODO remove if changed # interpolation
             'qa': null,
             'flags': null,
             'add_qa': null,
@@ -84,7 +83,7 @@
                                    'nonghost_available_resolutions', 'nonghost_available_networks', 'offline', 
                                    'interactive', 'download', 'interpolation', 'slurm_job_id', 'network', 'species', 
                                    'resolution', 'start_date', 'end_date', 'observations_data_label', 'alias_flag', 
-                                   'experiments', 'domain', 'ensemble_options', 'forecast', 'forecast_day', 'experiment_types', 
+                                   'experiments', 'domain', 'ensemble_options', 'forecast', 'forecast_day',
                                    'temporal_colocation', 'spatial_colocation', 'spatial_colocation_tolerance', 
                                    'spatial_colocation_station_reference', 'spatial_colocation_station_name', 
                                    'spatial_colocation_longitude_latitude',  'spatial_colocation_measurement_altitude',
@@ -99,7 +98,7 @@
                                  'generate_file_tree', 'disable_file_tree', 'nonghost_available_resolutions', 
                                  'nonghost_available_networks', 'offline', 'interactive', 'download', 'interpolation', 
                                  'slurm_job_id', 'network', 'species', 'resolution', 'start_date', 'end_date',
-                                 'alias_flag', 'experiments', 'exp_ids', 'experiment_types', 'qa', 'flags', 'add_qa', 
+                                 'alias_flag', 'experiments', 'exp_ids', 'qa', 'flags', 'add_qa', 
                                  'subtract_qa', 'add_flags', 'subtract_flags', 'temporal_colocation', 
                                  'spatial_colocation', 'map_extent', 'filter_species', 'calibration_factor', 
                                  'lower_bound', 'upper_bound', 'active_dashboard_plots', 'statistic_aggregation',
