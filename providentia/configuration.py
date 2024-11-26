@@ -780,10 +780,11 @@ class ProvConfiguration:
                 experiment_exists = True
             
             msg += f"Cannot find the experiment ID '{experiment}' in '{self.read_instance.exp_to_interp_root}'."
-        
+
         # if experiment does not exist, exit
+        # supressed warning deactivation
         if experiment_exists is False:
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
 
         return experiment_exists, [full_experiment]
     
