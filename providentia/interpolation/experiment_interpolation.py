@@ -110,13 +110,12 @@ class ExperimentInterpolation(object):
            # get experiment type and specific directories
             for experiment_type, experiment_dict in interp_experiments.items():
                 if self.experiment_to_process in experiment_dict["experiments"]:
-                    exp_dir_list = experiment_dict["paths"]
-                    break
-
-            # take first functional directory 
-            for temp_exp_dir in exp_dir_list:
-                if os.path.exists(temp_exp_dir):
-                    exp_dir = join(temp_exp_dir, self.experiment_to_process)
+                    # take first functional directory 
+                    for temp_exp_dir in experiment_dict["paths"]:
+                        temp_exp_dir = join(temp_exp_dir, self.experiment_to_process)
+                        if os.path.exists(temp_exp_dir):
+                            exp_dir = temp_exp_dir
+                            break
                     break
 
         # if local machine or if not exp_dir, get directory from data_paths
