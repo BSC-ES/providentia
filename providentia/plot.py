@@ -2017,7 +2017,7 @@ class Plot:
                                                       valid_station_idxs, networkspeci)
         try:
             valid_station_classifications = get_valid_metadata(self, f'{classification_type}_classification', 
-                                                            valid_station_idxs, networkspeci)
+                                                               valid_station_idxs, networkspeci)
         except:
             valid_station_classifications = np.full(len(valid_station_references), np.NaN, dtype=np.float32)
             print(f'Data for {classification_type}_classification is not available and will not be shown in the legend')
@@ -2083,7 +2083,7 @@ class Plot:
 
             # plot data
             for x, y, classification in (zip(x_points, y_points, classifications)):
-                if classification not in plot_characteristics['markers'][f'{classification_type}_classification']:
+                if classification not in plot_characteristics['markers'][f'{classification_type}_classification'].keys():
                     marker = 'h'
                 else:
                     marker = plot_characteristics['markers'][f'{classification_type}_classification'][classification]

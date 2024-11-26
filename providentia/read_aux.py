@@ -890,6 +890,9 @@ def get_valid_metadata(read_instance, variable, valid_station_idxs, networkspeci
         first_valid_station_metadata = next((
             value for value in station_metadata 
             if value == value), 'nan')
+        # if metadata returns an array, get first
+        if isinstance(first_valid_station_metadata, (np.ndarray)):
+            first_valid_station_metadata = first_valid_station_metadata.item()
         valid_metadata.append(first_valid_station_metadata)
 
     return valid_metadata
