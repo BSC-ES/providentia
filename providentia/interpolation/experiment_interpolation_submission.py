@@ -146,13 +146,13 @@ class SubmitInterpolation(object):
 
             # initialize experiment search variables
             exp_dir = None
-            error = ""
+            msg = ""
 
             # for HPC machines, search in interp_experiments
             if self.machine != "local":
                 # get experiment type and specific directories
                 for experiment_type, experiment_dict in interp_experiments.items():
-                    if self.experiment_to_process in experiment_dict["experiments"]:
+                    if experiment_to_process in experiment_dict["experiments"]:
                         # take first functional directory 
                         for temp_exp_dir in experiment_dict["paths"]:
                             temp_exp_dir = join(temp_exp_dir, experiment_to_process)
@@ -161,7 +161,7 @@ class SubmitInterpolation(object):
                                 break
                         break
                 
-                error += f"None of the experiment paths in {self.exp_to_interp_root} are available in this machine ({self.machine}). "
+                msg += f"The experiment '{experiment_to_process}' is in none of the experiment paths in {self.exp_to_interp_root} are available in this machine ({self.machine}). "
 
             # if local machine or if not exp_dir, get directory from data_paths
             if exp_dir is None: 
@@ -169,12 +169,12 @@ class SubmitInterpolation(object):
                 if os.path.exists(exp_to_interp_path):
                     exp_dir = exp_to_interp_path
                 
-                error += f"The experiment is not in {self.exp_to_interp_root}."
+                msg += f"The experiment '{experiment_to_process}' is not in {self.exp_to_interp_root}."
 
             # take first functional directory 
             if exp_dir is None:
-                error = f"Error: {error}"
-                sys.exit(error)
+                print(msg)
+                continue
 
             # get model bin edges
             r_edges, rho_bins = get_model_bin_radii(experiment_type)
@@ -513,7 +513,7 @@ class SubmitInterpolation(object):
                             msg += f'Observational dates: {obs_files_dates}\n'
             else:
                 msg = '***INTERSECTING OBSERVATIONAL AND EXPERIMENTAL DATA IS AVAILABLE FOR INTERPOLATION.***' 
-
+                msg += f'\nExperiment Data Source Path: {exp_dir}'
             print(msg)
 
             # get the arguments from the last iteration
@@ -927,11 +927,11 @@ def main(**kwargs):
 
     # submit interpolation jobs
     if SI.interp_multiprocessing:
-        print('Using multiprocessing to manage the job submission.')
+        print('\nUsing multiprocessing to manage the job submission.')
         SI.submit_job_multiprocessing()
     else:
         if is_greasy_installed:
-            print('Using Greasy to manage the job submission.')
+            print('\nUsing Greasy to manage the job submission.')
             # create submission script according to machine
             if SI.machine == "nord3":
                 SI.create_lsf_submission_script()
