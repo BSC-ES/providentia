@@ -741,8 +741,21 @@ class ProvidentiaOffline:
                         
                         # setup fairmode summary stats plot type gridspec
                         elif base_plot_type == 'fairmode-statsummary':
-                            gs = gridspec.GridSpec(8, 4, **plot_characteristics["gridspec_kw"])
-                            grid_list = np.reshape(np.array([[fig.add_subplot(gs[i, j]) for j in range(4)] for i in range(8)]),(8, 4))
+                            # get current species
+                            speci = networkspeci.split('|')[1]
+
+                            # get number of rows and columns
+                            ncols = 4
+                            nrows = 8 if speci in ["sconco3", "sconcno2", "pm10"] else 7
+                            
+                            # create gridspec and add it to a list
+                            gs = gridspec.GridSpec(nrows, ncols, **plot_characteristics["gridspec_kw"])
+                            grid_list = []
+                            for i in range(nrows):
+                                for j in range(ncols):
+                                    grid_list.append(fig.add_subplot(gs[i, j]))
+                            
+                            # setup dictionary
                             self.plot_dictionary[page_n]['axs'].append({'handle':grid_list, 'data_labels':[]})
 
                             # format axis 
@@ -1540,8 +1553,6 @@ class ProvidentiaOffline:
                     chunk_resolution = None
 
             for data_labels in iter_data_labels:
-                print("data labels", data_labels,iter_data_labels)
-
                 # skip individual plots if we have no data for a specific label
                 if 'individual' in plot_options:
                     if data_labels not in self.selected_station_data_labels[networkspeci]:
@@ -1552,7 +1563,6 @@ class ProvidentiaOffline:
                     data_labels = [data_labels]
                     
                 # get relevant axis to plot on
-                print(plotting_paradigm)
                 if plotting_paradigm == 'summary':
                     if 'individual' in plot_options:
                         if ((base_plot_type in ['scatter', 'fairmode-target', 'fairmode-statsummary']) or ('bias' in plot_options) or 
@@ -1582,8 +1592,8 @@ class ProvidentiaOffline:
                         if relevant_temporal_resolution == 'hour':
                             axis_title = sub_ax.get_title()
                             break
-                elif isinstance(relevant_axis, np.ndarray):
-                    axis_title = relevant_axis[0,0].get_title()
+                elif isinstance(relevant_axis, list):
+                    axis_title = relevant_axis[0].get_title()
                 else:
                     axis_title = relevant_axis.get_title()
 
@@ -1594,7 +1604,7 @@ class ProvidentiaOffline:
                             axis_xlabel = 'NaN'
                             axis_ylabel = sub_ax.get_ylabel()
                             break
-                elif isinstance(relevant_axis, np.ndarray):
+                elif isinstance(relevant_axis, list):
                     axis_xlabel = ""
                     axis_ylabel = ""
                 else:
@@ -1704,10 +1714,9 @@ class ProvidentiaOffline:
                             annotation.set_visible(True)
                 
                 elif base_plot_type == "fairmode-statsummary":
-                    for i in range(8):
-                        for j in range(4):
-                            relevant_axis[i,j].axis('on')
-                            relevant_axis[i,j].set_visible(True)
+                    for i in range(len(relevant_axis)):
+                        relevant_axis[i].axis('on')
+                        relevant_axis[i].set_visible(True)
                 else:
                     relevant_axis.axis('on')
                     relevant_axis.set_visible(True)
@@ -1899,7 +1908,7 @@ class ProvidentiaOffline:
 
     def get_relevant_axs_per_networkspeci_plot_type(self, base_plot_type, relevant_pages):
         """Get relevant axs per plot type"""
-        
+       
         relevant_axs = []
         relevant_data_labels = []
         for relevant_page in relevant_pages:
@@ -1910,9 +1919,8 @@ class ProvidentiaOffline:
                         relevant_data_labels.append(ax['data_labels'])
             elif base_plot_type == 'fairmode-statsummary':
                 for ax in self.plot_dictionary[relevant_page]['axs']:
-                    for i in range(8):
-                        for j in range(4):
-                            relevant_axs.append(ax['handle'][i,j])
+                    for i in range(len(ax)):
+                        relevant_axs.append(ax['handle'][i])
                     relevant_data_labels.append(ax['data_labels'])
             else:
                 for ax in self.plot_dictionary[relevant_page]['axs']:
