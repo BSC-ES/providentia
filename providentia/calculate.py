@@ -574,7 +574,7 @@ class ExpBias(object):
             elif plot == 'summary':
 
                 # calculate exceedance
-                exc = Stats.calculate_exceedances(obs,exc_threshold)
+                exc = Stats.calculate_exceedances(obs,exc_threshold) if exc_threshold != None else None
 
                 # calculate mean
                 mean = Stats.calculate_mean(obs)

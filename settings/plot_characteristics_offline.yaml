@@ -1304,6 +1304,15 @@
           "x": 0.05,
           "y": 0.98,
         },
+      "subplots_adjust":
+        {
+          "left": 0.25,
+          "right": 0.98,
+          "top": 0.89,
+          "bottom": 0.06,
+          "hspace": 0.30,
+          "wspace": 0.10,
+        },
       "axis_title": { "label": "", "fontsize": 8 },
       "xlabel": { "xlabel": "", "fontsize": 8 },
       "ylabel": { "ylabel": "", "fontsize": 8 },
@@ -1401,7 +1410,7 @@
                 "left_dashed_zone_linestyle" : 'none'
             },
             "observed exceedances":{
-                "title":"Observed\nexceedences\n(> exceedance_value ugm⁻³)",
+                "title":"Observed\nexceedences\n(> {} ugm⁻³)",
                 "x_axis_limits":[0,
                 100],
                 "units":"days",
@@ -1490,7 +1499,7 @@
           },
           "left-description-text" : "--------space--------    ----------------------time----------------------    ----observations----",
           "left-description":{
-            "xy": [-5.4, 0.05],
+            "xy": [-5.1, 0.05],
             "va":"bottom",
             "ha":"center",
             "rotation":"vertical",
