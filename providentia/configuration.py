@@ -869,7 +869,7 @@ class ProvConfiguration:
           
         # check have network information, 
         # if offline, throw message, stating are using default instead
-        # in download mode is allowed to not have network, so continue
+        # in download mode of non interpolated experiments is allowed to not have network, so continue
         if not self.read_instance.network and not (self.read_instance.download and not self.read_instance.interpolated):
             # default = ['GHOST']
             if self.read_instance.interpolation:
@@ -1060,6 +1060,11 @@ class ProvConfiguration:
             if not deactivate_warning and not self.read_instance.alias_flag:
                 msg = "Experiment alias could not be set."
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+
+        # before checking the experiment check that the remote download has the interpolated tag as False, if not exit
+        if self.read_instance.download and MACHINE in ["storage5","nord3v2"] and self.read_instance.interpolated is True:
+            error = F"Error: Nothing from the {self.read_instance.section} section was copied to gpfs, change the interpolated field to 'False'."
+            exit(error)
 
         # get correct check experiment function
         # TODO do it using heritage
