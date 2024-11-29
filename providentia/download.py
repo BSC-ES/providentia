@@ -172,30 +172,22 @@ class ProvidentiaDownload(object):
             signal.signal(signal.SIGINT, sighandler)
 
             # in the case of doing the download in mn5, check if the experiment has the interpolated tag as False
-            # TODO add nored3v2 in the future
             if self.machine in ["storage5","nord3v2"]:
-                # if the tag is True, show a warning an skip the section
-                if self.interpolated is True:
-                    msg = f"Nothing from the {self.section} section was copied to gpfs, change the interpolated field to 'False'."
-                    show_message(self, msg)
-                    continue
-                # if it is False, start the download
-                else:
-                    # when one of those symbols is passed, get all experiments
-                    if self.experiments == {'*': '*'}:
-                        self.get_all_experiments()
+                # when one of those symbols is passed, get all experiments
+                if self.experiments == {'*': '*'}:
+                    self.get_all_experiments()
 
-                    # download from the remote machine
-                    if self.experiments:
-                        # iterate the experiments download
-                        for experiment in self.experiments.keys():
-                            initial_check_nc_files = self.copy_non_interpolated_experiment(experiment, initial_check=True)
-                            files_to_download = self.select_files_to_download(initial_check_nc_files)
-                            if not initial_check_nc_files or files_to_download:
-                                self.copy_non_interpolated_experiment(experiment, initial_check=False, files_to_copy=files_to_download)
-                    else:
-                        error = "Error: No experiments available to be downloaded."
-                        sys.exit(error)
+                # download from the remote machine
+                if self.experiments:
+                    # iterate the experiments download
+                    for experiment in self.experiments.keys():
+                        initial_check_nc_files = self.copy_non_interpolated_experiment(experiment, initial_check=True)
+                        files_to_download = self.select_files_to_download(initial_check_nc_files)
+                        if not initial_check_nc_files or files_to_download:
+                            self.copy_non_interpolated_experiment(experiment, initial_check=False, files_to_copy=files_to_download)
+                else:
+                    error = "Error: No experiments available to be downloaded."
+                    sys.exit(error)
             
             # in local continue as normally
             else:
@@ -1302,6 +1294,7 @@ class ProvidentiaDownload(object):
             show_message(self, msg, deactivate=initial_check)
             
     def copy_non_interpolated_experiment(self, experiment, initial_check, files_to_copy=None):
+        print(" entra aki",initial_check)
         if not initial_check:
             # print current experiment
             print('\n'+'-'*40)
@@ -1495,6 +1488,11 @@ class ProvidentiaDownload(object):
                     # create directories if they don't exist
                     if not os.path.exists(gpfs_dir):
                         os.makedirs(gpfs_dir) 
+                    print("antes del newgrp")
+                    # change to primary group
+                    from subprocess import check_output
+                    out = check_output(["groups"])
+                    print(out)
 
                     # give to each directory 770 permissions and make group owner bsc32 
                     temp_gpfs_dir = gpfs_dir
