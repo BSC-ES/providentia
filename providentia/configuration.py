@@ -775,11 +775,24 @@ class ProvConfiguration:
         # if executed from the hpc machines and want to do a download, don't enter
         if experiment_exists is False and not (self.read_instance.machine != "local" and self.read_instance.download is True):
             # get the path to the non interpolated experiments
-            exp_to_interp_path = join(self.read_instance.exp_to_interp_root, experiment)
-            if os.path.exists(exp_to_interp_path):
-                experiment_exists = True
+            # in the current machine if it is an intepolation
+            if self.read_instance.interpolation is True:
+                exp_to_interp_path = join(self.read_instance.exp_to_interp_root, experiment)
+                if os.path.exists(exp_to_interp_path):
+                    experiment_exists = True
+            # in the remote machine if it is a local download
+            else:
+                # connect to the remote machine
+                self.read_instance.connect()        
+                # get all possible experiments
+                exp_to_interp_path = join(self.read_instance.exp_to_interp_remote_path,experiment,domain)
+                try:
+                    self.read_instance.sftp.stat(exp_to_interp_path)
+                    experiment_exists = True
+                except FileNotFoundError:
+                    pass     
             
-            msg += f"Cannot find the experiment ID '{experiment}' in '{self.read_instance.exp_to_interp_root}'."
+            msg += f"Cannot find the {experiment} experiment with the {domain} domain in '{self.read_instance.exp_to_interp_root}'."
 
         # if experiment does not exist, exit
         # supressed warning deactivation
