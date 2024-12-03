@@ -1059,7 +1059,6 @@ class ProvidentiaDownload(object):
             try:
                 self.sftp.stat(exp_dir)
                 exp_dir_functional_list.append(exp_dir)      
-                break
             except FileNotFoundError:
                 pass
 
