@@ -443,11 +443,16 @@ class Interactive:
             ghelper = get_taylor_diagram_ghelper(reference_stddev, self.plot_characteristics[plot_type])
             ax = fig.add_subplot(111, axes_class=fa.FloatingAxes, grid_helper=ghelper)
         elif base_plot_type == "fairmode-statsummary":
-            gs = gridspec.GridSpec(8, 4, **self.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
-            ax = []
-            for i in range(8):
-                for j in range(4):
-                    ax.append(fig.add_subplot(gs[i, j]))  
+            # get current species
+            speci = networkspeci.split('|')[1]
+
+            # get number of rows and columns
+            ncols = 4
+            nrows = 8 if speci in ["sconco3", "sconcno2", "pm10"] else 7
+
+            # create gridspec and add it to a list
+            gs = gridspec.GridSpec(nrows, ncols, **self.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
+            ax = [fig.add_subplot(gs[i, j]) for i in range(nrows) for j in range(ncols)]
         else:
             ax = fig.add_subplot(111)
 
@@ -686,9 +691,7 @@ class Interactive:
         elif n_stations == 0:
             print('No valid stations for {} in {} subsection. Not making {} plot'.format(networkspeci, self.subsection, plot_type))
             return
-            
-        # set title, xlabel and ylabel for plots
-
+        
         # set xlabel / ylabel
         if base_plot_type == 'periodic' or ((base_plot_type == 'timeseries') 
                                             and (chunk_stat is not None) 
@@ -813,8 +816,10 @@ class Interactive:
                             ax_to_plot = self.relevant_temporal_resolutions[0]
                         relevant_ax[ax_to_plot].legend(**legend_handles)
                     else:
-                        if base_plot_type in ['fairmode-target','fairmode-statsummary']:
+                        if base_plot_type in ['fairmode-target']:
                             print("Warning: Data labels legend cannot be plotted, create single legend using make_plot function.")
+                        elif base_plot_type in ['fairmode-statsummary']:
+                            relevant_ax[3].legend(**legend_handles)
                         else:
                             relevant_ax.legend(**legend_handles)
 
