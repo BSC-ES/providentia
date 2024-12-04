@@ -2157,17 +2157,10 @@ class Plot:
         beta = fairmode_settings[speci].get('beta')
         exc_threshold = fairmode_settings[speci].get('exc_threshold')
       
-        # get metadata without nans
-        classification_type = plot_characteristics['markers']['type'].lower()
+        # get station references
         valid_station_references = get_valid_metadata(self, 'station_reference', 
                                                       valid_station_idxs, networkspeci)
-        try:
-            valid_station_classifications = get_valid_metadata(self, f'{classification_type}_classification', 
-                                                            valid_station_idxs, networkspeci)
-        except:
-            valid_station_classifications = np.full(len(valid_station_references), np.NaN, dtype=np.float32)
-            print(f'Data for {classification_type}_classification is not available and will not be shown in the legend')
-
+        
         # get valid data labels for networkspeci
         valid_data_labels = self.canvas_instance.selected_station_data_labels[networkspeci]
 
@@ -2191,7 +2184,7 @@ class Plot:
             t_sd_list = []
             h_perc_list = []
         
-            for station_idx, (station, classification) in enumerate(zip(valid_station_references, valid_station_classifications)):
+            for station_idx, station in enumerate(valid_station_references):
 
                 st_observations_data = observations_data[station_idx, :]
                 st_experiment_data = experiment_data[station_idx, :]
@@ -2342,7 +2335,7 @@ class Plot:
             # add the title
             # plt.suptitle(**plot_characteristics["auxiliar"]["title"])
             
-            # add the classifications on the left of the plot
+            # add information on the left of the plot
             if Version(matplotlib.__version__) >= Version("3.3"):
                 relevant_axis[-4].annotate(text=plot_characteristics["auxiliar"]["left-description-text"],
                                         **plot_characteristics["auxiliar"]["left-description"])
