@@ -750,10 +750,7 @@ class ProvidentiaOffline:
                             
                             # create gridspec and add it to a list
                             gs = gridspec.GridSpec(nrows, ncols, **plot_characteristics["gridspec_kw"])
-                            grid_list = []
-                            for i in range(nrows):
-                                for j in range(ncols):
-                                    grid_list.append(fig.add_subplot(gs[i, j]))
+                            grid_list = [fig.add_subplot(gs[i, j]) for i in range(nrows) for j in range(ncols)]
                             
                             # setup dictionary
                             self.plot_dictionary[page_n]['axs'].append({'handle':grid_list, 'data_labels':[]})

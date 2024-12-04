@@ -299,7 +299,7 @@ class HoverAnnotation(object):
         # activate hover over plot
         if (plot_type in self.canvas_instance.read_instance.active_dashboard_plots):
             if event.inaxes == self.canvas_instance.plot_axes[plot_type]:
-                search_plot = 'fairmode_target' if plot_type == 'fairmode-target' else plot_type
+                search_plot = plot_type.replace('-','_') if plot_type in ['fairmode-target', 'fairmode-statsummary'] else plot_type
                 if ((hasattr(self.canvas_instance.plot, search_plot + '_plot')) 
                     and (plot_type in self.canvas_instance.plot_elements)
                     and (self.canvas_instance.annotations_lock[plot_type] == False)):
@@ -498,6 +498,45 @@ class HoverAnnotation(object):
 
                 # update bbox position
                 if x > self.x_middle['fairmode-target']:
+                    self.annotation.set_x(-10)
+                    self.annotation.set_ha('right')
+                else:
+                    self.annotation.set_x(10)
+                    self.annotation.set_ha('left')
+
+                # create annotation text
+                # experiment label
+                text_label = copy.deepcopy(data_label)
+                # observations label
+                text_label += ('\n{0}: {1:.{2}f}').format('CRMSE / β·RMSᵤ', x, self.round_decimal_places)
+                # experiment label
+                text_label += ('\n{0}: {1:.{2}f}').format('Mean Bias / β·RMSᵤ', y, self.round_decimal_places)
+
+        self.annotation.set_text(text_label)
+
+        return None
+    
+    # TODO adapt method
+    def update_fairmode_statsummary_annotation(self, annotation_index):
+
+        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
+
+            # for annotate data label
+            if data_label == self.annotate_data_label:
+                # do not annotate if plot is cleared
+                if data_label not in self.canvas_instance.plot_elements['fairmode-statsummary'][self.canvas_instance.plot_elements['fairmode-statsummary']['active']].keys():
+                    continue
+
+                # retrieve CRMSE / β·RMSᵤ and Mean Bias / β·RMSᵤ
+                line = self.canvas_instance.plot_elements['fairmode-statsummary'][self.canvas_instance.plot_elements['fairmode-statsummary']['active']][data_label]['plot'][0]
+                x = line.get_xdata()[annotation_index['ind'][0]]
+                y = line.get_ydata()[annotation_index['ind'][0]]
+
+                # update location
+                self.annotation.xy = (x, y)
+
+                # update bbox position
+                if x > self.x_middle['fairmode-statsummary']:
                     self.annotation.set_x(-10)
                     self.annotation.set_ha('right')
                 else:
