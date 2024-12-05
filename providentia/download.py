@@ -301,6 +301,7 @@ class ProvidentiaDownload(object):
         self.ghost_remote_obs_path = data_paths[REMOTE_MACHINE]["ghost_root"]
         self.nonghost_remote_obs_path = data_paths[REMOTE_MACHINE]["nonghost_root"]
         self.exp_remote_path = data_paths[REMOTE_MACHINE]["exp_root"]
+        self.exp_to_interp_remote_path = data_paths[REMOTE_MACHINE]["exp_to_interp_root"]
 
         # get public remote machine public key and add it to ssh object
         _, output = subprocess.getstatusoutput(f"ssh-keyscan -t ed25519 {self.remote_hostname}")
@@ -1067,48 +1068,72 @@ class ProvidentiaDownload(object):
         if ensemble_options.startswith("stat_"): 
             stat = ensemble_options.split("_",1)[-1]
 
-        # get experiment type
+        # initialise warning message and experiment exists boolean
+        msg = ""
+        experiment_exists = False
+
+        # see if the experiment is any of the interp_experiment.yaml lists
         for experiment_type, experiment_dict in interp_experiments.items():
             if exp_id in experiment_dict["experiments"]:
+                experiment_exists = True
                 break
         
-        # get experiment specific directories list
-        exp_dir_list = experiment_dict["paths"]
+        # if it is in the list, check if the paths work
+        if experiment_exists is True:
+            # get boolean to False again until the paths works
+            experiment_exists = False
 
-        # take all functional directories
-        exp_dir_functional_list = []    
-        for exp_dir in exp_dir_list:
-            # esarchive in transfer5 is located inside gpfs
-            if "/esarchive/" == exp_dir[:11]:
-                exp_dir = join("/gpfs/archive/bsc32/",exp_dir[1:])
-            # check if directory exists in the remote machine
-            try:
-                self.sftp.stat(exp_dir)
-                exp_dir_functional_list.append(exp_dir)      
-            except FileNotFoundError:
-                pass
+            # get all paths that work
+            # if there is none, show a warning
+            exp_dir_functional_list = []    
+            for exp_dir in experiment_dict["paths"]:
+                # esarchive in transfer5 is located inside gpfs
+                if "/esarchive/" == exp_dir[:11]:
+                    exp_dir = join("/gpfs/archive/bsc32/",exp_dir[1:])
+                # check if directory exists in the remote machine
+                try:
+                    self.sftp.stat(exp_dir)
+                    exp_dir_functional_list.append(exp_dir)      
+                except FileNotFoundError:
+                    pass
 
-        # if none of the paths are in this current machine, break
-        if not exp_dir_functional_list:
-            msg = f"None of the paths specified in {join('settings', 'interp_experiments.yaml')} are available on the remote machine ({REMOTE_MACHINE})."
-            show_message(self, msg, deactivate=initial_check)
-            return
-        
-        # take first functional directory  
-        remote_dir = None
-        for exp_dir in exp_dir_functional_list:
-            temp_remote_dir = join(exp_dir,exp_id,domain)
-            # check if remote experiment and domain directories exist in the remote machine
+            # if none of the paths are in this current machine, break
+            if not exp_dir_functional_list:
+                msg += f"None of the paths specified in {join('settings', 'interp_experiments.yaml')} are available on the remote machine ({REMOTE_MACHINE}). "
+            # if any path works, get the first one that has the experiment
+            else:
+                # get first functional directory  
+                for exp_dir in exp_dir_functional_list:
+                    remote_dir = join(exp_dir,exp_id,domain)
+                    # check if remote experiment and domain directories exist in the remote machine
+                    try:
+                        self.sftp.stat(remote_dir)
+                        experiment_exists = True
+                        break
+                    except FileNotFoundError:
+                        pass
+
+                # if the experiment-domain combination is not possible, show the warning
+                if experiment_exists is False:
+                    msg += f"There is no data available for the {exp_id} experiment with the {domain} domain in none of the paths specified in {join('settings', 'interp_experiments.yaml')} in the remote machine ({REMOTE_MACHINE}). "
+
+        # if experiment was not in the list, or any of the paths were available
+        # or there was no valid path experiment combination then search in the gpfs directory
+        if experiment_exists is False:
+            # get all possible experiments
+            exp_to_interp_path = join(self.exp_to_interp_remote_path,exp_id,domain)
             try:
-                self.sftp.stat(temp_remote_dir)
-                remote_dir = temp_remote_dir
-                break
+                self.sftp.stat(exp_to_interp_path)
+                remote_dir = exp_to_interp_path
+                experiment_exists = True
             except FileNotFoundError:
-                pass
+                pass 
+            
+            # add to the message if experiment was not found in the gpfs remote directory
+            msg += f"Cannot find the {exp_id} experiment with the {domain} domain in '{self.exp_to_interp_remote_path}'."    
         
-        # if the experiment-domain combination is possible, break
-        if remote_dir is None:
-            msg = f"There is no data available for the {exp_id} experiment with the {domain} domain in none of the paths specified in {join('settings', 'interp_experiments.yaml')} in the remote machine ({REMOTE_MACHINE})."
+        # if the experiment-domain combination is not possible, break
+        if experiment_exists is False:
             show_message(self, msg, deactivate=initial_check)
             return
 
@@ -1183,7 +1208,7 @@ class ProvidentiaDownload(object):
             for remote_dir in res_spec_dir:
                 if not initial_check:
                     local_path = remote_dir.split('/',7)[-1]
-                    print(f"\n  - {join(self.exp_to_interp_root,local_path)}")
+                    print(f"\n  - {join(self.exp_to_interp_root,local_path)}, source: {remote_dir}")
                          
                 # get nc files
                 nc_files = self.sftp.listdir(remote_dir)
