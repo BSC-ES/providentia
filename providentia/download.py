@@ -1059,7 +1059,6 @@ class ProvidentiaDownload(object):
             try:
                 self.sftp.stat(exp_dir)
                 exp_dir_functional_list.append(exp_dir)      
-                break
             except FileNotFoundError:
                 pass
 
@@ -1157,7 +1156,7 @@ class ProvidentiaDownload(object):
             # get all the nc files in the date range
             for remote_dir in res_spec_dir:
                 if not initial_check:
-                    local_path = remote_dir.split('/',7)[-1]
+                    local_path = remote_dir.split('/',8)[-1]
                     print(f"\n  - {join(self.exp_to_interp_root,local_path)}")
                          
                 # get nc files
