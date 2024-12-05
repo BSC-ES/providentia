@@ -2,6 +2,7 @@ import ast
 from calendar import monthrange
 import cartopy.crs as ccrs
 import cftime
+import copy
 import glob
 import os
 import shutil
@@ -184,13 +185,13 @@ class ExperimentInterpolation(object):
             
             try:
                 # load instance of model file netCDF
-                self.mod_nc_root = Dataset(model_file)
+                mod_nc_root = Dataset(model_file)
 
                 # get all variable names in file
-                mod_nc_varnames = list(self.mod_nc_root.variables.keys())
+                mod_nc_varnames = list(mod_nc_root.variables.keys())
 
                 # get instance of species variable
-                mod_speci_obj = self.mod_nc_root[self.speci_to_process]
+                mod_speci_obj = mod_nc_root[self.speci_to_process]
     
                 # get species units
                 self.mod_speci_units = mod_speci_obj.units
@@ -202,6 +203,9 @@ class ExperimentInterpolation(object):
                 grid_dimensions = mod_speci_obj.dimensions
 
             except Exception as e:
+                # in case of exception close model netCDF root
+                mod_nc_root.close()
+                
                 # if have got to last file of month and that is corrupted, return from function
                 if model_file_ii == (len(self.model_files)-1):
                     self.log_file_str += 'All model files corrupted in {}. Skipping month. \n'.format(self.yearmonth)
@@ -231,7 +235,7 @@ class ExperimentInterpolation(object):
                 self.z_varname = mod_speci_obj.dimensions[1]
                 
                 # check if vertical dimension goes up or down to get correct index for surface
-                mod_vert_obj = self.mod_nc_root[self.z_varname]
+                mod_vert_obj = mod_nc_root[self.z_varname]
                 direction = mod_vert_obj.positive
                 
                 # if direction == 'up', surface index is location of mininum value in z var
@@ -270,8 +274,8 @@ class ExperimentInterpolation(object):
                     create_output_logfile(1, self.log_file_str)
 
             # get instances of x/y grid dimension variables
-            mod_lon_obj = self.mod_nc_root[self.x_varname]
-            mod_lat_obj = self.mod_nc_root[self.y_varname]
+            mod_lon_obj = mod_nc_root[self.x_varname]
+            mod_lat_obj = mod_nc_root[self.y_varname]
 
             # get size of x/y grid dimensions
             self.x_N = mod_lon_obj.size
@@ -298,8 +302,8 @@ class ExperimentInterpolation(object):
                 create_output_logfile(1, self.log_file_str)
 
             # get longitude and latitude grid centre values
-            self.mod_lons_centre = np.float32(self.mod_nc_root[lon_centre_varname][:])
-            self.mod_lats_centre = np.float32(self.mod_nc_root[lat_centre_varname][:])
+            self.mod_lons_centre = np.float32(mod_nc_root[lon_centre_varname][:])
+            self.mod_lats_centre = np.float32(mod_nc_root[lat_centre_varname][:])
             
             # check if there are coordinates to remap
             lons_to_remap = self.mod_lons_centre[np.where(self.mod_lons_centre > 180.0)]
@@ -320,6 +324,12 @@ class ExperimentInterpolation(object):
                 else: 
                     self.log_file_str += 'Cannot handle grid of type: {} with these coordinates. Please remap. Terminating process'.format(self.mod_grid_type)
                     create_output_logfile(1, self.log_file_str)
+            
+            # close model netCDF root
+            mod_nc_root.close()
+
+            # get the last valid model file
+            self.valid_model_file = copy.deepcopy(model_file)
 
             # break out of for loop, now that have read a valid model file in the month
             break
@@ -336,6 +346,8 @@ class ExperimentInterpolation(object):
             This is handled differently for regular grids (i.e. following lines of longitude/latitude), 
             and non-regular grids (e.g. lambert-conformal).
         """
+        # load instance of model file netCDF
+        mod_nc_root = Dataset(self.valid_model_file)
 
         # if grid type == 'crs, then is regular grid
         if self.mod_grid_type == 'crs':
@@ -355,7 +367,7 @@ class ExperimentInterpolation(object):
             self.general_grid_type = 'non-regular'
 
             # get instance of variable which defines key variables associated with the non-regular grid
-            non_regular_grid_type_obj = self.mod_nc_root[self.mod_grid_type]
+            non_regular_grid_type_obj = mod_nc_root[self.mod_grid_type]
 
             # get non-regular grid-specific variables used for defining coordinate reference system
             if self.mod_grid_type == 'rotated_pole':
@@ -379,8 +391,8 @@ class ExperimentInterpolation(object):
                 central_latitude  = np.float32(non_regular_grid_type_obj.latitude_of_projection_origin)
 
             # read in non-regular grid x/y grid centre coordinates 
-            x_centre = np.float32(self.mod_nc_root[self.x_varname][:])
-            y_centre = np.float32(self.mod_nc_root[self.y_varname][:])
+            x_centre = np.float32(mod_nc_root[self.x_varname][:])
+            y_centre = np.float32(mod_nc_root[self.y_varname][:])
 
         # the grid type cannot be handled, therefore terminate process
         else:
@@ -473,7 +485,7 @@ class ExperimentInterpolation(object):
         self.model_grid_outline_poly = Polygon(self.model_grid_outline)
 
         # close model netCDF root - now have all neccessary grid information
-        self.mod_nc_root.close()
+        mod_nc_root.close()
 
     def get_observational_objects(self):
 
@@ -486,37 +498,54 @@ class ExperimentInterpolation(object):
         obs_nc_root = Dataset(self.obs_file)
 
         # get measured observational variable object 
-        self.obs_measured_var_obj = obs_nc_root[self.original_speci_to_process]
+        obs_measured_var_obj = obs_nc_root[self.original_speci_to_process]
+
+        # get the metadata
+        self.obs_long_name = obs_measured_var_obj.long_name
+        self.obs_units = obs_measured_var_obj.units
+        self.obs_standard_name = obs_measured_var_obj.standard_name
 
         # station object
         # for GHOST always is "station_reference" 
-        #for non-GHOST, try for "station_reference", then "station_code", then "station_name".
+        # for non-GHOST, try for "station_reference", then "station_code", then "station_name".
         if self.reading_ghost:
-            self.obs_station_reference_obj = obs_nc_root['station_reference']
+            obs_station_reference_obj = obs_nc_root['station_reference']
         else:
             if 'station_reference' in obs_nc_root.variables:
-                self.obs_station_reference_obj = obs_nc_root['station_reference']
+                obs_station_reference_obj = obs_nc_root['station_reference']
             elif 'station_code' in obs_nc_root.variables:
-                self.obs_station_reference_obj = obs_nc_root['station_code']
+                obs_station_reference_obj = obs_nc_root['station_code']
             elif 'station_name' in obs_nc_root.variables:
-                self.obs_station_reference_obj = obs_nc_root['station_name']
+                obs_station_reference_obj = obs_nc_root['station_name']
+
+        # get station references atributes
+        self.obs_station_reference_standard_name = obs_station_reference_obj.standard_name
+        self.obs_station_reference_long_name = obs_station_reference_obj.long_name
+        self.obs_station_reference_units = obs_station_reference_obj.units
+        self.obs_station_reference_description = obs_station_reference_obj.description
 
         # lon/lat objects
         if "latitude" in obs_nc_root.variables:
-            self.obs_lon_obj = obs_nc_root['longitude']
-            self.obs_lat_obj = obs_nc_root['latitude']
+            obs_lon_obj = obs_nc_root['longitude']
+            obs_lat_obj = obs_nc_root['latitude']
         else:
-            self.obs_lon_obj = obs_nc_root['lon']
-            self.obs_lat_obj = obs_nc_root['lat']
+            obs_lon_obj = obs_nc_root['lon']
+            obs_lat_obj = obs_nc_root['lat']
+
+        # get lon lat atributes
+        self.obs_lat_obj_standard_name, self.obs_lon_obj_standard_name = obs_lat_obj.standard_name, obs_lon_obj.standard_name
+        self.obs_lat_obj_units, self.obs_lon_obj_units = obs_lat_obj.units, obs_lon_obj.units
+        self.obs_lat_obj_long_name, self.obs_lon_obj_long_name = obs_lat_obj.long_name, obs_lon_obj.long_name
+        self.obs_lat_obj_description, self.obs_lon_obj_description = obs_lat_obj.description, obs_lon_obj.description
 
         # get station data
         # GHOST
         if self.reading_ghost:
-            self.station_references = self.obs_station_reference_obj[:]
+            self.station_references = obs_station_reference_obj[:]
         # non-GHOST
         else:
-            meta_shape = self.obs_station_reference_obj.shape
-            self.station_references = self.obs_station_reference_obj[:]
+            meta_shape = obs_station_reference_obj.shape
+            self.station_references = obs_station_reference_obj[:]
             meta_val_dtype = np.array([self.station_references[0]]).dtype
 
             if len(meta_shape) == 2:
@@ -530,8 +559,8 @@ class ExperimentInterpolation(object):
         self.station_references = self.station_references[non_nan_station_indices]
 
         # get valid longitude and latitudes
-        self.obs_lons = self.obs_lon_obj[non_nan_station_indices]
-        self.obs_lats = self.obs_lat_obj[non_nan_station_indices]
+        self.obs_lons = obs_lon_obj[non_nan_station_indices]
+        self.obs_lats = obs_lat_obj[non_nan_station_indices]
 
         # close the nc file
         obs_nc_root.close()
@@ -544,7 +573,7 @@ class ExperimentInterpolation(object):
         """ Get conversion factor between observations and experiment data. """
 
         # get units conversion factor between model and observations (go from model to observational units)    
-        obs_speci_units = self.obs_measured_var_obj.units
+        obs_speci_units = self.obs_units
 
         # if units are unitless, then no need for conversion (i.e. conversion factor = 1.0)   
         if (obs_speci_units == 'unitless') or (obs_speci_units == '-') or (obs_speci_units == '1'):
@@ -688,10 +717,11 @@ class ExperimentInterpolation(object):
             try:
                 print("for 11",self.yearmonth)
                 # read in chunked netcdf file
-                self.mod_nc_root = Dataset(model_file)
+                mod_nc_root = Dataset(model_file)
+            
                 print("for 2",self.yearmonth)
                 # check if have time dimension in daily file, if do not, do not process file
-                if 'time' not in list(self.mod_nc_root.dimensions.keys()):
+                if 'time' not in list(mod_nc_root.dimensions.keys()):
                     self.log_file_str += 'File {} is corrupt. Skipping.\n'.format(model_file)
                     failed_files += 1
                     continue 
@@ -704,9 +734,9 @@ class ExperimentInterpolation(object):
                 print("for 4",self.yearmonth)
                 # get file time (handle monthly resolution data differently to hourly/daily
                 # as num2date does not support 'months since' units)
-                file_time = self.mod_nc_root['time'][:] 
-                time_units = self.mod_nc_root['time'].units
-                time_calendar = self.mod_nc_root['time'].calendar
+                file_time = mod_nc_root['time'][:] 
+                time_units = mod_nc_root['time'].units
+                time_calendar = mod_nc_root['time'].calendar
                 print("for 5",self.yearmonth)
                 if 'months' in time_units:
                     monthly_start_date = time_units.split(' ')[2]
@@ -775,7 +805,7 @@ class ExperimentInterpolation(object):
                 # read valid data from file for valid indices
                 # have bin dimension?
                 if self.have_bin_dimension:
-                    read_data = self.mod_nc_root[self.speci_to_process][valid_file_time_inds,bin_index,:,:]
+                    read_data = mod_nc_root[self.speci_to_process][valid_file_time_inds,bin_index,:,:]
                     
                     # convert model units from kg m-2 to um3/um2
                     read_data = 1e6 * read_data / rho_bin
@@ -784,17 +814,18 @@ class ExperimentInterpolation(object):
                     read_data = read_data * bin_transform_factor
                 # has vertical dimension 
                 elif self.have_vertical_dimension:
-                    read_data = self.mod_nc_root[self.speci_to_process][valid_file_time_inds,self.z_index,:,:] 
+                    read_data = mod_nc_root[self.speci_to_process][valid_file_time_inds,self.z_index,:,:] 
                 # has no vertical dimension?
                 else:
-                    read_data = self.mod_nc_root[self.speci_to_process][valid_file_time_inds,:,:]
+                    read_data = mod_nc_root[self.speci_to_process][valid_file_time_inds,:,:]
                 print("for 13",self.yearmonth)
                 print(self.conversion_factor,self.yearmonth)
                 # convert model units to observational units
-                read_data = read_data * self.conversion_factor
+                print(type(read_data),type(self.conversion_factor),self.yearmonth)
+                print(read_data*self.conversion_factor,self.yearmonth)
+                # read_data = read_data * self.conversion_factor
                 print("for 14",self.yearmonth)
                 # set any model values outside GHOST extreme limits for variable to be NaN
-                print(type(read_data),self.yearmonth)
                 read_data[(read_data < self.GHOST_speci_lower_limit) | (read_data > self.GHOST_speci_upper_limit)] = np.NaN 
                 print("for 15",self.yearmonth)
                 # create xarray for resampling
@@ -826,15 +857,14 @@ class ExperimentInterpolation(object):
                 print("for 18",self.yearmonth)
                 # fill in data array
                 self.monthly_model_data[inds_to_fill,:,:] = xr_data.values
-                print("for 19",self.yearmonth)
-                # close chunked model netcdf
-                self.mod_nc_root.close()
-                print("for 20",self.yearmonth)
 
             except Exception as e:
                 print("4",self.yearmonth)
                 self.log_file_str += 'File {} is corrupt. Skipping.\n{}'.format(model_file, traceback.format_exc())
                 failed_files += 1
+
+            # close chunked model netcdf
+            mod_nc_root.close()
         print("5",self.yearmonth)
         if failed_files == len(self.model_files):
             self.log_file_str += 'No model dataset could be interpolated.'
@@ -987,26 +1017,26 @@ class ExperimentInterpolation(object):
                 # create observational equivalent station reference variable
                 station_reference_var = root_grp.createVariable('station_reference', str, ('station'))
                 if self.reading_ghost:
-                    station_reference_var.standard_name = self.obs_station_reference_obj.standard_name
-                    station_reference_var.long_name = self.obs_station_reference_obj.long_name
-                    station_reference_var.units = self.obs_station_reference_obj.units
-                    station_reference_var.description = self.obs_station_reference_obj.description
+                    station_reference_var.standard_name = self.obs_station_reference_standard_name
+                    station_reference_var.long_name = self.obs_station_reference_long_name
+                    station_reference_var.units = self.obs_station_reference_units
+                    station_reference_var.description = self.obs_station_reference_description
 
                 # create observational equivalent longitude/latitude variables
                 longitude_var = root_grp.createVariable('longitude', 'f8', ('station'))
                 if self.reading_ghost:
-                    longitude_var.standard_name = self.obs_lon_obj.standard_name
-                    longitude_var.units = self.obs_lon_obj.units
-                    longitude_var.long_name = self.obs_lon_obj.long_name
-                    longitude_var.description = self.obs_lon_obj.description
+                    longitude_var.standard_name = self.obs_lon_obj_standard_name
+                    longitude_var.units = self.obs_lon_obj_units
+                    longitude_var.long_name = self.obs_lon_obj_long_name
+                    longitude_var.description = self.obs_lon_obj_description
                 longitude_var.axis = 'X'
 
                 latitude_var = root_grp.createVariable('latitude', 'f8', ('station'))
                 if self.reading_ghost:
-                    latitude_var.standard_name = self.obs_lat_obj.standard_name
-                    latitude_var.units = self.obs_lat_obj.units
-                    latitude_var.long_name = self.obs_lat_obj.long_name
-                    latitude_var.description = self.obs_lat_obj.description
+                    latitude_var.standard_name = self.obs_lat_obj_standard_name
+                    latitude_var.units = self.obs_lat_obj_units
+                    latitude_var.long_name = self.obs_lat_obj_long_name
+                    latitude_var.description = self.obs_lat_obj_description
                 latitude_var.axis = 'Y'
 
                 # create 2D meshed longitude/latitude gridcell centre variables
@@ -1014,7 +1044,7 @@ class ExperimentInterpolation(object):
                                                                      ('model_latitude','model_longitude'))
                 model_centre_longitude_var.standard_name = 'model centre longitude'
                 model_centre_longitude_var.long_name = 'model centre longitude'
-                model_centre_longitude_var.units = self.obs_lon_obj.units
+                model_centre_longitude_var.units = self.obs_lon_obj_units
                 msg = '2D meshed grid centre longitudes with '
                 msg += '{} longitudes in {} bands of latitude'.format(self.x_N, self.y_N)
                 model_centre_longitude_var.description = msg
@@ -1024,7 +1054,7 @@ class ExperimentInterpolation(object):
                                                                     ('model_latitude','model_longitude'))
                 model_centre_latitude_var.standard_name = 'model centre latitude'
                 model_centre_latitude_var.long_name = 'model centre latitude'
-                model_centre_latitude_var.units = self.obs_lat_obj.units
+                model_centre_latitude_var.units = self.obs_lat_obj_units
                 msg = '2D meshed grid centre longitudes with '
                 msg += '{} longitudes in {} bands of latitude'.format(self.y_N, self.x_N)
                 model_centre_latitude_var.description = msg
@@ -1034,7 +1064,7 @@ class ExperimentInterpolation(object):
                 grid_edge_longitude_var = root_grp.createVariable('grid_edge_longitude', 'f8', ('grid_edge'))   
                 grid_edge_longitude_var.standard_name = 'grid edge longitude'
                 grid_edge_longitude_var.long_name = 'grid edge longitude'
-                grid_edge_longitude_var.units = self.obs_lon_obj.units
+                grid_edge_longitude_var.units = self.obs_lon_obj_units
                 msg = 'Longitude coordinate along edge of grid domain '
                 msg += '(going clockwise around grid boundary from bottom-left corner).'
                 grid_edge_longitude_var.description = msg
@@ -1043,7 +1073,7 @@ class ExperimentInterpolation(object):
                 grid_edge_latitude_var = root_grp.createVariable('grid_edge_latitude', 'f8', ('grid_edge'))
                 grid_edge_latitude_var.standard_name = 'grid edge latitude'
                 grid_edge_latitude_var.long_name = 'grid edge latitude'
-                grid_edge_latitude_var.units = self.obs_lat_obj.units
+                grid_edge_latitude_var.units = self.obs_lat_obj_units
                 msg = 'Latitude coordinate along edge of grid domain '
                 msg += '(going clockwise around grid boundary from bottom-left corner).'
                 grid_edge_latitude_var.description = msg
@@ -1053,12 +1083,12 @@ class ExperimentInterpolation(object):
                 measured_var = root_grp.createVariable(self.original_speci_to_process, 'f4', ('station', 'time'))
                 # GHOST
                 if self.reading_ghost:
-                    measured_var.long_name = self.obs_measured_var_obj.long_name
-                    measured_var.units = self.obs_measured_var_obj.units
-                    measured_var.standard_name = self.obs_measured_var_obj.standard_name
+                    measured_var.long_name = self.obs_long_name
+                    measured_var.units = self.obs_units
+                    measured_var.standard_name = self.obs_standard_name
                     measured_var.description = 'Interpolated value of {} from the experiment {} ' \
                                           'with reference to the measurement stations in the {} network'.format(
-                        self.obs_measured_var_obj.standard_name, self.experiment_to_process, 
+                        self.obs_standard_name, self.experiment_to_process, 
                         self.network_to_interpolate_against)
                 # non-GHOST
                 else:

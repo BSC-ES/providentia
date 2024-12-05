@@ -4,7 +4,7 @@ module purge
 # Marenostrum5
 if [ "${BSC_MACHINE}" == "mn5" ]; then
     module load intel/2024.1 impi/2021.12
-    module load greasy/2.2.4.1
+    module load greasy/2.2.4.2
     module load hdf5/1.14.4.2 netcdf/c-4.9.2_hdf5-1.14.4.2 pnetcdf/1.12.3 libexpat udunits 
     module load nco/5.2.4
 
