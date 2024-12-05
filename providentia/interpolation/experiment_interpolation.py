@@ -126,8 +126,8 @@ class ExperimentInterpolation(object):
                     exp_dir = temp_exp_dir
                     break
 
-            # add file to directory path
-            exp_dir += f"{self.experiment_to_process}/" 
+            # add experiment to directory path
+            exp_dir  = join(exp_dir,self.experiment_to_process)
 
         # define if network is in GHOST format
         self.reading_ghost = check_for_ghost(self.network_to_interpolate_against)
