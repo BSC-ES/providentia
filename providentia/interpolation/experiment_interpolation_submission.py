@@ -174,8 +174,8 @@ class SubmitInterpolation(object):
                     error = f"Error: None of the experiment paths in {join('settings', 'interp_experiments.yaml')} are available in this machine ({MACHINE})."
                     sys.exit(error)
                 
-                # add file to directory path
-                exp_dir += f"{experiment_to_process}/"
+                # add experiment to directory path
+                exp_dir = join(exp_dir,experiment_to_process)
 
             # get model bin edges
             r_edges, rho_bins = get_model_bin_radii(experiment_type)
