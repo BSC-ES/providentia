@@ -13,7 +13,6 @@ from base64 import decodebytes
 import signal
 import copy
 import time
-import shutil
 
 # urlparse
 from tqdm import tqdm
@@ -1190,53 +1189,53 @@ class ProvidentiaDownload(object):
                 nc_files = self.sftp.listdir(remote_dir)
 
                 if nc_files:
-                        # if it is an ensemble member
-                        if not ensemble_options.startswith("stat_"):
-                            # get the domain, resolution and species from the path
-                            domain, resolution, species = remote_dir.split('/')[-3:]
+                    # if it is an ensemble member
+                    if not ensemble_options.startswith("stat_"):
+                        # get the domain, resolution and species from the path
+                        domain, resolution, species = remote_dir.split('/')[-3:]
 
-                            # identify format of the directory
-                            # the format is a tuple of how many - and how many _ are there
-                            # the directory format is choosen by popularity
-                            formats_list = [(file.count("-"), file.count("_")) for file in nc_files]
-                            number_of_formats_dict = {format: formats_list.count(format) for format in set(formats_list)}
-                            format = max(number_of_formats_dict, key=number_of_formats_dict.get)
-                            
-                            # filter and get only the files that follow the format
-                            nc_files = list(filter(lambda x:(x.count("-"),x.count("_")) == format,nc_files))
-                            
-                            # example: od550du_2019040212.nc (0,1)
-                            if format == (0,1):
-                                # when there is no ensemble option in the name only allmembers and 000 are valid
-                                if ensemble_options == '000' or ensemble_options == 'allmembers':
-                                    nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
-                                else:
-                                    msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble_options} ensemble option."
-                                    show_message(self, msg, deactivate=initial_check)
-                                    continue
-                            # example: od550du-000_2021020812.nc (1,1)
-                            elif format == (1,1):
-                                # filter by ensemble option in case that ensemble option is not allmembers
-                                if ensemble_options != 'allmembers':
-                                    nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble_options,nc_files))
-                                # if there is no options with the ensemble option, tell the user
-                                if nc_files is []:
-                                    msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble_options} ensemble option."
-                                    show_message(self, msg, deactivate=initial_check)
-                                    continue
-                            else:
-                                # TODO delete this in the future
-                                error = "It is not possible to download this nc file type yet. Please, contact the developers.", nc_files
-                                sys.exit(error)
+                        # identify format of the directory
+                        # the format is a tuple of how many - and how many _ are there
+                        # the directory format is choosen by popularity
+                        formats_list = [(file.count("-"), file.count("_")) for file in nc_files]
+                        number_of_formats_dict = {format: formats_list.count(format) for format in set(formats_list)}
+                        format = max(number_of_formats_dict, key=number_of_formats_dict.get)
                         
-                        # if it is an ensemble statistic
+                        # filter and get only the files that follow the format
+                        nc_files = list(filter(lambda x:(x.count("-"),x.count("_")) == format,nc_files))
+                        
+                        # example: od550du_2019040212.nc (0,1)
+                        if format == (0,1):
+                            # when there is no ensemble option in the name only allmembers and 000 are valid
+                            if ensemble_options == '000' or ensemble_options == 'allmembers':
+                                nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
+                            else:
+                                msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble_options} ensemble option."
+                                show_message(self, msg, deactivate=initial_check)
+                                continue
+                        # example: od550du-000_2021020812.nc (1,1)
+                        elif format == (1,1):
+                            # filter by ensemble option in case that ensemble option is not allmembers
+                            if ensemble_options != 'allmembers':
+                                nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble_options,nc_files))
+                            # if there is no options with the ensemble option, tell the user
+                            if nc_files is []:
+                                msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble_options} ensemble option."
+                                show_message(self, msg, deactivate=initial_check)
+                                continue
                         else:
-                            # get the domain, resolution and species from the path
-                            domain, resolution, _, species = remote_dir.split('/')[-4:]
-                            species = species.split("_",1)[0]
+                            # TODO delete this in the future
+                            error = "It is not possible to download this nc file type yet. Please, contact the developers.", nc_files
+                            sys.exit(error)
+                    
+                    # if it is an ensemble statistic
+                    else:
+                        # get the domain, resolution and species from the path
+                        domain, resolution, _, species = remote_dir.split('/')[-4:]
+                        species = species.split("_",1)[0]
 
-                            # filter the nc files to only get the ones that have the correct species and stats
-                            nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == stat, nc_files))
+                        # filter the nc files to only get the ones that have the correct species and stats
+                        nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == stat, nc_files))
                 
                 # get the nc files in the date range        
                 valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
@@ -1294,7 +1293,6 @@ class ProvidentiaDownload(object):
             show_message(self, msg, deactivate=initial_check)
             
     def copy_non_interpolated_experiment(self, experiment, initial_check, files_to_copy=None):
-        print(" entra aki",initial_check)
         if not initial_check:
             # print current experiment
             print('\n'+'-'*40)
@@ -1488,17 +1486,11 @@ class ProvidentiaDownload(object):
                     # create directories if they don't exist
                     if not os.path.exists(gpfs_dir):
                         os.makedirs(gpfs_dir) 
-                    print("antes del newgrp")
-                    # change to primary group
-                    from subprocess import check_output
-                    out = check_output(["groups"])
-                    print(out)
-
-                    # give to each directory 770 permissions and make group owner bsc32 
-                    temp_gpfs_dir = gpfs_dir
-                    for i in range(4):
-                        os.system(f"chmod 770 {temp_gpfs_dir}; chgrp bsc32 {temp_gpfs_dir}")
-                        temp_gpfs_dir = os.path.dirname(temp_gpfs_dir)
+                        # give to each directory 770 permissions and make group owner bsc32 
+                        temp_gpfs_dir = gpfs_dir
+                        for i in range(4):
+                            os.system(f"chmod 770 {temp_gpfs_dir}; chgrp bsc32 {temp_gpfs_dir}")
+                            temp_gpfs_dir = os.path.dirname(temp_gpfs_dir)
 
                     # sort nc_files
                     valid_nc_files.sort() 
@@ -1524,10 +1516,15 @@ class ProvidentiaDownload(object):
                             self.latest_nc_file_path = gpfs_path
                             esarchive_path = join(esarchive_dir, nc_file)
                             self.ncfile_dl_start_time = time.time()
-                            shutil.copy(esarchive_path, gpfs_path)
+                            # check if the file already exists
+                            new_file = not os.path.isfile(gpfs_path)
+                            # copy file
+                            with open(os.devnull, 'wb') as devnull:
+                                subprocess.check_call(['dtrsync', esarchive_path, gpfs_path], stdout=devnull, stderr=subprocess.STDOUT)
 
-                            # give to each file 770 permissions to directory and make group owner bsc32
-                            os.system(f"chmod 770 {gpfs_path}; chgrp bsc32 {gpfs_path}")
+                            if new_file:                        
+                                # give to each file 770 permissions to directory and make group owner bsc32
+                                os.system(f"chmod 770 {gpfs_path}; chgrp bsc32 {gpfs_path}")
             
             return initial_check_nc_files
 
