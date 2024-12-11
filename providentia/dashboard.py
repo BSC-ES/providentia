@@ -1071,8 +1071,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     if previous_plot_type == menu_plot_type:
                         menu_button.hide()
                         save_button.hide()
-                        if previous_plot_type in ['periodic_violin','fairmode_target','fairmode_statsummary']:
-                            previous_plot_type = previous_plot_type.replace('_','-')
+                        if previous_plot_type in ['periodic-violin','fairmode-target','fairmode-statsummary']:
+                            previous_plot_type = previous_plot_type.replace('-','_')
                         for element in getattr(self.mpl_canvas, previous_plot_type + '_elements'):
                             if isinstance(element, dict):
                                 for sub_element in element.values():
@@ -1222,7 +1222,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                 lambda event: annotation.hover_periodic_annotation(event, changed_plot_type))
             
-        elif changed_plot_type in ['timeseries', 'scatter', 'distribution', 'fairmode-target', 'fairmode-statsummary']:
+        elif changed_plot_type in ['timeseries', 'scatter', 'distribution', 'fairmode-target']:
             
             # add vertical line to timeseries and distribution plots
             if changed_plot_type in ['timeseries', 'distribution']:
@@ -1248,6 +1248,23 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # connect axis to hover function
             canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                 lambda event: annotation.hover_annotation(event, changed_plot_type))
+        
+        elif changed_plot_type =='fairmode-statsummary':
+            for ax in canvas_instance.plot_axes[changed_plot_type]:
+                annotation = HoverAnnotation(canvas_instance, 
+                                         changed_plot_type, 
+                                         ax,
+                                         canvas_instance.plot_characteristics[changed_plot_type], 
+                                         add_vline=False)
+                canvas_instance.annotations[changed_plot_type] = annotation.annotation
+                canvas_instance.annotations_lock[changed_plot_type] = False
+            
+                # connect axis to xlim change on zoom
+                ax.callbacks.connect('xlim_changed', lambda event: annotation.update_x_middle(event, changed_plot_type))
+            
+            # connect axis to hover function
+            canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
+                lambda event: annotation.hover_periodic_annotation(event, changed_plot_type))
 
     def handle_data_selection_update(self):
         """ Function which handles update of data selection
