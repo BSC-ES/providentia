@@ -2331,9 +2331,6 @@ class Plot:
                 # add row title
                 relevant_axis[i*4 + 0].text(*plot_characteristics["auxiliar"]["row_title"]["position"], row_title, 
                             **plot_characteristics["auxiliar"]["row_title"], transform=relevant_axis[i*4 + 0].transAxes)
-                    
-            # add the title
-            # plt.suptitle(**plot_characteristics["auxiliar"]["title"])
             
             # add information on the left of the plot
             if Version(matplotlib.__version__) >= Version("3.3"):
