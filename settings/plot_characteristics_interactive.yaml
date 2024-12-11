@@ -1228,7 +1228,7 @@
           "plot":
             {
               "loc": "upper right",
-              "bbox_to_anchor": [6, 1.2],
+              "bbox_to_anchor": [3.5, 1.2],
               "columnspacing": 0.5,
               "frameon": false,
               "handletextpad": 0,
