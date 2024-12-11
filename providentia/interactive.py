@@ -816,9 +816,9 @@ class Interactive:
                             ax_to_plot = self.relevant_temporal_resolutions[0]
                         relevant_ax[ax_to_plot].legend(**legend_handles)
                     else:
-                        if base_plot_type in ['fairmode-target']:
+                        if base_plot_type == 'fairmode-target':
                             print("Warning: Data labels legend cannot be plotted, create single legend using make_plot function.")
-                        elif base_plot_type in ['fairmode-statsummary']:
+                        elif base_plot_type == 'fairmode-statsummary':
                             relevant_ax[3].legend(**legend_handles)
                         else:
                             relevant_ax.legend(**legend_handles)
