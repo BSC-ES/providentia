@@ -265,6 +265,8 @@ class MPLCanvas(FigureCanvas):
             for relevant_temporal_resolution, sub_ax in ax.items():
                 if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
                     axs_to_reset.append(sub_ax)
+        elif isinstance(ax, list):
+            axs_to_reset = copy.deepcopy(ax)
         else:
             axs_to_reset.append(ax)
 
@@ -1589,7 +1591,7 @@ class MPLCanvas(FigureCanvas):
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
                     self.remove_axis_objects(objects)
 
-            elif plot_type in ['fairmode-target','fairmode-statsummary']:
+            elif plot_type == 'fairmode-target':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists, 
                                 ax_to_remove.patches, ax_to_remove.texts]:
                     self.remove_axis_objects(objects)
