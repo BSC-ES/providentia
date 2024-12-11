@@ -1198,8 +1198,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             nrows = 8 if self.species in ["sconco3", "sconcno2", "pm10"] else 7
 
             # create gridspec and add it to a list
-            gs = gridspec.GridSpec(nrows, ncols, **self.canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
-            canvas_instance.plot_axes[changed_plot_type] = [canvas_instance.plot_axes[changed_plot_type].add_subplot(gs[i, j]) for i in range(nrows) for j in range(ncols)]
+            gs = gridspec.GridSpec(nrows, ncols, **canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
+            canvas_instance.plot_axes[changed_plot_type] = [canvas_instance.figure.add_subplot(gs[i, j]) for i in range(nrows) for j in range(ncols)]
 
         # setup annotations
         if changed_plot_type in ['periodic', 'periodic-violin']:

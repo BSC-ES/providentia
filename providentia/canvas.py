@@ -1534,8 +1534,9 @@ class MPLCanvas(FigureCanvas):
         # get appropriate axes for nested axes
         axs_to_remove = []
         if isinstance(ax, dict):
-            for relevant_temporal_resolution, sub_ax in ax.items():
-                axs_to_remove.append(sub_ax)
+            axs_to_remove = list(ax.values())
+        elif isinstance(ax, list):
+            axs_to_remove = copy.deepcopy(ax)
         else:
             if plot_type == 'taylor':
                 axs_to_remove.append(self.plot.taylor_polar_relevant_axis)
@@ -1621,8 +1622,8 @@ class MPLCanvas(FigureCanvas):
         for plot_type in plot_types:
             all_plot_options = self.plot_characteristics[plot_type]['plot_options']
             checked_options = self.current_plot_options[plot_type]
-            if plot_type in ['periodic_violin','fairmode_target','fairmode_statsummary']:
-                plot_type = plot_type.replace('_','-')
+            if plot_type in ['periodic-violin','fairmode-target','fairmode-statsummary']:
+                plot_type = plot_type.replace('-','_')
             cb_options = getattr(self, plot_type + '_options')
 
             # uncheck all options
