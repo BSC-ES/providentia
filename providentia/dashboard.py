@@ -1055,6 +1055,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 if isinstance(ax, dict):
                     for sub_ax in ax.values():
                         sub_ax.remove()
+                elif isinstance(ax, list):
+                    for sub_ax in ax:
+                        sub_ax.remove()
                 else:
                     ax.remove()
                 self.active_dashboard_plots.remove(previous_plot_type)
@@ -1087,6 +1090,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 self.mpl_canvas.remove_axis_elements(ax, changed_plot_type)
                 if isinstance(ax, dict):
                     for sub_ax in ax.values():
+                        sub_ax.remove()
+                elif isinstance(ax, list):
+                    for sub_ax in ax:
                         sub_ax.remove()
                 else:
                     ax.remove()
@@ -1129,6 +1135,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             reference_stddev = 7.5
             plot_characteristics = canvas_instance.plot_characteristics['taylor']
             ghelper = get_taylor_diagram_ghelper(reference_stddev, plot_characteristics)
+        elif changed_plot_type == "fairmode-statsummary":
+            # get number of rows and columns
+            ncols = 4
+            nrows = 8 if self.species[0] in ["sconco3", "sconcno2", "pm10"] else 7
 
         # position 2 (top right)
         if changed_position == self.cb_position_2 or changed_position == 2:
@@ -1142,6 +1152,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                                                                                   axes_class=fa.FloatingAxes, grid_helper=ghelper)
             elif changed_plot_type in ['statsummary', 'metadata']:
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((15, 50), rowspan=36, colspan=50))
+            elif changed_plot_type == 'fairmode-statsummary':
+                inner_gs = canvas_instance.gridspec.new_subplotspec((15, 53), rowspan=34, colspan=51).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((15, 53), rowspan=34, colspan=51))
             
@@ -1157,6 +1169,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                                                                                   axes_class=fa.FloatingAxes, grid_helper=ghelper)
             elif changed_plot_type in ['statsummary', 'metadata']:
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 1), rowspan=38, colspan=28))
+            elif changed_plot_type == 'fairmode-statsummary':
+                inner_gs = canvas_instance.gridspec.new_subplotspec((60, 4), rowspan=38, colspan=28).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 4), rowspan=38, colspan=28))
         # position 4 (bottom centre)
@@ -1171,6 +1185,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                                                                                   axes_class=fa.FloatingAxes, grid_helper=ghelper)
             elif changed_plot_type in ['statsummary', 'metadata']:
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 35), rowspan=38, colspan=28))
+            elif changed_plot_type == 'fairmode-statsummary':
+                inner_gs = canvas_instance.gridspec.new_subplotspec((60, 38), rowspan=38, colspan=28).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 38), rowspan=38, colspan=28))
             
@@ -1186,20 +1202,18 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                                                                                   axes_class=fa.FloatingAxes, grid_helper=ghelper)
             elif changed_plot_type in ['statsummary', 'metadata']:
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 69), rowspan=38, colspan=28))
+            elif changed_plot_type == 'fairmode-statsummary':
+                inner_gs = canvas_instance.gridspec.new_subplotspec((60, 72), rowspan=38, colspan=28).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 72), rowspan=38, colspan=28))
 
         # initialise polar axis for Taylor plots
         if changed_plot_type == 'taylor':
             canvas_instance.plot.taylor_polar_relevant_axis = canvas_instance.plot_axes[changed_plot_type].get_aux_axes(PolarAxes.PolarTransform())
+        
         elif changed_plot_type == "fairmode-statsummary":
-            # get number of rows and columns
-            ncols = 4
-            nrows = 8 if self.species in ["sconco3", "sconcno2", "pm10"] else 7
-
             # create gridspec and add it to a list
-            gs = gridspec.GridSpec(nrows, ncols, **canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
-            canvas_instance.plot_axes[changed_plot_type] = [canvas_instance.figure.add_subplot(gs[i, j]) for i in range(nrows) for j in range(ncols)]
+            canvas_instance.plot_axes[changed_plot_type] = [canvas_instance.figure.add_subplot(inner_gs[i, j]) for i in range(nrows) for j in range(ncols)]
 
         # setup annotations
         if changed_plot_type in ['periodic', 'periodic-violin']:
