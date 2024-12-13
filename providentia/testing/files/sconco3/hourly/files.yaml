@@ -8012,18 +8012,24 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XR/AN/EJ/XRAN-EJWY.nc:
   - ozone_qc
   - ozone_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XR/W9/YJ/XRW9-YJWY.nc:
-  end_date: 2024-01-01T00:00:00 UTC
+  end_date: 2024-03-31T15:00:00 UTC
   resolution: hourly
-  start_date: 1986-01-01T00:00:00 UTC
+  start_date: 2007-12-31T15:00:00 UTC
   variables:
   - time_bnds
   - metadata_time_bnds
-  - ozone_nmol_per_mol
-  - ozone_nmol_per_mol_qc
-  - ozone_nmol_per_mol_ebasmetadata
-  - ozone_ug_per_m3
-  - ozone_ug_per_m3_qc
-  - ozone_ug_per_m3_ebasmetadata
+  - ozone_nmol_per_mol_amean
+  - ozone_nmol_per_mol_amean_qc
+  - ozone_nmol_per_mol_amean_ebasmetadata
+  - ozone_ug_per_m3_amean
+  - ozone_ug_per_m3_amean_qc
+  - ozone_ug_per_m3_amean_ebasmetadata
+  - ozone_nmol_per_mol_stddev
+  - ozone_nmol_per_mol_stddev_qc
+  - ozone_nmol_per_mol_stddev_ebasmetadata
+  - ozone_ug_per_m3_stddev
+  - ozone_ug_per_m3_stddev_qc
+  - ozone_ug_per_m3_stddev_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XR/Y5/ES/XRY5-ESUQ.nc:
   end_date: 1998-01-01T00:00:00 UTC
   resolution: hourly
