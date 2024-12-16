@@ -1120,14 +1120,14 @@ class ProvidentiaDownload(object):
                 except FileNotFoundError:
                     # change species name to the species to map
                     if speci_to_process in mapping_species:
-                        for species in mapping_species[speci_to_process]:
+                        for mapping_speci in mapping_species[speci_to_process]:
                             try:
                                 # if it is an ensemble member
                                 if not ensemble_options.startswith("stat_"):
-                                    res_spec = join(remote_dir,resolution,species)
+                                    res_spec = join(remote_dir,resolution, mapping_speci)
                                 # if it is an ensemble statistic
                                 else:
-                                    res_spec = join(remote_dir,resolution,"ensemble-stats",species+"_"+stat)
+                                    res_spec = join(remote_dir,resolution, "ensemble-stats", species + "_" + stat)
   
                                 self.sftp.stat(res_spec)  
                                 species_exists = True
