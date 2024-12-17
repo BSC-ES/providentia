@@ -30,11 +30,13 @@ from .read_aux import (generate_file_trees, get_lower_resolutions,
                        get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
                        get_valid_experiments, get_valid_obs_files_in_date_range)
 from .statistics import (calculate_statistic, generate_colourbar, generate_colourbar_detail, 
-                         get_selected_station_data, get_z_statistic_info)
+                         get_fairmode_data, get_selected_station_data, get_z_statistic_info)
 from .writing import export_configuration, export_data_npz, export_netcdf
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
+
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
 
 # do not print deprecated warnings
 import warnings
@@ -58,11 +60,11 @@ class Interactive:
         self.kwargs['interactive'] = True
 
         # load statistical yamls
-        self.basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
-        self.expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
+        self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
+        self.expbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
 
         # load representativity information
-        self.representativity_info = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
+        self.representativity_info = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
 
         # set configuration variables, as well as any other defined variables
         valid_config = self.set_config(**self.kwargs)
@@ -79,11 +81,12 @@ class Interactive:
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
             if self.tests:
-                path = 'settings/plot_characteristics_tests.yaml'
+                mode = 'tests'
             else:
-                path = 'settings/plot_characteristics_interactive.yaml'
-            self.plot_characteristics_filename = os.path.join(PROVIDENTIA_ROOT, path)
-        self.plot_characteristics_templates = yaml.safe_load(open(self.plot_characteristics_filename))
+                mode = 'interactive'
+            self.plot_characteristics_filename = join(PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')
+        plot_characteristics = yaml.safe_load(open(self.plot_characteristics_filename))
+        self.plot_characteristics_templates = expand_plot_characteristics(plot_characteristics, mode)
 
         # initialise Plot class
         self.plot = Plot(read_instance=self, canvas_instance=self)
@@ -390,13 +393,19 @@ class Interactive:
         # do not make FAIRMODE target plot if species not in list or resolution not hourly
         if base_plot_type in ['fairmode-target','fairmode-statsummary']:
             if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
-                print(f'Warning: Fairmode target plot cannot be created for {speci} in {self.current_station_name}.')
+                print(f'Warning: Fairmode target plot cannot be created for {speci}.')
                 return
             if ((speci in ['sconco3', 'sconcno2'] and self.resolution != 'hourly') 
                 or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
                 print('Warning: Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).')
                 return
             
+            # skip making plot if there is no valid data
+            data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
+            if not any(valid_station_idxs):
+                print(f'No data after filtering by coverage for {speci}.')
+                return
+
         # get data labels for plot
         if len(data_labels) == 0:
             data_labels = copy.deepcopy(self.data_labels)
@@ -764,6 +773,10 @@ class Interactive:
                         else:
                             title = '{} stations'.format(n_stations)
 
+                    if base_plot_type == 'fairmode-target':
+                        speci = networkspeci.split('|')[1]
+                        title += '\n{}'.format(fairmode_settings[speci]['title'])
+
         # overwrite passed xlabels and ylabels
         if title:
             set_axis_title(self, relevant_ax, title, self.plot_characteristics[plot_type])
@@ -809,7 +822,7 @@ class Interactive:
                         try:
                             ax_to_plot = self.plot_characteristics[plot_type]['legend']['handles']['ax']
                         except:
-                            print("Warning: axis to plot legend on not defined for plot type in plot_characteristics_interactive.yaml, or passed via 'format' argument.\nTaking first available axis.")
+                            print("Warning: axis to plot legend on not defined for plot type in plot_characteristics.yaml, or passed via 'format' argument.\nTaking first available axis.")
                             ax_to_plot = self.relevant_temporal_resolutions[0]
                         if ax_to_plot not in self.relevant_temporal_resolutions:
                             print("Warning: defined axis to plot legend on not available for data resolution of read data.\nInstead, taking first available axis.")
@@ -834,7 +847,7 @@ class Interactive:
         if save:
             # if save is boolean then auto generate fname
             if type(save) == bool:
-                figure_fname = os.path.join(PROVIDENTIA_ROOT, 'plots/{}.png'.format(plot_type))
+                figure_fname = join(PROVIDENTIA_ROOT, 'plots/{}.png'.format(plot_type))
             else:
                 figure_fname = copy.deepcopy(save)
             print('Saving {} figure to {}'.format(plot_type, figure_fname))
@@ -890,7 +903,7 @@ class Interactive:
         elif 'legend' in self.plot_characteristics[plot_type]:
             legend_characteristics = self.plot_characteristics[plot_type]['legend']
         else:
-            print("Warning: 'legend' not defined for plot type in plot_characteristics_interactive.yaml")
+            print("Warning: 'legend' not defined for plot type in plot_characteristics.yaml")
             return
 
         legend_handles = self.plot.make_legend_handles(legend_characteristics, data_labels=data_labels, set_obs=set_obs)
@@ -959,8 +972,8 @@ class Interactive:
             if os.path.exists(self.config):
                 read_conf = True
             else:
-                if os.path.exists(os.path.join(self.config_dir, self.config)):
-                    self.config = os.path.join(self.config_dir, self.config)
+                if os.path.exists(join(self.config_dir, self.config)):
+                    self.config = join(self.config_dir, self.config)
                     read_conf = True
             if read_conf:
                 load_conf(self, self.config)
@@ -1217,7 +1230,7 @@ class Interactive:
         # set fname if not provided
         if fname == '':
             date_str = datetime.datetime.today().strftime('%Y%m%d_%H%M')
-            fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/PRV_{}'.format(date_str))
+            fname = join(PROVIDENTIA_ROOT, 'saved_data/PRV_{}'.format(date_str))
 
         if format in ['conf','config','.conf']:
             fname = '{}.conf'.format(fname)
@@ -1250,7 +1263,7 @@ class Interactive:
             networkspeci = networkspeci.replace('/', '-')
 
         # set temporary fname for writing
-        temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp_{}'.format(networkspeci))
+        temporary_fname = join(PROVIDENTIA_ROOT, 'saved_data/temp_{}'.format(networkspeci))
         
         # check if temporary fname already exists 
         if os.path.isfile(temporary_fname):
@@ -1258,7 +1271,7 @@ class Interactive:
             invalid_fname = True
             dup_count = 2
             while invalid_fname:
-                temporary_fname = os.path.join(PROVIDENTIA_ROOT, 'saved_data/temp_{}_{}'.format(networkspeci, dup_count))
+                temporary_fname = join(PROVIDENTIA_ROOT, 'saved_data/temp_{}_{}'.format(networkspeci, dup_count))
                 if os.path.isfile(temporary_fname):
                     dup_count += 1
                 else:

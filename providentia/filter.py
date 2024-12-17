@@ -15,7 +15,8 @@ from .configuration import split_options
 from .statistics import get_z_statistic_info, exceedance_lim
 from .warnings_prv import show_message
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+from providentia.auxiliar import CURRENT_PATH, join
+
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 class DataFilter:
@@ -463,7 +464,7 @@ class DataFilter:
         if self.read_instance.remove_extreme_stations:
 
             # load yaml of defined stattistics limits
-            remove_extreme_stations_fname = os.path.join(PROVIDENTIA_ROOT, 'settings/remove_extreme_stations.yaml')
+            remove_extreme_stations_fname = join(PROVIDENTIA_ROOT, 'settings/remove_extreme_stations.yaml')
             stat_defs = yaml.safe_load(open(remove_extreme_stations_fname))
 
             # get specific set of limits (if available)

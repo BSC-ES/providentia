@@ -52,8 +52,9 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Run the tool</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#running-the-tool-on-a-bsc-machine">Running the tool on a BSC machine</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#launch-the-dashboard">Launch the dashboard</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#generate-an-offline-report">Generate an offline report</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#using-interactive-mode">Using interactive mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generate-a-report">Generate a report</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#using-providentia-as-a-library">Using Providentia as a library</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#interpolate-your-model-data-to-observations">Interpolate your model data to observations</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#running-the-tool-on-a-personal-machine">Running the tool on a personal machine</a></li>
@@ -121,8 +122,8 @@
 </div>
 <p>A pop-up window will immediately appear where you can choose the section or subsection of interest. After that, the graphical window of Providentia will appear and you can begin using the tool.</p>
 </section>
-<section id="generate-an-offline-report">
-<h3>Generate an offline report<a class="headerlink" href="#generate-an-offline-report" title="Link to this heading"></a></h3>
+<section id="generate-a-report">
+<h3>Generate a report<a class="headerlink" href="#generate-a-report" title="Link to this heading"></a></h3>
 <p>If you have your <a class="reference internal" href="Configuration-files.html"><span class="doc std std-doc">configuration file</span></a> ready, you can generate reports by running Providentia with the following command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">offline</span>
 </pre></div>
@@ -130,17 +131,25 @@
 <p>The mandatory commands are:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">--config</span></code>: specify the path of your <a class="reference internal" href="Configuration-files.html"><span class="doc std std-doc">configuration file</span></a></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--offline</span></code>: for running offline, without launching the dashboard</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--offline</span></code>: for creating a report, without launching the dashboard</p></li>
 </ul>
 <p>You can also launch the dashboard or get a report for only one section by using the option  <code class="docutils literal notranslate"><span class="pre">--section</span></code>. In order to indicate subsections, you will need to write the section name, followed by a hyphen (-) and the subsection name.</p>
 <p>The reports will be saved under the folder <code class="docutils literal notranslate"><span class="pre">reports</span></code>. You can add a path in the <code class="docutils literal notranslate"><span class="pre">report_filename</span></code> of the configuration file to change the default directory.</p>
 </section>
-<section id="using-interactive-mode">
-<h3>Using interactive mode<a class="headerlink" href="#using-interactive-mode" title="Link to this heading"></a></h3>
+<section id="using-providentia-as-a-library">
+<h3>Using Providentia as a library<a class="headerlink" href="#using-providentia-as-a-library" title="Link to this heading"></a></h3>
 <p>A Jupyter notebook can be launched with the following command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">interactive</span>
 </pre></div>
 </div>
+</section>
+<section id="interpolate-your-model-data-to-observations">
+<h3>Interpolate your model data to observations<a class="headerlink" href="#interpolate-your-model-data-to-observations" title="Link to this heading"></a></h3>
+<p>Using a <a class="reference internal" href="Configuration-files.html"><span class="doc std std-doc">configuration file</span></a>, you can start interpolating your model data to your desired observational network.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">interpolate</span>
+</pre></div>
+</div>
+<p>More details can be found in the <a class="reference internal" href="Interpolation.html"><span class="doc std std-doc">interpolation section</span></a>.</p>
 </section>
 </section>
 <section id="running-the-tool-on-a-personal-machine">

@@ -10,6 +10,7 @@ import sys
 import time
 import traceback
 import yaml
+import pathlib
 from pydoc import locate
 
 import datetime
@@ -23,21 +24,23 @@ import scipy
 from scipy.spatial import cKDTree
 from shapely.geometry import Polygon, Point
 import xarray as xr
-from aux import (check_for_ghost, findMiddle, check_directory_existence, set_file_permissions_ownership,
+from aux_interp import (check_for_ghost, findMiddle, check_directory_existence, set_file_permissions_ownership,
                  get_aeronet_bin_radius_from_bin_variable, get_aeronet_model_bin, 
                  get_model_to_aeronet_bin_transform_factor)
+
+sys.path.append(str(pathlib.Path(__file__).resolve().parents[2]))
+from providentia.auxiliar import CURRENT_PATH, join
 
 MACHINE = os.environ.get('BSC_MACHINE', 'local')
 
 # get current path and providentia root path
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
+PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
 # load the defined experiments paths and agrupations jsons
-interp_experiments = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
+interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 
 # add unit-converter submodule to python load path
-sys.path.append(os.path.join(PROVIDENTIA_ROOT,'providentia','dependencies','unit-converter'))
+sys.path.append(join(PROVIDENTIA_ROOT,'providentia','dependencies','unit-converter'))
 import unit_converter
 
 class ExperimentInterpolation(object):
@@ -63,16 +66,13 @@ class ExperimentInterpolation(object):
         self.month = self.yearmonth[4:]
 
         # determine if ensemble option is member or emsemble stat
-        if self.ensemble_option.isdigit():
-            self.ensemble_member = True
-        else:
-            self.ensemble_member = False
+        self.ensemble_member = self.ensemble_option.isdigit()
 
         # dictionary to save utilized interpolation variables
         self.interpolation_variables = {}
         
         # from file in management_logs, get and set the arguments which were not passed as a paremeter
-        submission_file = os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/management_logs',
+        submission_file = join(PROVIDENTIA_ROOT, 'logs/interpolation/management_logs',
                                        f'{self.unique_id}.out')
         with open(submission_file, 'r') as f:
             submission_file_txt = f.read().split()
@@ -91,7 +91,7 @@ class ExperimentInterpolation(object):
                 setattr(self, variable_key, variable_val)
 
         # import GHOST standards
-        sys.path.insert(1, os.path.join(PROVIDENTIA_ROOT, 'providentia/dependencies/GHOST_standards/{}'.format(self.ghost_version)))
+        sys.path.insert(1, join(PROVIDENTIA_ROOT, 'providentia/dependencies/GHOST_standards/{}'.format(self.ghost_version)))
         from GHOST_standards import standard_parameters
         self.standard_parameters = standard_parameters
         
@@ -108,7 +108,7 @@ class ExperimentInterpolation(object):
         exp_dir = None
         # if local machine, get directory from data_paths
         if MACHINE == 'local':  
-            exp_to_interp_path = os.path.join(self.exp_to_interp_root, self.experiment_to_process)
+            exp_to_interp_path = join(self.exp_to_interp_root, self.experiment_to_process)
             if os.path.exists(exp_to_interp_path):
                 exp_dir = exp_to_interp_path
             
@@ -126,8 +126,8 @@ class ExperimentInterpolation(object):
                     exp_dir = temp_exp_dir
                     break
 
-            # add file to directory path
-            exp_dir += f"{self.experiment_to_process}/" 
+            # add experiment to directory path
+            exp_dir  = join(exp_dir,self.experiment_to_process)
 
         # define if network is in GHOST format
         self.reading_ghost = check_for_ghost(self.network_to_interpolate_against)
@@ -665,6 +665,7 @@ class ExperimentInterpolation(object):
             bin_transform_factor = get_model_to_aeronet_bin_transform_factor(self.model_name, rmin, rmax)
         
         # iterate and read chunked model files
+        failed_files = 0
         for model_ii, model_file in enumerate(self.model_files):
 
             # put model file read in try/except to catch corrupt model files
@@ -676,11 +677,15 @@ class ExperimentInterpolation(object):
                 # check if have time dimension in daily file, if do not, do not process file
                 if 'time' not in list(self.mod_nc_root.dimensions.keys()):
                     self.log_file_str += 'File {} is corrupt. Skipping.\n'.format(model_file)
+                    failed_files += 1
                     continue 
 
                 # get date from filename
-                file_date = model_file.split('_')[-1][:-3]                
-                
+                if not self.ensemble_member:
+                    file_date = model_file.replace('_' + self.ensemble_option, '').split('_')[-1][:-3]
+                else:
+                    file_date = model_file.split('_')[-1][:-3]                
+
                 # get file time (handle monthly resolution data differently to hourly/daily
                 # as num2date does not support 'months since' units)
                 file_time = self.mod_nc_root['time'][:] 
@@ -717,6 +722,10 @@ class ExperimentInterpolation(object):
                     start_file_dt = datetime.datetime(year=int(file_date[:4]), month=int(file_date[4:6]), 
                                                       day=int(file_date[6:8]), hour=int(file_date[8:10]), minute=0)
                     end_file_dt = start_file_dt + datetime.timedelta(days=1)
+                else:
+                    self.log_file_str += 'Resolution could not be detected in {}, check the date in the filename as now it shows as "{}".\n'.format(model_file, file_date)
+                    failed_files += 1
+                    continue
 
                 # for forecast runs, get timesteps for corresponding forecast day
                 if self.forecast:
@@ -791,7 +800,8 @@ class ExperimentInterpolation(object):
                 inds_to_fill = np.isin(self.yearmonth_dt, xr_data.time.values)
                 if not any(inds_to_fill):
                     self.log_file_str += 'Time in model dataset {} is not in standard format: \n {}'.format(model_file, xr_data.time.values)
-                    create_output_logfile(1, self.log_file_str)
+                    failed_files += 1
+                    continue
 
                 # fill in data array
                 self.monthly_model_data[inds_to_fill,:,:] = xr_data.values
@@ -801,6 +811,11 @@ class ExperimentInterpolation(object):
 
             except Exception as e:
                 self.log_file_str += 'File {} is corrupt. Skipping.\n{}'.format(model_file, traceback.format_exc())
+                failed_files += 1
+
+        if failed_files == len(self.model_files):
+            self.log_file_str += 'No model dataset could be interpolated.'
+            create_output_logfile(1, self.log_file_str)
 
     def n_nearest_neighbour_inverse_distance_weights(self):
         """ Calculate N nearest neighbour inverse distance weights (and indices) of model gridcells centres 
@@ -887,7 +902,7 @@ class ExperimentInterpolation(object):
         else:
             # as it appears in PRV (e.g. nasa-aeronet/oneill_v3-lev15 -> nasa-aeronet-oneill_v3-lev15)
             network_name = self.network_to_interpolate_against.replace('/', '-')
-        output_dir = os.path.join(self.exp_root, self.ghost_version, self.prov_exp_code, 
+        output_dir = join(self.exp_root, self.ghost_version, self.prov_exp_code, 
                                   self.temporal_resolution_to_output, self.original_speci_to_process, network_name)
 
         # check if need to create any directories in path 
@@ -1101,7 +1116,7 @@ def create_output_logfile(process_code, log_file_str):
         :param process_code: interpolation outcome code
         :type process_code: int
     """
-    output_logfile_dir = (f"{os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs/')}"
+    output_logfile_dir = (f"{join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs/')}"
     f"{submit_args['prov_exp_code']}/"
     f"{submit_args['original_speci_to_process']}/"
     f"{submit_args['network_to_interpolate_against']}/"
