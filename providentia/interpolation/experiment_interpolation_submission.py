@@ -10,21 +10,22 @@ from pydoc import locate
 import numpy as np
 import multiprocessing
 
+from providentia.auxiliar import CURRENT_PATH, join
+
 MACHINE = os.environ.get('BSC_MACHINE', 'local')
 
 # get current path and providentia root path
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-PROVIDENTIA_ROOT = os.path.dirname(os.path.dirname(CURRENT_PATH))
+PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
-sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia', 'interpolation'))
-sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia'))
+sys.path.append(join(PROVIDENTIA_ROOT, 'providentia', 'interpolation'))
+sys.path.append(join(PROVIDENTIA_ROOT, 'providentia'))
 
-from aux import get_aeronet_bin_radius_from_bin_variable, get_model_bin_radii, check_for_ghost
+from interpolation.aux_interp import get_aeronet_bin_radius_from_bin_variable, get_model_bin_radii, check_for_ghost
 from configuration import ProvConfiguration, load_conf
 
 # load the defined experiments and species yamls
-interp_experiments = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
-mapping_species =  yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
+interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
+mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 
 class SubmitInterpolation(object):
     """ Class that handles the interpolation submission. """
@@ -37,9 +38,9 @@ class SubmitInterpolation(object):
         # define current working directory and
         # arguments/greasy/interpolation log subdirectories
         self.working_directory = CURRENT_PATH     
-        self.arguments_dir = os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/arguments')
-        self.submit_dir = os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/greasy_logs')
-        self.interpolation_log_dir = os.path.join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs')
+        self.arguments_dir = join(PROVIDENTIA_ROOT, 'logs/interpolation/arguments')
+        self.submit_dir = join(PROVIDENTIA_ROOT, 'logs/interpolation/greasy_logs')
+        self.interpolation_log_dir = join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs')
 
         # initialize commandline arguments, if given
         provconf = ProvConfiguration(self, **kwargs)
@@ -50,8 +51,8 @@ class SubmitInterpolation(object):
             if os.path.exists(self.config):
                 read_conf = True
             else: 
-                if os.path.exists(os.path.join(self.config_dir, self.config)):
-                    self.config = os.path.join(self.config_dir, self.config)
+                if os.path.exists(join(self.config_dir, self.config)):
+                    self.config = join(self.config_dir, self.config)
                     read_conf = True
             if read_conf:
                 load_conf(self, self.config)
@@ -117,7 +118,7 @@ class SubmitInterpolation(object):
             self.qos = 'bsc_es'
 
         # import unit converter
-        sys.path.append(os.path.join(PROVIDENTIA_ROOT, 'providentia', 'dependencies','unit-converter'))
+        sys.path.append(join(PROVIDENTIA_ROOT, 'providentia', 'dependencies','unit-converter'))
         import unit_converter
 
     def gather_arguments(self):
@@ -151,7 +152,7 @@ class SubmitInterpolation(object):
             exp_dir = None
             # if local machine, get directory from data_paths
             if MACHINE == 'local':  
-                exp_to_interp_path = os.path.join(self.exp_to_interp_root, experiment_to_process)
+                exp_to_interp_path = join(self.exp_to_interp_root, experiment_to_process)
                 if os.path.exists(exp_to_interp_path):
                     exp_dir = exp_to_interp_path
                 
@@ -164,17 +165,17 @@ class SubmitInterpolation(object):
                 # get experiment type and specific directories
                 exp_dir_list = interp_experiments[experiment_type]["paths"]
                 for temp_exp_dir in exp_dir_list:
-                    if os.path.exists(os.path.join(temp_exp_dir,experiment_to_process)):
+                    if os.path.exists(join(temp_exp_dir,experiment_to_process)):
                         exp_dir = temp_exp_dir
                         break
 
                 # take first functional directory 
                 if exp_dir is None:
-                    error = f"Error: None of the experiment paths in {os.path.join('settings', 'interp_experiments.yaml')} are available in this machine ({MACHINE})."
+                    error = f"Error: None of the experiment paths in {join('settings', 'interp_experiments.yaml')} are available in this machine ({MACHINE})."
                     sys.exit(error)
                 
-                # add file to directory path
-                exp_dir += f"{experiment_to_process}/"
+                # add experiment to directory path
+                exp_dir = join(exp_dir,experiment_to_process)
 
             # get model bin edges
             r_edges, rho_bins = get_model_bin_radii(experiment_type)
@@ -330,12 +331,15 @@ class SubmitInterpolation(object):
                             if len(obs_files) == 0:
                                 continue
                             
+                            # determine if ensemble option is member or emsemble stat
+                            ensemble_member = ensemble_option.isdigit()
+
                             # check if ensemble option is ensemble stat and get all relevant experiment files
-                            if 'stat_' in ensemble_option:
+                            if not ensemble_member:
                                 ensemble_stat = True
                                 exp_files_all = np.sort(glob.glob('{}/{}/{}/ensemble-stats/{}_{}/{}*{}.nc'.format(
                                     exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
-                                    ensemble_option[5:], speci_to_process, ensemble_option[5:])))
+                                    ensemble_option, speci_to_process, ensemble_option)))
                             else:
                                 ensemble_stat = False
                                 exp_files_all = np.sort(glob.glob('{}/{}/{}/{}/{}*.nc'.format(
@@ -351,7 +355,7 @@ class SubmitInterpolation(object):
 
                             # ensemble stat?
                             if ensemble_stat:
-                                available_ensemble_options = [ensemble_option[5:]]    
+                                available_ensemble_options = [ensemble_option]    
 
                             # not ensemble stat?
                             else:                                
@@ -502,7 +506,7 @@ class SubmitInterpolation(object):
                         msg += f'Experiment data between {self.start_date} and {self.end_date} cannot be found.'
                     else:
                         msg += f'Experiment files: {exp_files}\n'
-                        msg += f'Experiment dates: {exp_files_dates}'
+                        msg += f'Experiment dates: {exp_files_dates}\n'
                         if len(obs_files) == 0:
                             msg += f'Observational data between {self.start_date} and {self.end_date} cannot be found.'
                         else:
@@ -594,7 +598,7 @@ class SubmitInterpolation(object):
                 str_to_write = str_to_write.replace(ch,'\{}'.format(ch))
         
             # write arguments str to current file
-            arguments_file.write('python -u {}/experiment_interpolation.py {}\n'.format(self.working_directory, 
+            arguments_file.write('python -u {}/interpolation/experiment_interpolation.py {}\n'.format(self.working_directory, 
                                                                                         str_to_write))
 
             # iterate n lines written    
@@ -852,14 +856,32 @@ class SubmitInterpolation(object):
     
     def run_command(self, commands):
         arguments_list = commands.strip().split()
-        subprocess.run(arguments_list, capture_output=True, text=True)
+        result = subprocess.run(arguments_list, capture_output=True, text=True)
+        if result.returncode != 0:
+            error = result.stderr
+            if error == '':
+                error = 'Unknown error'
+            print(f"Error in submission using the following args {result.args[3:-1]}: {error}")
 
     def submit_job_multiprocessing(self):
         
+        # if n_cpus hasn't been defined, use 1 or half of the available CPUS to 
+        # avoid having to kill other processes locally
+        if (MACHINE == 'local') and (self.n_cpus == self.available_cpus):  
+            n_cpus = max(1, int(self.n_cpus * 0.50))
+            msg = f'Warning: Using {n_cpus} out of {self.n_cpus} available CPUs to'
+            msg += ' ensure that other processes keep running. \nIf you encounter any problems'
+            msg += ' consider reducing the number of CPUS by defining n_cpus \nin your'
+            msg += ' configuration file (e.g. n_cpus = 2).'
+        else:
+            n_cpus = self.n_cpus
+            msg = f'Using {n_cpus} CPUs.'
+        print(msg)
+        
         # launch interpolation
-        commands = [f'python -u {CURRENT_PATH}/experiment_interpolation.py '
-                    + argument for argument in self.arguments]
-        with multiprocessing.Pool(processes=self.n_cpus) as pool:
+        commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(
+            self.working_directory, argument) for argument in self.arguments]
+        with multiprocessing.Pool(processes=n_cpus) as pool:
             pool.map(self.run_command, commands)
 
         # stop timer
@@ -907,17 +929,32 @@ def main(**kwargs):
     # create greasy arguments file
     SI.create_greasy_arguments_file()
 
+    # check if Greasy is installed
+    is_greasy_installed = False
+    try:
+        result = subprocess.run(
+            ['greasy', '-V'],
+            stdout=subprocess.PIPE,
+            text=True
+        )
+        if 'greasy' in result.stdout:
+            is_greasy_installed = True
+    except:
+        pass
+
     # submit interpolation jobs
     if SI.interp_multiprocessing:
+        print('Using multiprocessing to manage the job submission.')
         SI.submit_job_multiprocessing()
     else:
-        if SI.machine == 'local':
-            error = 'Error: It is not possible to interpolate locally without using multiprocessing.'
-            sys.exit(error)
-        else:
+        if is_greasy_installed:
+            print('Using Greasy to manage the job submission.')
             # create submission script according to machine
             if SI.machine == "nord3":
                 SI.create_lsf_submission_script()
             else:
                 SI.create_slurm_submission_script()
             SI.submit_job_greasy()
+        else:
+            print('Using multiprocessing to manage the job submission.')
+            SI.submit_job_multiprocessing()

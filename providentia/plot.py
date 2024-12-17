@@ -32,14 +32,15 @@ from .read_aux import drop_nans, get_valid_metadata
 from .plot_aux import (create_chunked_timeseries, get_multispecies_aliases, 
                        get_taylor_diagram_ghelper_info, kde_fft, merge_cells, periodic_labels, 
                        periodic_xticks, round_decimal_places, temp_axis_dict)
-
+from .plot_formatting import set_axis_title
+from .warnings_prv import show_message
+from providentia.auxiliar import CURRENT_PATH, join
 
 # speed up transformations in cartopy
 pyproj.set_use_global_context()
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
+fairmode_settings = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
 
 
 class Plot:
@@ -337,7 +338,7 @@ class Plot:
         page = plt.figure(**plot_characteristics['figure'])
 
         # get logo
-        logo_path = os.path.join(PROVIDENTIA_ROOT, 'assets/logoline.png')
+        logo_path = join(PROVIDENTIA_ROOT, 'assets/logoline.png')
         logo = mpimg.imread(logo_path)
 
         # place logo on top center
@@ -1161,10 +1162,11 @@ class Plot:
         # if so subset arrays
         subset = False
         data_array_size = observations_data.size
-        if data_array_size > plot_characteristics['max_points']:
-            subset = True
-            inds_subset = np.random.choice(data_array_size, size=plot_characteristics['max_points'], replace=False)
-            observations_data = observations_data[inds_subset]
+        if 'max_points' in plot_characteristics:
+            if data_array_size > plot_characteristics['max_points']:
+                subset = True
+                inds_subset = np.random.choice(data_array_size, size=plot_characteristics['max_points'], replace=False)
+                observations_data = observations_data[inds_subset]
 
         # iterate through data labels
         for data_label in cut_data_labels:
@@ -1961,6 +1963,18 @@ class Plot:
         # finally filter by coverage
         data, valid_station_idxs = get_fairmode_data(self.canvas_instance, self.read_instance, networkspeci,
                                                      self.read_instance.resolution, data_labels)
+        
+        # skip making plot if there is no valid data
+        # interactive and offline modes are already handling this in advance
+        if (not self.read_instance.offline) and (not self.read_instance.interactive) and (not any(valid_station_idxs)):
+            msg = 'Warning: No valid data to create FAIRMODE target plot after filtering by coverage.'
+            show_message(self.read_instance, msg)
+            relevant_axis.set_visible(False)
+            return
+        else:
+            if not relevant_axis.get_visible():
+                relevant_axis.set_visible(True)
+        
         observations_data = data[0, :, :]
 
         # get settings
@@ -2004,7 +2018,7 @@ class Plot:
                                                       valid_station_idxs, networkspeci)
         try:
             valid_station_classifications = get_valid_metadata(self, f'{classification_type}_classification', 
-                                                            valid_station_idxs, networkspeci)
+                                                               valid_station_idxs, networkspeci)
         except:
             valid_station_classifications = np.full(len(valid_station_references), np.NaN, dtype=np.float32)
             print(f'Data for {classification_type}_classification is not available and will not be shown in the legend')
@@ -2070,7 +2084,7 @@ class Plot:
 
             # plot data
             for x, y, classification in (zip(x_points, y_points, classifications)):
-                if classification not in plot_characteristics['markers'][f'{classification_type}_classification']:
+                if classification not in plot_characteristics['markers'][f'{classification_type}_classification'].keys():
                     marker = 'h'
                 else:
                     marker = plot_characteristics['markers'][f'{classification_type}_classification'][classification]
@@ -2139,6 +2153,10 @@ class Plot:
             legend_elements.append(legend_element)
         relevant_axis.legend(handles=legend_elements, 
                              **plot_characteristics['markers']['legend'])
+
+        # add title if using dashboard 
+        if (not self.read_instance.offline) and (not self.read_instance.interactive):
+            set_axis_title(self.read_instance, relevant_axis, fairmode_settings[speci]['title'], plot_characteristics)
 
     def make_fairmode_statsummary(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         

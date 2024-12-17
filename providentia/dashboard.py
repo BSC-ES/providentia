@@ -40,6 +40,8 @@ from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, gene
 from .toolbar import NavigationToolbar
 from .warnings_prv import show_message
 
+from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
+
 # set proper scaling
 os.environ["QT_ENABLE_HIGHDPI_SCALING"]   = "1"
 os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
@@ -48,7 +50,6 @@ os.environ["QT_FONT_DPI"] = "96"
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 class ProvidentiaMainWindow(QtWidgets.QWidget):
@@ -64,11 +65,11 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         super(ProvidentiaMainWindow, self).__init__()
 
         # load statistical yamls
-        self.basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
-        self.expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
+        self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
+        self.expbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
 
         # load representativity information
-        self.representativity_info = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
+        self.representativity_info = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
 
         # save warnings that appear next in to show them after the UI is initialised
         self.delay = True
@@ -87,8 +88,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             if os.path.exists(self.config):
                 read_conf = True
             else:
-                if os.path.exists(os.path.join(self.config_dir, self.config)):
-                    self.config = os.path.join(self.config_dir, self.config)
+                if os.path.exists(join(self.config_dir, self.config)):
+                    self.config = join(self.config_dir, self.config)
                     read_conf = True
 
             if read_conf:
@@ -152,24 +153,19 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # get operating system specific formatting
         if self.operating_system == 'Mac':
-            self.formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_mac.yaml')))
+            self.formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_mac.yaml')))
         elif self.operating_system == 'Linux':
-            self.formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_linux.yaml')))
+            self.formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_linux.yaml')))
         elif self.operating_system == 'Windows':
-            self.formatting_dict = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_windows.yaml')))
+            self.formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_windows.yaml')))
 
         # load characteristics per plot type
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
-            self.plot_characteristics_filename = os.path.join(
-                PROVIDENTIA_ROOT, 'settings/plot_characteristics_dashboard.yaml')
-        self.plot_characteristics_templates = yaml.safe_load(open(self.plot_characteristics_filename))
-
-        # error when using wrong custom plot characteristics path to launch dashboard
-        if 'header' in self.plot_characteristics_templates.keys():
-            msg = 'It is not possible to use the offline plot characteristics path to launch the dashboard. Consider adding another path to plot_characteristics_filename, as in: '
-            msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.yaml, offline:/path/plot_characteristics_offline.yaml.'
-            sys.exit(msg)
+            self.plot_characteristics_filename = join(
+                PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')
+        plot_characteristics = yaml.safe_load(open(self.plot_characteristics_filename))
+        self.plot_characteristics_templates = expand_plot_characteristics(plot_characteristics, 'dashboard')
 
         # arguments are only local
         self.full_window_geometry = None
@@ -336,7 +332,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.setWindowTitle(self.window_title)
 
         # add logo as icon
-        self.setWindowIcon(QtGui.QIcon(os.path.join(PROVIDENTIA_ROOT, 'assets/logo.png')))
+        self.setWindowIcon(QtGui.QIcon(join(PROVIDENTIA_ROOT, 'assets/logo.png')))
 
         # create parent layout to pull together a configuration bar,
         # a MPL navigation toolbar, and a MPL canvas of plots
@@ -899,7 +895,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 else:
                     if plot_type not in canvas_instance.layout_options:
                         canvas_instance.layout_options.append(plot_type)       
- 
+
+            if 'fairmode-target' in canvas_instance.layout_options and hasattr(self, 'selected_species'):
+                if self.selected_species not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
+                    canvas_instance.layout_options.remove('fairmode-target')   
+                if ((self.selected_species in ['sconco3', 'sconcno2'] and self.selected_resolution != 'hourly') 
+                    or (self.selected_species in ['pm10', 'pm2p5'] and (self.selected_resolution not in ['hourly', 'daily']))):
+                    canvas_instance.layout_options.remove('fairmode-target')
+            
         # order alphabetically
         layout_options = sorted(canvas_instance.layout_options)
 
@@ -970,7 +973,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             
             elif event_source == self.cb_species:
                 self.selected_species = changed_param
-                if self.selected_species not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5'] or self.selected_resolution != 'hourly':
+                if ((self.selected_species not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5'])
+                    or (self.selected_species in ['sconco3', 'sconcno2'] and self.selected_resolution != 'hourly')
+                    or (self.selected_species in ['pm10', 'pm2p5'] and self.selected_resolution not in ['hourly', 'daily'])):
                     for plot_type in ['fairmode-target', 'fairmode-statsummary']:
                         if plot_type in self.mpl_canvas.layout_options:
                             self.mpl_canvas.layout_options.remove(plot_type)
@@ -1619,7 +1624,7 @@ def main(**kwargs):
 
     # explicitely set colour palette to avoid issues with dark modes (e.g. on Mac)
     p = q_app.palette()
-    dcp = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/dashboard_colour_palette.yaml')))
+    dcp = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/dashboard_colour_palette.yaml')))
     p.setColor(QtGui.QPalette.Dark, QtGui.QColor(*dcp['Dark']))
     p.setColor(QtGui.QPalette.Light, QtGui.QColor(*dcp['Light']))
     p.setColor(QtGui.QPalette.Window, QtGui.QColor(*dcp['Window']))
