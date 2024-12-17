@@ -72,10 +72,11 @@ def linear_regression(canvas_instance, read_instance, relevant_axis, networkspec
     # if so subset arrays
     subset = False
     data_array_size = observations_data.size
-    if data_array_size > plot_characteristics['max_points']:
-        subset = True
-        inds_subset = np.random.choice(data_array_size, size=plot_characteristics['max_points'], replace=False)
-        observations_data = observations_data[inds_subset]
+    if 'max_points' in plot_characteristics:
+        if data_array_size > plot_characteristics['max_points']:
+            subset = True
+            inds_subset = np.random.choice(data_array_size, size=plot_characteristics['max_points'], replace=False)
+            observations_data = observations_data[inds_subset]
 
     # iterate through experiment data, making regression line to observations
     for data_label in cut_data_labels:
@@ -265,9 +266,8 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
         
         # if no stats defined, then return
         if len(stats) == 0:
-            msg_dashboard = 'No annotation statistics are defined for {} in plot_characteristics_dashboard.yaml.'.format(base_plot_type)
-            msg_offline = 'No annotation statistics are defined for {} in plot_characteristics_offline.yaml.'.format(base_plot_type)
-            show_message(read_instance, msg=msg_dashboard, msg_offline=msg_offline)
+            msg = 'No annotation statistics are defined for {} in plot_characteristics.yaml.'.format(base_plot_type)
+            show_message(read_instance, msg=msg)
             return
 
         # initialise colours of annotations

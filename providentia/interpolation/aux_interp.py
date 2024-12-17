@@ -151,7 +151,7 @@ def check_directory_existence(directory_tree_str, directories_not_to_test=None):
 
                 # if not, create it
                 os.system("mkdir {}".format(alt_directory_str_to_test))
-                
+                    
                 # give 770 permissions to directory
                 os.system("chmod 770 {}".format(alt_directory_str_to_test))
                 

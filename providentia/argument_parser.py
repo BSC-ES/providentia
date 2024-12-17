@@ -194,10 +194,10 @@ class ProvArgumentParser(object):
                                      help="activate station specific plots in offline report")
             self.parser.add_argument("--report_title",
                                      dest="report_title",
-                                     help="offline report title")
+                                     help="report title")
             self.parser.add_argument("--report_filename",
                                      dest="report_filename",
-                                     help="offline report filename")
+                                     help="report filename")
             self.parser.add_argument("--harmonise_summary",
                                      dest="harmonise_summary",
                                      help="harmonise axes limits across subsections for summary report")

@@ -115,7 +115,7 @@ Spatial and Temporal.</p>
 <h3>Dimensional reduction by statistical mode and plot type<a class="headerlink" href="#dimensional-reduction-by-statistical-mode-and-plot-type" title="Link to this heading"></a></h3>
 <p>For some plot types the full dimensional reduction is not possible, e.g map. Therefore, they are locked in certain reduction configurations. This is illustrated per plot type:</p>
 <p><img alt="statistical-modes-2" src="_images/statistical-modes-2.png" /></p>
-<p>In both the dashboard and offline versions of Providentia, the statistical modes and aggregation statistics can be set.</p>
+<p>In both the dashboard and reports, the statistical modes and aggregation statistics can be set.</p>
 <p>On the dashboard, in the statistics tab at the top, the mode and aggregation can be selected via the dropdown menus. In the .conf file these can be set like so:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">statistic_mode</span> <span class="o">=</span> <span class="n">Temporal</span><span class="o">|</span><span class="n">Spatial</span>
 <span class="n">statistic_aggregation</span> <span class="o">=</span> <span class="n">Median</span>
@@ -136,7 +136,7 @@ Spatial and Temporal.</p>
 </ul>
 <p>Independent works by calculating the desired statistic per timestep (i.e. as seen in periodic plot), before aggregating across the timesteps.</p>
 <p>Cycle works by aggregating the grouped data per timestep (e.g. mean), before then calculating the desired statistic across the timesteps.</p>
-<p>Again, in both the dashboard and offline versions of Providentia, the periodic statistical modes and aggregation statistic can be set.</p>
+<p>Again, in both the dashboard and reports the periodic statistical modes and aggregation statistic can be set.</p>
 <p>On the dashboard, in the plot options of the statsummary plot, the periodic statistic mode and aggregation can be selected via the dropdown menus. Additionally, periodic statistics can be added to the statsummary plot also via the dropdown menus.</p>
 <p>In the .conf file these can be set like so:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">periodic_statistic_mode</span> <span class="o">=</span> <span class="n">Independent</span>

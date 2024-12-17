@@ -4,7 +4,7 @@ Currently, it is possible to export three different types of files: configuratio
 
 ## .conf file format (Providentia)
 
-Users can download their configurations (.conf) and use the corresponding files to create offline reports or launch Providentia again. In [Run the tool](Run-the-tool) you can learn how to load your configurations through the command line or [from the dashboard](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Dashboard#loading-a-configuration-file).
+Users can download their configurations (.conf) and use the corresponding files to create reports or launch Providentia again. In [Run the tool](Run-the-tool) you can learn how to load your configurations through the command line or [from the dashboard](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Dashboard#loading-a-configuration-file).
 
 ## Saved variables (Numpy and NetCDF)
 

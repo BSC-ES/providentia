@@ -1,6 +1,6 @@
 # Interpolation
 
-Starting from the release of version 2.4.0 in August 2024, our old tool Providentia Interpolation will be merged into Providentia and it will be now refered as the Interpolation mode.
+Starting from the release of version 2.4.0 in September 2024, our old tool Providentia Interpolation will be merged into Providentia and it will be now refered as the Interpolation mode.
 
 This mode allows users to spatially interpolate experiment output against available observational stations to be viewable in **Providentia**. 
 

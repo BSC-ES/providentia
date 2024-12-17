@@ -33,8 +33,11 @@ from .read_aux import (generate_file_trees, get_lower_resolutions,
 from .statistics import (calculate_statistic, get_fairmode_data,
                          generate_colourbar, get_selected_station_data, get_z_statistic_info)
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
+from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
+
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
+fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
+
 
 class ProvidentiaOffline:
     """ Class to create Providentia offline reports. """
@@ -46,11 +49,11 @@ class ProvidentiaOffline:
         print("Starting Providentia offline...")
 
         # load statistical yamls
-        self.basic_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
-        self.expbias_stats = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
+        self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
+        self.expbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
 
         # load representativity information
-        self.representativity_info = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
+        self.representativity_info = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
@@ -65,8 +68,8 @@ class ProvidentiaOffline:
             if os.path.exists(self.config):
                 read_conf = True
             else: 
-                if os.path.exists(os.path.join(self.config_dir, self.config)):
-                    self.config = os.path.join(self.config_dir, self.config)
+                if os.path.exists(join(self.config_dir, self.config)):
+                    self.config = join(self.config_dir, self.config)
                     read_conf = True
             if read_conf:
                 load_conf(self, self.config)
@@ -79,7 +82,11 @@ class ProvidentiaOffline:
             sys.exit(error)
 
         # load report plot presets
-        self.report_plots = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/report_plots.yaml')))
+        try:
+            self.report_plots = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/report_plots.yaml')))
+        except:
+            error = "Error: Report plots file could not be read, check for common typos (e.g. missing double quotes or commas)."
+            sys.exit(error)
 
         # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
         # if have filetree flags, then these overwrite any defaults
@@ -162,15 +169,10 @@ class ProvidentiaOffline:
 
             # check for self defined plot characteristics file
             if self.plot_characteristics_filename == '':
-                self.plot_characteristics_filename = os.path.join(PROVIDENTIA_ROOT, 'settings/plot_characteristics_offline.yaml')
-            self.plot_characteristics_templates = yaml.safe_load(open(self.plot_characteristics_filename))
+                self.plot_characteristics_filename = join(PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')
+            plot_characteristics = yaml.safe_load(open(self.plot_characteristics_filename))
+            self.plot_characteristics_templates = expand_plot_characteristics(plot_characteristics, 'offline')
             self.plot_characteristics = {}
-
-            # error when using wrong custom plot characteristics path to launch dashboard
-            if 'header' not in self.plot_characteristics_templates.keys():
-                msg = 'It is not possible to use the dashboard plot characteristics path to generate offline reports. Consider adding another path to plot_characteristics_filename, as in: '
-                msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.yaml, offline:/path/plot_characteristics_offline.yaml.'
-                sys.exit(msg)
 
             # initialise Plot class
             self.plot = Plot(read_instance=self, canvas_instance=self)
@@ -291,7 +293,7 @@ class ProvidentiaOffline:
             if os.path.isdir(os.path.dirname(filename)):
                 reports_path = filename
         else:
-            reports_path = (os.path.join(PROVIDENTIA_ROOT, 'reports/')) + filename
+            reports_path = (join(PROVIDENTIA_ROOT, 'reports/')) + filename
 
         # create reports folder
         if not os.path.exists(os.path.dirname(reports_path)):
@@ -1046,11 +1048,10 @@ class ProvidentiaOffline:
                     or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
                     print('Warning: Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).')
                     continue
-                data, _ = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
-                observations_data = data[0, :, :]
 
-                # skip stations without observational data
-                if observations_data.shape[0] == 0:
+                # skip making plot if there is no valid data
+                data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
+                if not any(valid_station_idxs):
                     print(f'No data after filtering by coverage for {speci}.')
                     continue
 
@@ -1229,11 +1230,10 @@ class ProvidentiaOffline:
                         or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
                         print('Warning: Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).')
                         continue
-                    data, _ = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
-                    observations_data = data[0, :, :]
 
-                    # skip stations without observational data
-                    if observations_data.shape[0] == 0:
+                    # skip making plot if there is no valid data
+                    data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
+                    if not any(valid_station_idxs):
                         print(f'No data after filtering by coverage for {speci} in {self.current_station_name}.')
                         continue
 
@@ -1548,8 +1548,15 @@ class ProvidentiaOffline:
                 else:
                     chunk_stat = None
                     chunk_resolution = None
-
+            
             for data_labels in iter_data_labels:
+
+                # skip observations
+                if ((data_labels == self.observations_data_label) 
+                    and ((base_plot_type in ['scatter', 'fairmode-target']) or ('bias' in plot_options) or 
+                    (z_statistic_sign == 'bias'))):
+                    continue
+
                 # skip individual plots if we have no data for a specific label
                 if 'individual' in plot_options:
                     if data_labels not in self.selected_station_data_labels[networkspeci]:
@@ -1687,7 +1694,11 @@ class ProvidentiaOffline:
                                                                                   self.plot_characteristics[plot_type]['round_decimal_places']['title'],
                                                                                   self.current_lat,
                                                                                   self.plot_characteristics[plot_type]['round_decimal_places']['title'])
-                            
+                    
+                    if base_plot_type == 'fairmode-target':
+                        speci = networkspeci.split('|')[1]
+                        axis_title_label += '\n{}'.format(fairmode_settings[speci]['title'])
+
                     # set title
                     set_axis_title(self, relevant_axis, axis_title_label, self.plot_characteristics[plot_type])
 
