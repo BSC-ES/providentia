@@ -19,6 +19,8 @@ from .plot_aux import get_land_polygon_resolution, set_map_extent
 from .plot_options import annotation, experiment_domain, linear_regression, log_axes, smooth, threshold
 from .statistics import get_z_statistic_info
 
+from providentia.auxiliar import CURRENT_PATH, join
+
 Image.MAX_IMAGE_PIXELS = None
 
 def set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type):
@@ -163,8 +165,9 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
     # get lower and upper limits across all relevant axes
     for ax in relevant_axs_active:
         if 'equal_aspect' in plot_characteristics:
-            set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type)
-            continue
+            if plot_characteristics['equal_aspect']:
+                set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type)
+                continue
         else:
             ax.set_aspect('auto')
 
@@ -332,22 +335,30 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
     # get minimum and maximum from all axes and set limits for timeseries
     elif base_plot_type == 'timeseries':
         if (plot_characteristics['xtick_alteration']['define']) and (xlim):
-        
+            
+            # get left and right
+            if isinstance(xlim, dict):
+                left = xlim['left']
+                right = xlim['right']
+            else:
+                left = xlim[0]
+                right = xlim[1]
+
             # get steps for all data labels
-            steps = pd.date_range(xlim['left'], xlim['right'], freq=read_instance.active_frequency_code)
+            steps = pd.date_range(left, right, freq=read_instance.active_frequency_code)
 
             # get number of months and days
-            n_months = (12*(xlim['right'].year - xlim['left'].year) + (xlim['right'].month - xlim['left'].month))
-            n_days = (xlim['right'] - xlim['left']).days
+            n_months = (12*(right.year - left.year) + (right.month - left.month))
+            n_days = (right - left).days
 
             # get months that are complete
-            months_start = pd.date_range(xlim['left'], xlim['right'], freq='MS')
+            months_start = pd.date_range(left, right, freq='MS')
             if Version(matplotlib.__version__) < Version("3.9"):
-                months_end = pd.date_range(xlim['left'], xlim['right'], freq='M')
+                months_end = pd.date_range(left, right, freq='M')
             else:
-                months_end = pd.date_range(xlim['left'], xlim['right'], freq='ME')
+                months_end = pd.date_range(left, right, freq='ME')
             if months_start.size > 1:
-                if (xlim['right'] - months_end[-1]).days >= 1:
+                if (right - months_end[-1]).days >= 1:
                     months = months_start[:-1]
                 else:
                     months = months_start
@@ -374,12 +385,12 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             # transform to numpy.datetime64
             if not isinstance(xticks[0], np.datetime64):
                 xticks = [x.to_datetime64() for x in xticks]
-            if not isinstance(xlim['right'], np.datetime64):
-                xlim = {'left':xlim['left'], 'right':np.datetime64(xlim['right'])}
+            if not isinstance(right, np.datetime64):
+                right = np.datetime64(right)
 
             # add last step to xticks
-            if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != xlim['right']):
-                xticks = np.append(xticks, xlim['right'])
+            if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != right):
+                xticks = np.append(xticks, right)
 
             # set modified xticks
             for ax in relevant_axs_active:
@@ -721,8 +732,6 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
         
         elif base_plot_type == 'map':
 
-            CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-
             # set map background
 
             # providentia default background
@@ -739,7 +748,7 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
             # other type of map background
             else:
                 # check file for background exists
-                background_fname = os.path.join(CURRENT_PATH, "resources/{}.png".format(plot_characteristics['background']))
+                background_fname = join(CURRENT_PATH, "resources/{}.png".format(plot_characteristics['background']))
                 if os.path.isfile(background_fname):
                     img = plt.imread(background_fname)
                     img_extent = (-180, 180, -90, 90)

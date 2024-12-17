@@ -408,10 +408,8 @@ class HoverAnnotation(object):
 
                 # update bbox position
                 if time > np.datetime64(self.x_middle['timeseries']):
-                    self.annotation.set_x(-10)
                     self.annotation.set_ha('right')
                 else:
-                    self.annotation.set_x(10)
                     self.annotation.set_ha('left')
 
                 # create annotation text
@@ -510,7 +508,7 @@ class HoverAnnotation(object):
                 # observations label
                 text_label += ('\n{0}: {1:.{2}f}').format('CRMSE / β·RMSᵤ', x, self.round_decimal_places)
                 # experiment label
-                text_label += ('\n{0}: {1:.{2}f}').format('Mean Bias / β·RMSᵤ', y, self.round_decimal_places)
+                text_label += ('\n{0}: {1:.{2}f}').format('MB / β·RMSᵤ', y, self.round_decimal_places)
 
         self.annotation.set_text(text_label)
 

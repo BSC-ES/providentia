@@ -19,8 +19,7 @@ from .read_aux import generate_file_trees
 from .warnings_prv import show_message
 from .writing import export_configuration, export_data_npz, export_netcdf
 
-CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
-
+from providentia.auxiliar import CURRENT_PATH, join
 
 class _Mode(str, Enum):
 
@@ -66,12 +65,12 @@ class NavigationToolbar(NavigationToolbar2QT):
 
         # set toolbar icons
         actions = self.findChildren(QtWidgets.QAction)
-        self._actions['save_data'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_icon.png")))
-        self._actions['conf_dialogs'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/conf_icon.png")))
-        self._actions['home'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/world_icon.png")))
-        self._actions['zoom'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/zoom_icon.png")))
-        self._actions['connect_lasso'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/lasso_icon.png")))
-        self._actions['save_figure'].setIcon(QtGui.QIcon(os.path.join(CURRENT_PATH, "resources/save_fig_icon.png")))
+        self._actions['save_data'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/save_icon.png")))
+        self._actions['conf_dialogs'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/conf_icon.png")))
+        self._actions['home'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/world_icon.png")))
+        self._actions['zoom'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/zoom_icon.png")))
+        self._actions['connect_lasso'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/lasso_icon.png")))
+        self._actions['save_figure'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/save_fig_icon.png")))
         
         # allow lasso button to be checked        
         self._actions['connect_lasso'].setCheckable(True)
@@ -98,7 +97,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         daterange = self.read_instance.le_start_date.text() + "_" \
                     + self.read_instance.le_end_date.text()
         default_name = "PRV_" + str(self.read_instance.species[0]) + "_" + daterange
-        start = os.path.join(startpath, default_name)
+        start = join(startpath, default_name)
 
         filter_ext = ['%s (%s)' % (name, '*.%s' % ext) for name, ext in sorted_filetypes]
         filter_ext = ';;'.join(filter_ext)
@@ -126,6 +125,19 @@ class NavigationToolbar(NavigationToolbar2QT):
                     msg = 'There was an error saving the file.'
                     print(e)
                     show_message(self.read_instance, msg)
+
+    def save_figure(self):
+        """ Method inherited from qt save_figure that controls
+            the image creation.
+        """
+        if self.read_instance.le_minimum_value.text() == '' and self.read_instance.le_minimum_value.text() == '':
+            # control that data was read
+            msg = 'The figure could not be created. Read the data first.'
+            show_message(self.read_instance, msg)
+            return
+        
+        # inherit from qt
+        super().save_figure(self)
 
     def conf_dialogs(self):
         """ Pop window for selecting configuration file. If file selcted, pops an
