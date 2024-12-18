@@ -36,7 +36,7 @@ from .statistics import (calculate_statistic, get_fairmode_data,
 from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
+fairmode_settings = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
 
 
 class ProvidentiaOffline:
