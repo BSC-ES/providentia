@@ -4,6 +4,7 @@ import itertools
 import os
 import requests
 import yaml
+import re
 
 import numpy as np
 import pandas as pd
@@ -68,35 +69,6 @@ def get_files_per_var(var):
     return files_per_var
 
 
-def get_files_info(var, files):
-
-    files_info = {}
-    files_info[var] = {}
-    for i, file in enumerate(files):
-        try:
-            ds = xr.open_dataset(file)
-        except:
-            print(i, '-', file, '- Error: Could not open dataset')
-            continue
-        coverage = ds.time_coverage_resolution
-        try:
-            file_resolution = coverages_dict[coverage]
-        except:
-            print(i, '-', file, '- Error: Unknown coverage:', coverage)
-            continue
-        start_date = ds.time_coverage_start
-        end_date = ds.time_coverage_end
-        variables = list(ds.data_vars.keys())
-        files_info[var][file] = {}
-        files_info[var][file]['resolution'] = file_resolution
-        files_info[var][file]['start_date'] = start_date
-        files_info[var][file]['end_date'] = end_date
-        files_info[var][file]['variables'] = variables
-        print(i, '-', file, '- OK')
-
-    return files_info
-
-
 def get_files_path(var):
 
     alpha_var = ''.join(x for x in var if x.isalpha())
@@ -106,113 +78,6 @@ def get_files_path(var):
         path = join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', f'files/{var}/files.yaml')
 
     return path
-
-
-def create_files_info_file(var):
-
-    path = get_files_path(var)
-    print('Searching for data in Thredds...')
-    combined_data = get_files_per_var(var)
-
-    # if file does not exist
-    if not os.path.isfile(path):
-
-        print(f'File {path} does not exist, creating.')
-
-        # get files information
-        files = combined_data[var]['files']
-        print(f'Reading basic information from {len(files)} files')
-        files_info = get_files_info(var, files)
-
-        # create file
-        datasets = {
-            url: data
-            for url, data in files_info[var].items()
-        }
-        if len(datasets) != 0:
-            path_dir = os.path.dirname(path)
-            if not os.path.exists(path_dir):
-                os.makedirs(path_dir)
-            with open(path, 'w') as file:
-                yaml.dump(datasets, file, default_flow_style=False)
-
-    # if file exists
-    else:
-        print(
-            f'File {path} already exists, checking if it needs an update.')
-
-        # get currently available files
-        current_files = combined_data[var]['files']
-
-        # get previously saved files
-        file_info_to_update = yaml.safe_load(
-            open(join(CURRENT_PATH, path)))
-        previous_files = list(file_info_to_update.keys())
-
-        # keep old files only if they are currently available
-        files_to_remove = []
-        for file in previous_files:
-            if file not in current_files:
-                files_to_remove.append(file)
-
-        # add new files
-        files_to_add = []
-        for file in current_files:
-            if file not in previous_files:
-                files_to_add.append(file)
-
-        # get information from new files
-        datasets = []
-        if len(files_to_add) > 0:
-            print(
-                '- Files to add ({0}): {1}'.format(len(files_to_add), files_to_add))
-            print('Reading basic information...')
-            files_info = get_files_info(var, files_to_add)
-            datasets = {
-                url: data
-                for url, data in files_info[var].items()
-            }
-
-            # add new data to dictionary
-            if len(datasets) != 0:
-                file_info_to_update.update(datasets)
-
-        # remove unavailable data
-        if len(files_to_remove) > 0:
-            print(
-                '- Files to remove ({0}): {1}'.format(len(files_to_remove), files_to_remove))
-            for file in files_to_remove:
-                print(f'Removing file {file}')
-                file_info_to_update.pop(file, None)
-
-        # recreate file info
-        if len(datasets) != 0 or len(files_to_remove) > 0:
-            print('Updating file...')
-            os.remove(path)
-            with open(path, 'w') as file:
-                yaml.dump(file_info_to_update, file,
-                            default_flow_style=False)
-        else:
-            print('No relevant changes were found.')
-
-
-def filter_files(var, resolution, target_start_date, target_end_date):
-    
-    create_files_info_file(var)
-
-    files = []
-    path = get_files_path(var)
-    files_info = yaml.safe_load(open(join(CURRENT_PATH, path)))
-    files_info = {k: v for k, v in files_info.items() if k.strip() and v}
-    for file, attributes in files_info.items():
-        if attributes["resolution"] == resolution:
-            start_date = datetime.datetime.strptime(
-                attributes["start_date"], "%Y-%m-%dT%H:%M:%S UTC")
-            end_date = datetime.datetime.strptime(
-                attributes["end_date"], "%Y-%m-%dT%H:%M:%S UTC")
-            if start_date <= target_end_date and end_date >= target_start_date:
-                files.append(file)
-    return files
 
 
 def temporally_average_data(combined_ds, resolution, year, month, var):
@@ -326,3 +191,132 @@ def temporally_average_data(combined_ds, resolution, year, month, var):
     combined_ds[var] = combined_averaged_ds
 
     return combined_ds
+
+
+def is_wavelength_var(actris_parameter):
+    wavelength_var = False
+    if actris_parameter in ['aerosol particle light absorption coefficient',
+                            'aerosol particle light hemispheric backscatter coefficient',
+                            'aerosol particle light scattering coefficient']:
+        wavelength_var = True
+    return wavelength_var
+
+
+def get_data(files, var, actris_parameter, resolution, path, save):
+    
+    # combine datasets that have the same variable and resolution
+    combined_ds_list = []
+    metadata = {}
+    metadata[resolution] = {}
+    files_info = {}
+    files_info[var] = {}
+    
+    # get EBAS component
+    ebas_component = variable_mapping[actris_parameter]['var']
+
+    print('Total number of files:', len(files))
+    for i, file in enumerate(files):
+        print(i, '-', file)
+        # open file
+        try:
+            ds = xr.open_dataset(file)
+        except:
+            print('Error opening file')
+            continue
+
+        # get resolution
+        coverage = ds.time_coverage_resolution
+        try:             
+            file_resolution = coverages_dict[coverage]
+        except:
+            print('Error in resolution with coverage:', coverage)
+            continue
+            
+        start_date = ds.time_coverage_start
+        end_date = ds.time_coverage_end
+        variables = list(ds.data_vars.keys())
+        files_info[var][file] = {}
+        files_info[var][file]['resolution'] = file_resolution
+        files_info[var][file]['start_date'] = start_date
+        files_info[var][file]['end_date'] = end_date
+        files_info[var][file]['variables'] = variables
+        
+        # get lowest level if tower height is in coordinates
+        if 'Tower_inlet_height' in list(ds.coords):
+            ds = ds.sel(Tower_inlet_height=min(ds.Tower_inlet_height.values), drop=True)
+
+        # get data at desired wavelength if wavelength is in coordinates
+        if 'Wavelength' in list(ds.coords):
+            wavelength = int(re.findall(r'\d+', var)[0])
+            if wavelength in ds.Wavelength.values:
+                ds = ds.sel(Wavelength=wavelength, drop=True)
+            else:
+                print(f'Data at {wavelength}nm could not be found')
+                continue
+        
+        # assign station code as dimension
+        ds = ds.expand_dims(dim={'station': [i]})
+
+        # select data for that variable only
+        unformatted_units = variable_mapping[actris_parameter]['units']
+        if unformatted_units in units_dict.keys():
+            units = units_dict[unformatted_units]
+        else:
+            print(f'Units {unformatted_units} were not found in dictionary')
+            continue
+        units_var = f'{ebas_component}_{units}'
+        possible_vars = [ebas_component, 
+                         f'{ebas_component}_amean', 
+                         units_var, 
+                         f'{units_var}_amean']
+        ds_var_exists = False
+        for possible_var in possible_vars:
+            if possible_var in ds:
+                ds_var = ds[possible_var]
+                ds_var_exists = True
+                break
+
+        # continue to next file if variable cannot be read
+        if not ds_var_exists:
+            print(f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}')
+            continue
+            
+        # save metadata
+        for ghost_key, ebas_key in metadata_dict.items():
+            # create key if it does not exist
+            if ghost_key not in metadata[resolution].keys():
+                metadata[resolution][ghost_key] = []
+
+            # search value in var attrs
+            if ebas_key in ds_var.attrs.keys():
+                metadata[resolution][ghost_key].append(ds_var.attrs[ebas_key])
+            # search value in ds attrs
+            elif ebas_key in ds.attrs.keys():
+                metadata[resolution][ghost_key].append(ds.attrs[ebas_key])
+            # not found -> nan
+            else:
+                metadata[resolution][ghost_key].append(np.nan)
+
+        # remove all attributes except units
+        ds_var.attrs = {key: value for key, value in ds_var.attrs.items() if key == 'units'}
+
+        # rename variable to BSC standards
+        ds_var = ds_var.to_dataset(name=var)
+
+        # append modified dataset to list
+        combined_ds_list.append(ds_var)
+
+    if save:
+        # create file
+        datasets = {
+            url: data
+            for url, data in files_info[var].items()
+        }
+        if len(datasets) != 0:
+            path_dir = os.path.dirname(path)
+            if not os.path.exists(path_dir):
+                os.makedirs(path_dir)
+            with open(path, 'w') as file:
+                yaml.dump(datasets, file, default_flow_style=False)
+                
+    return combined_ds_list, metadata
