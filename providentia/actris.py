@@ -1,4 +1,4 @@
-
+import copy
 import datetime
 import itertools
 import os
@@ -229,8 +229,7 @@ def get_data(files, var, actris_parameter, resolution, path, save):
         try:             
             file_resolution = coverages_dict[coverage]
         except:
-            print('Error in resolution with coverage:', coverage)
-            continue
+            file_resolution = f'Unrecognised ({coverage})'
             
         start_date = ds.time_coverage_start
         end_date = ds.time_coverage_end
@@ -320,3 +319,22 @@ def get_data(files, var, actris_parameter, resolution, path, save):
                 yaml.dump(datasets, file, default_flow_style=False)
                 
     return combined_ds_list, metadata
+
+
+def get_files_to_download(nonghost_root, target_start_date, target_end_date, resolution, var):
+
+    base_dir = join(nonghost_root, 'actris/actris', resolution, var)
+    paths = []
+    current_date = copy.deepcopy(target_start_date)
+    while current_date <= target_end_date:
+        
+        # save path
+        path = f"{base_dir}/{var}_{current_date.strftime('%Y%m')}.nc"
+        paths.append(path)
+
+        # get following month
+        next_month = current_date.month % 12 + 1
+        next_year = current_date.year + (current_date.month // 12)
+        current_date = current_date.replace(year=next_year, month=next_month)
+
+    return paths
