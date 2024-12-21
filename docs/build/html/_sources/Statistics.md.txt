@@ -25,7 +25,7 @@ For some plot types the full dimensional reduction is not possible, e.g map. The
 
 ![statistical-modes-2](uploads/8f1e1a4aa4e3254965066811d4499ec6/statistical-modes-2.png)
 
-In both the dashboard and offline versions of Providentia, the statistical modes and aggregation statistics can be set.
+In both the dashboard and reports, the statistical modes and aggregation statistics can be set.
 
 On the dashboard, in the statistics tab at the top, the mode and aggregation can be selected via the dropdown menus. In the .conf file these can be set like so:
 
@@ -52,7 +52,7 @@ Independent works by calculating the desired statistic per timestep (i.e. as see
 
 Cycle works by aggregating the grouped data per timestep (e.g. mean), before then calculating the desired statistic across the timesteps. 
 
-Again, in both the dashboard and offline versions of Providentia, the periodic statistical modes and aggregation statistic can be set.
+Again, in both the dashboard and reports the periodic statistical modes and aggregation statistic can be set.
 
 On the dashboard, in the plot options of the statsummary plot, the periodic statistic mode and aggregation can be selected via the dropdown menus. Additionally, periodic statistics can be added to the statsummary plot also via the dropdown menus.
 

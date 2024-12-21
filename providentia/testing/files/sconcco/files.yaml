@@ -1,0 +1,1123 @@
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/25/FU/X7/25FU-X7CV.nc:
+  end_date: 2022-07-19T13:02:00 UTC
+  resolution: daily
+  start_date: 2022-07-12T12:10:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2H/7S/VX/2H7S-VXET.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2010-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2Q/88/E8/2Q88-E8QG.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2015-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/33/Q8/GW/33Q8-GW9Q.nc:
+  end_date: 2019-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3D/84/FS/3D84-FSAE.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2020-09-14T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean_0
+  - carbon_dioxide_amean_0_qc
+  - carbon_dioxide_amean_0_ebasmetadata
+  - carbon_dioxide_amean_1
+  - carbon_dioxide_amean_1_qc
+  - carbon_dioxide_amean_1_ebasmetadata
+  - carbon_dioxide_amean_2
+  - carbon_dioxide_amean_2_qc
+  - carbon_dioxide_amean_2_ebasmetadata
+  - carbon_dioxide_stddev_0
+  - carbon_dioxide_stddev_0_qc
+  - carbon_dioxide_stddev_0_ebasmetadata
+  - carbon_dioxide_stddev_1
+  - carbon_dioxide_stddev_1_qc
+  - carbon_dioxide_stddev_1_ebasmetadata
+  - carbon_dioxide_stddev_2
+  - carbon_dioxide_stddev_2_qc
+  - carbon_dioxide_stddev_2_ebasmetadata
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_stddev
+  - methane_amean
+  - methane_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3G/4B/ZN/3G4B-ZN8C.nc:
+  end_date: 2015-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2014-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3T/4G/EX/3T4G-EXYU.nc:
+  end_date: 2022-07-19T12:05:00 UTC
+  resolution: daily
+  start_date: 2022-07-12T11:38:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/46/DN/N5/46DN-N5WF.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4F/R5/V8/4FR5-V8KB.nc:
+  end_date: 2014-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4V/S5/XX/4VS5-XXCK.nc:
+  end_date: 2022-07-19T13:00:00 UTC
+  resolution: daily
+  start_date: 2022-07-12T12:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5E/MN/3E/5EMN-3E4Y.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2021-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+  - carbon_dioxide_amean
+  - carbon_dioxide_stddev
+  - carbon_monoxide_amean
+  - carbon_monoxide_stddev
+  - methane_amean
+  - methane_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5P/YT/AV/5PYT-AVSU.nc:
+  end_date: 2010-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2003-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/65/6E/CJ/656E-CJ6R.nc:
+  end_date: 2016-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2014-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6A/BX/NR/6ABX-NR2P.nc:
+  end_date: 2016-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2015-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/77/S6/36/77S6-364A.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2020-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+  - carbon_dioxide_amean
+  - carbon_dioxide_stddev
+  - carbon_monoxide_amean
+  - carbon_monoxide_stddev
+  - methane_amean
+  - methane_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8H/ME/2V/8HME-2VJF.nc:
+  end_date: 2012-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8S/JB/WQ/8SJB-WQG7.nc:
+  end_date: 2013-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9H/5A/X6/9H5A-X6HC.nc:
+  end_date: 2022-01-02T00:00:00 UTC
+  resolution: hourly
+  start_date: 2017-08-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BD/3S/PQ/BD3S-PQCN.nc:
+  end_date: 2012-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2005-07-31T23:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BH/FB/KK/BHFB-KKJS.nc:
+  end_date: 2013-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2012-01-01T01:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/C4/AZ/U2/C4AZ-U2YF.nc:
+  end_date: 2022-07-19T14:32:00 UTC
+  resolution: daily
+  start_date: 2022-07-12T13:15:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/D2/EU/HJ/D2EU-HJQW.nc:
+  end_date: 2017-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2004-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/D8/GB/UF/D8GB-UFR3.nc:
+  end_date: 2010-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DS/QP/HX/DSQP-HXT7.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2012-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EK/VX/XU/EKVX-XUC9.nc:
+  end_date: 2015-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/G4/QM/37/G4QM-37F2.nc:
+  end_date: 2013-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2012-12-31T23:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GJ/VZ/6S/GJVZ-6SFJ.nc:
+  end_date: 2014-08-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GK/8U/QC/GK8U-QC3E.nc:
+  end_date: 2015-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H7/ZK/ZT/H7ZK-ZT84.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2021-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+  - carbon_dioxide_amean
+  - carbon_dioxide_stddev
+  - carbon_monoxide_amean
+  - carbon_monoxide_stddev
+  - methane_amean
+  - methane_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JA/TU/HG/JATU-HGR3.nc:
+  end_date: 2008-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2007-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JN/7S/67/JN7S-67P2.nc:
+  end_date: 2017-08-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2017-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JR/UZ/HN/JRUZ-HNTG.nc:
+  end_date: 2018-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2015-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_stddev
+  - water_vapor_stddev_qc
+  - water_vapor_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JU/DZ/FS/JUDZ-FSJD.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2014-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_max
+  - carbon_monoxide_max_qc
+  - carbon_monoxide_max_ebasmetadata
+  - carbon_monoxide_min
+  - carbon_monoxide_min_qc
+  - carbon_monoxide_min_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JX/FH/54/JXFH-54WA.nc:
+  end_date: 2010-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/K3/UA/AN/K3UA-ANCP.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2001-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/K8/A9/KE/K8A9-KEJB.nc:
+  end_date: 2012-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2008-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KD/B9/HF/KDB9-HFER.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2018-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_max
+  - carbon_monoxide_max_qc
+  - carbon_monoxide_max_ebasmetadata
+  - carbon_monoxide_min
+  - carbon_monoxide_min_qc
+  - carbon_monoxide_min_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KS/EJ/FC/KSEJ-FC58.nc:
+  end_date: 2017-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2015-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_max
+  - carbon_monoxide_max_qc
+  - carbon_monoxide_max_ebasmetadata
+  - carbon_monoxide_min
+  - carbon_monoxide_min_qc
+  - carbon_monoxide_min_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KX/JB/V4/KXJB-V4G6.nc:
+  end_date: 2010-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2008-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MS/TQ/EN/MSTQ-EN3W.nc:
+  end_date: 2012-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2001-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MU/Z4/WN/MUZ4-WNPJ.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2014-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - carbon_dioxide_amean
+  - carbon_dioxide_stddev
+  - carbon_monoxide_amean
+  - carbon_monoxide_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N8/C9/N2/N8C9-N2YS.nc:
+  end_date: 2020-09-14T00:00:00 UTC
+  resolution: hourly
+  start_date: 2018-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NP/4M/JH/NP4M-JHDQ.nc:
+  end_date: 2014-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NV/6C/53/NV6C-53DT.nc:
+  end_date: 2022-07-18T14:00:00 UTC
+  resolution: daily
+  start_date: 2022-07-12T13:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/P9/2P/8W/P92P-8WKN.nc:
+  end_date: 2007-03-01T01:00:00 UTC
+  resolution: hourly
+  start_date: 2006-06-01T01:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PM/XY/DJ/PMXY-DJBB.nc:
+  end_date: 2020-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2018-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q7/S6/9Z/Q7S6-9Z5J.nc:
+  end_date: 2022-07-19T13:00:00 UTC
+  resolution: daily
+  start_date: 2022-07-12T12:07:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QQ/2S/ZM/QQ2S-ZM9W.nc:
+  end_date: 2024-01-02T00:00:00 UTC
+  resolution: hourly
+  start_date: 2017-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RP/MK/MA/RPMK-MADM.nc:
+  end_date: 2012-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2006-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RQ/KY/DV/RQKY-DVWV.nc:
+  end_date: 2022-07-19T13:07:00 UTC
+  resolution: daily
+  start_date: 2022-07-12T12:14:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RS/YM/KS/RSYM-KSS6.nc:
+  end_date: 2019-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RT/XH/S3/RTXH-S3BJ.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2018-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_max
+  - carbon_monoxide_max_qc
+  - carbon_monoxide_max_ebasmetadata
+  - carbon_monoxide_min
+  - carbon_monoxide_min_qc
+  - carbon_monoxide_min_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RZ/KJ/TP/RZKJ-TPP4.nc:
+  end_date: 2013-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2012-12-31T23:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SH/VZ/9D/SHVZ-9DV4.nc:
+  end_date: 2012-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2001-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SY/C5/JJ/SYC5-JJU3.nc:
+  end_date: 2022-07-19T13:06:00 UTC
+  resolution: daily
+  start_date: 2022-07-12T12:05:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/T3/WZ/KV/T3WZ-KVNC.nc:
+  end_date: 2017-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2016-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TJ/AA/Y5/TJAA-Y5EZ.nc:
+  end_date: 2013-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2012-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TR/DC/JF/TRDC-JFTT.nc:
+  end_date: 2014-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UG/QY/D4/UGQY-D46C.nc:
+  end_date: 2018-01-02T00:00:00 UTC
+  resolution: hourly
+  start_date: 2017-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_max
+  - carbon_monoxide_max_qc
+  - carbon_monoxide_max_ebasmetadata
+  - carbon_monoxide_min
+  - carbon_monoxide_min_qc
+  - carbon_monoxide_min_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VY/PF/EV/VYPF-EVUA.nc:
+  end_date: 2008-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 1995-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/W9/W5/AN/W9W5-ANC6.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2021-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_max
+  - carbon_monoxide_max_qc
+  - carbon_monoxide_max_ebasmetadata
+  - carbon_monoxide_min
+  - carbon_monoxide_min_qc
+  - carbon_monoxide_min_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WR/NV/EG/WRNV-EGEA.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2007-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/X6/5T/84/X65T-84RU.nc:
+  end_date: 2022-07-19T13:00:00 UTC
+  resolution: daily
+  start_date: 2022-07-12T12:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XS/Q2/ZM/XSQ2-ZMH2.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2021-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+  - carbon_dioxide_amean
+  - carbon_dioxide_stddev
+  - carbon_monoxide_amean
+  - carbon_monoxide_stddev
+  - methane_amean
+  - methane_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XV/BV/GF/XVBV-GFKH.nc:
+  end_date: 2007-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 1996-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YC/U7/MF/YCU7-MF9A.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2012-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZQ/HH/ER/ZQHH-ER2G.nc:
+  end_date: 2014-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitrogen_dioxide
+  - nitrogen_dioxide_qc
+  - nitrogen_dioxide_ebasmetadata
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata

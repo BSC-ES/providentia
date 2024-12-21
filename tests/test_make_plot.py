@@ -97,3 +97,9 @@ def test_make_periodic_violin(inst, statistic_mode, network_type):
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_scatter(inst, statistic_mode, network_type):
     make_plot(inst, statistic_mode, network_type, 'scatter', ['regression'])
+
+
+@pytest.mark.parametrize("inst, statistic_mode, network_type", [possibilities[2]])
+def test_make_fairmode_target(inst, statistic_mode, network_type):
+    make_plot(inst, statistic_mode, network_type,
+              'fairmode-target')
