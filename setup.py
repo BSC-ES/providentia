@@ -18,7 +18,7 @@ REQUIREMENTS = {
         'ConfigArgParse==1.7',
         'cftime==1.6.3',
         'KDEpy==1.1.9',
-        'xarray==2024.6.0',
+        'xarray==2024.11.0',
         'Sphinx==7.2.6',
         'Sphinx-rtd-theme==2.0.0',
         'coverage==7.4.3',

@@ -125,15 +125,15 @@ while [ $# -gt 0 ]; do
         -c|--cores) shift
                     cores=$OPTARG;;
         -t|--time) shift
-                    cores=$OPTARG;;
+                    time=$OPTARG;;
         -J|--jobname) shift
                     jobname=$OPTARG;;
         -q|--queue) shift
                     queue=$OPTARG;;
         -m|--mem) shift
-                  mem=$OPTARG;;
+                    mem=$OPTARG;;
         --constraint) shift 
-                      constraint=$OPTARG;;            
+                    constraint=$OPTARG;;            
         -*) shift
             OTHEROPTS+="$OPT ";;
         * ) echo "ALL OPTIONS MUST BE PREFIXED WITH '-' or '--', AND ARGUMENTS MUST BE PREFIXED WITH '=', e.g. '--cores=10'" 

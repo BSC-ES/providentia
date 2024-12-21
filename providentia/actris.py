@@ -1,0 +1,340 @@
+import copy
+import datetime
+import itertools
+import os
+import requests
+import yaml
+import re
+
+import numpy as np
+import pandas as pd
+import xarray as xr
+
+from providentia.auxiliar import CURRENT_PATH, join
+
+PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
+
+# load ACTRIS mapping files
+parameters_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'ghost_actris_variables.yaml')))
+metadata_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'metadata.yaml')))
+coverages_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'coverages.yaml')))
+units_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'units.yaml')))
+variable_mapping = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'variable_mapping.yaml')))
+variable_mapping = {k: v for k, v in variable_mapping.items() if k.strip() and v}
+
+
+def get_files_per_var(var):
+    files_per_var = {}
+    base_url = "https://prod-actris-md.nilu.no/metadata/content"
+
+    if var not in files_per_var:
+        files_per_var[var] = {}
+
+    variable_files = []
+    page = 0
+    while True:
+        # set up URL with pagination
+        url = f"{base_url}/{parameters_dict[var]}/page/{page}"
+        response = requests.get(url)
+
+        # check if the response is valid and contains data
+        if response.status_code != 200:
+            print(
+                f"Error fetching page {page}. Status code: {response.status_code}")
+            break
+
+        data = response.json()
+
+        # check if there's content in the data
+        if not data:
+            break
+
+        # loop through each entry in the data and get OPeNDAP URL
+        for item in data:
+            doi = item.get("md_identification", {}).get(
+                "identifier", {}).get("pid")
+            opendap_urls = [protocol_dict['dataset_url'] for protocol_dict in item.get(
+                'md_distribution_information', []) if protocol_dict.get('protocol') == 'OPeNDAP']
+
+            # print DOI and OPeNDAP URL if both are present
+            if doi and opendap_urls:
+                variable_files.append(opendap_urls)
+
+        # go to the next page
+        page += 1
+
+    files_per_var[var]['files'] = list(
+        itertools.chain.from_iterable(variable_files))
+
+    return files_per_var
+
+
+def get_files_path(var):
+
+    alpha_var = ''.join(x for x in var if x.isalpha())
+    if alpha_var in ['lsco', 'absco', 'lbsco', 'odaero']:
+        path = join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', f'files/{alpha_var}/files.yaml')
+    else:
+        path = join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', f'files/{var}/files.yaml')
+
+    return path
+
+
+def temporally_average_data(combined_ds, resolution, year, month, var):
+
+    # get valid dates frequency
+    if resolution == 'hourly':
+        frequency = 'h'
+    elif resolution == 'daily':
+        frequency = 'D'
+    elif resolution == 'monthly':
+        frequency = 'MS'
+
+    # get start and end of period to construct valid dates
+    time = combined_ds.time.values
+    start_date = datetime.datetime(year, month, 1)
+    first_day_next_month = datetime.datetime(
+        year, month % 12 + 1, 1) if month != 12 else datetime.datetime(year + 1, 1, 1)
+    end_date = first_day_next_month - datetime.timedelta(days=1)
+    valid_dates = pd.date_range(
+        start=start_date, end=end_date, freq=frequency).to_numpy(dtype='datetime64[ns]')
+
+    # initialise averaged data
+    averaged_data = np.empty(
+        (len(combined_ds.station.values), len(valid_dates)))
+
+    for station_i, station in enumerate(combined_ds.station.values):
+        # initialise averaged data
+        station_averaged_data = []
+
+        # read data per station
+        data = combined_ds[var].isel(station=station_i).values
+
+        # ignore data (times and values) if the values are nan
+        valid_idxs = ~np.isnan(data)
+        valid_time = time[valid_idxs]
+        valid_data = data[valid_idxs]
+
+        # calculate weighted averages
+        if len(valid_data) != 0:
+            for date in valid_dates:
+
+                # get differences between valid time and actual times in minutes
+                time_diffs = (
+                    valid_time - date).astype('timedelta64[ns]').astype(float)
+
+                # get positive differences and negative differences to differentiate
+                # between the actual times that are earlier than the valid date (negative), and those that are later (positive)
+                positive_diffs = time_diffs[time_diffs > 0]
+                negative_diffs = time_diffs[time_diffs < 0]
+
+                # find the closest actual time after the valid time
+                closest_positive = None
+                if len(positive_diffs) > 0:
+                    closest_positive_idx = np.abs(positive_diffs).argmin()
+                    closest_positive = positive_diffs[closest_positive_idx]
+                    closest_positive_time = valid_time[time_diffs ==
+                                                       positive_diffs[closest_positive_idx]][0]
+                    closest_positive_value = valid_data[time_diffs ==
+                                                        positive_diffs[closest_positive_idx]][0]
+
+                # find the closest actual time before the valid time
+                closest_negative = None
+                if len(negative_diffs) > 0:
+                    closest_negative_idx = np.abs(negative_diffs).argmin()
+                    closest_negative = negative_diffs[closest_negative_idx]
+                    closest_negative_time = valid_time[time_diffs ==
+                                                       negative_diffs[closest_negative_idx]][-1]
+                    closest_negative_value = valid_data[time_diffs ==
+                                                        negative_diffs[closest_negative_idx]][-1]
+
+                # when the valid time only has a value in one direction, get closest value without calculating weights
+                if closest_positive is None:
+                    value = closest_negative_value
+                elif closest_negative is None:
+                    value = closest_positive_value
+                # in the rest of cases, calculate weights of 2 closest values and make average
+                else:
+                    # get 2 closest times and make positive to be able to compare differences
+                    closest_diffs = np.abs(
+                        [closest_negative, closest_positive])
+
+                    # we do the reverse, since we want the differences in minutes to have a heavier weight if these are smaller (nearer the actual time)
+                    weights = 1 / closest_diffs
+
+                    # finally we normalize them to have values between 0 and 1
+                    weights_normalized = weights / np.sum(weights)
+
+                    # get average
+                    value = np.average(
+                        [closest_negative_value, closest_positive_value], weights=weights_normalized)
+
+                # save averaged data
+                station_averaged_data.append(value)
+
+            averaged_data[station_i, :] = station_averaged_data
+        else:
+            averaged_data[station_i, :] = [np.nan]*len(valid_dates)
+
+    # create new variable with averaged data
+    combined_averaged_ds = xr.DataArray(
+        data=averaged_data,
+        coords={'station': combined_ds.station.values, 'time': valid_dates},
+        dims=['station', 'time'],
+        attrs={'units': combined_ds[var].units})
+
+    # drop old variable and associated time
+    combined_ds = combined_ds.drop_vars(var)
+    combined_ds = combined_ds.drop_dims('time')
+
+    # add new variable
+    combined_ds[var] = combined_averaged_ds
+
+    return combined_ds
+
+
+def is_wavelength_var(actris_parameter):
+    wavelength_var = False
+    if actris_parameter in ['aerosol particle light absorption coefficient',
+                            'aerosol particle light hemispheric backscatter coefficient',
+                            'aerosol particle light scattering coefficient']:
+        wavelength_var = True
+    return wavelength_var
+
+
+def get_data(files, var, actris_parameter, resolution, path, save):
+    
+    # combine datasets that have the same variable and resolution
+    combined_ds_list = []
+    metadata = {}
+    metadata[resolution] = {}
+    files_info = {}
+    files_info[var] = {}
+    
+    # get EBAS component
+    ebas_component = variable_mapping[actris_parameter]['var']
+
+    print('Total number of files:', len(files))
+    for i, file in enumerate(files):
+        print(i, '-', file)
+        # open file
+        try:
+            ds = xr.open_dataset(file)
+        except:
+            print('Error opening file')
+            continue
+
+        # get resolution
+        coverage = ds.time_coverage_resolution
+        try:             
+            file_resolution = coverages_dict[coverage]
+        except:
+            file_resolution = f'Unrecognised ({coverage})'
+            
+        start_date = ds.time_coverage_start
+        end_date = ds.time_coverage_end
+        variables = list(ds.data_vars.keys())
+        files_info[var][file] = {}
+        files_info[var][file]['resolution'] = file_resolution
+        files_info[var][file]['start_date'] = start_date
+        files_info[var][file]['end_date'] = end_date
+        files_info[var][file]['variables'] = variables
+        
+        # get lowest level if tower height is in coordinates
+        if 'Tower_inlet_height' in list(ds.coords):
+            ds = ds.sel(Tower_inlet_height=min(ds.Tower_inlet_height.values), drop=True)
+
+        # get data at desired wavelength if wavelength is in coordinates
+        if 'Wavelength' in list(ds.coords):
+            wavelength = int(re.findall(r'\d+', var)[0])
+            if wavelength in ds.Wavelength.values:
+                ds = ds.sel(Wavelength=wavelength, drop=True)
+            else:
+                print(f'Data at {wavelength}nm could not be found')
+                continue
+        
+        # assign station code as dimension
+        ds = ds.expand_dims(dim={'station': [i]})
+
+        # select data for that variable only
+        unformatted_units = variable_mapping[actris_parameter]['units']
+        if unformatted_units in units_dict.keys():
+            units = units_dict[unformatted_units]
+        else:
+            print(f'Units {unformatted_units} were not found in dictionary')
+            continue
+        units_var = f'{ebas_component}_{units}'
+        possible_vars = [ebas_component, 
+                         f'{ebas_component}_amean', 
+                         units_var, 
+                         f'{units_var}_amean']
+        ds_var_exists = False
+        for possible_var in possible_vars:
+            if possible_var in ds:
+                ds_var = ds[possible_var]
+                ds_var_exists = True
+                break
+
+        # continue to next file if variable cannot be read
+        if not ds_var_exists:
+            print(f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}')
+            continue
+            
+        # save metadata
+        for ghost_key, ebas_key in metadata_dict.items():
+            # create key if it does not exist
+            if ghost_key not in metadata[resolution].keys():
+                metadata[resolution][ghost_key] = []
+
+            # search value in var attrs
+            if ebas_key in ds_var.attrs.keys():
+                metadata[resolution][ghost_key].append(ds_var.attrs[ebas_key])
+            # search value in ds attrs
+            elif ebas_key in ds.attrs.keys():
+                metadata[resolution][ghost_key].append(ds.attrs[ebas_key])
+            # not found -> nan
+            else:
+                metadata[resolution][ghost_key].append(np.nan)
+
+        # remove all attributes except units
+        ds_var.attrs = {key: value for key, value in ds_var.attrs.items() if key == 'units'}
+
+        # rename variable to BSC standards
+        ds_var = ds_var.to_dataset(name=var)
+
+        # append modified dataset to list
+        combined_ds_list.append(ds_var)
+
+    if save:
+        # create file
+        datasets = {
+            url: data
+            for url, data in files_info[var].items()
+        }
+        if len(datasets) != 0:
+            path_dir = os.path.dirname(path)
+            if not os.path.exists(path_dir):
+                os.makedirs(path_dir)
+            with open(path, 'w') as file:
+                yaml.dump(datasets, file, default_flow_style=False)
+                
+    return combined_ds_list, metadata
+
+
+def get_files_to_download(nonghost_root, target_start_date, target_end_date, resolution, var):
+
+    base_dir = join(nonghost_root, 'actris/actris', resolution, var)
+    paths = []
+    current_date = copy.deepcopy(target_start_date)
+    while current_date <= target_end_date:
+        
+        # save path
+        path = f"{base_dir}/{var}_{current_date.strftime('%Y%m')}.nc"
+        paths.append(path)
+
+        # get following month
+        next_month = current_date.month % 12 + 1
+        next_year = current_date.year + (current_date.month // 12)
+        current_date = current_date.replace(year=next_year, month=next_month)
+
+    return paths

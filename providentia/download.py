@@ -2,23 +2,25 @@ import sys
 import os
 import shutil
 
-import requests
-from io import BytesIO
+import copy
 import subprocess
-import yaml
-import json
 from dotenv import dotenv_values
 import paramiko 
 from base64 import decodebytes
 import signal
-import copy
 import time
+import re
+import requests
+import yaml
+
+import xarray as xr
 
 # urlparse
 from tqdm import tqdm
 from remotezip import RemoteZip
 import tarfile
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from getpass import getpass
 
 from .configuration import ProvConfiguration, load_conf
@@ -26,6 +28,9 @@ from .read_aux import check_for_ghost
 from .warnings_prv import show_message
 
 from providentia.auxiliar import CURRENT_PATH, join
+from providentia.actris import (get_files_path, temporally_average_data, get_data,
+                                get_files_per_var, is_wavelength_var, get_files_to_download,
+                                parameters_dict)
 
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 REMOTE_MACHINE = "storage5"
@@ -34,6 +39,7 @@ REMOTE_MACHINE = "storage5"
 data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
+
 
 def check_time(size, file_size):
     if (time.time() - download.ncfile_dl_start_time) > download.timeoutLimit:
@@ -195,15 +201,19 @@ class ProvidentiaDownload(object):
                     if filter_species is not None:
                         self.species = [filter_species]
 
-                    # get the files to be downlaoded, check if they files were already downlaoded and download if not
+                    # get the files to be downloaded, check if they files were already downloaded and download if not
                     # download from the remote machine
-                    if self.bsc_download_choice == 'y':
+                    elif self.bsc_download_choice == 'y':
                         # GHOST
                         if check_for_ghost(network):
                             initial_check_nc_files = self.download_ghost_network_sftp(network, initial_check=True)
                             files_to_download = self.select_files_to_download(initial_check_nc_files)
                             if not initial_check_nc_files or files_to_download:
                                 self.download_ghost_network_sftp(network, initial_check=False, files_to_download=files_to_download)
+                        # ACTRIS
+                        elif network == 'actris/actris':
+                            error = f"Error: It is not possible to download files from the ACTRIS network from BSC machines. Set BSC_DL_CHOICE=n in .env file."
+                            sys.exit(error)
                         # non-GHOST
                         else:
                             initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
@@ -219,6 +229,9 @@ class ProvidentiaDownload(object):
                             files_to_download = self.select_files_to_download(initial_check_nc_files)
                             if not initial_check_nc_files or files_to_download:
                                 self.download_ghost_network_zenodo(network, initial_check=False, files_to_download=files_to_download)
+                        # ACTRIS
+                        elif network == 'actris/actris':
+                            self.download_actris_network()
                         # non-GHOST
                         else:
                             error = f"Error: It is not possible to download files from the non-GHOST network {network} from the zenodo webpage."
@@ -1120,14 +1133,14 @@ class ProvidentiaDownload(object):
                 except FileNotFoundError:
                     # change species name to the species to map
                     if speci_to_process in mapping_species:
-                        for species in mapping_species[speci_to_process]:
+                        for mapping_speci in mapping_species[speci_to_process]:
                             try:
                                 # if it is an ensemble member
                                 if not ensemble_options.startswith("stat_"):
-                                    res_spec = join(remote_dir,resolution,species)
+                                    res_spec = join(remote_dir,resolution, mapping_speci)
                                 # if it is an ensemble statistic
                                 else:
-                                    res_spec = join(remote_dir,resolution,"ensemble-stats",species+"_"+stat)
+                                    res_spec = join(remote_dir,resolution, "ensemble-stats", species + "_" + stat)
   
                                 self.sftp.stat(res_spec)  
                                 species_exists = True
@@ -1347,7 +1360,149 @@ class ProvidentiaDownload(object):
                     valid_nc_files.append(nc_file)
                     
         return valid_nc_files        
+    
+    def download_actris_network(self):
         
+        resolution = self.resolution[0]
+        target_start_date = datetime(int(self.start_date[:4]), int(self.start_date[4:6]), int(self.start_date[6:8]), 0)
+        target_end_date = datetime(int(self.end_date[:4]), int(self.end_date[4:6]), int(self.end_date[6:8]), 23, 59, 59) - timedelta(days=1)
+
+        for var in self.species:
+            
+            # get files that were already downloaded
+            initial_check_nc_files = get_files_to_download(self.nonghost_root, target_start_date, target_end_date, resolution, var)
+            files_to_download = self.select_files_to_download(initial_check_nc_files)
+            if not files_to_download:
+                msg = f"Files were already downloaded for {var} at {resolution} "
+                msg += f"resolution between {target_start_date} and {target_end_date}."
+                show_message(self, msg, deactivate=False)     
+                continue 
+            
+            actris_parameter = parameters_dict[var]
+            path = get_files_path(var)
+
+            # if file does not exist
+            if not os.path.isfile(path):
+                # indicate we need to save the file with available files information
+                print(f'File containing information of the files available in Thredds for {var} ({path}) does not exist, creating.')
+                save = True
+
+                # get files
+                combined_data = get_files_per_var(var)
+                files = combined_data[var]['files']
+                    
+            # if file exists
+            else:
+                # indicate we do not need to save the file with available files information
+                print(f'File containing information of the files available in Thredds for {var} ({path}) already exists.')
+                save = False
+
+                # get files information
+                files = []
+                files_info = yaml.safe_load(open(os.path.join(CURRENT_PATH, path)))
+                files_info = {k: v for k, v in files_info.items() if k.strip() and v}
+                for file, attributes in files_info.items():
+                    if attributes["resolution"] == resolution:
+                        start_date = datetime.strptime(attributes["start_date"], "%Y-%m-%dT%H:%M:%S UTC")
+                        end_date = datetime.strptime(attributes["end_date"], "%Y-%m-%dT%H:%M:%S UTC")
+                        for file_to_download in files_to_download:
+                            file_to_download_yearmonth = file_to_download.split(f'{var}_')[1].split('.nc')[0]
+                            file_to_download_start_date = datetime.strptime(file_to_download_yearmonth, "%Y%m")
+                            file_to_download_end_date = datetime(file_to_download_start_date.year, file_to_download_start_date.month, 1) + relativedelta(months=1, seconds=-1)
+                            if file_to_download_start_date <= end_date and file_to_download_end_date >= start_date:
+                                if file not in files:
+                                    files.append(file)
+                
+            if len(files) != 0:
+                    
+                # get data and metadata for each file within period
+                combined_ds_list, metadata = get_data(files, var, actris_parameter, resolution, path, save)
+
+                # combine and create new dataset
+                print('Combining files...')
+                try:
+                    combined_ds = xr.concat(combined_ds_list, 
+                                            dim='station', 
+                                            combine_attrs='drop_conflicts')
+                except Exception as error:
+                    print(f'Error: Datasets could not be combined - {error}')
+                    if 'time' in str(error):
+                        for item in combined_ds_list:
+                            print(item.time.values[0], item.time.values[1])
+                    continue
+                
+                # add metadata
+                for key, value in metadata[resolution].items():
+                    if key in ['latitude', 'longitude']:
+                        value = [float(val) for val in value]
+                    elif key in ['altitude', 'measurement_altitude', 'sampling_height']:
+                        value = [float(val.replace('m', '').strip()) if isinstance(val, str) else val for val in value]
+                    combined_ds[key] = xr.Variable(data=value, dims=('station'))
+
+                # add units for lat and lon
+                # TODO: Check attrs geospatial_lat_units and geospatial_lon_units
+                combined_ds.latitude.attrs['units'] = 'degrees_north'
+                combined_ds.longitude.attrs['units'] = 'degrees_east'
+
+                # add general attrs
+                combined_ds.attrs['data_license'] = 'BSD-3-Clause. Copyright 2025 Alba Vilanova Cortezón'
+                combined_ds.attrs['source'] = 'Observations'
+                combined_ds.attrs['institution'] = 'Barcelona Supercomputing Center'
+                combined_ds.attrs['creator_name'] = 'Alba Vilanova Cortezón'
+                combined_ds.attrs['creator_email'] = 'alba.vilanova@bsc.es'
+                combined_ds.attrs['application_area'] = 'Monitoring atmospheric composition'
+                combined_ds.attrs['domain'] = 'Atmosphere'
+                combined_ds.attrs['observed_layer'] = 'Land surface'
+                        
+                # save data per year and month
+                path = join(self.nonghost_root, f'actris/actris/{resolution}/{var}')
+                if not os.path.isdir(path):
+                    os.makedirs(path, exist_ok=True)
+                saved_files = 0
+                for year, ds_year in combined_ds.groupby('time.year'):
+                    for month, ds_month in ds_year.groupby('time.month'):
+                        filename = f"{path}/{var}_{year}{month:02d}.nc"
+                        if filename in files_to_download:
+                            combined_ds_yearmonth = combined_ds.sel(time=f"{year}-{month:02d}")
+                            combined_ds_yearmonth = temporally_average_data(combined_ds_yearmonth, resolution, year, month, var)
+
+                            # add title to attrs
+                            extra_info = ''
+                            wavelength_var = is_wavelength_var(actris_parameter)
+                            if wavelength_var:
+                                wavelength = int(re.findall(r'\d+', var)[0])
+                                extra_info = f' at {wavelength}nm'
+                            combined_ds_yearmonth.attrs['title'] = f'Surface {parameters_dict[var]}{extra_info} in the ACTRIS network in {year}-{month:02d}.'
+
+                            # order attrs
+                            custom_order = ['title', 'institution', 'creator_name', 'creator_email',
+                                            'source', 'application_area', 'domain', 'observed_layer',
+                                            'data_license']
+                            ordered_attrs = {key: combined_ds_yearmonth.attrs[key] 
+                                            for key in custom_order 
+                                            if key in combined_ds_yearmonth.attrs}
+                            combined_ds_yearmonth.attrs = ordered_attrs
+
+                            # remove stations if all variable data is nan
+                            previous_n_stations = len(combined_ds_yearmonth.station)
+                            combined_ds_yearmonth = combined_ds_yearmonth.dropna(dim="station", subset=[var], how="all")
+                            combined_ds_yearmonth = combined_ds_yearmonth.assign_coords(station=range(len(combined_ds_yearmonth.station)))
+                            current_n_stations = len(combined_ds_yearmonth.station)
+                            n_stations_diff = previous_n_stations - current_n_stations
+                            if n_stations_diff > 0:
+                                print(f'Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
+                            
+                            # save file
+                            combined_ds_yearmonth.to_netcdf(filename)
+
+                            # change permissions
+                            os.system("chmod 777 {}".format(filename))
+                            print(f"Saved: {filename}")
+                            saved_files += 1
+                            
+                print(f'Total number of saved files: {saved_files}')
+
+
 def main(**kwargs):
     """ Main function when running download function. """
     # initialise break blocker
