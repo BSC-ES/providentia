@@ -646,7 +646,7 @@ def export_configuration(prv, cname, separator="||"):
                                'active_dashboard_plots': ",".join(str(i) for i in prv.active_dashboard_plots)})
 
     # plot_characteristics_filename
-    if ((prv.plot_characteristics_filename != join(PROVIDENTIA_ROOT, 'settings/plot_characteristics_dashboard.yaml')) &
+    if ((prv.plot_characteristics_filename != join(PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')) &
        (prv.plot_characteristics_filename != '')):
         options['section'].update({'plot_characteristics_filename': prv.plot_characteristics_filename})
 

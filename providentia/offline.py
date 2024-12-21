@@ -33,10 +33,10 @@ from .read_aux import (generate_file_trees, get_lower_resolutions,
 from .statistics import (calculate_statistic, get_fairmode_data,
                          generate_colourbar, get_selected_station_data, get_z_statistic_info)
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
+fairmode_settings = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
 
 
 class ProvidentiaOffline:
@@ -82,7 +82,11 @@ class ProvidentiaOffline:
             sys.exit(error)
 
         # load report plot presets
-        self.report_plots = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/report_plots.yaml')))
+        try:
+            self.report_plots = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/report_plots.yaml')))
+        except:
+            error = "Error: Report plots file could not be read, check for common typos (e.g. missing double quotes or commas)."
+            sys.exit(error)
 
         # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
         # if have filetree flags, then these overwrite any defaults
@@ -165,15 +169,10 @@ class ProvidentiaOffline:
 
             # check for self defined plot characteristics file
             if self.plot_characteristics_filename == '':
-                self.plot_characteristics_filename = join(PROVIDENTIA_ROOT, 'settings/plot_characteristics_offline.yaml')
-            self.plot_characteristics_templates = yaml.safe_load(open(self.plot_characteristics_filename))
+                self.plot_characteristics_filename = join(PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')
+            plot_characteristics = yaml.safe_load(open(self.plot_characteristics_filename))
+            self.plot_characteristics_templates = expand_plot_characteristics(plot_characteristics, 'offline')
             self.plot_characteristics = {}
-
-            # error when using wrong custom plot characteristics path to launch dashboard
-            if 'header' not in self.plot_characteristics_templates.keys():
-                msg = 'It is not possible to use the dashboard plot characteristics path to generate offline reports. Consider adding another path to plot_characteristics_filename, as in: '
-                msg += 'plot_characteristics_filename = dashboard:/path/plot_characteristics_dashboard.yaml, offline:/path/plot_characteristics_offline.yaml.'
-                sys.exit(msg)
 
             # initialise Plot class
             self.plot = Plot(read_instance=self, canvas_instance=self)
@@ -1530,8 +1529,14 @@ class ProvidentiaOffline:
                 else:
                     chunk_stat = None
                     chunk_resolution = None
-
+            
             for data_labels in iter_data_labels:
+
+                # skip observations
+                if ((data_labels == self.observations_data_label) 
+                    and ((base_plot_type in ['scatter', 'fairmode-target']) or ('bias' in plot_options) or 
+                    (z_statistic_sign == 'bias'))):
+                    continue
 
                 # skip individual plots if we have no data for a specific label
                 if 'individual' in plot_options:

@@ -31,7 +31,7 @@ Providentia will be able to find these datasets if they are saved in the directo
 
 The next time you use Providentia you must use the argument `--gft`, to regenerate the internal file tree to account for the new network.
 
-If you then launch the dashboard and select any period in 2019, you will see that you can select CSIC as a network. If you want to use a configuration file to launch it or create offline reports, then you will need to write:
+If you then launch the dashboard and select any period in 2019, you will see that you can select CSIC as a network. If you want to use a configuration file to launch it or create reports, then you will need to write:
 
 ```
 network = csic/csic
