@@ -10,5 +10,6 @@ reports/*
 saved_data/*
 notebooks/.ipynb_checkpoints
 providentia/testing/.ipynb_checkpoints
+providentia/testing/files/.ipynb_checkpoints
 interactive.out
 .env
