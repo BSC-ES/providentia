@@ -4,7 +4,8 @@
                                   'eea/eionet', 'eea/eionet-valid', 'cnrs-lisa/indaaf', 'port_barcelona/port-barcelona',
                                   'csic/csic', 'miteco_voc/miteco_voc', 'meteofrance/eionet-cams2_40', 
                                   'ineris/eionet-cams2_40-vra', 'ineris/eionet-cams2_40-ira', 'xvpca/xvpca',
-                                  'ehu_valderejo/ehu_valderejo', 'csic_montseny/csic_montseny', 'ghost_btx/ghost_btx'],
+                                  'ehu_valderejo/ehu_valderejo', 'csic_montseny/csic_montseny', 'ghost_btx/ghost_btx',
+                                  'actris/actris'],
   'nonghost_available_resolutions': ['hourly', '3hourly', '6hourly', 'hourly_instantaneous',
                                     '3hourly_instantaneous', '6hourly_instantaneous',
                                     'daily', 'monthly']

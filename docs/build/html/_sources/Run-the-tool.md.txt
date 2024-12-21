@@ -37,7 +37,7 @@ If you already have a [configuration file](Configuration-files), you can specify
 
 A pop-up window will immediately appear where you can choose the section or subsection of interest. After that, the graphical window of Providentia will appear and you can begin using the tool. 
 
-### Generate an offline report
+### Generate a report
 
 If you have your [configuration file](Configuration-files) ready, you can generate reports by running Providentia with the following command:
 
@@ -48,18 +48,27 @@ If you have your [configuration file](Configuration-files) ready, you can genera
 The mandatory commands are:
 
 * `--config`: specify the path of your [configuration file](Configuration-files)
-* `--offline`: for running offline, without launching the dashboard
+* `--offline`: for creating a report, without launching the dashboard
 
 You can also launch the dashboard or get a report for only one section by using the option  `--section`. In order to indicate subsections, you will need to write the section name, followed by a hyphen (-) and the subsection name.
 
 The reports will be saved under the folder `reports`. You can add a path in the `report_filename` of the configuration file to change the default directory.
 
-### Using interactive mode
+### Using Providentia as a library
 
 A Jupyter notebook can be launched with the following command:
 ```
 ./bin/providentia --interactive
 ```        
+
+### Interpolate your model data to observations
+
+Using a [configuration file](Configuration-files), you can start interpolating your model data to your desired observational network.
+```
+./bin/providentia --config='/path/to/file/example.conf' --interpolate
+```
+
+More details can be found in the [interpolation section](Interpolation).
 
 ## Running the tool on a personal machine
 
