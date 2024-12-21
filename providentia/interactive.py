@@ -36,7 +36,7 @@ from .writing import export_configuration, export_data_npz, export_netcdf
 from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
+fairmode_settings = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
 
 # do not print deprecated warnings
 import warnings

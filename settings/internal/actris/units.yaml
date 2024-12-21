@@ -1,0 +1,8 @@
+{
+  "nmol/mol": "nmol_per_mol",
+  "ug/m3": "ug_per_m3",
+  "ug N/m3": "ug_N_per_m3",
+  "ug S/m3": "ug_S_per_m3",
+  "pmol/mol": "pmol_per_mol",
+  "1/Mm": "1_per_Mm",
+}
