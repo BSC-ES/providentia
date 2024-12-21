@@ -1252,7 +1252,7 @@
         {
           "element_type": "container",
           "formatting_dict": "settings_container",
-          "size": [250, 180],
+          "size": [250, 130],
           "relative_position": [-230, 25],
         },
 
@@ -1289,7 +1289,7 @@
         {
           "element_type": "label",
           "size": [230, 20],
-          "relative_position": [-220, 150],
+          "relative_position": [-220, 100],
           "text": "Options",
         },
 
@@ -1298,7 +1298,7 @@
           "element_type": "checkable_combobox",
           "formatting_dict": "checkable_combobox_menu",
           "size": [230, 20],
-          "relative_position": [-220, 175],
+          "relative_position": [-220, 125],
           "object_name": "fairmode_statsummary_options",
           "function": "update_plot_option",
         },
