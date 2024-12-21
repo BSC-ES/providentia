@@ -218,7 +218,7 @@ def legend_picker_func(canvas_instance, event):
                                         plot_element.set_visible(False)
 
                         # reset axes limits (harmonising across subplots for periodic plots) 
-                        if plot_type not in ['taylor']:
+                        if plot_type not in ['taylor', "fairmode-statsummary"]:
                             if plot_type == 'scatter':
                                 harmonise_xy_lims_paradigm(canvas_instance, canvas_instance.read_instance, 
                                                         canvas_instance.plot_axes[plot_type], plot_type, 
@@ -509,45 +509,6 @@ class HoverAnnotation(object):
                 text_label += ('\n{0}: {1:.{2}f}').format('CRMSE / β·RMSᵤ', x, self.round_decimal_places)
                 # experiment label
                 text_label += ('\n{0}: {1:.{2}f}').format('MB / β·RMSᵤ', y, self.round_decimal_places)
-
-        self.annotation.set_text(text_label)
-
-        return None
-    
-    # TODO adapt method
-    def update_fairmode_statsummary_annotation(self, annotation_index):
-
-        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
-
-            # for annotate data label
-            if data_label == self.annotate_data_label:
-                # do not annotate if plot is cleared
-                if data_label not in self.canvas_instance.plot_elements['fairmode-statsummary'][self.canvas_instance.plot_elements['fairmode-statsummary']['active']].keys():
-                    continue
-
-                # retrieve CRMSE / β·RMSᵤ and Mean Bias / β·RMSᵤ
-                line = self.canvas_instance.plot_elements['fairmode-statsummary'][self.canvas_instance.plot_elements['fairmode-statsummary']['active']][data_label]['plot'][0]
-                x = line.get_xdata()[annotation_index['ind'][0]]
-                y = line.get_ydata()[annotation_index['ind'][0]]
-
-                # update location
-                self.annotation.xy = (x, y)
-
-                # update bbox position
-                if x > self.x_middle['fairmode-statsummary']:
-                    self.annotation.set_x(-10)
-                    self.annotation.set_ha('right')
-                else:
-                    self.annotation.set_x(10)
-                    self.annotation.set_ha('left')
-
-                # create annotation text
-                # experiment label
-                text_label = copy.deepcopy(data_label)
-                # observations label
-                text_label += ('\n{0}: {1:.{2}f}').format('CRMSE / β·RMSᵤ', x, self.round_decimal_places)
-                # experiment label
-                text_label += ('\n{0}: {1:.{2}f}').format('Mean Bias / β·RMSᵤ', y, self.round_decimal_places)
 
         self.annotation.set_text(text_label)
 

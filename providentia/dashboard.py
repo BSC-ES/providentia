@@ -246,8 +246,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                                          self.mpl_canvas.elements):
 
                 menu_plot_type = menu_button.objectName().split('_menu')[0]
-                if plot_type in ['periodic_violin','fairmode_target','fairmode_statsummary']:
-                    plot_type = plot_type.replace('_','-')
+                if plot_type in ['periodic-violin','fairmode-target','fairmode-statsummary']:
+                    plot_type = plot_type.replace('-','_')
 
                 # proceed once have objects for plot type
                 if plot_type == menu_plot_type:
@@ -1158,7 +1158,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             elif changed_plot_type in ['statsummary', 'metadata']:
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((15, 50), rowspan=36, colspan=50))
             elif changed_plot_type == 'fairmode-statsummary':
-                inner_gs = canvas_instance.gridspec.new_subplotspec((15, 53), rowspan=34, colspan=51).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
+                inner_gs = canvas_instance.gridspec.new_subplotspec((14, 63), rowspan=36, colspan=36).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((15, 53), rowspan=34, colspan=51))
             
@@ -1175,7 +1175,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             elif changed_plot_type in ['statsummary', 'metadata']:
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 1), rowspan=38, colspan=28))
             elif changed_plot_type == 'fairmode-statsummary':
-                inner_gs = canvas_instance.gridspec.new_subplotspec((60, 4), rowspan=38, colspan=28).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
+                inner_gs = canvas_instance.gridspec.new_subplotspec((61, 8), rowspan=38, colspan=24).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 4), rowspan=38, colspan=28))
         # position 4 (bottom centre)
@@ -1191,7 +1191,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             elif changed_plot_type in ['statsummary', 'metadata']:
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 35), rowspan=38, colspan=28))
             elif changed_plot_type == 'fairmode-statsummary':
-                inner_gs = canvas_instance.gridspec.new_subplotspec((60, 38), rowspan=38, colspan=28).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
+                inner_gs = canvas_instance.gridspec.new_subplotspec((61, 41), rowspan=38, colspan=25).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 38), rowspan=38, colspan=28))
             
@@ -1208,7 +1208,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             elif changed_plot_type in ['statsummary', 'metadata']:
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 69), rowspan=38, colspan=28))
             elif changed_plot_type == 'fairmode-statsummary':
-                inner_gs = canvas_instance.gridspec.new_subplotspec((60, 72), rowspan=38, colspan=28).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
+                inner_gs = canvas_instance.gridspec.new_subplotspec((61, 75), rowspan=38, colspan=25).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 72), rowspan=38, colspan=28))
 
@@ -1268,23 +1268,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                 lambda event: annotation.hover_annotation(event, changed_plot_type))
         
-        elif changed_plot_type =='fairmode-statsummary':
-            for ax in canvas_instance.plot_axes[changed_plot_type]:
-                annotation = HoverAnnotation(canvas_instance, 
-                                         changed_plot_type, 
-                                         ax,
-                                         canvas_instance.plot_characteristics[changed_plot_type], 
-                                         add_vline=False)
-                canvas_instance.annotations[changed_plot_type] = annotation.annotation
-                canvas_instance.annotations_lock[changed_plot_type] = False
-            
-                # connect axis to xlim change on zoom
-                ax.callbacks.connect('xlim_changed', lambda event: annotation.update_x_middle(event, changed_plot_type))
-            
-            # connect axis to hover function
-            canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
-                lambda event: annotation.hover_periodic_annotation(event, changed_plot_type))
-
     def handle_data_selection_update(self):
         """ Function which handles update of data selection
             and MPL canvas upon pressing of READ button.
