@@ -823,7 +823,7 @@ class MPLCanvas(FigureCanvas):
                          self.plot_characteristics[plot_type], plot_options)
 
                 # reset axes limits (harmonising across subplots for periodic plots) 
-                if plot_type not in ['map', 'taylor']:
+                if plot_type not in ['map', 'taylor', 'fairmode-statsummary']:
                     if plot_type == 'scatter':
                         harmonise_xy_lims_paradigm(self, self.read_instance, ax, plot_type, 
                                                 self.plot_characteristics[plot_type], plot_options, relim=True)
@@ -2267,7 +2267,7 @@ class MPLCanvas(FigureCanvas):
        
         # get sliders and update values
         self.fairmode_statsummary_markersize_sl = self.fairmode_statsummary_menu.sliders['markersize_sl']
-        self.fairmode_statsummary_markersize_sl.setMaximum(int(self.plot_characteristics['fairmode-target']['plot']['markersize']*10))
+        self.fairmode_statsummary_markersize_sl.setMaximum(int(self.plot_characteristics['fairmode-target']['plot']['markersize']*2))
         self.fairmode_statsummary_markersize_sl.setValue(int(self.plot_characteristics['fairmode-target']['plot']['markersize']))
 
         # get fairmode statsummary interactive dictionary
@@ -2946,7 +2946,7 @@ class MPLCanvas(FigureCanvas):
                         self.read_instance.block_config_bar_handling_updates = False
 
                     # reset axes limits (harmonising across subplots for periodic plots) 
-                    if plot_type not in ['map', 'taylor']:
+                    if plot_type not in ['map', 'taylor', 'fairmode-statsummary']:
                         if plot_type == 'scatter':
                             harmonise_xy_lims_paradigm(self, self.read_instance, self.plot_axes[plot_type], plot_type, 
                                                        self.plot_characteristics[plot_type], 
@@ -3016,6 +3016,10 @@ class MPLCanvas(FigureCanvas):
             
             if isinstance(ax, dict):
                 for sub_ax in ax.values():
+                    for line in sub_ax.lines:
+                        line.set_markersize(markersize)
+            elif isinstance(ax, list):
+                for sub_ax in ax:
                     for line in sub_ax.lines:
                         line.set_markersize(markersize)
             else:
