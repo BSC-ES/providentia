@@ -1695,7 +1695,7 @@ class ProvidentiaOffline:
                                                                                   self.current_lat,
                                                                                   self.plot_characteristics[plot_type]['round_decimal_places']['title'])
                     
-                    if base_plot_type == 'fairmode-target':
+                    if base_plot_type in ['fairmode-target', 'fairmode-statsummary']:
                         speci = networkspeci.split('|')[1]
                         axis_title_label += '\n{}'.format(fairmode_settings[speci]['title'])
 

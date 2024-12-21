@@ -773,7 +773,7 @@ class Interactive:
                         else:
                             title = '{} stations'.format(n_stations)
 
-                    if base_plot_type == 'fairmode-target':
+                    if base_plot_type in ['fairmode-target','fairmode-statsummary']:
                         speci = networkspeci.split('|')[1]
                         title += '\n{}'.format(fairmode_settings[speci]['title'])
 
