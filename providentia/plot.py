@@ -2224,10 +2224,16 @@ class Plot:
             # get subplots dictionary
             subplots = dict(plot_characteristics["auxiliar"]["subplots"])
 
+            # get the variable that tells you if there are exceedances in this species
+            has_exceedances = exc_threshold != None
+
             # if there is no threshold don't create the exceedances row
-            if exc_threshold == None:
+            if not has_exceedances:
                 subplots.pop("observed exceedances", None)
                 statistics_list.pop(1)
+
+            # create list for track_plot_elements
+            self.fairmode_statsummary_plot = []
 
             # apply configuration to each row
             for i, (row, fairmode_data) in enumerate(zip(subplots,statistics_list)):
@@ -2299,8 +2305,10 @@ class Plot:
                 # if there is a dot outside the limits
                 if np.any(right_zone_mask):
                     # plot it in the middle of the right dashed zone
-                    relevant_axis[i*4 + 2].plot(0, 0, plot_characteristics["auxiliar"]["station_dots"]["marker"], 
-                                color=self.read_instance.plotting_params[data_label]['colour'])
+                    stations_dots = relevant_axis[i*4 + 2].plot(0, 0, plot_characteristics["auxiliar"]["station_dots"]["marker"], 
+                            color=self.read_instance.plotting_params[data_label]['colour'], markersize=plot_characteristics["auxiliar"]["station_dots"]["markersize"])
+                    # add the dots to the track plot elements list
+                    self.fairmode_statsummary_plot.append(stations_dots[0])
                     # remove it from the data plotted in the middle zone
                     fairmode_data = fairmode_data[~right_zone_mask] if isinstance(fairmode_data,np.ndarray) else np.array([])
          
@@ -2330,15 +2338,21 @@ class Plot:
                     # if there is a dot outside the limits
                     if np.any(left_zone_mask):
                         # plot it in the middle of the left dashed zone
-                        relevant_axis[i*4 + 0].plot(0, 0, plot_characteristics["auxiliar"]["station_dots"]["marker"], 
-                                    color=self.read_instance.plotting_params[data_label]['colour'])
+                        stations_dots = relevant_axis[i*4 + 0].plot(0, 0, plot_characteristics["auxiliar"]["station_dots"]["marker"], 
+                            color=self.read_instance.plotting_params[data_label]['colour'], markersize=plot_characteristics["auxiliar"]["station_dots"]["markersize"])
+                        # add the dot to the track plot elements list
+                        self.fairmode_statsummary_plot.append(stations_dots[0])
                         # remove it from the data plotted in the middle zone
                         fairmode_data = fairmode_data[~left_zone_mask] if isinstance(fairmode_data,np.ndarray) else np.array([])
 
-                # plot stations as blue dots
-                relevant_axis[i*4 + 1].plot(fairmode_data, np.zeros_like(fairmode_data), plot_characteristics["auxiliar"]["station_dots"]["marker"], 
-                            color=self.read_instance.plotting_params[data_label]['colour'])
-                
+                # plot stations as dots
+                stations_dots = relevant_axis[i*4 + 1].plot(fairmode_data, np.zeros_like(fairmode_data), plot_characteristics["auxiliar"]["station_dots"]["marker"], 
+                            color=self.read_instance.plotting_params[data_label]['colour'], markersize=plot_characteristics["auxiliar"]["station_dots"]["markersize"])
+                # change the size of the x-axis tick labels
+                relevant_axis[i*4 + 1].tick_params(**plot_characteristics["auxiliar"]["station_dots"]["tick_params"])
+                # add the dots to the track plot elements list
+                self.fairmode_statsummary_plot.append(stations_dots[0])
+
                 # get the row title
                 row_title = plot_dict["title"]
                
@@ -2350,13 +2364,24 @@ class Plot:
                 relevant_axis[i*4 + 0].text(*plot_characteristics["auxiliar"]["row_title"]["position"], row_title, 
                             **plot_characteristics["auxiliar"]["row_title"], transform=relevant_axis[i*4 + 0].transAxes)
             
+            # track plot elements if using dashboard 
+            if (not self.read_instance.offline) and (not self.read_instance.interactive):
+                self.track_plot_elements(data_label, 'fairmode-statsummary', 'plot', self.fairmode_statsummary_plot, bias=False)
+                
             # add information on the left of the plot
             if Version(matplotlib.__version__) >= Version("3.3"):
-                relevant_axis[-4].annotate(text=plot_characteristics["auxiliar"]["left-description-text"],
-                                        **plot_characteristics["auxiliar"]["left-description"])
+                relevant_axis[-4].annotate(text=plot_characteristics["auxiliar"]["has_exceedances"][has_exceedances]["left_description_text"],
+                                        **plot_characteristics["auxiliar"]["has_exceedances"][has_exceedances]["left_description"],
+                                        **plot_characteristics["auxiliar"]["left_description"]) 
             else:
-                relevant_axis[-4].annotate(s=plot_characteristics["auxiliar"]["left-description-text"],  
-                                            **plot_characteristics["auxiliar"]["left-description"])  
+                relevant_axis[-4].annotate(s=plot_characteristics["auxiliar"]["has_exceedances"][has_exceedances]["left_description_text"],  
+                                            **plot_characteristics["auxiliar"]["has_exceedances"][has_exceedances]["left_description"],
+                                            **plot_characteristics["auxiliar"]["left_description"])  
+        
+        # add title if using dashboard 
+        if (not self.read_instance.offline) and (not self.read_instance.interactive):
+            set_axis_title(self.read_instance, relevant_axis, fairmode_settings[speci]['title'], plot_characteristics)
+
 
     def track_plot_elements(self, data_label, base_plot_type, element_type, plot_object, bias=False):
         """ Function that tracks plotted lines and collections
