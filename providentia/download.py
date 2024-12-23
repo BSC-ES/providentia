@@ -30,7 +30,7 @@ from .warnings_prv import show_message
 from providentia.auxiliar import CURRENT_PATH, join
 from providentia.actris import (get_files_path, temporally_average_data, get_data,
                                 get_files_per_var, is_wavelength_var, get_files_to_download,
-                                parameters_dict)
+                                get_files_info, parameters_dict)
 
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 REMOTE_MACHINE = "storage5"
@@ -1373,7 +1373,7 @@ class ProvidentiaDownload(object):
             initial_check_nc_files = get_files_to_download(self.nonghost_root, target_start_date, target_end_date, resolution, var)
             files_to_download = self.select_files_to_download(initial_check_nc_files)
             if not files_to_download:
-                msg = f"Files were already downloaded for {var} at {resolution} "
+                msg = f"\nFiles were already downloaded for {var} at {resolution} "
                 msg += f"resolution between {target_start_date} and {target_end_date}."
                 show_message(self, msg, deactivate=False)     
                 continue 
@@ -1381,14 +1381,13 @@ class ProvidentiaDownload(object):
             actris_parameter = parameters_dict[var]
             path = get_files_path(var)
 
-            # indicate we need to save the file with available files information
-            save = True
             # if file does not exist
             if not os.path.isfile(path):
-                # get files
+                # get files information
                 print(f'\nFile containing information of the files available in Thredds for {var} ({path}) does not exist, creating.')
                 combined_data = get_files_per_var(var)
-                files = combined_data[var]['files']
+                all_files = combined_data[var]['files']
+                files_info = get_files_info(all_files, var, path)
                     
             # if file exists
             else:
@@ -1397,36 +1396,39 @@ class ProvidentiaDownload(object):
                 while self.origin_update_choice not in ['y','n']:
                     self.origin_update_choice = input(f"\nFile containing information of the files available in Thredds for {var} ({path}) already exists. Do you want to update it (y/n)? ").lower() 
                 if self.origin_update_choice == 'n':
-                    # indicate we do not need to save the file with available files information
-                    save = False
-
                     # get files information
-                    files = []
                     files_info = yaml.safe_load(open(os.path.join(CURRENT_PATH, path)))
                     files_info = {k: v for k, v in files_info.items() if k.strip() and v}
-                    for file, attributes in files_info.items():
-                        if attributes["resolution"] == resolution:
-                            start_date = datetime.strptime(attributes["start_date"], "%Y-%m-%dT%H:%M:%S UTC")
-                            end_date = datetime.strptime(attributes["end_date"], "%Y-%m-%dT%H:%M:%S UTC")
-                            for file_to_download in files_to_download:
-                                file_to_download_yearmonth = file_to_download.split(f'{var}_')[1].split('.nc')[0]
-                                file_to_download_start_date = datetime.strptime(file_to_download_yearmonth, "%Y%m")
-                                file_to_download_end_date = datetime(file_to_download_start_date.year, file_to_download_start_date.month, 1) + relativedelta(months=1, seconds=-1)
-                                if file_to_download_start_date <= end_date and file_to_download_end_date >= start_date:
-                                    if file not in files:
-                                        files.append(file)
                 else:
-                    # get files
+                    # get files information
                     combined_data = get_files_per_var(var)
-                    files = combined_data[var]['files']
-                     
+                    all_files = combined_data[var]['files']
+                    files_info = get_files_info(all_files, var, path)
+            
+            # filter files by resolution and dates
+            print('    Filtering files by resolution and dates...')
+            files = []
+            files_info = yaml.safe_load(open(os.path.join(CURRENT_PATH, path)))
+            files_info = {k: v for k, v in files_info.items() if k.strip() and v}
+            for file, attributes in files_info.items():
+                if attributes["resolution"] == resolution:
+                    start_date = datetime.strptime(attributes["start_date"], "%Y-%m-%dT%H:%M:%S UTC")
+                    end_date = datetime.strptime(attributes["end_date"], "%Y-%m-%dT%H:%M:%S UTC")
+                    for file_to_download in files_to_download:
+                        file_to_download_yearmonth = file_to_download.split(f'{var}_')[1].split('.nc')[0]
+                        file_to_download_start_date = datetime.strptime(file_to_download_yearmonth, "%Y%m")
+                        file_to_download_end_date = datetime(file_to_download_start_date.year, file_to_download_start_date.month, 1) + relativedelta(months=1, seconds=-1)
+                        if file_to_download_start_date <= end_date and file_to_download_end_date >= start_date:
+                            if file not in files:
+                                files.append(file)
+
             if len(files) != 0:
                     
                 # get data and metadata for each file within period
-                combined_ds_list, metadata = get_data(files, var, actris_parameter, resolution, path, save)
+                combined_ds_list, metadata = get_data(files, var, actris_parameter, resolution)
 
                 # combine and create new dataset
-                print('Combining files...')
+                print('    Combining files...')
                 try:
                     combined_ds = xr.concat(combined_ds_list, 
                                             dim='station', 
