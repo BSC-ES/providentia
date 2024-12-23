@@ -1381,38 +1381,45 @@ class ProvidentiaDownload(object):
             actris_parameter = parameters_dict[var]
             path = get_files_path(var)
 
+            # indicate we need to save the file with available files information
+            save = True
             # if file does not exist
             if not os.path.isfile(path):
-                # indicate we need to save the file with available files information
-                print(f'File containing information of the files available in Thredds for {var} ({path}) does not exist, creating.')
-                save = True
-
                 # get files
+                print(f'\nFile containing information of the files available in Thredds for {var} ({path}) does not exist, creating.')
                 combined_data = get_files_per_var(var)
                 files = combined_data[var]['files']
                     
             # if file exists
             else:
-                # indicate we do not need to save the file with available files information
-                print(f'File containing information of the files available in Thredds for {var} ({path}) already exists.')
-                save = False
+                # ask if user wants to overwrite file
+                self.origin_update_choice = None
+                while self.origin_update_choice not in ['y','n']:
+                    self.origin_update_choice = input(f"\nFile containing information of the files available in Thredds for {var} ({path}) already exists. Do you want to update it (y/n)? ").lower() 
+                if self.origin_update_choice == 'n':
+                    # indicate we do not need to save the file with available files information
+                    save = False
 
-                # get files information
-                files = []
-                files_info = yaml.safe_load(open(os.path.join(CURRENT_PATH, path)))
-                files_info = {k: v for k, v in files_info.items() if k.strip() and v}
-                for file, attributes in files_info.items():
-                    if attributes["resolution"] == resolution:
-                        start_date = datetime.strptime(attributes["start_date"], "%Y-%m-%dT%H:%M:%S UTC")
-                        end_date = datetime.strptime(attributes["end_date"], "%Y-%m-%dT%H:%M:%S UTC")
-                        for file_to_download in files_to_download:
-                            file_to_download_yearmonth = file_to_download.split(f'{var}_')[1].split('.nc')[0]
-                            file_to_download_start_date = datetime.strptime(file_to_download_yearmonth, "%Y%m")
-                            file_to_download_end_date = datetime(file_to_download_start_date.year, file_to_download_start_date.month, 1) + relativedelta(months=1, seconds=-1)
-                            if file_to_download_start_date <= end_date and file_to_download_end_date >= start_date:
-                                if file not in files:
-                                    files.append(file)
-                
+                    # get files information
+                    files = []
+                    files_info = yaml.safe_load(open(os.path.join(CURRENT_PATH, path)))
+                    files_info = {k: v for k, v in files_info.items() if k.strip() and v}
+                    for file, attributes in files_info.items():
+                        if attributes["resolution"] == resolution:
+                            start_date = datetime.strptime(attributes["start_date"], "%Y-%m-%dT%H:%M:%S UTC")
+                            end_date = datetime.strptime(attributes["end_date"], "%Y-%m-%dT%H:%M:%S UTC")
+                            for file_to_download in files_to_download:
+                                file_to_download_yearmonth = file_to_download.split(f'{var}_')[1].split('.nc')[0]
+                                file_to_download_start_date = datetime.strptime(file_to_download_yearmonth, "%Y%m")
+                                file_to_download_end_date = datetime(file_to_download_start_date.year, file_to_download_start_date.month, 1) + relativedelta(months=1, seconds=-1)
+                                if file_to_download_start_date <= end_date and file_to_download_end_date >= start_date:
+                                    if file not in files:
+                                        files.append(file)
+                else:
+                    # get files
+                    combined_data = get_files_per_var(var)
+                    files = combined_data[var]['files']
+                     
             if len(files) != 0:
                     
                 # get data and metadata for each file within period
