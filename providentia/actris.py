@@ -6,6 +6,7 @@ import requests
 import yaml
 import re
 
+from tqdm import tqdm
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -202,26 +203,16 @@ def is_wavelength_var(actris_parameter):
     return wavelength_var
 
 
-def get_data(files, var, actris_parameter, resolution, path, save):
+def get_files_info(files, var, path):
     
-    # combine datasets that have the same variable and resolution
-    combined_ds_list = []
-    metadata = {}
-    metadata[resolution] = {}
     files_info = {}
     files_info[var] = {}
-    
-    # get EBAS component
-    ebas_component = variable_mapping[actris_parameter]['var']
-
-    print('Total number of files:', len(files))
-    for i, file in enumerate(files):
-        print(i, '-', file)
+    tqdm_iter = tqdm(files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Creating information file ({len(files)})")
+    for file in tqdm_iter:
         # open file
         try:
             ds = xr.open_dataset(file)
         except:
-            print('Error opening file')
             continue
 
         # get resolution
@@ -231,15 +222,49 @@ def get_data(files, var, actris_parameter, resolution, path, save):
         except:
             file_resolution = f'Unrecognised ({coverage})'
             
-        start_date = ds.time_coverage_start
-        end_date = ds.time_coverage_end
-        variables = list(ds.data_vars.keys())
+        file_start_date = ds.time_coverage_start
+        file_end_date = ds.time_coverage_end
+        file_variables = list(ds.data_vars.keys())
         files_info[var][file] = {}
         files_info[var][file]['resolution'] = file_resolution
-        files_info[var][file]['start_date'] = start_date
-        files_info[var][file]['end_date'] = end_date
-        files_info[var][file]['variables'] = variables
-        
+        files_info[var][file]['start_date'] = file_start_date
+        files_info[var][file]['end_date'] = file_end_date
+        files_info[var][file]['variables'] = file_variables
+
+    # create file
+    datasets = {
+        url: data
+        for url, data in files_info[var].items()
+    }
+    if len(datasets) != 0:
+        path_dir = os.path.dirname(path)
+        if not os.path.exists(path_dir):
+            os.makedirs(path_dir)
+        with open(path, 'w') as file:
+            yaml.dump(datasets, file, default_flow_style=False)
+    
+    return files_info
+
+def get_data(files, var, actris_parameter, resolution):
+    
+    # combine datasets that have the same variable and resolution
+    combined_ds_list = []
+    metadata = {}
+    metadata[resolution] = {}
+    
+    # get EBAS component
+    ebas_component = variable_mapping[actris_parameter]['var']
+
+    tqdm_iter = tqdm(files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Reading data ({len(files)})")
+    errors = {}
+    for i, file in enumerate(tqdm_iter):
+        # open file
+        try:
+            ds = xr.open_dataset(file)
+        except:
+            errors[file] = 'Error opening file'
+            continue
+
         # get lowest level if tower height is in coordinates
         if 'Tower_inlet_height' in list(ds.coords):
             ds = ds.sel(Tower_inlet_height=min(ds.Tower_inlet_height.values), drop=True)
@@ -250,7 +275,7 @@ def get_data(files, var, actris_parameter, resolution, path, save):
             if wavelength in ds.Wavelength.values:
                 ds = ds.sel(Wavelength=wavelength, drop=True)
             else:
-                print(f'Data at {wavelength}nm could not be found')
+                errors[file] = f'- Data at {wavelength}nm could not be found'
                 continue
         
         # assign station code as dimension
@@ -261,7 +286,7 @@ def get_data(files, var, actris_parameter, resolution, path, save):
         if unformatted_units in units_dict.keys():
             units = units_dict[unformatted_units]
         else:
-            print(f'Units {unformatted_units} were not found in dictionary')
+            errors[file] = f'- Units {unformatted_units} were not found in dictionary'
             continue
         units_var = f'{ebas_component}_{units}'
         possible_vars = [ebas_component, 
@@ -277,7 +302,7 @@ def get_data(files, var, actris_parameter, resolution, path, save):
 
         # continue to next file if variable cannot be read
         if not ds_var_exists:
-            print(f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}')
+            errors[file] = f'- No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}'
             continue
             
         # save metadata
@@ -304,20 +329,13 @@ def get_data(files, var, actris_parameter, resolution, path, save):
 
         # append modified dataset to list
         combined_ds_list.append(ds_var)
+    
+    # show errors
+    if len(errors) > 0:
+        print('\nCollected errors:')
+        for file, error in errors.items():
+            print(f'{file} - Error: {error}')
 
-    if save:
-        # create file
-        datasets = {
-            url: data
-            for url, data in files_info[var].items()
-        }
-        if len(datasets) != 0:
-            path_dir = os.path.dirname(path)
-            if not os.path.exists(path_dir):
-                os.makedirs(path_dir)
-            with open(path, 'w') as file:
-                yaml.dump(datasets, file, default_flow_style=False)
-                
     return combined_ds_list, metadata
 
 
