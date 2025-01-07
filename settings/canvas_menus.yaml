@@ -655,24 +655,6 @@
           "relative_position": [-220, 30],
           "text": "SETTINGS",
         },
-
-      "options_label":
-        {
-          "element_type": "label",
-          "size": [230, 20],
-          "relative_position": [-220, 50],
-          "text": "Options",
-        },
-
-      "options":
-        {
-          "element_type": "checkable_combobox",
-          "formatting_dict": "checkable_combobox_menu",
-          "size": [230, 20],
-          "relative_position": [-220, 75],
-          "object_name": "metadata_options",
-          "function": "update_plot_option",
-        },
     },
 
   "distribution":
@@ -1149,7 +1131,7 @@
           "formatting_dict": "save_icon",
           "size": [20, 20],
           "path": "resources/save_fig_icon.png",
-          "object_name": "fairmode_target__save_button",
+          "object_name": "fairmode_target_save_button",
           "function": "save_axis_figure_func",
         },
 
@@ -1224,6 +1206,65 @@
           "relative_position": [-220, 175],
           "object_name": "fairmode_target_options",
           "function": "update_plot_option",
+        },
+    },
+  "fairmode_statsummary":
+    {
+      "settings_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "settings_icon",
+          "size": [31, 37],
+          "path": "resources/menu_icon.png",
+          "object_name": "fairmode_statsummary_menu_button",
+          "function": "interactive_elements_button_func",
+        },
+
+      "save_button":
+        {
+          "element_type": "button",
+          "formatting_dict": "save_icon",
+          "size": [20, 20],
+          "path": "resources/save_fig_icon.png",
+          "object_name": "fairmode_statsummary_save_button",
+          "function": "save_axis_figure_func",
+        },
+
+      "container":
+        {
+          "element_type": "container",
+          "formatting_dict": "settings_container",
+          "size": [250, 80],
+          "relative_position": [-230, 25],
+        },
+
+      "settings_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_label",
+          "size": [230, 20],
+          "relative_position": [-220, 30],
+          "text": "SETTINGS",
+        },
+
+      "markersize_sl_label":
+        {
+          "element_type": "label",
+          "size": [230, 20],
+          "relative_position": [-220, 50],
+          "text": "Size",
+        },
+
+      "markersize_sl":
+        {
+          "element_type": "slider",
+          "size": [230, 20],
+          "relative_position": [-220, 75],
+          "object_name": "fairmode_statsummary_markersize_sl",
+          "minimum": 0,
+          "tick_interval": 2,
+          "tracking": false,
+          "function": "update_markersize_func",
         },
     },
 }
