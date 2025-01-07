@@ -2397,156 +2397,6 @@
     },
   "fairmode-statsummary":
     {
-      "offline":
-        {
-          "orientation": "landscape",
-          "subplots_adjust": { "left": 0.25 },
-          "figure": { "nrows": 1, "ncols": 1 },
-          "page_title":
-            {
-              "t": "Fairmode statsummary",
-              "fontsize": 12,
-              "ha": "left",
-              "x": 0.05,
-              "y": 0.98,
-            },
-          "auxiliar":
-            {
-              "has_exceedances":
-                {
-                  True:
-                    {
-                      "left_description_text": "----------space----------    ------------------------time------------------------    ----observations----",
-                      "left_description": { "fontsize": 12 },
-                    },
-                  False:
-                    {
-                      "left_description_text": "----------space----------    ----------------------------------time--------------------------------    -observations-",
-                      "left_description": { "fontsize": 11 },
-                    },
-                },
-              "left_description": { "xy": [-5.1, 0.05] },
-              "row_title": { "fontsize": 11 },
-              "units": { "position": [-0.19, -0.45], "fontsize": 9 },
-              "right_dot": { "s": 170 },
-              "station_dots":
-                {
-                  "tick_params": { "axis": "x", "labelsize": 10 },
-                  "markersize": 7,
-                },
-            },
-          "legend":
-            {
-              "plot":
-                {
-                  "ncol": 4,
-                  "fontsize": 10,
-                  "loc": "upper right",
-                  "columnspacing": 0.5,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "borderaxespad": 0,
-                },
-              "handles": { "markersize": 10, "marker": "o", "color": "white" },
-            },
-        },
-      "interactive":
-        {
-          "figsize": [10, 5],
-          "subplots_adjust": { "left": 0.3 },
-          "legend":
-            {
-              "plot":
-                {
-                  "bbox_to_anchor": [4.5, 1.2],
-                  "ncol": 1,
-                  "fontsize": 10,
-                  "loc": "upper right",
-                  "columnspacing": 0.5,
-                  "frameon": false,
-                  "handletextpad": 0,
-                  "borderaxespad": 0,
-                },
-              "handles": { "markersize": 10, "marker": "o", "color": "white" },
-            },
-          "auxiliar":
-            {
-              "has_exceedances":
-                {
-                  True:
-                    {
-                      "left_description_text": "-------space-------    ------------------time------------------    ---observations---",
-                      "left_description": { "fontsize": 8.8 },
-                    },
-                  False:
-                    {
-                      "left_description_text": "---------space---------   -------------------------time-------------------------   -observations-",
-                      "left_description": { "fontsize": 8.1 },
-                    },
-                },
-              "left_description": { "xy": [-4.5, 0.05] },
-              "row_title": { "fontsize": 9.5 },
-              "units": { "position": [-0.19, -0.8], "fontsize": 9 },
-              "right_dot": { "s": 100 },
-              "station_dots":
-                {
-                  "tick_params": { "axis": "x", "labelsize": 10 },
-                  "markersize": 4,
-                },
-            },
-        },
-      "dashboard":
-        {
-          "marker_annotate":
-            {
-              "xytext": [0, 0],
-              "textcoords": "offset points",
-              "size": 8,
-              "ha": "center",
-              "zorder": 100,
-            },
-          "marker_annotate_bbox":
-            {
-              "boxstyle": "round",
-              "linewidth": 0.5,
-              "facecolor": "white",
-              "edgecolor": "#757575",
-            },
-          "marker_annotate_arrowprops":
-            {
-              "frac": 1,
-              "headwidth": 10,
-              "shrink": 0.1,
-              "color": "#757575",
-              "edgecolor": "#5e5e5e",
-            },
-          "marker_annotate_text": { "round_decimal_places": 2 },
-          "auxiliar":
-            {
-              "has_exceedances":
-                {
-                  True:
-                    {
-                      "left_description_text": "----space----   --------------time-------------   --observations--",
-                      "left_description": { "fontsize": 7.5 },
-                    },
-                  False:
-                    {
-                      "left_description_text": "-------space-------  --------------------time--------------------  observations",
-                      "left_description": { "fontsize": 6.5 },
-                    },
-                },
-              "left_description": { "xy": [-4.5, -0.8] },
-              "row_title": { "fontsize": 7.7 },
-              "units": { "position": [-0.19, -1], "fontsize": 7.5 },
-              "right_dot": { "s": 60 },
-              "station_dots":
-                {
-                  "tick_params": { "axis": "x", "labelsize": 6 },
-                  "markersize": 3.5,
-                },
-            },
-        },
       "gridspec_kw":
         { "width_ratios": [1, 16, 1, 1], "wspace": 0, "hspace": 1.95 },
       "grid": { "axis": "both", "color": "lightgrey", "alpha": 0.8 },
@@ -2684,5 +2534,155 @@
           "station_dots": { "marker": "o", "color": "#1111ff" },
         },
       "plot_options": [],
+    },
+  "dashboard":
+    {
+      "marker_annotate":
+        {
+          "xytext": [0, 0],
+          "textcoords": "offset points",
+          "size": 8,
+          "ha": "center",
+          "zorder": 100,
+        },
+      "marker_annotate_bbox":
+        {
+          "boxstyle": "round",
+          "linewidth": 0.5,
+          "facecolor": "white",
+          "edgecolor": "#757575",
+        },
+      "marker_annotate_arrowprops":
+        {
+          "frac": 1,
+          "headwidth": 10,
+          "shrink": 0.1,
+          "color": "#757575",
+          "edgecolor": "#5e5e5e",
+        },
+      "marker_annotate_text": { "round_decimal_places": 2 },
+      "auxiliar":
+        {
+          "has_exceedances":
+            {
+              True:
+                {
+                  "left_description_text": "----space----   --------------time-------------   --observations--",
+                  "left_description": { "fontsize": 7.5 },
+                },
+              False:
+                {
+                  "left_description_text": "-------space-------  --------------------time--------------------  observations",
+                  "left_description": { "fontsize": 6.5 },
+                },
+            },
+          "left_description": { "xy": [-4.5, -0.8] },
+          "row_title": { "fontsize": 7.7 },
+          "units": { "position": [-0.19, -1], "fontsize": 7.5 },
+          "right_dot": { "s": 60 },
+          "station_dots":
+            {
+              "tick_params": { "axis": "x", "labelsize": 6 },
+              "markersize": 3.5,
+            },
+        },
+    },
+  "offline":
+    {
+      "orientation": "landscape",
+      "subplots_adjust": { "left": 0.25 },
+      "figure": { "nrows": 1, "ncols": 1 },
+      "page_title":
+        {
+          "t": "Fairmode statsummary",
+          "fontsize": 12,
+          "ha": "left",
+          "x": 0.05,
+          "y": 0.98,
+        },
+      "auxiliar":
+        {
+          "has_exceedances":
+            {
+              True:
+                {
+                  "left_description_text": "----------space----------    ------------------------time------------------------    ----observations----",
+                  "left_description": { "fontsize": 12 },
+                },
+              False:
+                {
+                  "left_description_text": "----------space----------    ----------------------------------time--------------------------------    -observations-",
+                  "left_description": { "fontsize": 11 },
+                },
+            },
+          "left_description": { "xy": [-5.1, 0.05] },
+          "row_title": { "fontsize": 11 },
+          "units": { "position": [-0.19, -0.45], "fontsize": 9 },
+          "right_dot": { "s": 170 },
+          "station_dots":
+            {
+              "tick_params": { "axis": "x", "labelsize": 10 },
+              "markersize": 7,
+            },
+        },
+      "legend":
+        {
+          "plot":
+            {
+              "ncol": 4,
+              "fontsize": 10,
+              "loc": "upper right",
+              "columnspacing": 0.5,
+              "frameon": false,
+              "handletextpad": 0,
+              "borderaxespad": 0,
+            },
+          "handles": { "markersize": 10, "marker": "o", "color": "white" },
+        },
+    },
+  "interactive":
+    {
+      "figsize": [10, 5],
+      "subplots_adjust": { "left": 0.3 },
+      "legend":
+        {
+          "plot":
+            {
+              "bbox_to_anchor": [4.5, 1.2],
+              "ncol": 1,
+              "fontsize": 10,
+              "loc": "upper right",
+              "columnspacing": 0.5,
+              "frameon": false,
+              "handletextpad": 0,
+              "borderaxespad": 0,
+            },
+          "handles": { "markersize": 10, "marker": "o", "color": "white" },
+        },
+      "auxiliar":
+        {
+          "has_exceedances":
+            {
+              True:
+                {
+                  "left_description_text": "-------space-------    ------------------time------------------    ---observations---",
+                  "left_description": { "fontsize": 8.8 },
+                },
+              False:
+                {
+                  "left_description_text": "---------space---------   -------------------------time-------------------------   -observations-",
+                  "left_description": { "fontsize": 8.1 },
+                },
+            },
+          "left_description": { "xy": [-4.5, 0.05] },
+          "row_title": { "fontsize": 9.5 },
+          "units": { "position": [-0.19, -0.8], "fontsize": 9 },
+          "right_dot": { "s": 100 },
+          "station_dots":
+            {
+              "tick_params": { "axis": "x", "labelsize": 10 },
+              "markersize": 4,
+            },
+        },
     },
 }
