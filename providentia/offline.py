@@ -1553,7 +1553,7 @@ class ProvidentiaOffline:
 
                 # skip observations
                 if ((data_labels == self.observations_data_label) 
-                    and ((base_plot_type in ['scatter', 'fairmode-target']) or ('bias' in plot_options) or 
+                    and ((base_plot_type in ['scatter', 'fairmode-target', 'fairmode-statsummary']) or ('bias' in plot_options) or 
                     (z_statistic_sign == 'bias'))):
                     continue
 
