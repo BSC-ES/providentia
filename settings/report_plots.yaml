@@ -63,6 +63,6 @@
                   "taylor-r2", "taylor-r", "taylor-r2_annotate", "taylor-r_annotate",
                   "fairmode-target", "fairmode-target_individual", "fairmode-target_annotate"],
     
-    "debug": ["scatter_individual",  "fairmode-target", "fairmode-target_individual", "timeseries_bias_individual"]
+    "debug": ["fairmode-statsummary"]
 
 }

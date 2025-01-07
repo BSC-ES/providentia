@@ -12,6 +12,7 @@ from weakref import WeakKeyDictionary
 import yaml
 
 import matplotlib
+import matplotlib.gridspec as gridspec
 from matplotlib.projections import PolarAxes
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
@@ -245,10 +246,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                                          self.mpl_canvas.elements):
 
                 menu_plot_type = menu_button.objectName().split('_menu')[0]
-                if plot_type == 'periodic-violin':
-                    plot_type = 'periodic_violin'
-                elif plot_type == 'fairmode-target':
-                    plot_type = 'fairmode_target'
+                if plot_type in ['periodic-violin','fairmode-target','fairmode-statsummary']:
+                    plot_type = plot_type.replace('-','_')
 
                 # proceed once have objects for plot type
                 if plot_type == menu_plot_type:
@@ -888,7 +887,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             if 'taylor' in canvas_instance.layout_options:
                 canvas_instance.layout_options.remove('taylor')
         else:
-            for plot_type in ['scatter', 'taylor', 'fairmode-target']:
+            for plot_type in ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']:
                 if ((not self.temporal_colocation) 
                     or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
                     if plot_type in canvas_instance.layout_options:
@@ -974,12 +973,13 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             
             elif event_source == self.cb_species:
                 self.selected_species = changed_param
-                if (('fairmode-target' in self.mpl_canvas.layout_options)
-                    and ((self.selected_species not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5'])
+                if ((self.selected_species not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5'])
                     or (self.selected_species in ['sconco3', 'sconcno2'] and self.selected_resolution != 'hourly')
-                    or (self.selected_species in ['pm10', 'pm2p5'] and self.selected_resolution not in ['hourly', 'daily']))):
-                    self.mpl_canvas.layout_options.remove('fairmode-target')
-                    self.update_layout_fields(self.mpl_canvas)
+                    or (self.selected_species in ['pm10', 'pm2p5'] and self.selected_resolution not in ['hourly', 'daily'])):
+                    for plot_type in ['fairmode-target', 'fairmode-statsummary']:
+                        if plot_type in self.mpl_canvas.layout_options:
+                            self.mpl_canvas.layout_options.remove(plot_type)
+                            self.update_layout_fields(self.mpl_canvas)
 
             elif event_source == self.cb_statistic_mode:
                 self.selected_statistic_mode = changed_param
@@ -1060,6 +1060,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 if isinstance(ax, dict):
                     for sub_ax in ax.values():
                         sub_ax.remove()
+                elif isinstance(ax, list):
+                    for sub_ax in ax:
+                        sub_ax.remove()
                 else:
                     ax.remove()
                 self.active_dashboard_plots.remove(previous_plot_type)
@@ -1070,18 +1073,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                                              self.mpl_canvas.elements):
 
                     menu_plot_type = menu_button.objectName().split('_menu')[0]
-                    if menu_plot_type == 'periodic_violin':
-                        menu_plot_type = 'periodic-violin'
-                    elif menu_plot_type == 'fairmode-target':
-                        menu_plot_type = 'fairmode_target'
+                    if menu_plot_type in ['periodic_violin','fairmode_target','fairmode_statsummary']:
+                        menu_plot_type = menu_plot_type.replace('_','-')
 
                     if previous_plot_type == menu_plot_type:
                         menu_button.hide()
                         save_button.hide()
-                        if previous_plot_type == 'periodic-violin':
-                            previous_plot_type = 'periodic_violin'
-                        elif previous_plot_type == 'fairmode-target':
-                            previous_plot_type = 'fairmode_target'
+                        if previous_plot_type in ['periodic-violin','fairmode-target','fairmode-statsummary']:
+                            previous_plot_type = previous_plot_type.replace('-','_')
                         for element in getattr(self.mpl_canvas, previous_plot_type + '_elements'):
                             if isinstance(element, dict):
                                 for sub_element in element.values():
@@ -1096,6 +1095,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                 self.mpl_canvas.remove_axis_elements(ax, changed_plot_type)
                 if isinstance(ax, dict):
                     for sub_ax in ax.values():
+                        sub_ax.remove()
+                elif isinstance(ax, list):
+                    for sub_ax in ax:
                         sub_ax.remove()
                 else:
                     ax.remove()
@@ -1138,6 +1140,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             reference_stddev = 7.5
             plot_characteristics = canvas_instance.plot_characteristics['taylor']
             ghelper = get_taylor_diagram_ghelper(reference_stddev, plot_characteristics)
+        elif changed_plot_type == "fairmode-statsummary":
+            # get number of rows and columns
+            ncols = 4
+            nrows = 8 if self.species[0] in ["sconco3", "sconcno2", "pm10"] else 7
 
         # position 2 (top right)
         if changed_position == self.cb_position_2 or changed_position == 2:
@@ -1151,6 +1157,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                                                                                   axes_class=fa.FloatingAxes, grid_helper=ghelper)
             elif changed_plot_type in ['statsummary', 'metadata']:
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((15, 50), rowspan=36, colspan=50))
+            elif changed_plot_type == 'fairmode-statsummary':
+                inner_gs = canvas_instance.gridspec.new_subplotspec((14, 63), rowspan=36, colspan=36).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((15, 53), rowspan=34, colspan=51))
             
@@ -1166,6 +1174,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                                                                                   axes_class=fa.FloatingAxes, grid_helper=ghelper)
             elif changed_plot_type in ['statsummary', 'metadata']:
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 1), rowspan=38, colspan=28))
+            elif changed_plot_type == 'fairmode-statsummary':
+                inner_gs = canvas_instance.gridspec.new_subplotspec((61, 8), rowspan=38, colspan=24).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 4), rowspan=38, colspan=28))
         # position 4 (bottom centre)
@@ -1180,6 +1190,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                                                                                   axes_class=fa.FloatingAxes, grid_helper=ghelper)
             elif changed_plot_type in ['statsummary', 'metadata']:
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 35), rowspan=38, colspan=28))
+            elif changed_plot_type == 'fairmode-statsummary':
+                inner_gs = canvas_instance.gridspec.new_subplotspec((61, 41), rowspan=38, colspan=25).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 38), rowspan=38, colspan=28))
             
@@ -1195,12 +1207,18 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                                                                                                   axes_class=fa.FloatingAxes, grid_helper=ghelper)
             elif changed_plot_type in ['statsummary', 'metadata']:
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 69), rowspan=38, colspan=28))
+            elif changed_plot_type == 'fairmode-statsummary':
+                inner_gs = canvas_instance.gridspec.new_subplotspec((61, 75), rowspan=38, colspan=25).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 72), rowspan=38, colspan=28))
 
         # initialise polar axis for Taylor plots
         if changed_plot_type == 'taylor':
             canvas_instance.plot.taylor_polar_relevant_axis = canvas_instance.plot_axes[changed_plot_type].get_aux_axes(PolarAxes.PolarTransform())
+        
+        elif changed_plot_type == "fairmode-statsummary":
+            # create gridspec and add it to a list
+            canvas_instance.plot_axes[changed_plot_type] = [canvas_instance.figure.add_subplot(inner_gs[i, j]) for i in range(nrows) for j in range(ncols)]
 
         # setup annotations
         if changed_plot_type in ['periodic', 'periodic-violin']:
@@ -1249,7 +1267,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # connect axis to hover function
             canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
                 lambda event: annotation.hover_annotation(event, changed_plot_type))
-
+        
     def handle_data_selection_update(self):
         """ Function which handles update of data selection
             and MPL canvas upon pressing of READ button.
