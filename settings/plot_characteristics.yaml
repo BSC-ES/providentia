@@ -2533,7 +2533,7 @@
           "right_dot_colors": { "green": "#4cff00", "red": "#ff0000" },
           "station_dots": { "marker": "o", "color": "#1111ff" },
         },
-      "plot_options": [],
+      "plot_options": ["individual"],
       "dashboard":
         {
           "marker_annotate":
