@@ -903,7 +903,7 @@ class MPLCanvas(FigureCanvas):
                             self.read_instance.handle_layout_update('None', sender=plot_type_position)
                             continue
                     
-                    if plot_type == 'fairmode-target':
+                    if plot_type in ['fairmode-target', 'fairmode-statsummary']:
                         speci = self.read_instance.networkspeci.split('|')[1]
                         if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
                             msg = f'Warning: Fairmode target plot cannot be created for {speci}.'
@@ -1553,7 +1553,7 @@ class MPLCanvas(FigureCanvas):
         if isinstance(ax, dict):
             axs_to_remove = list(ax.values())
         elif isinstance(ax, list):
-            axs_to_remove = copy.deepcopy(ax)
+            axs_to_remove = ax
         else:
             if plot_type == 'taylor':
                 axs_to_remove.append(self.plot.taylor_polar_relevant_axis)
@@ -1610,6 +1610,9 @@ class MPLCanvas(FigureCanvas):
                 for objects in [ax_to_remove.lines, ax_to_remove.artists, 
                                 ax_to_remove.patches, ax_to_remove.texts]:
                     self.remove_axis_objects(objects, elements_to_skip=[self.annotations['fairmode-target']])
+
+            elif plot_type == 'fairmode-statsummary':
+                self.remove_axis_objects(ax_to_remove.lines)
 
         # remove tracked plot elements
         if plot_type in self.plot_elements:

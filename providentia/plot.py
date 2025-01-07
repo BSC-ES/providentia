@@ -2071,8 +2071,9 @@ class Plot:
                 st_observations_data = observations_data[station_idx, :]
                 st_experiment_data = experiment_data[station_idx, :]
                 
-                x, y, mqi = ExpBias.calculate_fairmode_stats(st_observations_data, st_experiment_data, 
-                                                                    u_95r_RV, RV, alpha, beta, exc_threshold, 'target')
+                x, y, mqi = ExpBias.calculate_fairmode_stats(
+                    st_observations_data, st_experiment_data, 
+                    u_95r_RV, RV, alpha, beta, exc_threshold, 'target')
 
                 x_points.append(x)
                 y_points.append(y)
@@ -2156,9 +2157,11 @@ class Plot:
 
         # add title if using dashboard 
         if (not self.read_instance.offline) and (not self.read_instance.interactive):
-            set_axis_title(self.read_instance, relevant_axis, fairmode_settings[speci]['title'], plot_characteristics)
+            set_axis_title(self.read_instance, relevant_axis, fairmode_settings[speci]['title'], 
+                           plot_characteristics)
 
-    def make_fairmode_statsummary(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
+    def make_fairmode_statsummary(self, relevant_axis, networkspeci, data_labels, plot_characteristics, 
+                                  plot_options):
         
         # resample to daily for PM10 and PM2.5 if data is hourly
         # get MDA8 for ozone if data is hourly
@@ -2207,8 +2210,9 @@ class Plot:
                 st_observations_data = observations_data[station_idx, :]
                 st_experiment_data = experiment_data[station_idx, :]
                 
-                mean, exc, t_bias, t_R, t_sd, h_perc = ExpBias.calculate_fairmode_stats(st_observations_data, st_experiment_data, 
-                                                                    u_95r_RV, RV, alpha, beta, exc_threshold, 'summary')
+                mean, exc, t_bias, t_R, t_sd, h_perc = ExpBias.calculate_fairmode_stats(
+                    st_observations_data, st_experiment_data, 
+                    u_95r_RV, RV, alpha, beta, exc_threshold, 'summary')
                 
                 means.append(mean)
                 exceedances.append(exc)
@@ -2216,10 +2220,12 @@ class Plot:
                 t_R_list.append(t_R)
                 t_sd_list.append(t_sd)
                 h_perc_list.append(h_perc)
-        
+
             # plot data
             # join all statistics in one list
-            statistics_list = [np.array(means), np.array(exceedances), np.array(t_biases), np.array(t_R_list), np.array(t_sd_list), np.array(h_perc_list), np.nanmean(t_sd_list), np.nanmean(t_R_list)]
+            statistics_list = [np.array(means), np.array(exceedances), np.array(t_biases), 
+                               np.array(t_R_list), np.array(t_sd_list), np.array(h_perc_list), 
+                               np.nanmean(t_sd_list), np.nanmean(t_R_list)]
 
             # get subplots dictionary
             subplots = dict(plot_characteristics["auxiliar"]["subplots"])
@@ -2233,7 +2239,7 @@ class Plot:
                 statistics_list.pop(1)
 
             # create list for track_plot_elements
-            self.fairmode_statsummary_plot = []
+            fairmode_statsummary_plot = []
 
             # apply configuration to each row
             for i, (row, fairmode_data) in enumerate(zip(subplots,statistics_list)):
@@ -2253,7 +2259,10 @@ class Plot:
 
                 # add units to the first two rows
                 if 'units' in plot_dict:
-                    relevant_axis[i*4 + 3].text(*plot_characteristics["auxiliar"]["units"]["position"], plot_dict['units'], fontsize=plot_characteristics["auxiliar"]["units"]["fontsize"])
+                    relevant_axis[i*4 + 3].text(
+                        *plot_characteristics["auxiliar"]["units"]["position"], 
+                        plot_dict['units'], 
+                        fontsize=plot_characteristics["auxiliar"]["units"]["fontsize"])
                 
                 # configure color of the row and the dot on the right for rows 3 to 8
                 if 'range_style' in plot_dict:
@@ -2271,8 +2280,10 @@ class Plot:
                     arr = np.array(fairmode_data)[~np.isnan(fairmode_data)]
                     correct_arr = arr[(arr >= min_span) & (arr <= max_span)]
                     dot_color = plot_characteristics["auxiliar"]["right_dot_colors"]["green"] if len(correct_arr)/len(arr) >= .9 else plot_characteristics["auxiliar"]["right_dot_colors"]['red']
+                    
                     # plot dot on the right
-                    relevant_axis[i*4 + 3].scatter(**plot_characteristics["auxiliar"]["right_dot"], color=dot_color, edgecolor=dot_color)
+                    relevant_axis[i*4 + 3].scatter(**plot_characteristics["auxiliar"]["right_dot"], 
+                                                   color=dot_color, edgecolor=dot_color)
 
                 # y axis / grid
                 # remove y axis ticks
@@ -2283,12 +2294,14 @@ class Plot:
                 # x axis
                 # get the x axis limit for the current row
                 x_limit = plot_dict['x_axis_limits']
+                
                 # set x axis limits
                 relevant_axis[i*4 + 1].set_xlim(*x_limit)
 
                 # right zone configuration
                 # remove x ticks from the right dashed zone
                 relevant_axis[i*4 + 2].set_xticks([])
+                
                 # remove vertical lines separating middle and right dashed zone
                 relevant_axis[i*4 + 2].spines['left'].set_linestyle('none')
                 relevant_axis[i*4 + 1].spines['right'].set_linestyle('none')
@@ -2300,30 +2313,41 @@ class Plot:
                 # right zone dot configuration
                 # get the points that surpass the limit
                 right_zone_mask = x_limit[1] < fairmode_data
+                
                 # set the right dashed zone range to (-1,1)
                 relevant_axis[i*4 + 2].set_xlim(-1,1)
+                
                 # if there is a dot outside the limits
                 if np.any(right_zone_mask):
                     # plot it in the middle of the right dashed zone
-                    stations_dots = relevant_axis[i*4 + 2].plot(0, 0, plot_characteristics["auxiliar"]["station_dots"]["marker"], 
-                            color=self.read_instance.plotting_params[data_label]['colour'], markersize=plot_characteristics["auxiliar"]["station_dots"]["markersize"])
+                    stations_dots = relevant_axis[i*4 + 2].plot(
+                        0, 0, 
+                        plot_characteristics["auxiliar"]["station_dots"]["marker"], 
+                        color=self.read_instance.plotting_params[data_label]['colour'], 
+                        markersize=plot_characteristics["auxiliar"]["station_dots"]["markersize"])
+                    
                     # add the dots to the track plot elements list
-                    self.fairmode_statsummary_plot.append(stations_dots[0])
+                    fairmode_statsummary_plot.append(stations_dots[0])
+                    
                     # remove it from the data plotted in the middle zone
                     fairmode_data = fairmode_data[~right_zone_mask] if isinstance(fairmode_data,np.ndarray) else np.array([])
          
                 # left zone configuration
                 # remove x ticks from the left dashed zone
                 relevant_axis[i*4 + 0].set_xticks([])
+                
                 # define left zone line style (can be dashed or no left zone)
                 left_dashed_zone_linestyle = plot_dict['left_dashed_zone_linestyle']
+                
                 # if left dashed zone exists in the current row
                 if left_dashed_zone_linestyle != 'none':
                     # convert to tuple [x,[x,x]] because yaml does not return python tuples
                     left_dashed_zone_linestyle = (left_dashed_zone_linestyle[0],tuple(left_dashed_zone_linestyle[1]))
+                    
                     # remove vertical lines separating middle and left dashed zone
                     relevant_axis[i*4 + 1].spines['left'].set_linestyle('none')
                     relevant_axis[i*4 + 0].spines['right'].set_linestyle('none')
+                
                 # change the linestyle to dashed or remove the dashed zone
                 for side in ['bottom', 'top', 'left']:
                     relevant_axis[i*4 + 0].spines[side].set_linestyle(left_dashed_zone_linestyle)
@@ -2331,27 +2355,40 @@ class Plot:
                 # left zone dot configuration               
                 # if left dashed zone exists in the current row
                 if left_dashed_zone_linestyle != 'none':
+                    
                     # get the points that surpass the limit
                     left_zone_mask = x_limit[0] > fairmode_data
+                    
                     # set the left dashed zone range to (-1,1)
                     relevant_axis[i*4 + 0].set_xlim(-1,1)
+                   
                     # if there is a dot outside the limits
                     if np.any(left_zone_mask):
                         # plot it in the middle of the left dashed zone
-                        stations_dots = relevant_axis[i*4 + 0].plot(0, 0, plot_characteristics["auxiliar"]["station_dots"]["marker"], 
-                            color=self.read_instance.plotting_params[data_label]['colour'], markersize=plot_characteristics["auxiliar"]["station_dots"]["markersize"])
+                        stations_dots = relevant_axis[i*4 + 0].plot(
+                            0, 0, 
+                            plot_characteristics["auxiliar"]["station_dots"]["marker"], 
+                            color=self.read_instance.plotting_params[data_label]['colour'], 
+                            markersize=plot_characteristics["auxiliar"]["station_dots"]["markersize"])
+                        
                         # add the dot to the track plot elements list
-                        self.fairmode_statsummary_plot.append(stations_dots[0])
+                        fairmode_statsummary_plot.append(stations_dots[0])
+                        
                         # remove it from the data plotted in the middle zone
                         fairmode_data = fairmode_data[~left_zone_mask] if isinstance(fairmode_data,np.ndarray) else np.array([])
 
                 # plot stations as dots
-                stations_dots = relevant_axis[i*4 + 1].plot(fairmode_data, np.zeros_like(fairmode_data), plot_characteristics["auxiliar"]["station_dots"]["marker"], 
-                            color=self.read_instance.plotting_params[data_label]['colour'], markersize=plot_characteristics["auxiliar"]["station_dots"]["markersize"])
+                stations_dots = relevant_axis[i*4 + 1].plot(
+                    fairmode_data, np.zeros_like(fairmode_data), 
+                    plot_characteristics["auxiliar"]["station_dots"]["marker"], 
+                    color=self.read_instance.plotting_params[data_label]['colour'], 
+                    markersize=plot_characteristics["auxiliar"]["station_dots"]["markersize"])
+                
                 # change the size of the x-axis tick labels
                 relevant_axis[i*4 + 1].tick_params(**plot_characteristics["auxiliar"]["station_dots"]["tick_params"])
+                
                 # add the dots to the track plot elements list
-                self.fairmode_statsummary_plot.append(stations_dots[0])
+                fairmode_statsummary_plot.append(stations_dots[0])
 
                 # get the row title
                 row_title = plot_dict["title"]
@@ -2361,22 +2398,26 @@ class Plot:
                     row_title = row_title.format(exc_threshold)
 
                 # add row title
-                relevant_axis[i*4 + 0].text(*plot_characteristics["auxiliar"]["row_title"]["position"], row_title, 
-                            **plot_characteristics["auxiliar"]["row_title"], transform=relevant_axis[i*4 + 0].transAxes)
+                relevant_axis[i*4 + 0].text(
+                    *plot_characteristics["auxiliar"]["row_title"]["position"], 
+                    row_title, 
+                    **plot_characteristics["auxiliar"]["row_title"], 
+                    transform=relevant_axis[i*4 + 0].transAxes)
             
             # track plot elements if using dashboard 
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
-                self.track_plot_elements(data_label, 'fairmode-statsummary', 'plot', self.fairmode_statsummary_plot, bias=False)
+                self.track_plot_elements(data_label, 'fairmode-statsummary', 'plot', 
+                                         fairmode_statsummary_plot, bias=False)
                 
             # add information on the left of the plot
             if Version(matplotlib.__version__) >= Version("3.3"):
                 relevant_axis[-4].annotate(text=plot_characteristics["auxiliar"]["has_exceedances"][has_exceedances]["left_description_text"],
-                                        **plot_characteristics["auxiliar"]["has_exceedances"][has_exceedances]["left_description"],
-                                        **plot_characteristics["auxiliar"]["left_description"]) 
+                                           **plot_characteristics["auxiliar"]["has_exceedances"][has_exceedances]["left_description"],
+                                           **plot_characteristics["auxiliar"]["left_description"]) 
             else:
                 relevant_axis[-4].annotate(s=plot_characteristics["auxiliar"]["has_exceedances"][has_exceedances]["left_description_text"],  
-                                            **plot_characteristics["auxiliar"]["has_exceedances"][has_exceedances]["left_description"],
-                                            **plot_characteristics["auxiliar"]["left_description"])  
+                                           **plot_characteristics["auxiliar"]["has_exceedances"][has_exceedances]["left_description"],
+                                           **plot_characteristics["auxiliar"]["left_description"])  
         
         # add title if using dashboard 
         if (not self.read_instance.offline) and (not self.read_instance.interactive):
