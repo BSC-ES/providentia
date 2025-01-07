@@ -841,8 +841,9 @@ class MPLCanvas(FigureCanvas):
                 # reset navigation toolbar stack for plot
                 self.reset_ax_navigation_toolbar_stack(ax)
 
-                # update plot options
-                self.update_plot_options(plot_types=[plot_type])
+                # update plot options, except for plots with no options in dashboard
+                if plot_type not in ['metadata', 'fairmode-statsummary']:
+                    self.update_plot_options(plot_types=[plot_type])
 
     def get_plot_type_position(self, plot_type):
         """ Function that returns numeric position of plot type within the dashboard
@@ -2199,14 +2200,14 @@ class MPLCanvas(FigureCanvas):
                                                         }
 
         # METADATA PLOT SETTINGS MENU #
+        # TODO: Uncomment this when we add options to metadata plot
         # create metadata settings menu
-        self.metadata_menu = SettingsMenu(plot_type='metadata', canvas_instance=self)
-        self.metadata_options = self.metadata_menu.checkable_comboboxes['options']
-        self.metadata_elements = self.metadata_menu.get_elements()
+        # self.metadata_menu = SettingsMenu(plot_type='metadata', canvas_instance=self)
+        # self.metadata_elements = self.metadata_menu.get_elements()
 
-        # get metadata interactive dictionary
-        self.interactive_elements['metadata'] = {'hidden': True
-                                                 }
+        # # get metadata interactive dictionary
+        # self.interactive_elements['metadata'] = {'hidden': True
+        #                                          }
 
         # DISTRIBUTION PLOT SETTINGS MENU #
         # create distribution settings menu
@@ -2265,7 +2266,6 @@ class MPLCanvas(FigureCanvas):
         # FAIRMODE STATSUMMARY PLOT SETTINGS MENU #
         # create fairmode statsummary settings menu
         self.fairmode_statsummary_menu = SettingsMenu(plot_type='fairmode_statsummary', canvas_instance=self)
-        self.fairmode_statsummary_options = self.fairmode_statsummary_menu.checkable_comboboxes['options']
         self.fairmode_statsummary_elements = self.fairmode_statsummary_menu.get_elements()
        
         # get sliders and update values
@@ -2331,9 +2331,11 @@ class MPLCanvas(FigureCanvas):
         for plot_type in settings_dict.keys():
             if plot_type in ['periodic-violin','fairmode-target','fairmode-statsummary']:
                 plot_type = plot_type.replace('-','_')
-            self.menu_buttons.append(getattr(self, plot_type + '_menu').buttons['settings_button'])
-            self.save_buttons.append(getattr(self, plot_type + '_menu').buttons['save_button'])
-            self.elements.append(getattr(self, plot_type + '_elements'))
+            # TODO: Remove this when we add options to metadata plot
+            if plot_type != 'metadata':
+                self.menu_buttons.append(getattr(self, plot_type + '_menu').buttons['settings_button'])
+                self.save_buttons.append(getattr(self, plot_type + '_menu').buttons['save_button'])
+                self.elements.append(getattr(self, plot_type + '_elements'))
 
         # make sure white containers are above buttons
         for element in self.elements:
