@@ -218,7 +218,7 @@ def legend_picker_func(canvas_instance, event):
                                         plot_element.set_visible(False)
 
                         # reset axes limits (harmonising across subplots for periodic plots) 
-                        if plot_type not in ['taylor']:
+                        if plot_type not in ['taylor', "fairmode-statsummary"]:
                             if plot_type == 'scatter':
                                 harmonise_xy_lims_paradigm(canvas_instance, canvas_instance.read_instance, 
                                                         canvas_instance.plot_axes[plot_type], plot_type, 
@@ -299,7 +299,7 @@ class HoverAnnotation(object):
         # activate hover over plot
         if (plot_type in self.canvas_instance.read_instance.active_dashboard_plots):
             if event.inaxes == self.canvas_instance.plot_axes[plot_type]:
-                search_plot = 'fairmode_target' if plot_type == 'fairmode-target' else plot_type
+                search_plot = plot_type.replace('-','_') if plot_type in ['fairmode-target', 'fairmode-statsummary'] else plot_type
                 if ((hasattr(self.canvas_instance.plot, search_plot + '_plot')) 
                     and (plot_type in self.canvas_instance.plot_elements)
                     and (self.canvas_instance.annotations_lock[plot_type] == False)):
