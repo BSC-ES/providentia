@@ -2081,22 +2081,21 @@ class Plot:
                 if mqi > 1:
                     bad_stations.append(station)
 
+            # create list for track_plot_elements
+            self.fairmode_target_plot = []
+
             # plot data
+            # we need to create the plot point by point to be able to set the marker
+            # depending on the area classification since Matplotlib doesn't have a way to 
+            # set different markers at the same time
             for x, y, classification in (zip(x_points, y_points, classifications)):
                 if classification not in plot_characteristics['markers'][f'{classification_type}_classification'].keys():
                     marker = 'h'
                 else:
                     marker = plot_characteristics['markers'][f'{classification_type}_classification'][classification]
-                relevant_axis.plot(x, y, markeredgecolor=self.read_instance.plotting_params[data_label]['colour'], 
+                stations_dots = relevant_axis.plot(x, y, markeredgecolor=self.read_instance.plotting_params[data_label]['colour'], 
                                    marker=marker, **plot_characteristics['plot'])
-            
-            # we need to create the plot point by point to be able to set the marker
-            # depending on the area classification since Matplotlib doesn't have a way to 
-            # set different markers at the same time
-            # we add this invisible line to be able to hover on all points and get annotations
-            # we make it invisible since data has already been plotted
-            self.fairmode_target_plot = relevant_axis.plot(x_points, y_points)
-            self.fairmode_target_plot[0].set_visible(False)
+                self.fairmode_target_plot.append(stations_dots[0])
 
             # track plot elements if using dashboard 
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
