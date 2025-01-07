@@ -2589,11 +2589,11 @@
       "offline":
         {
           "orientation": "landscape",
-          "subplots_adjust": { "left": 0.25 },
+          "subplots_adjust": { "left": 0.25, "top": 0.85 },
           "figure": { "nrows": 1, "ncols": 1 },
           "page_title":
             {
-              "t": "Fairmode statsummary",
+              "t": "Fairmode statistics summary",
               "fontsize": 12,
               "ha": "left",
               "x": 0.05,
