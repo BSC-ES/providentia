@@ -161,6 +161,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2P/9G/Q3/2P9G-Q3BM.nc:
   - ozone
   - ozone_qc
   - ozone_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2P/E8/8F/2PE8-8FAN.nc:
+  end_date: 2022-07-20T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2022-07-12T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ozone_nmol_per_mol
+  - ozone_nmol_per_mol_qc
+  - ozone_nmol_per_mol_ebasmetadata
+  - ozone_ug_per_m3
+  - ozone_ug_per_m3_qc
+  - ozone_ug_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2Q/CH/D4/2QCH-D4DR.nc:
   end_date: 2009-01-01T00:00:00 UTC
   resolution: hourly
@@ -257,6 +270,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/35/68/2W/3568-2W3Q.nc:
   - ozone
   - ozone_qc
   - ozone_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/35/DD/E2/35DD-E28C.nc:
+  end_date: 2022-07-20T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2022-07-12T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ozone_nmol_per_mol
+  - ozone_nmol_per_mol_qc
+  - ozone_nmol_per_mol_ebasmetadata
+  - ozone_ug_per_m3
+  - ozone_ug_per_m3_qc
+  - ozone_ug_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/35/YK/8T/35YK-8TR6.nc:
   end_date: 1989-12-31T23:00:00 UTC
   resolution: hourly
@@ -751,6 +777,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4W/VZ/3U/4WVZ-3U62.nc:
   end_date: 2023-01-01T00:00:00 UTC
   resolution: hourly
   start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ozone_nmol_per_mol
+  - ozone_nmol_per_mol_qc
+  - ozone_nmol_per_mol_ebasmetadata
+  - ozone_ug_per_m3
+  - ozone_ug_per_m3_qc
+  - ozone_ug_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4X/UY/XX/4XUY-XX66.nc:
+  end_date: 2022-07-19T23:15:04 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2022-07-12T00:00:00 UTC
   variables:
   - time_bnds
   - metadata_time_bnds
@@ -1643,6 +1682,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8P/QF/99/8PQF-99ED.nc:
   - ozone
   - ozone_qc
   - ozone_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Q/2P/Y2/8Q2P-Y2Z4.nc:
+  end_date: 2022-07-20T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2022-07-12T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ozone_nmol_per_mol
+  - ozone_nmol_per_mol_qc
+  - ozone_nmol_per_mol_ebasmetadata
+  - ozone_ug_per_m3
+  - ozone_ug_per_m3_qc
+  - ozone_ug_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Q/C9/T9/8QC9-T9D3.nc:
   end_date: 2013-01-01T00:00:00 UTC
   resolution: hourly
@@ -1955,6 +2007,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Q/2N/FB/9Q2N-FBP3.nc:
   - ozone
   - ozone_qc
   - ozone_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9U/DF/CK/9UDF-CKQX.nc:
+  end_date: 2022-07-20T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2022-07-12T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ozone_nmol_per_mol
+  - ozone_nmol_per_mol_qc
+  - ozone_nmol_per_mol_ebasmetadata
+  - ozone_ug_per_m3
+  - ozone_ug_per_m3_qc
+  - ozone_ug_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9V/SD/42/9VSD-426S.nc:
   end_date: 2024-01-01T00:00:00 UTC
   resolution: hourly
@@ -2115,6 +2180,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AK/YM/VU/AKYM-VUTN.nc:
   - ozone
   - ozone_qc
   - ozone_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AM/E9/9E/AME9-9EGX.nc:
+  end_date: 2022-07-20T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2022-07-12T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ozone_nmol_per_mol
+  - ozone_nmol_per_mol_qc
+  - ozone_nmol_per_mol_ebasmetadata
+  - ozone_ug_per_m3
+  - ozone_ug_per_m3_qc
+  - ozone_ug_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AM/YK/5Z/AMYK-5ZJ5.nc:
   end_date: 2023-01-01T00:00:00 UTC
   resolution: hourly
@@ -7197,6 +7275,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UQ/B6/YS/UQB6-YSE4.nc:
   - ozone_ug_per_m3_stddev
   - ozone_ug_per_m3_stddev_qc
   - ozone_ug_per_m3_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UR/GM/TW/URGM-TWSA.nc:
+  end_date: 2022-07-19T23:15:04 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2022-07-12T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ozone_nmol_per_mol
+  - ozone_nmol_per_mol_qc
+  - ozone_nmol_per_mol_ebasmetadata
+  - ozone_ug_per_m3
+  - ozone_ug_per_m3_qc
+  - ozone_ug_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UU/4S/CS/UU4S-CS8A.nc:
   end_date: 1996-01-01T00:00:00 UTC
   resolution: hourly
