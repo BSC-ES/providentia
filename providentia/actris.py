@@ -1,8 +1,10 @@
 import copy
+import csv
 import datetime
 import itertools
 import os
 import requests
+import sys
 import yaml
 import re
 
@@ -22,6 +24,39 @@ coverages_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interna
 units_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'units.yaml')))
 variable_mapping = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'variable_mapping.yaml')))
 variable_mapping = {k: v for k, v in variable_mapping.items() if k.strip() and v}
+
+
+def create_variable_mapping_file():
+
+    result = {
+        value['preferred_term'].replace('"', ''): {'var': key[2], 'units': key[0]}
+        for key, value in variable_mapping.items()
+    }
+    with open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'variable_mapping.yaml'), 
+              mode='w') as file:
+        yaml.dump(result, file, default_flow_style=False)
+
+
+def create_actris_variables_file():
+    
+    with open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'actris_variables.csv'), 
+              mode="w", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        for key in variable_mapping.keys():
+            writer.writerow([key, variable_mapping[key]['var']])
+
+
+def create_ghost_variables_file(ghost_version):    
+    
+    sys.path.insert(1, join(PROVIDENTIA_ROOT, 'providentia/dependencies/GHOST_standards/{}'.format(ghost_version)))
+    from GHOST_standards import standard_parameters
+    with open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'ghost_variables.csv'), 
+              mode="w", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        for key in standard_parameters.keys():
+            writer.writerow([standard_parameters[key]['long_parameter_name'], 
+                             standard_parameters[key]['bsc_parameter_name'], 
+                             ', '.join( standard_parameters[key]['ebas_parameter_name'])])
 
 
 def get_files_per_var(var):
