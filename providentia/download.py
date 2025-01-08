@@ -1427,7 +1427,7 @@ class ProvidentiaDownload(object):
             if len(files) != 0:
                     
                 # get data and metadata for each file within period
-                combined_ds_list, metadata = get_data(files, var, actris_parameter, resolution)
+                combined_ds_list, metadata, wavelength = get_data(files, var, actris_parameter, resolution)
 
                 # combine and create new dataset
                 print('    Combining files...')
@@ -1480,8 +1480,7 @@ class ProvidentiaDownload(object):
                             # add title to attrs
                             extra_info = ''
                             wavelength_var = is_wavelength_var(actris_parameter)
-                            if wavelength_var:
-                                wavelength = int(re.findall(r'\d+', var)[0])
+                            if wavelength_var and wavelength is not None:
                                 extra_info = f' at {wavelength}nm'
                             combined_ds_yearmonth.attrs['title'] = f'Surface {parameters_dict[var]}{extra_info} in the ACTRIS network in {year}-{month:02d}.'
 
