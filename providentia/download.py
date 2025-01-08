@@ -1495,24 +1495,26 @@ class ProvidentiaDownload(object):
                             combined_ds_yearmonth.attrs = ordered_attrs
 
                             # remove stations if all variable data is nan
-                            previous_n_stations = len(combined_ds_yearmonth.station)
+                            # previous_n_stations = len(combined_ds_yearmonth.station)
                             combined_ds_yearmonth = combined_ds_yearmonth.dropna(dim="station", subset=[var], how="all")
                             combined_ds_yearmonth = combined_ds_yearmonth.assign_coords(station=range(len(combined_ds_yearmonth.station)))
-                            current_n_stations = len(combined_ds_yearmonth.station)
-                            n_stations_diff = previous_n_stations - current_n_stations
-                            if n_stations_diff > 0:
-                                print(f'Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
+                            # current_n_stations = len(combined_ds_yearmonth.station)
+                            # n_stations_diff = previous_n_stations - current_n_stations
+                            # if n_stations_diff > 0:
+                            #     print(f'    Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
                             
                             # save file
                             combined_ds_yearmonth.to_netcdf(filename)
 
                             # change permissions
                             os.system("chmod 777 {}".format(filename))
-                            print(f"Saved: {filename}")
+                            print(f"    Saved: {filename}")
                             saved_files += 1
                             
-                print(f'Total number of saved files: {saved_files}')
+                print(f'    Total number of saved files: {saved_files}')
 
+            else:
+                print('    No files were found')
 
 def main(**kwargs):
     """ Main function when running download function. """
