@@ -292,8 +292,43 @@ class HoverAnnotation(object):
 
         return None
 
+    def get_hover_item(self, plot_type, event):
+
+        is_contained = False
+        annotation_index = None
+        line_index = None
+        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
+
+            # skip observations for bias plot
+            if ((plot_type in ['timeseries', 'distribution']) 
+                and (self.canvas_instance.plot_elements[plot_type]['active'] == 'bias')
+                and (data_label == self.canvas_instance.read_instance.observations_data_label)):
+                continue
+
+            # do not annotate if plot is cleared
+            if data_label not in self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']].keys():
+                continue
+            
+            # do no annotate if hidedata is active
+            if len(self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label]['plot']) == 0:
+                continue
+            
+            # iterate through multiple lines in FAIRMODE target since it is constructed dot by dot,
+            # in other cases line index will always be 0 (only one line)
+            if plot_type == 'fairmode-target':
+                lines = self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label]['plot']
+            else:
+                lines = [self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label]['plot'][0]]
+            for line_index, line in enumerate(lines):
+                is_contained, annotation_index = line.contains(event)
+                if is_contained:
+                    self.annotate_data_label = data_label
+                    return is_contained, annotation_index, line_index
+        
+        return is_contained, annotation_index, line_index
+                          
     def hover_annotation(self, event, plot_type):
-        """ Function that annotates on hover in timeseries, scatter, distribution, taylor and FAIRMODE target plots.
+        """ Function that annotates on hover in timeseries, scatter, distribution, Taylor and FAIRMODE plots.
         """
 
         # activate hover over plot
@@ -306,34 +341,14 @@ class HoverAnnotation(object):
 
                     # lock annotation
                     self.canvas_instance.annotations_lock[plot_type] = True
-                    is_contained = False
 
-                    for data_label in self.canvas_instance.plot_elements['data_labels_active']:
+                    # find item on hover
+                    is_contained, annotation_index, line_index = self.get_hover_item(plot_type, event)
 
-                        # skip observations for bias plot
-                        if ((plot_type in ['timeseries', 'distribution']) 
-                            and (self.canvas_instance.plot_elements[plot_type]['active'] == 'bias')
-                            and (data_label == self.canvas_instance.read_instance.observations_data_label)):
-                            continue
-
-                        # do not annotate if plot is cleared
-                        if data_label not in self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']].keys():
-                            continue
-                        
-                        # do no annotate if hidedata is active
-                        if len(self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label]['plot']) == 0:
-                            continue
-                        
-                        line = self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label]['plot'][0]
-                        is_contained, annotation_index = line.contains(event)
-                        if is_contained:
-                            self.annotate_data_label = data_label
-                            break
-                    
                     if is_contained:
                         # update annotation if hovered
                         func = getattr(self, 'update_' + search_plot + '_annotation')
-                        func(annotation_index)
+                        func(annotation_index, line_index)
                         self.annotation.set_visible(True)
                         if hasattr(self, 'vline'):
                             self.vline.set_visible(True)
@@ -381,7 +396,7 @@ class HoverAnnotation(object):
         else:
             self.x_middle[plot_type] = x_middle
 
-    def update_timeseries_annotation(self, annotation_index):
+    def update_timeseries_annotation(self, annotation_index, line_index):
         """ Update annotation for each timeseries point that is hovered. """
     
         for data_label in self.canvas_instance.plot_elements['data_labels_active']:
@@ -437,7 +452,7 @@ class HoverAnnotation(object):
 
         return None
 
-    def update_scatter_annotation(self, annotation_index):
+    def update_scatter_annotation(self, annotation_index, line_index):
 
         for data_label in self.canvas_instance.plot_elements['data_labels_active']:
 
@@ -476,7 +491,7 @@ class HoverAnnotation(object):
 
         return None
 
-    def update_fairmode_target_annotation(self, annotation_index):
+    def update_fairmode_target_annotation(self, annotation_index, line_index):
 
         for data_label in self.canvas_instance.plot_elements['data_labels_active']:
 
@@ -487,7 +502,7 @@ class HoverAnnotation(object):
                     continue
 
                 # retrieve CRMSE / β·RMSᵤ and Mean Bias / β·RMSᵤ
-                line = self.canvas_instance.plot_elements['fairmode-target'][self.canvas_instance.plot_elements['fairmode-target']['active']][data_label]['plot'][0]
+                line = self.canvas_instance.plot_elements['fairmode-target'][self.canvas_instance.plot_elements['fairmode-target']['active']][data_label]['plot'][line_index]
                 x = line.get_xdata()[annotation_index['ind'][0]]
                 y = line.get_ydata()[annotation_index['ind'][0]]
 
@@ -514,7 +529,7 @@ class HoverAnnotation(object):
 
         return None
     
-    def update_distribution_annotation(self, annotation_index):
+    def update_distribution_annotation(self, annotation_index, line_index):
         """ Update annotation for each distribution point that is hovered. """
         
         for data_label in self.canvas_instance.plot_elements['data_labels_active']:
@@ -572,7 +587,7 @@ class HoverAnnotation(object):
 
         return None
 
-    def update_taylor_annotation(self, annotation_index):
+    def update_taylor_annotation(self, annotation_index, line_index):
         
         for data_label in self.canvas_instance.plot_elements['data_labels_active']:
 
