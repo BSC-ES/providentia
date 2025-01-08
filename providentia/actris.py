@@ -241,7 +241,6 @@ def is_wavelength_var(actris_parameter):
 def get_files_info(files, var, path):
     
     files_info = {}
-    files_info[var] = {}
     tqdm_iter = tqdm(files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Creating information file ({len(files)})")
     for file in tqdm_iter:
         # open file
@@ -260,16 +259,16 @@ def get_files_info(files, var, path):
         file_start_date = ds.time_coverage_start
         file_end_date = ds.time_coverage_end
         file_variables = list(ds.data_vars.keys())
-        files_info[var][file] = {}
-        files_info[var][file]['resolution'] = file_resolution
-        files_info[var][file]['start_date'] = file_start_date
-        files_info[var][file]['end_date'] = file_end_date
-        files_info[var][file]['variables'] = file_variables
+        files_info[file] = {}
+        files_info[file]['resolution'] = file_resolution
+        files_info[file]['start_date'] = file_start_date
+        files_info[file]['end_date'] = file_end_date
+        files_info[file]['variables'] = file_variables
 
     # create file
     datasets = {
         url: data
-        for url, data in files_info[var].items()
+        for url, data in files_info.items()
     }
     if len(datasets) != 0:
         path_dir = os.path.dirname(path)
@@ -278,8 +277,7 @@ def get_files_info(files, var, path):
         with open(path, 'w') as file:
             yaml.dump(datasets, file, default_flow_style=False)
     else:
-        error = f'    Error: No data could be found for {var}'
-        sys.exit(error)
+        print(f'    Error: No data could be found for {var}')
     
     return files_info
 
