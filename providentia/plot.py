@@ -1785,6 +1785,10 @@ class Plot:
             self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(
                 PolarAxes.PolarTransform(apply_theta_transforms=False))
 
+        # add observations to labels to get all standard deviation when plotting per label
+        if 'individual' in plot_options:
+            data_labels.insert(0, self.read_instance.observations_data_label)
+
         # calculate statistics
         stats_dict = {}
 
@@ -1795,7 +1799,7 @@ class Plot:
         cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
         # get data labels without observations
-        obs_index = cut_data_labels.index(self.read_instance.observations_data_label)
+        obs_index = valid_data_labels.index(self.read_instance.observations_data_label)
         data_labels_sans_obs = copy.deepcopy(cut_data_labels)
         if self.read_instance.observations_data_label in data_labels_sans_obs:
             data_labels_sans_obs.remove(self.read_instance.observations_data_label)
