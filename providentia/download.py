@@ -1397,7 +1397,7 @@ class ProvidentiaDownload(object):
                     origin_update_choice = input(f"\nFile containing information of the files available in Thredds for {var} ({path}) already exists. Do you want to update it (y/n)? ").lower() 
                 if origin_update_choice == 'n':
                     # get files information
-                    files_info = yaml.safe_load(open(os.path.join(CURRENT_PATH, path)))
+                    files_info = yaml.safe_load(open(join(CURRENT_PATH, path)))
                     files_info = {k: v for k, v in files_info.items() if k.strip() and v}
                 else:
                     # get files information
@@ -1408,8 +1408,6 @@ class ProvidentiaDownload(object):
             # filter files by resolution and dates
             print('    Filtering files by resolution and dates...')
             files = []
-            files_info = yaml.safe_load(open(os.path.join(CURRENT_PATH, path)))
-            files_info = {k: v for k, v in files_info.items() if k.strip() and v}
             for file, attributes in files_info.items():
                 if attributes["resolution"] == resolution:
                     start_date = datetime.strptime(attributes["start_date"], "%Y-%m-%dT%H:%M:%S UTC")
