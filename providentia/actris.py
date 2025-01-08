@@ -311,7 +311,7 @@ def get_data(files, var, actris_parameter, resolution):
             if wavelength in ds.Wavelength.values:
                 ds = ds.sel(Wavelength=wavelength, drop=True)
             else:
-                errors[file] = f'- Data at {wavelength}nm could not be found'
+                errors[file] = f'Data at {wavelength}nm could not be found'
                 continue
         
         # assign station code as dimension
@@ -322,7 +322,7 @@ def get_data(files, var, actris_parameter, resolution):
         if unformatted_units in units_dict.keys():
             units = units_dict[unformatted_units]
         else:
-            errors[file] = f'- Units {unformatted_units} were not found in dictionary'
+            errors[file] = f'Units {unformatted_units} were not found in dictionary'
             continue
         units_var = f'{ebas_component}_{units}'
         possible_vars = [ebas_component, 
@@ -338,7 +338,7 @@ def get_data(files, var, actris_parameter, resolution):
 
         # continue to next file if variable cannot be read
         if not ds_var_exists:
-            errors[file] = f'- No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}'
+            errors[file] = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}'
             continue
             
         # save metadata
