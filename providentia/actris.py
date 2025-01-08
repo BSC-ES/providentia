@@ -155,7 +155,7 @@ def temporally_average_data(combined_ds, resolution, year, month, var):
         if len(valid_data) != 0:
             for date in valid_dates:
 
-                # get differences between valid time and actual times in minutes
+                # get differences between valid time and actual times in nanoseconds
                 time_diffs = (
                     valid_time - date).astype('timedelta64[ns]').astype(float)
 
@@ -195,7 +195,7 @@ def temporally_average_data(combined_ds, resolution, year, month, var):
                     closest_diffs = np.abs(
                         [closest_negative, closest_positive])
 
-                    # we do the reverse, since we want the differences in minutes to have a heavier weight if these are smaller (nearer the actual time)
+                    # we do the reverse, since we want the differences to have a heavier weight if these are smaller (nearer the actual time)
                     weights = 1 / closest_diffs
 
                     # finally we normalize them to have values between 0 and 1
