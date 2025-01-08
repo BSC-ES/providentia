@@ -2012,7 +2012,7 @@
         },
       "axis_title": { "label": "" },
       "plot": { "marker": "o", "linestyle": "None" },
-      "plot_options": ["annotate"],
+      "plot_options": ["annotate", "individual"],
       "dashboard":
         {
           "axis_title": { "fontsize": 8.5, "loc": "left" },
