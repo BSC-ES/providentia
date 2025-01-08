@@ -1392,10 +1392,10 @@ class ProvidentiaDownload(object):
             # if file exists
             else:
                 # ask if user wants to overwrite file
-                self.origin_update_choice = None
-                while self.origin_update_choice not in ['y','n']:
-                    self.origin_update_choice = input(f"\nFile containing information of the files available in Thredds for {var} ({path}) already exists. Do you want to update it (y/n)? ").lower() 
-                if self.origin_update_choice == 'n':
+                origin_update_choice = None
+                while origin_update_choice not in ['y','n']:
+                    origin_update_choice = input(f"\nFile containing information of the files available in Thredds for {var} ({path}) already exists. Do you want to update it (y/n)? ").lower() 
+                if origin_update_choice == 'n':
                     # get files information
                     files_info = yaml.safe_load(open(os.path.join(CURRENT_PATH, path)))
                     files_info = {k: v for k, v in files_info.items() if k.strip() and v}
