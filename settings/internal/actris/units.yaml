@@ -5,4 +5,5 @@
   "ug S/m3": "ug_S_per_m3",
   "pmol/mol": "pmol_per_mol",
   "1/Mm": "1_per_Mm",
+  "ng/m3": "ng_per_m3"
 }
