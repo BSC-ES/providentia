@@ -277,6 +277,9 @@ def get_files_info(files, var, path):
             os.makedirs(path_dir)
         with open(path, 'w') as file:
             yaml.dump(datasets, file, default_flow_style=False)
+    else:
+        error = f'    Error: No data could be found for {var}'
+        sys.exit(error)
     
     return files_info
 
