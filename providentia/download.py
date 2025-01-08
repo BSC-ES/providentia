@@ -1405,6 +1405,10 @@ class ProvidentiaDownload(object):
                     all_files = combined_data[var]['files']
                     files_info = get_files_info(all_files, var, path)
             
+            # go to next variable if no data is found
+            if len(files_info) == 0:
+                continue
+
             # filter files by resolution and dates
             print('    Filtering files by resolution and dates...')
             files = []
