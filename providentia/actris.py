@@ -233,7 +233,8 @@ def is_wavelength_var(actris_parameter):
     wavelength_var = False
     if actris_parameter in ['aerosol particle light absorption coefficient',
                             'aerosol particle light hemispheric backscatter coefficient',
-                            'aerosol particle light scattering coefficient']:
+                            'aerosol particle light scattering coefficient',
+                            'aerosol particle equivalent black carbon mass concentration']:
         wavelength_var = True
     return wavelength_var
 
@@ -291,8 +292,11 @@ def get_data(files, var, actris_parameter, resolution):
     # get EBAS component
     ebas_component = variable_mapping[actris_parameter]['var']
 
-    tqdm_iter = tqdm(files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Reading data ({len(files)})")
+    # initalise wavelength
+    wavelength = None
+
     errors = {}
+    tqdm_iter = tqdm(files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Reading data ({len(files)})")
     for i, file in enumerate(tqdm_iter):
         # open file
         try:
@@ -307,7 +311,12 @@ def get_data(files, var, actris_parameter, resolution):
 
         # get data at desired wavelength if wavelength is in coordinates
         if 'Wavelength' in list(ds.coords):
-            wavelength = int(re.findall(r'\d+', var)[0])
+            # TODO: Review wavelength to choose for black carbon
+            if var == 'sconcbc':
+                wavelength = 370
+            # Get wavelength from variable name for other variables
+            else:
+                wavelength = float(re.findall(r'\d+', var)[0])
             if wavelength in ds.Wavelength.values:
                 ds = ds.sel(Wavelength=wavelength, drop=True)
             else:
@@ -372,7 +381,7 @@ def get_data(files, var, actris_parameter, resolution):
         for file, error in errors.items():
             print(f'{file} - Error: {error}')
 
-    return combined_ds_list, metadata
+    return combined_ds_list, metadata, wavelength
 
 
 def get_files_to_download(nonghost_root, target_start_date, target_end_date, resolution, var):
