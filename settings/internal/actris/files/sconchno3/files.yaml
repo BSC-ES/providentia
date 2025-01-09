@@ -1,0 +1,876 @@
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2C/U5/6K/2CU5-6K6Z.nc:
+  end_date: 2000-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 1999-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - nitrogen_dioxide
+  - nitrogen_dioxide_qc
+  - nitrogen_dioxide_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2N/KR/VB/2NKR-VB3A.nc:
+  end_date: 2014-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2013-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3B/ZY/WE/3BZY-WEC3.nc:
+  end_date: 2009-03-24T06:00:00 UTC
+  resolution: hourly
+  start_date: 2006-06-01T16:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3H/YC/X5/3HYC-X5H4.nc:
+  end_date: 2002-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2001-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3R/VE/ND/3RVE-NDJD.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2002-01-01T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/42/UY/N2/42UY-N2X8.nc:
+  end_date: 2000-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 1999-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - nitrogen_dioxide
+  - nitrogen_dioxide_qc
+  - nitrogen_dioxide_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/48/PZ/PX/48PZ-PXZJ.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - hydrochloric_acid
+  - hydrochloric_acid_qc
+  - hydrochloric_acid_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - nitrous_acid
+  - nitrous_acid_qc
+  - nitrous_acid_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4Y/6U/RB/4Y6U-RBPP.nc:
+  end_date: 2007-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2005-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4Z/9D/XR/4Z9D-XR7G.nc:
+  end_date: 2016-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2014-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/55/TW/JS/55TW-JSM5.nc:
+  end_date: 2014-01-01T06:00:28 UTC
+  resolution: daily
+  start_date: 2013-12-31T06:00:28 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/57/ZC/WJ/57ZC-WJXV.nc:
+  end_date: 1995-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 1994-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - nitrogen_dioxide
+  - nitrogen_dioxide_qc
+  - nitrogen_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5B/P4/67/5BP4-676K.nc:
+  end_date: 2021-12-30T10:00:00 UTC
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  start_date: 2017-03-14T10:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5Q/V3/GM/5QV3-GM7F.nc:
+  end_date: 1992-01-01T06:00:00 UTC
+  resolution: daily
+  start_date: 1991-01-01T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/64/DD/PX/64DD-PXAD.nc:
+  end_date: 2017-01-01T06:00:00 UTC
+  resolution: daily
+  start_date: 2016-01-01T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6W/DQ/8R/6WDQ-8RUA.nc:
+  end_date: 2016-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2014-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6Z/9M/GK/6Z9M-GK8B.nc:
+  end_date: 2007-01-01T08:00:00 UTC
+  resolution: daily
+  start_date: 2005-01-01T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/79/5B/A4/795B-A4RZ.nc:
+  end_date: 2021-01-01T11:55:00 UTC
+  resolution: monthly
+  start_date: 2013-02-02T13:40:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7D/CY/K3/7DCY-K3JJ.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2016-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7D/FD/SJ/7DFD-SJJJ.nc:
+  end_date: 2007-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2005-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8G/AB/S2/8GAB-S2KZ.nc:
+  end_date: 2005-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 1996-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/92/PE/DP/92PE-DP5F.nc:
+  end_date: 2012-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2011-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AN/KB/MR/ANKB-MR29.nc:
+  end_date: 2017-10-27T05:00:00 UTC
+  resolution: daily
+  start_date: 2017-01-01T05:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AZ/Z5/S6/AZZ5-S6XG.nc:
+  end_date: 1993-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 1990-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/B9/8V/JV/B98V-JVPD.nc:
+  end_date: 2010-01-01T08:00:00 UTC
+  resolution: daily
+  start_date: 2005-01-01T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BG/2J/FT/BG2J-FTRP.nc:
+  end_date: 1997-01-01T10:00:00 UTC
+  resolution: daily
+  start_date: 1994-01-01T10:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/C2/CM/7U/C2CM-7U76.nc:
+  end_date: 2020-12-28T10:50:00 UTC
+  resolution: monthly
+  start_date: 2015-12-30T10:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CT/TA/8U/CTTA-8UVP.nc:
+  end_date: 2021-01-01T08:00:00 UTC
+  resolution: daily
+  start_date: 2011-01-01T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/D8/SF/95/D8SF-955K.nc:
+  end_date: 1995-04-11T06:00:00 UTC
+  resolution: daily
+  start_date: 1995-01-01T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/D9/K7/AU/D9K7-AU4U.nc:
+  end_date: 1995-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 1988-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DB/PQ/98/DBPQ-987W.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 1993-01-01T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DR/XC/8X/DRXC-8XEP.nc:
+  end_date: 2018-01-01T06:00:00 UTC
+  resolution: daily
+  start_date: 1993-01-01T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/E5/VE/WA/E5VE-WA5F.nc:
+  end_date: 1997-07-01T09:00:00 UTC
+  resolution: daily
+  start_date: 1997-01-01T09:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EB/MR/HS/EBMR-HSPC.nc:
+  end_date: 1987-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 1986-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ES/58/RV/ES58-RVJ3.nc:
+  end_date: 2022-01-11T10:00:00 UTC
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  start_date: 2013-01-08T10:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/F6/3D/MT/F63D-MTME.nc:
+  end_date: 1995-04-11T06:00:00 UTC
+  resolution: daily
+  start_date: 1995-01-01T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FD/P3/MG/FDP3-MG5A.nc:
+  end_date: 2014-01-01T06:00:00 UTC
+  resolution: daily
+  start_date: 2013-01-01T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FT/7J/Z9/FT7J-Z925.nc:
+  end_date: 2016-01-01T06:00:00 UTC
+  resolution: daily
+  start_date: 1993-01-01T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GA/N6/TM/GAN6-TMPE.nc:
+  end_date: 2012-01-01T03:00:00 UTC
+  resolution: daily
+  start_date: 2009-01-01T03:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GF/HM/GQ/GFHM-GQFV.nc:
+  end_date: 1992-12-02T08:00:00 UTC
+  resolution: daily
+  start_date: 1992-12-01T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GK/BC/4W/GKBC-4WTU.nc:
+  end_date: 1996-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 1993-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GR/AV/7H/GRAV-7H2Z.nc:
+  end_date: 2020-12-31T03:00:00 UTC
+  resolution: daily
+  start_date: 2012-01-01T03:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H6/N5/XW/H6N5-XWR2.nc:
+  end_date: 2002-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2001-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HJ/RS/UY/HJRS-UY6R.nc:
+  end_date: 2016-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2014-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/J3/TG/ZP/J3TG-ZP4R.nc:
+  end_date: 2008-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2007-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - hydrochloric_acid
+  - hydrochloric_acid_qc
+  - hydrochloric_acid_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/J5/58/NH/J558-NH6Q.nc:
+  end_date: 2007-02-02T15:27:00 UTC
+  resolution: hourly
+  start_date: 2006-06-08T08:10:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JK/YX/9H/JKYX-9H6N.nc:
+  end_date: 2016-01-01T06:00:00 UTC
+  resolution: daily
+  start_date: 2014-01-01T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JZ/H5/P4/JZH5-P4Z2.nc:
+  end_date: 1997-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 1995-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/K2/UM/NQ/K2UM-NQ2S.nc:
+  end_date: 1996-01-01T06:00:00 UTC
+  resolution: daily
+  start_date: 1995-01-01T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KQ/DM/MB/KQDM-MBTX.nc:
+  end_date: 2016-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/M4/5Y/CZ/M45Y-CZB8.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MH/PY/AX/MHPY-AXR7.nc:
+  end_date: 1996-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 1995-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MY/CK/94/MYCK-94QG.nc:
+  end_date: 2016-01-04T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2014-06-09T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NF/MZ/YC/NFMZ-YCEP.nc:
+  end_date: 2010-03-25T07:00:00 UTC
+  resolution: daily
+  start_date: 2010-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NX/ER/T3/NXER-T3KA.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2018-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PB/2F/FV/PB2F-FV4T.nc:
+  end_date: 2020-12-30T11:40:00 UTC
+  resolution: monthly
+  start_date: 2013-01-02T10:30:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PJ/GV/HE/PJGV-HEKD.nc:
+  end_date: 1995-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 1994-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - nitrogen_dioxide
+  - nitrogen_dioxide_qc
+  - nitrogen_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q4/3K/YD/Q43K-YDWF.nc:
+  end_date: 2022-01-26T10:00:00 UTC
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  start_date: 2014-01-09T10:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RJ/9Y/DQ/RJ9Y-DQ8W.nc:
+  end_date: 1996-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 1995-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/S8/RR/84/S8RR-843M.nc:
+  end_date: 2020-01-01T08:00:00 UTC
+  resolution: daily
+  start_date: 2019-01-01T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SB/CD/BY/SBCD-BY25.nc:
+  end_date: 2020-12-30T10:05:00 UTC
+  resolution: monthly
+  start_date: 2013-01-01T09:40:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/T2/4H/B2/T24H-B26R.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - hydrochloric_acid
+  - hydrochloric_acid_qc
+  - hydrochloric_acid_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - nitrous_acid
+  - nitrous_acid_qc
+  - nitrous_acid_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TD/M2/WV/TDM2-WVRJ.nc:
+  end_date: 2002-01-01T06:00:00 UTC
+  resolution: daily
+  start_date: 1993-01-01T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TP/BS/8U/TPBS-8UKE.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2016-01-01T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TS/K9/AT/TSK9-AT93.nc:
+  end_date: 2021-01-06T11:30:00 UTC
+  resolution: monthly
+  start_date: 2013-01-09T10:10:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TT/TA/Y7/TTTA-Y746.nc:
+  end_date: 2002-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2001-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UH/U8/HK/UHU8-HKMD.nc:
+  end_date: 2019-01-01T09:00:00 UTC
+  resolution: daily
+  start_date: 2013-01-01T09:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UQ/A9/HQ/UQA9-HQHT.nc:
+  end_date: 2002-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2001-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UV/87/TB/UV87-TB2P.nc:
+  end_date: 2021-01-01T08:00:00 UTC
+  resolution: daily
+  start_date: 2011-01-01T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VN/XG/HX/VNXG-HX59.nc:
+  end_date: 2021-01-01T08:00:00 UTC
+  resolution: daily
+  start_date: 2013-01-01T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VQ/N4/VC/VQN4-VCVC.nc:
+  end_date: 2016-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2014-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WU/FR/YV/WUFR-YVQZ.nc:
+  end_date: 2008-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2007-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/X3/RS/G2/X3RS-G2CR.nc:
+  end_date: 2016-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2014-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XJ/5K/B3/XJ5K-B3N8.nc:
+  end_date: 1994-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 1989-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XN/K4/T5/XNK4-T5J4.nc:
+  end_date: 2002-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2001-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XW/D3/DM/XWD3-DM24.nc:
+  end_date: 2007-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2005-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XW/UD/SS/XWUD-SSMY.nc:
+  end_date: 2002-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2001-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YD/4A/HZ/YD4A-HZ7E.nc:
+  end_date: 1988-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 1986-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZX/TY/M8/ZXTY-M8M2.nc:
+  end_date: 2010-01-01T05:00:00 UTC
+  resolution: Unrecognised (P0000-00-03T00:00:00)
+  start_date: 2009-01-01T05:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
