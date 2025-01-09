@@ -33,10 +33,10 @@ from .statistics import (calculate_statistic, generate_colourbar, generate_colou
                          get_fairmode_data, get_selected_station_data, get_z_statistic_info)
 from .writing import export_configuration, export_data_npz, export_netcdf
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-fairmode_settings = yaml.safe_load(open(os.path.join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
+fairmode_settings = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
 
 # do not print deprecated warnings
 import warnings
@@ -81,11 +81,12 @@ class Interactive:
         # check for self defined plot characteristics file
         if self.plot_characteristics_filename == '':
             if self.tests:
-                path = 'settings/plot_characteristics_tests.yaml'
+                mode = 'tests'
             else:
-                path = 'settings/plot_characteristics_interactive.yaml'
-            self.plot_characteristics_filename = join(PROVIDENTIA_ROOT, path)
-        self.plot_characteristics_templates = yaml.safe_load(open(self.plot_characteristics_filename))
+                mode = 'interactive'
+            self.plot_characteristics_filename = join(PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')
+        plot_characteristics = yaml.safe_load(open(self.plot_characteristics_filename))
+        self.plot_characteristics_templates = expand_plot_characteristics(plot_characteristics, mode)
 
         # initialise Plot class
         self.plot = Plot(read_instance=self, canvas_instance=self)
@@ -311,7 +312,7 @@ class Interactive:
 
         # get zstat for required plots
         base_plot_type_split = base_plot_type.split('-')
-        if (len(base_plot_type_split) > 1) & (base_plot_type not in ['periodic-violin', 'fairmode-target']):
+        if (len(base_plot_type_split) > 1) & (base_plot_type not in ['periodic-violin', 'fairmode-target','fairmode-statsummary']):
             base_plot_type = base_plot_type_split[0]
             zstat = base_plot_type_split[1]
         else:
@@ -390,7 +391,7 @@ class Interactive:
             return
         
         # do not make FAIRMODE target plot if species not in list or resolution not hourly
-        if base_plot_type == 'fairmode-target':
+        if base_plot_type in ['fairmode-target','fairmode-statsummary']:
             if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
                 print(f'Warning: Fairmode target plot cannot be created for {speci}.')
                 return
@@ -450,6 +451,17 @@ class Interactive:
             reference_stddev = 7.5
             ghelper = get_taylor_diagram_ghelper(reference_stddev, self.plot_characteristics[plot_type])
             ax = fig.add_subplot(111, axes_class=fa.FloatingAxes, grid_helper=ghelper)
+        elif base_plot_type == "fairmode-statsummary":
+            # get current species
+            speci = networkspeci.split('|')[1]
+
+            # get number of rows and columns
+            ncols = 4
+            nrows = 8 if speci in ["sconco3", "sconcno2", "pm10"] else 7
+
+            # create gridspec and add it to a list
+            gs = gridspec.GridSpec(nrows, ncols, **self.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
+            ax = [fig.add_subplot(gs[i, j]) for i in range(nrows) for j in range(ncols)]
         else:
             ax = fig.add_subplot(111)
 
@@ -471,12 +483,11 @@ class Interactive:
         # adjust margings and subplot spacing if defined
         if 'subplots_adjust' in self.plot_characteristics[plot_type]:
             fig.subplots_adjust(**self.plot_characteristics[plot_type]['subplots_adjust'])
-
         # get plotting function
         if base_plot_type == 'statsummary':
             func = getattr(self.plot, 'make_table')
-        elif base_plot_type == 'fairmode-target':
-            func = getattr(self.plot, 'make_fairmode_target')
+        elif base_plot_type in ['fairmode-target', 'fairmode-statsummary']:
+            func = getattr(self.plot, 'make_{}'.format(base_plot_type.replace('-','_')))
         elif base_plot_type != 'legend':
             func = getattr(self.plot, 'make_{}'.format(base_plot_type.split('-')[0]))
          
@@ -689,9 +700,7 @@ class Interactive:
         elif n_stations == 0:
             print('No valid stations for {} in {} subsection. Not making {} plot'.format(networkspeci, self.subsection, plot_type))
             return
-            
-        # set title, xlabel and ylabel for plots
-
+        
         # set xlabel / ylabel
         if base_plot_type == 'periodic' or ((base_plot_type == 'timeseries') 
                                             and (chunk_stat is not None) 
@@ -764,7 +773,7 @@ class Interactive:
                         else:
                             title = '{} stations'.format(n_stations)
 
-                    if base_plot_type == 'fairmode-target':
+                    if base_plot_type in ['fairmode-target','fairmode-statsummary']:
                         speci = networkspeci.split('|')[1]
                         title += '\n{}'.format(fairmode_settings[speci]['title'])
 
@@ -789,7 +798,7 @@ class Interactive:
         if base_plot_type == 'scatter':
             harmonise_xy_lims_paradigm(self, self, relevant_ax, base_plot_type, 
                                         self.plot_characteristics[plot_type], plot_options, relim=True)
-        elif base_plot_type not in ['legend', 'metadata', 'map', 'taylor', 'fairmode-target']:
+        elif base_plot_type not in ['legend', 'metadata', 'map', 'taylor', 'fairmode-target', 'fairmode-statsummary']:
             harmonise_xy_lims_paradigm(self, self, relevant_ax, base_plot_type, 
                                         self.plot_characteristics[plot_type], plot_options, relim=True, 
                                         autoscale=True)
@@ -813,7 +822,7 @@ class Interactive:
                         try:
                             ax_to_plot = self.plot_characteristics[plot_type]['legend']['handles']['ax']
                         except:
-                            print("Warning: axis to plot legend on not defined for plot type in plot_characteristics_interactive.yaml, or passed via 'format' argument.\nTaking first available axis.")
+                            print("Warning: axis to plot legend on not defined for plot type in plot_characteristics.yaml, or passed via 'format' argument.\nTaking first available axis.")
                             ax_to_plot = self.relevant_temporal_resolutions[0]
                         if ax_to_plot not in self.relevant_temporal_resolutions:
                             print("Warning: defined axis to plot legend on not available for data resolution of read data.\nInstead, taking first available axis.")
@@ -822,6 +831,8 @@ class Interactive:
                     else:
                         if base_plot_type == 'fairmode-target':
                             print("Warning: Data labels legend cannot be plotted, create single legend using make_plot function.")
+                        elif base_plot_type == 'fairmode-statsummary':
+                            relevant_ax[3].legend(**legend_handles)
                         else:
                             relevant_ax.legend(**legend_handles)
 
@@ -892,7 +903,7 @@ class Interactive:
         elif 'legend' in self.plot_characteristics[plot_type]:
             legend_characteristics = self.plot_characteristics[plot_type]['legend']
         else:
-            print("Warning: 'legend' not defined for plot type in plot_characteristics_interactive.yaml")
+            print("Warning: 'legend' not defined for plot type in plot_characteristics.yaml")
             return
 
         legend_handles = self.plot.make_legend_handles(legend_characteristics, data_labels=data_labels, set_obs=set_obs)

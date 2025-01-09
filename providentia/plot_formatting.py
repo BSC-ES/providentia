@@ -423,6 +423,8 @@ def set_axis_title(read_instance, relevant_axis, title, plot_characteristics):
             if relevant_temporal_resolution in read_instance.relevant_temporal_resolutions:
                 axs_to_set_title.append(sub_ax)
                 break
+    elif isinstance(relevant_axis, list):
+        axs_to_set_title.append(relevant_axis[0])
     else:
         axs_to_set_title.append(relevant_axis)
 
@@ -626,6 +628,9 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
             if relevant_temporal_resolution in relevant_temporal_resolutions:
                 axs_to_format.append(sub_ax)
                 temporal_resolutions_per_ax.append(relevant_temporal_resolution)
+    elif isinstance(ax, list):
+        axs_to_format = ax
+        temporal_resolutions_per_ax = [""] * len(ax)
     else:
         axs_to_format.append(ax)
         temporal_resolutions_per_ax.append('')

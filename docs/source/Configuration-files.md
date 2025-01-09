@@ -86,10 +86,13 @@ It is **mandatory** to define sections to launch Providentia. Their names must b
 | observations_data_label | ✗ | Alias for observational data |
 | remove_extreme_stations | ✗ | Type of extreme stations removal, from the options given in `remove_extreme_stations.yaml`. |
 | resampling_resolution | ✗ | Resolution you want to resample your data to. Options: `hourly`, `daily`, `monthly`, `annual`.|
+| forecast | ✗ | Indicates if data comes from forecast, this affects how the timesteps are taken in the interpolation. |
+| forecast_day | ✗ | Day of the model forecast to analyse. |
+| interp_multiprocessing | ✗ | Use multiprocessing instead of greasy to interpolate in HPC machines. |
   
 Defining a list of experiments is optional since the user might only want to check the observations data.
 
-In the offline version, there will be a report per section. In the dashboard, you will only be able to load one section or subsection at a time.
+In the reports, a report will be created per section. In the dashboard and using Providentia as a library, you will only be able to load one section or subsection at a time.
 
 #### Use of non-GHOST networks
 

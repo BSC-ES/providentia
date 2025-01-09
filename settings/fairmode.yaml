@@ -6,6 +6,7 @@
     "percentile": 92.9,
     "beta": 2,
     "coverage": 75,
+    "exc_threshold": 60.12,
     "title": "Surface ozone 8h moving average daily maximum"
   },
   "sconcno2": {
@@ -15,6 +16,7 @@
     "percentile": 99.8,
     "beta": 2,
     "coverage": 75,
+    "exc_threshold": 104.55,
     "title": "Surface nitrogen dioxide hourly mean"
   },
   "pm2p5": {
@@ -33,6 +35,7 @@
     "percentile": 90.1,
     "beta": 2,
     "coverage": 75,
+    "exc_threshold": 50,
     "title": "Surface PM10 aerosol daily mean"
   }
 }

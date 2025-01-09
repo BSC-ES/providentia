@@ -857,14 +857,30 @@ class SubmitInterpolation(object):
         arguments_list = commands.strip().split()
         result = subprocess.run(arguments_list, capture_output=True, text=True)
         if result.returncode != 0:
-            print(f"Error: {result.stderr}")
+            error = result.stderr
+            if error == '':
+                error = 'Unknown error'
+            print(f"Error in submission using the following args {result.args[3:-1]}: {error}")
 
     def submit_job_multiprocessing(self):
+        
+        # if n_cpus hasn't been defined, use 1 or half of the available CPUS to 
+        # avoid having to kill other processes locally
+        if (MACHINE == 'local') and (self.n_cpus == self.available_cpus):  
+            n_cpus = max(1, int(self.n_cpus * 0.50))
+            msg = f'Warning: Using {n_cpus} out of {self.n_cpus} available CPUs to'
+            msg += ' ensure that other processes keep running. \nIf you encounter any problems'
+            msg += ' consider reducing the number of CPUS by defining n_cpus \nin your'
+            msg += ' configuration file (e.g. n_cpus = 2).'
+        else:
+            n_cpus = self.n_cpus
+            msg = f'Using {n_cpus} CPUs.'
+        print(msg)
         
         # launch interpolation
         commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(
             self.working_directory, argument) for argument in self.arguments]
-        with multiprocessing.Pool(processes=self.n_cpus) as pool:
+        with multiprocessing.Pool(processes=n_cpus) as pool:
             pool.map(self.run_command, commands)
 
         # stop timer
