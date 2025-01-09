@@ -305,6 +305,9 @@ def get_data(files, var, actris_parameter, resolution):
             errors[file] = 'Error opening file'
             continue
 
+        # remove time duplicates if any (keep first)
+        ds = ds.sel(time=~ds['time'].to_index().duplicated())
+        
         # get lowest level if tower height is in coordinates
         if 'Tower_inlet_height' in list(ds.coords):
             ds = ds.sel(Tower_inlet_height=min(ds.Tower_inlet_height.values), drop=True)
