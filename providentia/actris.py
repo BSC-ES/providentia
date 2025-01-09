@@ -353,6 +353,17 @@ def get_data(files, var, actris_parameter, resolution):
             errors[file] = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}'
             continue
             
+        # avoid datasets that do not have defined units
+        if 'units' not in ds_var.attrs:
+            errors[file] = f'No units were defined'
+            continue
+
+        # avoid datasets that do not have the same units as in variable mapping
+        if ds_var.attrs['units'] != variable_mapping[actris_parameter]['units']:
+            errors[file] = f"Units {ds_var.attrs['units']} do not match those in variable mapping "
+            errors[file] += f"dictionary ({variable_mapping[actris_parameter]['units']})"
+            continue
+
         # save metadata
         for ghost_key, ebas_key in metadata_dict.items():
             # create key if it does not exist
