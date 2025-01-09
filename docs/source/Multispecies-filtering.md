@@ -10,7 +10,7 @@ If we take a look at the timeseries for one station, we can see what this actual
 
 It can be observed that there are less data points for the AOD after the filtering is applied and the removal of those happens when the Angstrom exponent is higher than 0.6.
 
-This can easily be done by using the `MULTI` menu in the dashboard or by defining the `filter_species` variable in our configuration files. The equivalent of this in the offline reports:
+This can easily be done by using the `MULTI` menu in the dashboard or by defining the `filter_species` variable in our configuration files. The equivalent of this in the reports:
 
 ```
 [All]
