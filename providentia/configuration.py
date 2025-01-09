@@ -31,6 +31,8 @@ if MACHINE not in ['nord3v2', 'mn5']:
     ip = socket.gethostbyname(socket.gethostname())
     if "bscearth" in hostname:
         MACHINE = "workstation"
+    elif "transfer" in hostname:
+        MACHINE = "storage5"
     elif "bscesdust02.bsc.es" in hostname:
         MACHINE = "dust"
     elif ip == "84.88.185.48":
@@ -712,7 +714,7 @@ class ProvConfiguration:
         # TODO Check if i can only import one time
         from warnings_prv import show_message
 
-        """ Check individual experiment and get list of options."""
+        """ Check individual experiment and get list of options. """
         # split full experiment
         experiment, domain, ensemble_option = full_experiment.split('-')
         
@@ -771,36 +773,47 @@ class ProvConfiguration:
             return True, experiment
         
         # search if the experiment id is in the interp_experiments file
+        # initialize experiment search variables
         experiment_exists = False
-        
-        # if we are doing the interpolation from the local machine, get directory from data_paths
-        if MACHINE == 'local' and self.read_instance.interpolation:
-            # get the path to the non interpolated experiments
-            exp_to_interp_root = data_paths['local']['exp_to_interp_root']
-            exp_to_interp_root = os.path.expanduser(exp_to_interp_root[0])+exp_to_interp_root[1:]
-            exp_to_interp_path = join(exp_to_interp_root, experiment)
-            if os.path.exists(exp_to_interp_path):
-                experiment_exists = True
-        else:
+        msg = ""
+
+        # for HPC machines, search in interp_experiments
+        # if it's local interpolation, don't enter
+        if not (self.read_instance.machine == "local" and self.read_instance.interpolation is True):
             for experiment_type, experiment_dict in interp_experiments.items():
                 if experiment in experiment_dict["experiments"]:
                     experiment_exists = True
                     break
-        
-        # if experiment id is not defined, exit
-        if not experiment_exists:
-            if MACHINE == 'local' and self.read_instance.interpolation:
-                msg = f"Cannot find the experiment ID '{experiment}' in '{exp_to_interp_root}'."
+            
+            msg += f"Cannot find the experiment ID '{experiment}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
+
+        # get directory from data_paths if it doesn't exists in the interp_experiments file 
+        # if executed from the hpc machines and want to do a download, don't enter
+        if experiment_exists is False and not (self.read_instance.machine != "local" and self.read_instance.download is True):
+            # get the path to the non interpolated experiments
+            # in the current machine if it is an intepolation
+            if self.read_instance.interpolation is True:
+                exp_to_interp_path = join(self.read_instance.exp_to_interp_root, experiment)
+                if os.path.exists(exp_to_interp_path):
+                    experiment_exists = True
+            # in the remote machine if it is a local download
             else:
-                msg = f"Cannot find the experiment ID '{experiment}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file."
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-        else:
-            # append experiment name in local since we do not differentiate between types
-            # and we won't use this variable to get the paths
-            if MACHINE == 'local' and self.read_instance.interpolation:
-                self.read_instance.experiment_types.append(experiment)
-            else:
-                self.read_instance.experiment_types.append(experiment_type)
+                # connect to the remote machine
+                self.read_instance.connect()        
+                # get all possible experiments
+                exp_to_interp_path = join(self.read_instance.exp_to_interp_remote_path,experiment,domain)
+                try:
+                    self.read_instance.sftp.stat(exp_to_interp_path)
+                    experiment_exists = True
+                except FileNotFoundError:
+                    pass     
+            
+            msg += f"Cannot find the {experiment} experiment with the {domain} domain in '{self.read_instance.exp_to_interp_root}'."
+
+        # if experiment does not exist, exit
+        # supressed warning deactivation
+        if experiment_exists is False:
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
 
         return experiment_exists, [full_experiment]
     
@@ -885,7 +898,7 @@ class ProvConfiguration:
           
         # check have network information, 
         # if offline, throw message, stating are using default instead
-        # in download mode is allowed to not have network, so continue
+        # in download mode of non interpolated experiments is allowed to not have network, so continue
         if not self.read_instance.network and not (self.read_instance.download and not self.read_instance.interpolated):
             # default = ['GHOST']
             if self.read_instance.interpolation:
@@ -974,7 +987,7 @@ class ProvConfiguration:
                         msg = "Start date (start_date) was defined as YYYYMMDD, changing it to YYYYMM. Using '{}'.".format(self.read_instance.start_date)
                         show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     else:
-                        error = "Format of Start date (start_date) not correct, please change it to YYYYMM."
+                        error = "Error: Format of Start date (start_date) not correct, please change it to YYYYMM."
                         sys.exit(error)
             else:
                 if len_start_date != 8:
@@ -983,7 +996,7 @@ class ProvConfiguration:
                         msg = "Start date (start_date) was defined as YYYYMM, changing it to YYYYMMDD. Using '{}'.".format(self.read_instance.start_date)
                         show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     else:
-                        error = "The format of Start date (start_date) is not correct, please change it to YYYYMMDD."
+                        error = "Error: The format of Start date (start_date) is not correct, please change it to YYYYMMDD."
                         sys.exit(error)
 
         # check end_date  format, TODO START DATE IS DIFFERENT IN INTERPOLATION (check in the refactoring)
@@ -1005,7 +1018,7 @@ class ProvConfiguration:
                         msg = "End Date (end_date) was defined as YYYYMMDD, changing it to YYYYMM. Using '{}'.".format(self.read_instance.end_date)
                         show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     else:
-                        error = "Format of End Date (end_date) not correct, please change it to YYYYMM."
+                        error = "Error: Format of End Date (end_date) not correct, please change it to YYYYMM."
                         sys.exit(error)
             else:
                 if len_end_date != 8:
@@ -1014,7 +1027,7 @@ class ProvConfiguration:
                         msg = "End Date (end_date) was defined as YYYYMM, changing it to YYYYMMDD. Using '{}'.".format(self.read_instance.end_date)
                         show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     else:
-                        error = "The format of End Date (end_date) is not correct, please change it to YYYYMMDD."
+                        error = "Error: The format of End Date (end_date) is not correct, please change it to YYYYMMDD."
                         sys.exit(error)
 
         # check have interp_n_neighbours information, TODO ONLY FOR INTERPOLATION
@@ -1034,8 +1047,8 @@ class ProvConfiguration:
 
         # make sure there are experiments in interpolation
         if self.read_instance.interpolation and (len(self.read_instance.experiments) == 0):
-            msg = 'No experiments were provided in the configuration file.'
-            sys.exit("Error: " + msg)
+            error = 'Error: No experiments were provided in the configuration file.'
+            sys.exit(error)
 
         # get domain, ensemble options, experiment ids and flag to get the default values of these variables
         self.decompose_experiments()
@@ -1077,6 +1090,11 @@ class ProvConfiguration:
                 msg = "Experiment alias could not be set."
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
+        # before checking the experiment check that the remote download has the interpolated tag as False, if not exit
+        if self.read_instance.download and MACHINE in ["storage5","nord3v2"] and self.read_instance.interpolated is True:
+            error = F"Error: Nothing from the {self.read_instance.section} section was copied to gpfs, change the interpolated field to 'False'."
+            exit(error)
+
         # get correct check experiment function
         # TODO do it using heritage
         # if the current mode is interpolation or the experiment i want to download is not interpolated
@@ -1092,7 +1110,6 @@ class ProvConfiguration:
         final_experiments = []
         correct_experiments = {}
 
-        
         # TODO keep the check only in download or configuration
         # in case of zenodo download don't even check
         if not (self.read_instance.download and self.read_instance.bsc_download_choice == "n"): 
