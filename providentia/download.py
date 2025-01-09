@@ -222,7 +222,7 @@ class ProvidentiaDownload(object):
 
                     # get the files to be downloaded, check if they files were already downloaded and download if not
                     # download from the remote machine
-                    elif self.bsc_download_choice == 'y':
+                    if self.bsc_download_choice == 'y':
                         # GHOST
                         if check_for_ghost(network):
                             initial_check_nc_files = self.download_ghost_network_sftp(network, initial_check=True)
