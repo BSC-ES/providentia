@@ -1371,7 +1371,7 @@ class ProvidentiaDownload(object):
             
             # check if variable name is available
             if var not in parameters_dict.keys():
-                print(f'Data for {var} cannot be downloaded.')
+                print(f'Data for {var} cannot be downloaded')
                 continue
             else:
                 actris_parameter = parameters_dict[var]
@@ -1444,9 +1444,6 @@ class ProvidentiaDownload(object):
                                             combine_attrs='drop_conflicts')
                 except Exception as error:
                     print(f'Error: Datasets could not be combined - {error}')
-                    if 'time' in str(error):
-                        for item in combined_ds_list:
-                            print(item.time.values[0], item.time.values[1])
                     continue
                 
                 # add metadata
