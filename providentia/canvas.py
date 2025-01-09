@@ -2200,14 +2200,13 @@ class MPLCanvas(FigureCanvas):
                                                         }
 
         # METADATA PLOT SETTINGS MENU #
-        # TODO: Uncomment this when we add options to metadata plot
         # create metadata settings menu
-        # self.metadata_menu = SettingsMenu(plot_type='metadata', canvas_instance=self)
-        # self.metadata_elements = self.metadata_menu.get_elements()
+        self.metadata_menu = SettingsMenu(plot_type='metadata', canvas_instance=self)
+        self.metadata_elements = self.metadata_menu.get_elements()
 
-        # # get metadata interactive dictionary
-        # self.interactive_elements['metadata'] = {'hidden': True
-        #                                          }
+        # get metadata interactive dictionary
+        self.interactive_elements['metadata'] = {'hidden': True
+                                                 }
 
         # DISTRIBUTION PLOT SETTINGS MENU #
         # create distribution settings menu
