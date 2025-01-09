@@ -221,8 +221,8 @@ fi
 
 # if download mode is executed from the remote machines, exit
 if $download; then
-    if [[ "${BSC_MACHINE}" == "mn5" || "${BSC_MACHINE}" == "nord3v2" || "${BSC_MACHINE}" == "84.88.185.48" ]]; then
-        echo "Download mode only available in local. Exiting..."
+    if [[ "${BSC_MACHINE}" == "mn5" || "${BSC_MACHINE}" == "84.88.185.48" ]]; then
+        echo "Download mode not available in $BSC_MACHINE. Exiting..."
         exit 1
     fi
 fi
@@ -334,6 +334,23 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
                 eval "${salloc_command} ${constraint_option} ${queue_option} srun ${python_command}"
             fi
         fi
+    fi
+
+# storage5
+elif [[ "${BSC_MACHINE}" == "stg" ]]; then
+    echo "INFO: Running on the storage5..."
+    # load modules from conda environment
+    active_env=false
+    eval "$(conda shell.bash hook)"
+    if { conda env list | grep 'providentia-env_v2.4.0'; } >/dev/null 2>&1; then 
+        echo "Activating environment..."
+        conda activate providentia-env_v2.4.0
+        active_env=true
+    fi
+    if $download; then
+        eval "${python_command}"
+    else
+        echo "Mode not available in storage5."
     fi
 
 # Hub

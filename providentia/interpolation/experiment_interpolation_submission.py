@@ -12,8 +12,6 @@ import multiprocessing
 
 from providentia.auxiliar import CURRENT_PATH, join
 
-MACHINE = os.environ.get('BSC_MACHINE', 'local')
-
 # get current path and providentia root path
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
@@ -112,7 +110,7 @@ class SubmitInterpolation(object):
                         print(f" - {exp}")
 
         # define the QOS (Quality of Service) used to manage jobs on the SLURM system
-        if MACHINE == 'mn5':
+        if self.machine == 'mn5':
             self.qos = 'gp_bsces'
         else:
             self.qos = 'bsc_es'
@@ -134,14 +132,11 @@ class SubmitInterpolation(object):
         last_arguments = None
 
         # iterate through desired experiment IDs and its types
-        for (exp_dom_ens, alias), experiment_type in zip(self.experiments.items(), self.experiment_types):
+        for exp_dom_ens, alias in self.experiments.items():
             
             experiment_to_process, grid_type, ensemble_option = exp_dom_ens.split("-") 
 
             print('\nEXPERIMENT: {0}'.format(alias))
-
-            # create arguments list
-            exp_arguments = []
 
             # initialise files lists
             obs_files = []
@@ -149,33 +144,37 @@ class SubmitInterpolation(object):
             obs_files_dates = []
             exp_files_dates = []
 
+            # initialize experiment search variables
             exp_dir = None
-            # if local machine, get directory from data_paths
-            if MACHINE == 'local':  
+            msg = ""
+
+            # for HPC machines, search in interp_experiments
+            if self.machine != "local":
+                # get experiment type and specific directories
+                for experiment_type, experiment_dict in interp_experiments.items():
+                    if experiment_to_process in experiment_dict["experiments"]:
+                        # take first functional directory 
+                        for temp_exp_dir in experiment_dict["paths"]:
+                            temp_exp_dir = join(temp_exp_dir, experiment_to_process)
+                            if os.path.exists(temp_exp_dir):
+                                exp_dir = temp_exp_dir
+                                break
+                        break
+                
+                msg += f"The experiment '{experiment_to_process}' is in none of the experiment paths in {self.exp_to_interp_root} are available in this machine ({self.machine}). "
+
+            # if local machine or if not exp_dir, get directory from data_paths
+            if exp_dir is None: 
                 exp_to_interp_path = join(self.exp_to_interp_root, experiment_to_process)
                 if os.path.exists(exp_to_interp_path):
                     exp_dir = exp_to_interp_path
                 
-                # if none of the paths are in this current machine, break
-                if exp_dir is None:
-                    error = f"Error: None of the experiment paths in {self.exp_to_interp_root} are available in this machine ({MACHINE})."
-                    sys.exit(error)
-            # for HPC machines
-            else:
-                # get experiment type and specific directories
-                exp_dir_list = interp_experiments[experiment_type]["paths"]
-                for temp_exp_dir in exp_dir_list:
-                    if os.path.exists(join(temp_exp_dir,experiment_to_process)):
-                        exp_dir = temp_exp_dir
-                        break
+                msg += f"The experiment '{experiment_to_process}' is not in {self.exp_to_interp_root}."
 
-                # take first functional directory 
-                if exp_dir is None:
-                    error = f"Error: None of the experiment paths in {join('settings', 'interp_experiments.yaml')} are available in this machine ({MACHINE})."
-                    sys.exit(error)
-                
-                # add experiment to directory path
-                exp_dir = join(exp_dir,experiment_to_process)
+            # take first functional directory 
+            if exp_dir is None:
+                print(msg)
+                continue
 
             # get model bin edges
             r_edges, rho_bins = get_model_bin_radii(experiment_type)
@@ -514,7 +513,7 @@ class SubmitInterpolation(object):
                             msg += f'Observational dates: {obs_files_dates}\n'
             else:
                 msg = '***INTERSECTING OBSERVATIONAL AND EXPERIMENTAL DATA IS AVAILABLE FOR INTERPOLATION.***' 
-
+                msg += f'\nExperiment Data Source Path: {exp_dir}'
             print(msg)
 
             # get the arguments from the last iteration
@@ -670,7 +669,7 @@ class SubmitInterpolation(object):
         submit_file.write("#SBATCH --qos={}\n".format(self.qos))
         # submit_file.write("#SBATCH --output=/dev/null\n") # decomment when debugging
         # submit_file.write("#SBATCH --error=/dev/null\n")
-        if MACHINE == 'mn5': # TODO when checking if debug works check this
+        if self.machine == 'mn5': # TODO when checking if debug works check this
             submit_file.write("#SBATCH --account=bsc32\n")  
             submit_file.write("#SBATCH --ntasks-per-node={}\n".format(n_simultaneous_tasks))
             submit_file.write("#SBATCH --cpus-per-task=1\n")
@@ -750,7 +749,7 @@ class SubmitInterpolation(object):
         submit_complete = False
         while submit_complete == False:
 
-            if MACHINE == "nord3":
+            if self.machine == "nord3":
                 submit_process = subprocess.Popen(['bsub'], stdout=subprocess.PIPE,
                                               stdin=open('{}/{}'.format(self.submit_dir, self.job_fname), 'r'))
             else:
@@ -775,7 +774,7 @@ class SubmitInterpolation(object):
         job_entered = False 
 
         while all_tasks_finished == False:
-            if MACHINE == "nord3":
+            if self.machine == "nord3":
                 # cmd = ['bjobs', '-noheader', '-J', 'PRVI_{}[1]'.format(self.slurm_job_id)]
                 cmd = ['bjobs', '-noheader']
             else:
@@ -785,10 +784,10 @@ class SubmitInterpolation(object):
             n_jobs_in_queue = len(squeue_status.split('\n')[:-1])
             # if number of jobs in queue > 0, then sleep for 10
             # seconds and then check again how many jobs there are in queue
-            if (MACHINE in ('nord3v2', 'amd', 'mn5')) and (n_jobs_in_queue > 0):
+            if (self.machine in ('nord3v2', 'amd', 'mn5')) and (n_jobs_in_queue > 0):
                 time.sleep(10)
                 continue
-            elif MACHINE == 'nord3':
+            elif self.machine == 'nord3':
                 # has submitted jobs entered the queue?
                 if self.slurm_job_id[1:] in squeue_status.split('\n')[1:][0]:
                     job_entered = True
@@ -944,11 +943,11 @@ def main(**kwargs):
 
     # submit interpolation jobs
     if SI.interp_multiprocessing:
-        print('Using multiprocessing to manage the job submission.')
+        print('\nUsing multiprocessing to manage the job submission.')
         SI.submit_job_multiprocessing()
     else:
         if is_greasy_installed:
-            print('Using Greasy to manage the job submission.')
+            print('\nUsing Greasy to manage the job submission.')
             # create submission script according to machine
             if SI.machine == "nord3":
                 SI.create_lsf_submission_script()
