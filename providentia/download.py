@@ -58,7 +58,8 @@ def sighandler(*unused):
     # delete the las downloaded nc file to avoid corrupted files
     if hasattr(download,'latest_nc_file_path'):
         print(f"\nDeleting last file to avoid corruption: {download.latest_nc_file_path}...")
-        os.remove(download.latest_nc_file_path)
+        if os.path.isfile(download.latest_nc_file_path):
+            os.remove(download.latest_nc_file_path)
 
     # remove the output files frojm dtrsync in case it was a download from storage5
     if download.machine == "storage5":
@@ -1252,8 +1253,8 @@ class ProvidentiaDownload(object):
                         number_of_formats_dict = {format: formats_list.count(format) for format in set(formats_list)}
                         format = max(number_of_formats_dict, key=number_of_formats_dict.get)
                         
-                        # filter and get only the files that follow the format
-                        nc_files = list(filter(lambda x:(x.count("-"),x.count("_")) == format,nc_files))
+                        # filter and get only the files that follow the format (number of dashes and hyphens and end of file)
+                        nc_files = list(filter(lambda x:(x.count("-"),x.count("_")) == format and x.endswith(".nc"),nc_files))
                         
                         # example: od550du_2019040212.nc (0,1)
                         if format == (0,1):
@@ -1483,8 +1484,8 @@ class ProvidentiaDownload(object):
                         number_of_formats_dict = {format: formats_list.count(format) for format in set(formats_list)}
                         format = max(number_of_formats_dict, key=number_of_formats_dict.get)
                         
-                        # filter and get only the files that follow the format
-                        nc_files = list(filter(lambda x:(x.count("-"),x.count("_")) == format,nc_files))
+                        # filter and get only the files that follow the format (number of dashes and hyphens and end of file)
+                        nc_files = list(filter(lambda x:(x.count("-"),x.count("_")) == format and x.endswith(".nc"), nc_files))
                         
                         # example: od550du_2019040212.nc (0,1)
                         if format == (0,1):
@@ -1644,12 +1645,12 @@ class ProvidentiaDownload(object):
             self.network = self.nonghost_available_networks
     
     def get_all_experiments(self):
-        # check if ssh exists and check if still active, connect if not
-        if (self.ssh is None) or (self.ssh.get_transport().is_active()):
-            self.connect()  
-
         # download all interpolated experiments
         if self.interpolated is True:
+            # check if ssh exists and check if still active, connect if not
+            if (self.ssh is None) or (self.ssh.get_transport().is_active()):
+                self.connect()  
+
             # get directory content and format it as the experiments       
             experiment_list = self.sftp.listdir(join(self.exp_remote_path,self.ghost_version))
         # download all non interpolated experiments
