@@ -12,7 +12,6 @@ import pandas as pd
 import xarray as xr
 
 from .configuration import write_conf
-from .dashboard_elements import InputDialog
 
 from providentia.auxiliar import CURRENT_PATH, join
 
@@ -36,6 +35,8 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
         :set_in_memory: booolean informing if saved data is set in memory
         :type set_in_memory: boolean
     """
+    # import function from dashboard_elements
+    from .dashboard_elements import InputDialog
 
     # ensure fname has correct extension
     if fname[-4:] != '.npz':
@@ -169,6 +170,8 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
         :type xarray: boolean
 
     """
+    # import function from dashboard_elements
+    from .dashboard_elements import InputDialog
 
     # ensure fname has correct extension
     if fname[-3:] != '.nc':

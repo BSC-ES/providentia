@@ -17,7 +17,6 @@ import xarray as xr
 
 # urlparse
 from tqdm import tqdm
-from remotezip import RemoteZip
 import tarfile
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -50,15 +49,24 @@ def sighandler(*unused):
     print('\nKeyboard Interrupt. Stopping execution.')
     
     # close connection, if it exists
-    if download.ssh is not None:
+    if hasattr(download, 'ssh') and download.ssh is not None:
         print("\nClosing ssh connection...")
         download.ssh.close()
-        download.sftp.close()
+        if hasattr(download, 'sftp'):
+            download.sftp.close()
 
     # delete the las downloaded nc file to avoid corrupted files
     if hasattr(download,'latest_nc_file_path'):
         print(f"\nDeleting last file to avoid corruption: {download.latest_nc_file_path}...")
         os.remove(download.latest_nc_file_path)
+
+    # remove the output files frojm dtrsync in case it was a download from storage5
+    if download.machine == "storage5":
+        time.sleep(3)
+            
+        for file in os.listdir(PROVIDENTIA_ROOT):
+            if file.startswith("dtrsync_"):
+                os.remove(join(PROVIDENTIA_ROOT,file)) 
 
     # delete temp dir if necessary
     temp_dir = join(download.ghost_root,'.temp')
@@ -71,19 +79,8 @@ def sighandler(*unused):
 
 class ProvidentiaDownload(object):
     def __init__(self, **kwargs):
-        # TODO move some of these variables to configuration.py
-        # initialise zenodo url
-        self.ghost_url = 'https://zenodo.org/records/10637450'
-
         # get providentia start time
         self.prov_start_time = time.time()
-
-        # initialise remote hostname
-        self.remote_hostname = "transfer1.bsc.es"
-
-        # in case transfer broke
-        # global REMOTE_MACHINE
-        # self.remote_hostname, REMOTE_MACHINE = "glogin4.bsc.es", "mn5" 
 
         # get ssh user and password 
         env = dotenv_values(join(PROVIDENTIA_ROOT, ".env"))
@@ -139,27 +136,37 @@ class ProvidentiaDownload(object):
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
             sys.exit(error)
 
-        # create empty directories for all the paths if they don't exist
-        for path in [self.nonghost_root,self.ghost_root,self.exp_root,self.exp_to_interp_root]:
-            if not os.path.exists(path):
-                try:
-                    os.makedirs(path)
-                except PermissionError as error:
-                    os.system(f"sudo mkdir -p {path}")
-                    os.system(f"sudo chmod o+w {path}")
-
-        # initialise type of download
-        if not self.bsc_download_choice:
-            self.confirm_bsc_download()
-
-        # initialise ssh 
-        self.ssh = None
-
-        # initialise boolean thath indicates whether remote machine changed 
-        self.switched_remote = False
-
         # variable that saves whether some experiments/observations were downloaded before
         self.overwritten_files_flag = False
+
+        # initialize the necessary things in local
+        if self.machine == "local":
+
+            # TODO move some of these variables to configuration.py
+            # initialise zenodo url
+            self.ghost_url = 'https://zenodo.org/records/10637450'
+
+            # initialise remote hostname
+            self.remote_hostname = "transfer1.bsc.es"
+
+            # create empty directories for all the paths if they don't exist
+            for path in [self.nonghost_root,self.ghost_root,self.exp_root,self.exp_to_interp_root]:
+                if not os.path.exists(path):
+                    try:
+                        os.makedirs(path)
+                    except PermissionError as error:
+                        os.system(f"sudo mkdir -p {path}")
+                        os.system(f"sudo chmod o+w {path}")
+
+            # initialise type of download
+            if not self.bsc_download_choice:
+                self.confirm_bsc_download()
+
+            # initialise ssh 
+            self.ssh = None
+
+            # initialise boolean thath indicates whether remote machine changed 
+            self.switched_remote = False
 
     def run(self):
         for section_ind, section in enumerate(self.sections):
@@ -174,97 +181,110 @@ class ProvidentiaDownload(object):
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             self.provconf.check_validity(deactivate_warning=True)
 
-            # if networks is none and is not the non interpolated mode, raise error
-            if not self.network and self.interpolated is True:
-                error = "Error: No networks were passed."
-                sys.exit(error)
-            
-            # when one of those symbols is passed, get all networks
-            if self.network == ["*"]:
-                self.get_all_networks()
-
             # from here generate control if user stopped execution
             signal.signal(signal.SIGINT, sighandler)
-
-            # networks
-            if self.network:
-                # combine all networks and species combinations to download (for network and filter species)
-                combined_networks = [(network, None) for network in self.network] + \
-                                    [(network_specie.split('|')[0], network_specie.split('|')[1]) for network_specie in self.filter_species]
+            
+            # only the local download iterates through the networks
+            if self.machine in "local":
+                # if networks is none and is not the non interpolated mode, raise error
+                if not self.network and self.interpolated is True:
+                    error = "Error: No networks were passed."
+                    sys.exit(error)
                 
-                # save main species
-                main_species = copy.deepcopy(self.species)
-                
-                # download network observations with species and filter_species
-                for network, filter_species in combined_networks:
-                    # change species when turn of filter species
-                    if filter_species is not None:
-                        self.species = [filter_species]
+                # when one of those symbols is passed, get all networks
+                if self.network == ["*"]:
+                    self.get_all_networks()
 
-                    # get the files to be downloaded, check if they files were already downloaded and download if not
-                    # download from the remote machine
-                    elif self.bsc_download_choice == 'y':
-                        # GHOST
-                        if check_for_ghost(network):
-                            initial_check_nc_files = self.download_ghost_network_sftp(network, initial_check=True)
-                            files_to_download = self.select_files_to_download(initial_check_nc_files)
-                            if not initial_check_nc_files or files_to_download:
-                                self.download_ghost_network_sftp(network, initial_check=False, files_to_download=files_to_download)
-                        # ACTRIS
-                        elif network == 'actris/actris':
-                            error = f"Error: It is not possible to download files from the ACTRIS network from BSC machines. Set BSC_DL_CHOICE=n in .env file."
-                            sys.exit(error)
-                        # non-GHOST
-                        else:
-                            initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
-                            files_to_download = self.select_files_to_download(initial_check_nc_files)
-                            if not initial_check_nc_files or files_to_download:
-                                self.download_nonghost_network(network, initial_check=False, files_to_download=files_to_download)
-
-                    # download from the zenodo webpage
-                    elif self.bsc_download_choice == 'n':
-                        # GHOST
-                        if check_for_ghost(network):
-                            initial_check_nc_files = self.download_ghost_network_zenodo(network, initial_check=True)
-                            files_to_download = self.select_files_to_download(initial_check_nc_files)
-                            if not initial_check_nc_files or files_to_download:
-                                self.download_ghost_network_zenodo(network, initial_check=False, files_to_download=files_to_download)
-                        # ACTRIS
-                        elif network == 'actris/actris':
-                            self.download_actris_network()
-                        # non-GHOST
-                        else:
-                            error = f"Error: It is not possible to download files from the non-GHOST network {network} from the zenodo webpage."
-                            sys.exit(error)
+                # networks
+                if self.network:
+                    # combine all networks and species combinations to download (for network and filter species)
+                    combined_networks = [(network, None) for network in self.network] + \
+                                        [(network_specie.split('|')[0], network_specie.split('|')[1]) for network_specie in self.filter_species]
                     
-                    # download option invalid
-                    else:
-                        error = "Error: Download option not valid, check your .env file."
-                        sys.exit(error)
+                    # save main species
+                    main_species = copy.deepcopy(self.species)
+                    
+                    # download network observations with species and filter_species
+                    for network, filter_species in combined_networks:
+                        # change species when turn of filter species
+                        if filter_species is not None:
+                            self.species = [filter_species]
+
+                        # get the files to be downloaded, check if they files were already downloaded and download if not
+                        # download from the remote machine
+                        if self.bsc_download_choice == 'y':
+                            # GHOST
+                            if check_for_ghost(network):
+                                initial_check_nc_files = self.download_ghost_network_sftp(network, initial_check=True)
+                                files_to_download = self.select_files_to_download(initial_check_nc_files)
+                                if not initial_check_nc_files or files_to_download:
+                                    self.download_ghost_network_sftp(network, initial_check=False, files_to_download=files_to_download)
+                            # ACTRIS
+                            elif network == 'actris/actris':
+                                error = f"Error: It is not possible to download files from the ACTRIS network from BSC machines. Set BSC_DL_CHOICE=n in .env file."
+                                sys.exit(error)
+                            # non-GHOST
+                            else:
+                                initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
+                                files_to_download = self.select_files_to_download(initial_check_nc_files)
+                                if not initial_check_nc_files or files_to_download:
+                                    self.download_nonghost_network(network, initial_check=False, files_to_download=files_to_download)
+
+                        # download from the zenodo webpage
+                        elif self.bsc_download_choice == 'n':
+                            # GHOST
+                            if check_for_ghost(network):
+                                initial_check_nc_files = self.download_ghost_network_zenodo(network, initial_check=True)
+                                files_to_download = self.select_files_to_download(initial_check_nc_files)
+                                if not initial_check_nc_files or files_to_download:
+                                    self.download_ghost_network_zenodo(network, initial_check=False, files_to_download=files_to_download)
+                            # ACTRIS
+                            elif network == 'actris/actris':
+                                self.download_actris_network()
+                            # non-GHOST
+                            else:
+                                error = f"Error: It is not possible to download files from the non-GHOST network {network} from the zenodo webpage."
+                                sys.exit(error)
+                        
+                        # download option invalid
+                        else:
+                            error = "Error: Download option not valid, check your .env file."
+                            sys.exit(error)
 
                 # get orignal species back
                 self.species = main_species
 
             # when one of those symbols is passed, get all experiments
-            if self.experiments == {'*': '*'}:
+            if self.experiments == {'*' : '*'}:
                 self.get_all_experiments()
 
-            # experiment
-            # download from the remote machine
             if self.experiments:
-                if self.bsc_download_choice == 'y':
+                # remote machine experiment download
+                if self.machine in ["storage5","nord3v2"]:
                     # get function to download experiment depending on the configuration file field
-                    self.download_experiment_fun = self.download_experiment if self.interpolated is True else self.download_non_interpolated_experiment
-                    # iterate the experiments download
-                    for experiment in self.experiments.keys():
-                        initial_check_nc_files = self.download_experiment_fun(experiment, initial_check=True)
-                        files_to_download = self.select_files_to_download(initial_check_nc_files)
-                        if not initial_check_nc_files or files_to_download:
-                            self.download_experiment_fun(experiment, initial_check=False, files_to_download=files_to_download)
-                # download from the zenodo webpage
+                    download_experiment_fun = self.copy_non_interpolated_experiment
+                # local experiment download
                 else:
-                    error = f"Error: It is not possible to download experiments from the zenodo webpage."
-                    sys.exit(error)
+                    # download from the bsc machines
+                    if self.bsc_download_choice == 'y':
+                        # get function to download experiment depending on the configuration file field
+                        download_experiment_fun = self.download_experiment if self.interpolated is True else self.download_non_interpolated_experiment
+                    # download from the zenodo webpage
+                    else:
+                        error = f"Error: It is not possible to download experiments from the zenodo webpage."
+                        sys.exit(error)    
+            
+            # raise an error if there are no valid experiments                                
+            else:
+                error = "Error: No experiments available to be downloaded."
+                sys.exit(error)            
+           
+            # iterate the experiments download
+            for experiment in self.experiments.keys():
+                initial_check_nc_files = download_experiment_fun(experiment, initial_check=True)
+                files_to_download = self.select_files_to_download(initial_check_nc_files)
+                if not initial_check_nc_files or files_to_download:
+                    download_experiment_fun(experiment, initial_check=False, files_to_download=files_to_download)
 
             # remove section variables from memory
             for k in self.section_opts:
@@ -281,10 +301,11 @@ class ProvidentiaDownload(object):
         if self.overwritten_files_flag == True:
             print("\nSome experiments/observations were found but were not downloaded because the OVERWRITE option is set to 'n'.")
 
-        # close connection, if it exists
-        if self.ssh is not None:
-            self.ssh.close() 
-            self.sftp.close()
+        if self.machine == "local":
+            # close connection, if it exists
+            if self.ssh is not None:
+                self.ssh.close() 
+                self.sftp.close()
 
     def connect(self):
         # declare that we are using the remote machine
@@ -294,9 +315,13 @@ class ProvidentiaDownload(object):
         self.ghost_remote_obs_path = data_paths[REMOTE_MACHINE]["ghost_root"]
         self.nonghost_remote_obs_path = data_paths[REMOTE_MACHINE]["nonghost_root"]
         self.exp_remote_path = data_paths[REMOTE_MACHINE]["exp_root"]
+        self.exp_to_interp_remote_path = data_paths[REMOTE_MACHINE]["exp_to_interp_root"]
 
         # get public remote machine public key and add it to ssh object
         _, output = subprocess.getstatusoutput(f"ssh-keyscan -t ed25519 {self.remote_hostname}")
+
+        ed25519_key = output.split()[-1].encode()
+        key = paramiko.Ed25519Key(data=decodebytes(ed25519_key))
         
         # encode the output public key if possible
         try:
@@ -506,7 +531,7 @@ class ProvidentiaDownload(object):
 
                 #  print the species, resolution and network combinations that are going to be downloaded
                 if not initial_check:
-                    print(f"\n  - {local_dir}")
+                    print(f"\n  - {local_dir}, source: {remote_dir}")
 
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
@@ -552,9 +577,12 @@ class ProvidentiaDownload(object):
                         if initial_check:
                             initial_check_nc_files.append(local_path)
                         else:
+                            # get last downloaded file in case there was a keyboard interrupt
                             self.latest_nc_file_path = local_path
-                            remote_path = join(remote_dir,nc_file)
+
+                            # initialize the timeout and get the file
                             self.ncfile_dl_start_time = time.time()
+                            remote_path = join(remote_dir,nc_file)
                             self.sftp.get(remote_path,local_path, callback=check_time)
 
             return initial_check_nc_files
@@ -654,7 +682,7 @@ class ProvidentiaDownload(object):
 
                 #  print the species, resolution and network combinations that are going to be downloaded
                 if not initial_check:
-                    print(f"\n  - {local_dir}")
+                    print(f"\n  - {local_dir}, source: {remote_dir}")
 
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
@@ -700,14 +728,20 @@ class ProvidentiaDownload(object):
                         if initial_check:
                             initial_check_nc_files.append(local_path)
                         else:
+                            # get last downloaded file in case there was a keyboard interrupt
                             self.latest_nc_file_path = local_path
-                            remote_path = join(remote_dir,nc_file)
+
+                            # initialize the timeout and get the file
                             self.ncfile_dl_start_time = time.time()
+                            remote_path = join(remote_dir,nc_file)
                             self.sftp.get(remote_path,local_path, callback=check_time)
                        
             return initial_check_nc_files
 
     def download_ghost_network_zenodo(self, network, initial_check, files_to_download=None):
+        # import remotezip
+        from remotezip import RemoteZip
+        
         if not initial_check:
             # print current_network
             print('\n'+'-'*40)
@@ -831,7 +865,10 @@ class ProvidentiaDownload(object):
                                 if initial_check:
                                     initial_check_nc_files.append(local_path)
                                 else:
+                                    # get last downloaded file in case there was a keyboard interrupt
                                     self.latest_nc_file_path = local_path
+
+                                    # extract the file
                                     tar_file.extract(member = nc_file, path = tar_dir)
                 
                 # remove the temp directory
@@ -972,9 +1009,9 @@ class ProvidentiaDownload(object):
                 if not initial_check:
                     local_path = remote_dir.split('/',7)[-1]
                     if self.ghost_version in ["1.2", "1.3", "1.3.1"]:
-                        print(f"\n  - {join(self.exp_root,self.ghost_version,'-'.join(local_path.split('/')[1:4]),*local_path.split('/')[4:])}")
+                        print(f"\n  - {join(self.exp_root,self.ghost_version,'-'.join(local_path.split('/')[1:4]),*local_path.split('/')[4:])}, source: {remote_dir}")
                     else:
-                        print(f"\n  - {join(self.exp_root,local_path)}")
+                        print(f"\n  - {join(self.exp_root,local_path)}, source: {remote_dir}")
             
                 network = remote_dir.split('/')[-1]
                 species = remote_dir.split('/')[-2]
@@ -1027,9 +1064,12 @@ class ProvidentiaDownload(object):
                         if initial_check:
                             initial_check_nc_files.append(local_path)
                         else:
+                            # get last downloaded file in case there was a keyboard interrupt
                             self.latest_nc_file_path = local_path
-                            remote_path = join(remote_dir,nc_file)
+
+                            # initialize the timeout and get the file
                             self.ncfile_dl_start_time = time.time()
+                            remote_path = join(remote_dir,nc_file)
                             self.sftp.get(remote_path,local_path, callback=check_time) 
             
             return initial_check_nc_files
@@ -1054,48 +1094,72 @@ class ProvidentiaDownload(object):
         if ensemble_options.startswith("stat_"): 
             stat = ensemble_options.split("_",1)[-1]
 
-        # get experiment type
+        # initialise warning message and experiment exists boolean
+        msg = ""
+        experiment_exists = False
+
+        # see if the experiment is any of the interp_experiment.yaml lists
         for experiment_type, experiment_dict in interp_experiments.items():
             if exp_id in experiment_dict["experiments"]:
+                experiment_exists = True
                 break
         
-        # get experiment specific directories list
-        exp_dir_list = experiment_dict["paths"]
+        # if it is in the list, check if the paths work
+        if experiment_exists is True:
+            # get boolean to False again until the paths works
+            experiment_exists = False
 
-        # take all functional directories
-        exp_dir_functional_list = []    
-        for exp_dir in exp_dir_list:
-            # esarchive in transfer5 is located inside gpfs
-            if "/esarchive/" == exp_dir[:11]:
-                exp_dir = join("/gpfs/archive/bsc32/",exp_dir[1:])
-            # check if directory exists in the remote machine
-            try:
-                self.sftp.stat(exp_dir)
-                exp_dir_functional_list.append(exp_dir)      
-            except FileNotFoundError:
-                pass
+            # get all paths that work
+            # if there is none, show a warning
+            exp_dir_functional_list = []    
+            for exp_dir in experiment_dict["paths"]:
+                # esarchive in transfer5 is located inside gpfs
+                if "/esarchive/" == exp_dir[:11]:
+                    exp_dir = join("/gpfs/archive/bsc32/",exp_dir[1:])
+                # check if directory exists in the remote machine
+                try:
+                    self.sftp.stat(exp_dir)
+                    exp_dir_functional_list.append(exp_dir)      
+                except FileNotFoundError:
+                    pass
 
-        # if none of the paths are in this current machine, break
-        if not exp_dir_functional_list:
-            msg = f"None of the paths specified in {join('settings', 'interp_experiments.yaml')} are available on the remote machine ({REMOTE_MACHINE})."
-            show_message(self, msg, deactivate=initial_check)
-            return
-        
-        # take first functional directory  
-        remote_dir = None
-        for exp_dir in exp_dir_functional_list:
-            temp_remote_dir = join(exp_dir,exp_id,domain)
-            # check if remote experiment and domain directories exist in the remote machine
+            # if none of the paths are in this current machine, break
+            if not exp_dir_functional_list:
+                msg += f"None of the paths specified in {join('settings', 'interp_experiments.yaml')} are available on the remote machine ({REMOTE_MACHINE}). "
+            # if any path works, get the first one that has the experiment
+            else:
+                # get first functional directory  
+                for exp_dir in exp_dir_functional_list:
+                    remote_dir = join(exp_dir,exp_id,domain)
+                    # check if remote experiment and domain directories exist in the remote machine
+                    try:
+                        self.sftp.stat(remote_dir)
+                        experiment_exists = True
+                        break
+                    except FileNotFoundError:
+                        pass
+
+                # if the experiment-domain combination is not possible, show the warning
+                if experiment_exists is False:
+                    msg += f"There is no data available for the {exp_id} experiment with the {domain} domain in none of the paths specified in {join('settings', 'interp_experiments.yaml')} in the remote machine ({REMOTE_MACHINE}). "
+
+        # if experiment was not in the list, or any of the paths were available
+        # or there was no valid path experiment combination then search in the gpfs directory
+        if experiment_exists is False:
+            # get all possible experiments
+            exp_to_interp_path = join(self.exp_to_interp_remote_path,exp_id,domain)
             try:
-                self.sftp.stat(temp_remote_dir)
-                remote_dir = temp_remote_dir
-                break
+                self.sftp.stat(exp_to_interp_path)
+                remote_dir = exp_to_interp_path
+                experiment_exists = True
             except FileNotFoundError:
-                pass
+                pass 
+            
+            # add to the message if experiment was not found in the gpfs remote directory
+            msg += f"Cannot find the {exp_id} experiment with the {domain} domain in '{self.exp_to_interp_remote_path}'."    
         
-        # if the experiment-domain combination is possible, break
-        if remote_dir is None:
-            msg = f"There is no data available for the {exp_id} experiment with the {domain} domain in none of the paths specified in {join('settings', 'interp_experiments.yaml')} in the remote machine ({REMOTE_MACHINE})."
+        # if the experiment-domain combination is not possible, break
+        if experiment_exists is False:
             show_message(self, msg, deactivate=initial_check)
             return
 
@@ -1169,61 +1233,60 @@ class ProvidentiaDownload(object):
             # get all the nc files in the date range
             for remote_dir in res_spec_dir:
                 if not initial_check:
-                    local_path = remote_dir.split('/',8)[-1]
-                    print(f"\n  - {join(self.exp_to_interp_root,local_path)}")
+                    local_path = remote_dir.split('/', 6)[-1]
+                    print(f"\n  - {join(self.exp_to_interp_root,local_path)}, source: {remote_dir}")
                          
                 # get nc files
                 nc_files = self.sftp.listdir(remote_dir)
 
                 if nc_files:
-                        # if it is an ensemble member
-                        if not ensemble_options.startswith("stat_"):
-                            # get the domain, resolution and species from the path
-                            domain, resolution, species = remote_dir.split('/')[-3:]
+                    # if it is an ensemble member
+                    if not ensemble_options.startswith("stat_"):
+                        # get the domain, resolution and species from the path
+                        domain, resolution, species = remote_dir.split('/')[-3:]
 
-                            # identify format of the directory
-                            # the format is a tuple of how many - and how many _ are there
-                            # the directory format is choosen by popularity
-                            formats_list = [(file.count("-"), file.count("_")) for file in nc_files]
-                            number_of_formats_dict = {format: formats_list.count(format) for format in set(formats_list)}
-                            format = max(number_of_formats_dict, key=number_of_formats_dict.get)
-                            
-                            # filter and get only the files that follow the format
-                            nc_files = list(filter(lambda x:(x.count("-"),x.count("_")) == format,nc_files))
-                            
-                            # example: od550du_2019040212.nc (0,1)
-                            if format == (0,1):
-                                # when there is no ensemble option in the name only allmembers and 000 are valid
-                                if ensemble_options == '000' or ensemble_options == 'allmembers':
-                                    nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
-                                else:
-                                    msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble_options} ensemble option."
-                                    show_message(self, msg, deactivate=initial_check)
-                                    continue
-                            # example: od550du-000_2021020812.nc (1,1)
-                            elif format == (1,1):
-                                # filter by ensemble option in case that ensemble option is not allmembers
-                                if ensemble_options != 'allmembers':
-                                    nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble_options,nc_files))
-                                # if there is no options with the ensemble option, tell the user
-                                if nc_files is []:
-                                    msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble_options} ensemble option."
-                                    show_message(self, msg, deactivate=initial_check)
-                                    continue
-                            else:
-                                # TODO delete this in the future
-                                error = "It is not possible to download this nc file type yet. Please, contact the developers.", nc_files
-                                sys.exit(error)
+                        # identify format of the directory
+                        # the format is a tuple of how many - and how many _ are there
+                        # the directory format is choosen by popularity
+                        formats_list = [(file.count("-"), file.count("_")) for file in nc_files]
+                        number_of_formats_dict = {format: formats_list.count(format) for format in set(formats_list)}
+                        format = max(number_of_formats_dict, key=number_of_formats_dict.get)
                         
-                        # if it is an ensemble statistic
-                        else:
-                            # get the domain, resolution and species from the path
-                            domain, resolution, _, species = remote_dir.split('/')[-4:]
-                            species = species.split("_",1)[0]
+                        # filter and get only the files that follow the format
+                        nc_files = list(filter(lambda x:(x.count("-"),x.count("_")) == format,nc_files))
+                        
+                        # example: od550du_2019040212.nc (0,1)
+                        if format == (0,1):
+                            # when there is no ensemble option in the name only allmembers and 000 are valid
+                            if ensemble_options == '000' or ensemble_options == 'allmembers':
+                                nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
 
-                            # filter the nc files to only get the ones that have the correct species and stats
-                            nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == stat, nc_files))
+                        # example: od550du-000_2021020812.nc (1,1)
+                        elif format == (1,1):
+                            # filter by ensemble option in case that ensemble option is not allmembers
+                            if ensemble_options != 'allmembers':
+                                nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble_options,nc_files))
+                           
+                        else:
+                            # TODO delete this in the future
+                            error = "It is not possible to download this nc file type yet. Please, contact the developers.", nc_files
+                            sys.exit(error)
+                    
+                    # if it is an ensemble statistic
+                    else:
+                        # get the domain, resolution and species from the path
+                        domain, resolution, _, species = remote_dir.split('/')[-4:]
+                        species = species.split("_",1)[0]
+
+                        # filter the nc files to only get the ones that have the correct species and stats
+                        nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == stat, nc_files))
                 
+                # if there is no options with the ensemble option, tell the user
+                if nc_files == []:
+                    msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble_options} ensemble option."
+                    show_message(self, msg, deactivate=initial_check)
+                    continue
+
                 # get the nc files in the date range        
                 valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
 
@@ -1267,9 +1330,12 @@ class ProvidentiaDownload(object):
                         if initial_check:
                             initial_check_nc_files.append(local_path)
                         else:
+                            # get last downloaded file in case there was a keyboard interrupt
                             self.latest_nc_file_path = local_path
-                            remote_path = join(remote_dir,nc_file)
+
+                            # initialize the timeout and get the file
                             self.ncfile_dl_start_time = time.time()
+                            remote_path = join(remote_dir,nc_file)
                             self.sftp.get(remote_path,local_path,callback=check_time) 
             
             return initial_check_nc_files
@@ -1277,6 +1343,263 @@ class ProvidentiaDownload(object):
         # tell the user if not valid resolution specie date combinations
         else:
             msg = "There are no available observations to be downloaded."
+            show_message(self, msg, deactivate=initial_check)
+            
+    def copy_non_interpolated_experiment(self, experiment, initial_check, files_to_download=None):
+        if not initial_check:
+            # print current experiment
+            print('\n'+'-'*40)
+            print(f"\nCopying {experiment} non-interpolated experiment data from esarchive to gpfs...")
+            
+        # get resolution and species combinations
+        res_spec_dir = []
+
+        # get experiment id and the domain
+        exp_id, domain, ensemble_options = experiment.split("-")
+
+        # get stat if it is an ensemble statistic
+        if ensemble_options.startswith("stat_"): 
+            stat = ensemble_options.split("_",1)[-1]
+
+        # get experiment type
+        for experiment_type, experiment_dict in interp_experiments.items():
+            if exp_id in experiment_dict["experiments"]:
+                break
+        
+        # get experiment specific directories list
+        exp_dir_list = experiment_dict["paths"]
+
+        # take all functional directories
+        exp_dir_functional_list = []    
+        for exp_dir in exp_dir_list:
+            # make sure that it comes from esarchive
+            if "/esarchive/" in exp_dir:
+                # esarchive in transfer5 is located inside gpfs
+                if "/esarchive/" == exp_dir[:11] and self.machine == "storage5":
+                    exp_dir = join("/gpfs/archive/bsc32/",exp_dir[1:])
+                # check if directory exists in esarchive
+                if os.path.exists(exp_dir):
+                    exp_dir_functional_list.append(exp_dir)     
+            
+        # if none of the paths are in this current machine, break
+        if not exp_dir_functional_list:
+            msg = f"None of the paths specified in {join('settings', 'interp_experiments.yaml')} are available on esarchive."
+            show_message(self, msg, deactivate=initial_check)
+            return
+        
+        # take first functional directory  
+        esarchive_dir = None
+        for exp_dir in exp_dir_functional_list:
+            temp_esarchive_dir = join(exp_dir,exp_id,domain)
+            # check if experiment and domain directories exist in esarchive machine
+            if os.path.exists(temp_esarchive_dir): 
+                esarchive_dir = temp_esarchive_dir
+                break
+        
+        # if the experiment-domain combination is not possible, break
+        if esarchive_dir is None:
+            msg = f"There is no data available for the {exp_id} experiment with the {domain} domain in none of the paths specified in {join('settings', 'interp_experiments.yaml')} in esarchive."
+            show_message(self, msg, deactivate=initial_check)
+            return
+
+        # get all the resolutions available in the esarchive directory
+        sftp_resolutions = self.resolution if self.resolution else set(os.listdir(esarchive_dir)).intersection(self.nonghost_available_resolutions)
+
+        # iterate through the resolutions
+        for resolution in sftp_resolutions:
+            try:
+                # get available species ("normal" and mapped)
+                available_species = self.available_species+[spec[0] for spec in mapping_species.values()]
+                sftp_species = self.species if self.species else set(os.listdir(join(esarchive_dir,resolution))).intersection(available_species)
+            except FileNotFoundError:
+                msg = f"There is no data available in esarchive for the {exp_id} experiment with the {domain} domain at {resolution} resolution"
+                show_message(self, msg, deactivate=initial_check)
+                continue
+
+            # iterate through the species
+            for speci_to_process in sftp_species: 
+                # initialize boolean that saves whether species was found
+                species_exists = False
+                species = speci_to_process
+
+                # if it is an ensemble member
+                if not ensemble_options.startswith("stat_"):
+                    res_spec = join(esarchive_dir,resolution,species)
+                # if it is an ensemble statistic
+                else:
+                    res_spec = join(esarchive_dir,resolution,"ensemble-stats",species+"_"+stat)
+  
+                species_exists = os.path.exists(res_spec)
+                # if there are none, try with the mapped species
+                if species_exists is False:
+                    # change species name to the species to map
+                    if speci_to_process in mapping_species:
+                        for species in mapping_species[speci_to_process]:
+                            # if it is an ensemble member
+                            if not ensemble_options.startswith("stat_"):
+                                res_spec = join(esarchive_dir,resolution,species)
+                            # if it is an ensemble statistic
+                            else:
+                                res_spec = join(esarchive_dir,resolution,"ensemble-stats",species+"_"+stat)
+  
+                            species_exists = os.path.exists(res_spec)
+                
+                # if no species were found, then show the message
+                if species_exists is False:
+                    msg = f"There is no data available in esarchive for the {exp_id} experiment with the {domain} domain for {species} species at {resolution} resolution"
+                    show_message(self, msg, deactivate=initial_check)
+                    continue
+
+                # add the path with the resolution and species combination to the list
+                res_spec_dir.append(res_spec)
+                        
+        # print the species, resolution and experiment combinations that are going to be copied
+        if res_spec_dir:
+
+            # initialise list with all the nc files to be copied
+            initial_check_nc_files = []
+
+            if not initial_check:
+                print(f"\n{experiment} experiment data to copy ({len(res_spec_dir)}):")
+            
+            # get all the nc files in the date range
+            for esarchive_dir in res_spec_dir:
+                if not initial_check:
+                    print(f"\n  - {join(self.exp_to_interp_root,'/'.join(esarchive_dir.split('/')[-4:]))}, source: {esarchive_dir}")
+                         
+                # get nc files
+                nc_files = os.listdir(esarchive_dir)
+
+                if nc_files:
+                    # if it is an ensemble member
+                    if not ensemble_options.startswith("stat_"):
+                        # get the domain, resolution and species from the path
+                        domain, resolution, species = esarchive_dir.split('/')[-3:]
+
+                        # identify format of the directory
+                        # the format is a tuple of how many - and how many _ are there
+                        # the directory format is choosen by popularity
+                        formats_list = [(file.count("-"), file.count("_")) for file in nc_files]
+                        number_of_formats_dict = {format: formats_list.count(format) for format in set(formats_list)}
+                        format = max(number_of_formats_dict, key=number_of_formats_dict.get)
+                        
+                        # filter and get only the files that follow the format
+                        nc_files = list(filter(lambda x:(x.count("-"),x.count("_")) == format,nc_files))
+                        
+                        # example: od550du_2019040212.nc (0,1)
+                        if format == (0,1):
+                            # when there is no ensemble option in the name only allmembers and 000 are valid
+                            if ensemble_options == '000' or ensemble_options == 'allmembers':
+                                nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
+                        
+                        # example: od550du-000_2021020812.nc (1,1)
+                        elif format == (1,1):
+                            # filter by ensemble option in case that ensemble option is not allmembers
+                            if ensemble_options != 'allmembers':
+                                nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble_options,nc_files))
+                           
+                        else:
+                            # TODO delete this in the future
+                            error = "It is not possible to copy this nc file type yet. Please, contact the developers.", nc_files
+                            sys.exit(error)
+                    
+                    # if it is an ensemble statistic
+                    else:
+                        # get the domain, resolution and species from the path
+                        domain, resolution, _, species = esarchive_dir.split('/')[-4:]
+                        species = species.split("_",1)[0]
+
+                        # filter the nc files to only get the ones that have the correct species and stats
+                        nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == stat, nc_files))
+                        
+                # if there is no options with the ensemble option, tell the user
+                if nc_files == []:
+                    msg = f"There is no data available in esarchive for the {exp_id} experiment with the {domain} domain with the {ensemble_options} ensemble option."
+                    show_message(self, msg, deactivate=initial_check)
+                    continue
+                
+                # get the nc files in the date range        
+                valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
+
+                # warning if experiment + species + resolution + network + date range combination gets no matching results       
+                if not valid_nc_files:                 
+                    msg = f"There is no data available in esarchive from {self.start_date} to {self.end_date} for {experiment} experiment {species} species at {resolution} resolution"
+                    show_message(self, msg, deactivate=initial_check)
+                    continue
+
+                # copy the valid resolution specie date combinations
+                else:
+                    # if it is an ensemble member
+                    if not ensemble_options.startswith("stat_"):
+                        gpfs_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,species)
+                    else:
+                        gpfs_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+stat)
+                    
+                    # create directories if they don't exist
+                    if not os.path.exists(gpfs_dir):
+                        os.makedirs(gpfs_dir) 
+                        # give to each directory 770 permissions and make group owner bsc32 
+                        temp_gpfs_dir = gpfs_dir
+                        for i in range(4):
+                            os.system(f"chmod 770 {temp_gpfs_dir}; chgrp bsc32 {temp_gpfs_dir}")
+                            temp_gpfs_dir = os.path.dirname(temp_gpfs_dir)
+
+                    # sort nc_files
+                    valid_nc_files.sort() 
+
+                    if not initial_check:
+                        # get the ones that are not already copied
+                        valid_nc_files = list(filter(lambda x:join(gpfs_dir,x) in files_to_download, valid_nc_files))
+                        if not valid_nc_files:
+                            msg = "Files were already copied."
+                            show_message(self, msg, deactivate=initial_check)     
+                            continue         
+                        valid_nc_files_iter = tqdm(valid_nc_files, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Copying files from esarchive to gpfs ({len(valid_nc_files)})")
+                    else:
+                        # do not print the bar if it is the initial check
+                        valid_nc_files_iter = valid_nc_files
+
+                    # copy each individual nc file using sftp protocol
+                    for nc_file in valid_nc_files_iter:
+                        gpfs_path = join(gpfs_dir,nc_file)
+                        
+                        if initial_check:
+                            initial_check_nc_files.append(gpfs_path)
+                        
+                        else:
+                            # get last downloaded file in case there was a keyboard interrupt
+                            self.latest_nc_file_path = gpfs_path
+                            
+                            # check if the file already exists
+                            new_file = not os.path.isfile(gpfs_path)
+                           
+                            # get rsync command depending on which machine it was ran
+                            rsync_command = "dtrsync" if self.machine == "storage5" else "rsync"
+                            
+                            # copy file
+                            esarchive_path = join(esarchive_dir, nc_file)
+                            with open(os.devnull, 'wb') as devnull:
+                                subprocess.check_call([rsync_command, esarchive_path, gpfs_path], stdout=devnull, stderr=subprocess.STDOUT)
+
+                            # TODO: fails when creating a new file, wait until users use the copy option to see if it is really needed
+                            # give to each new file 770 permissions to directory and make group owner bsc32 
+                            # if new_file:                        
+                            #     os.system(f"chmod 770 {gpfs_path}; chgrp bsc32 {gpfs_path}")
+
+                    # dtrsync generates output files that are generated in 3 seconds 
+                    if not initial_check and self.machine == "storage5":
+                        time.sleep(3)
+            
+                        # remove the output files frojm dtrsync
+                        for file in os.listdir(PROVIDENTIA_ROOT):
+                            if file.startswith("dtrsync_"):
+                                os.remove(join(PROVIDENTIA_ROOT,file)) 
+            
+            return initial_check_nc_files
+
+        # tell the user if not valid resolution specie date combinations
+        else:
+            msg = "There are no available observations to be copied."
             show_message(self, msg, deactivate=initial_check)
             
     def fetch_zenodo_networks(self):
