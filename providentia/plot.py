@@ -2282,7 +2282,10 @@ class Plot:
                     # get the color of the dot on the right
                     arr = np.array(fairmode_data)[~np.isnan(fairmode_data)]
                     correct_arr = arr[(arr >= min_span) & (arr <= max_span)]
-                    dot_color = plot_characteristics["auxiliar"]["right_dot_colors"]["green"] if len(correct_arr)/len(arr) >= .9 else plot_characteristics["auxiliar"]["right_dot_colors"]['red']
+                    
+                    dot_color = plot_characteristics["auxiliar"]["right_dot_colors"]['red']
+                    if arr and len(correct_arr)/len(arr) >= .9:
+                        dot_color = plot_characteristics["auxiliar"]["right_dot_colors"]["green"]
                     
                     # plot dot on the right
                     relevant_axis[i*4 + 3].scatter(**plot_characteristics["auxiliar"]["right_dot"], 
