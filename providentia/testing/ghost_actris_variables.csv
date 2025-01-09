@@ -1,0 +1,542 @@
+STATUS,BSC,GHOST,GHOST EBAS,ACTRIS,ACTRIS EBAS,Preferred
+,sconco3,ozone,ozone,"ozone mass concentration, ozone amount fraction ",ozone,ozone mass concentration
+,sconcno,nitrogen monoxide,nitrogen_monoxide,,,
+,sconcno2,nitrogen dioxide,nitrogen_dioxide,"nitrogen dioxide mass concentration, nitrogen dioxide amount fraction ",nitrogen_dioxide,nitrogen dioxide mass concentration
+,sconcso2,sulphur dioxide,sulphur_dioxide,"sulfur dioxide mass concentration, sulfur dioxide amount fraction ",sulphur_dioxide,sulfur dioxide mass concentration
+,sconcco,carbon monoxide,carbon_monoxide,carbon monoxide amount fraction,carbon_monoxide,carbon monoxide amount fraction
+,sconcch4,methane,methane,methane amount fraction,methane,methane amount fraction
+,sconcc2h2,acetylene,ethyne,,,
+,sconcglyox,glyoxal,ethanedial,"glyoxal mass concentration, glyoxal amount fraction ",ethanedial,glyoxal mass concentration
+,sconcc2h4,ethene,ethene,ethene amount fraction,ethene,ethene amount fraction
+,sconcald2,acetaldehyde,ethanal,"acetaldehyde mass concentration,acetaldehyde amount fraction ",ethanal,acetaldehyde mass concentration
+,sconcc2h6,ethane,ethane,ethane amount fraction,ethane,ethane amount fraction
+,sconcetoh,ethanol,ethanol,"ethanol mass concentration, ethanol amount fraction ",ethanol,ethanol mass concentration
+,sconcc3h6,propene,propene,propene amount fraction,propene,propene amount fraction
+,sconcc3h8,propane,propane,propane amount fraction,propane,propane amount fraction
+,sconcc4h6,"1,3-butadiene",1-3-butadiene,"1,3-butadiene amount fraction",1-3-butadiene,"1,3-butadiene amount fraction"
+,sconcc4h8,1-butene,1-butene,1-butene amount fraction,1-butene,1-butene amount fraction
+,sconcc4h10,isobutane,2-methylpropane,,,
+,sconcisop,isoprene,isoprene,isoprene amount fraction,isoprene,isoprene amount fraction
+,sconcc5h12,n-pentane,n-pentane,n-pentane amount fraction,n-pentane,n-pentane amount fraction
+,sconcc6h6,benzene,benzene,benzene amount fraction,benzene ,benzene amount fraction
+,sconcc6h14,n-hexane,n-hexane,n-hexane amount fraction,n-hexane,n-hexane amount fraction
+,sconcc7h8,toluene,toluene,toluene,toluene,toluene
+,sconcxyl,xylene,,,,
+,sconcmpxyl,mp-xylene,m-p-xylene,m/p-xylenes amount fraction,m-p-xylene,m/p-xylenes amount fraction
+,sconcmxyl,m-xylene,m-xylene,m-xylene amount fraction,m-xylene,m-xylene amount fraction
+,sconcpxyl,p-xylene,p-xylene,,,
+,sconcoxyl,o-xylene,o-xylene,o-xylene amount fraction,o-xylene,o-xylene amount fraction
+,sconcc9h12,"1,2,4-trimethylbenzene",1-2-4-trimethylbenzene,"1,2,4-trimethylbenzene amount fraction",1-2-4-trimethylbenzene,"1,2,4-trimethylbenzene amount fraction"
+,sconcc10h16,monoterpenes,monoterpenes,monoterpenes amount fraction,monoterpenes,monoterpenes amount fraction
+?,sconcbap,benzo[a]pyrene,benzo_a_pyrene,"gas and particle benzo(a)pyrene mass concentration, aerosol particle benzo(a)pyrene mass concentration, gaseous benzo(a)pyrene mass concentration, precipitation benzo(a)pyrene mass flux , moss benzo(a)pyrene mass fraction, deposition benzo(a)pyrene mass flux, precipitation benzo(a)pyrene mass concentration ",benzo_a_pyrene,gas and particle benzo(a)pyrene mass concentration
+,sconcnmvoc,total non-methane volatile organic compounds,,,,
+,sconcvoc,total volatile organic compounds,voc_complete,,,
+,sconnmhc,total non-methane hydrocarbons,,,,
+,sconchc,total hydrocarbons,,,,
+,sconcnh3,ammonia,ammonia,"ammonia mass concentration, ammonia amount fraction ",ammonia,ammonia mass concentration
+,sconchno3,nitric acid,nitric_acid,"nitric acid mass concentration, nitric acid amount fraction ",nitric_acid,nitric acid mass concentration
+,sconcpan,peroxyacetyl nitrate,,,,
+,sconchcho,formaldehyde,methanal,"formaldehyde mass concentration, formaldehyde amount fraction ",methanal,formaldehyde mass concentration
+,sconchcl,hydrochloric acid,hydrochloric_acid,"hydrochloric acid mass concentration, hydrochloric acid amount fraction ",hydrochloric_acid,hydrochloric acid mass concentration
+,sconchf,hydrofluoric acid,,,,
+,sconch2s,hydrogen sulphide,,,,
+,sconchggem,gaseous elemental mercury,mercury_GEM,gaseous elemental mercury mass concentration,mercury_GEM,gaseous elemental mercury mass concentration
+,sconchggom,gaseous oxidised mercury,mercury_GOM,gaseous mercury oxides mass concentration,mercury_GOM,gaseous mercury oxides mass concentration
+,sconchgtgm,total gaseous mercury,"mercury_TGM, total_gaseous_mercury",gaseous elemental mercury and mercury oxides mass concentration,mercury_TGM,gaseous elemental mercury and mercury oxides mass concentration
+,sconcal,total particulate aluminium,aluminium,aerosol particle aluminium mass concentration,aluminium,aerosol particle aluminium mass concentration
+,sconcas,total particulate arsenic,arsenic,aerosol particle arsenic mass concentration,arsenic,aerosol particle arsenic mass concentration
+,sconcbappm,total particulate benzo[a]pyrene,benzo_a_pyrene,aerosol particle benzo(a)pyrene mass concentration,benzo_a_pyrene,aerosol particle benzo(a)pyrene mass concentration
+,sconcbc,total particulate black carbon,"equivalent_black_carbon, equivalent_black_carbon_mass",aerosol particle equivalent black carbon mass concentration,equivalent_black_carbon,aerosol particle equivalent black carbon mass concentration
+,sconcc,total particulate carbon,"total_carbon, total_carbon_corrected",aerosol particle total carbon mass concentration,total_carbon,aerosol particle total carbon mass concentration
+,sconcca,total particulate calcium,calcium,aerosol particle calcium mass concentration,calcium,aerosol particle calcium mass concentration
+,sconccd,total particulate cadmium,cadmium,aerosol particle cadmium mass concentration,cadmium,aerosol particle cadmium mass concentration
+,sconccl,total particulate chloride,chloride,aerosol particle chloride mass concentration,chloride,aerosol particle chloride mass concentration
+,sconccobalt,total particulate cobalt,cobalt,aerosol particle cobalt mass concentration,cobalt,aerosol particle cobalt mass concentration
+,sconccr,total particulate chromium,chromium,aerosol particle chromium mass concentration,chromium,aerosol particle chromium mass concentration
+,sconccu,total particulate copper,copper,aerosol particle copper mass concentration,copper,aerosol particle copper mass concentration
+,sconcdu,total particulate dust,,aerosol particle mineral dust mass concentration,mineral_dust,aerosol particle mineral dust mass concentration
+,sconcec,total particulate elemental carbon,elemental_carbon,aerosol particle elemental carbon mass concentration,elemental_carbon,aerosol particle elemental carbon mass concentration
+,sconcfe,total particulate iron,iron,aerosol particle iron mass concentration,iron,aerosol particle iron mass concentration
+,sconchg,total particulate mercury,"mercury, mercury_PBM",aerosol particle mercury mass concentration,mercury_PBM,aerosol particle mercury mass concentration
+,sconck,total particulate potassium,potassium,aerosol particle potassium mass concentration,potassium,aerosol particle potassium mass concentration
+,sconcmg,total particulate magnesium,magnesium,aerosol particle magnesium mass concentration,magnesium,aerosol particle magnesium mass concentration
+,sconcmn,total particulate manganese,manganese,aerosol particle manganese mass concentration,manganese,aerosol particle manganese mass concentration
+,sconcmsa,total particulate methanesulfonic acid,methanesulfonic_acid,aerosol particle methanesulfonic acid mass concentration,methanesulfonic_acid,aerosol particle methanesulfonic acid mass concentration
+,sconcna,total particulate sodium,sodium,aerosol particle sodium mass concentration,sodium,aerosol particle sodium mass concentration
+,sconcnh4,total particulate ammonium,ammonium,aerosol particle ammonium mass concentration,ammonium,aerosol particle ammonium mass concentration
+,sconcnh4no3,total particulate ammonium nitrate,ammonium_nitrate,aerosol particle ammonium nitrate mass concentration,ammonium_nitrate,aerosol particle ammonium nitrate mass concentration
+,sconcni,total particulate nickel,nickel,aerosol particle nickel mass concentration,nickel,aerosol particle nickel mass concentration
+,sconcno3,total particulate nitrate,nitrate,aerosol particle nitrate mass concentration,nitrate,aerosol particle nitrate mass concentration
+,sconcoc,total particulate organic carbon,"organic_carbon, organic_carbon_corrected",aerosol particle organic carbon mass concentration,organic_carbon,aerosol particle organic carbon mass concentration
+,sconcpb,total particulate lead,lead,aerosol particle lead mass concentration,lead,aerosol particle lead mass concentration
+,sconcse,total particulate selenium,selenium,aerosol particle selenium mass concentration,selenium,aerosol particle selenium mass concentration
+,sconcso4,total particulate sulphate,sulphate_total,aerosol particle sulphate mass concentration,sulphate_total,aerosol particle sulphate mass concentration
+,sconcso4nss,total particulate sulphate: non-sea salt,sulphate_corrected,,,
+,sconcso4ss,total particulate sulphate: sea salt,sulphate_seasalt,,,
+,sconcv,total particulate vanadium,vanadium,aerosol particle vanadium mass concentration,vanadium,aerosol particle vanadium mass concentration
+,sconczn,total particulate zinc,zinc,aerosol particle zinc mass concentration,zinc,aerosol particle zinc mass concentration
+,absco370,total particulate aerosol absorption coefficient at 370nm,aerosol_absorption_coefficient,aerosol particle light absorption coefficient,aerosol_absorption_coefficient,aerosol particle light absorption coefficient
+,absco467,total particulate aerosol absorption coefficient at 467nm,aerosol_absorption_coefficient,aerosol particle light absorption coefficient,aerosol_absorption_coefficient,aerosol particle light absorption coefficient
+,absco470,total particulate aerosol absorption coefficient at 470nm,aerosol_absorption_coefficient,aerosol particle light absorption coefficient,aerosol_absorption_coefficient,aerosol particle light absorption coefficient
+,absco520,total particulate aerosol absorption coefficient at 520nm,aerosol_absorption_coefficient,aerosol particle light absorption coefficient,aerosol_absorption_coefficient,aerosol particle light absorption coefficient
+,absco522,total particulate aerosol absorption coefficient at 522nm,aerosol_absorption_coefficient,aerosol particle light absorption coefficient,aerosol_absorption_coefficient,aerosol particle light absorption coefficient
+,absco525,total particulate aerosol absorption coefficient at 525nm,aerosol_absorption_coefficient,aerosol particle light absorption coefficient,aerosol_absorption_coefficient,aerosol particle light absorption coefficient
+,absco528,total particulate aerosol absorption coefficient at 528nm,aerosol_absorption_coefficient,aerosol particle light absorption coefficient,aerosol_absorption_coefficient,aerosol particle light absorption coefficient
+,absco530,total particulate aerosol absorption coefficient at 530nm,aerosol_absorption_coefficient,aerosol particle light absorption coefficient,aerosol_absorption_coefficient,aerosol particle light absorption coefficient
+,absco550,total particulate aerosol absorption coefficient at 550nm,aerosol_absorption_coefficient,aerosol particle light absorption coefficient,aerosol_absorption_coefficient,aerosol particle light absorption coefficient
+,absco565,total particulate aerosol absorption coefficient at 565nm,aerosol_absorption_coefficient,aerosol particle light absorption coefficient,aerosol_absorption_coefficient,aerosol particle light absorption coefficient
+,absco590,total particulate aerosol absorption coefficient at 590nm,aerosol_absorption_coefficient,aerosol particle light absorption coefficient,aerosol_absorption_coefficient,aerosol particle light absorption coefficient
+,absco637,total particulate aerosol absorption coefficient at 637nm,aerosol_absorption_coefficient,aerosol particle light absorption coefficient,aerosol_absorption_coefficient,aerosol particle light absorption coefficient
+,absco652,total particulate aerosol absorption coefficient at 652nm,aerosol_absorption_coefficient,aerosol particle light absorption coefficient,aerosol_absorption_coefficient,aerosol particle light absorption coefficient
+,absco660,total particulate aerosol absorption coefficient at 660nm,aerosol_absorption_coefficient,aerosol particle light absorption coefficient,aerosol_absorption_coefficient,aerosol particle light absorption coefficient
+,absco670,total particulate aerosol absorption coefficient at 670nm,aerosol_absorption_coefficient,aerosol particle light absorption coefficient,aerosol_absorption_coefficient,aerosol particle light absorption coefficient
+,absco880,total particulate aerosol absorption coefficient at 880nm,aerosol_absorption_coefficient,aerosol particle light absorption coefficient,aerosol_absorption_coefficient,aerosol particle light absorption coefficient
+,absco950,total particulate aerosol absorption coefficient at 950nm,aerosol_absorption_coefficient,aerosol particle light absorption coefficient,aerosol_absorption_coefficient,aerosol particle light absorption coefficient
+,absae370-880,angstrom exponent between 370 and 880 nm for total particulate absorption,,,,
+,absae370-950,angstrom exponent between 370 and 950 nm for total particulate absorption,,,,
+,absae467-652,angstrom exponent between 467 and 652 nm for total particulate absorption,,,,
+,absae467-660,angstrom exponent between 467 and 660 nm for total particulate absorption,,,,
+,lbsco450,total particulate aerosol light backscattering coefficient at 450nm,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient
+,lbsco520,total particulate aerosol light backscattering coefficient at 520nm,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient
+,lbsco525,total particulate aerosol light backscattering coefficient at 525nm,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient
+,lbsco530,total particulate aerosol light backscattering coefficient at 530nm,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient
+,lbsco532,total particulate aerosol light backscattering coefficient at 532nm,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient
+,lbsco550,total particulate aerosol light backscattering coefficient at 550nm,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient
+,lbsco635,total particulate aerosol light backscattering coefficient at 635nm,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient
+,lbsco700,total particulate aerosol light backscattering coefficient at 700nm,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient
+,lbsco850,total particulate aerosol light backscattering coefficient at 850nm,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient,aerosol_light_backscattering_coefficient,aerosol particle light hemispheric backscatter coefficient
+,lsco450,total particulate aerosol light scattering coefficient at 450nm,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient
+,lsco520,total particulate aerosol light scattering coefficient at 520nm,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient
+,lsco525,total particulate aerosol light scattering coefficient at 525nm,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient
+,lsco530,total particulate aerosol light scattering coefficient at 530nm,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient
+,lsco532,total particulate aerosol light scattering coefficient at 532nm,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient
+,lsco550,total particulate aerosol light scattering coefficient at 550nm,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient
+,lsco635,total particulate aerosol light scattering coefficient at 635nm,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient
+,lsco700,total particulate aerosol light scattering coefficient at 700nm,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient
+,lsco850,total particulate aerosol light scattering coefficient at 850nm,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient,aerosol_light_scattering_coefficient,aerosol particle light scattering coefficient
+,lsae450-635,angstrom exponent between 450 and 635 nm for total particulate scattering,,,,
+,lsae450-700,angstrom exponent between 450 and 700 nm for total particulate scattering,,,,
+,lbsf450,total particulate aerosol light backscattering fraction at 450nm,,,,
+,lbsf520,total particulate aerosol light backscattering fraction at 520nm,,,,
+,lbsf525,total particulate aerosol light backscattering fraction at 525nm,,,,
+,lbsf530,total particulate aerosol light backscattering fraction at 530nm,,,,
+,lbsf532,total particulate aerosol light backscattering fraction at 532nm,,,,
+,lbsf550,total particulate aerosol light backscattering fraction at 550nm,,,,
+,lbsf635,total particulate aerosol light backscattering fraction at 635nm,,,,
+,lbsf700,total particulate aerosol light backscattering fraction at 700nm,,,,
+,lbsf850,total particulate aerosol light backscattering fraction at 850nm,,,,
+,asy525,total particulate asymmetry factor at 525nm,,,,
+,asy550,total particulate asymmetry factor at 550nm,,,,
+,pm10,PM10 mass,pm10_mass,,,
+,pm10al,PM10 aluminium,aluminium,,,
+,pm10as,PM10 arsenic,arsenic,,,
+,pm10bap,PM10 benzo[a]pyrene,benzo_a_pyrene,,,
+,pm10bc,PM10 black carbon,"equivalent_black_carbon, equivalent_black_carbon_mass",,,
+,pm10c,PM10 carbon,"total_carbon, total_carbon_corrected",,,
+,pm10ca,PM10 calcium,calcium,,,
+,pm10cd,PM10 cadmium,cadmium,,,
+,pm10cl,PM10 chloride,chloride,,,
+,pm10cobalt,PM10 cobalt,cobalt,,,
+,pm10cr,PM10 chromium,chromium,,,
+,pm10cu,PM10 copper,copper,,,
+,pm10du,PM10 dust,,,,
+,pm10ec,PM10 elemental carbon,elemental_carbon,,,
+,pm10fe,PM10 iron,iron,,,
+,pm10hg,PM10 mercury,"mercury, mercury_PBM",,,
+,pm10k,PM10 potassium,potassium,,,
+,pm10mg,PM10 magnesium,magnesium,,,
+,pm10mn,PM10 manganese,manganese,,,
+,pm10msa,PM10 methanesulfonic acid,methanesulfonic_acid,,,
+,pm10na,PM10 sodium,sodium,,,
+,pm10nh4,PM10 ammonium,ammonium,,,
+,pm10nh4no3,PM10 ammonium nitrate,ammonium_nitrate,,,
+,pm10ni,PM10 nickel,nickel,,,
+,pm10no3,PM10 nitrate,nitrate,,,
+,pm10oc,PM10 organic carbon,"organic_carbon, organic_carbon_corrected",,,
+,pm10pb,PM10 lead,lead,,,
+,pm10se,PM10 selenium,selenium,,,
+,pm10so4,PM10 sulphate,sulphate_total,,,
+,pm10so4nss,PM10 sulphate : non-sea salt,sulphate_corrected,,,
+,pm10so4ss,PM10 sulphate : sea salt,sulphate_seasalt,,,
+,pm10v,PM10 vanadium,vanadium,,,
+,pm10zn,PM10 zinc,zinc,,,
+,pm10absco370,PM10 aerosol absorption coefficient at 370nm,aerosol_absorption_coefficient,,,
+,pm10absco467,PM10 aerosol absorption coefficient at 467nm,aerosol_absorption_coefficient,,,
+,pm10absco470,PM10 aerosol absorption coefficient at 470nm,aerosol_absorption_coefficient,,,
+,pm10absco520,PM10 aerosol absorption coefficient at 520nm,aerosol_absorption_coefficient,,,
+,pm10absco522,PM10 aerosol absorption coefficient at 522nm,aerosol_absorption_coefficient,,,
+,pm10absco525,PM10 aerosol absorption coefficient at 525nm,aerosol_absorption_coefficient,,,
+,pm10absco528,PM10 aerosol absorption coefficient at 528nm,aerosol_absorption_coefficient,,,
+,pm10absco530,PM10 aerosol absorption coefficient at 530nm,aerosol_absorption_coefficient,,,
+,pm10absco550,PM10 aerosol absorption coefficient at 550nm,aerosol_absorption_coefficient,,,
+,pm10absco565,PM10 aerosol absorption coefficient at 565nm,aerosol_absorption_coefficient,,,
+,pm10absco590,PM10 aerosol absorption coefficient at 590nm,aerosol_absorption_coefficient,,,
+,pm10absco637,PM10 aerosol absorption coefficient at 637nm,aerosol_absorption_coefficient,,,
+,pm10absco652,PM10 aerosol absorption coefficient at 652nm,aerosol_absorption_coefficient,,,
+,pm10absco660,PM10 aerosol absorption coefficient at 660nm,aerosol_absorption_coefficient,,,
+,pm10absco670,PM10 aerosol absorption coefficient at 670nm,aerosol_absorption_coefficient,,,
+,pm10absco880,PM10 aerosol absorption coefficient at 880nm,aerosol_absorption_coefficient,,,
+,pm10absco950,PM10 aerosol absorption coefficient at 950nm,aerosol_absorption_coefficient,,,
+,pm10absae370-880,angstrom exponent between 370 and 880 nm for PM10 absorption,,,,
+,pm10absae370-950,angstrom exponent between 370 and 950 nm for PM10 absorption,,,,
+,pm10absae467-652,angstrom exponent between 467 and 652 nm for PM10 absorption,,,,
+,pm10absae467-660,angstrom exponent between 467 and 660 nm for PM10 absorption,,,,
+,pm10lbsco450,PM10 aerosol light backscattering coefficient at 450nm,aerosol_light_backscattering_coefficient,,,
+,pm10lbsco520,PM10 aerosol light backscattering coefficient at 520nm,aerosol_light_backscattering_coefficient,,,
+,pm10lbsco525,PM10 aerosol light backscattering coefficient at 525nm,aerosol_light_backscattering_coefficient,,,
+,pm10lbsco530,PM10 aerosol light backscattering coefficient at 530nm,aerosol_light_backscattering_coefficient,,,
+,pm10lbsco532,PM10 aerosol light backscattering coefficient at 532nm,aerosol_light_backscattering_coefficient,,,
+,pm10lbsco550,PM10 aerosol light backscattering coefficient at 550nm,aerosol_light_backscattering_coefficient,,,
+,pm10lbsco635,PM10 aerosol light backscattering coefficient at 635nm,aerosol_light_backscattering_coefficient,,,
+,pm10lbsco700,PM10 aerosol light backscattering coefficient at 700nm,aerosol_light_backscattering_coefficient,,,
+,pm10lbsco850,PM10 aerosol light backscattering coefficient at 850nm,aerosol_light_backscattering_coefficient,,,
+,pm10lsco450,PM10 aerosol light scattering coefficient at 450nm,aerosol_light_scattering_coefficient,,,
+,pm10lsco520,PM10 aerosol light scattering coefficient at 520nm,aerosol_light_scattering_coefficient,,,
+,pm10lsco525,PM10 aerosol light scattering coefficient at 525nm,aerosol_light_scattering_coefficient,,,
+,pm10lsco530,PM10 aerosol light scattering coefficient at 530nm,aerosol_light_scattering_coefficient,,,
+,pm10lsco532,PM10 aerosol light scattering coefficient at 532nm,aerosol_light_scattering_coefficient,,,
+,pm10lsco550,PM10 aerosol light scattering coefficient at 550nm,aerosol_light_scattering_coefficient,,,
+,pm10lsco635,PM10 aerosol light scattering coefficient at 635nm,aerosol_light_scattering_coefficient,,,
+,pm10lsco700,PM10 aerosol light scattering coefficient at 700nm,aerosol_light_scattering_coefficient,,,
+,pm10lsco850,PM10 aerosol light scattering coefficient at 850nm,aerosol_light_scattering_coefficient,,,
+,pm10lsae450-635,angstrom exponent between 450 and 635 nm for PM10 scattering,,,,
+,pm10lsae450-700,angstrom exponent between 450 and 700 nm for PM10 scattering,,,,
+,pm10lbsf450,PM10 aerosol light backscattering fraction at 450nm,,,,
+,pm10lbsf520,PM10 aerosol light backscattering fraction at 520nm,,,,
+,pm10lbsf525,PM10 aerosol light backscattering fraction at 525nm,,,,
+,pm10lbsf530,PM10 aerosol light backscattering fraction at 530nm,,,,
+,pm10lbsf532,PM10 aerosol light backscattering fraction at 532nm,,,,
+,pm10lbsf550,PM10 aerosol light backscattering fraction at 550nm,,,,
+,pm10lbsf635,PM10 aerosol light backscattering fraction at 635nm,,,,
+,pm10lbsf700,PM10 aerosol light backscattering fraction at 700nm,,,,
+,pm10lbsf850,PM10 aerosol light backscattering fraction at 850nm,,,,
+,pm10asy525,PM10 asymmetry factor at 525nm,,,,
+,pm10asy550,PM10 asymmetry factor at 550nm,,,,
+,pm2p5,PM2.5 mass,pm25_mass,,,
+,pm2p5al,PM2.5 aluminium,aluminium,,,
+,pm2p5as,PM2.5 arsenic,arsenic,,,
+,pm2p5bap,PM2.5 benzo[a]pyrene,benzo_a_pyrene,,,
+,pm2p5bc,PM2.5 black carbon,"equivalent_black_carbon, equivalent_black_carbon_mass",,,
+,pm2p5c,PM2.5 carbon,"total_carbon, total_carbon_corrected",,,
+,pm2p5ca,PM2.5 calcium,calcium,,,
+,pm2p5cd,PM2.5 cadmium,cadmium,,,
+,pm2p5cl,PM2.5 chloride,chloride,,,
+,pm2p5cobalt,PM2.5 cobalt,cobalt,,,
+,pm2p5cr,PM2.5 chromium,chromium,,,
+,pm2p5cu,PM2.5 copper,copper,,,
+,pm2p5du,PM2.5 dust,,,,
+,pm2p5ec,PM2.5 elemental carbon,elemental_carbon,,,
+,pm2p5fe,PM2.5 iron,iron,,,
+,pm2p5hg,PM2.5 mercury,"mercury, mercury_PBM",,,
+,pm2p5k,PM2.5 potassium,potassium,,,
+,pm2p5mg,PM2.5 magnesium,magnesium,,,
+,pm2p5mn,PM2.5 manganese,manganese,,,
+,pm2p5msa,PM2.5 methanesulfonic acid,methanesulfonic_acid,,,
+,pm2p5na,PM2.5 sodium,sodium,,,
+,pm2p5nh4,PM2.5 ammonium,ammonium,,,
+,pm2p5nh4no3,PM2.5 ammonium nitrate,ammonium_nitrate,,,
+,pm2p5ni,PM2.5 nickel,nickel,,,
+,pm2p5no3,PM2.5 nitrate,nitrate,,,
+,pm2p5oc,PM2.5 organic carbon,"organic_carbon, organic_carbon_corrected",,,
+,pm2p5pb,PM2.5 lead,lead,,,
+,pm2p5se,PM2.5 selenium,selenium,,,
+,pm2p5so4,PM2.5 sulphate,sulphate_total,,,
+,pm2p5so4nss,PM2.5 sulphate : non-sea salt,sulphate_corrected,,,
+,pm2p5so4ss,PM2.5 sulphate : sea salt,sulphate_seasalt,,,
+,pm2p5v,PM2.5 vanadium,vanadium,,,
+,pm2p5zn,PM2.5 zinc,zinc,,,
+,pm2p5absco370,PM2.5 aerosol absorption coefficient at 370nm,aerosol_absorption_coefficient,,,
+,pm2p5absco467,PM2.5 aerosol absorption coefficient at 467nm,aerosol_absorption_coefficient,,,
+,pm2p5absco470,PM2.5 aerosol absorption coefficient at 470nm,aerosol_absorption_coefficient,,,
+,pm2p5absco520,PM2.5 aerosol absorption coefficient at 520nm,aerosol_absorption_coefficient,,,
+,pm2p5absco522,PM2.5 aerosol absorption coefficient at 522nm,aerosol_absorption_coefficient,,,
+,pm2p5absco525,PM2.5 aerosol absorption coefficient at 525nm,aerosol_absorption_coefficient,,,
+,pm2p5absco528,PM2.5 aerosol absorption coefficient at 528nm,aerosol_absorption_coefficient,,,
+,pm2p5absco530,PM2.5 aerosol absorption coefficient at 530nm,aerosol_absorption_coefficient,,,
+,pm2p5absco550,PM2.5 aerosol absorption coefficient at 550nm,aerosol_absorption_coefficient,,,
+,pm2p5absco565,PM2.5 aerosol absorption coefficient at 565nm,aerosol_absorption_coefficient,,,
+,pm2p5absco590,PM2.5 aerosol absorption coefficient at 590nm,aerosol_absorption_coefficient,,,
+,pm2p5absco637,PM2.5 aerosol absorption coefficient at 637nm,aerosol_absorption_coefficient,,,
+,pm2p5absco652,PM2.5 aerosol absorption coefficient at 652nm,aerosol_absorption_coefficient,,,
+,pm2p5absco660,PM2.5 aerosol absorption coefficient at 660nm,aerosol_absorption_coefficient,,,
+,pm2p5absco670,PM2.5 aerosol absorption coefficient at 670nm,aerosol_absorption_coefficient,,,
+,pm2p5absco880,PM2.5 aerosol absorption coefficient at 880nm,aerosol_absorption_coefficient,,,
+,pm2p5absco950,PM2.5 aerosol absorption coefficient at 950nm,aerosol_absorption_coefficient,,,
+,pm2p5absae370-880,angstrom exponent between 370 and 880 nm for PM2.5 absorption,,,,
+,pm2p5absae370-950,angstrom exponent between 370 and 950 nm for PM2.5 absorption,,,,
+,pm2p5absae467-652,angstrom exponent between 467 and 652 nm for PM2.5 absorption,,,,
+,pm2p5absae467-660,angstrom exponent between 467 and 660 nm for PM2.5 absorption,,,,
+,pm2p5lbsco450,PM2.5 aerosol light backscattering coefficient at 450nm,aerosol_light_backscattering_coefficient,,,
+,pm2p5lbsco520,PM2.5 aerosol light backscattering coefficient at 520nm,aerosol_light_backscattering_coefficient,,,
+,pm2p5lbsco525,PM2.5 aerosol light backscattering coefficient at 525nm,aerosol_light_backscattering_coefficient,,,
+,pm2p5lbsco530,PM2.5 aerosol light backscattering coefficient at 530nm,aerosol_light_backscattering_coefficient,,,
+,pm2p5lbsco532,PM2.5 aerosol light backscattering coefficient at 532nm,aerosol_light_backscattering_coefficient,,,
+,pm2p5lbsco550,PM2.5 aerosol light backscattering coefficient at 550nm,aerosol_light_backscattering_coefficient,,,
+,pm2p5lbsco635,PM2.5 aerosol light backscattering coefficient at 635nm,aerosol_light_backscattering_coefficient,,,
+,pm2p5lbsco700,PM2.5 aerosol light backscattering coefficient at 700nm,aerosol_light_backscattering_coefficient,,,
+,pm2p5lbsco850,PM2.5 aerosol light backscattering coefficient at 850nm,aerosol_light_backscattering_coefficient,,,
+,pm2p5lsco450,PM2.5 aerosol light scattering coefficient at 450nm,aerosol_light_scattering_coefficient,,,
+,pm2p5lsco520,PM2.5 aerosol light scattering coefficient at 520nm,aerosol_light_scattering_coefficient,,,
+,pm2p5lsco525,PM2.5 aerosol light scattering coefficient at 525nm,aerosol_light_scattering_coefficient,,,
+,pm2p5lsco530,PM2.5 aerosol light scattering coefficient at 530nm,aerosol_light_scattering_coefficient,,,
+,pm2p5lsco532,PM2.5 aerosol light scattering coefficient at 532nm,aerosol_light_scattering_coefficient,,,
+,pm2p5lsco550,PM2.5 aerosol light scattering coefficient at 550nm,aerosol_light_scattering_coefficient,,,
+,pm2p5lsco635,PM2.5 aerosol light scattering coefficient at 635nm,aerosol_light_scattering_coefficient,,,
+,pm2p5lsco700,PM2.5 aerosol light scattering coefficient at 700nm,aerosol_light_scattering_coefficient,,,
+,pm2p5lsco850,PM2.5 aerosol light scattering coefficient at 850nm,aerosol_light_scattering_coefficient,,,
+,pm2p5lsae450-635,angstrom exponent between 450 and 635 nm for PM2.5 scattering,,,,
+,pm2p5lsae450-700,angstrom exponent between 450 and 700 nm for PM2.5 scattering,,,,
+,pm2p5lbsf450,PM2.5 aerosol light backscattering fraction at 450nm,,,,
+,pm2p5lbsf520,PM2.5 aerosol light backscattering fraction at 520nm,,,,
+,pm2p5lbsf525,PM2.5 aerosol light backscattering fraction at 525nm,,,,
+,pm2p5lbsf530,PM2.5 aerosol light backscattering fraction at 530nm,,,,
+,pm2p5lbsf532,PM2.5 aerosol light backscattering fraction at 532nm,,,,
+,pm2p5lbsf550,PM2.5 aerosol light backscattering fraction at 550nm,,,,
+,pm2p5lbsf635,PM2.5 aerosol light backscattering fraction at 635nm,,,,
+,pm2p5lbsf700,PM2.5 aerosol light backscattering fraction at 700nm,,,,
+,pm2p5lbsf850,PM2.5 aerosol light backscattering fraction at 850nm,,,,
+,pm2p5asy525,PM2.5 asymmetry factor at 525nm,,,,
+,pm2p5asy550,PM2.5 asymmetry factor at 550nm,,,,
+,pm1,PM1 mass,pm1_mass,,,
+,pm1al,PM1 aluminium,aluminium,,,
+,pm1as,PM1 arsenic,arsenic,,,
+,pm1bap,PM1 benzo[a]pyrene,benzo_a_pyrene,,,
+,pm1bc,PM1 black carbon,"equivalent_black_carbon, equivalent_black_carbon_mass",,,
+,pm1c,PM1 carbon,"total_carbon, total_carbon_corrected",,,
+,pm1ca,PM1 calcium,calcium,,,
+,pm1cd,PM1 cadmium,cadmium,,,
+,pm1cl,PM1 chloride,chloride,,,
+,pm1cobalt,PM1 cobalt,cobalt,,,
+,pm1cr,PM1 chromium,chromium,,,
+,pm1cu,PM1 copper,copper,,,
+,pm1du,PM1 dust,,,,
+,pm1ec,PM1 elemental carbon,elemental_carbon,,,
+,pm1fe,PM1 iron,iron,,,
+,pm1hg,PM1 mercury,"mercury, mercury_PBM",,,
+,pm1k,PM1 potassium,potassium,,,
+,pm1mg,PM1 magnesium,magnesium,,,
+,pm1mn,PM1 manganese,manganese,,,
+,pm1msa,PM1 methanesulfonic acid,methanesulfonic_acid,,,
+,pm1na,PM1 sodium,sodium,,,
+,pm1nh4,PM1 ammonium,ammonium,,,
+,pm1nh4no3,PM1 ammonium nitrate,ammonium_nitrate,,,
+,pm1ni,PM1 nickel,nickel,,,
+,pm1no3,PM1 nitrate,nitrate,,,
+,pm1oc,PM1 organic carbon,"organic_carbon, organic_carbon_corrected",,,
+,pm1pb,PM1 lead,lead,,,
+,pm1se,PM1 selenium,selenium,,,
+,pm1so4,PM1 sulphate,sulphate_total,,,
+,pm1so4nss,PM1 sulphate : non-sea salt,sulphate_corrected,,,
+,pm1so4ss,PM1 sulphate : sea salt,sulphate_seasalt,,,
+,pm1v,PM1 vanadium,vanadium,,,
+,pm1zn,PM1 zinc,zinc,,,
+,pm1absco370,PM1 aerosol absorption coefficient at 370nm,aerosol_absorption_coefficient,,,
+,pm1absco467,PM1 aerosol absorption coefficient at 467nm,aerosol_absorption_coefficient,,,
+,pm1absco470,PM1 aerosol absorption coefficient at 470nm,aerosol_absorption_coefficient,,,
+,pm1absco520,PM1 aerosol absorption coefficient at 520nm,aerosol_absorption_coefficient,,,
+,pm1absco522,PM1 aerosol absorption coefficient at 522nm,aerosol_absorption_coefficient,,,
+,pm1absco525,PM1 aerosol absorption coefficient at 525nm,aerosol_absorption_coefficient,,,
+,pm1absco528,PM1 aerosol absorption coefficient at 528nm,aerosol_absorption_coefficient,,,
+,pm1absco530,PM1 aerosol absorption coefficient at 530nm,aerosol_absorption_coefficient,,,
+,pm1absco550,PM1 aerosol absorption coefficient at 550nm,aerosol_absorption_coefficient,,,
+,pm1absco565,PM1 aerosol absorption coefficient at 565nm,aerosol_absorption_coefficient,,,
+,pm1absco590,PM1 aerosol absorption coefficient at 590nm,aerosol_absorption_coefficient,,,
+,pm1absco637,PM1 aerosol absorption coefficient at 637nm,aerosol_absorption_coefficient,,,
+,pm1absco652,PM1 aerosol absorption coefficient at 652nm,aerosol_absorption_coefficient,,,
+,pm1absco660,PM1 aerosol absorption coefficient at 660nm,aerosol_absorption_coefficient,,,
+,pm1absco670,PM1 aerosol absorption coefficient at 670nm,aerosol_absorption_coefficient,,,
+,pm1absco880,PM1 aerosol absorption coefficient at 880nm,aerosol_absorption_coefficient,,,
+,pm1absco950,PM1 aerosol absorption coefficient at 950nm,aerosol_absorption_coefficient,,,
+,pm1absae370-880,angstrom exponent between 370 and 880 nm for PM1 absorption,,,,
+,pm1absae370-950,angstrom exponent between 370 and 950 nm for PM1 absorption,,,,
+,pm1absae467-652,angstrom exponent between 467 and 652 nm for PM1 absorption,,,,
+,pm1absae467-660,angstrom exponent between 467 and 660 nm for PM1 absorption,,,,
+,pm1lbsco450,PM1 aerosol light backscattering coefficient at 450nm,aerosol_light_backscattering_coefficient,,,
+,pm1lbsco520,PM1 aerosol light backscattering coefficient at 520nm,aerosol_light_backscattering_coefficient,,,
+,pm1lbsco525,PM1 aerosol light backscattering coefficient at 525nm,aerosol_light_backscattering_coefficient,,,
+,pm1lbsco530,PM1 aerosol light backscattering coefficient at 530nm,aerosol_light_backscattering_coefficient,,,
+,pm1lbsco532,PM1 aerosol light backscattering coefficient at 532nm,aerosol_light_backscattering_coefficient,,,
+,pm1lbsco550,PM1 aerosol light backscattering coefficient at 550nm,aerosol_light_backscattering_coefficient,,,
+,pm1lbsco635,PM1 aerosol light backscattering coefficient at 635nm,aerosol_light_backscattering_coefficient,,,
+,pm1lbsco700,PM1 aerosol light backscattering coefficient at 700nm,aerosol_light_backscattering_coefficient,,,
+,pm1lbsco850,PM1 aerosol light backscattering coefficient at 850nm,aerosol_light_backscattering_coefficient,,,
+,pm1lsco450,PM1 aerosol light scattering coefficient at 450nm,aerosol_light_scattering_coefficient,,,
+,pm1lsco520,PM1 aerosol light scattering coefficient at 520nm,aerosol_light_scattering_coefficient,,,
+,pm1lsco525,PM1 aerosol light scattering coefficient at 525nm,aerosol_light_scattering_coefficient,,,
+,pm1lsco530,PM1 aerosol light scattering coefficient at 530nm,aerosol_light_scattering_coefficient,,,
+,pm1lsco532,PM1 aerosol light scattering coefficient at 532nm,aerosol_light_scattering_coefficient,,,
+,pm1lsco550,PM1 aerosol light scattering coefficient at 550nm,aerosol_light_scattering_coefficient,,,
+,pm1lsco635,PM1 aerosol light scattering coefficient at 635nm,aerosol_light_scattering_coefficient,,,
+,pm1lsco700,PM1 aerosol light scattering coefficient at 700nm,aerosol_light_scattering_coefficient,,,
+,pm1lsco850,PM1 aerosol light scattering coefficient at 850nm,aerosol_light_scattering_coefficient,,,
+,pm1lsae450-635,angstrom exponent between 450 and 635 nm for PM1 scattering,,,,
+,pm1lsae450-700,angstrom exponent between 450 and 700 nm for PM1 scattering,,,,
+,pm1lbsf450,PM1 aerosol light backscattering fraction at 450nm,,,,
+,pm1lbsf520,PM1 aerosol light backscattering fraction at 520nm,,,,
+,pm1lbsf525,PM1 aerosol light backscattering fraction at 525nm,,,,
+,pm1lbsf530,PM1 aerosol light backscattering fraction at 530nm,,,,
+,pm1lbsf532,PM1 aerosol light backscattering fraction at 532nm,,,,
+,pm1lbsf550,PM1 aerosol light backscattering fraction at 550nm,,,,
+,pm1lbsf635,PM1 aerosol light backscattering fraction at 635nm,,,,
+,pm1lbsf700,PM1 aerosol light backscattering fraction at 700nm,,,,
+,pm1lbsf850,PM1 aerosol light backscattering fraction at 850nm,,,,
+,pm1asy525,PM1 asymmetry factor at 525nm,,,,
+,pm1asy550,PM1 asymmetry factor at 550nm,,,,
+,precal,aluminium in precipitaton,aluminium,precipitation aluminium mass concentration,aluminium,precipitation aluminium mass concentration
+,precas,arsenic in precipitaton,arsenic,precipitation arsenic mass concentration,arsenic,precipitation arsenic mass concentration
+,wetbap,benzo[a]pyrene wet deposition flux,benzo_a_pyrene,deposition benzo(a)pyrene mass flux,benzo_a_pyrene,deposition benzo(a)pyrene mass flux
+,precca,calcium in precipitaton,calcium,precipitation calcium mass concentration,calcium,precipitation calcium mass concentration
+,preccd,cadmium in precipitaton,cadmium,precipitation cadmium mass concentration,cadmium,precipitation cadmium mass concentration
+,preccl,chloride in precipitaton,chloride,precipitation chloride mass concentration ,chloride,precipitation chloride mass concentration 
+,preccobalt,cobalt in precipitaton,cobalt,precipitation cobalt mass concentration,cobalt,precipitation cobalt mass concentration
+,preccr,chromium in precipitaton,chromium,precipitation chromium mass concentration,chromium,precipitation chromium mass concentration
+,preccu,copper in precipitaton,copper,precipitation copper mass concentration,copper,precipitation copper mass concentration
+,precfe,iron in precipitaton,iron,precipitation iron mass concentration ,iron,precipitation iron mass concentration 
+,prechg,mercury in precipitaton,mercury,precipitation mercury mass concentration,mercury,precipitation mercury mass concentration
+,preck,potassium in precipitaton,potassium,precipitation potassium mass concentration,potassium,precipitation potassium mass concentration
+,precmg,magnesium in precipitaton,magnesium,precipitation magnesium mass concentration,magnesium,precipitation magnesium mass concentration
+,precmn,manganese in precipitaton,manganese,precipitation manganese mass concentration,manganese,precipitation manganese mass concentration
+,precmsa,methanesulfonic acid in precipitaton,methanesulfonic_acid,precipitation methanesulfonic acid mass concentration,methanesulfonic_acid,precipitation methanesulfonic acid mass concentration
+,precna,sodium in precipitaton,sodium,precipitation sodium mass concentration,sodium,precipitation sodium mass concentration
+,precnh4,ammonium in precipitaton,ammonium,precipitation ammonium mass concentration,ammonium,precipitation ammonium mass concentration
+,precnh4no3,ammonium nitrate in precipitaton,ammonium_nitrate,,,
+,precni,nickel in precipitaton,nickel,precipitation nickel mass concentration ,nickel,precipitation nickel mass concentration 
+,precno3,nitrate in precipitaton,nitrate,precipitation nitrate mass concentration ,nitrate,precipitation nitrate mass concentration 
+,precpb,lead in precipitaton,lead,precipitation lead mass concentration,lead,precipitation lead mass concentration
+,precse,selenium in precipitaton,selenium,precipitation selenium mass concentration,selenium,precipitation selenium mass concentration
+,precso4,sulphate in precipitaton,sulphate_total,precipitation sulphate mass concentration ,sulphate_total,precipitation sulphate mass concentration 
+,precso4nss,sulphate: non-sea salt in precipitaton,sulphate_corrected,,,
+,precso4ss,sulphate: sea salt in precipitaton,sulphate_seasalt,,,
+,precv,vanadium in precipitaton,vanadium,precipitation vanadium mass concentration ,vanadium,precipitation vanadium mass concentration 
+,preczn,zinc in precipitaton,zinc,precipitation zinc mass concentration,zinc,precipitation zinc mass concentration
+,wetal,aluminium wet deposition flux,aluminium,deposition aluminium mass flux ,aluminium,deposition aluminium mass flux 
+,wetas,arsenic wet deposition flux,arsenic,deposition arsenic mass flux,arsenic,deposition arsenic mass flux
+,wetca,calcium wet deposition flux,calcium,,calcium,
+,wetcd,cadmium wet deposition flux,cadmium,deposition cadmium mass flux,cadmium,deposition cadmium mass flux
+,wetcl,chloride wet deposition flux,chloride,,,
+,wetcobalt,cobalt wet deposition flux,cobalt,deposition cobalt mass flux,cobalt,deposition cobalt mass flux
+,wetcr,chromium wet deposition flux,chromium,deposition chromium mass flux,chromium,deposition chromium mass flux
+,wetcu,copper wet deposition flux,copper,deposition copper mass flux,copper,deposition copper mass flux
+,wetfe,iron wet deposition flux,iron,deposition iron mass flux,iron,deposition iron mass flux
+,wethg,mercury wet deposition flux,mercury,deposition mercury mass flux,mercury,deposition mercury mass flux
+,wetk,potassium wet deposition flux,potassium,,,
+,wetmg,magnesium wet deposition flux,magnesium,,,
+,wetmn,manganese wet deposition flux,manganese,deposition manganese mass flux,manganese,deposition manganese mass flux
+,wetmsa,methanesulfonic acid wet deposition flux,methanesulfonic_acid,,,
+,wetna,sodium wet deposition flux,sodium,,,
+,wetnh4,ammonium wet deposition flux,ammonium,,,
+,wetnh4no3,ammonium nitrate wet deposition flux,ammonium_nitrate,,,
+,wetni,nickel wet deposition flux,nickel,,,
+,wetno3,nitrate wet deposition flux,nitrate,,,
+,wetpb,lead wet deposition flux,lead,deposition lead mass flux,lead,deposition lead mass flux
+,wetse,selenium wet deposition flux,selenium,,,
+,wetso4,sulphate wet deposition flux,sulphate_total,,,
+,wetso4nss,sulphate: non-sea salt wet deposition flux,sulphate_corrected,,,
+,wetso4ss,sulphate: sea salt wet deposition flux,sulphate_seasalt,,,
+,wetv,vanadium wet deposition flux,vanadium,deposition vanadium mass flux,vanadium,deposition vanadium mass flux
+,wetzn,zinc wet deposition flux,zinc,deposition zinc mass flux,zinc,deposition zinc mass flux
+,dir10,10m wind direction,,,,
+,spd10,10m wind speed,,,,
+,t2,2m air temperature,,air temperature,temperature,air temperature
+,rh2,average relative humidity,,,,
+,sst,sea surface temperature,,,,
+,td2,2m dew point,,,,
+,pshltr,2m atmospheric pressure,,air pressure,pressure,air pressure
+,slp,sea level pressure,,,,
+,acprec,liquid precipitation accumulation,,precipitation depth,precipitation_amount,precipitation depth
+,acsnow,snow accumulation,,,,
+,si,snow depth,,,,
+,cldbot,the height above ground level of the lowest cloud or obscuring phenomena layer aloft with 5/8 or more summation total sky cover.,,,,
+,vdist,visibility distance,,,,
+,cfracmax,"cloud coverage fraction, taken as maximum cloud coverage across cloud layers",,,,
+,od380aero,aerosol optical depth at 380nm,aerosol_optical_depth,aerosol particle optical depth,aerosol_optical_depth,aerosol particle optical depth
+,od440aero,aerosol optical depth at 440nm,aerosol_optical_depth,aerosol particle optical depth,aerosol_optical_depth,aerosol particle optical depth
+,od500aero,aerosol optical depth at 500nm,aerosol_optical_depth,aerosol particle optical depth,aerosol_optical_depth,aerosol particle optical depth
+,od500aerocoarse,coarse mode aerosol optical depth at 500nm,,,,
+,od500aerofine,fine mode aerosol optical depth at 500nm,,,,
+,fm500frac,fine mode aerosol optical depth fraction at 500nm,,,,
+,od550aero,aerosol optical depth at 550nm,aerosol_optical_depth,aerosol particle optical depth,aerosol_optical_depth,aerosol particle optical depth
+,od675aero,aerosol optical depth at 675nm,aerosol_optical_depth,aerosol particle optical depth,aerosol_optical_depth,aerosol particle optical depth
+,od870aero,aerosol optical depth at 870nm,aerosol_optical_depth,aerosol particle optical depth,aerosol_optical_depth,aerosol particle optical depth
+,od1020aero,aerosol optical depth at 1020nm,aerosol_optical_depth,aerosol particle optical depth,aerosol_optical_depth,aerosol particle optical depth
+,ae440-870aero,angstrom exponent between 440 and 870nm for aerosol optical depth,,,,
+,extod440aero,extinction aerosol optical depth at 440nm,,,,
+,extod440aerocoarse,extinction coarse mode aerosol optical depth at 440nm,,,,
+,extod440aerofine,extinction fine mode aerosol optical depth at 440nm,,,,
+,extod550aero,extinction aerosol optical depth at 550nm,,,,
+,extod675aero,extinction aerosol optical depth at 675nm,,,,
+,extod675aerocoarse,extinction coarse mode aerosol optical depth at 675nm,,,,
+,extod675aerofine,extinction fine mode aerosol optical depth at 675nm,,,,
+,extod870aero,extinction aerosol optical depth at 870nm,,,,
+,extod870aerocoarse,extinction coarse mode aerosol optical depth at 870nm,,,,
+,extod870aerofine,extinction fine mode aerosol optical depth at 870nm,,,,
+,extod1020aero,extinction aerosol optical depth at 1020nm,,,,
+,extod1020aerocoarse,extinction coarse mode aerosol optical depth at 1020nm,,,,
+,extod1020aerofine,extinction fine mode aerosol optical depth at 1020nm,,,,
+,extae440-675aero,angstrom exponent between 440nm and 675nm for extinction aerosol optical depth,,,,
+,extae440-870aero,angstrom exponent between 440nm and 870nm for extinction aerosol optical depth,,,,
+,absod440aero,absorption aerosol optical depth at 440nm,,,,
+,absod550aero,absorption aerosol optical depth at 550nm,,,,
+,absod675aero,absorption aerosol optical depth at 675nm,,,,
+,absod870aero,absorption aerosol optical depth at 870nm,,,,
+,absod1020aero,absorption aerosol optical depth at 1020nm,,,,
+,absae440-675aero,angstrom exponent between 440nm and 675nm for absorption aerosol optical depth,,,,
+,absae440-870aero,angstrom exponent between 440nm and 870nm for absorption aerosol optical depth,,,,
+,absae675-870aero,angstrom exponent between 675nm and 870nm for absorption aerosol optical depth,,,,
+,abswdaeaero,wavelength dependence of the absorption aerosol optical depth angstrom exponent,,,,
+,absod440bc,black carbon absorption aerosol optical depth at 440nm,,,,
+,absae440-870bc,angstrom exponent between 440nm and 870nm for black carbon absorption aerosol optical depth,,,,
+,absod440brc,brown carbon absorption aerosol optical depth at 440nm,,,,
+,lsae440-675aero,angstrom exponent between 440nm and 675nm for scattering aerosol optical depth,,,,
+,sca440aero,single scattering albedo at 440nm,,,,
+,sca550aero,single scattering albedo at 550nm,,,,
+,sca675aero,single scattering albedo at 675nm,,,,
+,sca870aero,single scattering albedo at 870nm,,,,
+,sca1020aero,single scattering albedo at 1020nm,,,,
+,scaae440-675aero,angstrom exponent between 440nm and 675nm for single scattering albedo,,,,
+,asy440aero,asymmetry factor at 440nm,,,,
+,asy440aerocoarse,coarse mode asymmetry factor at 440nm,,,,
+,asy440aerofine,fine mode asymmetry factor at 440nm,,,,
+,asy675aero,asymmetry factor at 675nm,,,,
+,asy675aerocoarse,coarse mode asymmetry factor at 675nm,,,,
+,asy675aerofine,fine mode asymmetry factor at 675nm,,,,
+,asy870aero,asymmetry factor at 870nm,,,,
+,asy870aerocoarse,coarse mode asymmetry factor at 870nm,,,,
+,asy870aerofine,fine mode asymmetry factor at 870nm,,,,
+,asy1020aero,asymmetry factor at 1020nm,,,,
+,asy1020aerocoarse,coarse mode asymmetry factor at 1020nm,,,,
+,asy1020aerofine,fine mode asymmetry factor at 1020nm,,,,
+,sphaero,sphericity factor,,,,
+,rinreal440,real part of the refractive index at 440nm,,,,
+,rinreal675,real part of the refractive index at 675nm,,,,
+,rinreal870,real part of the refractive index at 870nm,,,,
+,rinreal1020,real part of the refractive index at 1020nm,,,,
+,rinimag440,imaginary part of the refractive index at 440nm,,,,
+,rinimag675,imaginary part of the refractive index at 675nm,,,,
+,rinimag870,imaginary part of the refractive index at 870nm,,,,
+,rinimag1020,imaginary part of the refractive index at 1020nm,,,,
+,vconcaero,normalised total volume concentration (dV(r)/dln(r)),,,,
+,vconcaerocoarse,normalised total coarse mode volume concentration (dV(r)/dln(r)),,,,
+,vconcaerofine,normalised total fine mode volume concentration (dV(r)/dln(r)),,,,
+,vconcaerobin1,normalised volume concentration at 0.05um (dV(r)/dln(r)),,,,
+,vconcaerobin2,normalised volume concentration at 0.065604um (dV(r)/dln(r)),,,,
+,vconcaerobin3,normalised volume concentration at 0.086077um (dV(r)/dln(r)),,,,
+,vconcaerobin4,normalised volume concentration at 0.086077um (dV(r)/dln(r)),,,,
+,vconcaerobin5,normalised volume concentration at 0.148184um (dV(r)/dln(r)),,,,
+,vconcaerobin6,normalised volume concentration at 0.194429um (dV(r)/dln(r)),,,,
+,vconcaerobin7,normalised volume concentration at 0.255105um (dV(r)/dln(r)),,,,
+,vconcaerobin8,normalised volume concentration at 0.334716um (dV(r)/dln(r)),,,,
+,vconcaerobin9,normalised volume concentration at 0.439173um (dV(r)/dln(r)),,,,
+,vconcaerobin10,normalised volume concentration at 0.576227um (dV(r)/dln(r)),,,,
+,vconcaerobin11,normalised volume concentration at 0.756052um (dV(r)/dln(r)),,,,
+,vconcaerobin12,normalised volume concentration at 0.991996um (dV(r)/dln(r)),,,,
+,vconcaerobin13,normalised volume concentration at 1.301571um (dV(r)/dln(r)),,,,
+,vconcaerobin14,normalised volume concentration at 1.707757um (dV(r)/dln(r)),,,,
+,vconcaerobin15,normalised volume concentration at 2.240702um (dV(r)/dln(r)),,,,
+,vconcaerobin16,normalised volume concentration at 2.939966um (dV(r)/dln(r)),,,,
+,vconcaerobin17,normalised volume concentration at 3.857452um (dV(r)/dln(r)),,,,
+,vconcaerobin18,normalised volume concentration at 5.061260um (dV(r)/dln(r)),,,,
+,vconcaerobin19,normalised volume concentration at 6.640745um (dV(r)/dln(r)),,,,
+,vconcaerobin20,normalised volume concentration at 8.713145um (dV(r)/dln(r)),,,,
+,vconcaerobin21,normalised volume concentration at 11.432287um (dV(r)/dln(r)),,,,
+,vconcaerobin22,normalised volume concentration at 15.00um (dV(r)/dln(r)),,,,
