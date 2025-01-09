@@ -3,7 +3,6 @@ import os
 import shutil
 
 import copy
-from io import BytesIO
 import subprocess
 from dotenv import dotenv_values
 import paramiko 
@@ -14,13 +13,13 @@ import re
 import requests
 import yaml
 
-import numpy as np
 import xarray as xr
 
 # urlparse
 from tqdm import tqdm
 import tarfile
-from datetime import datetime
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from getpass import getpass
 
 from .configuration import ProvConfiguration, load_conf
@@ -28,9 +27,9 @@ from .read_aux import check_for_ghost
 from .warnings_prv import show_message
 
 from providentia.auxiliar import CURRENT_PATH, join
-from providentia.actris import (filter_files, temporally_average_data, 
-                                parameters_dict, metadata_dict, 
-                                coverages_dict, units_dict, variable_mapping)
+from providentia.actris import (get_files_path, temporally_average_data, get_data,
+                                get_files_per_var, is_wavelength_var, get_files_to_download,
+                                get_files_info, parameters_dict)
 
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 REMOTE_MACHINE = "storage5"
@@ -221,9 +220,6 @@ class ProvidentiaDownload(object):
                         if filter_species is not None:
                             self.species = [filter_species]
 
-                    if network == 'actris/actris':
-                        self.download_actris_network()
-
                     # get the files to be downloaded, check if they files were already downloaded and download if not
                     # download from the remote machine
                     elif self.bsc_download_choice == 'y':
@@ -233,6 +229,10 @@ class ProvidentiaDownload(object):
                             files_to_download = self.select_files_to_download(initial_check_nc_files)
                             if not initial_check_nc_files or files_to_download:
                                 self.download_ghost_network_sftp(network, initial_check=False, files_to_download=files_to_download)
+                        # ACTRIS
+                        elif network == 'actris/actris':
+                            error = f"Error: It is not possible to download files from the ACTRIS network from BSC machines. Set BSC_DL_CHOICE=n in .env file."
+                            sys.exit(error)
                         # non-GHOST
                         else:
                             initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
@@ -248,6 +248,9 @@ class ProvidentiaDownload(object):
                             files_to_download = self.select_files_to_download(initial_check_nc_files)
                             if not initial_check_nc_files or files_to_download:
                                 self.download_ghost_network_zenodo(network, initial_check=False, files_to_download=files_to_download)
+                        # ACTRIS
+                        elif network == 'actris/actris':
+                            self.download_actris_network()
                         # non-GHOST
                         else:
                             error = f"Error: It is not possible to download files from the non-GHOST network {network} from the zenodo webpage."
@@ -1666,109 +1669,84 @@ class ProvidentiaDownload(object):
                     
         return valid_nc_files        
     
-
     def download_actris_network(self):
         
         resolution = self.resolution[0]
-        start_date = datetime(int(self.start_date[:4]), int(self.start_date[4:6]), int(self.start_date[6:8]), 0)
-        end_date = datetime(int(self.end_date[:4]), int(self.end_date[4:6]), int(self.end_date[6:8]), 23)
+        target_start_date = datetime(int(self.start_date[:4]), int(self.start_date[4:6]), int(self.start_date[6:8]), 0)
+        target_end_date = datetime(int(self.end_date[:4]), int(self.end_date[4:6]), int(self.end_date[6:8]), 23, 59, 59) - timedelta(days=1)
 
         for var in self.species:
-            files = filter_files(var, resolution, start_date, end_date)
-            if len(files) != 0:
             
+            # check if variable name is available
+            if var not in parameters_dict.keys():
+                print(f'Data for {var} cannot be downloaded.')
+                continue
+            else:
                 actris_parameter = parameters_dict[var]
-                ebas_component = variable_mapping[actris_parameter]['var']
-                
-                # combine datasets that have the same variable and resolution
-                combined_ds_list = []
-                metadata = {}
-                metadata[resolution] = {}
-                
-                print(f'Collecting species data from {len(files)} files in Thredds...')
-                for i, file in enumerate(files):
-                    # open file
-                    try:
-                        ds = xr.open_dataset(file)
-                    except:
-                        print(i, '-', file, '- Error: Could not open dataset')
-                        continue
 
-                    # get resolution
-                    coverage = ds.time_coverage_resolution
-                    resolution = coverages_dict[coverage]
-
-                    # get lowest level if tower height is in coordinates
-                    if 'Tower_inlet_height' in list(ds.coords):
-                        ds = ds.sel(Tower_inlet_height=min(ds.Tower_inlet_height.values), drop=True)
-
-                    # get data at desired wavelength if wavelength is in coordinates
-                    wavelength_var = False
-                    if 'Wavelength' in list(ds.coords):
-                        wavelength = int(re.findall(r'\d+', var)[0])
-                        if wavelength in ds.Wavelength.values:
-                            ds = ds.sel(Wavelength=wavelength, drop=True)
-                            wavelength_var = True
-                        else:
-                            print(i, '-', file, f'- Error: Data at {wavelength}nm is not available')
-                            continue
-                    
-                    # assign station code as dimension
-                    ds = ds.expand_dims(dim={'station': [i]})
+            # get files that were already downloaded
+            initial_check_nc_files = get_files_to_download(self.nonghost_root, target_start_date, target_end_date, resolution, var)
+            files_to_download = self.select_files_to_download(initial_check_nc_files)
+            if not files_to_download:
+                msg = f"\nFiles were already downloaded for {var} at {resolution} "
+                msg += f"resolution between {target_start_date} and {target_end_date}."
+                show_message(self, msg, deactivate=False)     
+                continue 
             
-                    # select data for that variable only
-                    unformatted_units = variable_mapping[actris_parameter]['units']
-                    if unformatted_units in units_dict.keys():
-                        units = units_dict[unformatted_units]
-                    else:
-                        print(f'Units {unformatted_units} were not found in dictionary')
-                        continue
-                    units_var = f'{ebas_component}_{units}'
-                    possible_vars = [ebas_component, 
-                                    f'{ebas_component}_amean', 
-                                    units_var, 
-                                    f'{units_var}_amean']
-                    ds_var_exists = False
-                    for possible_var in possible_vars:
-                        if possible_var in ds:
-                            ds_var = ds[possible_var]
-                            ds_var_exists = True
-                            break
+            # get files info path
+            path = get_files_path(var)
 
-                    # continue to next file if variable cannot be read
-                    if not ds_var_exists:
-                        print(f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}')
-                        continue
-                        
-                    # save metadata
-                    for ghost_key, ebas_key in metadata_dict.items():
-                        # create key if it does not exist
-                        if ghost_key not in metadata[resolution].keys():
-                            metadata[resolution][ghost_key] = []
+            # if file does not exist
+            if not os.path.isfile(path):
+                # get files information
+                print(f'\nFile containing information of the files available in Thredds for {var} ({path}) does not exist, creating.')
+                combined_data = get_files_per_var(var)
+                all_files = combined_data[var]['files']
+                files_info = get_files_info(all_files, var, path)
+                    
+            # if file exists
+            else:
+                # ask if user wants to overwrite file
+                origin_update_choice = None
+                while origin_update_choice not in ['y','n']:
+                    origin_update_choice = input(f"\nFile containing information of the files available in Thredds for {var} ({path}) already exists. Do you want to update it (y/n)? ").lower() 
+                if origin_update_choice == 'n':
+                    # get files information
+                    files_info = yaml.safe_load(open(join(CURRENT_PATH, path)))
+                    files_info = {k: v for k, v in files_info.items() if k.strip() and v}
+                else:
+                    # get files information
+                    combined_data = get_files_per_var(var)
+                    all_files = combined_data[var]['files']
+                    files_info = get_files_info(all_files, var, path)
+            
+            # go to next variable if no data is found
+            if len(files_info) == 0:
+                continue
 
-                        # search value in var attrs
-                        if ebas_key in ds_var.attrs.keys():
-                            metadata[resolution][ghost_key].append(ds_var.attrs[ebas_key])
-                        # search value in ds attrs
-                        elif ebas_key in ds.attrs.keys():
-                            metadata[resolution][ghost_key].append(ds.attrs[ebas_key])
-                        # not found -> nan
-                        else:
-                            metadata[resolution][ghost_key].append(np.nan)
+            # filter files by resolution and dates
+            print('    Filtering files by resolution and dates...')
+            files = []
+            for file, attributes in files_info.items():
+                if attributes["resolution"] == resolution:
+                    start_date = datetime.strptime(attributes["start_date"], "%Y-%m-%dT%H:%M:%S UTC")
+                    end_date = datetime.strptime(attributes["end_date"], "%Y-%m-%dT%H:%M:%S UTC")
+                    for file_to_download in files_to_download:
+                        file_to_download_yearmonth = file_to_download.split(f'{var}_')[1].split('.nc')[0]
+                        file_to_download_start_date = datetime.strptime(file_to_download_yearmonth, "%Y%m")
+                        file_to_download_end_date = datetime(file_to_download_start_date.year, file_to_download_start_date.month, 1) + relativedelta(months=1, seconds=-1)
+                        if file_to_download_start_date <= end_date and file_to_download_end_date >= start_date:
+                            if file not in files:
+                                files.append(file)
 
-                    # remove all attributes except units
-                    ds_var.attrs = {key: value for key, value in ds_var.attrs.items() if key == 'units'}
-
-                    # rename variable to BSC standards
-                    ds_var = ds_var.to_dataset(name=var)
-
-                    # append modified dataset to list
-                    combined_ds_list.append(ds_var)
-                    print(i, '-', file, '- OK')
+            if len(files) != 0:
+                    
+                # get data and metadata for each file within period
+                combined_ds_list, metadata, wavelength = get_data(files, var, actris_parameter, resolution)
 
                 # combine and create new dataset
+                print('    Combining files...')
                 try:
-                    print('Combining datasets...')
                     combined_ds = xr.concat(combined_ds_list, 
                                             dim='station', 
                                             combine_attrs='drop_conflicts')
@@ -1801,22 +1779,23 @@ class ProvidentiaDownload(object):
                 combined_ds.attrs['application_area'] = 'Monitoring atmospheric composition'
                 combined_ds.attrs['domain'] = 'Atmosphere'
                 combined_ds.attrs['observed_layer'] = 'Land surface'
-                
+                        
                 # save data per year and month
-                path = f'/home/avilanov/data/providentia/obs/nonghost/actris/actris/{resolution}/{var}'
+                path = join(self.nonghost_root, f'actris/actris/{resolution}/{var}')
                 if not os.path.isdir(path):
                     os.makedirs(path, exist_ok=True)
                 saved_files = 0
                 for year, ds_year in combined_ds.groupby('time.year'):
                     for month, ds_month in ds_year.groupby('time.month'):
-                        if start_date <= datetime(year, month, 1) <= end_date:
-                            filename = f"{path}/{var}_{year}{month:02d}.nc"
+                        filename = f"{path}/{var}_{year}{month:02d}.nc"
+                        if filename in files_to_download:
                             combined_ds_yearmonth = combined_ds.sel(time=f"{year}-{month:02d}")
                             combined_ds_yearmonth = temporally_average_data(combined_ds_yearmonth, resolution, year, month, var)
 
                             # add title to attrs
                             extra_info = ''
-                            if wavelength_var:
+                            wavelength_var = is_wavelength_var(actris_parameter)
+                            if wavelength_var and wavelength is not None:
                                 extra_info = f' at {wavelength}nm'
                             combined_ds_yearmonth.attrs['title'] = f'Surface {parameters_dict[var]}{extra_info} in the ACTRIS network in {year}-{month:02d}.'
 
@@ -1829,18 +1808,27 @@ class ProvidentiaDownload(object):
                                             if key in combined_ds_yearmonth.attrs}
                             combined_ds_yearmonth.attrs = ordered_attrs
 
+                            # remove stations if all variable data is nan
+                            # previous_n_stations = len(combined_ds_yearmonth.station)
+                            combined_ds_yearmonth = combined_ds_yearmonth.dropna(dim="station", subset=[var], how="all")
+                            combined_ds_yearmonth = combined_ds_yearmonth.assign_coords(station=range(len(combined_ds_yearmonth.station)))
+                            # current_n_stations = len(combined_ds_yearmonth.station)
+                            # n_stations_diff = previous_n_stations - current_n_stations
+                            # if n_stations_diff > 0:
+                            #     print(f'    Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
+                            
                             # save file
                             combined_ds_yearmonth.to_netcdf(filename)
 
                             # change permissions
                             os.system("chmod 777 {}".format(filename))
-                            print(f"Saved: {filename}")
+                            print(f"    Saved: {filename}")
                             saved_files += 1
                             
-                print(f'Total number of saved files: {saved_files}')
-            else:
-                print(f'No files were found for {var} in {resolution} resolution between {start_date} and {end_date}')
+                print(f'    Total number of saved files: {saved_files}')
 
+            else:
+                print('    No files were found')
 
 def main(**kwargs):
     """ Main function when running download function. """

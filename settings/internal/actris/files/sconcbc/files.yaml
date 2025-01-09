@@ -1,0 +1,265 @@
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/32/37/HV/3237-HVFZ.nc:
+  end_date: 2014-10-31T22:00:00 UTC
+  resolution: hourly
+  start_date: 2013-12-31T22:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure_qc
+  - pressure_ebasmetadata
+  - temperature_qc
+  - temperature_ebasmetadata
+  - equivalent_black_carbon_amean_qc
+  - equivalent_black_carbon_amean_ebasmetadata
+  - equivalent_black_carbon_prec1587_qc
+  - equivalent_black_carbon_prec1587_ebasmetadata
+  - equivalent_black_carbon_perc8413_qc
+  - equivalent_black_carbon_perc8413_ebasmetadata
+  - pressure
+  - temperature
+  - equivalent_black_carbon_amean
+  - equivalent_black_carbon_prec1587
+  - equivalent_black_carbon_perc8413
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Q/V2/RB/3QV2-RBN5.nc:
+  end_date: 2012-05-17T21:00:00 UTC
+  resolution: hourly
+  start_date: 2012-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3R/GV/MG/3RGV-MGMP.nc:
+  end_date: 2012-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/74/RQ/AB/74RQ-AB9G.nc:
+  end_date: 2008-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2006-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9X/5B/KR/9X5B-KR3N.nc:
+  end_date: 2003-01-01T08:00:00 UTC
+  resolution: daily
+  start_date: 2001-01-01T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AG/Y9/QW/AGY9-QWTB.nc:
+  end_date: 2014-12-31T22:00:00 UTC
+  resolution: hourly
+  start_date: 2014-10-31T22:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure_qc
+  - pressure_ebasmetadata
+  - temperature_qc
+  - temperature_ebasmetadata
+  - equivalent_black_carbon_amean_qc
+  - equivalent_black_carbon_amean_ebasmetadata
+  - equivalent_black_carbon_prec1587_qc
+  - equivalent_black_carbon_prec1587_ebasmetadata
+  - equivalent_black_carbon_perc8413_qc
+  - equivalent_black_carbon_perc8413_ebasmetadata
+  - pressure
+  - temperature
+  - equivalent_black_carbon_amean
+  - equivalent_black_carbon_prec1587
+  - equivalent_black_carbon_perc8413
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DG/S4/8Z/DGS4-8ZWN.nc:
+  end_date: 2015-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2012-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FJ/UT/BW/FJUT-BWWW.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2010-02-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - attenuation_coefficient_qc
+  - attenuation_coefficient_ebasmetadata
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+  - flow_rate
+  - flow_rate_qc
+  - flow_rate_ebasmetadata
+  - relative_humidity
+  - attenuation_coefficient
+  - equivalent_black_carbon
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/G5/WH/UT/G5WH-UT6C.nc:
+  end_date: 2007-02-03T01:00:00 UTC
+  resolution: hourly
+  start_date: 2006-06-01T01:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JS/EU/4T/JSEU-4T3Z.nc:
+  end_date: 2012-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KS/9E/PS/KS9E-PSHJ.nc:
+  end_date: 2001-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 1995-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/M3/TP/DD/M3TP-DDWQ.nc:
+  end_date: 2009-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2008-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - attenuation_coefficient_qc
+  - attenuation_coefficient_ebasmetadata
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+  - flow_rate
+  - flow_rate_qc
+  - flow_rate_ebasmetadata
+  - relative_humidity
+  - attenuation_coefficient
+  - equivalent_black_carbon
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MK/73/KZ/MK73-KZHF.nc:
+  end_date: 2012-05-17T21:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T03:00:00)
+  start_date: 2012-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TX/CS/25/TXCS-25MX.nc:
+  end_date: 2010-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure_qc
+  - pressure_ebasmetadata
+  - temperature_qc
+  - temperature_ebasmetadata
+  - aerosol_absorption_coefficient_amean_qc
+  - aerosol_absorption_coefficient_amean_ebasmetadata
+  - aerosol_absorption_coefficient_prec1587_qc
+  - aerosol_absorption_coefficient_prec1587_ebasmetadata
+  - aerosol_absorption_coefficient_perc8413_qc
+  - aerosol_absorption_coefficient_perc8413_ebasmetadata
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+  - pressure
+  - temperature
+  - aerosol_absorption_coefficient_amean
+  - aerosol_absorption_coefficient_prec1587
+  - aerosol_absorption_coefficient_perc8413
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UA/AY/Z2/UAAY-Z28U.nc:
+  end_date: 2009-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2008-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - aerosol_absorption_coefficient
+  - aerosol_absorption_coefficient_qc
+  - aerosol_absorption_coefficient_ebasmetadata
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WF/5W/BR/WF5W-BRX7.nc:
+  end_date: 2012-12-29T23:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+  - equivalent_black_carbon
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YK/M8/X9/YKM8-X9W8.nc:
+  end_date: 2012-05-17T21:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z7/JF/V3/Z7JF-V39E.nc:
+  end_date: 1993-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 1989-05-29T16:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+  - flow_rate
+  - flow_rate_qc
+  - flow_rate_ebasmetadata
+  - equivalent_black_carbon
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZW/HV/8U/ZWHV-8U8E.nc:
+  end_date: 2015-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2012-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
