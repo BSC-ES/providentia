@@ -1369,6 +1369,13 @@ class ProvidentiaDownload(object):
 
         for var in self.species:
             
+            # check if variable name is available
+            if var not in parameters_dict.keys():
+                print(f'Data for {var} cannot be downloaded.')
+                continue
+            else:
+                actris_parameter = parameters_dict[var]
+
             # get files that were already downloaded
             initial_check_nc_files = get_files_to_download(self.nonghost_root, target_start_date, target_end_date, resolution, var)
             files_to_download = self.select_files_to_download(initial_check_nc_files)
@@ -1378,7 +1385,7 @@ class ProvidentiaDownload(object):
                 show_message(self, msg, deactivate=False)     
                 continue 
             
-            actris_parameter = parameters_dict[var]
+            # get files info path
             path = get_files_path(var)
 
             # if file does not exist
