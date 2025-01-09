@@ -1,0 +1,10 @@
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FN/M2/MM/FNM2-MM7C.nc:
+  end_date: 2003-01-07T02:43:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 1981-01-05T09:45:56 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - methanesulfonic_acid
+  - methanesulfonic_acid_qc
+  - methanesulfonic_acid_ebasmetadata
