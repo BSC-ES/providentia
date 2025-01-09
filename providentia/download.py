@@ -1545,21 +1545,37 @@ class ProvidentiaDownload(object):
                     # copy each individual nc file using sftp protocol
                     for nc_file in valid_nc_files_iter:
                         gpfs_path = join(gpfs_dir,nc_file)
+                        
                         if initial_check:
                             initial_check_nc_files.append(gpfs_path)
+                        
                         else:
+                            # ger source path
                             self.latest_nc_file_path = gpfs_path
                             esarchive_path = join(esarchive_dir, nc_file)
-                            self.ncfile_dl_start_time = time.time()
+                            
                             # check if the file already exists
                             new_file = not os.path.isfile(gpfs_path)
+                           
+                            # get rsync command depending on which machine it was ran
+                            rsync_command = "dtrsync" if self.machine == "storage5" else "rsync"
+                            
                             # copy file
                             with open(os.devnull, 'wb') as devnull:
-                                subprocess.check_call(['dtrsync', esarchive_path, gpfs_path], stdout=devnull, stderr=subprocess.STDOUT)
+                                subprocess.check_call([rsync_command, esarchive_path, gpfs_path], stdout=devnull, stderr=subprocess.STDOUT)
 
+                            # give to each new file 770 permissions to directory and make group owner bsc32 
                             if new_file:                        
-                                # give to each file 770 permissions to directory and make group owner bsc32
                                 os.system(f"chmod 770 {gpfs_path}; chgrp bsc32 {gpfs_path}")
+
+                    # dtrsync generates output files that are generated in 3 seconds 
+                    if not initial_check and self.machine == "storage5":
+                        time.sleep(3)
+            
+                        # remove the output files frojm dtrsync
+                        for i in os.listdir(PROVIDENTIA_ROOT):
+                            if i.startswith("dtrsync_"):
+                                os.remove(join(PROVIDENTIA_ROOT,i)) 
             
             return initial_check_nc_files
 
