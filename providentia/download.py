@@ -517,7 +517,7 @@ class ProvidentiaDownload(object):
 
                 #  print the species, resolution and network combinations that are going to be downloaded
                 if not initial_check:
-                    print(f"\n  - {local_dir}")
+                    print(f"\n  - {local_dir}, source: {remote_dir}")
 
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
@@ -665,7 +665,7 @@ class ProvidentiaDownload(object):
 
                 #  print the species, resolution and network combinations that are going to be downloaded
                 if not initial_check:
-                    print(f"\n  - {local_dir}")
+                    print(f"\n  - {local_dir}, source: {remote_dir}")
 
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
@@ -986,9 +986,9 @@ class ProvidentiaDownload(object):
                 if not initial_check:
                     local_path = remote_dir.split('/',7)[-1]
                     if self.ghost_version in ["1.2", "1.3", "1.3.1"]:
-                        print(f"\n  - {join(self.exp_root,self.ghost_version,'-'.join(local_path.split('/')[1:4]),*local_path.split('/')[4:])}")
+                        print(f"\n  - {join(self.exp_root,self.ghost_version,'-'.join(local_path.split('/')[1:4]),*local_path.split('/')[4:])}, source: {remote_dir}")
                     else:
-                        print(f"\n  - {join(self.exp_root,local_path)}")
+                        print(f"\n  - {join(self.exp_root,local_path)}, source: {remote_dir}")
             
                 network = remote_dir.split('/')[-1]
                 species = remote_dir.split('/')[-2]
