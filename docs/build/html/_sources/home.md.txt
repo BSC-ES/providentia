@@ -4,13 +4,13 @@
 
 ## Description
 
-Providentia currently has 5 different modes:
+Providentia can be used in a variety of ways:
 
 * [Interpolation](Interpolation), to interpolate the experiments to the observations networks of your interest. 
 * [Dashboard](Dashboard), designed to allow on-the-fly analysis of BSC experiment output.
-* [Offline reports](Offline-reports), designed to obtain complete reports and carry out in-depth analysis of BSC experiment output.
-* [Interactive](Interactive-mode), allowing use of the Providentia backend functions, and use within Jupyter notebooks.
+* [Report](Report), designed to obtain complete reports and carry out in-depth analysis of BSC experiment output.
 * [Download](Download), to download data from esarchive and Zenodo into your local directories.
+* [Library](Library), allowing use of the Providentia backend functions, and use within your own scripts.
 
 ### Training sessions
 
@@ -28,7 +28,7 @@ Below you will find the recorded videos of the last training sessions, as well a
 
 Below you will find the presentation of the last user meetings:
 
-* 28/08/2024: [20240828_Providentia_User_Meeting.pdf](uploads/6d92c8fedad10a550ee70234cedbc41b/20240828_Providentia_User_Meeting.pdf) and [Video](https://www.youtube.com/watch?v=TCgAFlwRYZk)
+* 28/08/2024: [20240828_Providentia_User_Meeting.pdf](uploads/e3491ccd46f501af2275d015ce727d01/20240828_Providentia_User_Meeting.pdf) and [Video](https://www.youtube.com/watch?v=TCgAFlwRYZk)
 
 * 07/02/2024: [20240207_Providentia_User_Meeting.pdf](uploads/4968fb7be294610aba851ca51accf3a8/20240207_Providentia_User_Meeting.pdf) and [Video](https://www.youtube.com/watch?v=sQrILt4udOU)
 

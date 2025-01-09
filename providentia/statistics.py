@@ -1116,7 +1116,7 @@ def get_z_statistic_info(plot_type=None, zstat=None):
     # have plot_type? Therefore need to extract zstat from plot_type name (if available)
     if plot_type is not None:
         # have zstat in plot_type name?
-        if ('-' in plot_type) & ('-violin' not in plot_type) & ('-target' not in plot_type):
+        if ('-' in plot_type) & ('-violin' not in plot_type) & ('-target' not in plot_type) & ('-statsummary' not in plot_type):
             # have other options in plot_type?
             if '_' in plot_type:
                 # bias plot or not (if so, add bias to zstat)
@@ -1221,7 +1221,6 @@ def get_fairmode_data(canvas_instance, read_instance, networkspeci, resolution,
     if resolution == 'hourly':
         # reshape data to count the hourly nans per day
         num_days = data_array.shape[-1] // 24
-        
         daily_data = data_array.reshape(data_array.shape[0], data_array.shape[1], num_days, 24)  
         non_nan_count = np.count_nonzero(~np.isnan(daily_data), axis=-1)
 
@@ -1260,15 +1259,12 @@ def get_fairmode_data(canvas_instance, read_instance, networkspeci, resolution,
             # get valid data labels for networkspeci
             valid_data_labels = canvas_instance.selected_station_data_labels[networkspeci]
 
-            # cut data_labels for those in valid data labels
-            cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
-
             # calculate MDA8
             stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, 
-                                             'MDA8', cut_data_labels, [], chunking=True, 
+                                             'MDA8', valid_data_labels, [], chunking=True, 
                                              chunk_resolution='daily', ignore_mode=True)
             data_array = np.transpose(stats_calc, (1, 2, 0))
-    
+
     # filter by valid stations
     data_array = data_array[:, valid_station_idxs, :]
 
