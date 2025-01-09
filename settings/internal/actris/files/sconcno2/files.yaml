@@ -600,6 +600,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/34/D5/7M/34D5-7MG9.nc:
   - nitrogen_dioxide
   - nitrogen_dioxide_qc
   - nitrogen_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/36/NX/WJ/36NX-WJ49.nc:
+  end_date: 2022-07-19T23:15:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2022-07-12T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitrogen_dioxide_nmol_per_mol
+  - nitrogen_dioxide_nmol_per_mol_qc
+  - nitrogen_dioxide_nmol_per_mol_ebasmetadata
+  - nitrogen_dioxide_ug_N_per_m3
+  - nitrogen_dioxide_ug_N_per_m3_qc
+  - nitrogen_dioxide_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/38/BS/KP/38BS-KPM8.nc:
   end_date: 2023-01-02T00:00:00 UTC
   resolution: daily
@@ -1059,6 +1072,16 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4E/WS/99/4EWS-99FP.nc:
   end_date: 2013-01-01T00:00:00 UTC
   resolution: daily
   start_date: 2010-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitrogen_dioxide
+  - nitrogen_dioxide_qc
+  - nitrogen_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4G/6W/DS/4G6W-DSWN.nc:
+  end_date: 2014-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2011-01-01T00:00:00 UTC
   variables:
   - time_bnds
   - metadata_time_bnds
@@ -1956,6 +1979,16 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6Y/MM/M4/6YMM-M456.nc:
   - nitrogen_dioxide_ug_N_per_m3
   - nitrogen_dioxide_ug_N_per_m3_qc
   - nitrogen_dioxide_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6Y/S6/2S/6YS6-2SAK.nc:
+  end_date: 2015-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2014-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitrogen_dioxide
+  - nitrogen_dioxide_qc
+  - nitrogen_dioxide_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/72/FT/KF/72FT-KFNC.nc:
   end_date: 2016-01-01T00:00:00 UTC
   resolution: hourly
@@ -2090,6 +2123,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7D/XC/MT/7DXC-MT88.nc:
   - sulphur_dioxide
   - sulphur_dioxide_qc
   - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7E/2C/93/7E2C-93ZM.nc:
+  end_date: 2022-07-20T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2022-07-12T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitrogen_dioxide_nmol_per_mol
+  - nitrogen_dioxide_nmol_per_mol_qc
+  - nitrogen_dioxide_nmol_per_mol_ebasmetadata
+  - nitrogen_dioxide_ug_N_per_m3
+  - nitrogen_dioxide_ug_N_per_m3_qc
+  - nitrogen_dioxide_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7G/BS/35/7GBS-35JW.nc:
   end_date: 1990-01-01T07:00:00 UTC
   resolution: daily
@@ -3420,6 +3466,16 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AP/KU/2Y/APKU-2YDC.nc:
   end_date: 2005-01-01T00:00:00 UTC
   resolution: hourly
   start_date: 2004-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitrogen_dioxide
+  - nitrogen_dioxide_qc
+  - nitrogen_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AQ/9T/82/AQ9T-82XY.nc:
+  end_date: 2004-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 1993-01-01T00:00:00 UTC
   variables:
   - time_bnds
   - metadata_time_bnds
@@ -7209,6 +7265,35 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/N2/XT/HT/N2XT-HTD2.nc:
   - nitrogen_dioxide_ug_N_per_m3
   - nitrogen_dioxide_ug_N_per_m3_qc
   - nitrogen_dioxide_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N5/JK/ZB/N5JK-ZB63.nc:
+  end_date: 2016-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2015-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitrogen_dioxide_nmol_per_mol
+  - nitrogen_dioxide_nmol_per_mol_qc
+  - nitrogen_dioxide_nmol_per_mol_ebasmetadata
+  - nitrogen_dioxide_ug_N_per_m3
+  - nitrogen_dioxide_ug_N_per_m3_qc
+  - nitrogen_dioxide_ug_N_per_m3_ebasmetadata
+  - nitrogen_monoxide_nmol_per_mol
+  - nitrogen_monoxide_nmol_per_mol_qc
+  - nitrogen_monoxide_nmol_per_mol_ebasmetadata
+  - nitrogen_monoxide_ug_N_per_m3
+  - nitrogen_monoxide_ug_N_per_m3_qc
+  - nitrogen_monoxide_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N9/9R/KW/N99R-KWA4.nc:
+  end_date: 1998-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 1993-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitrogen_dioxide
+  - nitrogen_dioxide_qc
+  - nitrogen_dioxide_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NB/H3/X6/NBH3-X6FT.nc:
   end_date: 2022-07-20T00:00:00 UTC
   resolution: hourly
@@ -7986,6 +8071,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RC/2V/MQ/RC2V-MQ93.nc:
   - nitrogen_dioxide
   - nitrogen_dioxide_qc
   - nitrogen_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RE/D6/37/RED6-37JP.nc:
+  end_date: 2022-07-20T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2022-07-12T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitrogen_dioxide_nmol_per_mol
+  - nitrogen_dioxide_nmol_per_mol_qc
+  - nitrogen_dioxide_nmol_per_mol_ebasmetadata
+  - nitrogen_dioxide_ug_N_per_m3
+  - nitrogen_dioxide_ug_N_per_m3_qc
+  - nitrogen_dioxide_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RF/W8/B4/RFW8-B4C9.nc:
   end_date: 2009-01-01T06:00:00 UTC
   resolution: daily
@@ -8109,121 +8207,6 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RU/P2/JA/RUP2-JA46.nc:
   - nitrogen_monoxide
   - nitrogen_monoxide_qc
   - nitrogen_monoxide_ebasmetadata
-https://thredds.nilu.no/thredds/dodsC/ebas_doi/RV/2J/JQ/RV2J-JQ8J.nc:
-  end_date: 2023-06-07T01:00:00 UTC
-  resolution: hourly
-  start_date: 2023-01-01T00:00:00 UTC
-  variables:
-  - time_bnds
-  - metadata_time_bnds
-  - NOx_nmol_per_mol_amean
-  - NOx_nmol_per_mol_amean_qc
-  - NOx_nmol_per_mol_amean_ebasmetadata
-  - NOx_ug_N_per_m3_amean
-  - NOx_ug_N_per_m3_amean_qc
-  - NOx_ug_N_per_m3_amean_ebasmetadata
-  - NOx_nmol_per_mol_det.lim.
-  - NOx_nmol_per_mol_det.lim._qc
-  - NOx_nmol_per_mol_det.lim._ebasmetadata
-  - NOx_ug_N_per_m3_det.lim.
-  - NOx_ug_N_per_m3_det.lim._qc
-  - NOx_ug_N_per_m3_det.lim._ebasmetadata
-  - NOx_nmol_per_mol_ExpUnc2s
-  - NOx_nmol_per_mol_ExpUnc2s_qc
-  - NOx_nmol_per_mol_ExpUnc2s_ebasmetadata
-  - NOx_ug_N_per_m3_ExpUnc2s
-  - NOx_ug_N_per_m3_ExpUnc2s_qc
-  - NOx_ug_N_per_m3_ExpUnc2s_ebasmetadata
-  - NOx_nmol_per_mol_prec1587
-  - NOx_nmol_per_mol_prec1587_qc
-  - NOx_nmol_per_mol_prec1587_ebasmetadata
-  - NOx_ug_N_per_m3_prec1587
-  - NOx_ug_N_per_m3_prec1587_qc
-  - NOx_ug_N_per_m3_prec1587_ebasmetadata
-  - NOx_nmol_per_mol_perc8413
-  - NOx_nmol_per_mol_perc8413_qc
-  - NOx_nmol_per_mol_perc8413_ebasmetadata
-  - NOx_ug_N_per_m3_perc8413
-  - NOx_ug_N_per_m3_perc8413_qc
-  - NOx_ug_N_per_m3_perc8413_ebasmetadata
-  - NOx_nmol_per_mol_stddev
-  - NOx_nmol_per_mol_stddev_qc
-  - NOx_nmol_per_mol_stddev_ebasmetadata
-  - NOx_ug_N_per_m3_stddev
-  - NOx_ug_N_per_m3_stddev_qc
-  - NOx_ug_N_per_m3_stddev_ebasmetadata
-  - nitrogen_dioxide_nmol_per_mol_amean
-  - nitrogen_dioxide_nmol_per_mol_amean_qc
-  - nitrogen_dioxide_nmol_per_mol_amean_ebasmetadata
-  - nitrogen_dioxide_ug_N_per_m3_amean
-  - nitrogen_dioxide_ug_N_per_m3_amean_qc
-  - nitrogen_dioxide_ug_N_per_m3_amean_ebasmetadata
-  - nitrogen_dioxide_nmol_per_mol_det.lim.
-  - nitrogen_dioxide_nmol_per_mol_det.lim._qc
-  - nitrogen_dioxide_nmol_per_mol_det.lim._ebasmetadata
-  - nitrogen_dioxide_ug_N_per_m3_det.lim.
-  - nitrogen_dioxide_ug_N_per_m3_det.lim._qc
-  - nitrogen_dioxide_ug_N_per_m3_det.lim._ebasmetadata
-  - nitrogen_dioxide_nmol_per_mol_ExpUnc2s
-  - nitrogen_dioxide_nmol_per_mol_ExpUnc2s_qc
-  - nitrogen_dioxide_nmol_per_mol_ExpUnc2s_ebasmetadata
-  - nitrogen_dioxide_ug_N_per_m3_ExpUnc2s
-  - nitrogen_dioxide_ug_N_per_m3_ExpUnc2s_qc
-  - nitrogen_dioxide_ug_N_per_m3_ExpUnc2s_ebasmetadata
-  - nitrogen_dioxide_nmol_per_mol_prec1587
-  - nitrogen_dioxide_nmol_per_mol_prec1587_qc
-  - nitrogen_dioxide_nmol_per_mol_prec1587_ebasmetadata
-  - nitrogen_dioxide_ug_N_per_m3_prec1587
-  - nitrogen_dioxide_ug_N_per_m3_prec1587_qc
-  - nitrogen_dioxide_ug_N_per_m3_prec1587_ebasmetadata
-  - nitrogen_dioxide_nmol_per_mol_perc8413
-  - nitrogen_dioxide_nmol_per_mol_perc8413_qc
-  - nitrogen_dioxide_nmol_per_mol_perc8413_ebasmetadata
-  - nitrogen_dioxide_ug_N_per_m3_perc8413
-  - nitrogen_dioxide_ug_N_per_m3_perc8413_qc
-  - nitrogen_dioxide_ug_N_per_m3_perc8413_ebasmetadata
-  - nitrogen_dioxide_nmol_per_mol_stddev
-  - nitrogen_dioxide_nmol_per_mol_stddev_qc
-  - nitrogen_dioxide_nmol_per_mol_stddev_ebasmetadata
-  - nitrogen_dioxide_ug_N_per_m3_stddev
-  - nitrogen_dioxide_ug_N_per_m3_stddev_qc
-  - nitrogen_dioxide_ug_N_per_m3_stddev_ebasmetadata
-  - nitrogen_monoxide_nmol_per_mol_amean
-  - nitrogen_monoxide_nmol_per_mol_amean_qc
-  - nitrogen_monoxide_nmol_per_mol_amean_ebasmetadata
-  - nitrogen_monoxide_ug_N_per_m3_amean
-  - nitrogen_monoxide_ug_N_per_m3_amean_qc
-  - nitrogen_monoxide_ug_N_per_m3_amean_ebasmetadata
-  - nitrogen_monoxide_nmol_per_mol_det.lim.
-  - nitrogen_monoxide_nmol_per_mol_det.lim._qc
-  - nitrogen_monoxide_nmol_per_mol_det.lim._ebasmetadata
-  - nitrogen_monoxide_ug_N_per_m3_det.lim.
-  - nitrogen_monoxide_ug_N_per_m3_det.lim._qc
-  - nitrogen_monoxide_ug_N_per_m3_det.lim._ebasmetadata
-  - nitrogen_monoxide_nmol_per_mol_ExpUnc2s
-  - nitrogen_monoxide_nmol_per_mol_ExpUnc2s_qc
-  - nitrogen_monoxide_nmol_per_mol_ExpUnc2s_ebasmetadata
-  - nitrogen_monoxide_ug_N_per_m3_ExpUnc2s
-  - nitrogen_monoxide_ug_N_per_m3_ExpUnc2s_qc
-  - nitrogen_monoxide_ug_N_per_m3_ExpUnc2s_ebasmetadata
-  - nitrogen_monoxide_nmol_per_mol_prec1587
-  - nitrogen_monoxide_nmol_per_mol_prec1587_qc
-  - nitrogen_monoxide_nmol_per_mol_prec1587_ebasmetadata
-  - nitrogen_monoxide_ug_N_per_m3_prec1587
-  - nitrogen_monoxide_ug_N_per_m3_prec1587_qc
-  - nitrogen_monoxide_ug_N_per_m3_prec1587_ebasmetadata
-  - nitrogen_monoxide_nmol_per_mol_perc8413
-  - nitrogen_monoxide_nmol_per_mol_perc8413_qc
-  - nitrogen_monoxide_nmol_per_mol_perc8413_ebasmetadata
-  - nitrogen_monoxide_ug_N_per_m3_perc8413
-  - nitrogen_monoxide_ug_N_per_m3_perc8413_qc
-  - nitrogen_monoxide_ug_N_per_m3_perc8413_ebasmetadata
-  - nitrogen_monoxide_nmol_per_mol_stddev
-  - nitrogen_monoxide_nmol_per_mol_stddev_qc
-  - nitrogen_monoxide_nmol_per_mol_stddev_ebasmetadata
-  - nitrogen_monoxide_ug_N_per_m3_stddev
-  - nitrogen_monoxide_ug_N_per_m3_stddev_qc
-  - nitrogen_monoxide_ug_N_per_m3_stddev_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RX/BB/KC/RXBB-KC36.nc:
   end_date: 2022-07-20T00:00:00 UTC
   resolution: hourly
@@ -9831,6 +9814,121 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WJ/9E/CN/WJ9E-CN98.nc:
   - nitrogen_dioxide
   - nitrogen_dioxide_qc
   - nitrogen_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WJ/XG/7V/WJXG-7V5G.nc:
+  end_date: 2023-02-07T22:00:00 UTC
+  resolution: hourly
+  start_date: 2023-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - NOx_nmol_per_mol_amean
+  - NOx_nmol_per_mol_amean_qc
+  - NOx_nmol_per_mol_amean_ebasmetadata
+  - NOx_ug_N_per_m3_amean
+  - NOx_ug_N_per_m3_amean_qc
+  - NOx_ug_N_per_m3_amean_ebasmetadata
+  - NOx_nmol_per_mol_det.lim.
+  - NOx_nmol_per_mol_det.lim._qc
+  - NOx_nmol_per_mol_det.lim._ebasmetadata
+  - NOx_ug_N_per_m3_det.lim.
+  - NOx_ug_N_per_m3_det.lim._qc
+  - NOx_ug_N_per_m3_det.lim._ebasmetadata
+  - NOx_nmol_per_mol_ExpUnc2s
+  - NOx_nmol_per_mol_ExpUnc2s_qc
+  - NOx_nmol_per_mol_ExpUnc2s_ebasmetadata
+  - NOx_ug_N_per_m3_ExpUnc2s
+  - NOx_ug_N_per_m3_ExpUnc2s_qc
+  - NOx_ug_N_per_m3_ExpUnc2s_ebasmetadata
+  - NOx_nmol_per_mol_prec1587
+  - NOx_nmol_per_mol_prec1587_qc
+  - NOx_nmol_per_mol_prec1587_ebasmetadata
+  - NOx_ug_N_per_m3_prec1587
+  - NOx_ug_N_per_m3_prec1587_qc
+  - NOx_ug_N_per_m3_prec1587_ebasmetadata
+  - NOx_nmol_per_mol_perc8413
+  - NOx_nmol_per_mol_perc8413_qc
+  - NOx_nmol_per_mol_perc8413_ebasmetadata
+  - NOx_ug_N_per_m3_perc8413
+  - NOx_ug_N_per_m3_perc8413_qc
+  - NOx_ug_N_per_m3_perc8413_ebasmetadata
+  - NOx_nmol_per_mol_stddev
+  - NOx_nmol_per_mol_stddev_qc
+  - NOx_nmol_per_mol_stddev_ebasmetadata
+  - NOx_ug_N_per_m3_stddev
+  - NOx_ug_N_per_m3_stddev_qc
+  - NOx_ug_N_per_m3_stddev_ebasmetadata
+  - nitrogen_dioxide_nmol_per_mol_amean
+  - nitrogen_dioxide_nmol_per_mol_amean_qc
+  - nitrogen_dioxide_nmol_per_mol_amean_ebasmetadata
+  - nitrogen_dioxide_ug_N_per_m3_amean
+  - nitrogen_dioxide_ug_N_per_m3_amean_qc
+  - nitrogen_dioxide_ug_N_per_m3_amean_ebasmetadata
+  - nitrogen_dioxide_nmol_per_mol_det.lim.
+  - nitrogen_dioxide_nmol_per_mol_det.lim._qc
+  - nitrogen_dioxide_nmol_per_mol_det.lim._ebasmetadata
+  - nitrogen_dioxide_ug_N_per_m3_det.lim.
+  - nitrogen_dioxide_ug_N_per_m3_det.lim._qc
+  - nitrogen_dioxide_ug_N_per_m3_det.lim._ebasmetadata
+  - nitrogen_dioxide_nmol_per_mol_ExpUnc2s
+  - nitrogen_dioxide_nmol_per_mol_ExpUnc2s_qc
+  - nitrogen_dioxide_nmol_per_mol_ExpUnc2s_ebasmetadata
+  - nitrogen_dioxide_ug_N_per_m3_ExpUnc2s
+  - nitrogen_dioxide_ug_N_per_m3_ExpUnc2s_qc
+  - nitrogen_dioxide_ug_N_per_m3_ExpUnc2s_ebasmetadata
+  - nitrogen_dioxide_nmol_per_mol_prec1587
+  - nitrogen_dioxide_nmol_per_mol_prec1587_qc
+  - nitrogen_dioxide_nmol_per_mol_prec1587_ebasmetadata
+  - nitrogen_dioxide_ug_N_per_m3_prec1587
+  - nitrogen_dioxide_ug_N_per_m3_prec1587_qc
+  - nitrogen_dioxide_ug_N_per_m3_prec1587_ebasmetadata
+  - nitrogen_dioxide_nmol_per_mol_perc8413
+  - nitrogen_dioxide_nmol_per_mol_perc8413_qc
+  - nitrogen_dioxide_nmol_per_mol_perc8413_ebasmetadata
+  - nitrogen_dioxide_ug_N_per_m3_perc8413
+  - nitrogen_dioxide_ug_N_per_m3_perc8413_qc
+  - nitrogen_dioxide_ug_N_per_m3_perc8413_ebasmetadata
+  - nitrogen_dioxide_nmol_per_mol_stddev
+  - nitrogen_dioxide_nmol_per_mol_stddev_qc
+  - nitrogen_dioxide_nmol_per_mol_stddev_ebasmetadata
+  - nitrogen_dioxide_ug_N_per_m3_stddev
+  - nitrogen_dioxide_ug_N_per_m3_stddev_qc
+  - nitrogen_dioxide_ug_N_per_m3_stddev_ebasmetadata
+  - nitrogen_monoxide_nmol_per_mol_amean
+  - nitrogen_monoxide_nmol_per_mol_amean_qc
+  - nitrogen_monoxide_nmol_per_mol_amean_ebasmetadata
+  - nitrogen_monoxide_ug_N_per_m3_amean
+  - nitrogen_monoxide_ug_N_per_m3_amean_qc
+  - nitrogen_monoxide_ug_N_per_m3_amean_ebasmetadata
+  - nitrogen_monoxide_nmol_per_mol_det.lim.
+  - nitrogen_monoxide_nmol_per_mol_det.lim._qc
+  - nitrogen_monoxide_nmol_per_mol_det.lim._ebasmetadata
+  - nitrogen_monoxide_ug_N_per_m3_det.lim.
+  - nitrogen_monoxide_ug_N_per_m3_det.lim._qc
+  - nitrogen_monoxide_ug_N_per_m3_det.lim._ebasmetadata
+  - nitrogen_monoxide_nmol_per_mol_ExpUnc2s
+  - nitrogen_monoxide_nmol_per_mol_ExpUnc2s_qc
+  - nitrogen_monoxide_nmol_per_mol_ExpUnc2s_ebasmetadata
+  - nitrogen_monoxide_ug_N_per_m3_ExpUnc2s
+  - nitrogen_monoxide_ug_N_per_m3_ExpUnc2s_qc
+  - nitrogen_monoxide_ug_N_per_m3_ExpUnc2s_ebasmetadata
+  - nitrogen_monoxide_nmol_per_mol_prec1587
+  - nitrogen_monoxide_nmol_per_mol_prec1587_qc
+  - nitrogen_monoxide_nmol_per_mol_prec1587_ebasmetadata
+  - nitrogen_monoxide_ug_N_per_m3_prec1587
+  - nitrogen_monoxide_ug_N_per_m3_prec1587_qc
+  - nitrogen_monoxide_ug_N_per_m3_prec1587_ebasmetadata
+  - nitrogen_monoxide_nmol_per_mol_perc8413
+  - nitrogen_monoxide_nmol_per_mol_perc8413_qc
+  - nitrogen_monoxide_nmol_per_mol_perc8413_ebasmetadata
+  - nitrogen_monoxide_ug_N_per_m3_perc8413
+  - nitrogen_monoxide_ug_N_per_m3_perc8413_qc
+  - nitrogen_monoxide_ug_N_per_m3_perc8413_ebasmetadata
+  - nitrogen_monoxide_nmol_per_mol_stddev
+  - nitrogen_monoxide_nmol_per_mol_stddev_qc
+  - nitrogen_monoxide_nmol_per_mol_stddev_ebasmetadata
+  - nitrogen_monoxide_ug_N_per_m3_stddev
+  - nitrogen_monoxide_ug_N_per_m3_stddev_qc
+  - nitrogen_monoxide_ug_N_per_m3_stddev_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WK/Z8/G9/WKZ8-G9PV.nc:
   end_date: 2017-12-31T15:00:00 UTC
   resolution: hourly
@@ -9859,6 +9957,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WK/Z8/G9/WKZ8-G9PV.nc:
   - pressure
   - relative_humidity
   - temperature
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WN/NG/U4/WNNG-U4PC.nc:
+  end_date: 2022-07-20T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2022-07-12T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitrogen_dioxide_nmol_per_mol
+  - nitrogen_dioxide_nmol_per_mol_qc
+  - nitrogen_dioxide_nmol_per_mol_ebasmetadata
+  - nitrogen_dioxide_ug_N_per_m3
+  - nitrogen_dioxide_ug_N_per_m3_qc
+  - nitrogen_dioxide_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WP/MK/6M/WPMK-6MTQ.nc:
   end_date: 1990-01-01T07:00:00 UTC
   resolution: daily
@@ -10207,6 +10318,22 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XB/WC/EE/XBWC-EE6B.nc:
   - nitrogen_monoxide
   - nitrogen_monoxide_qc
   - nitrogen_monoxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XC/AN/MS/XCAN-MSNE.nc:
+  end_date: 2012-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitrogen_dioxide_nmol_per_mol
+  - nitrogen_dioxide_nmol_per_mol_qc
+  - nitrogen_dioxide_nmol_per_mol_ebasmetadata
+  - nitrogen_dioxide_ug_N_per_m3
+  - nitrogen_dioxide_ug_N_per_m3_qc
+  - nitrogen_dioxide_ug_N_per_m3_ebasmetadata
+  - nitrogen_monoxide
+  - nitrogen_monoxide_qc
+  - nitrogen_monoxide_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XC/B4/JJ/XCB4-JJHX.nc:
   end_date: 2015-01-01T00:00:00 UTC
   resolution: hourly
@@ -10358,6 +10485,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XF/SP/TM/XFSP-TMW9.nc:
   - nitrogen_dioxide
   - nitrogen_dioxide_qc
   - nitrogen_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XG/JH/SW/XGJH-SWEZ.nc:
+  end_date: 2022-07-20T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2022-07-12T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitrogen_dioxide_nmol_per_mol
+  - nitrogen_dioxide_nmol_per_mol_qc
+  - nitrogen_dioxide_nmol_per_mol_ebasmetadata
+  - nitrogen_dioxide_ug_N_per_m3
+  - nitrogen_dioxide_ug_N_per_m3_qc
+  - nitrogen_dioxide_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XK/AQ/QF/XKAQ-QFC5.nc:
   end_date: 1998-01-01T07:00:00 UTC
   resolution: daily
@@ -10537,6 +10677,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XV/SZ/HX/XVSZ-HXV5.nc:
   - nitrogen_dioxide
   - nitrogen_dioxide_qc
   - nitrogen_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XW/6X/XW/XW6X-XWTP.nc:
+  end_date: 2012-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitrogen_dioxide
+  - nitrogen_dioxide_qc
+  - nitrogen_dioxide_ebasmetadata
+  - nitrogen_monoxide
+  - nitrogen_monoxide_qc
+  - nitrogen_monoxide_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XZ/3M/XT/XZ3M-XT2U.nc:
   end_date: 2014-01-01T00:04:12 UTC
   resolution: hourly
@@ -10866,6 +11019,19 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YX/VF/JQ/YXVF-JQR2.nc:
   - sulphur_dioxide
   - sulphur_dioxide_qc
   - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YZ/W5/MU/YZW5-MURR.nc:
+  end_date: 2022-07-20T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2022-07-12T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - nitrogen_dioxide_nmol_per_mol
+  - nitrogen_dioxide_nmol_per_mol_qc
+  - nitrogen_dioxide_nmol_per_mol_ebasmetadata
+  - nitrogen_dioxide_ug_N_per_m3
+  - nitrogen_dioxide_ug_N_per_m3_qc
+  - nitrogen_dioxide_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z2/UM/ZW/Z2UM-ZWX2.nc:
   end_date: 2022-01-01T00:00:00 UTC
   resolution: hourly
