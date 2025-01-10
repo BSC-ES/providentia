@@ -866,7 +866,7 @@ class SubmitInterpolation(object):
         
         # if n_cpus hasn't been defined, use 1 or half of the available CPUS to 
         # avoid having to kill other processes locally
-        if (MACHINE == 'local') and (self.n_cpus == self.available_cpus):  
+        if (self.machine == 'local') and (self.n_cpus == self.available_cpus):  
             n_cpus = max(1, int(self.n_cpus * 0.50))
             msg = f'Warning: Using {n_cpus} out of {self.n_cpus} available CPUs to'
             msg += ' ensure that other processes keep running. \nIf you encounter any problems'
