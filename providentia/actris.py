@@ -360,7 +360,7 @@ def get_data(files, var, actris_parameter, resolution):
             if wavelength in ds_var.Wavelength.values:
                 ds_var = ds_var.sel(Wavelength=wavelength, drop=True)
             else:
-                errors[file] = f'Data at {wavelength}nm could not be found'
+                warnings[file] = f'Data at {wavelength}nm could not be found'
                 continue
                 
         # remove artifact and fraction (sconcoc)
