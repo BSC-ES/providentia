@@ -330,6 +330,8 @@ def get_data(files, var, actris_parameter, resolution):
                          f'{ebas_component}_amean', 
                          units_var, 
                          f'{units_var}_amean']
+        if var == 'sconcso4':
+            possible_vars.append(f'sulphate_corrected_{units}')
         ds_var_exists = False
         for possible_var in possible_vars:
             if possible_var in ds:
