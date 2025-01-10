@@ -302,6 +302,7 @@ def get_data(files, var, actris_parameter, resolution):
     wavelength = None
 
     errors = {}
+    warnings = {}
     tqdm_iter = tqdm(files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Reading data ({len(files)})")
     for i, file in enumerate(tqdm_iter):
         # open file
@@ -313,24 +314,6 @@ def get_data(files, var, actris_parameter, resolution):
 
         # remove time duplicates if any (keep first)
         ds = ds.sel(time=~ds['time'].to_index().duplicated())
-        
-        # get lowest level if tower height is in coordinates
-        if 'Tower_inlet_height' in list(ds.coords):
-            ds = ds.sel(Tower_inlet_height=min(ds.Tower_inlet_height.values), drop=True)
-
-        # get data at desired wavelength if wavelength is in coordinates
-        if 'Wavelength' in list(ds.coords):
-            # TODO: Review wavelength to choose for black carbon
-            if var == 'sconcbc':
-                wavelength = 370
-            # Get wavelength from variable name for other variables
-            else:
-                wavelength = float(re.findall(r'\d+', var)[0])
-            if wavelength in ds.Wavelength.values:
-                ds = ds.sel(Wavelength=wavelength, drop=True)
-            else:
-                errors[file] = f'Data at {wavelength}nm could not be found'
-                continue
         
         # assign station code as dimension
         ds = ds.expand_dims(dim={'station': [i]})
@@ -358,7 +341,34 @@ def get_data(files, var, actris_parameter, resolution):
         if not ds_var_exists:
             errors[file] = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}'
             continue
-            
+    
+        # get lowest level if tower height is in coordinates
+        if 'Tower_inlet_height' in list(ds_var.coords):
+            warnings[file] = f'Taking data from first height (Tower_inlet_height={min(ds_var.Tower_inlet_height.values)})'
+            ds_var = ds_var.sel(Tower_inlet_height=min(ds_var.Tower_inlet_height.values), drop=True)
+
+        # get data at desired wavelength if wavelength is in coordinates
+        if 'Wavelength' in list(ds_var.coords):
+            # TODO: Review wavelength to choose for black carbon
+            if var == 'sconcbc':
+                wavelength = 370
+            # Get wavelength from variable name for other variables
+            else:
+                wavelength = float(re.findall(r'\d+', var)[0])
+            if wavelength in ds_var.Wavelength.values:
+                ds_var = ds_var.sel(Wavelength=wavelength, drop=True)
+            else:
+                errors[file] = f'Data at {wavelength}nm could not be found'
+                continue
+                
+        # remove artifact and fraction (sconcoc)
+        if 'Artifact' in list(ds_var.coords):
+            warnings[file] = f'Taking data from first artifact dimension (Artifact={ds_var.Artifact.values[0]})'
+            ds_var = ds_var.isel(Artifact=0, drop=True)
+        if 'Fraction' in list(ds_var.coords):
+            warnings[file] = f'Taking data from first fraction dimension (Fraction={ds_var.Fraction.values[0]})'
+            ds_var = ds_var.isel(Fraction=0, drop=True)
+
         # avoid datasets that do not have defined units
         if 'ebas_unit' not in ds_var.attrs:
             errors[file] = f'No units were defined'
@@ -400,6 +410,12 @@ def get_data(files, var, actris_parameter, resolution):
         print('\nCollected errors:')
         for file, error in errors.items():
             print(f'{file} - Error: {error}')
+
+    # show warnings
+    if len(warnings) > 0:
+        print('\nCollected warnings:')
+        for file, warning in warnings.items():
+            print(f'{file} - Warning: {warning}')
 
     return combined_ds_list, metadata, wavelength
 
