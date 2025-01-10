@@ -8,5 +8,6 @@
   "ng/m3": "ng_per_m3",
   "ug Cl/m3": "ug_Cl_per_m3",
   "ug C/m3": "ug_C_per_m3",
-  "pg/m3": "pg_per_m3"
+  "pg/m3": "pg_per_m3",
+  "ug/l": "ug_per_l"
 }
