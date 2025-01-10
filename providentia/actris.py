@@ -146,8 +146,14 @@ def temporally_average_data(combined_ds, resolution, year, month, var):
         # read data per station
         data = combined_ds[var].isel(station=station_i).values
 
-        # ignore data (times and values) if the values are nan
+        # get indices where values are nan
         valid_idxs = ~np.isnan(data)
+
+        # go to next station if all values are nan
+        if np.sum(valid_idxs) == 0:
+            continue
+
+        # filter nan values
         valid_time = time[valid_idxs]
         valid_data = data[valid_idxs]
 
@@ -217,7 +223,7 @@ def temporally_average_data(combined_ds, resolution, year, month, var):
         data=averaged_data,
         coords={'station': combined_ds.station.values, 'time': valid_dates},
         dims=['station', 'time'],
-        attrs={'units': combined_ds[var].units})
+        attrs={'units': combined_ds[var].attrs['ebas_unit']})
 
     # drop old variable and associated time
     combined_ds = combined_ds.drop_vars(var)
@@ -354,13 +360,13 @@ def get_data(files, var, actris_parameter, resolution):
             continue
             
         # avoid datasets that do not have defined units
-        if 'units' not in ds_var.attrs:
+        if 'ebas_unit' not in ds_var.attrs:
             errors[file] = f'No units were defined'
             continue
 
         # avoid datasets that do not have the same units as in variable mapping
-        if ds_var.attrs['units'] != variable_mapping[actris_parameter]['units']:
-            errors[file] = f"Units {ds_var.attrs['units']} do not match those in variable mapping "
+        if ds_var.attrs['ebas_unit'] != variable_mapping[actris_parameter]['units']:
+            errors[file] = f"Units {ds_var.attrs['ebas_unit']} do not match those in variable mapping "
             errors[file] += f"dictionary ({variable_mapping[actris_parameter]['units']})"
             continue
 
@@ -381,7 +387,7 @@ def get_data(files, var, actris_parameter, resolution):
                 metadata[resolution][ghost_key].append(np.nan)
 
         # remove all attributes except units
-        ds_var.attrs = {key: value for key, value in ds_var.attrs.items() if key == 'units'}
+        ds_var.attrs = {key: value for key, value in ds_var.attrs.items() if key == 'ebas_unit'}
 
         # rename variable to BSC standards
         ds_var = ds_var.to_dataset(name=var)
