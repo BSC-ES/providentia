@@ -2284,7 +2284,7 @@ class Plot:
                     correct_arr = arr[(arr >= min_span) & (arr <= max_span)]
                     
                     dot_color = plot_characteristics["auxiliar"]["right_dot_colors"]['red']
-                    if arr and len(correct_arr)/len(arr) >= .9:
+                    if len(arr) > 0 and len(correct_arr)/len(arr) >= .9:
                         dot_color = plot_characteristics["auxiliar"]["right_dot_colors"]["green"]
                     
                     # plot dot on the right
