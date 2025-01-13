@@ -1,0 +1,4061 @@
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/22/XM/NV/22XM-NV7Y.nc:
+  end_date: 2016-09-30T07:00:00 UTC
+  resolution: Unrecognised (P0000-02-00T00:00:00)
+  start_date: 2016-02-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2Q/QX/JU/2QQX-JUYB.nc:
+  end_date: 2012-06-30T07:00:00 UTC
+  resolution: monthly
+  start_date: 2012-03-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthene
+  - acenaphthene_qc
+  - acenaphthene_ebasmetadata
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chromium
+  - chromium_qc
+  - chromium_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - naphthalene
+  - naphthalene_qc
+  - naphthalene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2T/2J/BR/2T2J-BR6F.nc:
+  end_date: 2022-01-03T00:00:00 UTC
+  resolution: monthly
+  start_date: 2020-12-28T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - BDE_100
+  - BDE_100_qc
+  - BDE_100_ebasmetadata
+  - BDE_47
+  - BDE_47_qc
+  - BDE_47_ebasmetadata
+  - BDE_99
+  - BDE_99_qc
+  - BDE_99_ebasmetadata
+  - HCB
+  - HCB_qc
+  - HCB_ebasmetadata
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pp_DDD
+  - pp_DDD_qc
+  - pp_DDD_ebasmetadata
+  - pp_DDE
+  - pp_DDE_qc
+  - pp_DDE_ebasmetadata
+  - pp_DDT
+  - pp_DDT_qc
+  - pp_DDT_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2T/MF/N4/2TMF-N4HG.nc:
+  end_date: 2024-01-01T08:00:00 UTC
+  resolution: monthly
+  start_date: 2022-01-01T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthene
+  - acenaphthene_qc
+  - acenaphthene_ebasmetadata
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_j_fluoranthene
+  - benzo_j_fluoranthene_qc
+  - benzo_j_fluoranthene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - naphthalene
+  - naphthalene_qc
+  - naphthalene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2T/V2/7U/2TV2-7UA2.nc:
+  end_date: 2016-11-22T00:00:00 UTC
+  resolution: monthly
+  start_date: 2015-12-07T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - BDE_100
+  - BDE_100_qc
+  - BDE_100_ebasmetadata
+  - BDE_47
+  - BDE_47_qc
+  - BDE_47_ebasmetadata
+  - BDE_99
+  - BDE_99_qc
+  - BDE_99_ebasmetadata
+  - HCB
+  - HCB_qc
+  - HCB_ebasmetadata
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pp_DDD
+  - pp_DDD_qc
+  - pp_DDD_ebasmetadata
+  - pp_DDE
+  - pp_DDE_qc
+  - pp_DDE_ebasmetadata
+  - pp_DDT
+  - pp_DDT_qc
+  - pp_DDT_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2X/P4/VE/2XP4-VEFZ.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: monthly
+  start_date: 2010-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - chrysene_triphenylene
+  - chrysene_triphenylene_qc
+  - chrysene_triphenylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2Y/QH/8U/2YQH-8UQ9.nc:
+  end_date: 2005-01-17T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2004-01-19T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/32/NG/F4/32NG-F4SD.nc:
+  end_date: 2011-12-31T07:00:00 UTC
+  resolution: monthly
+  start_date: 2011-09-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthene
+  - acenaphthene_qc
+  - acenaphthene_ebasmetadata
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - naphthalene
+  - naphthalene_qc
+  - naphthalene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3S/6A/Z5/3S6A-Z5P4.nc:
+  end_date: 2020-12-28T00:00:00 UTC
+  resolution: monthly
+  start_date: 2015-12-28T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Z/YN/QW/3ZYN-QW99.nc:
+  end_date: 2012-10-31T07:00:00 UTC
+  resolution: monthly
+  start_date: 2012-07-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthene
+  - acenaphthene_qc
+  - acenaphthene_ebasmetadata
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chromium
+  - chromium_qc
+  - chromium_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - naphthalene
+  - naphthalene_qc
+  - naphthalene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/42/7D/A5/427D-A5UP.nc:
+  end_date: 1996-12-30T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 1996-01-22T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4G/JR/FZ/4GJR-FZ8M.nc:
+  end_date: 2014-01-01T08:00:00 UTC
+  resolution: monthly
+  start_date: 2013-01-01T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_bjk_fluoranthenes
+  - benzo_bjk_fluoranthenes_qc
+  - benzo_bjk_fluoranthenes_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4Q/BN/P5/4QBN-P5DJ.nc:
+  end_date: 2021-04-30T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-61T00:00:00)
+  start_date: 2021-02-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthene
+  - acenaphthene_qc
+  - acenaphthene_ebasmetadata
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_bj_fluoranthenes
+  - benzo_bj_fluoranthenes_qc
+  - benzo_bj_fluoranthenes_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - naphthalene
+  - naphthalene_qc
+  - naphthalene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4Z/V3/YP/4ZV3-YPD6.nc:
+  end_date: 2016-01-04T06:00:00 UTC
+  resolution: monthly
+  start_date: 2013-01-03T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5E/M5/HA/5EM5-HAS6.nc:
+  end_date: 2002-12-17T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2000-01-18T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5K/SJ/SD/5KSJ-SDXS.nc:
+  end_date: 2013-01-01T00:00:00 UTC
+  resolution: monthly
+  start_date: 2012-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5R/6H/JP/5R6H-JPKU.nc:
+  end_date: 2008-01-02T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2003-01-27T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5S/RD/PH/5SRD-PHPV.nc:
+  end_date: 2001-12-17T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2001-01-22T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/65/2Q/WT/652Q-WT6T.nc:
+  end_date: 1997-12-29T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 1997-01-20T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/68/SH/8V/68SH-8VBX.nc:
+  end_date: 2008-12-15T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2008-01-14T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6M/UR/U7/6MUR-U7VY.nc:
+  end_date: 2001-12-17T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2001-01-23T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene_triphenylene
+  - chrysene_triphenylene_qc
+  - chrysene_triphenylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6U/PG/2M/6UPG-2MDP.nc:
+  end_date: 2016-01-04T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-28T00:00:00)
+  start_date: 2014-01-07T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - naphthalene
+  - naphthalene_qc
+  - naphthalene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/79/89/XK/7989-XKEP.nc:
+  end_date: 2017-12-26T00:00:00 UTC
+  resolution: monthly
+  start_date: 2016-11-22T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7E/58/T5/7E58-T5DF.nc:
+  end_date: 2011-01-03T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2010-01-04T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9C/K4/6Z/9CK4-6Z87.nc:
+  end_date: 2022-01-04T00:00:00 UTC
+  resolution: monthly
+  start_date: 2020-12-29T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - BDE_100
+  - BDE_100_qc
+  - BDE_100_ebasmetadata
+  - BDE_47
+  - BDE_47_qc
+  - BDE_47_ebasmetadata
+  - BDE_99
+  - BDE_99_qc
+  - BDE_99_ebasmetadata
+  - HCB
+  - HCB_qc
+  - HCB_ebasmetadata
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pp_DDD
+  - pp_DDD_qc
+  - pp_DDD_ebasmetadata
+  - pp_DDE
+  - pp_DDE_qc
+  - pp_DDE_ebasmetadata
+  - pp_DDT
+  - pp_DDT_qc
+  - pp_DDT_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9H/EK/55/9HEK-55HM.nc:
+  end_date: 2015-08-31T07:00:00 UTC
+  resolution: monthly
+  start_date: 2014-09-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9P/MJ/9T/9PMJ-9TTN.nc:
+  end_date: 2007-01-02T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2002-01-07T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9X/C6/SU/9XC6-SU7Z.nc:
+  end_date: 2012-12-31T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2008-03-31T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_bjk_fluoranthenes
+  - benzo_bjk_fluoranthenes_qc
+  - benzo_bjk_fluoranthenes_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AC/8J/JM/AC8J-JM8F.nc:
+  end_date: 2015-10-31T07:00:00 UTC
+  resolution: monthly
+  start_date: 2015-07-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AQ/SX/VW/AQSX-VWTZ.nc:
+  end_date: 2019-11-30T07:00:00 UTC
+  resolution: Unrecognised (P0000-04-00T00:00:00)
+  start_date: 2019-02-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AW/QP/D3/AWQP-D397.nc:
+  end_date: 2022-10-31T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-61T00:00:00)
+  start_date: 2022-02-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_j_fluoranthene
+  - benzo_j_fluoranthene_qc
+  - benzo_j_fluoranthene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/B8/VF/3H/B8VF-3H8P.nc:
+  end_date: 2001-12-20T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2001-01-22T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene_triphenylene
+  - chrysene_triphenylene_qc
+  - chrysene_triphenylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BK/BM/ZH/BKBM-ZHET.nc:
+  end_date: 2015-04-30T07:00:00 UTC
+  resolution: monthly
+  start_date: 2014-03-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BX/FT/EU/BXFT-EURA.nc:
+  end_date: 2011-01-17T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2010-01-04T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/C4/YF/4G/C4YF-4GW2.nc:
+  end_date: 2022-10-31T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-61T00:00:00)
+  start_date: 2022-02-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_j_fluoranthene
+  - benzo_j_fluoranthene_qc
+  - benzo_j_fluoranthene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/C9/ZX/RZ/C9ZX-RZQZ.nc:
+  end_date: 2021-01-04T00:00:00 UTC
+  resolution: monthly
+  start_date: 2016-01-04T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CD/X3/9W/CDX3-9WJS.nc:
+  end_date: 2007-12-17T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 1996-01-22T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene_triphenylene
+  - chrysene_triphenylene_qc
+  - chrysene_triphenylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CJ/83/VY/CJ83-VYRJ.nc:
+  end_date: 2016-01-26T06:00:00 UTC
+  resolution: monthly
+  start_date: 2013-01-02T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CQ/Y4/5A/CQY4-5AFT.nc:
+  end_date: 2008-12-22T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2008-01-14T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene_triphenylene
+  - chrysene_triphenylene_qc
+  - chrysene_triphenylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DJ/2S/Q8/DJ2S-Q8Q4.nc:
+  end_date: 2022-10-31T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-61T00:00:00)
+  start_date: 2022-02-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_j_fluoranthene
+  - benzo_j_fluoranthene_qc
+  - benzo_j_fluoranthene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DJ/ZB/VG/DJZB-VG97.nc:
+  end_date: 2013-07-31T07:00:00 UTC
+  resolution: monthly
+  start_date: 2013-03-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/E2/DJ/EY/E2DJ-EYBT.nc:
+  end_date: 2013-12-30T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2012-12-31T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_bjk_fluoranthenes
+  - benzo_bjk_fluoranthenes_qc
+  - benzo_bjk_fluoranthenes_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/E4/MF/6G/E4MF-6G63.nc:
+  end_date: 1998-12-28T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 1997-01-20T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene_triphenylene
+  - chrysene_triphenylene_qc
+  - chrysene_triphenylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EP/VK/SV/EPVK-SVKN.nc:
+  end_date: 2022-01-01T08:00:00 UTC
+  resolution: monthly
+  start_date: 2015-01-01T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthene
+  - acenaphthene_qc
+  - acenaphthene_ebasmetadata
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_bjk_fluoranthenes
+  - benzo_bjk_fluoranthenes_qc
+  - benzo_bjk_fluoranthenes_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - chrysene_triphenylene
+  - chrysene_triphenylene_qc
+  - chrysene_triphenylene_ebasmetadata
+  - dibenzo_ac_ah_anthracenes
+  - dibenzo_ac_ah_anthracenes_qc
+  - dibenzo_ac_ah_anthracenes_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - naphthalene
+  - naphthalene_qc
+  - naphthalene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/F6/8S/NR/F68S-NRED.nc:
+  end_date: 2014-12-31T08:00:00 UTC
+  resolution: monthly
+  start_date: 2014-01-01T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_bjk_fluoranthenes
+  - benzo_bjk_fluoranthenes_qc
+  - benzo_bjk_fluoranthenes_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FK/V4/UK/FKV4-UKBV.nc:
+  end_date: 2013-01-02T06:00:00 UTC
+  resolution: monthly
+  start_date: 2011-12-27T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pp_DDD
+  - pp_DDD_qc
+  - pp_DDD_ebasmetadata
+  - pp_DDE
+  - pp_DDE_qc
+  - pp_DDE_ebasmetadata
+  - pp_DDT
+  - pp_DDT_qc
+  - pp_DDT_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FN/C3/4W/FNC3-4WQ3.nc:
+  end_date: 2008-12-29T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2008-01-02T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene_triphenylene
+  - chrysene_triphenylene_qc
+  - chrysene_triphenylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FV/4C/58/FV4C-58QC.nc:
+  end_date: 2011-12-12T06:00:00 UTC
+  resolution: monthly
+  start_date: 2011-01-03T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pp_DDD
+  - pp_DDD_qc
+  - pp_DDD_ebasmetadata
+  - pp_DDE
+  - pp_DDE_qc
+  - pp_DDE_ebasmetadata
+  - pp_DDT
+  - pp_DDT_qc
+  - pp_DDT_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/G4/AX/VY/G4AX-VYW6.nc:
+  end_date: 2021-10-31T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-61T00:00:00)
+  start_date: 2021-06-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_jk_fluoranthenes
+  - benzo_jk_fluoranthenes_qc
+  - benzo_jk_fluoranthenes_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - perylene
+  - perylene_qc
+  - perylene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/G5/JQ/BP/G5JQ-BPP7.nc:
+  end_date: 2016-02-08T06:00:00 UTC
+  resolution: monthly
+  start_date: 2013-04-29T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GS/MS/26/GSMS-26NH.nc:
+  end_date: 2014-12-31T08:00:00 UTC
+  resolution: monthly
+  start_date: 2013-01-01T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_bjk_fluoranthenes
+  - benzo_bjk_fluoranthenes_qc
+  - benzo_bjk_fluoranthenes_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GZ/VY/QZ/GZVY-QZG3.nc:
+  end_date: 2010-03-08T07:00:00 UTC
+  resolution: monthly
+  start_date: 2009-04-20T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HF/MK/35/HFMK-35HT.nc:
+  end_date: 2006-12-19T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2006-01-23T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene_triphenylene
+  - chrysene_triphenylene_qc
+  - chrysene_triphenylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HT/2F/HU/HT2F-HUA9.nc:
+  end_date: 2023-01-26T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-28T00:00:00)
+  start_date: 2015-12-08T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - naphthalene
+  - naphthalene_qc
+  - naphthalene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KF/2F/RR/KF2F-RR4Z.nc:
+  end_date: 2011-01-03T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2010-01-04T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MC/YV/Z2/MCYV-Z2DC.nc:
+  end_date: 2005-12-22T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2005-01-17T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MM/43/7Y/MM43-7YFW.nc:
+  end_date: 2015-12-31T07:00:00 UTC
+  resolution: monthly
+  start_date: 2014-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MW/Y3/S3/MWY3-S3VX.nc:
+  end_date: 2023-01-02T08:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2017-01-02T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_bjk_fluoranthenes
+  - benzo_bjk_fluoranthenes_qc
+  - benzo_bjk_fluoranthenes_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N7/WH/ES/N7WH-ES78.nc:
+  end_date: 2010-05-11T07:00:00 UTC
+  resolution: monthly
+  start_date: 2009-06-22T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ND/GX/8S/NDGX-8SGR.nc:
+  end_date: 2022-01-01T08:00:00 UTC
+  resolution: monthly
+  start_date: 2015-01-01T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthene
+  - acenaphthene_qc
+  - acenaphthene_ebasmetadata
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_bjk_fluoranthenes
+  - benzo_bjk_fluoranthenes_qc
+  - benzo_bjk_fluoranthenes_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - chrysene_triphenylene
+  - chrysene_triphenylene_qc
+  - chrysene_triphenylene_ebasmetadata
+  - dibenzo_ac_ah_anthracenes
+  - dibenzo_ac_ah_anthracenes_qc
+  - dibenzo_ac_ah_anthracenes_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - naphthalene
+  - naphthalene_qc
+  - naphthalene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NJ/66/ZY/NJ66-ZYJZ.nc:
+  end_date: 2024-01-25T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-28T00:00:00)
+  start_date: 2015-12-08T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - naphthalene
+  - naphthalene_qc
+  - naphthalene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NU/9G/MX/NU9G-MXUR.nc:
+  end_date: 2013-01-02T06:00:00 UTC
+  resolution: monthly
+  start_date: 2011-01-03T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pp_DDD
+  - pp_DDD_qc
+  - pp_DDD_ebasmetadata
+  - pp_DDE
+  - pp_DDE_qc
+  - pp_DDE_ebasmetadata
+  - pp_DDT
+  - pp_DDT_qc
+  - pp_DDT_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NY/M5/HS/NYM5-HSXX.nc:
+  end_date: 2022-01-03T00:00:00 UTC
+  resolution: monthly
+  start_date: 2021-01-04T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - BDE_100
+  - BDE_100_qc
+  - BDE_100_ebasmetadata
+  - BDE_209
+  - BDE_209_qc
+  - BDE_209_ebasmetadata
+  - BDE_47
+  - BDE_47_qc
+  - BDE_47_ebasmetadata
+  - BDE_99
+  - BDE_99_qc
+  - BDE_99_ebasmetadata
+  - HCB
+  - HCB_qc
+  - HCB_ebasmetadata
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pp_DDD
+  - pp_DDD_qc
+  - pp_DDD_ebasmetadata
+  - pp_DDE
+  - pp_DDE_qc
+  - pp_DDE_ebasmetadata
+  - pp_DDT
+  - pp_DDT_qc
+  - pp_DDT_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PN/YM/P6/PNYM-P65B.nc:
+  end_date: 2013-01-03T06:00:00 UTC
+  resolution: monthly
+  start_date: 2011-01-17T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q7/3U/UN/Q73U-UNAJ.nc:
+  end_date: 2013-04-29T06:00:00 UTC
+  resolution: monthly
+  start_date: 2011-04-11T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pp_DDD
+  - pp_DDD_qc
+  - pp_DDD_ebasmetadata
+  - pp_DDE
+  - pp_DDE_qc
+  - pp_DDE_ebasmetadata
+  - pp_DDT
+  - pp_DDT_qc
+  - pp_DDT_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QH/W5/MH/QHW5-MHZB.nc:
+  end_date: 2017-01-02T08:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2015-01-05T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_bjk_fluoranthenes
+  - benzo_bjk_fluoranthenes_qc
+  - benzo_bjk_fluoranthenes_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QY/QS/HX/QYQS-HXN8.nc:
+  end_date: 2020-12-29T00:00:00 UTC
+  resolution: monthly
+  start_date: 2017-12-29T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R2/M6/JS/R2M6-JS6K.nc:
+  end_date: 2003-12-22T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2003-01-27T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene_triphenylene
+  - chrysene_triphenylene_qc
+  - chrysene_triphenylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R3/QR/2R/R3QR-2RMC.nc:
+  end_date: 2024-01-01T08:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2017-01-02T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_bjk_fluoranthenes
+  - benzo_bjk_fluoranthenes_qc
+  - benzo_bjk_fluoranthenes_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R6/Q2/VH/R6Q2-VH68.nc:
+  end_date: 2015-12-28T06:00:00 UTC
+  resolution: monthly
+  start_date: 2013-01-02T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R7/58/E9/R758-E953.nc:
+  end_date: 2022-10-31T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-61T00:00:00)
+  start_date: 2022-02-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_j_fluoranthene
+  - benzo_j_fluoranthene_qc
+  - benzo_j_fluoranthene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RG/YF/3N/RGYF-3NHN.nc:
+  end_date: 2020-10-31T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-61T00:00:00)
+  start_date: 2017-02-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RM/BQ/BW/RMBQ-BW3R.nc:
+  end_date: 2011-08-31T07:00:00 UTC
+  resolution: monthly
+  start_date: 2011-05-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthene
+  - acenaphthene_qc
+  - acenaphthene_ebasmetadata
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_j_fluoranthene
+  - benzo_j_fluoranthene_qc
+  - benzo_j_fluoranthene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - naphthalene
+  - naphthalene_qc
+  - naphthalene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RW/9M/NJ/RW9M-NJ9Q.nc:
+  end_date: 2000-12-18T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 1995-01-25T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/S9/JB/RD/S9JB-RD4P.nc:
+  end_date: 2003-12-22T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2003-01-20T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SH/4Y/RB/SH4Y-RBE3.nc:
+  end_date: 2021-10-31T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-61T00:00:00)
+  start_date: 2021-02-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SY/DS/T8/SYDS-T8EW.nc:
+  end_date: 2022-01-03T00:00:00 UTC
+  resolution: monthly
+  start_date: 2020-12-28T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/T4/UU/8M/T4UU-8MY4.nc:
+  end_date: 2014-01-07T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-28T00:00:00)
+  start_date: 2012-12-06T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VM/5A/ZQ/VM5A-ZQBS.nc:
+  end_date: 2010-09-28T07:00:00 UTC
+  resolution: monthly
+  start_date: 2009-10-26T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VP/WZ/6V/VPWZ-6VRX.nc:
+  end_date: 2023-01-01T08:00:00 UTC
+  resolution: monthly
+  start_date: 2022-01-01T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthene
+  - acenaphthene_qc
+  - acenaphthene_ebasmetadata
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_j_fluoranthene
+  - benzo_j_fluoranthene_qc
+  - benzo_j_fluoranthene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - naphthalene
+  - naphthalene_qc
+  - naphthalene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VS/HS/8T/VSHS-8TKV.nc:
+  end_date: 2011-04-11T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2010-03-29T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/W8/3Z/DC/W83Z-DCWM.nc:
+  end_date: 2020-10-31T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-61T00:00:00)
+  start_date: 2016-02-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XA/22/DZ/XA22-DZNK.nc:
+  end_date: 2023-01-01T08:00:00 UTC
+  resolution: monthly
+  start_date: 2022-01-01T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthene
+  - acenaphthene_qc
+  - acenaphthene_ebasmetadata
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_j_fluoranthene
+  - benzo_j_fluoranthene_qc
+  - benzo_j_fluoranthene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - naphthalene
+  - naphthalene_qc
+  - naphthalene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XH/7T/PK/XH7T-PKUY.nc:
+  end_date: 2012-08-31T07:00:00 UTC
+  resolution: monthly
+  start_date: 2012-05-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthene
+  - acenaphthene_qc
+  - acenaphthene_ebasmetadata
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - naphthalene
+  - naphthalene_qc
+  - naphthalene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XU/6K/EM/XU6K-EMU3.nc:
+  end_date: 2017-12-27T00:00:00 UTC
+  resolution: monthly
+  start_date: 2015-12-28T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - BDE_100
+  - BDE_100_qc
+  - BDE_100_ebasmetadata
+  - BDE_47
+  - BDE_47_qc
+  - BDE_47_ebasmetadata
+  - BDE_99
+  - BDE_99_qc
+  - BDE_99_ebasmetadata
+  - HCB
+  - HCB_qc
+  - HCB_ebasmetadata
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pp_DDD
+  - pp_DDD_qc
+  - pp_DDD_ebasmetadata
+  - pp_DDE
+  - pp_DDE_qc
+  - pp_DDE_ebasmetadata
+  - pp_DDT
+  - pp_DDT_qc
+  - pp_DDT_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y4/3J/8F/Y43J-8FSX.nc:
+  end_date: 2020-10-31T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-61T00:00:00)
+  start_date: 2016-02-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y5/2S/55/Y52S-55WR.nc:
+  end_date: 2023-01-01T23:00:00 UTC
+  resolution: monthly
+  start_date: 2022-01-03T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - BDE_100
+  - BDE_100_qc
+  - BDE_100_ebasmetadata
+  - BDE_209
+  - BDE_209_qc
+  - BDE_209_ebasmetadata
+  - BDE_47
+  - BDE_47_qc
+  - BDE_47_ebasmetadata
+  - BDE_99
+  - BDE_99_qc
+  - BDE_99_ebasmetadata
+  - HCB
+  - HCB_qc
+  - HCB_ebasmetadata
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_j_fluoranthene
+  - benzo_j_fluoranthene_qc
+  - benzo_j_fluoranthene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pp_DDD
+  - pp_DDD_qc
+  - pp_DDD_ebasmetadata
+  - pp_DDE
+  - pp_DDE_qc
+  - pp_DDE_ebasmetadata
+  - pp_DDT
+  - pp_DDT_qc
+  - pp_DDT_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YD/HA/DG/YDHA-DGXW.nc:
+  end_date: 2007-12-25T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 1995-07-26T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YE/83/2C/YE83-2CKX.nc:
+  end_date: 2020-10-31T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-61T00:00:00)
+  start_date: 2016-02-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YR/62/8J/YR62-8JSQ.nc:
+  end_date: 1999-12-27T06:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 1999-01-19T06:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YR/B5/V6/YRB5-V695.nc:
+  end_date: 2011-02-01T00:00:00 UTC
+  resolution: monthly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YX/RK/QA/YXRK-QA8P.nc:
+  end_date: 2011-05-01T07:00:00 UTC
+  resolution: monthly
+  start_date: 2011-01-01T07:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthene
+  - acenaphthene_qc
+  - acenaphthene_ebasmetadata
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - arsenic
+  - arsenic_qc
+  - arsenic_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_j_fluoranthene
+  - benzo_j_fluoranthene_qc
+  - benzo_j_fluoranthene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - cadmium
+  - cadmium_qc
+  - cadmium_ebasmetadata
+  - chromium
+  - chromium_qc
+  - chromium_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - copper
+  - copper_qc
+  - copper_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - lead
+  - lead_qc
+  - lead_ebasmetadata
+  - naphthalene
+  - naphthalene_qc
+  - naphthalene_ebasmetadata
+  - nickel
+  - nickel_qc
+  - nickel_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+  - zinc
+  - zinc_qc
+  - zinc_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YY/A6/ZE/YYA6-ZE8R.nc:
+  end_date: 2020-12-28T00:00:00 UTC
+  resolution: monthly
+  start_date: 2017-12-27T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZD/8T/V3/ZD8T-V37P.nc:
+  end_date: 2023-01-01T23:00:00 UTC
+  resolution: monthly
+  start_date: 2022-01-03T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - BDE_100
+  - BDE_100_qc
+  - BDE_100_ebasmetadata
+  - BDE_209
+  - BDE_209_qc
+  - BDE_209_ebasmetadata
+  - BDE_47
+  - BDE_47_qc
+  - BDE_47_ebasmetadata
+  - BDE_99
+  - BDE_99_qc
+  - BDE_99_ebasmetadata
+  - HCB
+  - HCB_qc
+  - HCB_ebasmetadata
+  - PCB_101
+  - PCB_101_qc
+  - PCB_101_ebasmetadata
+  - PCB_118
+  - PCB_118_qc
+  - PCB_118_ebasmetadata
+  - PCB_138
+  - PCB_138_qc
+  - PCB_138_ebasmetadata
+  - PCB_153
+  - PCB_153_qc
+  - PCB_153_ebasmetadata
+  - PCB_180
+  - PCB_180_qc
+  - PCB_180_ebasmetadata
+  - PCB_28
+  - PCB_28_qc
+  - PCB_28_ebasmetadata
+  - PCB_52
+  - PCB_52_qc
+  - PCB_52_ebasmetadata
+  - alpha_HCH
+  - alpha_HCH_qc
+  - alpha_HCH_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_j_fluoranthene
+  - benzo_j_fluoranthene_qc
+  - benzo_j_fluoranthene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - gamma_HCH
+  - gamma_HCH_qc
+  - gamma_HCH_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pp_DDD
+  - pp_DDD_qc
+  - pp_DDD_ebasmetadata
+  - pp_DDE
+  - pp_DDE_qc
+  - pp_DDE_ebasmetadata
+  - pp_DDT
+  - pp_DDT_qc
+  - pp_DDT_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZK/V3/7W/ZKV3-7WHU.nc:
+  end_date: 2024-01-01T08:00:00 UTC
+  resolution: monthly
+  start_date: 2022-01-01T08:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - acenaphthene
+  - acenaphthene_qc
+  - acenaphthene_ebasmetadata
+  - acenaphthylene
+  - acenaphthylene_qc
+  - acenaphthylene_ebasmetadata
+  - anthracene
+  - anthracene_qc
+  - anthracene_ebasmetadata
+  - benz_a_anthracene
+  - benz_a_anthracene_qc
+  - benz_a_anthracene_ebasmetadata
+  - benzo_a_pyrene
+  - benzo_a_pyrene_qc
+  - benzo_a_pyrene_ebasmetadata
+  - benzo_b_fluoranthene
+  - benzo_b_fluoranthene_qc
+  - benzo_b_fluoranthene_ebasmetadata
+  - benzo_ghi_perylene
+  - benzo_ghi_perylene_qc
+  - benzo_ghi_perylene_ebasmetadata
+  - benzo_j_fluoranthene
+  - benzo_j_fluoranthene_qc
+  - benzo_j_fluoranthene_ebasmetadata
+  - benzo_k_fluoranthene
+  - benzo_k_fluoranthene_qc
+  - benzo_k_fluoranthene_ebasmetadata
+  - chrysene
+  - chrysene_qc
+  - chrysene_ebasmetadata
+  - dibenzo_ah_anthracene
+  - dibenzo_ah_anthracene_qc
+  - dibenzo_ah_anthracene_ebasmetadata
+  - fluoranthene
+  - fluoranthene_qc
+  - fluoranthene_ebasmetadata
+  - fluorene
+  - fluorene_qc
+  - fluorene_ebasmetadata
+  - inden_123cd_pyrene
+  - inden_123cd_pyrene_qc
+  - inden_123cd_pyrene_ebasmetadata
+  - naphthalene
+  - naphthalene_qc
+  - naphthalene_ebasmetadata
+  - phenanthrene
+  - phenanthrene_qc
+  - phenanthrene_ebasmetadata
+  - pyrene
+  - pyrene_qc
+  - pyrene_ebasmetadata
