@@ -532,7 +532,7 @@ class ProvidentiaDownload(object):
 
                 #  print the species, resolution and network combinations that are going to be downloaded
                 if not initial_check:
-                    print(f"\n  - {local_dir}, source: {remote_dir}")
+                    print(f"\n  - {local_dir}, source: {remote_dir} ({REMOTE_MACHINE})")
 
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
@@ -683,7 +683,7 @@ class ProvidentiaDownload(object):
 
                 #  print the species, resolution and network combinations that are going to be downloaded
                 if not initial_check:
-                    print(f"\n  - {local_dir}, source: {remote_dir}")
+                    print(f"\n  - {local_dir}, source: {remote_dir} ({REMOTE_MACHINE})")
 
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
@@ -1010,9 +1010,9 @@ class ProvidentiaDownload(object):
                 if not initial_check:
                     local_path = remote_dir.split('/',7)[-1]
                     if self.ghost_version in ["1.2", "1.3", "1.3.1"]:
-                        print(f"\n  - {join(self.exp_root,self.ghost_version,'-'.join(local_path.split('/')[1:4]),*local_path.split('/')[4:])}, source: {remote_dir}")
+                        print(f"\n  - {join(self.exp_root,self.ghost_version,'-'.join(local_path.split('/')[1:4]),*local_path.split('/')[4:])}, source: {remote_dir} ({REMOTE_MACHINE})")
                     else:
-                        print(f"\n  - {join(self.exp_root,local_path)}, source: {remote_dir}")
+                        print(f"\n  - {join(self.exp_root,local_path)}, source: {remote_dir} ({REMOTE_MACHINE})")
             
                 network = remote_dir.split('/')[-1]
                 species = remote_dir.split('/')[-2]
@@ -1235,7 +1235,7 @@ class ProvidentiaDownload(object):
             for remote_dir in res_spec_dir:
                 if not initial_check:
                     local_path = remote_dir.split('/', 6)[-1]
-                    print(f"\n  - {join(self.exp_to_interp_root,local_path)}, source: {remote_dir}")
+                    print(f"\n  - {join(self.exp_to_interp_root,local_path)}, source: {remote_dir} ({REMOTE_MACHINE})")
                          
                 # get nc files
                 nc_files = self.sftp.listdir(remote_dir)
@@ -1350,7 +1350,7 @@ class ProvidentiaDownload(object):
         if not initial_check:
             # print current experiment
             print('\n'+'-'*40)
-            print(f"\nCopying {experiment} non-interpolated experiment data from esarchive to gpfs...")
+            print(f"\nCopying {experiment} non-interpolated experiment data from esarchive to gpfs in {self.machine}...")
             
         # get resolution and species combinations
         res_spec_dir = []
@@ -1466,7 +1466,7 @@ class ProvidentiaDownload(object):
             # get all the nc files in the date range
             for esarchive_dir in res_spec_dir:
                 if not initial_check:
-                    print(f"\n  - {join(self.exp_to_interp_root,'/'.join(esarchive_dir.split('/')[-4:]))}, source: {esarchive_dir}")
+                    print(f"\n  - {join(self.exp_to_interp_root,'/'.join(esarchive_dir.split('/')[-4:]))}, source: {esarchive_dir} ({self.machine})")
                          
                 # get nc files
                 nc_files = os.listdir(esarchive_dir)
