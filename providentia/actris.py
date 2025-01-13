@@ -21,7 +21,6 @@ PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 parameters_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'ghost_actris_variables.yaml')))
 metadata_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'metadata.yaml')))
 coverages_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'coverages.yaml')))
-units_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'units.yaml')))
 variable_mapping = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'variable_mapping.yaml')))
 variable_mapping = {k: v for k, v in variable_mapping.items() if k.strip() and v}
 
@@ -320,11 +319,7 @@ def get_data(files, var, actris_parameter, resolution):
 
         # select data for that variable only
         unformatted_units = variable_mapping[actris_parameter]['units']
-        if unformatted_units in units_dict.keys():
-            units = units_dict[unformatted_units]
-        else:
-            errors[file] = f'Units {unformatted_units} were not found in dictionary'
-            continue
+        units = unformatted_units.replace('/', '_per_').replace(' ', '_')
         units_var = f'{ebas_component}_{units}'
         possible_vars = [ebas_component, 
                          f'{ebas_component}_amean', 
