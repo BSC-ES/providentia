@@ -4791,7 +4791,7 @@ precipitation magnesium mass concentration:
   var: magnesium
 precipitation manganese mass concentration:
   units: ug/l
-  var: manganium
+  var: manganese # Had to correct
 precipitation mercury mass concentration:
   units: ng/l
   var: mercury
