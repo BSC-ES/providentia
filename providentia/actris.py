@@ -120,6 +120,8 @@ def temporally_average_data(combined_ds, resolution, year, month, var):
     # get valid dates frequency
     if resolution == 'hourly':
         frequency = 'h'
+    elif resolution == '3hourly':
+        frequency = '3h'
     elif resolution == 'daily':
         frequency = 'D'
     elif resolution == 'monthly':
@@ -346,9 +348,10 @@ def get_data(files, var, actris_parameter, resolution):
 
         # get data at desired wavelength if wavelength is in coordinates
         if 'Wavelength' in list(ds_var.coords):
-            # TODO: Review wavelength to choose for black carbon
+            # Select most common wavelength for black carbon (name does not provide it)
             if var == 'sconcbc':
-                wavelength = 370
+                wavelength = 880
+                warnings[file] = f'Wavelength appears in dimensions. Selected wavelength: {wavelength}'
             # Get wavelength from variable name for other variables
             else:
                 wavelength = float(re.findall(r'\d+', var)[0])
@@ -373,6 +376,7 @@ def get_data(files, var, actris_parameter, resolution):
                 continue             
 
         # remove artifact and fraction (sconcoc)
+        # TODO: Discuss this
         if 'Artifact' in list(ds_var.coords):
             warnings[file] = f'Taking data from first artifact dimension (Artifact={ds_var.Artifact.values[0]})'
             ds_var = ds_var.isel(Artifact=0, drop=True)
@@ -424,7 +428,7 @@ def get_data(files, var, actris_parameter, resolution):
             
     # show warnings
     if len(warnings) > 0:
-        print(f'\nCollected warnings ({len(warnings)}:')
+        print(f'\nCollected warnings ({len(warnings)}):')
         for file, warning in warnings.items():
             print(f'{file} - Warning: {warning}')
 

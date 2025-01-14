@@ -174,7 +174,7 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/M3/TP/DD/M3TP-DDWQ.nc:
   - equivalent_black_carbon
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MK/73/KZ/MK73-KZHF.nc:
   end_date: 2012-05-17T21:00:00 UTC
-  resolution: Unrecognised (P0000-00-00T03:00:00)
+  resolution: 3hourly
   start_date: 2012-01-01T00:00:00 UTC
   variables:
   - time_bnds
