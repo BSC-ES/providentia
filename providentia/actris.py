@@ -363,13 +363,13 @@ def get_data(files, var, actris_parameter, resolution):
                     ds_var = ds_var.sel(Wavelengthx=wavelength, drop=True)
                     found_wavelength = True
                 else:
-                    existing_wavelengths = f'Existing wavelengths: {ds_var.Wavelengthx.values}'
+                    existing_wavelengths = ds_var.Wavelengthx.values
             elif 'Wavelength' in list(ds_var.coords):
                 if wavelength in ds_var.Wavelength.values:
                     ds_var = ds_var.sel(Wavelength=wavelength, drop=True)
                     found_wavelength = True
                 else:
-                    existing_wavelengths = f'Existing wavelengths: {ds_var.Wavelength.values}'
+                    existing_wavelengths = ds_var.Wavelength.values
                     
             if not found_wavelength:
                 warnings[file] = f'Data at {wavelength}nm could not be found. Existing wavelengths: {existing_wavelengths}'
