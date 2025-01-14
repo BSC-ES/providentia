@@ -611,7 +611,7 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2Q/P7/5Y/2QP7-5YQS.nc:
   - trans-2-butene_pmol_per_mol_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2V/SV/S8/2VSV-S8KP.nc:
   end_date: 2011-02-18T13:18:00 UTC
-  resolution: Unrecognised (P0000-00-00T03:00:00)
+  resolution: 3hourly
   start_date: 2001-03-08T04:20:38 UTC
   variables:
   - time_bnds
@@ -15002,7 +15002,7 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TF/K4/YR/TFK4-YR72.nc:
   - trans-2-butene_pmol_per_mol_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TG/D4/Z3/TGD4-Z3ND.nc:
   end_date: 2009-06-12T15:43:00 UTC
-  resolution: Unrecognised (P0000-00-00T03:00:00)
+  resolution: 3hourly
   start_date: 2001-03-08T04:38:00 UTC
   variables:
   - time_bnds
