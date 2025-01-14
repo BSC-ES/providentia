@@ -410,7 +410,7 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ST/QH/5C/STQH-5CKU.nc:
   - mercury_TGM_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TF/KP/P6/TFKP-P6BV.nc:
   end_date: 2023-01-01T00:00:00 UTC
-  resolution: Unrecognised (P0000-00-00T03:00:00)
+  resolution: 3hourly
   start_date: 2012-01-01T00:10:00 UTC
   variables:
   - time_bnds
@@ -420,7 +420,7 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TF/KP/P6/TFKP-P6BV.nc:
   - mercury_TGM_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UP/7S/P9/UP7S-P9BS.nc:
   end_date: 2023-12-31T21:00:00 UTC
-  resolution: Unrecognised (P0000-00-00T03:00:00)
+  resolution: 3hourly
   start_date: 2012-01-01T00:10:00 UTC
   variables:
   - time_bnds

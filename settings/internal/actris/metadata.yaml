@@ -14,7 +14,6 @@ measurement_methodology: ebas_method_ref
 measuring_instrument_inlet_information: ebas_inlet_description
 measuring_instrument_name: ebas_instrument_name
 measuring_instrument_sampling_type: ebas_instrument_type
-meta_update_stamp: date_metadata_modified
 network: naming_authority
 principal_investigator_email_address: creator_email
 principal_investigator_institution: creator_institution
