@@ -347,7 +347,7 @@ def get_data(files, var, actris_parameter, resolution):
             ds_var = ds_var.sel(Tower_inlet_height=min(ds_var.Tower_inlet_height.values), drop=True)
 
         # get data at desired wavelength if wavelength is in coordinates
-        if 'Wavelength' in list(ds_var.coords):
+        if 'Wavelength' in list(ds_var.coords) or 'Wavelengthx' in list(ds_var.coords):
             # Select most common wavelength for black carbon (name does not provide it)
             if var == 'sconcbc':
                 wavelength = 880
