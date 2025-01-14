@@ -90,9 +90,10 @@ class ProvidentiaDownload(object):
         self.prv_user = env.get("PRV_USER")
         self.prv_password = env.get("PRV_PWD")
 
-        # get user preference over GHOST download and overwrite
+        # get user preference over GHOST download, overwrite and origin update (ACTRIS)
         self.bsc_download_choice = env.get("BSC_DL_CHOICE")
         self.overwrite_choice = env.get("OVERWRITE")
+        self.origin_update_choice = env.get("ORIGIN_UPDATE")
 
         # set timeout limit
         self.timeoutLimit = 3 * 60
@@ -1722,11 +1723,19 @@ class ProvidentiaDownload(object):
                     
             # if file exists
             else:
-                # ask if user wants to overwrite file
-                origin_update_choice = None
-                while origin_update_choice not in ['y','n']:
-                    origin_update_choice = input(f"\nFile containing information of the files available in Thredds for {var} ({path}) already exists. Do you want to update it (y/n)? ").lower() 
-                if origin_update_choice == 'n':
+                # ask if user wants to update file information from NILU Thredds
+                if self.origin_update_choice not in ['y','n']:
+                    while self.origin_update_choice not in ['y','n']:
+                        self.origin_update_choice = input(f"\nFile containing information of the files available in Thredds for {var} ({path}) already exists. Do you want to update it (y/n)? ").lower() 
+                    # ask if user wants to remember the decision
+                    remind_txt = None
+                    while remind_txt not in ['y','n']:
+                        remind_txt = input("\nDo you want to remember your decision for future downloads (y/n)? ").lower() 
+                    # save the decision
+                    if remind_txt == 'y':
+                        with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
+                            f.write(f"ORIGIN_UPDATE={self.origin_update_choice}\n")
+                if self.origin_update_choice == 'n':
                     # get files information
                     files_info = yaml.safe_load(open(join(CURRENT_PATH, path)))
                     files_info = {k: v for k, v in files_info.items() if k.strip() and v}
