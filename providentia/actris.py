@@ -325,7 +325,7 @@ def get_data(files, var, actris_parameter, resolution):
                          f'{ebas_component}_amean', 
                          units_var, 
                          f'{units_var}_amean']
-        if var == 'sconcso4':
+        if var in ['sconcso4', 'precso4']:
             possible_vars.append(f'sulphate_corrected_{units}')
         ds_var_exists = False
         for possible_var in possible_vars:
@@ -352,12 +352,26 @@ def get_data(files, var, actris_parameter, resolution):
             # Get wavelength from variable name for other variables
             else:
                 wavelength = float(re.findall(r'\d+', var)[0])
-            if wavelength in ds_var.Wavelength.values:
-                ds_var = ds_var.sel(Wavelength=wavelength, drop=True)
-            else:
-                warnings[file] = f'Data at {wavelength}nm could not be found'
-                continue
-                
+
+            # Select data for wavelength
+            found_wavelength = False
+            if 'Wavelengthx' in list(ds_var.coords):
+                if wavelength in ds_var.Wavelengthx.values:
+                    ds_var = ds_var.sel(Wavelengthx=wavelength, drop=True)
+                    found_wavelength = True
+                else:
+                    existing_wavelengths = f'Existing wavelengths: {ds_var.Wavelengthx.values}'
+            elif 'Wavelength' in list(ds_var.coords):
+                if wavelength in ds_var.Wavelength.values:
+                    ds_var = ds_var.sel(Wavelength=wavelength, drop=True)
+                    found_wavelength = True
+                else:
+                    existing_wavelengths = f'Existing wavelengths: {ds_var.Wavelength.values}'
+                    
+            if not found_wavelength:
+                warnings[file] = f'Data at {wavelength}nm could not be found. Existing wavelengths: {existing_wavelengths}'
+                continue             
+
         # remove artifact and fraction (sconcoc)
         if 'Artifact' in list(ds_var.coords):
             warnings[file] = f'Taking data from first artifact dimension (Artifact={ds_var.Artifact.values[0]})'
@@ -404,13 +418,13 @@ def get_data(files, var, actris_parameter, resolution):
     
     # show errors
     if len(errors) > 0:
-        print('\nCollected errors:')
+        print(f'\nCollected errors ({len(errors)}):')
         for file, error in errors.items():
             print(f'{file} - Error: {error}')
-
+            
     # show warnings
     if len(warnings) > 0:
-        print('\nCollected warnings:')
+        print(f'\nCollected warnings ({len(warnings)}:')
         for file, warning in warnings.items():
             print(f'{file} - Warning: {warning}')
 
