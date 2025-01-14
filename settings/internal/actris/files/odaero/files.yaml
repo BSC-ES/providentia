@@ -1526,7 +1526,7 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MZ/24/XJ/MZ24-XJ8C.nc:
   - aerosol_optical_depth_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/N4/KZ/QE/N4KZ-QERU.nc:
   end_date: 2016-08-28T10:29:00 UTC
-  resolution: Unrecognised (P0000-00-00T03:00:00)
+  resolution: 3hourly
   start_date: 2016-08-18T07:30:00 UTC
   variables:
   - time_bnds
@@ -1545,7 +1545,7 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/N4/KZ/QE/N4KZ-QERU.nc:
   - aerosol_optical_depth_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/N8/K7/2Q/N8K7-2QJT.nc:
   end_date: 2014-08-29T08:29:00 UTC
-  resolution: Unrecognised (P0000-00-00T03:00:00)
+  resolution: 3hourly
   start_date: 2014-01-10T11:30:00 UTC
   variables:
   - time_bnds
@@ -2143,7 +2143,7 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/U5/X3/TJ/U5X3-TJKZ.nc:
   - aerosol_optical_depth_stddev
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/U8/4H/QJ/U84H-QJJP.nc:
   end_date: 2014-04-28T16:29:00 UTC
-  resolution: Unrecognised (P0000-00-00T03:00:00)
+  resolution: 3hourly
   start_date: 2014-04-20T08:30:00 UTC
   variables:
   - time_bnds

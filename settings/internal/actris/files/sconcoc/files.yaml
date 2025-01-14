@@ -288,7 +288,7 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/34/8U/SD/348U-SDNA.nc:
   - organic_carbon_max_Fraction
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3F/M8/4S/3FM8-4SXP.nc:
   end_date: 2012-05-17T21:00:00 UTC
-  resolution: Unrecognised (P0000-00-00T03:00:00)
+  resolution: 3hourly
   start_date: 2012-01-01T00:00:00 UTC
   variables:
   - time_bnds
@@ -4429,7 +4429,7 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HJ/T7/CQ/HJT7-CQBY.nc:
   - organic_carbon_pm25_amean_Fraction
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HV/DD/DC/HVDD-DCWN.nc:
   end_date: 2020-04-16T00:35:00 UTC
-  resolution: Unrecognised (P0000-00-00T03:00:00)
+  resolution: 3hourly
   start_date: 2017-01-01T01:00:00 UTC
   variables:
   - time_bnds
