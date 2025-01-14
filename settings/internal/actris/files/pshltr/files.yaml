@@ -1,0 +1,2865 @@
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/28/8E/9S/288E-9SET.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2P/CG/GP/2PCG-GPVV.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3H/SU/28/3HSU-28MU.nc:
+  end_date: 2013-08-28T09:00:00 UTC
+  resolution: hourly
+  start_date: 2011-12-31T23:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3N/4J/7D/3N4J-7DMB.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2020-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - gust
+  - gust_qc
+  - gust_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3N/77/QF/3N77-QF4J.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2020-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Q/WJ/K3/3QWJ-K3X3.nc:
+  end_date: 2008-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2008-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Z/6Q/K6/3Z6Q-K6ST.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2020-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/44/GJ/Z6/44GJ-Z6QB.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/46/4P/S2/464P-S2PV.nc:
+  end_date: 2009-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4E/KZ/RQ/4EKZ-RQR6.nc:
+  end_date: 2022-12-31T23:59:59 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4M/6H/5K/4M6H-5KUY.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4Z/WN/EH/4ZWN-EHK4.nc:
+  end_date: 2013-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/55/N6/BM/55N6-BMGW.nc:
+  end_date: 2013-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5J/JZ/WR/5JJZ-WRZ3.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2021-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5J/UB/Q4/5JUB-Q4TZ.nc:
+  end_date: 2009-09-30T23:00:00 UTC
+  resolution: hourly
+  start_date: 2008-02-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - gust
+  - gust_qc
+  - gust_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5K/7N/W6/5K7N-W6KK.nc:
+  end_date: 2015-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5S/6K/H3/5S6K-H39X.nc:
+  end_date: 2014-03-20T13:00:00 UTC
+  resolution: hourly
+  start_date: 2013-07-08T22:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5U/QC/MH/5UQC-MHTZ.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5X/2E/VS/5X2E-VS23.nc:
+  end_date: 2018-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/69/W4/ZF/69W4-ZFCF.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2010-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6G/VS/DW/6GVS-DWDW.nc:
+  end_date: 2022-07-20T00:00:00 UTC
+  resolution: hourly
+  start_date: 2022-07-12T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/72/E2/VN/72E2-VNKT.nc:
+  end_date: 2023-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2017-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/73/Z7/ZA/73Z7-ZAXD.nc:
+  end_date: 2018-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2014-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7A/76/2J/7A76-2J78.nc:
+  end_date: 2009-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7F/UT/NJ/7FUT-NJ7W.nc:
+  end_date: 2014-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7W/S5/GF/7WS5-GFVD.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2002-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8E/H9/XD/8EH9-XD6N.nc:
+  end_date: 2020-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2018-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8K/TZ/QY/8KTZ-QYBB.nc:
+  end_date: 2020-04-16T12:00:00 UTC
+  resolution: hourly
+  start_date: 2020-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8N/GM/GT/8NGM-GTFF.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2010-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8R/9K/22/8R9K-22MT.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2023-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8T/8Z/HN/8T8Z-HN42.nc:
+  end_date: 2022-12-31T23:59:59 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9H/Z7/4F/9HZ7-4FN4.nc:
+  end_date: 2008-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2008-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/A8/V6/T4/A8V6-T4VW.nc:
+  end_date: 2011-07-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 1996-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/A9/3A/MA/A93A-MADG.nc:
+  end_date: 2019-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2018-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AH/VG/UK/AHVG-UKKX.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2018-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AK/7E/3H/AK7E-3H9Y.nc:
+  end_date: 2018-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AM/74/CW/AM74-CWEQ.nc:
+  end_date: 2010-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AM/UP/V6/AMUP-V676.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AU/BF/RT/AUBF-RT2A.nc:
+  end_date: 2019-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2017-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AV/EH/J5/AVEH-J5HX.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2008-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/B5/HK/9A/B5HK-9AJ9.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2021-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BK/S5/N6/BKS5-N632.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2014-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BM/HB/NN/BMHB-NND8.nc:
+  end_date: 2015-12-31T05:00:00 UTC
+  resolution: hourly
+  start_date: 2014-12-31T23:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BP/V6/G7/BPV6-G7FU.nc:
+  end_date: 2014-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BQ/XQ/97/BQXQ-97NM.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2014-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BT/7B/A8/BT7B-A8CU.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2020-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BU/Y6/AU/BUY6-AUNC.nc:
+  end_date: 2008-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2002-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BZ/7K/XV/BZ7K-XVZE.nc:
+  end_date: 2018-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BZ/NF/M9/BZNF-M9X9.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2020-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CM/7J/T9/CM7J-T9SZ.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CM/UH/PT/CMUH-PTS3.nc:
+  end_date: 2022-12-31T23:59:59 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CT/M2/QR/CTM2-QRAB.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2021-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CY/KE/95/CYKE-95T6.nc:
+  end_date: 2013-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DJ/UQ/WY/DJUQ-WYHX.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DK/H5/GU/DKH5-GU5S.nc:
+  end_date: 2022-12-31T23:59:59 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DZ/PU/EH/DZPU-EHTY.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2010-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/E6/T3/7X/E6T3-7XK4.nc:
+  end_date: 2018-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2015-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EF/B6/3X/EFB6-3XKN.nc:
+  end_date: 2016-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2016-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EJ/JC/JA/EJJC-JAC3.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2002-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EJ/MU/WE/EJMU-WEBA.nc:
+  end_date: 2020-04-16T00:00:00 UTC
+  resolution: hourly
+  start_date: 2019-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EV/69/GT/EV69-GTAS.nc:
+  end_date: 2014-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EW/PW/4P/EWPW-4P3B.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2021-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EZ/QS/6P/EZQS-6PW6.nc:
+  end_date: 2014-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/F5/84/XH/F584-XHZF.nc:
+  end_date: 2013-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/F8/UA/RG/F8UA-RGPB.nc:
+  end_date: 2013-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2004-05-31T23:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FD/3Y/AN/FD3Y-ANKZ.nc:
+  end_date: 2011-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FE/54/99/FE54-99PF.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2021-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FG/EV/D5/FGEV-D5FS.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2014-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/G8/JT/9J/G8JT-9JAX.nc:
+  end_date: 2020-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-31T23:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GW/9B/HS/GW9B-HSNH.nc:
+  end_date: 2009-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2005-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - gust
+  - gust_qc
+  - gust_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GZ/YR/VV/GZYR-VVNE.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2002-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H3/9B/HE/H39B-HE2C.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2004-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H7/93/J5/H793-J5QT.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2018-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HA/XJ/FW/HAXJ-FWF7.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2018-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HC/35/H5/HC35-H52K.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HE/8B/UE/HE8B-UEZP.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2002-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HG/XY/E9/HGXY-E9M8.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2002-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HS/H3/MN/HSH3-MND4.nc:
+  end_date: 2022-12-31T23:59:59 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HU/7D/RC/HU7D-RCHB.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2014-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HV/H3/3W/HVH3-3WSZ.nc:
+  end_date: 2018-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2017-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JB/76/7W/JB76-7WVK.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2019-12-31T23:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JD/KC/4D/JDKC-4DZ8.nc:
+  end_date: 2013-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JQ/RU/EP/JQRU-EPCC.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2021-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature_qc
+  - temperature_ebasmetadata
+  - pressure_qc
+  - pressure_ebasmetadata
+  - gust_qc
+  - gust_ebasmetadata
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+  - relative_humidity
+  - temperature
+  - pressure
+  - gust
+  - wind_direction
+  - wind_speed
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JZ/78/C8/JZ78-C8GJ.nc:
+  end_date: 2009-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2002-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/K2/67/6B/K267-6BW3.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/K5/56/PZ/K556-PZ73.nc:
+  end_date: 2014-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KC/49/95/KC49-95QG.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - dewpoint_temperature
+  - dewpoint_temperature_qc
+  - dewpoint_temperature_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KE/WW/55/KEWW-556R.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2021-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KT/C7/U3/KTC7-U32M.nc:
+  end_date: 2020-09-09T14:00:00 UTC
+  resolution: hourly
+  start_date: 2020-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - gust
+  - gust_qc
+  - gust_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/M2/PK/M3/M2PK-M3XG.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2021-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MF/BU/C4/MFBU-C4MP.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2014-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MF/UH/ZP/MFUH-ZPCC.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2014-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MR/NY/CH/MRNY-CH3Y.nc:
+  end_date: 2013-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MU/76/P9/MU76-P9YU.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - dewpoint_temperature
+  - dewpoint_temperature_qc
+  - dewpoint_temperature_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N4/7K/SD/N47K-SDR6.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2010-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N5/ER/2Y/N5ER-2Y4B.nc:
+  end_date: 2023-12-31T23:01:00 UTC
+  resolution: hourly
+  start_date: 2020-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NJ/KT/X7/NJKT-X74H.nc:
+  end_date: 2010-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NV/WY/A8/NVWY-A8WJ.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2002-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NY/DF/CZ/NYDF-CZNW.nc:
+  end_date: 2009-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 1998-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - gust
+  - gust_qc
+  - gust_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/P4/S8/ZF/P4S8-ZFS6.nc:
+  end_date: 2020-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2014-01-31T23:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/P6/CC/CC/P6CC-CC4Q.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/P6/YQ/N7/P6YQ-N7CF.nc:
+  end_date: 2010-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PG/SV/JU/PGSV-JU4A.nc:
+  end_date: 2016-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2016-04-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_gust
+  - wind_gust_qc
+  - wind_gust_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PH/TH/P2/PHTH-P2YX.nc:
+  end_date: 2012-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - dewpoint_temperature
+  - dewpoint_temperature_qc
+  - dewpoint_temperature_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PJ/8E/B5/PJ8E-B5VZ.nc:
+  end_date: 2023-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2017-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PM/AB/P5/PMAB-P5ZF.nc:
+  end_date: 2019-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2017-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PQ/HZ/JB/PQHZ-JB9Q.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2021-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PU/S9/BW/PUS9-BWS6.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2018-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PV/2K/K6/PV2K-K6RG.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PW/AS/JT/PWAS-JTG3.nc:
+  end_date: 2022-12-31T23:59:59 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q7/AD/BY/Q7AD-BYF2.nc:
+  end_date: 2016-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QD/Q6/RY/QDQ6-RYU6.nc:
+  end_date: 2022-12-31T23:59:59 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QE/ZG/ZX/QEZG-ZXUP.nc:
+  end_date: 2008-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2008-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QG/UP/GR/QGUP-GR5G.nc:
+  end_date: 2013-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QK/RP/XP/QKRP-XPGA.nc:
+  end_date: 2022-12-31T23:59:59 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RH/E6/WR/RHE6-WREC.nc:
+  end_date: 2009-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RH/P5/WM/RHP5-WMMB.nc:
+  end_date: 2022-12-31T23:59:59 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - precipitation_amount
+  - precipitation_amount_qc
+  - precipitation_amount_ebasmetadata
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RK/WR/HA/RKWR-HA8U.nc:
+  end_date: 2018-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RU/AS/FM/RUAS-FM7Y.nc:
+  end_date: 2018-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RY/9D/9H/RY9D-9HN5.nc:
+  end_date: 2014-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2014-04-07T10:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SF/G3/VN/SFG3-VNZ8.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2016-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SU/6F/AD/SU6F-ADD9.nc:
+  end_date: 2014-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TS/J2/6K/TSJ2-6KY9.nc:
+  end_date: 2009-12-27T15:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/U6/98/U9/U698-U92H.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2010-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/U7/ZR/GU/U7ZR-GUU4.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/U8/C2/KJ/U8C2-KJPG.nc:
+  end_date: 2014-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UA/3T/MY/UA3T-MYS4.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2021-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UB/2G/7M/UB2G-7M42.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2014-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UC/S7/9Y/UCS7-9YBC.nc:
+  end_date: 2015-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2014-12-31T23:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UH/59/5F/UH59-5FR5.nc:
+  end_date: 2014-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2007-01-19T23:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UU/B9/XZ/UUB9-XZSS.nc:
+  end_date: 2012-07-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - gust
+  - gust_qc
+  - gust_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UV/QU/TQ/UVQU-TQEN.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2010-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UX/MB/F6/UXMB-F6SJ.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/V3/MN/G5/V3MN-G5X2.nc:
+  end_date: 2020-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2015-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/V9/UT/N6/V9UT-N67U.nc:
+  end_date: 2013-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2012-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - dewpoint_temperature
+  - dewpoint_temperature_qc
+  - dewpoint_temperature_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VB/NW/AK/VBNW-AK3W.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VC/SK/6N/VCSK-6NFM.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VK/25/4D/VK25-4DB8.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2021-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VZ/T8/AX/VZT8-AXQS.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2002-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/W9/3Q/KE/W93Q-KE8J.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2023-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WS/KR/QJ/WSKR-QJNN.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  start_date: 2016-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XA/NJ/PM/XANJ-PMEN.nc:
+  end_date: 2013-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XB/BQ/TF/XBBQ-TFUY.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2021-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+  - downward_solar_radiation_flux_density
+  - downward_solar_radiation_flux_density_qc
+  - downward_solar_radiation_flux_density_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XQ/JB/4N/XQJB-4NCK.nc:
+  end_date: 2016-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - UVA_radiation
+  - UVA_radiation_qc
+  - UVA_radiation_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YF/MA/8G/YFMA-8GPS.nc:
+  end_date: 2013-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YP/DU/ZF/YPDU-ZFHD.nc:
+  end_date: 2014-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YU/AZ/A2/YUAZ-A2QG.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2020-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - gust
+  - gust_qc
+  - gust_ebasmetadata
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - relative_humidity
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - wind_direction
+  - wind_direction_qc
+  - wind_direction_ebasmetadata
+  - wind_speed
+  - wind_speed_qc
+  - wind_speed_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YZ/TF/DC/YZTF-DCPV.nc:
+  end_date: 2015-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZV/3C/VE/ZV3C-VEGY.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZV/S4/6J/ZVS4-6JJN.nc:
+  end_date: 2013-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
