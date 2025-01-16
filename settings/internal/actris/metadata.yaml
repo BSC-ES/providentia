@@ -9,7 +9,6 @@ data_licence: license
 land_use: ebas_station_land_use
 latitude: ebas_station_latitude
 longitude: ebas_station_longitude
-measurement_altitude: ebas_station_altitude
 measurement_methodology: ebas_method_ref
 measuring_instrument_inlet_information: ebas_inlet_description
 measuring_instrument_name: ebas_instrument_name
