@@ -1783,9 +1783,14 @@ class ProvidentiaDownload(object):
                 for key, value in metadata[resolution].items():
                     if key in ['latitude', 'longitude']:
                         value = [float(val) for val in value]
-                    elif key in ['altitude', 'measurement_altitude', 'sampling_height']:
+                    elif key in ['altitude', 'sampling_height']:
                         value = [float(val.replace('m', '').strip()) if isinstance(val, str) else val for val in value]
                     combined_ds[key] = xr.Variable(data=value, dims=('station'))
+
+                # calculate measurement_altitude if altitude and sampling_height exist
+                if ('altitude' in combined_ds.keys()) and ('sampling_height' in combined_ds.keys()):
+                    value = combined_ds['altitude'].values + combined_ds['sampling_height'].values
+                    combined_ds['measurement_altitude'] = xr.Variable(data=value, dims=('station'))
 
                 # add units for lat and lon
                 # TODO: Check attrs geospatial_lat_units and geospatial_lon_units
