@@ -148,17 +148,20 @@ class SubmitInterpolation(object):
             exp_dir = None
             msg = ""
 
-            # for HPC machines, search in interp_experiments
-            if self.machine != "local":
-                # get experiment type and specific directories
-                for experiment_type, experiment_dict in interp_experiments.items():
-                    if experiment_to_process in experiment_dict["experiments"]:
-                        # take first functional directory 
+            # get experiment type and specific directories
+            for experiment_type, experiment_dict in interp_experiments.items():
+                if experiment_to_process in experiment_dict["experiments"]:
+                    # take first functional directory 
+                    if self.machine != "local":
+                        # for HPC machines, search in interp_experiments
                         for temp_exp_dir in experiment_dict["paths"]:
                             temp_exp_dir = join(temp_exp_dir, experiment_to_process)
                             if os.path.exists(temp_exp_dir):
                                 exp_dir = temp_exp_dir
                                 break
+                        break
+                    # for local machines, break to get experiment_type
+                    else: 
                         break
                 
                 msg += f"The experiment '{experiment_to_process}' is in none of the experiment paths in {self.exp_to_interp_root} are available in this machine ({self.machine}). "
