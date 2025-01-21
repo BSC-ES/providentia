@@ -496,7 +496,8 @@ class ExperimentInterpolation(object):
         # get the metadata
         self.obs_long_name = obs_measured_var_obj.long_name
         self.obs_units = obs_measured_var_obj.units
-        self.obs_standard_name = obs_measured_var_obj.standard_name
+        if self.reading_ghost:
+            self.obs_standard_name = obs_measured_var_obj.standard_name
 
         # station object
         # for GHOST always is "station_reference" 
