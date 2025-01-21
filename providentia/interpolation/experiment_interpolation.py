@@ -962,149 +962,154 @@ class ExperimentInterpolation(object):
         root_grp.creator_email = 'dene.bowdalo@bsc.es'
 
         # iterate through each station to process
-        for ii, station_reference in enumerate(self.station_references):
-            if ii == 0:
-                # netcdf dimensions
-                root_grp.createDimension('station', len(self.obs_lons))
-                root_grp.createDimension('time', len(self.yearmonth_time))
-                root_grp.createDimension('model_longitude', self.x_N)
-                root_grp.createDimension('model_latitude', self.y_N)
-                root_grp.createDimension('grid_edge', self.model_grid_outline.shape[0])
+        try:
+            for ii, station_reference in enumerate(self.station_references):
+                if ii == 0:
+                    # netcdf dimensions
+                    root_grp.createDimension('station', len(self.obs_lons))
+                    root_grp.createDimension('time', len(self.yearmonth_time))
+                    root_grp.createDimension('model_longitude', self.x_N)
+                    root_grp.createDimension('model_latitude', self.y_N)
+                    root_grp.createDimension('grid_edge', self.model_grid_outline.shape[0])
 
-                # create time variable
-                time_var = root_grp.createVariable('time', 'u4', ('time'))
-                time_var.standard_name = 'time'
-                time_var.long_name = 'time'
-                time_var.units = '{} since {}-{}-01 00:00:00'.format(self.descriptive_temporal_resolution, self.year, 
-                                                                     self.month)
-                msg = 'Time in {} since {}-{}-01 00:00 UTC. '.format(self.descriptive_temporal_resolution, self.year, 
-                                                                     self.month)
-                msg += 'Time given refers to the start of the time window the measurement '
-                msg += 'is representative of (temporal resolution)'
-                time_var.description = msg
-                time_var.axis = 'T'
-                time_var.calendar = 'standard'
-                time_var.tz = 'UTC'
+                    # create time variable
+                    time_var = root_grp.createVariable('time', 'u4', ('time'))
+                    time_var.standard_name = 'time'
+                    time_var.long_name = 'time'
+                    time_var.units = '{} since {}-{}-01 00:00:00'.format(self.descriptive_temporal_resolution, self.year, 
+                                                                        self.month)
+                    msg = 'Time in {} since {}-{}-01 00:00 UTC. '.format(self.descriptive_temporal_resolution, self.year, 
+                                                                        self.month)
+                    msg += 'Time given refers to the start of the time window the measurement '
+                    msg += 'is representative of (temporal resolution)'
+                    time_var.description = msg
+                    time_var.axis = 'T'
+                    time_var.calendar = 'standard'
+                    time_var.tz = 'UTC'
 
-                # create observational equivalent station reference variable
-                station_reference_var = root_grp.createVariable('station_reference', str, ('station'))
-                if self.reading_ghost:
-                    station_reference_var.standard_name = self.obs_station_reference_standard_name
-                    station_reference_var.long_name = self.obs_station_reference_long_name
-                    station_reference_var.units = self.obs_station_reference_units
-                    station_reference_var.description = self.obs_station_reference_description
+                    # create observational equivalent station reference variable
+                    station_reference_var = root_grp.createVariable('station_reference', str, ('station'))
+                    if self.reading_ghost:
+                        station_reference_var.standard_name = self.obs_station_reference_standard_name
+                        station_reference_var.long_name = self.obs_station_reference_long_name
+                        station_reference_var.units = self.obs_station_reference_units
+                        station_reference_var.description = self.obs_station_reference_description
 
-                # create observational equivalent longitude/latitude variables
-                longitude_var = root_grp.createVariable('longitude', 'f8', ('station'))
-                if self.reading_ghost:
-                    longitude_var.standard_name = self.obs_lon_obj_standard_name
-                    longitude_var.units = self.obs_lon_obj_units
-                    longitude_var.long_name = self.obs_lon_obj_long_name
-                    longitude_var.description = self.obs_lon_obj_description
-                longitude_var.axis = 'X'
+                    # create observational equivalent longitude/latitude variables
+                    longitude_var = root_grp.createVariable('longitude', 'f8', ('station'))
+                    if self.reading_ghost:
+                        longitude_var.standard_name = self.obs_lon_obj_standard_name
+                        longitude_var.units = self.obs_lon_obj_units
+                        longitude_var.long_name = self.obs_lon_obj_long_name
+                        longitude_var.description = self.obs_lon_obj_description
+                    longitude_var.axis = 'X'
 
-                latitude_var = root_grp.createVariable('latitude', 'f8', ('station'))
-                if self.reading_ghost:
-                    latitude_var.standard_name = self.obs_lat_obj_standard_name
-                    latitude_var.units = self.obs_lat_obj_units
-                    latitude_var.long_name = self.obs_lat_obj_long_name
-                    latitude_var.description = self.obs_lat_obj_description
-                latitude_var.axis = 'Y'
+                    latitude_var = root_grp.createVariable('latitude', 'f8', ('station'))
+                    if self.reading_ghost:
+                        latitude_var.standard_name = self.obs_lat_obj_standard_name
+                        latitude_var.units = self.obs_lat_obj_units
+                        latitude_var.long_name = self.obs_lat_obj_long_name
+                        latitude_var.description = self.obs_lat_obj_description
+                    latitude_var.axis = 'Y'
 
-                # create 2D meshed longitude/latitude gridcell centre variables
-                model_centre_longitude_var = root_grp.createVariable('model_centre_longitude', 'f8', 
-                                                                     ('model_latitude','model_longitude'))
-                model_centre_longitude_var.standard_name = 'model centre longitude'
-                model_centre_longitude_var.long_name = 'model centre longitude'
-                model_centre_longitude_var.units = self.obs_lon_obj_units
-                msg = '2D meshed grid centre longitudes with '
-                msg += '{} longitudes in {} bands of latitude'.format(self.x_N, self.y_N)
-                model_centre_longitude_var.description = msg
-                model_centre_longitude_var.axis = 'X'            
-    
-                model_centre_latitude_var = root_grp.createVariable('model_centre_latitude', 'f8', 
-                                                                    ('model_latitude','model_longitude'))
-                model_centre_latitude_var.standard_name = 'model centre latitude'
-                model_centre_latitude_var.long_name = 'model centre latitude'
-                model_centre_latitude_var.units = self.obs_lat_obj_units
-                msg = '2D meshed grid centre longitudes with '
-                msg += '{} longitudes in {} bands of latitude'.format(self.y_N, self.x_N)
-                model_centre_latitude_var.description = msg
-                model_centre_latitude_var.axis = 'Y'
-
-                # create grid domain edge longitude/latitude variables
-                grid_edge_longitude_var = root_grp.createVariable('grid_edge_longitude', 'f8', ('grid_edge'))   
-                grid_edge_longitude_var.standard_name = 'grid edge longitude'
-                grid_edge_longitude_var.long_name = 'grid edge longitude'
-                grid_edge_longitude_var.units = self.obs_lon_obj_units
-                msg = 'Longitude coordinate along edge of grid domain '
-                msg += '(going clockwise around grid boundary from bottom-left corner).'
-                grid_edge_longitude_var.description = msg
-                grid_edge_longitude_var.axis = 'X'
-
-                grid_edge_latitude_var = root_grp.createVariable('grid_edge_latitude', 'f8', ('grid_edge'))
-                grid_edge_latitude_var.standard_name = 'grid edge latitude'
-                grid_edge_latitude_var.long_name = 'grid edge latitude'
-                grid_edge_latitude_var.units = self.obs_lat_obj_units
-                msg = 'Latitude coordinate along edge of grid domain '
-                msg += '(going clockwise around grid boundary from bottom-left corner).'
-                grid_edge_latitude_var.description = msg
-                grid_edge_latitude_var.axis = 'Y'
-
-                # create measured variable
-                measured_var = root_grp.createVariable(self.original_speci_to_process, 'f4', ('station', 'time'))
-                # GHOST
-                if self.reading_ghost:
-                    measured_var.long_name = self.obs_long_name
-                    measured_var.units = self.obs_units
-                    measured_var.standard_name = self.obs_standard_name
-                    measured_var.description = 'Interpolated value of {} from the experiment {} ' \
-                                          'with reference to the measurement stations in the {} network'.format(
-                        self.obs_standard_name, self.experiment_to_process, 
-                        self.network_to_interpolate_against)
-                # non-GHOST
-                else:
-                    measured_var.standard_name = self.original_speci_to_process
-                    measured_var.description = 'Interpolated value of {} from the experiment {} with reference to the measurement stations in the {} network'.format(
-                        self.original_speci_to_process, self.experiment_to_process,
-                        self.network_to_interpolate_against)
-
-                # write to variables
-                time_var[:] = self.yearmonth_time
-                station_reference_var[:] = self.station_references
-                longitude_var[:] = self.obs_lons
-                latitude_var[:] = self.obs_lats                                                           
-                model_centre_longitude_var[:] = self.mod_lons_centre
-                model_centre_latitude_var[:] = self.mod_lats_centre
-                grid_edge_longitude_var[:] = self.model_grid_outline[:,0]
-                grid_edge_latitude_var[:] = self.model_grid_outline[:,1]
+                    # create 2D meshed longitude/latitude gridcell centre variables
+                    model_centre_longitude_var = root_grp.createVariable('model_centre_longitude', 'f8', 
+                                                                        ('model_latitude','model_longitude'))
+                    model_centre_longitude_var.standard_name = 'model centre longitude'
+                    model_centre_longitude_var.long_name = 'model centre longitude'
+                    model_centre_longitude_var.units = self.obs_lon_obj_units
+                    msg = '2D meshed grid centre longitudes with '
+                    msg += '{} longitudes in {} bands of latitude'.format(self.x_N, self.y_N)
+                    model_centre_longitude_var.description = msg
+                    model_centre_longitude_var.axis = 'X'            
         
-            # iterate through observational stations
-            # use calculated interpolated weights per station to model grid to produce model reciprocal output
-            # if all station weights are 0, station is outside model grid domain
-            # set all values to be NaN
-            station_weights = self.inverse_dists[ii,:]
-            if np.all(station_weights == 0):
-                interp_vals = np.full(len(self.yearmonth_time), np.NaN, dtype=np.float32)
-            else:
-                # get reciprocal model data at N nearest neighbours to observational station 
-                cut_model_data = self.monthly_model_data[:,self.nearest_neighbour_inds[ii,:int(self.interp_n_neighbours)],
-                                                                                       self.nearest_neighbour_inds[ii,int(self.interp_n_neighbours):]]
-                
-                # create mask where data == NaN or infinite
-                invalid_mask = ~np.isfinite(cut_model_data)
-                
-                # create masked array
-                cut_model_data = np.ma.MaskedArray(cut_model_data, mask=invalid_mask)
-                
-                # interpolate masked array across time dimension using interpolated weights per station
-                interp_vals = np.ma.average(cut_model_data, weights=station_weights, axis=1)
+                    model_centre_latitude_var = root_grp.createVariable('model_centre_latitude', 'f8', 
+                                                                        ('model_latitude','model_longitude'))
+                    model_centre_latitude_var.standard_name = 'model centre latitude'
+                    model_centre_latitude_var.long_name = 'model centre latitude'
+                    model_centre_latitude_var.units = self.obs_lat_obj_units
+                    msg = '2D meshed grid centre longitudes with '
+                    msg += '{} longitudes in {} bands of latitude'.format(self.y_N, self.x_N)
+                    model_centre_latitude_var.description = msg
+                    model_centre_latitude_var.axis = 'Y'
 
-            # write measured variable 
-            measured_var[ii,:] = interp_vals
+                    # create grid domain edge longitude/latitude variables
+                    grid_edge_longitude_var = root_grp.createVariable('grid_edge_longitude', 'f8', ('grid_edge'))   
+                    grid_edge_longitude_var.standard_name = 'grid edge longitude'
+                    grid_edge_longitude_var.long_name = 'grid edge longitude'
+                    grid_edge_longitude_var.units = self.obs_lon_obj_units
+                    msg = 'Longitude coordinate along edge of grid domain '
+                    msg += '(going clockwise around grid boundary from bottom-left corner).'
+                    grid_edge_longitude_var.description = msg
+                    grid_edge_longitude_var.axis = 'X'
 
-        # close writing to netCDF
-        root_grp.close() 
+                    grid_edge_latitude_var = root_grp.createVariable('grid_edge_latitude', 'f8', ('grid_edge'))
+                    grid_edge_latitude_var.standard_name = 'grid edge latitude'
+                    grid_edge_latitude_var.long_name = 'grid edge latitude'
+                    grid_edge_latitude_var.units = self.obs_lat_obj_units
+                    msg = 'Latitude coordinate along edge of grid domain '
+                    msg += '(going clockwise around grid boundary from bottom-left corner).'
+                    grid_edge_latitude_var.description = msg
+                    grid_edge_latitude_var.axis = 'Y'
+
+                    # create measured variable
+                    measured_var = root_grp.createVariable(self.original_speci_to_process, 'f4', ('station', 'time'))
+                    # GHOST
+                    if self.reading_ghost:
+                        measured_var.long_name = self.obs_long_name
+                        measured_var.units = self.obs_units
+                        measured_var.standard_name = self.obs_standard_name
+                        measured_var.description = 'Interpolated value of {} from the experiment {} ' \
+                                            'with reference to the measurement stations in the {} network'.format(
+                            self.obs_standard_name, self.experiment_to_process, 
+                            self.network_to_interpolate_against)
+                    # non-GHOST
+                    else:
+                        measured_var.standard_name = self.original_speci_to_process
+                        measured_var.description = 'Interpolated value of {} from the experiment {} with reference to the measurement stations in the {} network'.format(
+                            self.original_speci_to_process, self.experiment_to_process,
+                            self.network_to_interpolate_against)
+
+                    # write to variables
+                    time_var[:] = self.yearmonth_time
+                    station_reference_var[:] = self.station_references
+                    longitude_var[:] = self.obs_lons
+                    latitude_var[:] = self.obs_lats                                                           
+                    model_centre_longitude_var[:] = self.mod_lons_centre
+                    model_centre_latitude_var[:] = self.mod_lats_centre
+                    grid_edge_longitude_var[:] = self.model_grid_outline[:,0]
+                    grid_edge_latitude_var[:] = self.model_grid_outline[:,1]
+
+                # iterate through observational stations
+                # use calculated interpolated weights per station to model grid to produce model reciprocal output
+                # if all station weights are 0, station is outside model grid domain
+                # set all values to be NaN
+                station_weights = self.inverse_dists[ii,:]
+                if np.all(station_weights == 0):
+                    interp_vals = np.full(len(self.yearmonth_time), np.NaN, dtype=np.float32)
+                else:
+                    # get reciprocal model data at N nearest neighbours to observational station 
+                    cut_model_data = self.monthly_model_data[:,self.nearest_neighbour_inds[ii,:int(self.interp_n_neighbours)],
+                                                                                        self.nearest_neighbour_inds[ii,int(self.interp_n_neighbours):]]
+                    
+                    # create mask where data == NaN or infinite
+                    invalid_mask = ~np.isfinite(cut_model_data)
+                    
+                    # create masked array
+                    cut_model_data = np.ma.MaskedArray(cut_model_data, mask=invalid_mask)
+                    
+                    # interpolate masked array across time dimension using interpolated weights per station
+                    interp_vals = np.ma.average(cut_model_data, weights=station_weights, axis=1)
+
+                # write measured variable 
+                measured_var[ii,:] = interp_vals
+
+            # close writing to netCDF
+            root_grp.close() 
+        
+        except Exception as e:
+            self.log_file_str += 'File {} could not be written. Error: {}.\n'.format(netCDF_fname, e)
+            create_output_logfile(1, self.log_file_str)
 
         # compress netCDF file
         try:
