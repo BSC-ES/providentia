@@ -513,10 +513,11 @@ class ExperimentInterpolation(object):
                 obs_station_reference_obj = obs_nc_root['station_name']
 
         # get station references atributes
-        self.obs_station_reference_standard_name = obs_station_reference_obj.standard_name
+        if self.reading_ghost:
+            self.obs_station_reference_standard_name = obs_station_reference_obj.standard_name
+            self.obs_station_reference_description = obs_station_reference_obj.description
         self.obs_station_reference_long_name = obs_station_reference_obj.long_name
         self.obs_station_reference_units = obs_station_reference_obj.units
-        self.obs_station_reference_description = obs_station_reference_obj.description
 
         # lon/lat objects
         if "latitude" in obs_nc_root.variables:
@@ -529,8 +530,9 @@ class ExperimentInterpolation(object):
         # get lon lat atributes
         self.obs_lat_obj_standard_name, self.obs_lon_obj_standard_name = obs_lat_obj.standard_name, obs_lon_obj.standard_name
         self.obs_lat_obj_units, self.obs_lon_obj_units = obs_lat_obj.units, obs_lon_obj.units
-        self.obs_lat_obj_long_name, self.obs_lon_obj_long_name = obs_lat_obj.long_name, obs_lon_obj.long_name
-        self.obs_lat_obj_description, self.obs_lon_obj_description = obs_lat_obj.description, obs_lon_obj.description
+        if self.reading_ghost:
+            self.obs_lat_obj_long_name, self.obs_lon_obj_long_name = obs_lat_obj.long_name, obs_lon_obj.long_name
+            self.obs_lat_obj_description, self.obs_lon_obj_description = obs_lat_obj.description, obs_lon_obj.description
 
         # get station data
         # GHOST
