@@ -63,7 +63,7 @@ IFS=$'\n\t'
 # An option followed by double colons '::' means that its argument is optional.
 # See `man getopt'.
 SHORT=uc:t:J:q:m:V
-LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,clean,section:,ghost_version:,conf:,config:,config_dir:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,exp_to_interp_root:,generate_file_tree,gft,disable_file_tree,dft,offline,interactive,download,dl,interpolation,interp,interpolate,slurm_job_id:,network:,species:,resolution:,start_date:,end_date:,observations_data_label:,experiments:,domain:,ensemble_options:,forecast_day:,forecast:,qa:,flags:,add_qa:,subtract_qa:,add_flags:,subtract_flags:,temporal_colocation:,spatial_colocation:,spatial_colocation_tolerance:,spatial_colocation_station_reference:,spatial_colocation_station_name:,spatial_colocation_longitude_latitude:,spatial_colocation_measurement_altitude:,spatial_colocation_validation:,spatial_colocation_validation_tolerance:,map_extent:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,harmonise_summary:,harmonise_stations:,active_dashboard_plots:,resampling_resolution:,statistic_mode:,statistic_aggregation:,periodic_statistic_mode:,periodic_statistic_aggregation:,timeseries_statistic_aggregation:,plot_characteristics_filename:,interp_multiprocessing:,interp_n_neighbours:,interp_reverse_vertical_orientation:,interp_chunk_size:,interp_job_array_limit:
+LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,clean,section:,ghost_version:,conf:,config:,config_dir:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,exp_to_interp_root:,generate_file_tree,gft,disable_file_tree,dft,offline,interactive,download,dl,interpolation,interp,interpolate,notebook,slurm_job_id:,network:,species:,resolution:,start_date:,end_date:,observations_data_label:,experiments:,domain:,ensemble_options:,forecast_day:,forecast:,qa:,flags:,add_qa:,subtract_qa:,add_flags:,subtract_flags:,temporal_colocation:,spatial_colocation:,spatial_colocation_tolerance:,spatial_colocation_station_reference:,spatial_colocation_station_name:,spatial_colocation_longitude_latitude:,spatial_colocation_measurement_altitude:,spatial_colocation_validation:,spatial_colocation_validation_tolerance:,map_extent:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,harmonise_summary:,harmonise_stations:,active_dashboard_plots:,resampling_resolution:,statistic_mode:,statistic_aggregation:,periodic_statistic_mode:,periodic_statistic_aggregation:,timeseries_statistic_aggregation:,plot_characteristics_filename:,interp_multiprocessing:,interp_n_neighbours:,interp_reverse_vertical_orientation:,interp_chunk_size:,interp_job_array_limit:
 
 # parse arguments
 PARSED=$(getopt --options ${SHORT} \
@@ -146,7 +146,7 @@ queue_option="--qos=$queue"
 memory_option="--mem=$mem"
 constraint_option="--constraint=$constraint"
 load_command="source bin/load_modules.sh"
-interactive_alloc_command="sbatch -t $time -c $cores -J $jobname"
+notebook_alloc_command="sbatch -t $time -c $cores -J $jobname"
 script_dir=$(dirname $(realpath $(dirname $0)))
 
 # use python 3 if not in windows
@@ -176,11 +176,17 @@ else
     debug=false
 fi
 
-# if using interactive mode then 
+# remind users to use notebook instead of interactive
 if [[ $PARSED =~ "--interactive" ]]; then
-    interactive=true
+    echo "Interactive mode has been renamed to notebook, please use --notebook to open a Jupyter session. Exiting..."
+    exit 1
+fi
+
+# if using notebook mode then 
+if [[ $PARSED =~ "--notebook" ]]; then
+    notebook=true
 else
-    interactive=false
+    notebook=false
 fi
 
 # if using interpolation mode then
@@ -250,15 +256,15 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
     fi
 
     if $active_env; then
-        if $interactive; then
+        if $notebook; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-            echo "Starting interactive jupyter session."
-            echo "Check 'interactive.out' for information on how to connect to session."
+            echo "Starting jupyter session."
+            echo "Check 'notebook.out' for information on how to connect to session."
             
             if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
-                eval "${interactive_alloc_command} ${account_option} ${queue_option} bin/interactive.sh"
+                eval "${notebook_alloc_command} ${account_option} ${queue_option} bin/notebook.sh"
             else
-                eval "${interactive_alloc_command} ${account_option} ${constraint_option} ${queue_option} bin/interactive.sh"
+                eval "${notebook_alloc_command} ${account_option} ${constraint_option} ${queue_option} bin/notebook.sh"
             fi
 
         elif $debug; then
@@ -294,15 +300,15 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
 # Nord3v2
 elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
     echo "INFO: Running on ${BSC_MACHINE}..."
-    if $interactive; then
+    if $notebook; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-        echo "Starting interactive jupyter session."
-        echo "Check 'interactive.out' for information on how to connect to session."
+        echo "Starting notebook jupyter session."
+        echo "Check 'notebook.out' for information on how to connect to session."
         eval "${load_command}"
         if [[ "${constraint}" == "lowmem" ]]; then
-            eval "${interactive_alloc_command} ${queue_option} bin/interactive.sh"
+            eval "${notebook_alloc_command} ${queue_option} bin/notebook.sh"
         else
-            eval "${interactive_alloc_command} ${constraint_option} ${queue_option} bin/interactive.sh"
+            eval "${notebook_alloc_command} ${constraint_option} ${queue_option} bin/notebook.sh"
         fi
 
     elif $debug; then
@@ -357,8 +363,8 @@ elif [[ "${BSC_MACHINE}" == "stg" ]]; then
 elif [ "${ip}" == "84.88.185.48" ]; then
     echo "INFO: Running on the hub..."
     eval "${load_command}"
-    if $interactive; then
-        echo "Starting interactive jupyter session."
+    if $notebook; then
+        echo "Starting jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}
         jupyter-lab
 
@@ -389,8 +395,8 @@ else
         active_env=true
     fi
 
-    if $interactive; then
-        echo "Starting interactive jupyter session."
+    if $notebook; then
+        echo "Starting jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}
         jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
     elif $interpolation; then
