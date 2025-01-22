@@ -494,9 +494,9 @@ class ExperimentInterpolation(object):
         obs_measured_var_obj = obs_nc_root[self.original_speci_to_process]
 
         # get the metadata
-        self.obs_long_name = obs_measured_var_obj.long_name
         self.obs_units = obs_measured_var_obj.units
         if self.reading_ghost:
+            self.obs_long_name = obs_measured_var_obj.long_name
             self.obs_standard_name = obs_measured_var_obj.standard_name
 
         # station object
@@ -514,10 +514,10 @@ class ExperimentInterpolation(object):
 
         # get station references atributes
         if self.reading_ghost:
+            self.obs_station_reference_units = obs_station_reference_obj.units
             self.obs_station_reference_standard_name = obs_station_reference_obj.standard_name
             self.obs_station_reference_description = obs_station_reference_obj.description
-        self.obs_station_reference_long_name = obs_station_reference_obj.long_name
-        self.obs_station_reference_units = obs_station_reference_obj.units
+            self.obs_station_reference_long_name = obs_station_reference_obj.long_name
 
         # lon/lat objects
         if "latitude" in obs_nc_root.variables:
