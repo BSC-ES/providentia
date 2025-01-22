@@ -73,9 +73,9 @@ class ProvArgumentParser(object):
                                      dest="offline",
                                      default=False,
                                      action='store_true',
-                                     help="run Providentia offline mode")
-            self.parser.add_argument('--interactive',
-                                     help="runs Providentia interactive mode on Jupyter notebook")
+                                     help="run Providentia report mode")
+            self.parser.add_argument("--notebook",
+                                     help="opens a Jupyter session")
             self.parser.add_argument("--download", "--dl",
                                      dest="download",
                                      default=False,
