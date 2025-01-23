@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --output interactive.out
+#SBATCH --output notebook.out
 
 # get tunneling info
 XDG_RUNTIME_DIR=""
