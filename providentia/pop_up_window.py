@@ -11,7 +11,7 @@ import numpy as np
 from PyQt5 import QtCore, QtWidgets
 
 from .read_aux import get_default_qa
-from .dashboard_elements import set_formatting, wrap_tooltip_text
+from .dashboard_elements import set_formatting, wrap_tooltip_text, ComboBox
 from .warnings_prv import show_message
 
 from providentia.auxiliar import CURRENT_PATH, join
@@ -279,9 +279,9 @@ class PopUpWindow(QtWidgets.QWidget):
                                                                         'current_upper',
                                                                         'current_filter_species_fill_value', 
                                                                         'apply_selected'], 
-                                                    'widget':[QtWidgets.QComboBox,
-                                                              QtWidgets.QComboBox,
-                                                              QtWidgets.QComboBox,
+                                                    'widget':[ComboBox,
+                                                              ComboBox,
+                                                              ComboBox,
                                                               QtWidgets.QLineEdit, 
                                                               QtWidgets.QLineEdit, 
                                                               QtWidgets.QLineEdit, 
