@@ -528,9 +528,9 @@ class ExperimentInterpolation(object):
             obs_lat_obj = obs_nc_root['lat']
 
         # get lon lat atributes
-        self.obs_lat_obj_standard_name, self.obs_lon_obj_standard_name = obs_lat_obj.standard_name, obs_lon_obj.standard_name
         self.obs_lat_obj_units, self.obs_lon_obj_units = obs_lat_obj.units, obs_lon_obj.units
         if self.reading_ghost:
+            self.obs_lat_obj_standard_name, self.obs_lon_obj_standard_name = obs_lat_obj.standard_name, obs_lon_obj.standard_name
             self.obs_lat_obj_long_name, self.obs_lon_obj_long_name = obs_lat_obj.long_name, obs_lon_obj.long_name
             self.obs_lat_obj_description, self.obs_lon_obj_description = obs_lat_obj.description, obs_lon_obj.description
 
