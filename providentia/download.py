@@ -1580,9 +1580,12 @@ class ProvidentiaDownload(object):
                             
                             # copy file
                             esarchive_path = join(esarchive_dir, nc_file)
-                            with open(os.devnull, 'wb') as devnull:
-                                subprocess.check_call([rsync_command, esarchive_path, gpfs_path], stdout=devnull, stderr=subprocess.STDOUT)
-
+                            try:
+                                with open(os.devnull, 'wb') as devnull:
+                                    subprocess.check_call([rsync_command, esarchive_path, gpfs_path], stdout=devnull, stderr=subprocess.STDOUT)
+                            except subprocess.CalledProcessError:
+                                error = f'Failed to copy the files. Try later.'
+                                sys.exit(error)
                             # TODO: fails when creating a new file, wait until users use the copy option to see if it is really needed
                             # give to each new file 770 permissions to directory and make group owner bsc32 
                             # if new_file:                        
