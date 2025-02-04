@@ -2410,22 +2410,27 @@ class Plot:
                     row_title, 
                     **plot_characteristics["auxiliar"]["row_title"], 
                     transform=relevant_axis[i*4 + 0].transAxes)
+           
+                # add left description
+                relevant_axis[i*4 + 0].text(
+                    *plot_characteristics["auxiliar"]["description"]["position"], 
+                    plot_dict["description"], 
+                    **plot_characteristics["auxiliar"]["description"], 
+                    transform=relevant_axis[i*4 + 0].transAxes)
+
+                # add separator
+                if "separator" in plot_dict:
+                    relevant_axis[i*4 + 0].text(
+                        *plot_characteristics["auxiliar"]["separator"]["position"], 
+                        plot_characteristics["auxiliar"]["separator_text"], 
+                        **plot_characteristics["auxiliar"]["separator"], 
+                        transform=relevant_axis[i*4 + 0].transAxes)
             
             # track plot elements if using dashboard 
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
                 self.track_plot_elements(data_label, 'fairmode-statsummary', 'plot', 
                                          fairmode_statsummary_plot, bias=False)
-                
-            # add information on the left of the plot
-            if Version(matplotlib.__version__) >= Version("3.3"):
-                relevant_axis[-4].annotate(text=plot_characteristics["auxiliar"]["has_exceedances"][has_exceedances]["left_description_text"],
-                                           **plot_characteristics["auxiliar"]["has_exceedances"][has_exceedances]["left_description"],
-                                           **plot_characteristics["auxiliar"]["left_description"]) 
-            else:
-                relevant_axis[-4].annotate(s=plot_characteristics["auxiliar"]["has_exceedances"][has_exceedances]["left_description_text"],  
-                                           **plot_characteristics["auxiliar"]["has_exceedances"][has_exceedances]["left_description"],
-                                           **plot_characteristics["auxiliar"]["left_description"])  
-        
+                        
         # add title if using dashboard 
         if (not self.read_instance.offline) and (not self.read_instance.interactive):
             set_axis_title(self.read_instance, relevant_axis, fairmode_settings[speci]['title'], plot_characteristics)
