@@ -2453,12 +2453,12 @@
                 {
                   "title": "Observed\nmean",
                   "x_axis_limits": [0, 100],
-                  "units": "μgm⁻³",
+                  "units": "μgm-³",
                   "left_dashed_zone_linestyle": "none",
                 },
               "observed exceedances":
                 {
-                  "title": "Observed\nexceedences\n(> {} ugm⁻³)",
+                  "title": "Observed\nexceedences\n(> {} ugm-³)",
                   "x_axis_limits": [0, 100],
                   "units": "days",
                   "left_dashed_zone_linestyle": "none",
@@ -2526,9 +2526,16 @@
               "ha": "center",
               "rotation": "vertical",
               "xycoords": "axes fraction",
+              "fontweight": "light",
             },
           "row_title":
-            { "position": [-2.2, 0.5], "va": "center", "ha": "center" },
+            {
+              "position": [-2.2, 0.5],
+              "va": "center",
+              "ha": "center",
+              "fontweight": "light",
+            },
+          "units": { "fontweight": "light" },
           "right_dot": { "x": 0, "y": 0 },
           "right_dot_colors": { "green": "#4cff00", "red": "#ff0000" },
           "station_dots": { "marker": "o", "color": "#1111ff" },
