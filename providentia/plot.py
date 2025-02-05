@@ -2265,7 +2265,8 @@ class Plot:
                     relevant_axis[i*4 + 3].text(
                         *plot_characteristics["auxiliar"]["units"]["position"], 
                         plot_dict['units'], 
-                        fontsize=plot_characteristics["auxiliar"]["units"]["fontsize"])
+                        fontsize=plot_characteristics["auxiliar"]["units"]["fontsize"],
+                        fontweight=plot_characteristics["auxiliar"]["units"]["fontweight"])
                 
                 # configure color of the row and the dot on the right for rows 3 to 8
                 if 'range_style' in plot_dict:
