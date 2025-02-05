@@ -2455,6 +2455,7 @@
                   "x_axis_limits": [0, 100],
                   "units": "μgm-³",
                   "left_dashed_zone_linestyle": "none",
+                  "description": "Observations",
                 },
               "observed exceedances":
                 {
@@ -2462,6 +2463,8 @@
                   "x_axis_limits": [0, 100],
                   "units": "days",
                   "left_dashed_zone_linestyle": "none",
+                  "description": "",
+                  "separator": True,
                 },
               "temporal bias":
                 {
@@ -2469,6 +2472,7 @@
                   "x_axis_limits": [-2, 2],
                   "range_style": "orange-green-orange",
                   "left_dashed_zone_linestyle": [10, [8, 5]],
+                  "description": "Time",
                 },
               "temporal correlation":
                 {
@@ -2476,6 +2480,7 @@
                   "x_axis_limits": [0, 2],
                   "range_style": "green-orange",
                   "left_dashed_zone_linestyle": "none",
+                  "description": "",
                 },
               "temporal std":
                 {
@@ -2483,6 +2488,7 @@
                   "x_axis_limits": [-2, 2],
                   "range_style": "orange-green-orange",
                   "left_dashed_zone_linestyle": [10, [8, 5]],
+                  "description": "",
                 },
               "temporal highest percentile":
                 {
@@ -2490,6 +2496,8 @@
                   "x_axis_limits": [-2, 2],
                   "range_style": "green",
                   "left_dashed_zone_linestyle": [10, [8, 5]],
+                  "description": "",
+                  "separator": True,
                 },
               "averaged spatial correlation":
                 {
@@ -2497,6 +2505,7 @@
                   "x_axis_limits": [0, 2],
                   "range_style": "green-orange",
                   "left_dashed_zone_linestyle": "none",
+                  "description": "Space",
                 },
               "averaged standard deviation":
                 {
@@ -2504,6 +2513,7 @@
                   "x_axis_limits": [-2, 2],
                   "range_style": "orange-green-orange",
                   "left_dashed_zone_linestyle": [10, [8, 5]],
+                  "description": "",
                 },
             },
           "range_style":
@@ -2520,25 +2530,34 @@
                   "colors": ["#fea400", "#4cff00", "#fea400"],
                 },
             },
-          "left_description":
-            {
-              "va": "bottom",
-              "ha": "center",
-              "rotation": "vertical",
-              "xycoords": "axes fraction",
-              "fontweight": "light",
-            },
           "row_title":
             {
-              "position": [-2.2, 0.5],
+              "position": [-3.3, 0.5],
               "va": "center",
+              "ha": "left",
+              "fontweight": "light",
+            },
+          "description":
+            {
+              "position": [-6.5, 0.95],
+              "va": "top",
+              "ha": "left",
+              "fontweight": "light",
+              "fontsize": 8,
+            },
+          "separator":
+            {
+              "position": [-3.6, -1.8],
+              "va": "bottom",
               "ha": "center",
               "fontweight": "light",
+              "fontsize": 8,
             },
           "units": { "fontweight": "light" },
           "right_dot": { "x": 0, "y": 0 },
           "right_dot_colors": { "green": "#4cff00", "red": "#ff0000" },
           "station_dots": { "marker": "o", "color": "#1111ff" },
+          "separator_text": "----------------------------------------------",
         },
       "plot_options": ["individual"],
       "dashboard":
@@ -2569,20 +2588,6 @@
           "marker_annotate_text": { "round_decimal_places": 2 },
           "auxiliar":
             {
-              "has_exceedances":
-                {
-                  True:
-                    {
-                      "left_description_text": "----space----   --------------time-------------   --observations--",
-                      "left_description": { "fontsize": 7.5 },
-                    },
-                  False:
-                    {
-                      "left_description_text": "-------space-------  --------------------time--------------------  observations",
-                      "left_description": { "fontsize": 6.5 },
-                    },
-                },
-              "left_description": { "xy": [-4.5, -0.8] },
               "row_title": { "fontsize": 7.7 },
               "units": { "position": [-0.19, -1], "fontsize": 7.5 },
               "right_dot": { "s": 60 },
@@ -2608,20 +2613,6 @@
             },
           "auxiliar":
             {
-              "has_exceedances":
-                {
-                  True:
-                    {
-                      "left_description_text": "----------space----------    ------------------------time------------------------    ----observations----",
-                      "left_description": { "fontsize": 12 },
-                    },
-                  False:
-                    {
-                      "left_description_text": "----------space----------    ----------------------------------time--------------------------------    -observations-",
-                      "left_description": { "fontsize": 11 },
-                    },
-                },
-              "left_description": { "xy": [-5.1, 0.05] },
               "row_title": { "fontsize": 11 },
               "units": { "position": [-0.19, -0.45], "fontsize": 9 },
               "right_dot": { "s": 170 },
@@ -2667,20 +2658,6 @@
             },
           "auxiliar":
             {
-              "has_exceedances":
-                {
-                  True:
-                    {
-                      "left_description_text": "-------space-------    ------------------time------------------    ---observations---",
-                      "left_description": { "fontsize": 8.8 },
-                    },
-                  False:
-                    {
-                      "left_description_text": "---------space---------   -------------------------time-------------------------   -observations-",
-                      "left_description": { "fontsize": 8.1 },
-                    },
-                },
-              "left_description": { "xy": [-4.5, 0.05] },
               "row_title": { "fontsize": 9.5 },
               "units": { "position": [-0.19, -0.8], "fontsize": 9 },
               "right_dot": { "s": 100 },
