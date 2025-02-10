@@ -2613,7 +2613,6 @@
             },
           "auxiliar":
             {
-              "row_title": { "fontsize": 11 },
               "units": { "position": [-0.19, -0.45], "fontsize": 9 },
               "right_dot": { "s": 170 },
               "station_dots":
@@ -2621,6 +2620,9 @@
                   "tick_params": { "axis": "x", "labelsize": 10 },
                   "markersize": 7,
                 },
+              "row_title": { "position": [-3, 0.5], "fontsize": 11 },
+              "description": { "position": [-5.8, 0.95], "fontsize": 11 },
+              "separator": { "position": [-3, -1.8], "fontsize": 11 },
             },
           "legend":
             {
