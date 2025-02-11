@@ -47,7 +47,7 @@ register_matplotlib_converters()
 mplstyle.use('fast')
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
-settings_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/canvas_menus.yaml')))
+settings_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/canvas_menus.yaml')))
 
 
 class MPLCanvas(FigureCanvas):
