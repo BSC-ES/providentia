@@ -63,6 +63,8 @@
                   "taylor-r2", "taylor-r", "taylor-r2_annotate", "taylor-r_annotate",
                   "fairmode-target", "fairmode-target_individual", "fairmode-target_annotate"],
     
-    "debug": ["fairmode-statsummary"]
+    "training": ["map-Median", "map-r", "timeseries_annotate", "periodic-Mean_threshold", "statsummary_multispecies", "taylor-r2", "scatter_annotate_individual"],
+
+    "debug": ["timeseries_threshold"]
 
 }
