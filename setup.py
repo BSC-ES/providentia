@@ -30,7 +30,8 @@ REQUIREMENTS = {
         'myst-parser==3.0.1',
         'PyYAML==6.0.1',
         'python-dotenv==1.0.1',
-        'paramiko==3.4.0'
+        'paramiko==3.4.0',
+        'memory-profiler==0.61.0'
     ],
     'setup': [
         'setuptools_scm',
