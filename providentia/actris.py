@@ -141,11 +141,11 @@ def get_files_path(var):
 
 
 def pad_array(arr):
-    """Pad array with 255 if its length is less than 186."""
+    """Pad array with nan if its length is less than 186."""
 
     pad_size = max(0, 186 - len(arr))
 
-    return np.pad(arr, (0, pad_size), constant_values=255)
+    return np.pad(arr, (0, pad_size), constant_values=np.nan)
 
 
 def temporally_average_data(combined_ds, resolution, year, month, var):
@@ -268,13 +268,13 @@ def temporally_average_data(combined_ds, resolution, year, month, var):
         time_pairs.append(last_time_pair)
         
         # get data between each valid start date and end date, then get unique values for the available timesteps, and pad
-        # to have arrays of the same length (maximum length is 186, when there is less these are going to be 255)
+        # to have arrays of the same length (maximum length is 186, when there is less these are going to be nan)
         station_flag_data = []
         for start_date, end_date in time_pairs:
             unique_flag_values_per_pair = np.unique(combined_ds.flag.sel(time=slice(start_date, end_date), station=station).values)
             unique_flag_values_per_pair_nonan = unique_flag_values_per_pair[~np.isnan(unique_flag_values_per_pair)]
             station_flag_data.append(pad_array(unique_flag_values_per_pair_nonan))
-            
+
         # get station flag data for the valid dates
         flag_data[station_i, :, :] = station_flag_data
 
