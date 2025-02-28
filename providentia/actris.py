@@ -271,8 +271,10 @@ def temporally_average_data(combined_ds, resolution, year, month, var):
         # to have arrays of the same length (maximum length is 186, when there is less these are going to be 255)
         station_flag_data = []
         for start_date, end_date in time_pairs:
-            station_flag_data.append(pad_array(np.unique(combined_ds.flag.sel(time=slice(start_date, end_date), station=station).values)))
-        
+            unique_flag_values_per_pair = np.unique(combined_ds.flag.sel(time=slice(start_date, end_date), station=station).values)
+            unique_flag_values_per_pair_nonan = unique_flag_values_per_pair[~np.isnan(unique_flag_values_per_pair)]
+            station_flag_data.append(pad_array(unique_flag_values_per_pair_nonan))
+            
         # get station flag data for the valid dates
         flag_data[station_i, :, :] = station_flag_data
 
