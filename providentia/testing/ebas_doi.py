@@ -24,7 +24,7 @@ variables = ['sconco3']
 resolution = 'hourly'
 target_start_date = datetime.datetime(2018, 1, 1, 0)
 target_end_date = datetime.datetime(2019, 1, 1, 0)
-
+ghost_version = 1.5
 
 def select_files_to_download(prov_start_time, nc_files_to_download):
     """ Returns the files that are not already downloaded. """
@@ -248,7 +248,7 @@ for var in variables:
                     combined_ds_yearmonth_unaveraged = combined_ds.sel(
                         time=f"{year}-{month:02d}")
                     combined_ds_yearmonth = temporally_average_data(
-                        combined_ds_yearmonth_unaveraged, resolution, year, month, var)
+                        combined_ds_yearmonth_unaveraged, resolution, year, month, var, ghost_version)
 
                     # add title to attrs
                     extra_info = ''
