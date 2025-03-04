@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, pad_array
 
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
@@ -140,16 +140,8 @@ def get_files_path(var):
     return path
 
 
-def pad_array(arr):
-    """Pad array with nan if its length is less than 186."""
-
-    pad_size = max(0, 186 - len(arr))
-
-    return np.pad(arr, (0, pad_size), constant_values=np.nan)
-
-
-def convert_ebas_to_standard_flags(flags, ghost_version):
-    """Convert flags from EBAS standards to GHOST standards
+def get_standard_flags_and_qa(flags, ghost_version):
+    """Convert flags from EBAS standards to GHOST standards and get QA
 
     Parameters
     ----------
@@ -162,27 +154,30 @@ def convert_ebas_to_standard_flags(flags, ghost_version):
     sys.path.insert(1, join(PROVIDENTIA_ROOT, 'providentia/dependencies/GHOST_standards/{}'.format(ghost_version)))
     from GHOST_standards import standard_data_flag_name_to_data_flag_code
 
+    qa = []
     standard_flags = []
-    for flag in flags:
-        standard_flag_name = flags_dict[str(int(flag))]["standard_data_flag_name"][0]
-        standard_flag = standard_data_flag_name_to_data_flag_code[standard_flag_name]
-        standard_flags.append(standard_flag)
-
-    return np.array(standard_flags, dtype=np.uint8)
-
-
-def get_validity(flags):
-    
     network_decreed_validities = []
     GHOST_decreed_validities = []
     for flag in flags:
-        network_decreed_validity = flags_dict[str(flag)]["network_decreed_validity"]
-        GHOST_decreed_validity = flags_dict[str(flag)]["GHOST_decreed_validity"]
+        # get standard flag name from GHOST standards
+        flag_info = flags_dict[str(int(flag))]
+        standard_flag_name = flag_info["standard_data_flag_name"][0]
+        standard_flag = standard_data_flag_name_to_data_flag_code[standard_flag_name]
+        standard_flags.append(standard_flag)
+
+        # save validities
+        network_decreed_validity = flag_info["network_decreed_validity"][0]
+        GHOST_decreed_validity = flag_info["GHOST_decreed_validity"][0]
         network_decreed_validities.append(network_decreed_validity)
         GHOST_decreed_validities.append(GHOST_decreed_validity)
 
-    unique_network_decreed_validities = np.unique(network_decreed_validities)
-    unique_GHOST_decreed_validities = np.unique(GHOST_decreed_validities)
+    # get qa if there is any flag that is invalid
+    if 'I' in np.unique(GHOST_decreed_validities):
+        qa.append(6) # 'Invalid Data Provider Flags - GHOST Decreed'
+    if 'I' in np.unique(network_decreed_validities):
+        qa.append(7) # 'Invalid Data Provider Flags - Network Decreed'
+
+    return np.array(standard_flags, dtype=np.float32), np.array(qa, dtype=np.float32)
 
 
 def temporally_average_data(combined_ds, resolution, year, month, var, ghost_version):
@@ -225,8 +220,9 @@ def temporally_average_data(combined_ds, resolution, year, month, var, ghost_ver
     valid_dates = pd.date_range(start=start_date, end=end_date, freq=frequency).to_numpy(dtype='datetime64[ns]')
     
     # initialise averaged data
-    averaged_data = np.empty((len(combined_ds.station.values), len(valid_dates)))
-    flag_data = np.empty((len(combined_ds.station.values), len(valid_dates), 186))
+    averaged_data = np.empty((len(combined_ds.station.values), len(valid_dates)), dtype=np.float32)
+    flag_data = np.empty((len(combined_ds.station.values), len(valid_dates), 186), dtype=np.float32)
+    qa_data = np.empty((len(combined_ds.station.values), len(valid_dates), 2), dtype=np.float32)
 
     for station_i, station in enumerate(combined_ds.station.values):
 
@@ -306,18 +302,26 @@ def temporally_average_data(combined_ds, resolution, year, month, var, ghost_ver
         last_time_pair = (valid_dates[-1], valid_dates[-1] + (valid_dates[-1] - valid_dates[-2]))
         time_pairs.append(last_time_pair)
         
-        # get data between each valid start date and end date, then get unique values for the available timesteps, and pad
-        # to have arrays of the same length (maximum length is 186, when there is less these are going to be nan)
+        # get flag and qa data between each valid start date and end date
         station_flag_data = []
+        station_qa_data = []
         for start_date, end_date in time_pairs:
+            # get unique flag values for the available timesteps in period and remove nan
             unique_flag_values_per_pair = np.unique(combined_ds.flag.sel(time=slice(start_date, end_date), station=station).values)
             unique_flag_values_per_pair_nonan = unique_flag_values_per_pair[~np.isnan(unique_flag_values_per_pair)]
-            standard_flag_codes = convert_ebas_to_standard_flags(unique_flag_values_per_pair_nonan, ghost_version)
-            # validity = get_validity(unique_flag_values_per_pair_nonan)
-            station_flag_data.append(pad_array(standard_flag_codes))
 
-        # get station flag data for the valid dates
+            # get standard flag names (instead of EBAS) and qa
+            standard_flag_codes, qa = get_standard_flags_and_qa(unique_flag_values_per_pair_nonan, ghost_version)
+
+            # pad to have flag arrays of the same length (maximum length is 186, when there is less these are going to be nan)
+            station_flag_data.append(pad_array(standard_flag_codes, length=186))
+
+            # pad to have qa arrays of the same length (maximum length is 2, when there is less these are going to be nan)
+            station_qa_data.append(pad_array(qa, length=2))
+        
+        # get station flag and qa data for the valid dates
         flag_data[station_i, :, :] = station_flag_data
+        qa_data[station_i, :, :] = station_qa_data
 
     # create new variable with averaged data
     combined_averaged_da = xr.DataArray(
@@ -333,7 +337,7 @@ def temporally_average_data(combined_ds, resolution, year, month, var, ghost_ver
     # add new variable
     combined_ds[var] = combined_averaged_da
 
-    # add qa variable
+    # add flags variable
     da_flag = xr.DataArray(
             flag_data,
             dims=["station", "time", "N_flag_codes"],
@@ -343,6 +347,17 @@ def temporally_average_data(combined_ds, resolution, year, month, var, ghost_ver
             name="flag"
         )
     combined_ds['flag'] = da_flag
+
+    # add qa variable
+    da_qa = xr.DataArray(
+            qa_data,
+            dims=["station", "time", "N_qa_codes"],
+            coords={
+                "time": combined_ds.coords['time'],
+            },
+            name="qa"
+        )
+    combined_ds['qa'] = da_qa
 
     return combined_ds
 
@@ -605,13 +620,13 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
     
     # show errors
     if len(errors) > 0:
-        print(f'\nCollected errors ({len(errors)}):')
+        print(f'\n    Collected errors ({len(errors)}):')
         for file, error in errors.items():
             print(f'{file} - Error: {error}')
             
     # show warnings
     if len(warnings) > 0:
-        print(f'\nCollected warnings ({len(warnings)}):')
+        print(f'\n    Collected warnings ({len(warnings)}):')
         for file, warning in warnings.items():
             print(f'{file} - Warning: {warning}')
             
