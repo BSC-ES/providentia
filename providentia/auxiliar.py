@@ -1,4 +1,5 @@
 import os
+import numpy as np
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
@@ -79,3 +80,26 @@ def expand_plot_characteristics(plot_characteristics, mode):
             plot_type_characteristics.pop(key, None)
 
     return plot_characteristics
+
+
+def pad_array(arr, length, pad_value=np.nan):
+    """Pad array with pad value if its length is less than input length
+
+    Parameters
+    ----------
+    arr : numpy.array
+        Array to pad
+    length : int
+        Length the array will have after padding
+    pad_value : int, float, optional
+        Value to append if length is lesss than input length, by default np.nan
+
+    Returns
+    ------
+    numpy.array
+        Padded array
+    """
+
+    pad_size = max(0, length - len(arr))
+
+    return np.pad(arr, (0, pad_size), constant_values=pad_value)
