@@ -13,6 +13,7 @@ import re
 import requests
 import yaml
 
+import numpy as np
 import xarray as xr
 
 # urlparse
@@ -1770,12 +1771,37 @@ class ProvidentiaDownload(object):
             if len(files) != 0:
                     
                 # get data and metadata for each file within period
-                combined_ds_list, metadata, wavelength = get_data(files, var, actris_parameter, resolution)
+                combined_ds_list, metadata, wavelength = get_data(files, var, actris_parameter, resolution, target_start_date, target_end_date)
 
+                # get flag dimension per station
+                N_flag_codes_dims = []
+                for ds in combined_ds_list:
+                    N_flag_codes_dims.append(ds.dims['N_flag_codes'])
+                
+                # get maximum number of flags across all stations
+                N_flag_codes_max = max(N_flag_codes_dims)
+                
+                # recreate flag variable so that all stations have the same dimension and can be concatenated, leave nan for unknown values
+                combined_ds_list_corrected_flag = []
+                for ds in combined_ds_list:
+                    flag_data = ds['flag']
+                    da_flag = xr.DataArray(
+                            np.full((flag_data.sizes['station'], flag_data.sizes['time'], N_flag_codes_max), np.nan),
+                            dims=["station", "time", "N_flag_codes"],
+                            coords={
+                                "time": flag_data.coords["time"],
+                            },
+                            name="flag"
+                        )
+                    da_flag[:, :, :flag_data.values.shape[-1]] = flag_data.values
+                    ds = ds.drop_vars('flag')
+                    ds['flag'] = da_flag
+                    combined_ds_list_corrected_flag.append(ds)
+            
                 # combine and create new dataset
                 print('    Combining files...')
                 try:
-                    combined_ds = xr.concat(combined_ds_list, 
+                    combined_ds = xr.concat(combined_ds_list_corrected_flag, 
                                             dim='station', 
                                             combine_attrs='drop_conflicts')
                 except Exception as error:
@@ -1819,9 +1845,9 @@ class ProvidentiaDownload(object):
                     for month, ds_month in ds_year.groupby('time.month'):
                         filename = f"{path}/{var}_{year}{month:02d}.nc"
                         if filename in files_to_download:
-                            combined_ds_yearmonth = combined_ds.sel(time=f"{year}-{month:02d}")
-                            combined_ds_yearmonth = temporally_average_data(combined_ds_yearmonth, resolution, year, month, var)
-
+                            combined_ds_yearmonth_unaveraged = combined_ds.sel(time=f"{year}-{month:02d}")
+                            combined_ds_yearmonth = temporally_average_data(combined_ds_yearmonth_unaveraged, resolution, year, month, var, self.ghost_version)
+    
                             # add title to attrs
                             extra_info = ''
                             wavelength_var = is_wavelength_var(actris_parameter)
@@ -1847,6 +1873,10 @@ class ProvidentiaDownload(object):
                             # if n_stations_diff > 0:
                             #     print(f'    Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
                             
+                            # remove file if it exists
+                            if os.path.isfile(filename):
+                                os.system("rm {}".format(filename))
+                                
                             # save file
                             combined_ds_yearmonth.to_netcdf(filename)
 
