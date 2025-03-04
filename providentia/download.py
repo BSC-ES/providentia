@@ -1873,6 +1873,10 @@ class ProvidentiaDownload(object):
                             # if n_stations_diff > 0:
                             #     print(f'    Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
                             
+                            # remove file if it exists
+                            if os.path.isfile(filename):
+                                os.system("rm {}".format(filename))
+                                
                             # save file
                             combined_ds_yearmonth.to_netcdf(filename)
 
