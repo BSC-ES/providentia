@@ -23,7 +23,7 @@ metadata_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal
 coverages_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'coverages.yaml')))
 variable_mapping = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'variable_mapping.yaml')))
 variable_mapping = {k: v for k, v in variable_mapping.items() if k.strip() and v}
-
+flags_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'flags.yaml')))
 
 def create_variable_mapping_file():
 
@@ -148,7 +148,44 @@ def pad_array(arr):
     return np.pad(arr, (0, pad_size), constant_values=np.nan)
 
 
-def temporally_average_data(combined_ds, resolution, year, month, var):
+def convert_ebas_to_standard_flags(flags, ghost_version):
+    """Convert flags from EBAS standards to GHOST standards
+
+    Parameters
+    ----------
+    flags : numpy.array
+        Array with flags in EBAS standards
+    ghost_version : float
+        GHOST version
+    """
+
+    sys.path.insert(1, join(PROVIDENTIA_ROOT, 'providentia/dependencies/GHOST_standards/{}'.format(ghost_version)))
+    from GHOST_standards import standard_data_flag_name_to_data_flag_code
+
+    standard_flags = []
+    for flag in flags:
+        standard_flag_name = flags_dict[str(int(flag))]["standard_data_flag_name"][0]
+        standard_flag = standard_data_flag_name_to_data_flag_code[standard_flag_name]
+        standard_flags.append(standard_flag)
+
+    return np.array(standard_flags, dtype=np.uint8)
+
+
+def get_validity(flags):
+    
+    network_decreed_validities = []
+    GHOST_decreed_validities = []
+    for flag in flags:
+        network_decreed_validity = flags_dict[str(flag)]["network_decreed_validity"]
+        GHOST_decreed_validity = flags_dict[str(flag)]["GHOST_decreed_validity"]
+        network_decreed_validities.append(network_decreed_validity)
+        GHOST_decreed_validities.append(GHOST_decreed_validity)
+
+    unique_network_decreed_validities = np.unique(network_decreed_validities)
+    unique_GHOST_decreed_validities = np.unique(GHOST_decreed_validities)
+
+
+def temporally_average_data(combined_ds, resolution, year, month, var, ghost_version):
     """Temporally average data and get unique flags in the valid times (temporally averaged)
 
     Parameters
@@ -163,6 +200,8 @@ def temporally_average_data(combined_ds, resolution, year, month, var):
         Month
     var : str
         Variable
+    ghost_version : float
+        GHOST version
 
     Returns
     -------
@@ -273,7 +312,9 @@ def temporally_average_data(combined_ds, resolution, year, month, var):
         for start_date, end_date in time_pairs:
             unique_flag_values_per_pair = np.unique(combined_ds.flag.sel(time=slice(start_date, end_date), station=station).values)
             unique_flag_values_per_pair_nonan = unique_flag_values_per_pair[~np.isnan(unique_flag_values_per_pair)]
-            station_flag_data.append(pad_array(unique_flag_values_per_pair_nonan))
+            standard_flag_codes = convert_ebas_to_standard_flags(unique_flag_values_per_pair_nonan, ghost_version)
+            # validity = get_validity(unique_flag_values_per_pair_nonan)
+            station_flag_data.append(pad_array(standard_flag_codes))
 
         # get station flag data for the valid dates
         flag_data[station_i, :, :] = station_flag_data
