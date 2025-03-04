@@ -1846,7 +1846,7 @@ class ProvidentiaDownload(object):
                         filename = f"{path}/{var}_{year}{month:02d}.nc"
                         if filename in files_to_download:
                             combined_ds_yearmonth_unaveraged = combined_ds.sel(time=f"{year}-{month:02d}")
-                            combined_ds_yearmonth = temporally_average_data(combined_ds_yearmonth_unaveraged, resolution, year, month, var)
+                            combined_ds_yearmonth = temporally_average_data(combined_ds_yearmonth_unaveraged, resolution, year, month, var, self.ghost_version)
     
                             # add title to attrs
                             extra_info = ''
