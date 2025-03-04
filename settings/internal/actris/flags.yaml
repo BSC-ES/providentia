@@ -1,0 +1,1117 @@
+{
+  #Basic Flags
+  "999":
+    {
+      "standard_data_flag_name": ["Missing Data"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Missing measurement, unspecified reason",
+    },
+  "899":
+    {
+      "standard_data_flag_name": ["Missing Data"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Measurement undefined, unspecified reason",
+    },
+  "750":
+    {
+      "standard_data_flag_name": ["Missing Data"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "H+ not measured in alkaline sample",
+    },
+  "420":
+    {
+      "standard_data_flag_name": ["Preliminary Data"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Preliminary data",
+    },
+  "259":
+    {
+      "standard_data_flag_name": ["Invalid Data - Unspecified"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Unspecified error expected",
+    },
+  "220":
+    {
+      "standard_data_flag_name": ["Preliminary Data"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Preliminary data",
+    },
+  "000":
+    {
+      "standard_data_flag_name": ["Valid Data"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Valid Measurement",
+    },
+  #Estimated data
+  "799":
+    {
+      "standard_data_flag_name": ["Estimated Data - Unspecified"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Measurement missing (unspecified reason), data element contains estimated value",
+    },
+  "798":
+    {
+      "standard_data_flag_name": ["Estimated Data - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Measurement missing (unspecified reason), data element contains estimated value. Considered valid.",
+    },
+  "797":
+    {
+      "standard_data_flag_name":
+        ["Estimated Data - Value Substituted from Secondary Monitor"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Data element taken from co-located instrument",
+    },
+  "784":
+    {
+      "standard_data_flag_name": ["Estimated Data - Unspecified"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Low precipitation, concentration estimated",
+    },
+  "782":
+    {
+      "standard_data_flag_name": ["Estimated Data - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Low precipitation, concentration estimated",
+    },
+  "781":
+    {
+      "standard_data_flag_name":
+        ["Estimated Data - Value Below Detection Limit"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Value below detection limit, data element contains detection limit",
+    },
+  "780":
+    {
+      "standard_data_flag_name":
+        ["Estimated Data - Value Below Detection Limit"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Value below detection or quantification limit, data element contains estimated or measured value. Use of flag 147 is encouraged.",
+    },
+  "771":
+    {
+      "standard_data_flag_name":
+        ["Estimated Data - Value Above Detection Limit"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Value above range, data element contains upper range limit",
+    },
+  "770":
+    {
+      "standard_data_flag_name":
+        ["Estimated Data - Value Above Detection Limit"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Value above range, data element contains estimated value",
+    },
+  "760":
+    {
+      "standard_data_flag_name":
+        ["Estimated Data - Multiple Parameters Aggregated"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Value estimated by summing up the constituents measured",
+    },
+  "655":
+    {
+      "standard_data_flag_name": ["Estimated Data - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Estimated value created by averaging or splitting samples",
+    },
+  #Measurement issues
+  "741":
+    {
+      "standard_data_flag_name": ["Measurement Issue - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Non refractory AMS concentrations. Don't include compounds that volatalises above 600 deg C",
+    },
+  "699":
+    {
+      "standard_data_flag_name": ["Mechanical Issue/Non-Operational Equipment"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Mechanical problem, unspecified reason",
+    },
+  "681":
+    {
+      "standard_data_flag_name":
+        ["Aggregation/Representation Issue - Unspecified"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Low data capture",
+    },
+  "680":
+    {
+      "standard_data_flag_name": ["Unmeasured Key Meteorological Parameter"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Undefined wind direction",
+    },
+  "677":
+    {
+      "standard_data_flag_name": ["Extreme External Meteorological Conditions"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Icing or hoar frost in the intake",
+    },
+  "675":
+    {
+      "standard_data_flag_name": ["Unmeasured Key Meteorological Parameter"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "no visibility data available",
+    },
+  "674":
+    {
+      "standard_data_flag_name": ["Extreme External Meteorological Conditions"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Icing or hoar frost in the intake, considered valid",
+    },
+  "670":
+    {
+      "standard_data_flag_name":
+        ["Aggregation/Representation Issue - Unspecified"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Incomplete data acquisition for multi-component data sets",
+    },
+  "669":
+    {
+      "standard_data_flag_name": ["Physical Issue With Filter"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Moist or wet filter, invalid",
+    },
+  "668":
+    {
+      "standard_data_flag_name": ["Physical Issue With Filter"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Moist or wet filter, valid",
+    },
+  "666":
+    {
+      "standard_data_flag_name": ["Physical Issue With Filter"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Filter damaged, invalid",
+    },
+  "665":
+    {
+      "standard_data_flag_name": ["Physical Issue With Filter"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Filter damaged, valid",
+    },
+  "664":
+    {
+      "standard_data_flag_name": ["Invalid Flow Rate"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Instrument flow(s) too far off target value, considered invalid",
+    },
+  "663":
+    {
+      "standard_data_flag_name": ["Invalid Flow Rate"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Too high sampling flow, data considered invalid",
+    },
+  "662":
+    {
+      "standard_data_flag_name": ["Invalid Flow Rate"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Too high sampling flow, data considered valid",
+    },
+  "660":
+    {
+      "standard_data_flag_name": ["Erroneous Sampling Operation"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Unspecified sampling anomaly, considered valid",
+    },
+  "659":
+    {
+      "standard_data_flag_name": ["Erroneous Sampling Operation"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Unspecified sampling anomaly",
+    },
+  "658":
+    {
+      "standard_data_flag_name": ["Erroneous Sampling Operation"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Too small air volume",
+    },
+  "656":
+    {
+      "standard_data_flag_name": ["Mechanical Issue/Non-Operational Equipment"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Wet-only collector failure, operated as bulk collector",
+    },
+  "654":
+    {
+      "standard_data_flag_name": ["Erroneous Sampling Operation"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Sampling period longer than normal, considered representative. Observed values reported",
+    },
+  "653":
+    {
+      "standard_data_flag_name": ["Erroneous Sampling Operation"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Sampling period shorter than normal, considered representative. Observed values reported",
+    },
+  "650":
+    {
+      "standard_data_flag_name": ["Mechanical Issue/Non-Operational Equipment"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "wet-only precipitation chemistry sampler failure",
+    },
+  "649":
+    {
+      "standard_data_flag_name": ["Power Failure"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Temporary power fail has affected sampler operation",
+    },
+  "644":
+    {
+      "standard_data_flag_name": ["Operational Maintenance Check Issue"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Low instrument precision and/or calibration issues",
+    },
+  "641":
+    {
+      "standard_data_flag_name": ["Human Error"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Aerosol filters installed incorrectly",
+    },
+  "640":
+    {
+      "standard_data_flag_name":
+        ["Extreme Internal Instrument Meteorological Conditions"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Instrument internal relative humidity above 40%",
+    },
+  "635":
+    {
+      "standard_data_flag_name":
+        ["Extreme Internal Instrument Meteorological Conditions"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Internal temperatures too far off target value, considered invalid",
+    },
+  "632":
+    {
+      "standard_data_flag_name": ["Human Error"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Lid of polyurethane foam (PUF) sampler not closed",
+    },
+  "63O":
+    {
+      "standard_data_flag_name": ["Human Error"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "POP concentration from the polyurethane foam (PUF) only",
+    },
+  "549":
+    {
+      "standard_data_flag_name": ["Chemical Issue"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Impure chemicals",
+    },
+  "541":
+    {
+      "standard_data_flag_name": ["Chemical Issue"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Gold trap passiviated by unknown compound",
+    },
+  "540":
+    {
+      "standard_data_flag_name":
+        ["Internal Laboratory/Instrument Contamination"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Spectral interference in laboratory analysis",
+    },
+  "534":
+    {
+      "standard_data_flag_name": ["Human Error"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Wrong coated denuder used",
+    },
+  "533":
+    {
+      "standard_data_flag_name": ["Human Error"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Filters mixed up; incorrect analysis",
+    },
+  "532":
+    {
+      "standard_data_flag_name": ["Operational Maintenance Check Issue"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Data less accurate than normal due to high field blank value",
+    },
+  "531":
+    {
+      "standard_data_flag_name":
+        ["Aggregation/Representation Issue - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Low recovery, analysis inaccurate",
+    },
+  "530":
+    {
+      "standard_data_flag_name":
+        ["Aggregation/Representation Issue - Unspecified"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Invalid due to too low or too high recovery",
+    },
+  "521":
+    {
+      "standard_data_flag_name": ["Extreme Sample Transport Conditions"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Bactericide was added to sample for storage under warm climate. Considered valid",
+    },
+  "498":
+    {
+      "standard_data_flag_name": ["Chemical Issue"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Gold trap inconsistency in mercury monitor",
+    },
+  "478":
+    {
+      "standard_data_flag_name": ["Chemical Issue"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Invalid due to inconsistency discovered through ion balance calculations",
+    },
+  "477":
+    {
+      "standard_data_flag_name": ["Chemical Issue"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Invalid due to inconsistency between measured and estimated conductivity",
+    },
+  "476":
+    {
+      "standard_data_flag_name": ["Chemical Issue"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Inconsistency discovered through ion balance calculations, but considered valid",
+    },
+  "475":
+    {
+      "standard_data_flag_name": ["Chemical Issue"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Inconsistency between measured and estimated conductivity, but considered valid",
+    },
+  "298":
+    {
+      "standard_data_flag_name": ["Chemical Issue"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Gold trap inconsistency in mercury monitor",
+    },
+  "278":
+    {
+      "standard_data_flag_name": ["Chemical Issue"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Invalid due to inconsistency discovered through ion balance calculations",
+    },
+  "277":
+    {
+      "standard_data_flag_name": ["Chemical Issue"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Invalid due to inconsistency between measured and estimated conductivity",
+    },
+  "276":
+    {
+      "standard_data_flag_name": ["Chemical Issue"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Inconsistency discovered through ion balance calculations, but considered valid",
+    },
+  "275":
+    {
+      "standard_data_flag_name": ["Chemical Issue"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Inconsistency between measured and estimated conductivity, but considered valid",
+    },
+  "190":
+    {
+      "standard_data_flag_name": ["Measurement Issue - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Not corrected for cross-sensitivity to particle scattering",
+    },
+  "101":
+    {
+      "standard_data_flag_name":
+        ["Aggregation/Representation Issue - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Denuder capture efficiency < 75%. Valid measurement",
+    },
+  #Operational Maintenance checks
+  "980":
+    {
+      "standard_data_flag_name": ["Operational Maintenance - Unspecified"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Missing due to calibration or zero/span check",
+    },
+  "687":
+    {
+      "standard_data_flag_name": ["Span Check"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Invalid due to span check. Used for Level 0.",
+    },
+  "686":
+    {
+      "standard_data_flag_name": ["Zero Check"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Invalid due to zero check. Used for Level 0.",
+    },
+  "685":
+    {
+      "standard_data_flag_name": ["Operational Maintenance - Unspecified"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Invalid due to secondary standard gas measurement. Used for Level 0.",
+    },
+  "684":
+    {
+      "standard_data_flag_name": ["Zero Check"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Invalid due to zero/span check. Used for Level 0.",
+    },
+  "683":
+    {
+      "standard_data_flag_name": ["Calibration"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Invalid due to calibration. Used for Level 0.",
+    },
+  "682":
+    {
+      "standard_data_flag_name": ["Operational Maintenance - Unspecified"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Invalid due to calibration or zero/span check. Used for Level 0.",
+    },
+  #Local Contamination
+  "652":
+    {
+      "standard_data_flag_name": ["Construction Contamination"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Construction/acitivity nearby",
+    },
+  "651":
+    {
+      "standard_data_flag_name": ["Agricultural Contamination"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Agricultural activity nearby",
+    },
+  "647":
+    {
+      "standard_data_flag_name": ["Smoke"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Fire/wood burning nearby",
+    },
+  "646":
+    {
+      "standard_data_flag_name": ["Traffic Contamination"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Exceptional traffic nearby",
+    },
+  "645":
+    {
+      "standard_data_flag_name": ["Traffic Contamination"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Exceptional traffic nearby",
+    },
+  "599":
+    {
+      "standard_data_flag_name": ["Local Contamination - Unspecified"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Unspecified contamination or local influence",
+    },
+  "593":
+    {
+      "standard_data_flag_name": ["Industrial Contamination"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Industrial contamination, considered invalid",
+    },
+  "591":
+    {
+      "standard_data_flag_name": ["Agricultural Contamination"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Agricultural contamination, considered invalid",
+    },
+  "578":
+    {
+      "standard_data_flag_name": ["Sea Spray"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Large sea salt contribution (ratio between marine and excess sulphate is larger than 2.0). Used for old data only. For newer data use 451/450.",
+    },
+  "568":
+    {
+      "standard_data_flag_name": ["Dust"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Dust contamination, considered invalid",
+    },
+  "567":
+    {
+      "standard_data_flag_name": ["Insect Contamination"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Insect contamination, considered invalid",
+    },
+  "566":
+    {
+      "standard_data_flag_name": ["Bird-Dropping Contamination"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Bird droppings, considered invalid",
+    },
+  "565":
+    {
+      "standard_data_flag_name": ["Pollen/Leaf Contamination"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Pollen and/or leaf contamination, considered invalid",
+    },
+  "559":
+    {
+      "standard_data_flag_name": ["Local Contamination - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Unspecified contamination or local influence, but considered valid",
+    },
+  "558":
+    {
+      "standard_data_flag_name": ["Dust"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Dust contamination, but considered valid",
+    },
+  "557":
+    {
+      "standard_data_flag_name": ["Insect Contamination"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Insect contamination, but considered valid",
+    },
+  "556":
+    {
+      "standard_data_flag_name": ["Bird-Dropping Contamination"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Bird droppings, but considered valid",
+    },
+  "555":
+    {
+      "standard_data_flag_name": ["Pollen/Leaf Contamination"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Pollen and/or leaf contamination, but considered valid",
+    },
+  "460":
+    {
+      "standard_data_flag_name": ["Local Contamination - Unspecified"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Contamination suspected",
+    },
+  "451":
+    {
+      "standard_data_flag_name": ["Sea Spray"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Invalid due to large sea salt contribution",
+    },
+  "450":
+    {
+      "standard_data_flag_name": ["Sea Spray"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Considerable sea salt contribution, but considered valid",
+    },
+  "260":
+    {
+      "standard_data_flag_name": ["Local Contamination - Unspecified"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Contamination suspected",
+    },
+  "251":
+    {
+      "standard_data_flag_name": ["Sea Spray"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Invalid due to large sea salt contribution",
+    },
+  "250":
+    {
+      "standard_data_flag_name": ["Sea Spray"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Considerable sea salt contribution, but considered valid",
+    },
+  "189":
+    {
+      "standard_data_flag_name": ["Local Contamination - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Possible local contamination indicated by wind from contaminated sector (auto)",
+    },
+  "188":
+    {
+      "standard_data_flag_name": ["Local Contamination - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Possible local contamination indicated by low wind speed (auto)",
+    },
+  "187":
+    {
+      "standard_data_flag_name": ["Local Contamination - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Possible local contamination indicated by occurence of new particles (auto)",
+    },
+  "186":
+    {
+      "standard_data_flag_name": ["Local Contamination - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Possible local contamination indicated by single scattering albedo (auto)",
+    },
+  "185":
+    {
+      "standard_data_flag_name": ["Local Contamination - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Possible local contamination indicated by wind direction or velocity",
+    },
+  #Extreme/Irregular data
+  "990":
+    {
+      "standard_data_flag_name": ["Extreme External Meteorological Conditions"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Precipitation not measured due to snow-fall. Needed for historic data, should not be needed for new data",
+    },
+  "900":
+    {
+      "standard_data_flag_name":
+        ["Irregular Data Manually Screened and Rejected"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Hidden and invalidated by data originator",
+    },
+  "890":
+    {
+      "standard_data_flag_name": ["Unmeasured Key Meteorological Parameter"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Concentration in precipitation undefined, no precipitation",
+    },
+  "783":
+    {
+      "standard_data_flag_name": ["Unmeasured Key Meteorological Parameter"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Low precipitation, concentration unknown",
+    },
+  "740":
+    {
+      "standard_data_flag_name": ["Extreme/Irregular Data - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Probably biased gas/particle ratio",
+    },
+  "701":
+    {
+      "standard_data_flag_name": ["Extreme/Irregular Data - Unspecified"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Less accurate than usual, unspecified reason. (Used only with old data, for new data see groups 6 and 5)",
+    },
+  "499":
+    {
+      "standard_data_flag_name": ["Extreme/Irregular Data - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Inconsistent with another unspecified measurement",
+    },
+  "472":
+    {
+      "standard_data_flag_name": ["Extreme/Irregular Data - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Less accurate than normal due to high concentration(s)",
+    },
+  "471":
+    {
+      "standard_data_flag_name": ["Extreme/Irregular Data - Unspecified"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Particulate mass concentration higher than parallell mass concentration measurement with higher cut off i.e PM1_mass > PM25_mass and PM25_mass > PM10_mass. Considered invalid.",
+    },
+  "470":
+    {
+      "standard_data_flag_name": ["Extreme/Irregular Data - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Particulate mass concentration higher than parallell mass concentration measurement with higher cut off i.e PM1_mass > PM25_mass and PM25_mass > PM10_mass",
+    },
+  "459":
+    {
+      "standard_data_flag_name": ["Extreme/Irregular Data - Unspecified"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Extreme value, unspecified error",
+    },
+  "458":
+    {
+      "standard_data_flag_name": ["Value Above Acceptable Range"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Extremely high value, outside four times standard deviation in a lognormal distribution",
+    },
+  "457":
+    {
+      "standard_data_flag_name": ["Value Below Acceptable Range"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Extremely low value, outside four times standard deviation in a lognormal distribution",
+    },
+  "456":
+    {
+      "standard_data_flag_name":
+        ["Irregular Data Manually Screened and Rejected"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Invalidated by data originator",
+    },
+  "452":
+    {
+      "standard_data_flag_name":
+        ["Data Does Not Meet Internal Network Quality Control Criteria"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Invalid due to large uncertainty",
+    },
+  "440":
+    {
+      "standard_data_flag_name": ["Reconstructed/Recalculated Data"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Reconstructed or recalculated data",
+    },
+  "299":
+    {
+      "standard_data_flag_name": ["Extreme/Irregular Data - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Inconsistent with another unspecified measurement",
+    },
+  "258":
+    {
+      "standard_data_flag_name": ["Value Above Acceptable Range"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Extremely high value, outside four times standard deviation in a log-normal distribution",
+    },
+  "257":
+    {
+      "standard_data_flag_name": ["Value Below Acceptable Range"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Extremely low value, outside four times standard deviation in a log-normal",
+    },
+  "256":
+    {
+      "standard_data_flag_name":
+        ["Irregular Data Manually Screened and Rejected"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Invalidated by database co-ordinator",
+    },
+  "211":
+    {
+      "standard_data_flag_name":
+        ["Irregular Data Manually Screened and Accepted"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Irregular data checked and accepted by database co-ordinator. Valid measurement",
+    },
+  "210":
+    {
+      "standard_data_flag_name":
+        ["Irregular Data Manually Screened and Accepted"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Episode data checked and accepted by database co-ordinator. Valid measurement",
+    },
+  "147":
+    {
+      "standard_data_flag_name": ["Value Below Detection Limit"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Below theoretical detection limit or formal Q/A limit, but a value has been measured and reported and is considered valid",
+    },
+  "120":
+    {
+      "standard_data_flag_name":
+        ["Irregular Data Manually Screened and Accepted"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Sample reanalysed with similar results. Valid measurement",
+    },
+  "111":
+    {
+      "standard_data_flag_name":
+        ["Irregular Data Manually Screened and Accepted"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Irregular data checked and accepted by data originator. Valid measurement",
+    },
+  "110":
+    {
+      "standard_data_flag_name":
+        ["Irregular Data Manually Screened and Accepted"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Episode data checked and accepted by data originator. Valid measurement",
+    },
+  "103":
+    {
+      "standard_data_flag_name": ["High Variability of Data"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "CV of replicate ALPHA samplers > 15 %;. Valid measurement",
+    },
+  "102":
+    {
+      "standard_data_flag_name": ["High Variability of Data"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "CV of replicate diffusion tubes > 30 %. Valid measurement",
+    },
+  "100":
+    {
+      "standard_data_flag_name":
+        ["Irregular Data Manually Screened and Accepted"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Checked by data originator. Valid measurement, overrides any invalid flags",
+    },
+  #Exceptional Events
+  "679":
+    {
+      "standard_data_flag_name": ["Exceptional Event - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Unspecified meteorological condition",
+    },
+  "678":
+    {
+      "standard_data_flag_name":
+        ["Tropical Cyclone (Cyclone/Hurricane/Typhoon)"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Hurricane",
+    },
+  "676":
+    {
+      "standard_data_flag_name": ["Fog"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "station inside cloud (visibility < 1000 m)",
+    },
+  "657":
+    {
+      "standard_data_flag_name": ["Precipitation - Heavy"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "wet-only precipitation chemistry sampler overflow. Heavy snowfall/rain shower (squall)",
+    },
+  "648":
+    {
+      "standard_data_flag_name": ["Snow - Unspecified Intensity"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Snow sampler",
+    },
+  "410":
+    {
+      "standard_data_flag_name": ["Dust"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Sahara dust event",
+    },
+  #Aggregation/Representation issues
+  "395":
+    {
+      "standard_data_flag_name": ["Data Window Completeness < 90%"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Data completeness less than 90%",
+    },
+  "394":
+    {
+      "standard_data_flag_name": ["Data Window Completeness < 90%"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Data completeness less than 90%",
+    },
+  "393":
+    {
+      "standard_data_flag_name": ["Data Window Completeness < 75%"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Data completeness less than 75%",
+    },
+  "392":
+    {
+      "standard_data_flag_name": ["Data Window Completeness < 75%"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Data completeness less than 75%",
+    },
+  "391":
+    {
+      "standard_data_flag_name": ["Data Window Completeness < 50%"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Data completeness less than 50%",
+    },
+  "390":
+    {
+      "standard_data_flag_name": ["Data Window Completeness < 50%"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Data completeness less than 50%",
+    },
+  "389":
+    {
+      "standard_data_flag_name": ["Data Window Completeness < 66%"],
+      "network_decreed_validity": ["I"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "Data completeness less than 66%",
+    },
+  "388":
+    {
+      "standard_data_flag_name": ["Data Window Completeness < 66%"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Data completeness less than 66%",
+    },
+  "382":
+    {
+      "standard_data_flag_name":
+        [">= 75% of Measurements in Window Below Detection Limit"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "More than 75% of the measurements are below detection limit",
+    },
+  "380":
+    {
+      "standard_data_flag_name":
+        [">= 50% of Measurements in Window Below Detection Limit"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["I"],
+      "network_provided_flag_description": "More than 50% of the measurements are below detection limit",
+    },
+  "370":
+    {
+      "standard_data_flag_name":
+        ["Aggregation/Representation Issue - Unspecified"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "For monthly averages with samples partly in two months, the number of days in each month is used for weighing the sample",
+    },
+  #Data Formatting/Processing issues
+  "249":
+    {
+      "standard_data_flag_name": ["Corrected Data Formatting/Processing Issue"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Apparent typing error corrected. Valid measurement",
+    },
+  "248":
+    {
+      "standard_data_flag_name": ["Corrected Data Formatting/Processing Issue"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Illegal flag was removed by the database co-ordinator. Lost flag information (used for historic data only).",
+    },
+  "247":
+    {
+      "standard_data_flag_name": ["Corrected Data Formatting/Processing Issue"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Overlapping sample interval was corrected by the database co-ordinator. Possible wrong sample time (used for historic data only)",
+    },
+  "191":
+    {
+      "standard_data_flag_name": ["Corrected Data Formatting/Processing Issue"],
+      "network_decreed_validity": ["V"],
+      "GHOST_decreed_validity": ["V"],
+      "network_provided_flag_description": "Data not truncation corrected - Valid measurement",
+    },
+}
