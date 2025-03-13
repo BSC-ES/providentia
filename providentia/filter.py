@@ -757,4 +757,5 @@ class DataFilter:
                             float(calibration_factor)
                     else:
                         error = f"Error: Invalid format '{calibration_factor}' in calibration factor. Accepted formats are: '+num', '-num', '*num', or '/num'."
-                        sys.exit(error)
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)

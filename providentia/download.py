@@ -41,7 +41,9 @@ mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'inter
 def check_time(size, file_size):
     if (time.time() - download.ncfile_dl_start_time) > download.timeoutLimit:
         error = 'Download timeout, try later.'
-        sys.exit(error)
+        download.logger.error(error)
+        sys.exit(1)
+        
         
 def sighandler(*unused):
     download.logger.info('\nKeyboard Interrupt. Stopping execution.')
@@ -121,20 +123,25 @@ class ProvidentiaDownload(object):
                         error = 'Error: The section specified in the command line ({0}) does not exist.'.format(kwargs['section'])
                         tip = 'Tip: For subsections, add the name of the parent section followed by an interpunct (·) '
                         tip += 'before the subsection name (e.g. SECTIONA·Spain).'
-                        sys.exit(error + '\n' + tip)
+                        error = error + '\n' + tip
+                        self.logger.error(error)
+                        sys.exit(1)
                 # if no section passed, then get all the parent sections
                 else:
                     # if no parent section names are found throw an error
                     if len(self.parent_section_names) == 0:
                         error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
-                        sys.exit(error)
+                        self.logger.error(error)
+                        sys.exit(1)
                     self.sections = self.parent_section_names
             else:
                 error = 'Error: The path to the configuration file specified in the command line does not exist.'
-                sys.exit(error)
+                self.logger.error(error)
+                sys.exit(1)
         else:
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
-            sys.exit(error)
+            self.logger.error(error)
+            sys.exit(1)
 
         # variable that saves whether some experiments/observations were downloaded before
         self.overwritten_files_flag = False
@@ -189,7 +196,8 @@ class ProvidentiaDownload(object):
                 # if networks is none and is not the non interpolated mode, raise error
                 if not self.network and self.interpolated is True:
                     error = "Error: No networks were passed."
-                    sys.exit(error)
+                    self.logger.error(error)
+                    sys.exit(1)
                 
                 # when one of those symbols is passed, get all networks
                 if self.network == ["*"]:
@@ -222,7 +230,8 @@ class ProvidentiaDownload(object):
                             # ACTRIS
                             elif network == 'actris/actris':
                                 error = f"Error: It is not possible to download files from the ACTRIS network from BSC machines. Set BSC_DL_CHOICE=n in .env file."
-                                sys.exit(error)
+                                self.logger.error(error)
+                                sys.exit(1)
                             # non-GHOST
                             else:
                                 initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
@@ -244,12 +253,14 @@ class ProvidentiaDownload(object):
                             # non-GHOST
                             else:
                                 error = f"Error: It is not possible to download files from the non-GHOST network {network} from the zenodo webpage."
-                                sys.exit(error)
+                                self.logger.error(error)
+                                sys.exit(1)
                         
                         # download option invalid
                         else:
                             error = "Error: Download option not valid, check your .env file."
-                            sys.exit(error)
+                            self.logger.error(error)
+                            sys.exit(1)
 
                 # get orignal species back
                 self.species = main_species
@@ -272,12 +283,14 @@ class ProvidentiaDownload(object):
                     # download from the zenodo webpage
                     else:
                         error = f"Error: It is not possible to download experiments from the zenodo webpage."
-                        sys.exit(error)    
+                        self.logger.error(error)
+                        sys.exit(1) 
             
             # raise an error if there are no valid experiments                                
             else:
                 error = "Error: No experiments available to be downloaded."
-                sys.exit(error)            
+                self.logger.error(error)
+                sys.exit(1)           
            
             # iterate the experiments download
             for experiment in self.experiments.keys():
@@ -348,7 +361,8 @@ class ProvidentiaDownload(object):
             # if it has been changed already, exit
             else:
                 error = "Error: None of the machines are working right now. Try later."
-                sys.exit(error)
+                self.logger.error(error)
+                sys.exit(1)
 
         self.ssh = paramiko.SSHClient()
         hostkeys = self.ssh.get_host_keys().add(self.remote_hostname, 'ed25519', key)
@@ -374,7 +388,8 @@ class ProvidentiaDownload(object):
                 if prv_user is None:
                     error = f"Authentication failed. Please, check if PRV_USER on {join(PROVIDENTIA_ROOT, '.env')} aligns with your BSC {REMOTE_MACHINE} ssh user."
                     error += "\nIf it does not, change the user to the correct one. If it does, delete the whole PRV_USER row and execute again."
-                    sys.exit(error)
+                    self.logger.error(error)
+                    sys.exit(1)
                 else:
                     prv_password = getpass("Insert password: ")
                     self.prv_password = prv_password
@@ -391,7 +406,8 @@ class ProvidentiaDownload(object):
             # if user or password were taken from .env (did not change), tell the user to check .env
             if prv_user is None:
                 error += f" Please, check your credentials on {join(PROVIDENTIA_ROOT, '.env')}"
-            sys.exit(error)
+            self.logger.error(error)
+            sys.exit(1)
 
         # if pwd or user changed, ask if user wants to remember credentials
         if (prv_user is not None) or (prv_password is not None):
@@ -740,7 +756,7 @@ class ProvidentiaDownload(object):
                             # initialize the timeout and get the file
                             self.ncfile_dl_start_time = time.time()
                             remote_path = join(remote_dir,nc_file)
-                            self.sftp.get(remote_path,local_path, callback=check_time)
+                            self.sftp.get(remote_path, local_path, callback=check_time)
                        
             return initial_check_nc_files
 
@@ -1080,7 +1096,7 @@ class ProvidentiaDownload(object):
                             # initialize the timeout and get the file
                             self.ncfile_dl_start_time = time.time()
                             remote_path = join(remote_dir,nc_file)
-                            self.sftp.get(remote_path,local_path, callback=check_time) 
+                            self.sftp.get(remote_path, local_path, callback=check_time) 
             
             return initial_check_nc_files
 
@@ -1280,7 +1296,8 @@ class ProvidentiaDownload(object):
                         else:
                             # TODO delete this in the future
                             error = "It is not possible to download this nc file type yet. Please, contact the developers.", nc_files
-                            sys.exit(error)
+                            self.logger.error(error)
+                            sys.exit(1)
                     
                     # if it is an ensemble statistic
                     else:
@@ -1348,8 +1365,8 @@ class ProvidentiaDownload(object):
 
                             # initialize the timeout and get the file
                             self.ncfile_dl_start_time = time.time()
-                            remote_path = join(remote_dir,nc_file)
-                            self.sftp.get(remote_path,local_path,callback=check_time) 
+                            remote_path = join(remote_dir, nc_file)
+                            self.sftp.get(remote_path, local_path, callback=check_time) 
             
             return initial_check_nc_files
 
@@ -1514,7 +1531,8 @@ class ProvidentiaDownload(object):
                         else:
                             # TODO delete this in the future
                             error = "It is not possible to copy this nc file type yet. Please, contact the developers.", nc_files
-                            sys.exit(error)
+                            self.logger.error(error)
+                            sys.exit(1)
                     
                     # if it is an ensemble statistic
                     else:
@@ -1600,7 +1618,8 @@ class ProvidentiaDownload(object):
                                     subprocess.check_call([rsync_command, esarchive_path, gpfs_path], stdout=devnull, stderr=subprocess.STDOUT)
                             except subprocess.CalledProcessError:
                                 error = f'Failed to copy the files. Try later.'
-                                sys.exit(error)
+                                self.logger.error(error)
+                                sys.exit(1)
 
                             # TODO: fails when creating a new file, wait until users use the copy option to see if it is really needed
                             # give to each new file 770 permissions to directory and make group owner bsc32 
@@ -1634,7 +1653,8 @@ class ProvidentiaDownload(object):
         # Check if the request was successful (status code 200)
         if response.status_code != 200:
             error = f'Failed to retrieve the webpage. Status code: {response.status_code}'
-            sys.exit(error)
+            self.logger.error(error)
+            sys.exit(1)
         
         # fill network dictionary with its corresponding zip url
         for line in response.text.split(">"):
@@ -1659,7 +1679,8 @@ class ProvidentiaDownload(object):
                     self.network = list(self.zenodo_ghost_available_networks.keys())
             else:
                 error = "Download option not valid, check your .env file."
-                sys.exit(error)
+                self.logger.error(error)
+                sys.exit(1)
 
         if download_source in ["n","a"]:
             self.network = self.nonghost_available_networks
