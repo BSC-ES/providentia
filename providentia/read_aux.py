@@ -3,11 +3,9 @@
 import datetime
 from glob import glob
 import json
-import multiprocessing
 import os
 import sys
 import time
-import yaml
 
 import bisect
 import cftime
@@ -17,6 +15,7 @@ from packaging.version import Version
 import pandas as pd
 
 from providentia.auxiliar import CURRENT_PATH, join
+from providentia.warnings_prv import show_message
 
 # initialise dictionary for storing pointers to shared memory variables in read step 
 shared_memory_vars = {}
@@ -54,7 +53,7 @@ def read_netcdf_data(tuple_arguments):
     # assign arguments from tuple to variables
     relevant_file, station_references, station_names, speci,\
     observations_data_label, data_label, data_labels, reading_ghost, ghost_data_vars_to_read,\
-    metadata_dtype, metadata_vars_to_read, default_qa, filter_read = tuple_arguments
+    metadata_dtype, metadata_vars_to_read, logger, default_qa, filter_read = tuple_arguments
 
     start = time.time()
 
@@ -112,7 +111,7 @@ def read_netcdf_data(tuple_arguments):
         elif 'station_name' in ncdf_root.variables:
             station_reference_var = 'station_name'
         else: 
-            print('Error: {} cannot be read because it has no station_name.'.format(relevant_file))
+            logger.info('Error: {} cannot be read because it has no station_name.'.format(relevant_file))
             sys.exit()
 
         meta_shape = ncdf_root[station_reference_var].shape
@@ -305,7 +304,7 @@ def read_netcdf_metadata(tuple_arguments):
     """ Function that handles reading of observational basic metadata from a netCDF"""
 
     # assign arguments from tuple to variables
-    relevant_file, reading_ghost = tuple_arguments
+    relevant_file, reading_ghost, logger = tuple_arguments
 
     # read netCDF frame
     ncdf_root = Dataset(relevant_file)
@@ -329,7 +328,7 @@ def read_netcdf_metadata(tuple_arguments):
                 elif 'station_name' in ncdf_root.variables:
                     station_reference_var = 'station_name'
                 else: 
-                    print('Error: {} cannot be read because it has no station_name.'.format(relevant_files[0]))
+                    logger.info('Error: {} cannot be read because it has no station_name.'.format(relevant_file))
                     sys.exit()
 
                 meta_shape = ncdf_root[station_reference_var].shape
@@ -624,18 +623,21 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
 
     # check if start/end date are valid values, if not, return with no valid obs. files
     if (not valid_date(start_date)) or (not valid_date(end_date)):
-        print(f'Warning: One of start date ({start_date}) or end date ({end_date}) are not valid.')
+        msg = f'One of start date ({start_date}) or end date ({end_date}) are not valid.'
+        show_message(instance, msg)
         return
 
     # check end date is > start date, if not, return with no valid obs. files
     if int(start_date) >= int(end_date):
-        print(f'Warning: Start date ({start_date}) exceeds end date ({end_date}).')
+        msg = f'Start date ({start_date}) exceeds end date ({end_date}).'
+        show_message(instance, msg)
         return
 
     # check start date and end date are both within if valid date range (19000101 - 20500101),
     # if not, return with no valid obs. files
     if (int(start_date) < 19000101) or (int(end_date) < 19000101) or (int(start_date) >= 20500101) or (int(end_date) >= 20500101):
-        print(f'Warning: One of start date ({start_date}) or end date ({end_date}) are not valid.')
+        msg = f'One of start date ({start_date}) or end date ({end_date}) are not valid.'
+        show_message(instance, msg)
         return 
 
     # get start date on first of month
@@ -855,7 +857,7 @@ def generate_file_trees(instance, force=False):
 
     # generate file trees
     if gft or force:
-        print('Generating file trees...')
+        instance.logger.info('Generating file trees...')
         instance.all_observation_data = get_ghost_observational_tree(instance)
         if instance.nonghost_root is not None:
             nonghost_observation_data = get_nonghost_observational_tree(instance)

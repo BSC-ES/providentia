@@ -10,6 +10,8 @@ import pyproj
 import scipy
 from scipy.spatial import cKDTree
 
+from .warnings_prv import show_message
+
 class SpatialColocation:
 
     """ Given multiple species, return intersecting indices for matching stations across species (per network/species)
@@ -58,23 +60,27 @@ class SpatialColocation:
         # check if have measurement_altitudes or not
         if not self.read_instance.station_measurement_altitudes:
             if self.read_instance.spatial_colocation_measurement_altitude:
-                print("Warning: spatial_colocation is not using measurement_altitude as no valid values were found for this variable.")
+                msg = "'spatial_colocation' is not using measurement_altitude as no valid values were found for this variable."
+                show_message(self.read_instance, msg)
             self.read_instance.spatial_colocation_measurement_altitude = False 
 
         # check if have station_names or not
         if not self.read_instance.station_names:
             if self.read_instance.spatial_colocation_station_name:
-                print("Warning: spatial_colocation is not using station_name as no valid values were found for this variable.")
+                msg = "'spatial_colocation' is not using station_name as no valid values were found for this variable."
+                show_message(self.read_instance, msg)
             self.read_instance.spatial_colocation_station_name = False 
 
         # if wanting to use measurement altitudes for spatial colocation, but not lons/lats, then return as it is not possible
         if (self.read_instance.spatial_colocation_measurement_altitude) & (not self.read_instance.spatial_colocation_longitude_latitude):
-            print("Warning: spatial_colocation is set to False, as spatial_colocation_longitude_latitude must be set to True if spatial_colocation_measurement_altitude is True.")
+            msg = "'spatial_colocation' is set to False, as spatial_colocation_longitude_latitude must be set to True if spatial_colocation_measurement_altitude is True."
+            show_message(self.read_instance, msg)
             return
 
         # if not wanting to use any variables for spatial colcoation, then return as there is nothing to be done
         elif (not self.read_instance.spatial_colocation_station_reference) & (not self.read_instance.spatial_colocation_station_name) & (not self.read_instance.spatial_colocation_longitude_latitude) & (not self.read_instance.spatial_colocation_measurement_altitude):
-            print("Warning: spatial_colocation is set to False, as have no active variables to perform colocation.")
+            msg = "'spatial_colocation' is set to False, as have no active variables to perform colocation."
+            show_message(self.read_instance, msg)
             return
 
         # define coordinate systems for transformation

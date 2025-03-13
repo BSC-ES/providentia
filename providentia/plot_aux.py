@@ -591,7 +591,7 @@ def create_chunked_timeseries(read_instance, canvas_instance, chunk_stat, chunk_
     return timeseries_data
 
 
-def reorder_pdf_pages(input_pdf, output_pdf, summary_multispecies_pages, 
+def reorder_pdf_pages(read_instance, input_pdf, output_pdf, summary_multispecies_pages, 
                       station_multispecies_pages, paradigm_break_page):
     """ Reorder PDF pages so that multispecies plots appear before other plots.
 
@@ -641,6 +641,6 @@ def reorder_pdf_pages(input_pdf, output_pdf, summary_multispecies_pages,
         output_pdf_file.add_page(input_pdf_file.pages[page_number])
 
     # Write the rearranged pages to a new PDF file
-    print(f'Writing {output_pdf}')
+    read_instance.logger.info(f'Writing {output_pdf}')
     with open(output_pdf, "wb") as outputStream:
         output_pdf_file.write(outputStream)

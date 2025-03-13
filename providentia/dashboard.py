@@ -325,7 +325,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
     def init_ui(self, **kwargs):
         """ Initialise user interface. """
 
-        print("Starting Providentia dashboard...")
+        self.logger.info("Starting Providentia dashboard...")
 
         # set window title
         self.window_title = "Providentia"
@@ -1582,7 +1582,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.bu_flags.setEnabled(False)
         self.bu_QA.setEnabled(False)
         self.bu_period.setEnabled(False)
-        
 
     def enable_ghost_buttons(self):
         """ Enable button related only to ghost data. """
