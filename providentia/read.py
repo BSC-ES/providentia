@@ -117,10 +117,12 @@ class DataReader:
                     if len(stn_refs) == 0:
                         if networkspeci in self.read_instance.networkspecies:
                             self.read_instance.networkspecies.remove(networkspeci)
-                            print('Warning: There is no available observational data for the network|species: {}. Dropping.'.format(networkspeci))
+                            msg = 'There is no available observational data for the network|species: {}. Dropping.'.format(networkspeci)
+                            show_message(self.read_instance, msg)
                         elif networkspeci in self.read_instance.filter_networkspecies:
                             self.read_instance.filter_networkspecies.remove(networkspeci)
-                            print('Warning: There is no available observational data for the filter network|species: {}. Dropping.'.format(networkspeci))
+                            msg = 'There is no available observational data for the filter network|species: {}. Dropping.'.format(networkspeci)
+                            show_message(self.read_instance, msg)
 
                 # if have zero networkspecies left, then return with invalid_read
                 if len(self.read_instance.networkspecies) == 0:
@@ -565,22 +567,22 @@ class DataReader:
             update_plotting_parameters(self.read_instance) 
 
         # print basic information species
-        print('\nOBSERVATIONS')
+        self.read_instance.logger.info('\nOBSERVATIONS')
         for network in self.read_instance.networkspecies:
-            print(f" - {network}")
+            self.read_instance.logger.info(f" - {network}")
         if self.read_instance.filter_species:
-            print('OBSERVATIONS TO FILTER BY')
+            self.read_instance.logger.info('OBSERVATIONS TO FILTER BY')
             for network_experiment, parameters in self.read_instance.filter_species.items():
-                print(f" - {network_experiment} {parameters}")                       
+                self.read_instance.logger.info(f" - {network_experiment} {parameters}")                       
         # print experiments after observations
         if self.read_instance.experiments:
-            print("EXPERIMENTS")
+            self.read_instance.logger.info("EXPERIMENTS")
             for experiment, alias in self.read_instance.experiments.items():
                 str_experiment = f" - {experiment}"
                 if self.read_instance.alias_flag: 
                    str_experiment += f" ({alias})"
-                print(str_experiment)
-        print()
+                self.read_instance.logger.info(str_experiment)
+        self.read_instance.logger.info("")
 
     def read_basic_metadata(self):     
         """ Get basic unique metadata across networkspecies wanting to read
@@ -635,11 +637,13 @@ class DataReader:
             if len(relevant_files) == 0:
                 if networkspeci in self.read_instance.networkspecies:
                     self.read_instance.networkspecies.remove(networkspeci)
-                    print('Warning: There is no available observational data for the network|species: {}. Dropping.'.format(networkspeci))
+                    msg = 'There is no available observational data for the network|species: {}. Dropping.'.format(networkspeci)
+                    show_message(self.read_instance, msg)
                 elif networkspeci in self.read_instance.filter_networkspecies:
                     self.read_instance.filter_networkspecies.remove(networkspeci)
                     del self.read_instance.filter_species[networkspeci]
-                    print('Warning: There is no available observational data for the filter network|species: {}. Dropping.'.format(networkspeci))
+                    msg = 'There is no available observational data for the filter network|species: {}. Dropping.'.format(networkspeci)
+                    show_message(self.read_instance, msg)
                 continue
                 
             # get basic metadata for speci - read in parallel
@@ -654,7 +658,7 @@ class DataReader:
             # read metadata in parallel
             tuple_arguments = []
             for fname in relevant_files:
-                tuple_arguments.append((fname, self.read_instance.reading_ghost))
+                tuple_arguments.append((fname, self.read_instance.reading_ghost, self.read_instance.logger))
             pool = multiprocessing.Pool(self.read_instance.n_cpus)
             returned_data = pool.map(read_netcdf_metadata, tuple_arguments)
             pool.close()
@@ -733,7 +737,8 @@ class DataReader:
 
             # if have zero intersecting indices after spatial colocation, then deactivate spatial colocation
             if len(self.sc.intersecting_indices[self.sc.firstnetworkspeci]) == 0:
-                print("Warning: spatial_colocation is set to False, as have 0 intersecting stations across species.")
+                msg = "spatial_colocation is set to False, as have 0 intersecting stations across species."
+                show_message(self.read_instance, msg)
                 self.read_instance.spatial_colocation = False
             # otherwise, iterate through networkspecies specific intersecting indices, reducing associated variables 
             # for specific intersecting indices per networkspecies
@@ -912,6 +917,7 @@ class DataReader:
                                             self.read_instance.ghost_data_vars_to_read, 
                                             self.read_instance.metadata_dtype, 
                                             self.read_instance.metadata_vars_to_read,
+                                            self.read_instance.logger,
                                             default_qa_active, filter_read))
   
             returned_data = pool.map(read_netcdf_data, tuple_arguments)

@@ -2,16 +2,17 @@
 
 import configparser
 import copy
+from datetime import datetime
 import os
 import platform
 import socket
 import sys
 import yaml
 
+import logging
 import numpy as np
 from packaging.version import Version
 import pandas as pd
-from itertools import compress
 import ast
 
 from providentia.auxiliar import CURRENT_PATH, join
@@ -63,6 +64,10 @@ class ProvConfiguration:
         for k, val in self.var_defaults.items():
             val = kwargs.get(k, val)
             setattr(self.read_instance, k, self.parse_parameter(k, val))
+
+        # direct output to file/screen
+        if hasattr(self.read_instance, 'logger') is False:
+            self.switch_logging()
 
     def parse_parameter(self, key, value, deactivate_warning=False):
         """ Parse a parameter. """
@@ -417,7 +422,7 @@ class ProvConfiguration:
                         opt = opt.strip().zfill(3)
                     # check that it does not start with stat
                     elif opt.startswith('stat'):
-                        error = error = "Error: ensemble option cannot start with 'stat'.\n" \
+                        error = "Error: ensemble option cannot start with 'stat'.\n" \
                         "For ensemble statistics, simply define them based on the stat name provided in the filename, such as:\n" \
                         "   · 'av' for ensemble average\n" \
                         "   · 'av_an' for ensemble analysis average"
@@ -652,7 +657,7 @@ class ProvConfiguration:
                         exp_ens = exp_ens.strip().zfill(3)
                     # check that it does not start with stat
                     elif exp_ens.startswith('stat'):
-                            error = error = f"Error: ensemble option {exp_ens} cannot start with 'stat'.\n" \
+                            error = f"Error: ensemble option {exp_ens} cannot start with 'stat'.\n" \
                             "For ensemble statistics, simply define them based on the stat name provided in the filename, such as:\n" \
                             "   · 'av' for ensemble average\n" \
                             "   · 'av_an' for ensemble analysis average"
@@ -668,7 +673,7 @@ class ProvConfiguration:
                     exp_ens = exp_ens.strip().zfill(3)
                 # check that it does not start with stat
                 elif exp_ens.startswith('stat'):
-                        error = error = f"Error: ensemble option {exp_ens} cannot start with 'stat'.\n" \
+                        error = f"Error: ensemble option {exp_ens} cannot start with 'stat'.\n" \
                         "For ensemble statistics, simply define them based on the stat name provided in the filename, such as:\n" \
                         "   · 'av' for ensemble average\n" \
                         "   · 'av_an' for ensemble analysis average"
@@ -1093,7 +1098,7 @@ class ProvConfiguration:
         # before checking the experiment check that the remote download has the interpolated tag as False, if not exit
         if self.read_instance.download and MACHINE in ["storage5","nord3v2"] and self.read_instance.interpolated is True:
             error = F"Error: Nothing from the {self.read_instance.section} section was copied to gpfs, change the interpolated field to 'False'."
-            exit(error)
+            sys.exit(error)
 
         # get correct check experiment function
         # TODO do it using heritage
@@ -1457,6 +1462,53 @@ class ProvConfiguration:
             msg = 'During interpolation multiprocessing must be turned on for local runs, activating.'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.interp_multiprocessing = True
+    
+    def switch_logging(self):
+        # create logger
+        self.read_instance.logger = logging.getLogger("")
+        self.read_instance.logger.setLevel(logging.INFO) 
+
+        # remove previous handlers
+        while self.read_instance.logger.handlers:
+            self.read_instance.logger.removeHandler(self.read_instance.logger.handlers[0])
+
+        if self.read_instance.logfile != False:
+            # default path, default name
+            if self.read_instance.logfile == True:
+                # get log filename and filepath
+                timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+                filename = f"{timestamp}.log"
+            # default path, custom name
+            else:
+                filename = self.read_instance.logfile
+
+            # custom path, custom name (no need of creating the file path)
+            if type(self.read_instance.logfile) == str and os.sep in self.read_instance.logfile:
+                file_path = self.read_instance.logfile
+            # default path (the file path depends on the mode)
+            else:
+                # get the mode being used right now
+                mode_list = ["offline", "interactive", "download", "interpolation"] 
+                mode = "dashboard"
+                for temp_mode in mode_list:
+                    if getattr(self.read_instance, temp_mode) is True:
+                        mode = temp_mode if temp_mode != "interactive" else "notebook"
+                file_path = join(PROVIDENTIA_ROOT, 'logs', mode, filename)
+
+            # redirect output to a file
+            handler = logging.FileHandler(file_path)
+            print(f"Output redirected to {file_path}")
+        else:
+            # redirect output to terminal
+            handler = logging.StreamHandler(sys.stdout)
+
+        formatter = logging.Formatter("%(message)s")
+        handler.setFormatter(formatter)
+        self.read_instance.logger.addHandler(handler)
+
+        # suppress paramiko logs in download
+        if self.read_instance.download is True:
+            logging.getLogger("paramiko").setLevel(logging.WARNING)
 
 def read_conf(fpath=None):
     """ Read configuration files. """
@@ -1675,12 +1727,12 @@ def load_conf(self, fpath=None):
     from configuration import read_conf
 
     if fpath is None:
-        print("No configuration file found")
+        self.read_instance.logger.info("No configuration file found")
         sys.exit(1)
 
     # if DEFAULT is not present, then return
     if not os.path.isfile(fpath):
-        print(("Error %s" % fpath))
+        self.read_instance.logger.error(f"Error {fpath}")
         return
 
     self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names, self.filenames = read_conf(fpath)
