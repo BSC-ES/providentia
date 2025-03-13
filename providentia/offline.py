@@ -76,17 +76,20 @@ class ProvidentiaOffline:
                 self.from_conf = True
             else:
                 error = 'Error: The path to the configuration file specified in the command line does not exist.'
-                sys.exit(error)
+                self.logger.error(error)
+                sys.exit(1)
         else:
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
-            sys.exit(error)
+            self.logger.error(error)
+            sys.exit(1)
 
         # load report plot presets
         try:
             self.report_plots = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/report_plots.yaml')))
         except:
             error = "Error: Report plots file could not be read, check for common typos (e.g. missing double quotes or commas)."
-            sys.exit(error)
+            self.logger.error(error)
+            sys.exit(1)
 
         # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
         # if have filetree flags, then these overwrite any defaults
@@ -125,13 +128,15 @@ class ProvidentiaOffline:
                 self.filenames = [self.filenames[index]]
                 self.parent_section_names = [self.parent_section_names[index]]
             else:
-                msg = "Error: Section {} does not exist in configuration file.".format(self.commandline_arguments["section"])
-                sys.exit(msg)
+                error = "Error: Section {} does not exist in configuration file.".format(self.commandline_arguments["section"])
+                self.logger.error(error)
+                sys.exit(1)
 
         # if no parent section names are found throw an error
         if len(self.parent_section_names) == 0:
             error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
-            sys.exit(error)
+            self.logger.error(error)
+            sys.exit(1)
 
         # iterate through configuration sections
         for section_ind, (filename, section) in enumerate(zip(self.filenames, self.parent_section_names)):
@@ -214,9 +219,10 @@ class ProvidentiaOffline:
             
             # check if report type is valid
             if self.report_type not in self.report_plots.keys():
-                msg = 'Error: The report type {0} cannot be found in settings/report_plots.yaml. '.format(self.report_type)
-                msg += 'The available report types are {0}. Select one or create your own.'.format(list(self.report_plots.keys()))
-                sys.exit(msg)
+                error = 'Error: The report type {0} cannot be found in settings/report_plots.yaml. '.format(self.report_type)
+                error += 'The available report types are {0}. Select one or create your own.'.format(list(self.report_plots.keys()))
+                self.logger.error(error)
+                sys.exit(1)
 
             # set plots that need to be made (summary and station specific)
             self.summary_plots_to_make = []

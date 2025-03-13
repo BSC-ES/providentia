@@ -66,11 +66,17 @@ class DataReader:
                 msg += 'Plots will only be created when period is longer than 2 timesteps.'
                 show_message(self.read_instance, msg)
                 if (self.read_instance.from_conf) and (not self.read_instance.offline) and (not self.read_instance.interactive):
-                    sys.exit('Error: Providentia will not be launched.')
+                    error = 'Error: Providentia will not be launched.'
+                    self.read_instance.logger.error(error)
+                    sys.exit(1) 
                 elif (self.read_instance.offline):
-                    sys.exit('Error: Offline report will not be created.')
+                    error = 'Error: Offline report will not be created.'
+                    self.read_instance.logger.error(error)
+                    sys.exit(1) 
                 elif (self.read_instance.interactive):
-                    sys.exit('Error: Data cannot be read')
+                    error = 'Error: Data cannot be read.'
+                    self.read_instance.logger.error(error)
+                    sys.exit(1) 
                 else:
                     self.read_instance.first_read = True
                     return
@@ -717,7 +723,9 @@ class DataReader:
 
             # double check that lengths of read variables are the same
             if len(set(map(len, basic_metadata_read))) != 1:
-                sys.exit('Error: Some metadata variables do not appear in all netCDF files. This should not be the case!')
+                error = 'Error: Some metadata variables do not appear in all netCDF files. This should not be the case!'
+                self.read_instance.logger.error(error)
+                sys.exit(1) 
 
             # get unique station references and apply unique indices to the other variables        
             speci_station_references, station_unique_indices = np.unique(speci_station_references, return_index=True)
@@ -968,4 +976,5 @@ class DataReader:
                 elif np.isin(data_array.flatten(), [-9999.0, np.nan]).all():
                     error = 'Error: All observation and experiment arrays for {} are void.'.format(networkspeci)
 
-                sys.exit(error)
+                self.read_instance.logger.error(error)
+                sys.exit(1) 
