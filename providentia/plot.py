@@ -169,7 +169,8 @@ class Plot:
                         self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[base_plot_type])
                     except KeyError:
                         error = f'Error: Plot type {plot_type} is not available. Remove from settings/report_plots.yaml'
-                        sys.exit(error)
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)
 
                 # overwrite default plot characteristics with custom formatting
                 for format_var in format:

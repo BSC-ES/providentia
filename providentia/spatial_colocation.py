@@ -263,7 +263,9 @@ class SpatialColocation:
 
                     # more than 1 match, this shouldn't happen, so throw error
                     else:
-                        sys.exit('Error: Spatial colocation could not resolve duplicate matches between station coordinates.')
+                        error = 'Error: Spatial colocation could not resolve duplicate matches between station coordinates.'
+                        self.read_instance.logger.error(error)
+                        sys.exit(1) 
 
                 # have some interesects between species?
                 if len(self.fs_wtol_inds) > 0:
