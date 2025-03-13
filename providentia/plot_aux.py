@@ -161,10 +161,11 @@ def update_plotting_parameters(instance):
     color_palettes = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/color_palettes.yaml')))
     if color_palette in color_palettes.keys():
         if (len(instance.data_labels) - 1) > len(color_palettes[color_palette]):
-            msg = "Error: The number of experiments and palette colors should be equal. "
-            msg += f"Add more colors to your palette '{color_palette}' in settings/color_palettes.yaml "
-            msg += "or change your legend_color_palette in the plot characteristics files."
-            sys.exit()
+            error = "Error: The number of experiments and palette colors should be equal. "
+            error += f"Add more colors to your palette '{color_palette}' in settings/color_palettes.yaml "
+            error += "or change your legend_color_palette in the plot characteristics files."
+            instance.logger.error(error)
+            sys.exit(1)
         else:
             clrs = sns.color_palette(color_palettes[color_palette])
     else:
