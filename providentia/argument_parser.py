@@ -243,6 +243,10 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--interp_multiprocessing",
                                      dest="interp_multiprocessing",
                                      help="use multiprocessing instead of greasy to interpolate in HPC machines")
+            self.parser.add_argument("--logfile",
+                                     dest="logfile",
+                                     action='store_true',
+                                     help="redirect the output to a log file")
  
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)
