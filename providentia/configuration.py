@@ -432,8 +432,6 @@ class ProvConfiguration:
                         sys.exit(1)
                     
                     ensemble_opts.append(opt)
-                    
-
 
                 ensemble_opts = [opt.strip().zfill(3) if opt.isdigit() else opt for opt in str(value).split(",")]  
                 return ensemble_opts
@@ -1168,8 +1166,8 @@ class ProvConfiguration:
         if self.read_instance.experiments != [] and correct_experiments == {}:
             msg = 'No experiment data available.'
             if self.read_instance.interpolation:
-                msg = "Error: " + msg
-                self.read_instance.logger.error(msg)
+                error = "Error: " + msg
+                self.read_instance.logger.error(error)
                 sys.exit(1)
             else:
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
@@ -1500,7 +1498,8 @@ class ProvConfiguration:
         while self.read_instance.logger.handlers:
             self.read_instance.logger.removeHandler(self.read_instance.logger.handlers[0])
 
-        if self.read_instance.logfile != False:
+        # interpolation does not use this feature
+        if self.read_instance.logfile != False and self.read_instance.interpolation is False:
             # default path, default name
             if self.read_instance.logfile == True:
                 # get log filename and filepath
@@ -1508,12 +1507,12 @@ class ProvConfiguration:
                 filename = f"{timestamp}.log"
             # default path, custom name
             else:
-                filename = self.read_instance.logfile
+                filename = str(self.read_instance.logfile)
 
             # custom path, custom name (no need of creating the file path)
             if type(self.read_instance.logfile) == str and os.sep in self.read_instance.logfile:
                 file_path = self.read_instance.logfile
-            # default path (the file path depends on the mode)
+            # default path (the file name depends on the mode)
             else:
                 # get the mode being used right now
                 mode_list = ["offline", "interactive", "download", "interpolation"] 
