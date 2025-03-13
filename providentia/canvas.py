@@ -111,7 +111,8 @@ class MPLCanvas(FigureCanvas):
             if plot_type not in self.all_plots:
                 error = "Error: Plot type {0} is not an option. ".format(plot_type)
                 error += "The available plots are: {0}.".format(self.all_plots[2:])
-                sys.exit(error)
+                self.read_instance.logger.error(error)
+                sys.exit(1)
 
         # initialize layout positions
         self.read_instance.position_1 = 'map'

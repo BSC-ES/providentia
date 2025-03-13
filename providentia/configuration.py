@@ -112,7 +112,8 @@ class ProvConfiguration:
                 operating_system = 'Windows'
             else:
                 error = 'Error: The OS cannot be detected.'
-                sys.exit(error)
+                self.read_instance.logger.error(error)
+                sys.exit(1)
             return operating_system
         
         elif key == 'machine':
@@ -384,7 +385,8 @@ class ProvConfiguration:
                     for flag in value.split(","):
                         if flag.strip() not in self.read_instance.standard_data_flag_name_to_data_flag_code:
                             error = (f"Error: Flag '{flag}' not in this GHOST version ({self.read_instance.ghost_version}).")
-                            sys.exit(error)
+                            self.read_instance.logger.error(error)
+                            sys.exit(1)
                     return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[f.strip()] for f in value.split(",")])
                 # list of integer codes
                 else:
@@ -426,7 +428,8 @@ class ProvConfiguration:
                         "For ensemble statistics, simply define them based on the stat name provided in the filename, such as:\n" \
                         "   · 'av' for ensemble average\n" \
                         "   · 'av_an' for ensemble analysis average"
-                        sys.exit(error)
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)
                     
                     ensemble_opts.append(opt)
                     
@@ -611,7 +614,8 @@ class ProvConfiguration:
         # check if all the experiments are written in the same way
         if len(set([len(exp) for exp in split_experiments])) > 1:
             error = (f"Error: All the experiments have to follow the same structure: [expID], [expID]-[domain], [expID]-[ensembleNum] or [expID]-[domain]-[ensembleNum].")
-            sys.exit(error)
+            self.read_instance.logger.error(error)
+            sys.exit(1)
 
         # get original domain and ensemble options as passed in the configuration file
         config_domain = copy.deepcopy(self.read_instance.domain) 
@@ -640,8 +644,8 @@ class ProvConfiguration:
                     # other experiment goes by the format [expID]-[ensembleNum]
                     if exp_ens:
                         error = (f"Error: All the experiments have to follow the same structure: [expID], [expID]-[domain], [expID]-[ensembleNum] or [expID]-[domain]-[ensembleNum].")
-                        sys.exit(error)
-
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)
                     exp_dom = end_experiment
                     exp_domains_list.append(exp_dom)
                 # [expID]-[ensembleNum]   
@@ -649,7 +653,8 @@ class ProvConfiguration:
                     # other experiment goes by the format [expID]-[domain]
                     if exp_dom:
                         error = (f"Error: All the experiments have to follow the same structure: [expID], [expID]-[domain], [expID]-[ensembleNum] or [expID]-[domain]-[ensembleNum].")
-                        sys.exit(error)
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)
 
                     exp_ens = end_experiment
                     # if it is a number, then make it 3 digits, if not it stays as it is
@@ -661,7 +666,8 @@ class ProvConfiguration:
                             "For ensemble statistics, simply define them based on the stat name provided in the filename, such as:\n" \
                             "   · 'av' for ensemble average\n" \
                             "   · 'av_an' for ensemble analysis average"
-                            sys.exit(error)
+                            self.read_instance.logger.error(error)
+                            sys.exit(1)
                     exp_ensemble_options_list.append(exp_ens)
 
             # [expID]-[domain]-[ensembleNum]
@@ -677,19 +683,22 @@ class ProvConfiguration:
                         "For ensemble statistics, simply define them based on the stat name provided in the filename, such as:\n" \
                         "   · 'av' for ensemble average\n" \
                         "   · 'av_an' for ensemble analysis average"
-                        sys.exit(error)
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)
                 exp_ensemble_options_list.append(exp_ens)
                         
             # if experiment is composed by more than 3 parts, exit
             elif len(split_experiment) > 3:
                 error = 'Invalid experiment format, experiments have to consist of three elements maximum.'
-                sys.exit(error)
+                self.read_instance.logger.error(error)
+                sys.exit(1)
 
             # throw error if domain has been defined in configuration file and in experiment name
             if exp_dom and config_domain:
                 error = f"Error: Unable to set domain(s) as {', '.join(config_domain)} because the "
                 error += f"experiment {self.read_instance.experiments[exp_i]} already contains the domain."
-                sys.exit(error)
+                self.read_instance.logger.error(error)
+                sys.exit(1)
             # if there is no domain, fill it with the list from the experiments names
             elif not config_domain:
                 self.read_instance.domain = exp_domains_list
@@ -698,7 +707,8 @@ class ProvConfiguration:
             if exp_ens and config_ensemble_options:
                 error = f"Error: Unable to set ensemble option(s) as {', '.join(config_ensemble_options)} because the "
                 error +=  f"experiment {self.read_instance.experiments[exp_i]} already contains the ensemble option."                  
-                sys.exit(error)
+                self.read_instance.logger.error(error)
+                sys.exit(1)
             # if there is no ensemble option, fill it with the list from the experiments names
             elif not config_ensemble_options:
                 self.read_instance.ensemble_options = exp_ensemble_options_list
@@ -885,7 +895,8 @@ class ProvConfiguration:
             for speci in self.read_instance.species:
                 if '*' not in speci and speci not in self.read_instance.parameter_dictionary:
                     error = f'Error: species "{speci}" not valid.'
-                    sys.exit(error)
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
 
         # get non-default fields on config file if launching from a config file
         if hasattr(self.read_instance, "sub_opts"):
@@ -946,7 +957,8 @@ class ProvConfiguration:
             # otherwise throw error
             else:
                 error = 'Error: The number of "network" and "species" fields is not the same.'
-                sys.exit(error)
+                self.read_instance.logger.error(error)
+                sys.exit(1)
 
         # throw error if one of networks are non all GHOST or non-GHOST
         # in download mode it is allowed to have mixed networks #TODO Change this
@@ -958,7 +970,8 @@ class ProvConfiguration:
                     is_ghost = check_for_ghost(network)
                     if is_ghost != previous_is_ghost:
                         error = 'Error: "network" must be all GHOST or non-GHOST'
-                        sys.exit(error)
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)
                     previous_is_ghost = is_ghost
 
         # check have resolution information, TODO when refactoring init change this way of checking defaults
@@ -993,7 +1006,8 @@ class ProvConfiguration:
                         show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     else:
                         error = "Error: Format of Start date (start_date) not correct, please change it to YYYYMM."
-                        sys.exit(error)
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)
             else:
                 if len_start_date != 8:
                     if len_start_date == 6:
@@ -1002,7 +1016,8 @@ class ProvConfiguration:
                         show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     else:
                         error = "Error: The format of Start date (start_date) is not correct, please change it to YYYYMMDD."
-                        sys.exit(error)
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)
 
         # check end_date  format, TODO START DATE IS DIFFERENT IN INTERPOLATION (check in the refactoring)
         # if offline, throw message, stating are using default instead
@@ -1024,7 +1039,8 @@ class ProvConfiguration:
                         show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     else:
                         error = "Error: Format of End Date (end_date) not correct, please change it to YYYYMM."
-                        sys.exit(error)
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)
             else:
                 if len_end_date != 8:
                     if len_end_date == 6:
@@ -1033,7 +1049,8 @@ class ProvConfiguration:
                         show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
                     else:
                         error = "Error: The format of End Date (end_date) is not correct, please change it to YYYYMMDD."
-                        sys.exit(error)
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)
 
         # check have interp_n_neighbours information, TODO ONLY FOR INTERPOLATION
         # if offline, throw message, stating are using default instead
@@ -1053,7 +1070,8 @@ class ProvConfiguration:
         # make sure there are experiments in interpolation
         if self.read_instance.interpolation and (len(self.read_instance.experiments) == 0):
             error = 'Error: No experiments were provided in the configuration file.'
-            sys.exit(error)
+            self.read_instance.logger.error(error)
+            sys.exit(1)
 
         # get domain, ensemble options, experiment ids and flag to get the default values of these variables
         self.decompose_experiments()
@@ -1098,7 +1116,8 @@ class ProvConfiguration:
         # before checking the experiment check that the remote download has the interpolated tag as False, if not exit
         if self.read_instance.download and MACHINE in ["storage5","nord3v2"] and self.read_instance.interpolated is True:
             error = F"Error: Nothing from the {self.read_instance.section} section was copied to gpfs, change the interpolated field to 'False'."
-            sys.exit(error)
+            self.read_instance.logger.error(error)
+            sys.exit(1)
 
         # get correct check experiment function
         # TODO do it using heritage
@@ -1149,7 +1168,9 @@ class ProvConfiguration:
         if self.read_instance.experiments != [] and correct_experiments == {}:
             msg = 'No experiment data available.'
             if self.read_instance.interpolation:
-                sys.exit("Error: " + msg)
+                msg = "Error: " + msg
+                self.read_instance.logger.error(msg)
+                sys.exit(1)
             else:
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
@@ -1165,7 +1186,8 @@ class ProvConfiguration:
             # control that calibration factor not by experiment can only be one element
             if not calibration_by_experiment and len(self.read_instance.calibration_factor) > 1:
                 error = "Error: When calibration factor is not provided by the experiment, only one value can be passed."
-                sys.exit(error)
+                self.read_instance.logger.error(error)
+                sys.exit(1)
 
             # create dictionary per experiment
             calibration_factor_dict = {}
@@ -1235,11 +1257,13 @@ class ProvConfiguration:
             if Version(matplotlib.__version__) < Version("3.8"):
                 if 'taylor' in self.read_instance.active_dashboard_plots:
                     error = 'It is not possible to create Taylor diagrams yet, please remove from settings/report_plots.yaml.'
-                    sys.exit(error)
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
 
         if (len(self.read_instance.active_dashboard_plots) != 4) and (not self.read_instance.offline) & (not self.read_instance.interactive):
             error = 'Error: there must be 4 "active_dashboard_plots"'
-            sys.exit(error)
+            self.read_instance.logger.error(error)
+            sys.exit(1)
         
         # if filter_species is active, and spatial_colocation is not active, then cannot filter by species
         # set filter_species to empty dict and advise user of this
@@ -1257,7 +1281,8 @@ class ProvConfiguration:
                 # throw mapping error if species not ablet to be mapped
                 if speci not in multispecies_map:
                     error = f'Error: not able to map species "{speci}".'
-                    sys.exit(error)
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
                 
                 mapped_species = multispecies_map[speci]
                 del new_species[speci_ii]
@@ -1282,7 +1307,8 @@ class ProvConfiguration:
             # exit if there are no valid species left
             if not self.read_instance.species:
                 error = f"Error: No valid species for the current GHOST version ({self.read_instance.ghost_version})"
-                sys.exit(error)
+                self.read_instance.logger.error(error)
+                sys.exit(1)
 
         # check filter species, remove the ones that are not on the ghost version     
         if invalid_filter_species:
@@ -1325,7 +1351,8 @@ class ProvConfiguration:
                 elif len(self.read_instance.lower_bound) > 1:
                     if len(self.read_instance.species) != len(self.read_instance.lower_bound):
                         error = 'Error: "lower_bound" variable must be same length as number of species read.'
-                        sys.exit(error)
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)
                     else:
                         for speci_ii, speci in enumerate(self.read_instance.species):
                             lower_bound_dict[speci] = self.read_instance.lower_bound[speci_ii] 
@@ -1350,7 +1377,8 @@ class ProvConfiguration:
                 elif len(self.read_instance.upper_bound) > 1:
                     if len(self.read_instance.species) != len(self.read_instance.upper_bound):
                         error = 'Error: "upper_bound" variable must be same length as number of species read.'
-                        sys.exit(error)
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)
                     else:
                         for speci_ii, speci in enumerate(self.read_instance.species):
                             upper_bound_dict[speci] = self.read_instance.upper_bound[speci_ii] 
@@ -1510,7 +1538,7 @@ class ProvConfiguration:
         if self.read_instance.download is True:
             logging.getLogger("paramiko").setLevel(logging.WARNING)
 
-def read_conf(fpath=None):
+def read_conf(self, fpath=None):
     """ Read configuration files. """
 
     res = {}
@@ -1538,7 +1566,8 @@ def read_conf(fpath=None):
                         all_sections_modified.append(section_modified)
                     else:
                         error = 'Error: It is not possible to have two sections with the same name.'
-                        sys.exit(error)
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)
             elif '[[' in line and ']]' in line:
                 subsection = line.strip()
                 # if first character is comment do not parse subsection
@@ -1735,7 +1764,7 @@ def load_conf(self, fpath=None):
         self.read_instance.logger.error(f"Error {fpath}")
         return
 
-    self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names, self.filenames = read_conf(fpath)
+    self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names, self.filenames = read_conf(self, fpath)
 
 def split_options(read_instance, conf_string, separator="||"):
     """ For the options in the configuration that define the keep and remove

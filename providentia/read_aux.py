@@ -111,8 +111,9 @@ def read_netcdf_data(tuple_arguments):
         elif 'station_name' in ncdf_root.variables:
             station_reference_var = 'station_name'
         else: 
-            logger.info('Error: {} cannot be read because it has no station_name.'.format(relevant_file))
-            sys.exit()
+            error = 'Error: {} cannot be read because it has no station_name.'.format(relevant_file)
+            logger.error(error)
+            sys.exit(1)
 
         meta_shape = ncdf_root[station_reference_var].shape
         file_station_references = ncdf_root[station_reference_var][:]
@@ -328,8 +329,9 @@ def read_netcdf_metadata(tuple_arguments):
                 elif 'station_name' in ncdf_root.variables:
                     station_reference_var = 'station_name'
                 else: 
-                    logger.info('Error: {} cannot be read because it has no station_name.'.format(relevant_file))
-                    sys.exit()
+                    error = 'Error: {} cannot be read because it has no station_name.'.format(relevant_file)
+                    logger.error(error)
+                    sys.exit(1)
 
                 meta_shape = ncdf_root[station_reference_var].shape
                 meta_val = ncdf_root[station_reference_var][:]
@@ -866,14 +868,16 @@ def generate_file_trees(instance, force=False):
         try:
             instance.all_observation_data = json.load(open(join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(instance.ghost_version)))) 
         except FileNotFoundError as file_error:
-            msg = "Error: Trying to load 'settings/internal/ghost_filetree_{}.json' but file does not exist. Run with the flag '--gft' to generate this file.".format(instance.ghost_version)
-            sys.exit(msg)
+            error = "Error: Trying to load 'settings/internal/ghost_filetree_{}.json' but file does not exist. Run with the flag '--gft' to generate this file.".format(instance.ghost_version)
+            instance.logger.error(error)
+            sys.exit(1)
         if instance.nonghost_root is not None:
             try:
                 nonghost_observation_data = json.load(open(join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json')))
             except FileNotFoundError as file_error:
-                msg = "Error: Trying to load 'settings/internal/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
-                sys.exit(msg)
+                error = "Error: Trying to load 'settings/internal/nonghost_filetree.json' but file does not exist. Run with the flag '--gft' to generate this file."
+                instance.logger.error(error)
+                sys.exit(1)
 
     # merge GHOST and non-GHOST filetrees
     if instance.nonghost_root is not None:
