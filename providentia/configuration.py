@@ -292,12 +292,18 @@ class ProvConfiguration:
             # parse qa
 
             from GHOST_standards import providentia_defaults
+            from GHOST_standards import actris_defaults
+            
+            if self.read_instance.network == 'actris/actris':
+                defaults = actris_defaults
+            else:
+                defaults = providentia_defaults
 
             # set default qa codes (can differ per GHOST version)
             self.read_instance.default_qa_standard = [self.read_instance.standard_QA_name_to_QA_code[qa_name] 
-                                                      for qa_name in providentia_defaults['qa_standard']]
+                                                      for qa_name in defaults['qa_standard']]
             self.read_instance.default_qa_non_negative = [self.read_instance.standard_QA_name_to_QA_code[qa_name] 
-                                                          for qa_name in providentia_defaults['qa_non_negative']]
+                                                          for qa_name in defaults['qa_non_negative']]
 
             # if not None then set QA by that given
             if value is not None:
@@ -322,6 +328,12 @@ class ProvConfiguration:
             # parse flags
 
             from GHOST_standards import providentia_defaults
+            from GHOST_standards import actris_defaults
+
+            if self.read_instance.network == 'actris/actris':
+                defaults = actris_defaults
+            else:
+                defaults = providentia_defaults
 
             # if not None then set flags by that given
             if value is not None:
@@ -339,7 +351,7 @@ class ProvConfiguration:
                     return sorted(list(value))
             # otherwise, set default flags
             else:
-                return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[flag_name] for flag_name in providentia_defaults['flag']])
+                return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[flag_name] for flag_name in defaults['flag']])
 
         elif key in ['add_qa','subtract_qa']:
             # parse add/subtract qa
