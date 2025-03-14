@@ -1800,13 +1800,7 @@ class ProvidentiaDownload(object):
             
                 # combine and create new dataset
                 print('    Combining files...')
-                try:
-                    combined_ds = xr.concat(combined_ds_list_corrected_flag, 
-                                            dim='station', 
-                                            combine_attrs='drop_conflicts')
-                except Exception as error:
-                    print(f'Error: Datasets could not be combined - {error}')
-                    continue
+                combined_ds = temporally_average_data(combined_ds_list_corrected_flag, resolution, var, self.ghost_version, target_start_date, target_end_date)
                 
                 # add metadata
                 for key, value in metadata[resolution].items():
@@ -1835,7 +1829,7 @@ class ProvidentiaDownload(object):
                 combined_ds.attrs['application_area'] = 'Monitoring atmospheric composition'
                 combined_ds.attrs['domain'] = 'Atmosphere'
                 combined_ds.attrs['observed_layer'] = 'Land surface'
-                        
+
                 # save data per year and month
                 path = join(self.nonghost_root, f'actris/actris/{resolution}/{var}')
                 if not os.path.isdir(path):
@@ -1845,9 +1839,8 @@ class ProvidentiaDownload(object):
                     for month, ds_month in ds_year.groupby('time.month'):
                         filename = f"{path}/{var}_{year}{month:02d}.nc"
                         if filename in files_to_download:
-                            combined_ds_yearmonth_unaveraged = combined_ds.sel(time=f"{year}-{month:02d}")
-                            combined_ds_yearmonth = temporally_average_data(combined_ds_yearmonth_unaveraged, resolution, year, month, var, self.ghost_version)
-    
+                            combined_ds_yearmonth = combined_ds.sel(time=f"{year}-{month:02d}")
+
                             # add title to attrs
                             extra_info = ''
                             wavelength_var = is_wavelength_var(actris_parameter)
