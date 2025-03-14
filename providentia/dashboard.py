@@ -731,8 +731,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         else:
             self.selected_network = self.cb_network.currentText()
 
-        # turn off some features if using non-GHOST data
-        if check_for_ghost(self.selected_network):
+        # turn off some features if using non-GHOST data (on for ACTRIS)
+        if check_for_ghost(self.selected_network) or self.selected_network == 'actris/actris':
             self.enable_ghost_buttons()
         else:
             self.disable_ghost_buttons()
