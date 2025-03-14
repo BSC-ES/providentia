@@ -18,12 +18,19 @@ from providentia.auxiliar import CURRENT_PATH, join, pad_array
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
 # load ACTRIS mapping files
-parameters_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'ghost_actris_variables.yaml')))
-metadata_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'metadata.yaml')))
-coverages_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'coverages.yaml')))
-variable_mapping = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'variable_mapping.yaml')))
-variable_mapping = {k: v for k, v in variable_mapping.items() if k.strip() and v}
-flags_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'flags.yaml')))
+parameters_dict = yaml.safe_load(open(join(
+    PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'ghost_actris_variables.yaml')))
+metadata_dict = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'metadata.yaml')))
+coverages_dict = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'coverages.yaml')))
+variable_mapping = yaml.safe_load(open(join(
+    PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'variable_mapping.yaml')))
+variable_mapping = {k: v for k,
+                    v in variable_mapping.items() if k.strip() and v}
+flags_dict = yaml.safe_load(
+    open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'flags.yaml')))
+
 
 def create_variable_mapping_file():
 
@@ -31,31 +38,32 @@ def create_variable_mapping_file():
         value['preferred_term'].replace('"', ''): {'var': key[2], 'units': key[0]}
         for key, value in variable_mapping.items()
     }
-    with open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'variable_mapping.yaml'), 
+    with open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'variable_mapping.yaml'),
               mode='w') as file:
         yaml.dump(result, file, default_flow_style=False)
 
 
 def create_actris_variables_file():
-    
-    with open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'actris_variables.csv'), 
+
+    with open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'actris_variables.csv'),
               mode="w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         for key in variable_mapping.keys():
             writer.writerow([key, variable_mapping[key]['var']])
 
 
-def create_ghost_variables_file(ghost_version):    
-    
-    sys.path.insert(1, join(PROVIDENTIA_ROOT, 'providentia/dependencies/GHOST_standards/{}'.format(ghost_version)))
+def create_ghost_variables_file(ghost_version):
+
+    sys.path.insert(1, join(
+        PROVIDENTIA_ROOT, 'providentia/dependencies/GHOST_standards/{}'.format(ghost_version)))
     from GHOST_standards import standard_parameters
-    with open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'ghost_variables.csv'), 
+    with open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'ghost_variables.csv'),
               mode="w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         for key in standard_parameters.keys():
-            writer.writerow([standard_parameters[key]['long_parameter_name'], 
-                             standard_parameters[key]['bsc_parameter_name'], 
-                             ', '.join( standard_parameters[key]['ebas_parameter_name'])])
+            writer.writerow([standard_parameters[key]['long_parameter_name'],
+                             standard_parameters[key]['bsc_parameter_name'],
+                             ', '.join(standard_parameters[key]['ebas_parameter_name'])])
 
 
 def get_files_per_var(var):
@@ -133,9 +141,11 @@ def get_files_path(var):
 
     alpha_var = ''.join(x for x in var if x.isalpha())
     if alpha_var in ['lsco', 'absco', 'lbsco', 'odaero']:
-        path = join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', f'files/{alpha_var}/files.yaml')
+        path = join(PROVIDENTIA_ROOT, 'settings', 'internal',
+                    'actris', f'files/{alpha_var}/files.yaml')
     else:
-        path = join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', f'files/{var}/files.yaml')
+        path = join(PROVIDENTIA_ROOT, 'settings', 'internal',
+                    'actris', f'files/{var}/files.yaml')
 
     return path
 
@@ -151,7 +161,8 @@ def get_standard_flags_and_qa(flags, ghost_version):
         GHOST version
     """
 
-    sys.path.insert(1, join(PROVIDENTIA_ROOT, 'providentia/dependencies/GHOST_standards/{}'.format(ghost_version)))
+    sys.path.insert(1, join(
+        PROVIDENTIA_ROOT, 'providentia/dependencies/GHOST_standards/{}'.format(ghost_version)))
     from GHOST_standards import standard_data_flag_name_to_data_flag_code
 
     qa = []
@@ -173,26 +184,36 @@ def get_standard_flags_and_qa(flags, ghost_version):
 
     # get qa if there is any flag that is invalid
     if 'I' in np.unique(GHOST_decreed_validities):
-        qa.append(6) # 'Invalid Data Provider Flags - GHOST Decreed'
+        qa.append(6)  # 'Invalid Data Provider Flags - GHOST Decreed'
     if 'I' in np.unique(network_decreed_validities):
-        qa.append(7) # 'Invalid Data Provider Flags - Network Decreed'
+        qa.append(7)  # 'Invalid Data Provider Flags - Network Decreed'
 
     return np.array(standard_flags, dtype=np.float32), np.array(qa, dtype=np.float32)
 
 
-def temporally_average_data(combined_ds, resolution, year, month, var, ghost_version):
+def get_flag_validities(pair_flags, ghost_version):
+
+    sys.path.insert(1, join(
+        PROVIDENTIA_ROOT, 'providentia/dependencies/GHOST_standards/{}'.format(ghost_version)))
+    from GHOST_standards import standard_data_flag_name_to_data_flag_code
+
+    network_vfunc = np.vectorize(lambda flag: np.nan if np.isnan(
+        flag) else flags_dict[str(int(flag))]["network_decreed_validity"][0], otypes=['O'])
+    GHOST_vfunc = np.vectorize(lambda flag: np.nan if np.isnan(
+        flag) else flags_dict[str(int(flag))]["GHOST_decreed_validity"][0], otypes=['O'])
+
+    return network_vfunc(pair_flags), GHOST_vfunc(pair_flags)
+
+
+def temporally_average_data(combined_ds_list, resolution, var, ghost_version, target_start_date, target_end_date):
     """Temporally average data and get unique flags in the valid times (temporally averaged)
 
     Parameters
     ----------
-    combined_ds : xarray.Dataset
+    combined_ds_list : xarray.Dataset
         Concatenated data for all stations with original times per month
     resolution : str
         Temporal resolution
-    year : int
-        Year
-    month : int
-        Month
     var : str
         Variable
     ghost_version : float
@@ -212,137 +233,115 @@ def temporally_average_data(combined_ds, resolution, year, month, var, ghost_ver
     elif resolution == 'monthly':
         frequency = 'MS'
 
-    # get start and end of period to construct valid dates
-    time = combined_ds.time.values
-    start_date = datetime.datetime(year, month, 1)
-    first_day_next_month = datetime.datetime(year, month % 12 + 1, 1) if month != 12 else datetime.datetime(year + 1, 1, 1)
-    end_date = (first_day_next_month - datetime.timedelta(days=1)).replace(hour=23)
-    valid_dates = pd.date_range(start=start_date, end=end_date, freq=frequency).to_numpy(dtype='datetime64[ns]')
-    
-    # initialise averaged data
-    averaged_data = np.empty((len(combined_ds.station.values), len(valid_dates)), dtype=np.float32)
-    flag_data = np.empty((len(combined_ds.station.values), len(valid_dates), 186), dtype=np.float32)
-    qa_data = np.empty((len(combined_ds.station.values), len(valid_dates), 2), dtype=np.float32)
+    valid_dates = pd.date_range(start=target_start_date, end=target_end_date,
+                                freq=frequency).to_numpy(dtype='datetime64[ns]')
 
-    for station_i, station in enumerate(combined_ds.station.values):
+    # initialise averaged data
+    averaged_data = np.empty(
+        (len(combined_ds_list), len(valid_dates)), dtype=np.float32)
+    flag_data = np.empty(
+        (len(combined_ds_list), len(valid_dates), 186), dtype=np.float32)
+    qa_data = np.empty(
+        (len(combined_ds_list), len(valid_dates), 2), dtype=np.float32)
+
+    # create pairs of valid dates
+    time_pairs = list(zip(valid_dates[:-1], valid_dates[1:]))
+    last_time_pair = (
+        valid_dates[-1], valid_dates[-1] + (valid_dates[-1] - valid_dates[-2]))
+    time_pairs.append(last_time_pair)
+    
+    tqdm_iter = tqdm(combined_ds_list, bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}',
+                     desc=f"    Temporally averaging data ({len(combined_ds_list)})")
+    for station_i, station_ds in enumerate(tqdm_iter):
 
         # initialise averaged data
         station_averaged_data = []
-
-        # read data per station
-        data = combined_ds[var].isel(station=station_i).values
-
-        # get indices where values are nan
-        valid_idxs = ~np.isnan(data)
-
-        # go to next station if all values are nan
-        if np.sum(valid_idxs) == 0:
-            continue
-
-        # filter nan values
-        valid_time = time[valid_idxs]
-        valid_data = data[valid_idxs]
-        
-        # calculate weighted averages
-        if len(valid_data) != 0:
-            for date in valid_dates:
-            
-                # get differences between valid time and actual times in nanoseconds
-                time_diffs = (valid_time - date).astype('timedelta64[ns]').astype(float)
-            
-                # get positive differences and negative differences to differentiate 
-                # between the actual times that are earlier than the valid date (negative), and those that are later (positive)
-                positive_diffs = time_diffs[time_diffs > 0]
-                negative_diffs = time_diffs[time_diffs < 0]
-                
-                # find the closest actual time after the valid time
-                closest_positive = None
-                if len(positive_diffs) > 0:
-                    closest_positive_idx = np.abs(positive_diffs).argmin()
-                    closest_positive = positive_diffs[closest_positive_idx]
-                    closest_positive_time = valid_time[time_diffs == positive_diffs[closest_positive_idx]][0]
-                    closest_positive_value = valid_data[time_diffs == positive_diffs[closest_positive_idx]][0]
-            
-                # find the closest actual time before the valid time
-                closest_negative = None
-                if len(negative_diffs) > 0:
-                    closest_negative_idx = np.abs(negative_diffs).argmin()
-                    closest_negative = negative_diffs[closest_negative_idx]
-                    closest_negative_time = valid_time[time_diffs == negative_diffs[closest_negative_idx]][-1]
-                    closest_negative_value = valid_data[time_diffs == negative_diffs[closest_negative_idx]][-1]
-            
-                # when the valid time only has a value in one direction, get closest value without calculating weights
-                if closest_positive is None:
-                    value = closest_negative_value
-                elif closest_negative is None:
-                    value = closest_positive_value
-                # in the rest of cases, calculate weights of 2 closest values and make average
-                else:
-                    # get 2 closest times and make positive to be able to compare differences
-                    closest_diffs = np.abs([closest_negative, closest_positive])
-            
-                    # we do the reverse, since we want the differences to have a heavier weight if these are smaller (nearer the actual time)
-                    weights = 1 / closest_diffs
-                    
-                    # finally we normalize them to have values between 0 and 1
-                    weights_normalized = weights / np.sum(weights)
-            
-                    # get average
-                    value = np.average([closest_negative_value, closest_positive_value], weights=weights_normalized)
-        
-                # save averaged data
-                station_averaged_data.append(value)
-        
-            averaged_data[station_i, :] = station_averaged_data
-        else:
-            averaged_data[station_i, :] = [np.nan]*len(valid_dates)
-
-        # create pairs of valid dates
-        time_pairs = list(zip(valid_dates[:-1], valid_dates[1:]))
-        last_time_pair = (valid_dates[-1], valid_dates[-1] + (valid_dates[-1] - valid_dates[-2]))
-        time_pairs.append(last_time_pair)
-        
-        # get flag and qa data between each valid start date and end date
         station_flag_data = []
         station_qa_data = []
-        for start_date, end_date in time_pairs:
-            # get unique flag values for the available timesteps in period and remove nan
-            unique_flag_values_per_pair = np.unique(combined_ds.flag.sel(time=slice(start_date, end_date), station=station).values)
-            unique_flag_values_per_pair_nonan = unique_flag_values_per_pair[~np.isnan(unique_flag_values_per_pair)]
 
-            # get standard flag names (instead of EBAS) and qa
-            standard_flag_codes, qa = get_standard_flags_and_qa(unique_flag_values_per_pair_nonan, ghost_version)
+        # get data between each valid start date and end date
+        for pair_start_date, pair_end_date in time_pairs:
 
-            # pad to have flag arrays of the same length (maximum length is 186, when there is less these are going to be nan)
+            data = station_ds.sel(time=slice(
+                pair_start_date, pair_end_date)).isel(station=0)
+            pair_var = data[var].values
+            pair_flags = data['flag'].values
+            network_decreed_validities, GHOST_decreed_validities = get_flag_validities(
+                pair_flags, ghost_version)
+
+            # print(pair_start_date, pair_end_date)
+            # print('Var', pair_var)
+            # print('Flags', pair_flags)
+            # print('Network', network_decreed_validities)
+            # print('GHOST', GHOST_decreed_validities)
+
+            # if there is more than 1 value in period
+            # TODO: Check why this never happens
+            if len(pair_var) > 1:
+                # get invalid positions in flag axis (e.g. [[nan, nan], [999, nan]] -> [False True])
+                GHOST_invalid = np.any(GHOST_decreed_validities == "I", axis=1)
+                # if there are invalid flags
+                if np.any(GHOST_invalid):
+                    # if not all values have invalid flags, make values and flags with decreed invalid for GHOST nan
+                    if not np.all(GHOST_invalid):
+                        pair_var[GHOST_invalid] = np.nan
+                        pair_flags[GHOST_invalid] = np.nan
+
+            # get central time in period and calculate time difference between central time and actual times
+            middle_time = pair_start_date + \
+                (pair_end_date - pair_start_date) / 2
+            time_diffs = np.abs(
+                (middle_time - data.time.values).astype('timedelta64[ns]').astype(float))
+
+            # remove nan
+            time_diffs = time_diffs[~np.isnan(pair_var)]
+            pair_var = pair_var[~np.isnan(pair_var)]
+
+            # calculate weighted average if there are values left after removing nan
+            if len(pair_var) > 1:
+                # normalize them to have values between 0 and 1
+                weights_normalized = time_diffs / np.sum(time_diffs)
+                value = np.average(pair_var, weights=(1-weights_normalized))
+            elif len(pair_var) == 1:
+                value = pair_var[0]
+            else:
+                value = np.nan
+
+            # save averaged data
+            station_averaged_data.append(value)
+
+            # get unique flag values and convert to standard flag names (instead of EBAS) and qa
+            unique_pair_flags = np.unique(pair_flags)
+            unique_pair_flags_nonan = unique_pair_flags[~np.isnan(unique_pair_flags)]
+            standard_flag_codes, qa = get_standard_flags_and_qa(unique_pair_flags_nonan, ghost_version)
+
+            # save flags and qa
             station_flag_data.append(pad_array(standard_flag_codes, length=186))
-
-            # pad to have qa arrays of the same length (maximum length is 2, when there is less these are going to be nan)
             station_qa_data.append(pad_array(qa, length=2))
-        
-        # get station flag and qa data for the valid dates
+
+        averaged_data[station_i, :] = station_averaged_data
         flag_data[station_i, :, :] = station_flag_data
         qa_data[station_i, :, :] = station_qa_data
 
-    # create new variable with averaged data
-    combined_averaged_da = xr.DataArray(
-        data=averaged_data,
-        coords={'station': combined_ds.station.values, 'time': valid_dates}, 
-        dims=['station', 'time'],
-        attrs={'units': combined_ds[var].attrs['ebas_unit']})
-    
-    # drop old variable and associated time
-    combined_ds = combined_ds.drop_vars(var)
-    combined_ds = combined_ds.drop_dims('time')
-    
-    # add new variable
-    combined_ds[var] = combined_averaged_da
+    # create dataset with averaged data
+    units = combined_ds_list[0][var].attrs['ebas_unit']
+    combined_ds = xr.Dataset(
+        data_vars={
+            var: (['station', 'time'], averaged_data,
+                  {'units': units})
+        },
+        coords={
+            'station': np.arange(len(combined_ds_list)),
+            'time': valid_dates
+        }
+    )
 
     # add flags variable
     da_flag = xr.DataArray(
             flag_data,
             dims=["station", "time", "N_flag_codes"],
             coords={
-                "time": combined_ds.coords['time'],
+                "time": valid_dates,
             },
             name="flag"
         )
@@ -353,7 +352,7 @@ def temporally_average_data(combined_ds, resolution, year, month, var, ghost_ver
             qa_data,
             dims=["station", "time", "N_qa_codes"],
             coords={
-                "time": combined_ds.coords['time'],
+                "time": valid_dates,
             },
             name="qa"
         )
@@ -405,7 +404,8 @@ def get_files_info(files, var, path):
     """
 
     files_info = {}
-    tqdm_iter = tqdm(files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Creating information file ({len(files)})")
+    tqdm_iter = tqdm(files, bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}',
+                     desc=f"    Creating information file ({len(files)})")
     for file in tqdm_iter:
         # open file
         try:
@@ -415,11 +415,11 @@ def get_files_info(files, var, path):
 
         # get resolution
         coverage = ds.time_coverage_resolution
-        try:             
+        try:
             file_resolution = coverages_dict[coverage]
         except:
             file_resolution = f'Unrecognised ({coverage})'
-            
+
         file_start_date = ds.time_coverage_start
         file_end_date = ds.time_coverage_end
         file_variables = list(ds.data_vars.keys())
@@ -442,7 +442,7 @@ def get_files_info(files, var, path):
             yaml.dump(datasets, file, default_flow_style=False)
     else:
         print(f'    Error: No data could be found for {var}')
-    
+
     return files_info
 
 
@@ -478,7 +478,7 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
     combined_ds_list = []
     metadata = {}
     metadata[resolution] = {}
-    
+
     # get EBAS component
     ebas_component = variable_mapping[actris_parameter]['var']
 
@@ -487,9 +487,10 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
 
     errors = {}
     warnings = {}
-    tqdm_iter = tqdm(files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Reading data ({len(files)})")
+    tqdm_iter = tqdm(
+        files, bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}', desc=f"    Reading data ({len(files)})")
     for i, file in enumerate(tqdm_iter):
-        
+
         # open file
         try:
             ds = xr.open_dataset(file)
@@ -499,10 +500,10 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
 
         # remove time duplicates if any (keep first)
         ds = ds.sel(time=~ds['time'].to_index().duplicated())
-        
+
         # select data in period range
         ds = ds.sel(time=slice(target_start_date, target_end_date))
-        
+
         # assign station code as dimension
         ds = ds.expand_dims(dim={'station': [i]})
 
@@ -510,9 +511,9 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
         unformatted_units = variable_mapping[actris_parameter]['units']
         units = unformatted_units.replace('/', '_per_').replace(' ', '_')
         units_var = f'{ebas_component}_{units}'
-        possible_vars = [ebas_component, 
-                         f'{ebas_component}_amean', 
-                         units_var, 
+        possible_vars = [ebas_component,
+                         f'{ebas_component}_amean',
+                         units_var,
                          f'{units_var}_amean']
         if var in ['sconcso4', 'precso4']:
             possible_vars.append(f'sulphate_corrected_{units}')
@@ -524,23 +525,26 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
 
         # continue to next file if variable cannot be read
         if not da_var_exists:
-            errors[file] = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}'
+            errors[
+                file] = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}'
             continue
-            
+
         # rename qc dimension
         ds = ds.rename_dims({f'{possible_var}_qc_flags': 'N_flag_codes'})
 
         # get lowest level if tower height is in coordinates
         if 'Tower_inlet_height' in list(ds.coords):
             warnings[file] = f'Taking data from first height (Tower_inlet_height={min(ds.Tower_inlet_height.values)})'
-            ds = ds.sel(Tower_inlet_height=min(ds.Tower_inlet_height.values), drop=True)
+            ds = ds.sel(Tower_inlet_height=min(
+                ds.Tower_inlet_height.values), drop=True)
 
         # get data at desired wavelength if wavelength is in coordinates
         if 'Wavelength' in list(ds.coords) or 'Wavelengthx' in list(ds.coords):
             # Select most common wavelength for black carbon (name does not provide it)
             if var == 'sconcbc':
                 wavelength = 880
-                warnings[file] = f'Wavelength appears in dimensions. Selected wavelength: {wavelength}'
+                warnings[
+                    file] = f'Wavelength appears in dimensions. Selected wavelength: {wavelength}'
             # Get wavelength from variable name for other variables
             else:
                 wavelength = float(re.findall(r'\d+', var)[0])
@@ -559,11 +563,11 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
                     found_wavelength = True
                 else:
                     existing_wavelengths = ds.Wavelength.values
-                    
+
             if not found_wavelength:
                 warnings[file] = f'Data at {wavelength}nm could not be found. Existing wavelengths: {existing_wavelengths}'
-                continue             
-                
+                continue
+
         # remove artifact and fraction (sconcoc)
         # TODO: Discuss this
         if 'Artifact' in list(ds.coords):
@@ -575,7 +579,7 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
 
         # read variable
         da_var = ds[possible_var]
-        
+
         # avoid datasets that do not have defined units
         if 'ebas_unit' not in da_var.attrs:
             errors[file] = f'No units were defined'
@@ -586,7 +590,7 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
             errors[file] = f"Units {da_var.attrs['ebas_unit']} do not match those in variable mapping "
             errors[file] += f"dictionary ({variable_mapping[actris_parameter]['units']})"
             continue
-                
+
         # save metadata
         for ghost_key, ebas_key in metadata_dict.items():
             # create key if it does not exist
@@ -603,33 +607,40 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
             else:
                 metadata[resolution][ghost_key].append(np.nan)
 
+        # if metadata[resolution]['station_reference'][-1] == 'CH0002R':
+        #     print(file)
+        #     print(da_var.sel(time=slice(datetime.datetime(2018, 1, 23),
+        #           datetime.datetime(2018, 1, 24))).time.values)
+
         # remove all attributes except units
-        da_var.attrs = {key: value for key, value in da_var.attrs.items() if key == 'ebas_unit'}
+        da_var.attrs = {key: value for key,
+                        value in da_var.attrs.items() if key == 'ebas_unit'}
 
         # read quality control data
-        flag_data = ds[f'{possible_var}_qc'].transpose("station", "time", "N_flag_codes")
+        flag_data = ds[f'{possible_var}_qc'].transpose(
+            "station", "time", "N_flag_codes")
 
         # rename variable to BSC standards
         ds_station = da_var.to_dataset(name=var)
 
         # add quality control data
         ds_station['flag'] = flag_data
-              
+
         # append modified dataset to list
         combined_ds_list.append(ds_station)
-    
+
     # show errors
     if len(errors) > 0:
         print(f'\n    Collected errors ({len(errors)}):')
         for file, error in errors.items():
             print(f'{file} - Error: {error}')
-            
+
     # show warnings
     if len(warnings) > 0:
         print(f'\n    Collected warnings ({len(warnings)}):')
         for file, warning in warnings.items():
             print(f'{file} - Warning: {warning}')
-            
+
     return combined_ds_list, metadata, wavelength
 
 
@@ -659,7 +670,7 @@ def get_files_to_download(nonghost_root, target_start_date, target_end_date, res
     paths = []
     current_date = copy.deepcopy(target_start_date)
     while current_date <= target_end_date:
-        
+
         # save path
         path = f"{base_dir}/{var}_{current_date.strftime('%Y%m')}.nc"
         paths.append(path)
