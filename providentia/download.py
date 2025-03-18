@@ -80,6 +80,7 @@ def sighandler(*unused):
 
 class ProvidentiaDownload(object):
     def __init__(self, **kwargs):
+
         # get providentia start time
         self.prov_start_time = time.time()
 
@@ -101,6 +102,8 @@ class ProvidentiaDownload(object):
         # initialise default configuration variables
         # modified by commandline arguments, if given
         self.provconf = ProvConfiguration(self, **kwargs)
+
+        self.logger.info("Starting Providentia download...")
 
         # update variables from config file
         if self.config != '':  
