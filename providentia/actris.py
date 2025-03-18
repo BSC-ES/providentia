@@ -205,6 +205,32 @@ def get_flag_validities(pair_flags, ghost_version):
     return network_vfunc(pair_flags), GHOST_vfunc(pair_flags)
 
 
+def create_time_pairs(time):
+
+    time_pairs = list(zip(time[:-1], time[1:]))
+    last_time_pair = (time[-1], time[-1] + (time[-1] - time[-2]))
+    time_pairs.append(last_time_pair)
+
+    return time_pairs
+
+
+def check_overlap(measurement_start_date, measurement_end_date, standard_time_pairs):
+    overlap_durations = []
+    overlap_start_dates = []
+    overlap_end_dates = []
+    for i, (standard_start_date, standard_end_date) in enumerate(standard_time_pairs):
+        overlap_start = max(measurement_start_date, standard_start_date)
+        overlap_end = min(measurement_end_date, standard_end_date)
+        if overlap_start < overlap_end:
+            overlap_duration = pd.Timedelta(
+                overlap_end - overlap_start).total_seconds() / 60
+            overlap_durations.append(overlap_duration)
+            overlap_start_dates.append(standard_start_date)
+            overlap_end_dates.append(standard_end_date)
+
+    return overlap_durations, overlap_start_dates, overlap_end_dates
+
+
 def temporally_average_data(combined_ds_list, resolution, var, ghost_version, target_start_date, target_end_date):
     """Temporally average data and get unique flags in the valid times (temporally averaged)
 
@@ -233,23 +259,20 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
     elif resolution == 'monthly':
         frequency = 'MS'
 
-    valid_dates = pd.date_range(start=target_start_date, end=target_end_date,
-                                freq=frequency).to_numpy(dtype='datetime64[ns]')
+    standard_time = pd.date_range(start=target_start_date, end=target_end_date,
+                                  freq=frequency).to_numpy(dtype='datetime64[ns]')
 
     # initialise averaged data
     averaged_data = np.empty(
-        (len(combined_ds_list), len(valid_dates)), dtype=np.float32)
-    flag_data = np.empty(
-        (len(combined_ds_list), len(valid_dates), 186), dtype=np.float32)
-    qa_data = np.empty(
-        (len(combined_ds_list), len(valid_dates), 2), dtype=np.float32)
+        (len(combined_ds_list), len(standard_time)), dtype=np.float32)
+    averaged_flag_data = np.empty(
+        (len(combined_ds_list), len(standard_time), 186), dtype=np.float32)
+    averaged_qa_data = np.empty(
+        (len(combined_ds_list), len(standard_time), 2), dtype=np.float32)
 
     # create pairs of valid dates
-    time_pairs = list(zip(valid_dates[:-1], valid_dates[1:]))
-    last_time_pair = (
-        valid_dates[-1], valid_dates[-1] + (valid_dates[-1] - valid_dates[-2]))
-    time_pairs.append(last_time_pair)
-    
+    standard_time_pairs = create_time_pairs(standard_time)
+
     tqdm_iter = tqdm(combined_ds_list, bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}',
                      desc=f"    Temporally averaging data ({len(combined_ds_list)})")
     for station_i, station_ds in enumerate(tqdm_iter):
@@ -259,69 +282,98 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
         station_flag_data = []
         station_qa_data = []
 
-        # get data between each valid start date and end date
-        for pair_start_date, pair_end_date in time_pairs:
+        # remove station selection
+        station_ds = station_ds.isel(station=0)
 
-            data = station_ds.sel(time=slice(
-                pair_start_date, pair_end_date)).isel(station=0)
-            pair_var = data[var].values
-            pair_flags = data['flag'].values
+        data_dict = {}
+        measurement_time_pairs = [(t - np.timedelta64(30, 'm'), t + np.timedelta64(30, 'm'))
+                                  for t in station_ds.time.values]
+
+        for i, (measurement_start_date, measurement_end_date) in enumerate(measurement_time_pairs):
+            data = station_ds.isel(time=i)
+            var_data = data[var].values
+            flag_data = data['flag'].values
             network_decreed_validities, GHOST_decreed_validities = get_flag_validities(
-                pair_flags, ghost_version)
+                flag_data, ghost_version)
+            overlap_durations, overlap_start_dates, overlap_end_dates = check_overlap(measurement_start_date,
+                                                                                      measurement_end_date,
+                                                                                      standard_time_pairs)
+            for start, end, duration in zip(overlap_start_dates, overlap_end_dates, overlap_durations):
+                key = (start, end)
+                if key not in data_dict:
+                    data_dict[key] = []
+                data_dict[key].append({
+                    "duration": duration,
+                    var: var_data,
+                    "flag": flag_data,
+                    "network_decreed_validities": network_decreed_validities,
+                    "GHOST_decreed_validities": GHOST_decreed_validities})
 
-            # print(pair_start_date, pair_end_date)
-            # print('Var', pair_var)
-            # print('Flags', pair_flags)
-            # print('Network', network_decreed_validities)
-            # print('GHOST', GHOST_decreed_validities)
+        for standard_start_date, standard_end_date in standard_time_pairs:
+            # check if standard dates were found in file
+            if (standard_start_date, standard_end_date) in data_dict:
+                entries = data_dict[(standard_start_date, standard_end_date)]
+                durations = []
+                values = []
+                flags = []
+                if len(entries) > 1:
+                    # get invalid values in period
+                    GHOST_invalid = [
+                        'I' in entry['GHOST_decreed_validities'] for entry in entries]
+                    # if there are invalid values in period but some of them are valid
+                    if np.any(GHOST_invalid) and not np.all(GHOST_invalid):
+                        for entry in entries:
+                            # make invalid values and flags nan
+                            if 'I' in entry['GHOST_decreed_validities']:
+                                entry[var] = np.array(np.nan)
+                                entry["flag"] = [np.nan]*len(entry["flag"])
 
-            # if there is more than 1 value in period
-            # TODO: Check why this never happens
-            if len(pair_var) > 1:
-                # get invalid positions in flag axis (e.g. [[nan, nan], [999, nan]] -> [False True])
-                GHOST_invalid = np.any(GHOST_decreed_validities == "I", axis=1)
-                # if there are invalid flags
-                if np.any(GHOST_invalid):
-                    # if not all values have invalid flags, make values and flags with decreed invalid for GHOST nan
-                    if not np.all(GHOST_invalid):
-                        pair_var[GHOST_invalid] = np.nan
-                        pair_flags[GHOST_invalid] = np.nan
+                # store durations and values
+                for entry in entries:
+                    durations.append(entry["duration"])
+                    values.append(entry[var])
+                    flags.append(entry['flag'])
+                durations = np.array(durations)
+                values = np.array(values)
 
-            # get central time in period and calculate time difference between central time and actual times
-            middle_time = pair_start_date + \
-                (pair_end_date - pair_start_date) / 2
-            time_diffs = np.abs(
-                (middle_time - data.time.values).astype('timedelta64[ns]').astype(float))
+                # remove nan
+                valid_mask = ~np.isnan(values)
+                valid_durations = durations[valid_mask]
+                valid_values = values[valid_mask]
 
-            # remove nan
-            time_diffs = time_diffs[~np.isnan(pair_var)]
-            pair_var = pair_var[~np.isnan(pair_var)]
+                # get weighted average if there is more than one value
+                if len(valid_values) > 1:
+                    mean = np.average(valid_values, weights=valid_durations)
+                # get value if there is only one value
+                elif len(valid_values) == 1:
+                    mean = valid_values[0]
+                # otherwise nan
+                else:
+                    mean = np.nan
+                station_averaged_data.append(mean)
 
-            # calculate weighted average if there are values left after removing nan
-            if len(pair_var) > 1:
-                # normalize them to have values between 0 and 1
-                weights_normalized = time_diffs / np.sum(time_diffs)
-                value = np.average(pair_var, weights=(1-weights_normalized))
-            elif len(pair_var) == 1:
-                value = pair_var[0]
+                # get unique flag values and convert to standard flag names (instead of EBAS) and qa
+                flags = np.unique(flags)
+                valid_flags = flags[~np.isnan(flags)]
+                standard_flag_codes, qa = get_standard_flags_and_qa(
+                    valid_flags, ghost_version)
+
+                # print(start, end, valid_values, valid_durations, mean, standard_flag_codes, qa)
+
+                # save flags and qa
+                station_flag_data.append(
+                    pad_array(standard_flag_codes, length=186))
+                station_qa_data.append(pad_array(qa, length=2))
+
+            # if file has no data for dates, set it to be nan
             else:
-                value = np.nan
-
-            # save averaged data
-            station_averaged_data.append(value)
-
-            # get unique flag values and convert to standard flag names (instead of EBAS) and qa
-            unique_pair_flags = np.unique(pair_flags)
-            unique_pair_flags_nonan = unique_pair_flags[~np.isnan(unique_pair_flags)]
-            standard_flag_codes, qa = get_standard_flags_and_qa(unique_pair_flags_nonan, ghost_version)
-
-            # save flags and qa
-            station_flag_data.append(pad_array(standard_flag_codes, length=186))
-            station_qa_data.append(pad_array(qa, length=2))
+                station_averaged_data.append(np.nan)
+                station_flag_data.append([np.nan]*186)
+                station_qa_data.append([np.nan]*2)
 
         averaged_data[station_i, :] = station_averaged_data
-        flag_data[station_i, :, :] = station_flag_data
-        qa_data[station_i, :, :] = station_qa_data
+        averaged_flag_data[station_i, :, :] = station_flag_data
+        averaged_qa_data[station_i, :, :] = station_qa_data
 
     # create dataset with averaged data
     units = combined_ds_list[0][var].attrs['ebas_unit']
@@ -332,30 +384,30 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
         },
         coords={
             'station': np.arange(len(combined_ds_list)),
-            'time': valid_dates
+            'time': standard_time
         }
     )
 
     # add flags variable
     da_flag = xr.DataArray(
-            flag_data,
-            dims=["station", "time", "N_flag_codes"],
-            coords={
-                "time": valid_dates,
-            },
-            name="flag"
-        )
+        averaged_flag_data,
+        dims=["station", "time", "N_flag_codes"],
+        coords={
+            "time": standard_time,
+        },
+        name="flag"
+    )
     combined_ds['flag'] = da_flag
 
     # add qa variable
     da_qa = xr.DataArray(
-            qa_data,
-            dims=["station", "time", "N_qa_codes"],
-            coords={
-                "time": valid_dates,
-            },
-            name="qa"
-        )
+        averaged_qa_data,
+        dims=["station", "time", "N_qa_codes"],
+        coords={
+            "time": standard_time,
+        },
+        name="qa"
+    )
     combined_ds['qa'] = da_qa
 
     return combined_ds
@@ -411,6 +463,13 @@ def get_files_info(files, var, path):
         try:
             ds = xr.open_dataset(file)
         except:
+            continue
+
+        # check statistics
+        if 'ebas_statistics' in ds.attrs:
+            if ds.attrs['ebas_statistics'] != 'arithmetic mean':
+                continue
+        else:
             continue
 
         # get resolution
@@ -497,7 +556,7 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
         except:
             errors[file] = 'Error opening file'
             continue
-
+        
         # remove time duplicates if any (keep first)
         ds = ds.sel(time=~ds['time'].to_index().duplicated())
 
