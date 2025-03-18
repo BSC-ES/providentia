@@ -287,13 +287,7 @@ class ProvidentiaDownload(object):
                     else:
                         error = f"Error: It is not possible to download experiments from the zenodo webpage."
                         self.logger.error(error)
-                        sys.exit(1) 
-            
-            # raise an error if there are no valid experiments                                
-            else:
-                error = "Error: No experiments available to be downloaded."
-                self.logger.error(error)
-                sys.exit(1)           
+                        sys.exit(1)         
            
             # iterate the experiments download
             for experiment in self.experiments.keys():
@@ -1793,7 +1787,7 @@ class ProvidentiaDownload(object):
                 continue
 
             # filter files by resolution and dates
-            self.logger.info('    Filtering files by resolution and dates...')
+            self.logger.info('Filtering files by resolution and dates...')
             files = []
             for file, attributes in files_info.items():
                 if attributes["resolution"] == resolution:
@@ -1811,6 +1805,11 @@ class ProvidentiaDownload(object):
                     
                 # get data and metadata for each file within period
                 combined_ds_list, metadata, wavelength = get_data(files, var, actris_parameter, resolution, target_start_date, target_end_date)
+                
+                # check if there is data after reading available files
+                if len(combined_ds_list) == 0:
+                    self.logger.info('No data were found')
+                    continue
 
                 # get flag dimension per station
                 N_flag_codes_dims = []
@@ -1838,7 +1837,7 @@ class ProvidentiaDownload(object):
                     combined_ds_list_corrected_flag.append(ds)
             
                 # combine and create new dataset
-                self.logger.info('    Combining files...')
+                self.logger.info('Combining files...')
                 combined_ds = temporally_average_data(combined_ds_list_corrected_flag, resolution, var, self.ghost_version, target_start_date, target_end_date)
                 
                 # add metadata
@@ -1903,7 +1902,7 @@ class ProvidentiaDownload(object):
                             # current_n_stations = len(combined_ds_yearmonth.station)
                             # n_stations_diff = previous_n_stations - current_n_stations
                             # if n_stations_diff > 0:
-                            #     self.logger.info(f'    Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
+                            #     self.logger.info(f'Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
                             
                             # remove file if it exists
                             if os.path.isfile(filename):
@@ -1914,13 +1913,13 @@ class ProvidentiaDownload(object):
 
                             # change permissions
                             os.system("chmod 777 {}".format(filename))
-                            self.logger.info(f"    Saved: {filename}")
+                            self.logger.info(f"Saved: {filename}")
                             saved_files += 1
                             
-                self.logger.info(f'    Total number of saved files: {saved_files}')
+                self.logger.info(f'Total number of saved files: {saved_files}')
 
             else:
-                self.logger.info('    No files were found')
+                self.logger.info('No files were found')
 
 def main(**kwargs):
     """ Main function when running download function. """
