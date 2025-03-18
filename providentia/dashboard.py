@@ -104,8 +104,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                         error = 'Error: The section specified in the command line ({0}) does not exist.'.format(kwargs['section'])
                         tip = 'Tip: For subsections, add the name of the parent section followed by an interpunct (·) '
                         tip += 'before the subsection name (e.g. SECTIONA·Spain).'
-                        sys.exit(error + '\n' + tip)
-
+                        error = error + '\n' + tip
+                        self.logger.error(error)
+                        sys.exit(1)
                 else:
                     # config defined, section undefined
                     load_conf(self, fpath=self.config)    
@@ -114,7 +115,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     # if no parent section names are found throw an error
                     if len(all_sections) == 0:
                         error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
-                        sys.exit(error)
+                        self.logger.error(error)
+                        sys.exit(1)
                     # if there is only one section, do not ask the user    
                     elif len(all_sections) == 1:
                         okpressed = False
@@ -133,7 +135,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             else:
                 # have config, but path does not exist
                 error = 'Error: The path to the configuration file specified in the command line does not exist.'
-                sys.exit(error)
+                self.logger.error(error)
+                sys.exit(1)
 
         # set initial filter species
         self.previous_filter_species = {}
@@ -325,7 +328,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
     def init_ui(self, **kwargs):
         """ Initialise user interface. """
 
-        print("Starting Providentia dashboard...")
+        self.logger.info("Starting Providentia dashboard...")
 
         # set window title
         self.window_title = "Providentia"
@@ -1587,7 +1590,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.bu_flags.setEnabled(False)
         self.bu_QA.setEnabled(False)
         self.bu_period.setEnabled(False)
-        
 
     def enable_ghost_buttons(self):
         """ Enable button related only to ghost data. """

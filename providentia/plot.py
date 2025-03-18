@@ -103,18 +103,21 @@ class Plot:
 
                 # remove plots where setting 'obs' and 'bias' options together
                 if ('obs' in plot_options) & ('bias' in plot_options): 
-                    print(f"Warning: {plot_type} cannot not be created as 'obs' and 'bias' options set together.")
+                    msg = f"{plot_type} cannot not be created as 'obs' and 'bias' options set together."
+                    show_message(self.read_instance, msg)
                     valid_plot_type = False
 
                 # if no experiments are defined, remove all bias plots 
                 elif ('bias' in plot_options) or (z_statistic_sign == 'bias'):
                     if len(data_labels) == 1:
-                        print(f'Warning: No experiments defined, so {plot_type} bias plot cannot be created.')
+                        msg = f'No experiments defined, so {plot_type} bias plot cannot be created.'
+                        show_message(self.read_instance, msg)
                         valid_plot_type = False
 
                 # if are making an experiment bias plot, and temporal_colocation is off, then remove plot
                 elif (z_statistic_type == 'expbias') & (not self.read_instance.temporal_colocation):
-                    print(f'Warning: To calculate the experiment bias stat {zstat}, temporal_colocation must be set to True, so {plot_type} plot cannot be created.')
+                    msg = f'To calculate the experiment bias stat {zstat}, temporal_colocation must be set to True, so {plot_type} plot cannot be created.'
+                    show_message(self.read_instance, msg)
                     valid_plot_type = False
 
             # add new keys to make plots with stats (map, periodic, heatmap, table)
@@ -131,17 +134,20 @@ class Plot:
                     # check all defined plot options are allowed for current plot type
                     invalid_plot_options = [plot_option for plot_option in plot_options if plot_option not in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options']]
                     if len(invalid_plot_options) > 0:
-                        print(f'Warning: {plot_type} cannot be created as {invalid_plot_options} plot options are not valid.')
+                        msg = f'{plot_type} cannot be created as {invalid_plot_options} plot options are not valid.'
+                        show_message(self.read_instance, msg)
                         valid_plot_type = False
                     
                     # check desired statistic is defined in stats dict
                     elif base_zstat not in stats_dict:
-                        print(f"Warning: {plot_type} cannot be created as {base_zstat} not defined in Providentia's statistical library.")
+                        msg = f"{plot_type} cannot be created as {base_zstat} not defined in Providentia's statistical library."
+                        show_message(self.read_instance, msg)
                         valid_plot_type = False
                     
                     # remove plots where setting 'obs', but z_statistic_sign is 'bias'
                     elif ('obs' in plot_options) & (z_statistic_sign == 'bias'):
-                        print(f"Warning: {plot_type} cannot be created as are plotting a bias statistic but 'obs' option is set.")
+                        msg = f"{plot_type} cannot be created as are plotting a bias statistic but 'obs' option is set."
+                        show_message(self.read_instance, msg)
                         valid_plot_type = False
 
                 if not valid_plot_type:
@@ -163,7 +169,8 @@ class Plot:
                         self.canvas_instance.plot_characteristics[plot_type] = copy.deepcopy(self.canvas_instance.plot_characteristics_templates[base_plot_type])
                     except KeyError:
                         error = f'Error: Plot type {plot_type} is not available. Remove from settings/report_plots.yaml'
-                        sys.exit(error)
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)
 
                 # overwrite default plot characteristics with custom formatting
                 for format_var in format:
@@ -190,27 +197,32 @@ class Plot:
                     # check all defined plot options are allowed for current plot type
                     invalid_plot_options = [plot_option for plot_option in plot_options if plot_option not in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options']]
                     if len(invalid_plot_options) > 0:
-                        print(f'Warning: {plot_type} cannot be created as {invalid_plot_options} plot options are not valid.')
+                        msg = f'{plot_type} cannot be created as {invalid_plot_options} plot options are not valid.'
+                        show_message(self.read_instance, msg)
                         valid_plot_type = False
 
                     # warning for scatter, taylor and fairmode plots if the temporal colocation is not active 
                     elif (base_plot_type in ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']) & (not self.read_instance.temporal_colocation):
-                        print(f'Warning: {plot_type} cannot be created as temporal colocation is not active.')
+                        msg = f'{plot_type} cannot be created as temporal colocation is not active.'
+                        show_message(self.read_instance, msg)
                         valid_plot_type = False
 
                     # warning for scatter, taylor and fairmode plots if have no experiments
                     elif (base_plot_type in ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']) & (len(data_labels) == 1):
-                        print(f'Warning: No experiments defined, so {plot_type} cannot be created.')
+                        msg = f'No experiments defined, so {plot_type} cannot be created.'
+                        show_message(self.read_instance, msg)
                         valid_plot_type = False
 
                     # warning for timeseries bias plot if the temporal colocation is not active
                     elif ('timeseries' == base_plot_type) & ('bias' in plot_options) & (not self.read_instance.temporal_colocation):
-                        print(f'Warning: {plot_type} cannot be created as temporal colocation is not active.')
+                        msg = f'{plot_type} cannot be created as temporal colocation is not active.'
+                        show_message(self.read_instance, msg)
                         valid_plot_type = False
 
                     # warning for timeseries bias plot if have no experiments
                     elif ('timeseries' == base_plot_type) & ('bias' in plot_options) & (len(data_labels) == 1):
-                        print(f'Warning: No experiments defined, so {plot_type} cannot be created.')
+                        msg = f'No experiments defined, so {plot_type} cannot be created.'
+                        show_message(self.read_instance, msg)
                         valid_plot_type = False
 
                 # break loop if the plot type is not valid and remove plot type from lists
@@ -986,10 +998,12 @@ class Plot:
                     
                     # check if all values are equal in the dataframe
                     if kde_data_obs.size == 0:
-                        print('Warning: The kernel density cannot be calculated because there are no valid observational values.')
+                        msg = 'The kernel density cannot be calculated because there are no valid observational values.'
+                        show_message(self.read_instance, msg)
                         return
                     elif np.all(kde_data_obs == kde_data_obs[0]):
-                        print('Warning: The kernel density cannot be calculated because all observational values are equal.')
+                        msg = 'The kernel density cannot be calculated because all observational values are equal.'
+                        show_message(self.read_instance, msg)
                         return
                     else:
                         PDF_obs_sampled = kde_fft(kde_data_obs, xgrid=x_grid)
@@ -997,11 +1011,11 @@ class Plot:
                         #PDF_obs_sampled = PDF_fit.evaluate(x_grid)
 
                         if PDF_obs_sampled is None:
-                            msg = 'Warning: The kernel bandwidth is 0 for {}. '.format(data_label)
+                            msg = 'The kernel bandwidth is 0 for {}. '.format(data_label)
                             msg += 'The distribution plot will be created and not include data for this label. '
                             msg += 'To change the bandwith, we recommend increasing the number of '
                             msg += 'pdf_min_samples in the plot characteristics settings files.'
-                            print(msg)
+                            show_message(self.read_instance, msg)
                             continue
 
                 # calculate model PDF
@@ -1012,19 +1026,21 @@ class Plot:
                 
                 # check if all values are equal in the dataframe
                 if kde_data_model.size == 0:
-                    print('Warning: The kernel density cannot be calculated because there are no valid values for {} experiment.'.format(data_label))
+                    msg = 'The kernel density cannot be calculated because there are no valid values for {} experiment.'.format(data_label)
+                    show_message(self.read_instance, msg)
                     continue
                 elif np.all(kde_data_model == kde_data_model[0]):
-                    print('Warning: The kernel density cannot be calculated because all values for {} experiment are equal.'.format(data_label))
+                    msg = 'The kernel density cannot be calculated because all values for {} experiment are equal.'.format(data_label)
+                    show_message(self.read_instance, msg)
                     continue
                 # calculate PDF
                 PDF_model_sampled = kde_fft(kde_data_model, xgrid=x_grid)
                 if PDF_model_sampled is None:
-                    msg = 'Warning: The kernel bandwidth is 0 for {}. '.format(data_label)
+                    msg = 'The kernel bandwidth is 0 for {}. '.format(data_label)
                     msg += 'The distribution plot will be created and not include data for this label. '
                     msg += 'To change the bandwith, we recommend increasing the number of '
                     msg += 'pdf_min_samples in the plot characteristics settings files.'
-                    print(msg)
+                    show_message(self.read_instance, msg)
                     continue
     
                 #PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data_model)
@@ -1073,20 +1089,22 @@ class Plot:
                     # check if all values are equal in the dataframe
                     if kde_data.size == 0:
                         if violin_resolution is None:
-                            print('Warning: The kernel density cannot be calculated because there are no valid values for {}.'.format(data_label))
+                            msg = 'The kernel density cannot be calculated because there are no valid values for {}.'.format(data_label)
+                            show_message(self.read_instance, msg)
                         continue
                     elif np.all(kde_data == kde_data[0]):
                         if violin_resolution is None:
-                            print('Warning: The kernel density cannot be calculated because all {} values are equal.'.format(data_label))
+                            msg = 'The kernel density cannot be calculated because all {} values are equal.'.format(data_label)
+                            show_message(self.read_instance, msg)
                         continue
                     else:
                         PDF_sampled = kde_fft(kde_data, xgrid=x_grid)
                         if PDF_sampled is None:
-                            msg = 'Warning: The kernel bandwidth is 0 for {}. '.format(data_label)
+                            msg = 'The kernel bandwidth is 0 for {}. '.format(data_label)
                             msg += 'The distribution plot will be created and not include data for this label. '
                             msg += 'To change the bandwith, we recommend increasing the number of '
                             msg += 'pdf_min_samples in the plot characteristics settings files.'
-                            print(msg)
+                            show_message(self.read_instance, msg)
                             continue
                         
                         #PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data)
@@ -1971,7 +1989,7 @@ class Plot:
         # skip making plot if there is no valid data
         # interactive and offline modes are already handling this in advance
         if (not self.read_instance.offline) and (not self.read_instance.interactive) and (not any(valid_station_idxs)):
-            msg = 'Warning: No valid data to create FAIRMODE target plot after filtering by coverage.'
+            msg = 'No valid data to create FAIRMODE target plot after filtering by coverage.'
             show_message(self.read_instance, msg)
             relevant_axis.set_visible(False)
             return
@@ -2025,7 +2043,7 @@ class Plot:
                                                                valid_station_idxs, networkspeci)
         except:
             valid_station_classifications = np.full(len(valid_station_references), np.NaN, dtype=np.float32)
-            print(f'Data for {classification_type}_classification is not available and will not be shown in the legend')
+            self.read_instance.logger.info(f'Data for {classification_type}_classification is not available and will not be shown in the legend')
 
         # get number of stations
         n_stations = len(valid_station_references)

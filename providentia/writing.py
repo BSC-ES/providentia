@@ -328,12 +328,12 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
             var.tz = 'UTC'
             if prv.resolution in ['3hourly', '6hourly']:
                 # get indices of time_array in an array with all hours from start date to end date
-                all_hours_array = pd.to_datetime(np.arange(datetime(int(prv.start_date[0:4]), 
-                                                                    int(prv.start_date[4:6]), 
-                                                                    int(prv.start_date[6:8])), 
-                                                           datetime(int(prv.end_date[0:4]), 
-                                                                    int(prv.end_date[4:6]), 
-                                                                    int(prv.end_date[6:8])), 
+                all_hours_array = pd.to_datetime(np.arange(datetime(int(str(prv.start_date)[0:4]), 
+                                                                    int(str(prv.start_date)[4:6]), 
+                                                                    int(str(prv.start_date)[6:8])), 
+                                                           datetime(int(str(prv.end_date)[0:4]), 
+                                                                    int(str(prv.end_date)[4:6]), 
+                                                                    int(str(prv.end_date)[6:8])), 
                                                            timedelta(hours=1)))
                 time_var = np.where(np.in1d(all_hours_array, prv.time_array))[0]
             else:
@@ -368,12 +368,12 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
                 var.tz = 'UTC'
                 if prv.resampling_resolution in ['3hourly', '6hourly']:
                     # get indices of time_array in an array with all hours from start date to end date
-                    all_hours_array = pd.to_datetime(np.arange(datetime(int(prv.start_date[0:4]), 
-                                                                        int(prv.start_date[4:6]), 
-                                                                        int(prv.start_date[6:8])), 
-                                                            datetime(int(prv.end_date[0:4]), 
-                                                                        int(prv.end_date[4:6]), 
-                                                                        int(prv.end_date[6:8])), 
+                    all_hours_array = pd.to_datetime(np.arange(datetime(int(str(prv.start_date)[0:4]), 
+                                                                        int(str(prv.start_date)[4:6]), 
+                                                                        int(str(prv.start_date)[6:8])), 
+                                                            datetime(int(str(prv.end_date)[0:4]), 
+                                                                     int(str(prv.end_date)[4:6]), 
+                                                                     int(str(prv.end_date)[6:8])), 
                                                             timedelta(hours=1)))
                     time_var_resampled = np.where(np.in1d(all_hours_array, time_index))[0]
                 else:

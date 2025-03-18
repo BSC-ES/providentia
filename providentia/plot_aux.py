@@ -161,10 +161,11 @@ def update_plotting_parameters(instance):
     color_palettes = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/color_palettes.yaml')))
     if color_palette in color_palettes.keys():
         if (len(instance.data_labels) - 1) > len(color_palettes[color_palette]):
-            msg = "Error: The number of experiments and palette colors should be equal. "
-            msg += f"Add more colors to your palette '{color_palette}' in settings/color_palettes.yaml "
-            msg += "or change your legend_color_palette in the plot characteristics files."
-            sys.exit()
+            error = "Error: The number of experiments and palette colors should be equal. "
+            error += f"Add more colors to your palette '{color_palette}' in settings/color_palettes.yaml "
+            error += "or change your legend_color_palette in the plot characteristics files."
+            instance.logger.error(error)
+            sys.exit(1)
         else:
             clrs = sns.color_palette(color_palettes[color_palette])
     else:
@@ -591,7 +592,7 @@ def create_chunked_timeseries(read_instance, canvas_instance, chunk_stat, chunk_
     return timeseries_data
 
 
-def reorder_pdf_pages(input_pdf, output_pdf, summary_multispecies_pages, 
+def reorder_pdf_pages(read_instance, input_pdf, output_pdf, summary_multispecies_pages, 
                       station_multispecies_pages, paradigm_break_page):
     """ Reorder PDF pages so that multispecies plots appear before other plots.
 
@@ -641,6 +642,6 @@ def reorder_pdf_pages(input_pdf, output_pdf, summary_multispecies_pages,
         output_pdf_file.add_page(input_pdf_file.pages[page_number])
 
     # Write the rearranged pages to a new PDF file
-    print(f'Writing {output_pdf}')
+    read_instance.logger.info(f'Writing {output_pdf}')
     with open(output_pdf, "wb") as outputStream:
         output_pdf_file.write(outputStream)
