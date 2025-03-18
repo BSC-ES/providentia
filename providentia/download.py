@@ -263,7 +263,7 @@ class ProvidentiaDownload(object):
 
             if self.experiments:
                 # remote machine experiment download
-                if self.machine in ["storage5","nord3v2"]:
+                if self.machine in ["storage5", "nord3v2", "nord4"]:
                     # get function to download experiment depending on the configuration file field
                     download_experiment_fun = self.copy_non_interpolated_experiment
                 # local experiment download
