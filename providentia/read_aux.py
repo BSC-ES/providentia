@@ -851,7 +851,7 @@ def generate_file_trees(instance, force=False):
     elif instance.disable_file_tree:
         gft = False
     # by default generate filetree on MN5
-    elif instance.machine in ['mn5']:
+    elif instance.machine in ['mn5', 'nord4']:
         gft = True
     # by default generate filetree locally
     elif instance.filetree_type == 'local':

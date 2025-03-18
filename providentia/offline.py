@@ -99,7 +99,7 @@ class ProvidentiaOffline:
         elif self.disable_file_tree:
             gft = False
         # by default generate filetree on MN5
-        elif self.machine in ['mn5']:
+        elif self.machine in ['mn5', 'nord4']:
             gft = True
         # by default generate filetree locally
         elif self.filetree_type == 'local':
