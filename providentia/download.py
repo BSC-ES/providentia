@@ -2,23 +2,20 @@ import sys
 import os
 import shutil
 
-import copy
-import subprocess
-from dotenv import dotenv_values
-import paramiko 
 from base64 import decodebytes
-import signal
-import time
-import re
+import copy
+from dotenv import dotenv_values
+import numpy as np
+import paramiko 
 import requests
+import signal
+import subprocess
+import tarfile
+import time
+from tqdm import tqdm
+import xarray as xr
 import yaml
 
-import numpy as np
-import xarray as xr
-
-# urlparse
-from tqdm import tqdm
-import tarfile
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from getpass import getpass
@@ -44,21 +41,23 @@ mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'inter
 def check_time(size, file_size):
     if (time.time() - download.ncfile_dl_start_time) > download.timeoutLimit:
         error = 'Download timeout, try later.'
-        sys.exit(error)
+        download.logger.error(error)
+        sys.exit(1)
+        
         
 def sighandler(*unused):
-    print('\nKeyboard Interrupt. Stopping execution.')
+    download.logger.info('\nKeyboard Interrupt. Stopping execution.')
     
     # close connection, if it exists
     if hasattr(download, 'ssh') and download.ssh is not None:
-        print("\nClosing ssh connection...")
+        download.logger.info("\nClosing ssh connection...")
         download.ssh.close()
         if hasattr(download, 'sftp'):
             download.sftp.close()
 
     # delete the las downloaded nc file to avoid corrupted files
     if hasattr(download,'latest_nc_file_path'):
-        print(f"\nDeleting last file to avoid corruption: {download.latest_nc_file_path}...")
+        download.logger.info(f"\nDeleting last file to avoid corruption: {download.latest_nc_file_path}...")
         if os.path.isfile(download.latest_nc_file_path):
             os.remove(download.latest_nc_file_path)
 
@@ -73,14 +72,15 @@ def sighandler(*unused):
     # delete temp dir if necessary
     temp_dir = join(download.ghost_root,'.temp')
     if os.path.exists(temp_dir):
-        print(f"\nDeleting {temp_dir}")
+        download.logger.info(f"\nDeleting {temp_dir}")
         shutil.rmtree(temp_dir)
     
-    print("\nExiting...")
+    download.logger.info("\nExiting...")
     sys.exit()
 
 class ProvidentiaDownload(object):
     def __init__(self, **kwargs):
+
         # get providentia start time
         self.prov_start_time = time.time()
 
@@ -103,6 +103,8 @@ class ProvidentiaDownload(object):
         # modified by commandline arguments, if given
         self.provconf = ProvConfiguration(self, **kwargs)
 
+        self.logger.info("Starting Providentia download...")
+
         # update variables from config file
         if self.config != '':  
             read_conf = False
@@ -124,20 +126,25 @@ class ProvidentiaDownload(object):
                         error = 'Error: The section specified in the command line ({0}) does not exist.'.format(kwargs['section'])
                         tip = 'Tip: For subsections, add the name of the parent section followed by an interpunct (·) '
                         tip += 'before the subsection name (e.g. SECTIONA·Spain).'
-                        sys.exit(error + '\n' + tip)
+                        error = error + '\n' + tip
+                        self.logger.error(error)
+                        sys.exit(1)
                 # if no section passed, then get all the parent sections
                 else:
                     # if no parent section names are found throw an error
                     if len(self.parent_section_names) == 0:
                         error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
-                        sys.exit(error)
+                        self.logger.error(error)
+                        sys.exit(1)
                     self.sections = self.parent_section_names
             else:
                 error = 'Error: The path to the configuration file specified in the command line does not exist.'
-                sys.exit(error)
+                self.logger.error(error)
+                sys.exit(1)
         else:
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
-            sys.exit(error)
+            self.logger.error(error)
+            sys.exit(1)
 
         # variable that saves whether some experiments/observations were downloaded before
         self.overwritten_files_flag = False
@@ -192,7 +199,8 @@ class ProvidentiaDownload(object):
                 # if networks is none and is not the non interpolated mode, raise error
                 if not self.network and self.interpolated is True:
                     error = "Error: No networks were passed."
-                    sys.exit(error)
+                    self.logger.error(error)
+                    sys.exit(1)
                 
                 # when one of those symbols is passed, get all networks
                 if self.network == ["*"]:
@@ -225,7 +233,8 @@ class ProvidentiaDownload(object):
                             # ACTRIS
                             elif network == 'actris/actris':
                                 error = f"Error: It is not possible to download files from the ACTRIS network from BSC machines. Set BSC_DL_CHOICE=n in .env file."
-                                sys.exit(error)
+                                self.logger.error(error)
+                                sys.exit(1)
                             # non-GHOST
                             else:
                                 initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
@@ -247,12 +256,14 @@ class ProvidentiaDownload(object):
                             # non-GHOST
                             else:
                                 error = f"Error: It is not possible to download files from the non-GHOST network {network} from the zenodo webpage."
-                                sys.exit(error)
+                                self.logger.error(error)
+                                sys.exit(1)
                         
                         # download option invalid
                         else:
                             error = "Error: Download option not valid, check your .env file."
-                            sys.exit(error)
+                            self.logger.error(error)
+                            sys.exit(1)
 
                 # get orignal species back
                 self.species = main_species
@@ -275,12 +286,14 @@ class ProvidentiaDownload(object):
                     # download from the zenodo webpage
                     else:
                         error = f"Error: It is not possible to download experiments from the zenodo webpage."
-                        sys.exit(error)    
+                        self.logger.error(error)
+                        sys.exit(1) 
             
             # raise an error if there are no valid experiments                                
             else:
                 error = "Error: No experiments available to be downloaded."
-                sys.exit(error)            
+                self.logger.error(error)
+                sys.exit(1)           
            
             # iterate the experiments download
             for experiment in self.experiments.keys():
@@ -302,7 +315,7 @@ class ProvidentiaDownload(object):
 
         # show message in case experiments or observations were ignored
         if self.overwritten_files_flag == True:
-            print("\nSome experiments/observations were found but were not downloaded because the OVERWRITE option is set to 'n'.")
+            self.logger.info("\nSome experiments/observations were found but were not downloaded because the OVERWRITE option is set to 'n'.")
 
         if self.machine == "local":
             # close connection, if it exists
@@ -351,7 +364,8 @@ class ProvidentiaDownload(object):
             # if it has been changed already, exit
             else:
                 error = "Error: None of the machines are working right now. Try later."
-                sys.exit(error)
+                self.logger.error(error)
+                sys.exit(1)
 
         self.ssh = paramiko.SSHClient()
         hostkeys = self.ssh.get_host_keys().add(self.remote_hostname, 'ed25519', key)
@@ -377,7 +391,8 @@ class ProvidentiaDownload(object):
                 if prv_user is None:
                     error = f"Authentication failed. Please, check if PRV_USER on {join(PROVIDENTIA_ROOT, '.env')} aligns with your BSC {REMOTE_MACHINE} ssh user."
                     error += "\nIf it does not, change the user to the correct one. If it does, delete the whole PRV_USER row and execute again."
-                    sys.exit(error)
+                    self.logger.error(error)
+                    sys.exit(1)
                 else:
                     prv_password = getpass("Insert password: ")
                     self.prv_password = prv_password
@@ -394,7 +409,8 @@ class ProvidentiaDownload(object):
             # if user or password were taken from .env (did not change), tell the user to check .env
             if prv_user is None:
                 error += f" Please, check your credentials on {join(PROVIDENTIA_ROOT, '.env')}"
-            sys.exit(error)
+            self.logger.error(error)
+            sys.exit(1)
 
         # if pwd or user changed, ask if user wants to remember credentials
         if (prv_user is not None) or (prv_password is not None):
@@ -411,7 +427,7 @@ class ProvidentiaDownload(object):
                     if prv_password is not None:
                         f.write(f"PRV_PWD={self.prv_password}\n")
 
-                print(f"\nRemote machine credentials saved on {join(PROVIDENTIA_ROOT, '.env')}")
+                print(f"\nRemote machine credentials saved on {join(PROVIDENTIA_ROOT, '.env')}\n")
 
     def confirm_bsc_download(self):
         # get user choice regarding bsc downloads
@@ -473,8 +489,8 @@ class ProvidentiaDownload(object):
         
         if not initial_check:
             # print current_network
-            print('\n'+'-'*40)
-            print(f"\nDownloading non-GHOST {network} network data from {REMOTE_MACHINE}...")
+            self.logger.info('\n'+'-'*40)
+            self.logger.info(f"\nDownloading non-GHOST {network} network data from {REMOTE_MACHINE}...")
 
         # if not valid network, check if user put the network on init_prov 
         # TODO Move to configuration.py
@@ -523,7 +539,7 @@ class ProvidentiaDownload(object):
             initial_check_nc_files = []
 
             if not initial_check:
-                print(f"\n{network} observations to download ({len(res_spec_dir)}):")
+                self.logger.info(f"\n{network} observations to download ({len(res_spec_dir)}):")
             
             # get all the nc files in the date range within the specie and resolution combination
             for remote_dir in res_spec_dir:
@@ -534,7 +550,7 @@ class ProvidentiaDownload(object):
 
                 #  print the species, resolution and network combinations that are going to be downloaded
                 if not initial_check:
-                    print(f"\n  - {local_dir}, source: {remote_dir} ({REMOTE_MACHINE})")
+                    self.logger.info(f"\n  - {local_dir}, source: {remote_dir} ({REMOTE_MACHINE})")
 
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
@@ -568,7 +584,10 @@ class ProvidentiaDownload(object):
                         if not valid_nc_files:
                             msg = "Files were already downloaded."
                             show_message(self, msg, deactivate=initial_check)     
-                            continue         
+                            continue  
+
+                    if not initial_check and not self.logfile:
+                        # print the tqdm bar if output goes to screen       
                         valid_nc_files_iter = tqdm(valid_nc_files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading files ({len(valid_nc_files)})")
                     else:
                         # do not print the bar if it is the initial check
@@ -586,7 +605,7 @@ class ProvidentiaDownload(object):
                             # initialize the timeout and get the file
                             self.ncfile_dl_start_time = time.time()
                             remote_path = join(remote_dir,nc_file)
-                            self.sftp.get(remote_path,local_path, callback=check_time)
+                            self.sftp.get(remote_path, local_path, callback=check_time)
 
             return initial_check_nc_files
         
@@ -597,8 +616,8 @@ class ProvidentiaDownload(object):
 
         if not initial_check:
             # print current_network
-            print('\n'+'-'*40)
-            print(f"\nDownloading GHOST {network} network data from {REMOTE_MACHINE}...")
+            self.logger.info('\n'+'-'*40)
+            self.logger.info(f"\nDownloading GHOST {network} network data from {REMOTE_MACHINE}...")
 
         # if not valid network, next
         if network not in self.sftp.listdir(self.ghost_remote_obs_path):
@@ -674,7 +693,7 @@ class ProvidentiaDownload(object):
             initial_check_nc_files = []
             
             if not initial_check:
-                print(f"\n{network} observations to download ({len(res_spec_dir)}):")
+                self.logger.info(f"\n{network} observations to download ({len(res_spec_dir)}):")
             
             # get all the nc files in the date range within the specie and resolution combination
             for remote_dir in res_spec_dir:
@@ -685,7 +704,7 @@ class ProvidentiaDownload(object):
 
                 #  print the species, resolution and network combinations that are going to be downloaded
                 if not initial_check:
-                    print(f"\n  - {local_dir}, source: {remote_dir} ({REMOTE_MACHINE})")
+                    self.logger.info(f"\n  - {local_dir}, source: {remote_dir} ({REMOTE_MACHINE})")
 
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
@@ -719,7 +738,10 @@ class ProvidentiaDownload(object):
                         if not valid_nc_files:
                             msg = "Files were already downloaded."
                             show_message(self, msg, deactivate=initial_check)     
-                            continue         
+                            continue  
+
+                    if not initial_check and not self.logfile:
+                        # print the tqdm bar if output goes to screen          
                         valid_nc_files_iter = tqdm(valid_nc_files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading files ({len(valid_nc_files)})")
                     else:
                         # do not print the bar if it is the initial check
@@ -737,7 +759,7 @@ class ProvidentiaDownload(object):
                             # initialize the timeout and get the file
                             self.ncfile_dl_start_time = time.time()
                             remote_path = join(remote_dir,nc_file)
-                            self.sftp.get(remote_path,local_path, callback=check_time)
+                            self.sftp.get(remote_path, local_path, callback=check_time)
                        
             return initial_check_nc_files
 
@@ -747,8 +769,8 @@ class ProvidentiaDownload(object):
         
         if not initial_check:
             # print current_network
-            print('\n'+'-'*40)
-            print(f"\nDownloading GHOST {network} network data from Zenodo...")
+            self.logger.info('\n'+'-'*40)
+            self.logger.info(f"\nDownloading GHOST {network} network data from Zenodo...")
 
         # if first time reading a GHOST network, get current zips urls in zenodo page
         if not hasattr(self,"zenodo_ghost_available_networks"): 
@@ -798,7 +820,7 @@ class ProvidentiaDownload(object):
 
                 # print the species, resolution and network combinations that are going to be downloaded
                 if not initial_check:
-                    print(f"\n{network} observations to download:")
+                    self.logger.info(f"\n{network} observations to download:")
                 
                 # initialise only possible GHOST version
                 # TODO in the future there will be various versions in zenodo
@@ -811,7 +833,7 @@ class ProvidentiaDownload(object):
 
                     #  print the species, resolution and network combinations that are going to be downloaded
                     if not initial_check:
-                        print(f"\n  - {local_dir}")
+                        self.logger.info(f"\n  - {local_dir}")
 
                     # create temporal dir to store the middle tar file with its directories
                     temp_dir = join(self.ghost_root,'.temp')
@@ -857,7 +879,8 @@ class ProvidentiaDownload(object):
                             # sort nc_files
                             valid_nc_files.sort(key = lambda x:x.name)   
 
-                            if not initial_check:    
+                            if not initial_check and not self.logfile:
+                                # print the tqdm bar if output goes to screen   
                                 valid_nc_files_iter = tqdm(valid_nc_files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading files ({len(valid_nc_files)})")
                             else:
                                 # do not print the bar if it is the initial check
@@ -886,8 +909,8 @@ class ProvidentiaDownload(object):
         
         if not initial_check:
             # print current experiment
-            print('\n'+'-'*40)
-            print(f"\nDownloading {experiment} experiment data from {REMOTE_MACHINE}...")
+            self.logger.info('\n'+'-'*40)
+            self.logger.info(f"\nDownloading {experiment} experiment data from {REMOTE_MACHINE}...")
             
         # get resolution and species combinations
         res_spec_dir = []
@@ -1005,16 +1028,16 @@ class ProvidentiaDownload(object):
             initial_check_nc_files = []
 
             if not initial_check:
-                print(f"\n{experiment_new} experiment data to download ({len(res_spec_dir)}):")
+                self.logger.info(f"\n{experiment_new} experiment data to download ({len(res_spec_dir)}):")
             
             # get all the nc files in the date range
             for remote_dir in res_spec_dir:
                 if not initial_check:
                     local_path = remote_dir.split('/',7)[-1]
                     if self.ghost_version in ["1.2", "1.3", "1.3.1"]:
-                        print(f"\n  - {join(self.exp_root,self.ghost_version,'-'.join(local_path.split('/')[1:4]),*local_path.split('/')[4:])}, source: {remote_dir} ({REMOTE_MACHINE})")
+                        self.logger.info(f"\n  - {join(self.exp_root,self.ghost_version,'-'.join(local_path.split('/')[1:4]),*local_path.split('/')[4:])}, source: {remote_dir} ({REMOTE_MACHINE})")
                     else:
-                        print(f"\n  - {join(self.exp_root,local_path)}, source: {remote_dir} ({REMOTE_MACHINE})")
+                        self.logger.info(f"\n  - {join(self.exp_root,local_path)}, source: {remote_dir} ({REMOTE_MACHINE})")
             
                 network = remote_dir.split('/')[-1]
                 species = remote_dir.split('/')[-2]
@@ -1055,7 +1078,10 @@ class ProvidentiaDownload(object):
                         if not valid_nc_files:
                             msg = "Files were already downloaded."
                             show_message(self, msg, deactivate=initial_check)     
-                            continue         
+                            continue
+
+                    if not initial_check and not self.logfile:
+                        # print the tqdm bar if output goes to screen            
                         valid_nc_files_iter = tqdm(valid_nc_files, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading files ({len(valid_nc_files)})")
                     else:
                         # do not print the bar if it is the initial check
@@ -1073,7 +1099,7 @@ class ProvidentiaDownload(object):
                             # initialize the timeout and get the file
                             self.ncfile_dl_start_time = time.time()
                             remote_path = join(remote_dir,nc_file)
-                            self.sftp.get(remote_path,local_path, callback=check_time) 
+                            self.sftp.get(remote_path, local_path, callback=check_time) 
             
             return initial_check_nc_files
 
@@ -1084,8 +1110,8 @@ class ProvidentiaDownload(object):
         
         if not initial_check:
             # print current experiment
-            print('\n'+'-'*40)
-            print(f"\nDownloading {experiment} non-interpolated experiment data from {REMOTE_MACHINE}...")
+            self.logger.info('\n'+'-'*40)
+            self.logger.info(f"\nDownloading {experiment} non-interpolated experiment data from {REMOTE_MACHINE}...")
             
         # get resolution and species combinations
         res_spec_dir = []
@@ -1231,13 +1257,13 @@ class ProvidentiaDownload(object):
             initial_check_nc_files = []
 
             if not initial_check:
-                print(f"\n{experiment} experiment data to download ({len(res_spec_dir)}):")
+                self.logger.info(f"\n{experiment} experiment data to download ({len(res_spec_dir)}):")
             
             # get all the nc files in the date range
             for remote_dir in res_spec_dir:
                 if not initial_check:
                     local_path = remote_dir.split('/', 6)[-1]
-                    print(f"\n  - {join(self.exp_to_interp_root,local_path)}, source: {remote_dir} ({REMOTE_MACHINE})")
+                    self.logger.info(f"\n  - {join(self.exp_to_interp_root,local_path)}, source: {remote_dir} ({REMOTE_MACHINE})")
                          
                 # get nc files
                 nc_files = self.sftp.listdir(remote_dir)
@@ -1273,7 +1299,8 @@ class ProvidentiaDownload(object):
                         else:
                             # TODO delete this in the future
                             error = "It is not possible to download this nc file type yet. Please, contact the developers.", nc_files
-                            sys.exit(error)
+                            self.logger.error(error)
+                            sys.exit(1)
                     
                     # if it is an ensemble statistic
                     else:
@@ -1321,7 +1348,10 @@ class ProvidentiaDownload(object):
                         if not valid_nc_files:
                             msg = "Files were already downloaded."
                             show_message(self, msg, deactivate=initial_check)     
-                            continue         
+                            continue    
+
+                    if not initial_check and not self.logfile:
+                        # print the tqdm bar if output goes to screen        
                         valid_nc_files_iter = tqdm(valid_nc_files, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading files ({len(valid_nc_files)})")
                     else:
                         # do not print the bar if it is the initial check
@@ -1338,8 +1368,8 @@ class ProvidentiaDownload(object):
 
                             # initialize the timeout and get the file
                             self.ncfile_dl_start_time = time.time()
-                            remote_path = join(remote_dir,nc_file)
-                            self.sftp.get(remote_path,local_path,callback=check_time) 
+                            remote_path = join(remote_dir, nc_file)
+                            self.sftp.get(remote_path, local_path, callback=check_time) 
             
             return initial_check_nc_files
 
@@ -1351,8 +1381,8 @@ class ProvidentiaDownload(object):
     def copy_non_interpolated_experiment(self, experiment, initial_check, files_to_download=None):
         if not initial_check:
             # print current experiment
-            print('\n'+'-'*40)
-            print(f"\nCopying {experiment} non-interpolated experiment data from esarchive to gpfs in {self.machine}...")
+            self.logger.info('\n'+'-'*40)
+            self.logger.info(f"\nCopying {experiment} non-interpolated experiment data from esarchive to gpfs in {self.machine}...")
             
         # get resolution and species combinations
         res_spec_dir = []
@@ -1463,12 +1493,12 @@ class ProvidentiaDownload(object):
             initial_check_nc_files = []
 
             if not initial_check:
-                print(f"\n{experiment} experiment data to copy ({len(res_spec_dir)}):")
+                self.logger.info(f"\n{experiment} experiment data to copy ({len(res_spec_dir)}):")
             
             # get all the nc files in the date range
             for esarchive_dir in res_spec_dir:
                 if not initial_check:
-                    print(f"\n  - {join(self.exp_to_interp_root,'/'.join(esarchive_dir.split('/')[-4:]))}, source: {esarchive_dir} ({self.machine})")
+                    self.logger.info(f"\n  - {join(self.exp_to_interp_root,'/'.join(esarchive_dir.split('/')[-4:]))}, source: {esarchive_dir} ({self.machine})")
                          
                 # get nc files
                 nc_files = os.listdir(esarchive_dir)
@@ -1504,7 +1534,8 @@ class ProvidentiaDownload(object):
                         else:
                             # TODO delete this in the future
                             error = "It is not possible to copy this nc file type yet. Please, contact the developers.", nc_files
-                            sys.exit(error)
+                            self.logger.error(error)
+                            sys.exit(1)
                     
                     # if it is an ensemble statistic
                     else:
@@ -1556,7 +1587,10 @@ class ProvidentiaDownload(object):
                         if not valid_nc_files:
                             msg = "Files were already copied."
                             show_message(self, msg, deactivate=initial_check)     
-                            continue         
+                            continue   
+
+                    if not initial_check and not self.logfile:
+                        # print the tqdm bar if output goes to screen         
                         valid_nc_files_iter = tqdm(valid_nc_files, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Copying files from esarchive to gpfs ({len(valid_nc_files)})")
                     else:
                         # do not print the bar if it is the initial check
@@ -1573,8 +1607,9 @@ class ProvidentiaDownload(object):
                             # get last downloaded file in case there was a keyboard interrupt
                             self.latest_nc_file_path = gpfs_path
                             
+                            # TODO: remove if the permissions are not needed
                             # check if the file already exists
-                            new_file = not os.path.isfile(gpfs_path)
+                            # new_file = not os.path.isfile(gpfs_path)
                            
                             # get rsync command depending on which machine it was ran
                             rsync_command = "dtrsync" if self.machine == "storage5" else "rsync"
@@ -1586,7 +1621,9 @@ class ProvidentiaDownload(object):
                                     subprocess.check_call([rsync_command, esarchive_path, gpfs_path], stdout=devnull, stderr=subprocess.STDOUT)
                             except subprocess.CalledProcessError:
                                 error = f'Failed to copy the files. Try later.'
-                                sys.exit(error)
+                                self.logger.error(error)
+                                sys.exit(1)
+
                             # TODO: fails when creating a new file, wait until users use the copy option to see if it is really needed
                             # give to each new file 770 permissions to directory and make group owner bsc32 
                             # if new_file:                        
@@ -1619,7 +1656,8 @@ class ProvidentiaDownload(object):
         # Check if the request was successful (status code 200)
         if response.status_code != 200:
             error = f'Failed to retrieve the webpage. Status code: {response.status_code}'
-            sys.exit(error)
+            self.logger.error(error)
+            sys.exit(1)
         
         # fill network dictionary with its corresponding zip url
         for line in response.text.split(">"):
@@ -1644,7 +1682,8 @@ class ProvidentiaDownload(object):
                     self.network = list(self.zenodo_ghost_available_networks.keys())
             else:
                 error = "Download option not valid, check your .env file."
-                sys.exit(error)
+                self.logger.error(error)
+                sys.exit(1)
 
         if download_source in ["n","a"]:
             self.network = self.nonghost_available_networks
@@ -1700,7 +1739,7 @@ class ProvidentiaDownload(object):
             
             # check if variable name is available
             if var not in parameters_dict.keys():
-                print(f'Data for {var} cannot be downloaded')
+                self.logger.info(f'Data for {var} cannot be downloaded')
                 continue
             else:
                 actris_parameter = parameters_dict[var]
@@ -1720,7 +1759,7 @@ class ProvidentiaDownload(object):
             # if file does not exist
             if not os.path.isfile(path):
                 # get files information
-                print(f'\nFile containing information of the files available in Thredds for {var} ({path}) does not exist, creating.')
+                self.logger.info(f'\nFile containing information of the files available in Thredds for {var} ({path}) does not exist, creating.')
                 combined_data = get_files_per_var(var)
                 all_files = combined_data[var]['files']
                 files_info = get_files_info(all_files, var, path)
@@ -1754,7 +1793,7 @@ class ProvidentiaDownload(object):
                 continue
 
             # filter files by resolution and dates
-            print('    Filtering files by resolution and dates...')
+            self.logger.info('    Filtering files by resolution and dates...')
             files = []
             for file, attributes in files_info.items():
                 if attributes["resolution"] == resolution:
@@ -1799,13 +1838,13 @@ class ProvidentiaDownload(object):
                     combined_ds_list_corrected_flag.append(ds)
             
                 # combine and create new dataset
-                print('    Combining files...')
+                self.logger.info('    Combining files...')
                 try:
                     combined_ds = xr.concat(combined_ds_list_corrected_flag, 
                                             dim='station', 
                                             combine_attrs='drop_conflicts')
                 except Exception as error:
-                    print(f'Error: Datasets could not be combined - {error}')
+                    self.logger.info(f'Error: Datasets could not be combined - {error}')
                     continue
                 
                 # add metadata
@@ -1871,7 +1910,7 @@ class ProvidentiaDownload(object):
                             # current_n_stations = len(combined_ds_yearmonth.station)
                             # n_stations_diff = previous_n_stations - current_n_stations
                             # if n_stations_diff > 0:
-                            #     print(f'    Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
+                            #     self.logger.info(f'    Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
                             
                             # remove file if it exists
                             if os.path.isfile(filename):
@@ -1882,13 +1921,13 @@ class ProvidentiaDownload(object):
 
                             # change permissions
                             os.system("chmod 777 {}".format(filename))
-                            print(f"    Saved: {filename}")
+                            self.logger.info(f"    Saved: {filename}")
                             saved_files += 1
                             
-                print(f'    Total number of saved files: {saved_files}')
+                self.logger.info(f'    Total number of saved files: {saved_files}')
 
             else:
-                print('    No files were found')
+                self.logger.info('    No files were found')
 
 def main(**kwargs):
     """ Main function when running download function. """
