@@ -78,7 +78,8 @@ class SettingsMenu(object):
                     getattr(self, element_type + 'es')[element_name] = element
 
             else:
-                print(f'ERROR: Unknown element type: {element_type}')
+                error = f'Error: Unknown element type: {element_type}'
+                self.canvas_instance.read_instance.logger.error(error)
 
 
     def add_button(self, element_settings):
