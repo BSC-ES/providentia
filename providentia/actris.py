@@ -254,10 +254,16 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
     # get valid dates frequency
     if resolution == 'hourly':
         frequency = 'h'
+        timedelta = np.timedelta64(30, 'm')
+    elif resolution == '3hourly':
+        frequency = '3h'
+        timedelta = np.timedelta64(90, 'm') 
     elif resolution == 'daily':
         frequency = 'D'
+        timedelta = np.timedelta64(12, 'h') 
     elif resolution == 'monthly':
         frequency = 'MS'
+        timedelta = np.timedelta64(15, 'D')
 
     standard_time = pd.date_range(start=target_start_date, end=target_end_date,
                                   freq=frequency).to_numpy(dtype='datetime64[ns]')
@@ -274,7 +280,7 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
     standard_time_pairs = create_time_pairs(standard_time)
 
     tqdm_iter = tqdm(combined_ds_list, bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}',
-                     desc=f"    Temporally averaging data ({len(combined_ds_list)})")
+                     desc=f"Temporally averaging data ({len(combined_ds_list)})")
     for station_i, station_ds in enumerate(tqdm_iter):
 
         # initialise averaged data
@@ -286,9 +292,7 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
         station_ds = station_ds.isel(station=0)
 
         data_dict = {}
-        measurement_time_pairs = [(t - np.timedelta64(30, 'm'), t + np.timedelta64(30, 'm'))
-                                  for t in station_ds.time.values]
-
+        measurement_time_pairs = [(t - timedelta, t + timedelta) for t in station_ds.time.values]
         for i, (measurement_start_date, measurement_end_date) in enumerate(measurement_time_pairs):
             data = station_ds.isel(time=i)
             var_data = data[var].values
@@ -457,7 +461,7 @@ def get_files_info(files, var, path):
 
     files_info = {}
     tqdm_iter = tqdm(files, bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}',
-                     desc=f"    Creating information file ({len(files)})")
+                     desc=f"Creating information file ({len(files)})")
     for file in tqdm_iter:
         # open file
         try:
@@ -500,7 +504,7 @@ def get_files_info(files, var, path):
         with open(path, 'w') as file:
             yaml.dump(datasets, file, default_flow_style=False)
     else:
-        print(f'    Error: No data could be found for {var}')
+        print(f'Error: No data could be found for {var}')
 
     return files_info
 
@@ -547,7 +551,7 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
     errors = {}
     warnings = {}
     tqdm_iter = tqdm(
-        files, bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}', desc=f"    Reading data ({len(files)})")
+        files, bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}', desc=f"Reading data ({len(files)})")
     for i, file in enumerate(tqdm_iter):
 
         # open file
