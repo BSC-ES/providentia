@@ -20,6 +20,7 @@ from .plot_options import annotation, experiment_domain, linear_regression, log_
 from .statistics import get_z_statistic_info
 
 from providentia.auxiliar import CURRENT_PATH, join
+from .warnings_prv import show_message
 
 Image.MAX_IMAGE_PIXELS = None
 
@@ -536,24 +537,25 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
             if log_valid:
                 log_axes(relevant_ax, 'logx', canvas_instance.plot_characteristics[plot_type])
             else:
-                msg = "Warning: It is not possible to log the x-axis "
+                msg = "It is not possible to log the x-axis "
                 msg += "in {0} with negative values.".format(plot_type)
-                print(msg)
+                show_message(read_instance, msg)
 
         if 'logy' in plot_options:
             log_valid = log_validity(relevant_ax, 'logy')
             if log_valid:
                 log_axes(relevant_ax, 'logy', canvas_instance.plot_characteristics[plot_type])
             else:
-                msg = "Warning: It is not possible to log the y-axis "
+                msg = "It is not possible to log the y-axis "
                 msg += "in {0} with negative values.".format(plot_type)
-                print(msg)
+                show_message(read_instance, msg)
 
         # domain
         if 'domain' in plot_options:
             if len(read_instance.data_labels) == 1:
                 if read_instance.data_labels[0] == read_instance.observations_data_label:
-                    print("Warning: 'domain' plot option cannot be made as have no experiments.")
+                    msg = "'domain' plot option cannot be made as have no experiments."
+                    show_message(read_instance, msg)
                     return
             experiment_domain(canvas_instance, relevant_ax, relevant_data_labels[relevant_ax_ii], map_extent)
 
@@ -754,7 +756,8 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
                     img_extent = (-180, 180, -90, 90)
                     ax_to_format.imshow(img, origin='upper', extent=img_extent, transform=canvas_instance.datacrs)
                 else:
-                    print("Warning: Specified map background file cannot be found.")
+                    msg = "Specified map background file cannot be found."
+                    show_message(read_instance, msg)
 
             # add gridlines ?
             if 'gridlines' in plot_characteristics_vars:
