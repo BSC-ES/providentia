@@ -933,7 +933,7 @@ class PopUpWindow(QtWidgets.QWidget):
 
             # if any of the fields are not numbers, return from function
             except ValueError:
-                msg = 'Warning: Data limit fields must be numeric.'
+                msg = 'Data limit fields must be numeric.'
                 show_message(self.read_instance, msg)
                 self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
                 return

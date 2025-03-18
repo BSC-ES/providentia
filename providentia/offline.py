@@ -1,8 +1,6 @@
 """ Class to generate offline reports """
 
 import copy
-import datetime
-import json
 import os
 import sys
 import yaml
@@ -34,6 +32,7 @@ from .statistics import (calculate_statistic, get_fairmode_data,
                          generate_colourbar, get_selected_station_data, get_z_statistic_info)
 
 from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
+from .warnings_prv import show_message
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 fairmode_settings = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
@@ -46,7 +45,6 @@ class ProvidentiaOffline:
     matplotlib.use('Agg')
 
     def __init__(self, **kwargs):
-        print("Starting Providentia offline...")
 
         # load statistical yamls
         self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
@@ -62,6 +60,8 @@ class ProvidentiaOffline:
         # update self with command line arguments
         self.commandline_arguments = copy.deepcopy(kwargs)
 
+        self.logger.info("Starting Providentia offline...")
+
         # update variables from config file
         if self.config != '':  
             read_conf = False
@@ -76,17 +76,20 @@ class ProvidentiaOffline:
                 self.from_conf = True
             else:
                 error = 'Error: The path to the configuration file specified in the command line does not exist.'
-                sys.exit(error)
+                self.logger.error(error)
+                sys.exit(1)
         else:
             error = "Error: No configuration file found. The path to the config file must be added as an argument."
-            sys.exit(error)
+            self.logger.error(error)
+            sys.exit(1)
 
         # load report plot presets
         try:
             self.report_plots = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/report_plots.yaml')))
         except:
             error = "Error: Report plots file could not be read, check for common typos (e.g. missing double quotes or commas)."
-            sys.exit(error)
+            self.logger.error(error)
+            sys.exit(1)
 
         # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
         # if have filetree flags, then these overwrite any defaults
@@ -106,7 +109,7 @@ class ProvidentiaOffline:
         if len(self.filenames) != len(self.parent_section_names):
             msg = 'Report filename/s (report_filename) has not been defined in '
             msg += 'configuration file for one or more sections.'
-            print(msg)
+            self.logger.info(msg)
             if len(self.parent_section_names) == 1:
                 self.filenames.append(self.report_filename)
             else:
@@ -125,17 +128,19 @@ class ProvidentiaOffline:
                 self.filenames = [self.filenames[index]]
                 self.parent_section_names = [self.parent_section_names[index]]
             else:
-                msg = "Error: Section {} does not exist in configuration file.".format(self.commandline_arguments["section"])
-                sys.exit(msg)
+                error = "Error: Section {} does not exist in configuration file.".format(self.commandline_arguments["section"])
+                self.logger.error(error)
+                sys.exit(1)
 
         # if no parent section names are found throw an error
         if len(self.parent_section_names) == 0:
             error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
-            sys.exit(error)
+            self.logger.error(error)
+            sys.exit(1)
 
         # iterate through configuration sections
         for section_ind, (filename, section) in enumerate(zip(self.filenames, self.parent_section_names)):
-            print('Starting to create PDF for {} section'.format(section))
+            self.logger.info('Starting to create PDF for {} section'.format(section))
 
             # update for new section parameters
             self.section = section
@@ -209,14 +214,15 @@ class ProvidentiaOffline:
 
             # if no valid data has been found be to be read, then skip to next section
             if self.invalid_read:
-                print('No valid data for {} section'.format(section))
+                self.logger.info('No valid data for {} section'.format(section))
                 continue
             
             # check if report type is valid
             if self.report_type not in self.report_plots.keys():
-                msg = 'Error: The report type {0} cannot be found in settings/report_plots.yaml. '.format(self.report_type)
-                msg += 'The available report types are {0}. Select one or create your own.'.format(list(self.report_plots.keys()))
-                sys.exit(msg)
+                error = 'Error: The report type {0} cannot be found in settings/report_plots.yaml. '.format(self.report_type)
+                error += 'The available report types are {0}. Select one or create your own.'.format(list(self.report_plots.keys()))
+                self.logger.error(error)
+                sys.exit(1)
 
             # set plots that need to be made (summary and station specific)
             self.summary_plots_to_make = []
@@ -231,13 +237,15 @@ class ProvidentiaOffline:
                 # get summary plots
                 if 'summary' in self.report_plots[self.report_type].keys():
                     if not self.report_summary:
-                        print('Warning: report_summary is False, summary plots will not be created.')
+                        msg = 'report_summary is False, summary plots will not be created.'
+                        show_message(self, msg)
                     else:
                         self.summary_plots_to_make = self.report_plots[self.report_type]['summary']
                 # get station plots
                 if 'station' in self.report_plots[self.report_type].keys():
                     if not self.report_stations:
-                        print('Warning: report_stations is False, station plots will not be created.')
+                        msg = 'report_stations is False, station plots will not be created.'
+                        show_message(self, msg)
                     else:
                         for plot_type in self.report_plots[self.report_type]['station']:
                             # there can be no station specific plots for map plot type
@@ -262,9 +270,9 @@ class ProvidentiaOffline:
                     multispecies = True
                     break
             if (multispecies) and (len(np.unique(list(self.measurement_units.values()))) > 1):
-                msg = 'Warning: Be aware that the units across species are not the same and there are multispecies plots. '
+                msg = 'Be aware that the units across species are not the same and there are multispecies plots. '
                 msg += f'Units: {self.measurement_units}'
-                print(msg)
+                show_message(self, msg)
 
             # set plot characteristics for all plot types (summary, station)
             self.plots_to_make = list(self.summary_plots_to_make)
@@ -298,7 +306,7 @@ class ProvidentiaOffline:
         # create reports folder
         if not os.path.exists(os.path.dirname(reports_path)):
             if '/' in reports_path:
-                print('Path {0} does not exist and it will be created.'.format(os.path.dirname(reports_path)))
+                self.logger.info('Path {0} does not exist and it will be created.'.format(os.path.dirname(reports_path)))
             os.makedirs(os.path.dirname(reports_path))
 
         # add termination .pdf to filenames
@@ -503,7 +511,7 @@ class ProvidentiaOffline:
                     n_page_plotted_labels += len(ax_dict['data_labels'])
                 if n_page_plotted_labels > 0:
                     if not valid_page:
-                        print(f'\nWriting PDF in {reports_path}')
+                        self.logger.info(f'\nWriting PDF in {reports_path}')
                         valid_page = True
                     else:
                         # the following variables will be used to set the order of multispecies plot
@@ -525,11 +533,11 @@ class ProvidentiaOffline:
                     plt.close(fig)
                     real_page += 1
             if not valid_page:
-                print('\n0 plots remain to write to PDF')
+                self.logger.info('\n0 plots remain to write to PDF')
 
         # compress PDF using ghostscript if desired (at 300 DPI)
         if self.compression:
-            print('\nCompressing PDF')
+            self.logger.info('\nCompressing PDF')
             os.system("gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/printer -dNOPAUSE -dQUIET -dBATCH -sOutputFile={} {}".format(reports_path,reports_path_temp))
             os.system("rm {}".format(reports_path_temp))
         else:
@@ -537,12 +545,12 @@ class ProvidentiaOffline:
 
         # reorder pages
         if (len(self.summary_multispecies_pages) > 0) or (len(self.station_multispecies_pages) > 0):
-            print('\nReordering pages')
+            self.logger.info('\nReordering pages')
             # if only summary plots have been made, set paradigm break page to last page
             if not hasattr(self, 'paradigm_break_page'):
                 pdf_file = PdfReader(open(reports_path, "rb"))
                 self.paradigm_break_page = len(pdf_file.pages)
-            reorder_pdf_pages(reports_path, reports_path, self.summary_multispecies_pages, 
+            reorder_pdf_pages(self, reports_path, reports_path, self.summary_multispecies_pages, 
                               self.station_multispecies_pages, self.paradigm_break_page)
 
     def setup_plot_geometry(self, plotting_paradigm, networkspeci, have_setup_multispecies):
@@ -567,9 +575,9 @@ class ProvidentiaOffline:
                         continue
                 elif plotting_paradigm == 'station':
                     if not self.spatial_colocation:
-                        msg = f'Warning: {plot_type} cannot be created per station '
+                        msg = f'{plot_type} cannot be created per station '
                         msg += 'without activating the spatial colocation.'
-                        print(msg)
+                        show_message(self, msg)
                         continue
                     elif (have_setup_multispecies):
                         continue
@@ -884,7 +892,7 @@ class ProvidentiaOffline:
             self.previous_calibration_factor = copy.deepcopy(self.calibration_factor)
 
             # filter dataset for current subsection
-            print('\nFiltering data for {} subsection'.format(self.subsection))
+            self.logger.info('\nFiltering data for {} subsection'.format(self.subsection))
             DataFilter(self)
             
             # iterate through networks and species, creating plots
@@ -946,7 +954,7 @@ class ProvidentiaOffline:
         
         # if have 0 relevant stations, continue to next networkspeci
         if self.n_stations == 0:
-            print('No valid stations for {}, {}. Not making summmary plots'.format(networkspeci, self.subsection))
+            self.logger.info('No valid stations for {}, {}. Not making summmary plots'.format(networkspeci, self.subsection))
             # do not stop if there is any multispecies plot and we are in last subsection
             # if last subsection has data for 0 stations, it would not create them
             if (have_multispecies) and (self.subsection == self.subsections[-1]):
@@ -954,7 +962,7 @@ class ProvidentiaOffline:
             else:
                 return
         else:
-            print('Making {}, {} summary plots'.format(networkspeci, self.subsection)) 
+            self.logger.info('Making {}, {} summary plots'.format(networkspeci, self.subsection)) 
 
         # create nested dictionary to store statistical information across all networkspecies
         if networkspeci not in self.stats_summary[self.subsection]:
@@ -1042,21 +1050,23 @@ class ProvidentiaOffline:
                 # warning for fairmode plots if species aren't PM2.5, PM10, NO2 or O3
                 speci = networkspeci.split('|')[1]
                 if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
-                    print(f'Warning: Fairmode target summary plot cannot be created for {speci}.')
+                    msg = f'Fairmode target summary plot cannot be created for {speci}.'
+                    show_message(self, msg)
                     continue
                 if ((speci in ['sconco3', 'sconcno2'] and self.resolution != 'hourly') 
                     or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
-                    print('Warning: Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).')
+                    msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
+                    show_message(self, msg)
                     continue
 
                 # skip making plot if there is no valid data
                 data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
                 if not any(valid_station_idxs):
-                    print(f'No data after filtering by coverage for {speci}.')
+                    self.logger.info(f'No data after filtering by coverage for {speci}.')
                     continue
 
             # make plot
-            print('Making summary {0}'.format(plot_type))
+            self.logger.info('Making summary {0}'.format(plot_type))
             plot_indices = self.make_plot('summary', plot_type, plot_options, networkspeci)
 
             # do formatting for plot options
@@ -1090,7 +1100,7 @@ class ProvidentiaOffline:
 
         # if have 0 relevant stations, continue to next networkspeci
         if self.n_stations == 0:
-            print('No valid stations for {}, {}. Not making station plots'.format(networkspeci, self.subsection))
+            self.logger.info('No valid stations for {}, {}. Not making station plots'.format(networkspeci, self.subsection))
             # do not stop if there is any multispecies plot and we are in last subsection
             # if last subsection has data for 0 stations, it would not create them
             if (have_multispecies) and (networkspeci == self.networkspecies[-1]):
@@ -1098,7 +1108,7 @@ class ProvidentiaOffline:
             else:
                 return
         else:
-            print('Making {}, {} station plots'.format(networkspeci, self.subsection)) 
+            self.logger.info('Making {}, {} station plots'.format(networkspeci, self.subsection)) 
         
         # create nested dictionary to store statistical information across all networkspecies
         if networkspeci not in self.stats_station:
@@ -1224,21 +1234,23 @@ class ProvidentiaOffline:
                     # warning for fairmode plots if species aren't PM2.5, PM10, NO2 or O3
                     speci = networkspeci.split('|')[1]
                     if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
-                        print(f'Warning: Fairmode target station plot cannot be created for {speci} in {self.current_station_name}.')
+                        msg = f'Fairmode target station plot cannot be created for {speci} in {self.current_station_name}.'
+                        show_message(self, msg)
                         continue
                     if ((speci in ['sconco3', 'sconcno2'] and self.resolution != 'hourly') 
                         or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
-                        print('Warning: Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).')
+                        msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
+                        show_message(self, msg)
                         continue
 
                     # skip making plot if there is no valid data
                     data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
                     if not any(valid_station_idxs):
-                        print(f'No data after filtering by coverage for {speci} in {self.current_station_name}.')
+                        self.logger.info(f'No data after filtering by coverage for {speci} in {self.current_station_name}.')
                         continue
 
                 # make plot
-                print('Making station {2} for {3} ({0}/{1})'.format(i+1, 
+                self.logger.info('Making station {2} for {3} ({0}/{1})'.format(i+1, 
                                                                     len(self.relevant_station_inds),
                                                                     plot_type, 
                                                                     self.current_station_name))   
@@ -1371,28 +1383,29 @@ class ProvidentiaOffline:
 
         # do not make plot if bias and threshold plots are in plot options
         if ('bias' in plot_options) & ('threshold' in plot_options):
-            print("Warning: Cannot make a bias plot showing threshold lines. Not making plot.")
+            msg = "Cannot make a bias plot showing threshold lines. Not making plot."
+            show_message(self, msg)
             return plot_indices
 
         # do not make plot if hidedata is active but smooth is not in plot options
         if (base_plot_type == 'timeseries') and ('hidedata' in plot_options) and ('smooth' not in plot_options):
-            msg = f"Warning: Cannot make {plot_type} because 'hidedata' plot option is set for "
+            msg = f"Cannot make {plot_type} because 'hidedata' plot option is set for "
             msg += "timeseries plot, but 'smooth' is not active. Not making plot."
-            print(msg)
+            show_message(self, msg)
             return plot_indices
         
         # do not make plot if hidedata is active but regression is not in plot options
         if (base_plot_type == 'scatter') and ('hidedata' in plot_options) and ('regression' not in plot_options):
-            msg = f"Warning: Cannot make {plot_type} because 'hidedata' plot option is set for "
+            msg = f"Cannot make {plot_type} because 'hidedata' plot option is set for "
             msg += "scatter lot, but 'regression' is not active. Not making plot."
-            print(msg)
+            show_message(self, msg)
             return plot_indices
         
         # do not make Taylor diagram if statistic is not r or r2
         if (base_plot_type == 'taylor') and (zstat not in ['r', 'r2']):
-            msg = f"Warning: Cannot make {plot_type} because statistic is not available or defined. "
+            msg = f"Cannot make {plot_type} because statistic is not available or defined. "
             msg += "Choose between 'taylor-r' or 'taylor-r2'. Not making plot."
-            print(msg)
+            show_message(self, msg)
             return plot_indices
 
         # get data labels without observations
@@ -1416,7 +1429,8 @@ class ProvidentiaOffline:
                 if data_label in self.selected_station_data_labels[networkspeci]:
                     plot_validity = True
         if not plot_validity:
-            print(f'Warning: {plot_type} cannot be created because there is no available data.')
+            msg = f'{plot_type} cannot be created because there is no available data.'
+            show_message(self, msg)
             return plot_indices
 
         # get data ranges for plotting paradigm
@@ -1460,8 +1474,8 @@ class ProvidentiaOffline:
                         unavailable_label = '{}'.format(z1_label)
                     else:
                         unavailable_label = '{} - {}'.format(z2_label, z1_label)
-                    msg = f'Warning: {plot_type} cannot be created because there is no available data of {unavailable_label}.'
-                    print(msg)
+                    msg = f'{plot_type} cannot be created because there is no available data of {unavailable_label}.'
+                    show_message(self, msg)
                     return plot_indices
                     
                 # get relevant page/axis to plot on
@@ -1532,18 +1546,18 @@ class ProvidentiaOffline:
 
                     # show warning if it is not available
                     if chunk_resolution not in available_timeseries_chunk_resolutions:
-                        msg = f'Warning: {plot_type} cannot be created because {chunk_resolution} '
+                        msg = f'{plot_type} cannot be created because {chunk_resolution} '
                         msg += 'is not an available chunking resolution.'
                         if len(available_timeseries_chunk_resolutions) > 0:
                             msg += f'The available resolutions are: {available_timeseries_chunk_resolutions}'
-                        print(msg)
+                        show_message(self, msg)
                         return plot_indices
                     
                     # show warning if chunk stat is NStations and mode is not Temporal|Spatial
                     if (chunk_stat == 'NStations') and (self.statistic_mode != 'Temporal|Spatial'):
-                        msg = f'Warning: {plot_type} cannot be created because {chunk_stat} '
+                        msg = f'{plot_type} cannot be created because {chunk_stat} '
                         msg += 'it is only available when Temporal|Spatial mode is active.'
-                        print(msg)
+                        show_message(self, msg)
                         return plot_indices
                 else:
                     chunk_stat = None
@@ -1560,7 +1574,8 @@ class ProvidentiaOffline:
                 # skip individual plots if we have no data for a specific label
                 if 'individual' in plot_options:
                     if data_labels not in self.selected_station_data_labels[networkspeci]:
-                        print(f'Warning: {plot_type} cannot be created because there is no available data.')
+                        msg = f'{plot_type} cannot be created because there is no available data.'
+                        show_message(self, msg)
                         return plot_indices
 
                 if type(data_labels) != list:

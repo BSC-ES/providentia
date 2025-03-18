@@ -92,7 +92,7 @@ class DataFilter:
 
                     # get filter conditions
                     if ':' in upper_limit and ':' in lower_limit:
-                        print('Upper and lower bounds are :, no data filter will be applied for {0}'.format(filter_networkspeci))
+                        self.read_instance.logger.info('Upper and lower bounds are :, no data filter will be applied for {0}'.format(filter_networkspeci))
                         return
                     if ':' in upper_limit:
                         if '=' in lower_limit:
@@ -728,7 +728,7 @@ class DataFilter:
                             list(self.read_instance.experiments.values()).index(data_label)]
                         if exp_label not in self.read_instance.calibration_factor:
                             msg = f"No calibration factor applied to experiment {exp_label}."
-                            print(msg)
+                            self.read_instance.logger.info(msg)
                             continue
                         calibration_factor = self.read_instance.calibration_factor[exp_label]
                     else:
@@ -740,7 +740,7 @@ class DataFilter:
                     
                     msg = 'Applying calibration factor: '
                     msg += '{0} in {1} experiment'.format(calibration_factor, data_label)
-                    print(msg)
+                    self.read_instance.logger.info(msg)
                     
                     # apply calibration factor
                     if calibration_factor.count('*') == 1 and calibration_factor[0] == '*':
@@ -757,4 +757,5 @@ class DataFilter:
                             float(calibration_factor)
                     else:
                         error = f"Error: Invalid format '{calibration_factor}' in calibration factor. Accepted formats are: '+num', '-num', '*num', or '/num'."
-                        sys.exit(error)
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)

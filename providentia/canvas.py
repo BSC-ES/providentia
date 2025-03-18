@@ -111,7 +111,8 @@ class MPLCanvas(FigureCanvas):
             if plot_type not in self.all_plots:
                 error = "Error: Plot type {0} is not an option. ".format(plot_type)
                 error += "The available plots are: {0}.".format(self.all_plots[2:])
-                sys.exit(error)
+                self.read_instance.logger.error(error)
+                sys.exit(1)
 
         # initialize layout positions
         self.read_instance.position_1 = 'map'
@@ -907,13 +908,13 @@ class MPLCanvas(FigureCanvas):
                     if plot_type in ['fairmode-target', 'fairmode-statsummary']:
                         speci = self.read_instance.networkspeci.split('|')[1]
                         if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
-                            msg = f'Warning: Fairmode target plot cannot be created for {speci}.'
+                            msg = f'Fairmode target plot cannot be created for {speci}.'
                             show_message(self.read_instance, msg)
                             self.read_instance.handle_layout_update('None', sender=plot_type_position)
                             continue
                         if ((speci in ['sconco3', 'sconcno2'] and self.read_instance.resolution != 'hourly') 
                             or (speci in ['pm10', 'pm2p5'] and (self.read_instance.resolution not in ['hourly', 'daily']))):
-                            msg = 'Warning: Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
+                            msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
                             show_message(self.read_instance, msg)
                             self.read_instance.handle_layout_update('None', sender=plot_type_position)
                             continue
@@ -921,16 +922,12 @@ class MPLCanvas(FigureCanvas):
                     # update plot
                     self.update_associated_active_dashboard_plot(plot_type)
 
-                    #print('{}: {}'.format(plot_type, time.time()-plot_start))
-
                 # un-hide plotting axes
                 self.top_right_canvas_cover.hide() 
                 self.lower_canvas_cover.hide()
 
             # update map plot options
             self.update_plot_options(plot_types=['map'])
-
-            #print('TOTAL CANVAS UPDATE: {}'.format(time.time()-start))
 
     def update_experiment_domain_edges(self):
         """ Function that plots grid domain edges of experiments in memory. """
