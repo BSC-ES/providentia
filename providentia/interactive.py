@@ -31,6 +31,7 @@ from .read_aux import (generate_file_trees, get_lower_resolutions,
                        get_valid_experiments, get_valid_obs_files_in_date_range)
 from .statistics import (calculate_statistic, generate_colourbar, generate_colourbar_detail, 
                          get_fairmode_data, get_selected_station_data, get_z_statistic_info)
+from .warnings_prv import show_message
 from .writing import export_configuration, export_data_npz, export_netcdf
 
 from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
@@ -112,7 +113,7 @@ class Interactive:
         # read data
         self.read()  
         if self.invalid_read:
-            print('No valid data to read')
+            self.logger.info('No valid data to read')
             return
 
         # filter
@@ -124,7 +125,7 @@ class Interactive:
     def read(self):
         """ Wrapper method to read data. """
 
-        print('Reading data')
+        self.logger.info('Reading data')
 
         # read data
         self.datareader.read_setup(['reset'])
@@ -132,7 +133,7 @@ class Interactive:
     def filter(self):
         """ Wrapper method to filter data. """
 
-        print('Filtering data')
+        self.logger.info('Filtering data')
 
         # filter data
         DataFilter(self)
@@ -147,7 +148,7 @@ class Interactive:
         :type initialise: boolean, optional
         """
 
-        print(f'Resetting filter for {self.subsection}')
+        self.logger.info(f'Resetting filter for {self.subsection}')
    
         # initialise structures to store fields        
         init_representativity(self)
@@ -342,18 +343,18 @@ class Interactive:
 
                 # show warning if it is not
                 if chunk_resolution not in available_timeseries_chunk_resolutions:
-                    msg = f'Warning: {plot_type} cannot be created because {chunk_resolution} '
+                    msg = f'{plot_type} cannot be created because {chunk_resolution} '
                     msg += 'is not an available chunking resolution.'
                     if len(available_timeseries_chunk_resolutions) > 0:
                         msg += f'The available resolutions are: {available_timeseries_chunk_resolutions}'
-                    print(msg)
+                    show_message(self, msg)
                     return
 
                 # show warning if chunk stat is NStations and mode is not Temporal|Spatial
                 if chunk_stat == 'NStations' and self.statistic_mode != 'Temporal|Spatial':
-                    msg = f'Warning: {plot_type} cannot be created because {chunk_stat} '
+                    msg = f'{plot_type} cannot be created because {chunk_stat} '
                     msg += 'it is only available when Temporal|Spatial mode is active.'
-                    print(msg)
+                    show_message(self, msg)
                     return
                     
         # get zstat information 
@@ -361,49 +362,53 @@ class Interactive:
 
         # if only 1 label passed for map plot, and stat is a bias statistic then throw error
         if (base_plot_type == 'map') & (z_statistic_sign == 'bias') & (labelb == ''):
-            print("Warning: Plotting a bias statistic, and only 1 label is set. Not making plot.")
+            msg = "Plotting a bias statistic, and only 1 label is set. Not making plot."
+            show_message(self, msg)
             return
         
         # if bias and threshold plots are in plot options throw error
         if ('bias' in plot_options) & ('threshold' in plot_options):
-            print("Warning: Cannot make a bias plot showing threshold lines. Not making plot.")
+            msg = "Cannot make a bias plot showing threshold lines. Not making plot."
+            show_message(self, msg)
             return
 
         # do not make plot if hidedata is active but smooth is not in plot options
         if (base_plot_type == 'timeseries') and ('hidedata' in plot_options) and ('smooth' not in plot_options):
-            msg = f"Warning: Cannot make {plot_type} because 'hidedata' plot option is set for "
+            msg = f"Cannot make {plot_type} because 'hidedata' plot option is set for "
             msg += "timeseries plot, but 'smooth' is not active. Not making plot."
-            print(msg)
+            show_message(self, msg)
             return
         
         # do not make plot if hidedata is active but regression is not in plot options
         if (base_plot_type == 'scatter') and ('hidedata' in plot_options) and ('regression' not in plot_options):
-            msg = f"Warning: Cannot make {plot_type} because 'hidedata' plot option is set for "
+            msg = f"Cannot make {plot_type} because 'hidedata' plot option is set for "
             msg += "scatter lot, but 'regression' is not active. Not making plot."
-            print(msg)
+            show_message(self, msg)
             return
         
         # do not make Taylor diagram if statistic is not r or r2
         if (base_plot_type == 'taylor') and (zstat not in ['r', 'r2']):
-            msg = f"Warning: Cannot make {plot_type} because statistic is not available or defined. "
+            msg = f"Cannot make {plot_type} because statistic is not available or defined. "
             msg += "Choose between 'taylor-r' or 'taylor-r2'. Not making plot."
-            print(msg)
+            show_message(self, msg)
             return
         
         # do not make FAIRMODE target plot if species not in list or resolution not hourly
         if base_plot_type in ['fairmode-target','fairmode-statsummary']:
             if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
-                print(f'Warning: Fairmode target plot cannot be created for {speci}.')
+                msg = f'Fairmode target plot cannot be created for {speci}.'
+                show_message(self, msg)
                 return
             if ((speci in ['sconco3', 'sconcno2'] and self.resolution != 'hourly') 
                 or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
-                print('Warning: Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).')
+                msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
+                show_message(self, msg)
                 return
             
             # skip making plot if there is no valid data
             data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
             if not any(valid_station_idxs):
-                print(f'No data after filtering by coverage for {speci}.')
+                self.logger.info(f'No data after filtering by coverage for {speci}.')
                 return
 
         # get data labels for plot
@@ -414,10 +419,12 @@ class Interactive:
             invalid_data_labels = [data_label for data_label in data_labels if data_label not in self.data_labels]
             data_labels = [data_label for data_label in data_labels if data_label in self.data_labels]
             if len(data_labels) == 0:
-                print("Warning: None of the passed data labels are available. Not making plot.")
+                msg = "None of the passed data labels are available. Not making plot."
+                show_message(self, msg)
                 return
             elif len(invalid_data_labels) > 0:
-                print("Warning: Passed data labels {} are not available.".format(invalid_data_labels))
+                msg = "Passed data labels {} are not available.".format(invalid_data_labels)
+                show_message(self, msg)
 
         # set plot characteristics
         self.plot_characteristics = dict()
@@ -441,7 +448,8 @@ class Interactive:
         if (width is not None) and (height is not None):
             fig = plt.figure(figsize=(width, height))
         else:
-            print("Warning: Width and/or height have not been passed. The default values will be set.")
+            msg = "Width and/or height have not been passed. The default values will be set."
+            show_message(self, msg)
             fig = plt.figure(figsize=self.plot_characteristics[plot_type]['figsize'])
 
         # create axes
@@ -505,7 +513,8 @@ class Interactive:
         else:
             networkspecies = [networkspeci]
             if len(self.networkspecies) > 1:
-                print("Warning: More than 1 network or species defined, can only plot for 1 pair. Taking {}.".format(networkspeci))
+                msg = "More than 1 network or species defined, can only plot for 1 pair. Taking {}.".format(networkspeci)
+                show_message(self, msg)
             
         # legend plot (on its own axis)
         if base_plot_type == 'legend':
@@ -518,7 +527,8 @@ class Interactive:
             # if no specific labels defined then take first data label and give warning
             if (labela == '') & (labelb == ''):
                 labela = data_labels[0]
-                print("Warning: No specific data labels set, plotting first available data label: {}.".format(labela))
+                msg = "No specific data labels set, plotting first available data label: {}.".format(labela)
+                show_message(self, msg)
             # labelb defined but labela for some reason, set labela to be labelb, and labelb empty str 
             elif (labela == ''):
                 labela = copy.deepcopy(labelb)
@@ -698,7 +708,7 @@ class Interactive:
             current_station_name = self.station_names[networkspeci][station_ind]
             current_station_reference = self.station_references[networkspeci][station_ind]
         elif n_stations == 0:
-            print('No valid stations for {} in {} subsection. Not making {} plot'.format(networkspeci, self.subsection, plot_type))
+            self.logger.info('No valid stations for {} in {} subsection. Not making {} plot'.format(networkspeci, self.subsection, plot_type))
             return
         
         # set xlabel / ylabel
@@ -822,15 +832,18 @@ class Interactive:
                         try:
                             ax_to_plot = self.plot_characteristics[plot_type]['legend']['handles']['ax']
                         except:
-                            print("Warning: axis to plot legend on not defined for plot type in plot_characteristics.yaml, or passed via 'format' argument.\nTaking first available axis.")
+                            msg = "axis to plot legend on not defined for plot type in plot_characteristics.yaml, or passed via 'format' argument.\nTaking first available axis."
+                            show_message(self, msg)
                             ax_to_plot = self.relevant_temporal_resolutions[0]
                         if ax_to_plot not in self.relevant_temporal_resolutions:
-                            print("Warning: defined axis to plot legend on not available for data resolution of read data.\nInstead, taking first available axis.")
+                            msg = "defined axis to plot legend on not available for data resolution of read data.\nInstead, taking first available axis."
+                            show_message(self, msg)
                             ax_to_plot = self.relevant_temporal_resolutions[0]
                         relevant_ax[ax_to_plot].legend(**legend_handles)
                     else:
                         if base_plot_type == 'fairmode-target':
-                            print("Warning: Data labels legend cannot be plotted, create single legend using make_plot function.")
+                            msg = "Data labels legend cannot be plotted, create single legend using make_plot function."
+                            show_message(self, msg)
                         elif base_plot_type == 'fairmode-statsummary':
                             relevant_ax[3].legend(**legend_handles)
                         else:
@@ -850,7 +863,7 @@ class Interactive:
                 figure_fname = join(PROVIDENTIA_ROOT, 'plots/{}.png'.format(plot_type))
             else:
                 figure_fname = copy.deepcopy(save)
-            print('Saving {} figure to {}'.format(plot_type, figure_fname))
+            self.logger.info('Saving {} figure to {}'.format(plot_type, figure_fname))
             # save figure
             plt.savefig(figure_fname, bbox_inches='tight')
             return None
@@ -903,7 +916,8 @@ class Interactive:
         elif 'legend' in self.plot_characteristics[plot_type]:
             legend_characteristics = self.plot_characteristics[plot_type]['legend']
         else:
-            print("Warning: 'legend' not defined for plot type in plot_characteristics.yaml")
+            msg = "'legend' not defined for plot type in plot_characteristics.yaml"
+            show_message(self, msg)
             return
 
         legend_handles = self.plot.make_legend_handles(legend_characteristics, data_labels=data_labels, set_obs=set_obs)
@@ -928,7 +942,8 @@ class Interactive:
         # if no specific labels defined then take first data label and give warning
         if (labela == '') & (labelb == ''):
             labela = self.data_labels[0]
-            print("Warning: No specific data labels set, plotting first available data label: {}.".format(labela))
+            msg = "No specific data labels set, plotting first available data label: {}.".format(labela)
+            show_message(self, msg)
         # labelb defined but labela for some reason, set labela to be labelb, and labelb empty str 
         elif (labela == ''):
             labela = copy.deepcopy(labelb)
@@ -939,13 +954,15 @@ class Interactive:
 
         # if only 1 label passed and stat is a bias statistic then throw error
         if (z_statistic_sign == 'bias') & (labelb == ''):
-              print("Warning: Calculating a bias statistic, and only 1 label is set. Cannot calculate statistic.")
+              msg = "Calculating a bias statistic, and only 1 label is set. Cannot calculate statistic."
+              show_message(self, msg)
               return
 
         # get networkspeci to calculate for
         networkspeci = self.networkspecies[0]
         if len(self.networkspecies) > 1:
-            print("Warning: More than 1 network or species defined, can only calculate for 1. Taking {}.".format(networkspeci))
+            msg = "More than 1 network or species defined, can only calculate for 1. Taking {}.".format(networkspeci)
+            show_message(self, msg)
 
         if per_station:
             stat = calculate_statistic(self, self, networkspeci, stat, [labela], [labelb], per_station=True)
@@ -980,11 +997,11 @@ class Interactive:
                 self.from_conf = True
             else:
                 error = 'Error: The path to the configuration file passed as an argument does not exist.'
-                print(error)
+                self.logger.info(error)
                 return False
         else:
             error = "Error: The configuration file must be given as an argument: e.g. 'config=...'"
-            print(error)
+            self.logger.info(error)
             return False
 
         # parse section
@@ -995,7 +1012,7 @@ class Interactive:
         #check if configuration file has a section title
         if len(self.sections) == 0:
             error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
-            print(error)
+            self.logger.info(error)
             return False
     
         have_section = False
@@ -1004,11 +1021,13 @@ class Interactive:
             if self.section in self.sections:
                 have_section = True
             else:
-                print("Warning: Defined section {} does not exist in configuration file.".format(self.section))
+                msg = "Defined section {} does not exist in configuration file.".format(self.section)
+                show_message(self, msg)
         if not have_section:
             self.section = self.sections[0]
             if len(self.sections) > 1:
-                print("Warning: Taking first defined section ({}) to be read.".format(self.section))
+                msg = "Taking first defined section ({}) to be read.".format(self.section)
+                show_message(self, msg)
 
         # update self with section variables (if not overwritten by kwargs)
         self.section_opts = self.sub_opts[self.section]
@@ -1036,14 +1055,16 @@ class Interactive:
             elif self.subsection == self.section:
                 have_subsection = True
             else:
-                print("Warning: Defined subsection {} does not exist in configuration file.".format(self.subsection))
+                msg = "Defined subsection {} does not exist in configuration file.".format(self.subsection)
+                show_message(self, msg)
 
         if len(self.subsections) > 0:
             if not have_subsection:
                 self.subsection = self.subsections[0]
                 have_subsection = True
                 if len(self.subsections) > 1:
-                    print("Warning: Taking first defined subsection ({}) to be read.".format(self.subsection))
+                    msg = "Taking first defined subsection ({}) to be read.".format(self.subsection)
+                    show_message(self, msg)
         else:
             self.subsections = [self.section]
             self.subsection = self.subsections[0]
@@ -1085,11 +1106,12 @@ class Interactive:
 
         # check file exists
         if not os.path.isfile(conf):
-            print("Warning: The passed .conf file: '{}' does not exist.".format(conf))
+            msg = "The passed .conf file: '{}' does not exist.".format(conf)
+            show_message(self, msg)
         # otherwise, print conf
         else:
             with open(conf, "r") as f:
-                print(f.read())
+                self.logger.info(f.read())
 
     def select_station(self, station):
         """ Wrapper method to select specific station/s.
@@ -1144,7 +1166,8 @@ class Interactive:
             if limit is not None:
                 self.representativity_menu['rangeboxes']['current_lower'][field_index] = limit
             else:
-                print("Warning: When filtering by representativity field: {}, 'limit' must be passed as an argument.".format(field)) 
+                msg = "When filtering by representativity field: {}, 'limit' must be passed as an argument.".format(field)
+                show_message(self, msg)
                 return
 
         # field is a period field?
@@ -1153,7 +1176,8 @@ class Interactive:
 
             # if neither keep or remove are defined, filtering cannot be done
             if (keep is None) and (remove is None): 
-                print("Warning: When filtering by a period field, 'keep' or 'remove' must be passed as arguments.")
+                msg = "When filtering by a period field, 'keep' or 'remove' must be passed as arguments."
+                show_message(self, msg)
                 return
 
             if keep is not None:
@@ -1177,7 +1201,8 @@ class Interactive:
 
                     # if neither lower or upper are defined, filtering cannot be done
                     if (lower is None) and (upper is None): 
-                        print("Warning: When filtering by a numeric metadata field, 'lower' or 'upper' must be passed as arguments.")
+                        msg = "When filtering by a numeric metadata field, 'lower' or 'upper' must be passed as arguments."
+                        show_message(self, msg)
                         return
 
                     field_index = self.metadata_menu[menu_type]['rangeboxes']['labels'].index(field)
@@ -1194,7 +1219,8 @@ class Interactive:
 
                     # if neither keep or remove are defined, filtering cannot be done
                     if (keep is None) and (remove is None): 
-                        print("Warning: When filtering by a text period field, 'keep' or 'remove' must be passed as arguments.")
+                        msg = "When filtering by a text period field, 'keep' or 'remove' must be passed as arguments."
+                        show_message(self, msg)
                         return
 
                     if keep is not None:
@@ -1216,7 +1242,8 @@ class Interactive:
             self.filter()
         # otherwise set warning that field was not found
         else:
-            print('Warning: {} not available for filtering.'.format(field)) 
+            msg = '{} not available for filtering.'.format(field)
+            show_message(self, msg)
         
     def save(self, fname='', format='nc'):
         """ Wrapper method to save current data/ metadata in memory.
@@ -1244,7 +1271,7 @@ class Interactive:
             fname = '{}.npz'.format(fname)
             export_data_npz(self, fname)
 
-        print('Data saved to {}'.format(fname))
+        self.logger.info('Data saved to {}'.format(fname))
 
     def get_data(self, format='nc'):
         """ Wrapper method return data / metadata in specific format.
@@ -1299,7 +1326,8 @@ class Interactive:
 
         # if variable is undefined then print warning
         if var == '':
-            print("Warning: Variable to read is undefined.")
+            msg = "Variable to read is undefined."
+            show_message(self, msg)
             return 
         else:
             data = self.get_data(format='nc')
@@ -1310,7 +1338,8 @@ class Interactive:
                     if test_var in data.variables.keys():
                         var_data = data[test_var][:]
                         return var_data
-                print("Warning: Variable '{}' is not defined".format(var))
+                msg = "Variable '{}' is not defined".format(var)
+                show_message(self, msg)
             else:
                 var_data = data[var][:]
                 return var_data
