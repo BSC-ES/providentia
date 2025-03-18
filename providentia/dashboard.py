@@ -77,7 +77,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
-        provconf = ProvConfiguration(self, **kwargs)
+        self.provconf = ProvConfiguration(self, **kwargs)
 
         # update variables from config file (if available)
         self.from_conf = False
@@ -146,10 +146,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # update variables from defined config file
         if self.current_config:
             for k, val in self.current_config.items():
-                setattr(self, k, provconf.parse_parameter(k, val))
+                setattr(self, k, self.provconf.parse_parameter(k, val))
 
         # now all variables have been parsed, check validity of those, throwing errors where necessary
-        provconf.check_validity()
+        self.provconf.check_validity()
 
         # get operating system specific formatting
         if self.operating_system == 'Mac':
@@ -737,6 +737,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         else:
             self.disable_ghost_buttons()
 
+        # ensure that QA defaults have been updated if network has changed (i.e. to or from ACTRIS)
+        setattr(self, 'qa', self.provconf.parse_parameter('qa', self.qa))
+        self.qa_menu['checkboxes']['remove_selected'] = self.qa
+        
         # update resolution field
         available_resolutions = list(self.available_observation_data[self.selected_network].keys())
         # set order of available resolutions
@@ -1310,6 +1314,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.experiments = {exp:self.previous_experiments[exp] if exp in self.previous_experiments else exp 
                             for exp in self.experiments_menu['checkboxes']['keep_selected']}
         self.qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_selected'])
+        print(self.qa)
         self.qa_per_species[self.selected_species] = copy.deepcopy(self.qa)
         self.flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
