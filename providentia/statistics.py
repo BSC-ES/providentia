@@ -820,7 +820,8 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
                 else:
                     error = f"Error: colourmap ({cmap_var_name}) is not defined for {speci}. "
                     error += f"{cmap_var_name} can be set as a string per statistic (for all species), or as a dict (per species)."
-                    sys.exit(error)
+                    read_instance.logger.error(error)
+                    sys.exit(1) 
             else:
                 z_colourmap = stats_dict[cmap_var_name]
     #3. check configuration file
@@ -833,7 +834,8 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     if not set_cmap:
         error = f"Error: colourmap ({cmap_var_name}) for the colourbar needs to be defined, either in the "
         error += "configuration files for the map, or per statistic in 'basic_stats.yaml' or 'experiment_bias_stats.yaml'."
-        sys.exit(error)
+        read_instance.logger.error(error)
+        sys.exit(1) 
 
     # check if have defined vmin (in this order: 1. specific for z statistic 2. specific for species 3. configuration file)
     # if have no defined vmin, then take vmin as minimum range value of calculated statistic
@@ -950,7 +952,8 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     if not set_n_ticks:
         error = 'Error: The number of ticks (n_ticks) in the colorbar need to be defined, either in the '
         error += 'configuration files for the map or per statistic.'
-        sys.exit(error)
+        read_instance.logger.error(error)
+        sys.exit(1) 
 
     return z_vmin, z_vmax, z_label, z_colourmap, n_discrete, n_ticks
 
@@ -1178,7 +1181,8 @@ def aggregation(data_array, statistic_aggregation, axis=0):
     else:
         error = 'Aggregation statistic {0} is not available. '.format(statistic_aggregation)
         error += 'The options are: Mean, Median, p1, p5, p10, p25, p75, p90, p95 and p99'
-        sys.exit(error)
+        read_instance.logger.error(error)
+        sys.exit(1) 
 
     return aggregated_data
 
