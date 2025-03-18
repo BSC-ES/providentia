@@ -78,6 +78,7 @@
   "interp_chunk_size": 16,
   "interp_job_array_limit": 100,
   "interp_multiprocessing": False,
+  "logfile": False,
   "fixed_section_vars":
     [
       "ghost_version",
