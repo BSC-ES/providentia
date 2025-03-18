@@ -871,7 +871,7 @@ class SubmitInterpolation(object):
         # avoid having to kill other processes locally
         if (self.machine == 'local') and (self.n_cpus == self.available_cpus):  
             n_cpus = max(1, int(self.n_cpus * 0.50))
-            msg = f'Warning: Using {n_cpus} out of {self.n_cpus} available CPUs to'
+            msg = f'Using {n_cpus} out of {self.n_cpus} available CPUs to'
             msg += ' ensure that other processes keep running. \nIf you encounter any problems'
             msg += ' consider reducing the number of CPUS by defining n_cpus \nin your'
             msg += ' configuration file (e.g. n_cpus = 2).'
