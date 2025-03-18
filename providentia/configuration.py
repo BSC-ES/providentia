@@ -294,7 +294,7 @@ class ProvConfiguration:
             from GHOST_standards import providentia_defaults
             from GHOST_standards import actris_defaults
             
-            if self.read_instance.network == 'actris/actris':
+            if self.read_instance.network == ['actris/actris']:
                 defaults = actris_defaults
             else:
                 defaults = providentia_defaults
@@ -309,16 +309,20 @@ class ProvConfiguration:
             if value is not None:
                 # if conf has only 1 QA
                 if isinstance(value, int):
-                    return [value]
+                    value = [value]
                 # empty string
                 elif value == "":
-                    return []
+                    value = []
                 # if the QAs are written with their names
                 elif isinstance(value, str):
-                    return sorted([self.read_instance.standard_QA_name_to_QA_code[q.strip()] for q in value.split(",")])
+                    value = sorted([self.read_instance.standard_QA_name_to_QA_code[q.strip()] for q in value.split(",")])
                 # list of integer codes
                 else:
-                    return sorted(list(value))
+                    value = sorted(list(value))
+                # if we have an ACTRIS network, keep only qa that can be applied
+                if self.read_instance.network == ['actris/actris']:
+                    value = [val for val in value if val in [6, 7]]
+                return value
             # otherwise, set default QA per species (set later)
             else:
                 # set qa to be empty dict (to be later filled)
@@ -330,7 +334,7 @@ class ProvConfiguration:
             from GHOST_standards import providentia_defaults
             from GHOST_standards import actris_defaults
 
-            if self.read_instance.network == 'actris/actris':
+            if self.read_instance.network == ['actris/actris']:
                 defaults = actris_defaults
             else:
                 defaults = providentia_defaults
