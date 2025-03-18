@@ -280,7 +280,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
             echo "Loading dependencies..."
             eval "${load_command}"
-            jobid=$(eval "sbatch ${account_option} ${queue_option} bin/experiment_interpolation_submit_mn5.sh $OTHEROPTS | awk '{print \$4}'")
+            jobid=$(eval "sbatch ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
             echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
 
         else
@@ -325,7 +325,7 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
             echo "Loading dependencies..."
             eval "${load_command}"
-            jobid=$(eval "sbatch ${account_option} ${queue_option} bin/experiment_interpolation_submit.sh $OTHEROPTS | awk '{print \$4}'")
+            jobid=$(eval "sbatch ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
             echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
 
     else
@@ -370,6 +370,68 @@ elif [ "${ip}" == "84.88.185.48" ]; then
 
     else
         eval "${python_command}"
+    fi
+
+# Nord4
+elif [ "${BSC_MACHINE}" == "nord4" ]; then
+    echo "INFO: Running on ${BSC_MACHINE}..."
+
+    # load modules from conda environment
+    active_env=false
+    module load ANACONDA/5.0.1
+    eval "$(conda shell.bash hook)"
+    conda config --set env_prompt '($(basename {default_env})) '
+    if ! { conda config --show-sources | grep '/gpfs/projects/bsc32/repository/apps/conda_envs/'; } >/dev/null 2>&1; then
+        conda config --append envs_dirs /gpfs/projects/bsc32/repository/apps/conda_envs/
+    fi
+    if { conda env list | grep 'providentia-env_v2.4.0'; } >/dev/null 2>&1; then 
+        echo "Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v2.4.0..."
+        conda activate providentia-env_v2.4.0
+        active_env=true
+    else 
+        echo "Environment not found in /gpfs/projects/bsc32/repository/apps/conda_envs/"
+    fi
+
+    if $active_env; then
+        if $notebook; then
+            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+            echo "Starting jupyter session."
+            echo "Check 'notebook.out' for information on how to connect to session."
+            
+            if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+                eval "${notebook_alloc_command} ${account_option} ${queue_option} bin/notebook.sh"
+            else
+                eval "${notebook_alloc_command} ${account_option} ${constraint_option} ${queue_option} bin/notebook.sh"
+            fi
+
+        elif $debug; then
+            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+            echo "Entering debug mode"
+            if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+                eval "${salloc_command} ${account_option} ${queue_option}"
+            else
+                eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option}"
+            fi
+        
+        elif $interpolation; then
+            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+            echo "Loading dependencies..."
+            eval "${load_command}"
+            jobid=$(eval "sbatch ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
+            echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
+
+        else
+            if $debugexec; then
+                eval "srun ${account_option} ${python_command}"
+            else
+                echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+                    eval "${salloc_command} ${account_option} ${queue_option} srun ${python_command}"
+                else
+                    eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun ${python_command}"
+                fi
+            fi
+        fi
     fi
 
 # Local machines (Workstations, dust02 machine and personal laptops)
