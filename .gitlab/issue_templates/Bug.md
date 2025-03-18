@@ -21,7 +21,7 @@
 
 ## Machine
 
-(Tell us in which machine you are running Providentia (mn5, nord3v2, etc.))
+(Tell us in which machine you are running Providentia (mn5, nord4, local, etc.))
 
 ## Error logs
 
