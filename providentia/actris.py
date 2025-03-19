@@ -261,6 +261,7 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
     elif resolution == 'daily':
         frequency = 'D'
         timedelta = np.timedelta64(12, 'h') 
+    # TODO: Review this
     elif resolution == 'monthly':
         frequency = 'MS'
         timedelta = np.timedelta64(15, 'D')
@@ -293,6 +294,7 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
 
         data_dict = {}
         measurement_time_pairs = [(t - timedelta, t + timedelta) for t in station_ds.time.values]
+        
         for i, (measurement_start_date, measurement_end_date) in enumerate(measurement_time_pairs):
             data = station_ds.isel(time=i)
             var_data = data[var].values
@@ -468,13 +470,12 @@ def get_files_info(files, var, path):
             ds = xr.open_dataset(file)
         except:
             continue
-
-        # check statistics
+        
+        # get statistics
         if 'ebas_statistics' in ds.attrs:
-            if ds.attrs['ebas_statistics'] != 'arithmetic mean':
-                continue
+            file_statistics = ds.attrs['ebas_statistics']
         else:
-            continue
+            file_statistics = 'Unknown'
 
         # get resolution
         coverage = ds.time_coverage_resolution
@@ -486,11 +487,16 @@ def get_files_info(files, var, path):
         file_start_date = ds.time_coverage_start
         file_end_date = ds.time_coverage_end
         file_variables = list(ds.data_vars.keys())
+        file_reference = ds.attrs['ebas_station_code']
+
+        # save in dict
         files_info[file] = {}
         files_info[file]['resolution'] = file_resolution
         files_info[file]['start_date'] = file_start_date
         files_info[file]['end_date'] = file_end_date
         files_info[file]['variables'] = file_variables
+        files_info[file]['statistics'] = file_statistics
+        files_info[file]['station_reference'] = file_reference
 
     # create file
     datasets = {
@@ -669,11 +675,6 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
             # not found -> nan
             else:
                 metadata[resolution][ghost_key].append(np.nan)
-
-        # if metadata[resolution]['station_reference'][-1] == 'CH0002R':
-        #     print(file)
-        #     print(da_var.sel(time=slice(datetime.datetime(2018, 1, 23),
-        #           datetime.datetime(2018, 1, 24))).time.values)
 
         # remove all attributes except units
         da_var.attrs = {key: value for key,
