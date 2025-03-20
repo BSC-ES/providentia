@@ -576,6 +576,7 @@
                   "columnspacing": 1,
                   "ncol": 4,
                   "fontsize": 10.0,
+                  "frameon": false
                 },
               "handles": { "markersize": 10 },
             },
