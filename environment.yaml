@@ -2,10 +2,11 @@ name: providentia-env
 channels:
   - conda-forge
 dependencies:
-  - python==3.9.16
+  - python==3.11.5
   - anaconda
   - cartopy
   - jupyterlab
+  - ghostscript
   - pip
   - pip:
     - -r requirements.txt
