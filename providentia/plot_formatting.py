@@ -6,6 +6,7 @@ from PIL import Image
 
 import cartopy
 import cartopy.feature as cfeature
+from datetime import datetime
 import matplotlib
 import matplotlib as mpl 
 import matplotlib.pyplot as plt
@@ -86,6 +87,48 @@ def set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type):
 
     return None
 
+def get_first_days_of_month(start_date, end_date):
+    first_days = []
+
+    # start with the next month if the date doesn't start with 1
+    if start_date.day != 1:
+            next_month = start_date.month + 1 if start_date.month < 12 else 1
+            next_year = start_date.year if start_date.month < 12 else start_date.year + 1
+            current = datetime(next_year, next_month, 1)
+    else: 
+        current = start_date
+    
+    # iterate until getting all months in between
+    while current <= end_date:
+        first_days.append(current)
+        next_month = current.month + 1 if current.month < 12 else 1
+        next_year = current.year if current.month < 12 else current.year + 1
+        current = datetime(next_year, next_month, 1)
+
+    return first_days
+
+def divide_list(lst, n):    
+    # calculate size of the date separation
+    chunk_size = len(lst) // n
+    remainder = len(lst) % n
+
+    # if there are less month than number of slices + 1, get as many as months
+    if chunk_size == 0:
+        n = len(lst)
+    
+    slices = []
+    start = 0
+    
+    # for all the slices, distribute the dates
+    for i in range(n - 1):
+        end = start + chunk_size + (1 if i < remainder else 0)
+        slices.append(lst[start])
+        start = end
+    
+    # get the last element of the list if last_step is true
+    slices.append(lst[start])
+    
+    return slices
 
 def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, base_plot_type, plot_characteristics, 
                                plot_options, xlim=None, ylim=None, relim=False, autoscale=False, autoscale_x=False, 
@@ -349,22 +392,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             steps = pd.date_range(left, right, freq=read_instance.active_frequency_code)
 
             # get number of months and days
-            n_months = (12*(right.year - left.year) + (right.month - left.month))
             n_days = (right - left).days
-
-            # get months that are complete
-            months_start = pd.date_range(left, right, freq='MS')
-            if Version(matplotlib.__version__) < Version("3.9"):
-                months_end = pd.date_range(left, right, freq='M')
-            else:
-                months_end = pd.date_range(left, right, freq='ME')
-            if months_start.size > 1:
-                if (right - months_end[-1]).days >= 1:
-                    months = months_start[:-1]
-                else:
-                    months = months_start
-            else:
-                months = months_start
 
             # show hours if number of days is less than 7
             if n_days < 7:
@@ -372,26 +400,30 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             else:
                 ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d'))
 
-            # define time slices
-            if n_months >= 3:
-                steps = months
-            slices = int(np.ceil(len(steps) / int(plot_characteristics['xtick_alteration']['n_slices'])))
+            # get number of slices
+            n_slices = plot_characteristics['xtick_alteration']['n_slices']
 
-            # use default axes if the number of timesteps is lower than the number of slices
-            if slices >= 1:
-                xticks = steps[0::slices]
-            else:
-                xticks = ax.xaxis.get_ticks()
+            # get number of necessary numbers in the x-axis to get the slices
+            n_x_ticks = n_slices + 1
+
+            # get list of the first days of the months
+            months = get_first_days_of_month(left, right)
+
+            # get the first days of the month (and maybe first and/or last day) for the xticks
+            xticks = divide_list(months, n_x_ticks)
+
+            # add first day if option first_step is True
+            if plot_characteristics['xtick_alteration']['first_step']:
+                xticks.insert(0, left)
+
+            if plot_characteristics['xtick_alteration']['last_step']:
+                xticks.append(right)
 
             # transform to numpy.datetime64
             if not isinstance(xticks[0], np.datetime64):
-                xticks = [x.to_datetime64() for x in xticks]
+                xticks = [np.datetime64(x) for x in xticks]
             if not isinstance(right, np.datetime64):
                 right = np.datetime64(right)
-
-            # add last step to xticks
-            if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != right):
-                xticks = np.append(xticks, right)
 
             # set modified xticks
             for ax in relevant_axs_active:
