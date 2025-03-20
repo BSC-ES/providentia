@@ -479,8 +479,8 @@ class MPLCanvas(FigureCanvas):
             elif len(self.read_instance.data_labels) == 1:
                 invalid = True
             if invalid:
-                msg = 'Load experiments before activating the temporal colocation'
-                show_message(self.read_instance, msg)
+                # msg = 'Load experiments before activating the temporal colocation'
+                # show_message(self.read_instance, msg)
                 self.read_instance.temporal_colocation = False
                 self.read_instance.block_MPL_canvas_updates = True
                 self.read_instance.ch_colocate.setCheckState(QtCore.Qt.Unchecked)
