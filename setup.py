@@ -7,6 +7,7 @@ REQUIREMENTS = {
     'install': [
         'jupyterlab',
         'cartopy',
+        'ghostscript',
         'matplotlib==3.9.1',
         'netCDF4==1.6.5',
         'numpy==1.26.4',
