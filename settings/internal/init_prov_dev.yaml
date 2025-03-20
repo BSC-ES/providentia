@@ -43,7 +43,7 @@
   "subtract_qa": null,
   "add_flags": null,
   "subtract_flags": null,
-  "temporal_colocation": False,
+  "temporal_colocation": True,
   "spatial_colocation": True,
   "spatial_colocation_tolerance": 19.053,
   "spatial_colocation_station_reference": True,
