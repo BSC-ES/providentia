@@ -602,8 +602,11 @@ class SubmitInterpolation(object):
                 str_to_write = str_to_write.replace(ch,'\{}'.format(ch))
         
             # write arguments str to current file
-            arguments_file.write('python -u {}/interpolation/experiment_interpolation.py {}\n'.format(self.working_directory, 
-                                                                                        str_to_write))
+            command = 'python -u {}/interpolation/experiment_interpolation.py {}\n'.format(self.working_directory, 
+                                                                                           str_to_write)
+            if self.machine == 'nord4':
+                command = 'nord3_singu_es {}'.format(command)
+            arguments_file.write(command)
 
             # iterate n lines written    
             n_lines_written += 1
@@ -860,6 +863,8 @@ class SubmitInterpolation(object):
     
     def run_command(self, commands):
         arguments_list = commands.strip().split()
+        if self.machine == 'nord4':
+            arguments_list.insert(0, 'nord3_singu_es')
         result = subprocess.run(arguments_list, capture_output=True, text=True)
         if result.returncode != 0:
             error = result.stderr
