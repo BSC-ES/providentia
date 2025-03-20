@@ -8,6 +8,14 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
     module load hdf5/1.14.4.2 netcdf/c-4.9.2_hdf5-1.14.4.2 pnetcdf/1.12.3 libexpat udunits 
     module load nco/5.2.4
 
+# Nord4
+elif [ "${BSC_MACHINE}" = "nord4" ]; then
+    module load intel/2021.4 impi/2017.4
+    module load greasy/2.2.4
+    module load mkl/2017.4 netcdf/4.4.1.1 udunits/2.2.28 gsl/2.7
+    module load nco/5.2.8
+    module load singularity
+
 # Nord3v2
 elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then 
     module use /gpfs/projects/bsc32/software/suselinux/11/modules/all
