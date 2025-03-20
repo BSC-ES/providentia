@@ -185,7 +185,7 @@ class ProvArgumentParser(object):
                                      help="remove extreme stations using defined statistic limits")
             self.parser.add_argument("--report_type",
                                      dest="report_type",
-                                     help="define ")
+                                     help="define plot options")
             self.parser.add_argument("--report_summary",
                                      dest="report_summary",
                                      help="activate summary plots in offline report")
