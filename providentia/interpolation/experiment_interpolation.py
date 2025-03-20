@@ -1143,7 +1143,7 @@ class ExperimentInterpolation(object):
 
                 # give 770 permissions for file and make owner bsc32
                 set_file_permissions_ownership(esarchive_netCDF_fname)
-            except PermissionError as e:
+            except (PermissionError, FileNotFoundError) as e:
                 self.log_file_str += 'Interpolated file/s could not be copied to esarchive. Error: {}'.format(e)
                 create_output_logfile(1, self.log_file_str)
 
