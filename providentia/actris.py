@@ -191,20 +191,6 @@ def get_standard_flags_and_qa(flags, ghost_version):
     return np.array(standard_flags, dtype=np.float32), np.array(qa, dtype=np.float32)
 
 
-def get_flag_validities(pair_flags, ghost_version):
-
-    sys.path.insert(1, join(
-        PROVIDENTIA_ROOT, 'providentia/dependencies/GHOST_standards/{}'.format(ghost_version)))
-    from GHOST_standards import standard_data_flag_name_to_data_flag_code
-
-    network_vfunc = np.vectorize(lambda flag: np.nan if np.isnan(
-        flag) else flags_dict[str(int(flag))]["network_decreed_validity"][0], otypes=['O'])
-    GHOST_vfunc = np.vectorize(lambda flag: np.nan if np.isnan(
-        flag) else flags_dict[str(int(flag))]["GHOST_decreed_validity"][0], otypes=['O'])
-
-    return network_vfunc(pair_flags), GHOST_vfunc(pair_flags)
-
-
 def create_time_pairs(time):
 
     time_pairs = list(zip(time[:-1], time[1:]))
@@ -214,21 +200,40 @@ def create_time_pairs(time):
     return time_pairs
 
 
-def check_overlap(measurement_start_date, measurement_end_date, standard_time_pairs):
+def check_overlap(station_ds, var, standard_start_date, standard_end_date, measurement_time_pairs):
+
     overlap_durations = []
-    overlap_start_dates = []
-    overlap_end_dates = []
-    for i, (standard_start_date, standard_end_date) in enumerate(standard_time_pairs):
+    overlap_var_data = []
+    overlap_flag_data = []
+
+    for i, (measurement_start_date, measurement_end_date) in enumerate(measurement_time_pairs):
         overlap_start = max(measurement_start_date, standard_start_date)
         overlap_end = min(measurement_end_date, standard_end_date)
-        if overlap_start < overlap_end:
-            overlap_duration = pd.Timedelta(
-                overlap_end - overlap_start).total_seconds() / 60
-            overlap_durations.append(overlap_duration)
-            overlap_start_dates.append(standard_start_date)
-            overlap_end_dates.append(standard_end_date)
 
-    return overlap_durations, overlap_start_dates, overlap_end_dates
+        # Detect and save overlap
+        if overlap_start < overlap_end:
+            overlap_duration = np.array(pd.Timedelta(
+                overlap_end - overlap_start).total_seconds() / 60)
+            data = station_ds.sel(time=slice(
+                measurement_start_date, measurement_end_date))
+
+            # get values at 0 to remove time dimension (always 1)
+            var_data = data[var].values[0]
+            flag_data = data['flag'].values[0]
+
+            overlap_durations.append(overlap_duration)
+            overlap_var_data.append(var_data)
+            overlap_flag_data.append(flag_data)
+
+        # If there is no overlap and there have already been overlaps, go to next period
+        elif len(overlap_durations) > 0:
+            break
+
+    overlap_durations = np.array(overlap_durations)
+    overlap_var_data = np.array(overlap_var_data)
+    overlap_flag_data = np.array(overlap_flag_data)
+
+    return overlap_durations, overlap_var_data, overlap_flag_data
 
 
 def temporally_average_data(combined_ds_list, resolution, var, ghost_version, target_start_date, target_end_date):
@@ -257,10 +262,10 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
         timedelta = np.timedelta64(30, 'm')
     elif resolution == '3hourly':
         frequency = '3h'
-        timedelta = np.timedelta64(90, 'm') 
+        timedelta = np.timedelta64(90, 'm')
     elif resolution == 'daily':
         frequency = 'D'
-        timedelta = np.timedelta64(12, 'h') 
+        timedelta = np.timedelta64(12, 'h')
     # TODO: Review this
     elif resolution == 'monthly':
         frequency = 'MS'
@@ -277,6 +282,13 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
     averaged_qa_data = np.empty(
         (len(combined_ds_list), len(standard_time), 2), dtype=np.float32)
 
+    # define vectorize function to get GHOST_decreed_validity by overlap flags later
+    vfunc = np.vectorize(
+        lambda flag: np.nan if np.isnan(flag) else flags_dict[str(
+            int(flag))]["GHOST_decreed_validity"][0],
+        otypes=['O']
+    )
+
     # create pairs of valid dates
     standard_time_pairs = create_time_pairs(standard_time)
 
@@ -292,60 +304,31 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
         # remove station selection
         station_ds = station_ds.isel(station=0)
 
-        data_dict = {}
-        measurement_time_pairs = [(t - timedelta, t + timedelta) for t in station_ds.time.values]
-        
-        for i, (measurement_start_date, measurement_end_date) in enumerate(measurement_time_pairs):
-            data = station_ds.isel(time=i)
-            var_data = data[var].values
-            flag_data = data['flag'].values
-            network_decreed_validities, GHOST_decreed_validities = get_flag_validities(
-                flag_data, ghost_version)
-            overlap_durations, overlap_start_dates, overlap_end_dates = check_overlap(measurement_start_date,
-                                                                                      measurement_end_date,
-                                                                                      standard_time_pairs)
-            for start, end, duration in zip(overlap_start_dates, overlap_end_dates, overlap_durations):
-                key = (start, end)
-                if key not in data_dict:
-                    data_dict[key] = []
-                data_dict[key].append({
-                    "duration": duration,
-                    var: var_data,
-                    "flag": flag_data,
-                    "network_decreed_validities": network_decreed_validities,
-                    "GHOST_decreed_validities": GHOST_decreed_validities})
+        measurement_time_pairs = [(t - timedelta, t + timedelta)
+                                  for t in station_ds.time.values]
+        for i, (standard_start_date, standard_end_date) in enumerate(standard_time_pairs):
+            overlap_durations, overlap_var_data, overlap_flag_data = check_overlap(station_ds, var,
+                                                                                   standard_start_date,
+                                                                                   standard_end_date,
+                                                                                   measurement_time_pairs)
 
-        for standard_start_date, standard_end_date in standard_time_pairs:
-            # check if standard dates were found in file
-            if (standard_start_date, standard_end_date) in data_dict:
-                entries = data_dict[(standard_start_date, standard_end_date)]
-                durations = []
-                values = []
-                flags = []
-                if len(entries) > 1:
-                    # get invalid values in period
-                    GHOST_invalid = [
-                        'I' in entry['GHOST_decreed_validities'] for entry in entries]
-                    # if there are invalid values in period but some of them are valid
+            if len(overlap_var_data) > 0:
+                if len(overlap_var_data) > 1:
+                    GHOST_decreed_validities = vfunc(overlap_flag_data)
+                    GHOST_invalid = np.any(
+                        GHOST_decreed_validities == 'I', axis=1)
+                    # if there are invalid values in period but some of them are valid, convert invalid ones to nan
                     if np.any(GHOST_invalid) and not np.all(GHOST_invalid):
-                        for entry in entries:
-                            # make invalid values and flags nan
-                            if 'I' in entry['GHOST_decreed_validities']:
-                                entry[var] = np.array(np.nan)
-                                entry["flag"] = [np.nan]*len(entry["flag"])
-
-                # store durations and values
-                for entry in entries:
-                    durations.append(entry["duration"])
-                    values.append(entry[var])
-                    flags.append(entry['flag'])
-                durations = np.array(durations)
-                values = np.array(values)
+                        for i in range(len(overlap_var_data)):
+                            if GHOST_invalid[i]:
+                                overlap_var_data[i] = np.array(np.nan)
+                                overlap_flag_data[i, :] = np.array(
+                                    [np.nan]*overlap_flag_data.shape[1])
 
                 # remove nan
-                valid_mask = ~np.isnan(values)
-                valid_durations = durations[valid_mask]
-                valid_values = values[valid_mask]
+                valid_mask = ~np.isnan(overlap_var_data)
+                valid_durations = overlap_durations[valid_mask]
+                valid_values = overlap_var_data[valid_mask]
 
                 # get weighted average if there is more than one value
                 if len(valid_values) > 1:
@@ -359,12 +342,10 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
                 station_averaged_data.append(mean)
 
                 # get unique flag values and convert to standard flag names (instead of EBAS) and qa
-                flags = np.unique(flags)
+                flags = np.unique(overlap_flag_data)
                 valid_flags = flags[~np.isnan(flags)]
                 standard_flag_codes, qa = get_standard_flags_and_qa(
                     valid_flags, ghost_version)
-
-                # print(start, end, valid_values, valid_durations, mean, standard_flag_codes, qa)
 
                 # save flags and qa
                 station_flag_data.append(
@@ -470,7 +451,7 @@ def get_files_info(files, var, path):
             ds = xr.open_dataset(file)
         except:
             continue
-        
+
         # get statistics
         if 'ebas_statistics' in ds.attrs:
             file_statistics = ds.attrs['ebas_statistics']
@@ -566,7 +547,7 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
         except:
             errors[file] = 'Error opening file'
             continue
-        
+
         # remove time duplicates if any (keep first)
         ds = ds.sel(time=~ds['time'].to_index().duplicated())
 
