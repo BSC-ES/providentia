@@ -164,10 +164,12 @@ class SubmitInterpolation(object):
                     else: 
                         break
                 
-                msg += f"The experiment '{experiment_to_process}' is in none of the experiment paths in {self.exp_to_interp_root} are available in this machine ({self.machine}). "
-
             # if local machine or if not exp_dir, get directory from data_paths
             if exp_dir is None: 
+                
+                if self.machine != "local":
+                    msg += f"The experiment '{experiment_to_process}' is in none of the experiment paths defined in settings/interp_experiments.yaml."
+
                 exp_to_interp_path = join(self.exp_to_interp_root, experiment_to_process)
                 if os.path.exists(exp_to_interp_path):
                     exp_dir = exp_to_interp_path
@@ -600,8 +602,11 @@ class SubmitInterpolation(object):
                 str_to_write = str_to_write.replace(ch,'\{}'.format(ch))
         
             # write arguments str to current file
-            arguments_file.write('python -u {}/interpolation/experiment_interpolation.py {}\n'.format(self.working_directory, 
-                                                                                        str_to_write))
+            command = 'python -u {}/interpolation/experiment_interpolation.py {}\n'.format(self.working_directory, 
+                                                                                           str_to_write)
+            if self.machine == 'nord4':
+                command = 'nord3_singu_es {}'.format(command)
+            arguments_file.write(command)
 
             # iterate n lines written    
             n_lines_written += 1
@@ -672,7 +677,7 @@ class SubmitInterpolation(object):
         submit_file.write("#SBATCH --qos={}\n".format(self.qos))
         # submit_file.write("#SBATCH --output=/dev/null\n") # decomment when debugging
         # submit_file.write("#SBATCH --error=/dev/null\n")
-        if self.machine == 'mn5': # TODO when checking if debug works check this
+        if self.machine in ['mn5', 'nord4']: # TODO when checking if debug works check this
             submit_file.write("#SBATCH --account=bsc32\n")  
             submit_file.write("#SBATCH --ntasks-per-node={}\n".format(n_simultaneous_tasks))
             submit_file.write("#SBATCH --cpus-per-task=1\n")
@@ -787,7 +792,7 @@ class SubmitInterpolation(object):
             n_jobs_in_queue = len(squeue_status.split('\n')[:-1])
             # if number of jobs in queue > 0, then sleep for 10
             # seconds and then check again how many jobs there are in queue
-            if (self.machine in ('nord3v2', 'amd', 'mn5')) and (n_jobs_in_queue > 0):
+            if (self.machine in ('nord3v2', 'amd', 'mn5', 'nord4')) and (n_jobs_in_queue > 0):
                 time.sleep(10)
                 continue
             elif self.machine == 'nord3':
@@ -858,6 +863,8 @@ class SubmitInterpolation(object):
     
     def run_command(self, commands):
         arguments_list = commands.strip().split()
+        if self.machine == 'nord4':
+            arguments_list.insert(0, 'nord3_singu_es')
         result = subprocess.run(arguments_list, capture_output=True, text=True)
         if result.returncode != 0:
             error = result.stderr
