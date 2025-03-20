@@ -1126,7 +1126,7 @@ class ExperimentInterpolation(object):
             set_file_permissions_ownership(netCDF_fname)
 
         # copy file to esarchive (if have access)
-        if MACHINE == 'nord3v2':
+        if MACHINE in ['nord3v2', 'nord4']:
             
             # set esarchive output dir
             esarchive_output_dir = '/esarchive/recon/prov_interp/{}'.format('/'.join(netCDF_fname.split('/exp_interp/')[1].split('/')[:-1]))
@@ -1137,11 +1137,15 @@ class ExperimentInterpolation(object):
             # set esarchive fname
             esarchive_netCDF_fname = '{}/{}'.format(esarchive_output_dir, netCDF_fname.split('/')[-1])
             
-            # copy file (without permissions)
-            shutil.copyfile(netCDF_fname, esarchive_netCDF_fname)
+            try:
+                # copy file (without permissions)
+                shutil.copyfile(netCDF_fname, esarchive_netCDF_fname)
 
-            # give 770 permissions for file and make owner bsc32
-            set_file_permissions_ownership(esarchive_netCDF_fname)
+                # give 770 permissions for file and make owner bsc32
+                set_file_permissions_ownership(esarchive_netCDF_fname)
+            except (PermissionError, FileNotFoundError) as e:
+                self.log_file_str += 'Interpolated file/s could not be copied to esarchive. Error: {}'.format(e)
+                create_output_logfile(1, self.log_file_str)
 
 def create_output_logfile(process_code, log_file_str):
     """ Create a logfile for stating outcome of interpolation job'
