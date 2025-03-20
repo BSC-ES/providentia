@@ -2,6 +2,7 @@
 # Before using pip install -r requirements.txt, we need to install cartopy and jupyterlab usind conda:
 # conda install -c conda-forge cartopy
 # conda install -c conda-forge jupyterlab
+# conda install -c conda-forge ghostscript
 
 matplotlib==3.9.1
 netCDF4==1.6.5
