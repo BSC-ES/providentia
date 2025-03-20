@@ -8,7 +8,7 @@
 #SBATCH --qos=gp_bsces
 
 # load modules from conda environment
-module load anaconda
+module load Miniconda3/23.9.0-0
 eval "$(conda shell.bash hook)"
 conda config --set env_prompt '($(basename {default_env})) '
 if ! { conda config --show-sources | grep '/gpfs/projects/bsc32/repository/apps/conda_envs/'; } >/dev/null 2>&1; then
