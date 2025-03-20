@@ -378,7 +378,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
 
     # load modules from conda environment
     active_env=false
-    module load ANACONDA/5.0.1
+    module load Miniconda3/23.9.0-0
     eval "$(conda shell.bash hook)"
     conda config --set env_prompt '($(basename {default_env})) '
     if ! { conda config --show-sources | grep '/gpfs/projects/bsc32/repository/apps/conda_envs/'; } >/dev/null 2>&1; then
@@ -426,9 +426,9 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
             else
                 echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
                 if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
-                    eval "${salloc_command} ${account_option} ${queue_option} srun ${python_command}"
+                    eval "${salloc_command} ${account_option} ${queue_option} srun nord3_singu_es ${python_command}"
                 else
-                    eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun ${python_command}"
+                    eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun nord3_singu_es ${python_command}"
                 fi
             fi
         fi
