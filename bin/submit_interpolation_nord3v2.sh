@@ -7,4 +7,4 @@
 
 JOB_ID="--slurm_job_id=$SLURM_JOB_ID"
 
-srun --output=logs/interpolation/management_logs/$SLURM_JOB_ID.out python -u -c "from providentia.main import main; main()" $@ $JOB_ID
+srun --output=logs/interpolation/management_logs/$SLURM_JOB_ID.out nord3_singu_es python -u -c "from providentia.main import main; main()" $@ $JOB_ID
