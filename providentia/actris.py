@@ -142,10 +142,10 @@ def get_files_path(var):
     alpha_var = ''.join(x for x in var if x.isalpha())
     if alpha_var in ['lsco', 'absco', 'lbsco', 'odaero']:
         path = join(PROVIDENTIA_ROOT, 'settings', 'internal',
-                    'actris', f'files/{alpha_var}/files.yaml')
+                    'actris', f'files/{alpha_var}.yaml')
     else:
         path = join(PROVIDENTIA_ROOT, 'settings', 'internal',
-                    'actris', f'files/{var}/files.yaml')
+                    'actris', f'files/{var}.yaml')
 
     return path
 
