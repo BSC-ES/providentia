@@ -1,0 +1,120 @@
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/24/YQ/Y5/24YQ-Y5MZ.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2017-01-01T00:00:00 UTC
+  station_reference: NO0059G
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - mercury_GEM
+  - mercury_GEM_qc
+  - mercury_GEM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5W/EA/JE/5WEA-JE2K.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2022-02-08T16:00:00 UTC
+  station_reference: NO0073U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - mercury_GEM
+  - mercury_GEM_qc
+  - mercury_GEM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6X/E8/9M/6XE8-9MMD.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2006-01-01T00:00:00 UTC
+  station_reference: NO0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - mercury_GEM
+  - mercury_GEM_qc
+  - mercury_GEM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/72/QH/ZV/72QH-ZV2T.nc:
+  end_date: 2017-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2007-02-11T19:00:00 UTC
+  station_reference: NO0058G
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - mercury_GEM
+  - mercury_GEM_qc
+  - mercury_GEM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AU/8P/46/AU8P-462A.nc:
+  end_date: 2023-12-31T21:00:00 UTC
+  resolution: 3hourly
+  start_date: 2012-01-01T00:10:00 UTC
+  station_reference: GB0048R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - mercury_GEM
+  - mercury_GEM_qc
+  - mercury_GEM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/G3/PF/54/G3PF-542S.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2011-01-01T00:00:00 UTC
+  station_reference: NO0002R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - mercury_GEM
+  - mercury_GEM_qc
+  - mercury_GEM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GT/KB/VA/GTKB-VAUN.nc:
+  end_date: 2023-07-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2000-01-01T00:00:00 UTC
+  station_reference: DK0010G
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - mercury_GEM
+  - mercury_GEM_qc
+  - mercury_GEM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SC/JY/28/SCJY-286S.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2000-02-08T09:00:00 UTC
+  station_reference: NO0042G
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - mercury_GEM
+  - mercury_GEM_qc
+  - mercury_GEM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WM/KP/PH/WMKP-PHHQ.nc:
+  end_date: 2009-07-01T08:00:00 UTC
+  resolution: hourly
+  start_date: 2007-03-23T16:00:00 UTC
+  station_reference: NO0382R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - mercury_GEM
+  - mercury_GEM_qc
+  - mercury_GEM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z7/FD/ZY/Z7FD-ZYWM.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2004-03-08T16:00:00 UTC
+  station_reference: NO0090R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - mercury_GEM
+  - mercury_GEM_qc
+  - mercury_GEM_ebasmetadata
