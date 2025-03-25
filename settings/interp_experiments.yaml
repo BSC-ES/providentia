@@ -7,7 +7,7 @@
                         "a4vd", "a560", "a55u", "a4j1", "a4k2", "a4ej", "a4o1", "a4p1", "a4gy", "a4s2", "a5ec", "a57s", "a592", "a5e9", 
                         "a5fm", "a5fn", "a5ft", "a5g2", "a5ff", "a5gg", "a5gh", "a5gi", "a5gf", "a4vk", "a0yh", "a5c3", "a5nt", 
                         "a6pr", "a7bn", "a7bo", "a7bp", "a7by", "a7bz", "a2in", "a4xf", "a6gn", "a7ej3", "a00g_cirrus", "a00g_cirrus2", 
-                        "a00c_cirrus2", "a00f_cirrus2", "a00c_cirrus", "a823"],
+                        "a00c_cirrus2", "a00f_cirrus2", "a00c_cirrus", "a823", "a005_cirrus"],
         "paths": [
             "/esarchive/exp/monarch/"
         ]
@@ -66,4 +66,19 @@
             "/example/experiment/path"
         ]
     },
+    "cams2_82_nrt": {
+        "experiments": ["osuite", "osuite_24_48", "osuite_48_72", "osuite_72_96", "osuite_96_120",
+                        "cntrl", "cntrl_24_48", "cntrl_48_72", "cntrl_72_96", "cntrl_96_120",
+                        "sdswas", "sdswas_24_48", "sdswas_48_72",
+                        "icap", "icap_24_48", "icap_48_72", "icap_72_96", "icap_96_120"],
+        "paths": [
+            "/esarchive/exp/CAMS2_82/"
+        ]
+    },
+    "cams2_82_rean": {
+        "experiments": ["rean", "rean_cntrl"],
+        "paths": [
+            "/esarchive/exp/CAMS2_82/rean/"
+        ]
+    }
 }
