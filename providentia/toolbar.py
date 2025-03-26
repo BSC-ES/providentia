@@ -1,6 +1,7 @@
 """ Navigation toolbar and buttons/options functions"""
 
 import configparser
+import copy
 from enum import Enum
 import os
 import traceback
@@ -15,6 +16,7 @@ from .configuration import load_conf
 from .dashboard_elements import InputDialog
 from .dashboard_interactivity import LassoSelector
 from .fields_menus import metadata_conf, multispecies_conf, period_conf, representativity_conf
+from .plot_formatting import harmonise_xy_lims_paradigm
 from .read_aux import generate_file_trees
 from .warnings_prv import show_message
 from .writing import export_configuration, export_data_npz, export_netcdf
@@ -125,9 +127,23 @@ class NavigationToolbar(NavigationToolbar2QT):
                     msg = 'There was an error saving the file.'
                     self.read_instance.logger.info(e)
                     show_message(self.read_instance, msg)
+    
+    def release_zoom(self, event):
+        """ Method inherited from release_zoom that controls
+            the release in zoom.
+        """
+
+        super().release_zoom(event)
+        
+        # harmonize axis for the timeseries plot
+        plot_type = "timeseries"
+        if event.inaxes == self.canvas_instance.plot_axes[plot_type]:
+            plot_options = copy.deepcopy(self.canvas_instance.current_plot_options[plot_type])
+            harmonise_xy_lims_paradigm(self.canvas_instance, self.read_instance, self.canvas_instance.plot_axes[plot_type], plot_type, 
+                                    self.canvas_instance.plot_characteristics[plot_type], plot_options, relim=True, autoscale=False)
 
     def save_figure(self):
-        """ Method inherited from qt save_figure that controls
+        """ Method inherited from save_figure that controls
             the image creation.
         """
         if self.read_instance.le_minimum_value.text() == '' and self.read_instance.le_minimum_value.text() == '':
