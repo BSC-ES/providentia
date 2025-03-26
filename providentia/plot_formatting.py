@@ -6,8 +6,8 @@ from PIL import Image
 
 import cartopy
 import cartopy.feature as cfeature
-from datetime import datetime
-import matplotlib
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 import matplotlib as mpl 
 import matplotlib.pyplot as plt
 from matplotlib.dates import num2date
@@ -107,7 +107,33 @@ def get_first_days_of_month(start_date, end_date):
 
     return first_days
 
-def divide_list(lst, n):    
+def timeseries_get_xtick_dates(start_date, end_date, n_x_ticks):
+    end_date = end_date.replace(tzinfo=None)
+    
+    # get all months that have the first days in them
+    if start_date.day != 1:
+        next_month = start_date.month + 1 if start_date.month < 12 else 1
+        next_year = start_date.year if start_date.month < 12 else start_date.year + 1
+        current = datetime(next_year, next_month, 1)
+    else: 
+        current = start_date
+    
+    first_days = []
+    while current <= end_date:
+        first_days.append(current)
+        current += relativedelta(months=1)
+
+    # if there are no first days of the month get all the possible days
+    if len(first_days) < n_x_ticks:
+        first_days = []
+        current = start_date
+        while current <= end_date:
+            first_days.append(current)
+            current += timedelta(days=1)
+
+    return first_days
+
+def timeseries_select_evenly_spaced_xticks(lst, n):    
     # calculate size of the date separation
     chunk_size = len(lst) // n
     remainder = len(lst) % n
@@ -388,8 +414,22 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                 left = xlim[0]
                 right = xlim[1]
 
-            # get steps for all data labels
-            steps = pd.date_range(left, right, freq=read_instance.active_frequency_code)
+
+            # get number of necessary numbers in the x-axis to get the slices
+            n_x_ticks = plot_characteristics['xtick_alteration']['n_slices']
+
+            # get list of the possible dates to show
+            possible_dates = timeseries_get_xtick_dates(left, right, n_x_ticks)
+
+            # divide the possible dates on equal slices
+            xticks = timeseries_select_evenly_spaced_xticks(possible_dates, n_x_ticks)
+
+            # add first day if option first_step is True
+            if plot_characteristics['xtick_alteration']['first_step']:
+                xticks.insert(0, left)
+
+            if plot_characteristics['xtick_alteration']['last_step']:
+                xticks.append(right)
 
             # get number of months and days
             n_days = (right - left).days
@@ -399,25 +439,6 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                 ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d %H:%M'))
             else:
                 ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d'))
-
-            # get number of slices
-            n_slices = plot_characteristics['xtick_alteration']['n_slices']
-
-            # get number of necessary numbers in the x-axis to get the slices
-            n_x_ticks = n_slices + 1
-
-            # get list of the first days of the months
-            months = get_first_days_of_month(left, right)
-
-            # get the first days of the month (and maybe first and/or last day) for the xticks
-            xticks = divide_list(months, n_x_ticks)
-
-            # add first day if option first_step is True
-            if plot_characteristics['xtick_alteration']['first_step']:
-                xticks.insert(0, left)
-
-            if plot_characteristics['xtick_alteration']['last_step']:
-                xticks.append(right)
 
             # transform to numpy.datetime64
             if not isinstance(xticks[0], np.datetime64):
