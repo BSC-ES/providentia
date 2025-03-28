@@ -8,7 +8,8 @@ import json
 import scipy
 import yaml
 
-import matplotlib as mpl
+from matplotlib import transforms
+from matplotlib.colors import cnames
 from matplotlib.projections import PolarAxes
 import mpl_toolkits.axisartist.floating_axes as fa
 import mpl_toolkits.axisartist.grid_finder as gf
@@ -407,7 +408,7 @@ def merge_cells(table, cells):
     trans = (tpos[-1] - tpos[0])/2
 
     # didn't had to check for ha because I only want ha='center'
-    txts[0].set_transform(mpl.transforms.Affine2D().translate(*trans))
+    txts[0].set_transform(transforms.Affine2D().translate(*trans))
     for txt in txts[1:]:
         txt.set_visible(False)
 
@@ -645,3 +646,17 @@ def reorder_pdf_pages(read_instance, input_pdf, output_pdf, summary_multispecies
     read_instance.logger.info(f'Writing {output_pdf}')
     with open(output_pdf, "wb") as outputStream:
         output_pdf_file.write(outputStream)
+
+def get_hex_code(colour):
+    """ Convert from colour name or RGB decimal to hexadecimal code"""
+    
+    # convert from colour name to hex code
+    if type(colour) == str:
+        if colour[0] != '#':
+            hex_colour = cnames[colour]
+    # convert from rgb colour (as decimal) to hex code
+    elif type(colour) == tuple:
+        rgb_colour = tuple(round(255*x) for x in colour)
+        hex_colour = f'#{int(round(rgb_colour[0])):02x}{int(round(rgb_colour[1])):02x}{int(round(rgb_colour[2])):02x}'
+
+    return hex_colour

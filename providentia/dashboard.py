@@ -42,12 +42,9 @@ from .warnings_prv import show_message
 
 from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 
-# set proper scaling
-os.environ["QT_ENABLE_HIGHDPI_SCALING"]   = "1"
-os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
-os.environ["QT_SCALE_FACTOR"]             = "1"
+# set font DPI for uniform dashboard appearance across systems
 os.environ["QT_FONT_DPI"] = "96"
-QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+# enable high DPI pixmaps
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
@@ -234,7 +231,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         canvas_width = self.mpl_canvas.frameGeometry().width()
         canvas_height = self.mpl_canvas.frameGeometry().height()
         header_height = full_window_height - canvas_height
-        
+
         if plot_types == 'ALL':
             plot_types = [self.position_1, self.position_2, self.position_3, self.position_4, self.position_5]
             show_buttons = False
@@ -1597,6 +1594,18 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 def main(**kwargs):
     """ Main function. """
     
+    if sys.platform.startswith('darwin'):
+        # Set app name, if PyObjC is installed
+        # Python 2 has PyObjC preinstalled
+        # Python 3: pip3 install pyobjc-framework-Cocoa
+        from Foundation import NSBundle
+        bundle = NSBundle.mainBundle()
+        if bundle:
+            app_name = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+            app_info = bundle.localizedInfoDictionary() or bundle.infoDictionary()
+            if app_info:       
+                app_info['CFBundleName'] = app_name
+
     # pause briefly to allow QT modules time to correctly initilise
     time.sleep(0.1)
 
@@ -1630,6 +1639,12 @@ def main(**kwargs):
     p.setColor(QtGui.QPalette.Shadow, QtGui.QColor(*dcp['Shadow']))
     p.setColor(QtGui.QPalette.Text, QtGui.QColor(*dcp['Text']))
     q_app.setPalette(p)
+    
+    q_app.setWindowIcon(QtGui.QIcon(join(PROVIDENTIA_ROOT, 'assets/logo.icns')))
+    q_app.setApplicationName("Providentia")
+    q_app.setApplicationDisplayName("Providentia")
+    q_app.setDesktopFileName("Providentia")
+
 
     # open Providentia
     ProvidentiaMainWindow(**kwargs)
