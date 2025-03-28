@@ -153,7 +153,11 @@ if [[ "${OS}" =~ "Windows" ]] ; then
     python_ver="3"
 fi
 
-python_command="python$python_ver -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
+#ln -s /Users/denebowdalo/anaconda3/envs/providentia-env_2.4.0/bin/python3 Provi
+
+#python_command="python$python_ver -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
+
+python_command="./Provi -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
 
 # use clean mode and exit
 if [[ $PARSED =~ "--clean" ]]; then
