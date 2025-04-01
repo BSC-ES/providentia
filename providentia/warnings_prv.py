@@ -1,10 +1,10 @@
 """ Warning functions """
-def show_message(read_instance, msg, from_conf=None, deactivate=False):
+def show_message(read_instance, msg, from_conf=None, deactivate=False, print=False):
     # variable used to control when the warnings don't need to be shown
     if deactivate:
         return
 
-    if (read_instance.offline) or (read_instance.interactive) or (read_instance.interpolation) or (read_instance.download):
+    if (read_instance.offline) or (read_instance.interactive) or (read_instance.interpolation) or (read_instance.download) or print:
        read_instance.logger.warning('Warning: ' + msg)
     
     else:
