@@ -1719,14 +1719,6 @@ providentia_defaults = {
 "Systematic Inconsistent Monthly Distributions - 8/12 Months >= Zone 6"]
 }
 
-actris_defaults = {
-"flag": [],
-
-"qa_standard": ["Invalid Data Provider Flags - GHOST Decreed"],
-
-"qa_non_negative": ["Invalid Data Provider Flags - GHOST Decreed"]
-}
-
 ###--------------------------------------------------------------------------------------------------###
 ###DEFINE METADATA WARNING MODIFICATION FIELDS 
 ###--------------------------------------------------------------------------------------------------###
