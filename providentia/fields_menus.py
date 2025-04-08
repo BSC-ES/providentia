@@ -45,11 +45,37 @@ def init_qa(instance):
         instance.qa_menu['select_buttons'] = ['all', 'clear', 'default']
     
     # reset fields
-    instance.qa_menu['checkboxes']['labels'] = np.array(sorted(instance.standard_QA_name_to_QA_code, 
-                                                               key=instance.standard_QA_name_to_QA_code.get))
+    if instance.network == ['actris/actris']:
+        qa_labels = {'Invalid Data Provider Flags - GHOST Decreed': 6, 
+                     'Invalid Data Provider Flags - Network Decreed': 7}
+    else:
+        qa_labels = instance.standard_QA_name_to_QA_code
+
+    qa_key = qa_labels.get
+    qa_map_vars = qa_labels.values()
+    instance.qa_menu['checkboxes']['labels'] = np.array(sorted(qa_labels, 
+                                                               key=qa_key))
     instance.qa_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
     instance.qa_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
-    instance.qa_menu['checkboxes']['map_vars'] = np.sort(list(instance.standard_QA_name_to_QA_code.values()))
+    instance.qa_menu['checkboxes']['map_vars'] = np.sort(list(qa_map_vars))
+    
+
+def update_qa(instance):
+
+    # reset fields
+    if instance.selected_network == 'actris/actris':
+        qa_labels = {'Invalid Data Provider Flags - GHOST Decreed': 6, 
+                     'Invalid Data Provider Flags - Network Decreed': 7}
+    else:
+        qa_labels = instance.standard_QA_name_to_QA_code
+
+    qa_key = qa_labels.get
+    qa_map_vars = qa_labels.values()
+    instance.qa_menu['checkboxes']['labels'] = np.array(sorted(qa_labels, 
+                                                               key=qa_key))
+    instance.qa_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
+    instance.qa_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
+    instance.qa_menu['checkboxes']['map_vars'] = np.sort(list(qa_map_vars))
     
 
 def init_experiments(instance):

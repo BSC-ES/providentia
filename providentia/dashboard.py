@@ -26,7 +26,7 @@ from .configuration import ProvConfiguration
 from .dashboard_elements import ComboBox, QVLine, InputDialog
 from .dashboard_elements import set_formatting
 from .dashboard_interactivity import HoverAnnotation
-from .fields_menus import (init_experiments, init_flags, init_qa, init_metadata, init_multispecies, init_period, 
+from .fields_menus import (init_experiments, init_flags, init_qa, update_qa, init_metadata, init_multispecies, init_period, 
                            init_representativity, metadata_conf, multispecies_conf, representativity_conf, period_conf, 
                            update_metadata_fields, update_period_fields, update_representativity_fields)
 from .plot_aux import get_taylor_diagram_ghelper
@@ -741,8 +741,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.disable_ghost_buttons()
 
         # ensure that QA defaults have been updated if network has changed (i.e. to or from ACTRIS)
-        setattr(self, 'qa', self.provconf.parse_parameter('qa', self.qa))
-        self.qa_menu['checkboxes']['remove_selected'] = self.qa
+        update_qa(self)
         
         # update resolution field
         available_resolutions = list(self.available_observation_data[self.selected_network].keys())
@@ -969,6 +968,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # changed param
             if event_source == self.cb_network:
                 self.selected_network = changed_param
+                # ensure that QA defaults have been updated if network has changed (i.e. to or from ACTRIS)
+                update_qa(self)
 
             elif event_source == self.cb_resolution:
                 self.selected_resolution = changed_param
@@ -1317,7 +1318,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         self.experiments = {exp:self.previous_experiments[exp] if exp in self.previous_experiments else exp 
                             for exp in self.experiments_menu['checkboxes']['keep_selected']}
         self.qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_selected'])
-        print(self.qa)
         self.qa_per_species[self.selected_species] = copy.deepcopy(self.qa)
         self.flags = copy.deepcopy(self.flag_menu['checkboxes']['remove_selected'])
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
