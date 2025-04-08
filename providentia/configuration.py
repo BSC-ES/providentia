@@ -298,10 +298,13 @@ class ProvConfiguration:
             # parse qa
 
             from GHOST_standards import providentia_defaults
-            from GHOST_standards import actris_defaults
             
             if self.read_instance.network == ['actris/actris']:
-                defaults = actris_defaults
+                defaults = {
+                    "flag": [],
+                    "qa_standard": ["Invalid Data Provider Flags - GHOST Decreed"],
+                    "qa_non_negative": ["Invalid Data Provider Flags - GHOST Decreed"]
+                }
             else:
                 defaults = providentia_defaults
 
@@ -338,10 +341,13 @@ class ProvConfiguration:
             # parse flags
 
             from GHOST_standards import providentia_defaults
-            from GHOST_standards import actris_defaults
 
             if self.read_instance.network == ['actris/actris']:
-                defaults = actris_defaults
+                defaults = {
+                    "flag": [],
+                    "qa_standard": ["Invalid Data Provider Flags - GHOST Decreed"],
+                    "qa_non_negative": ["Invalid Data Provider Flags - GHOST Decreed"]
+                }
             else:
                 defaults = providentia_defaults
 
