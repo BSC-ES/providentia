@@ -739,9 +739,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.enable_ghost_buttons()
         else:
             self.disable_ghost_buttons()
-
-        # ensure that QA defaults have been updated if network has changed (i.e. to or from ACTRIS)
-        update_qa(self)
         
         # update resolution field
         available_resolutions = list(self.available_observation_data[self.selected_network].keys())
