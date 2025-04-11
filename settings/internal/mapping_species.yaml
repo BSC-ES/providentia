@@ -48,10 +48,15 @@ sconchf:
   - vmrhf
 sconch2s:
   - vmrh2s
-od500aerocoarse:
-  - od550ducoarse
 od550aero:
   - od550du
+od500aerocoarse:
+  - duaod550
+  - od550du
+  - od550ducoarse
+od500aero:
+  - aod550
+  - od550aero
 vconcaerobin1:
   - loaddu
 vconcaerobin2:
