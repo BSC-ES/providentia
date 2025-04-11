@@ -12,12 +12,6 @@
             "/esarchive/exp/monarch/"
         ]
     },
-    "testing": {
-        "experiments": ["cntrl"],
-        "paths": [ 
-            "/esarchive/scratch/bsc32443/testing/"
-        ]
-    },
     "nmmb-bsc-ctm": {
         "experiments": ["b007"],
         "paths": [ 
