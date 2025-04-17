@@ -1056,6 +1056,10 @@ class MPLCanvas(FigureCanvas):
             if ((self.read_instance.statistic_mode == 'Spatial|Temporal')
                 and (self.read_instance.timeseries_stat != \
                      self.read_instance.cb_statistic_aggregation.currentText())):
+                msg = f'Timeseries statistic aggregation {self.read_instance.timeseries_stat} cannot be different than '
+                msg += f'statistic aggregation {self.read_instance.cb_statistic_aggregation.currentText()} for Spatial|Temporal mode. '
+                msg += f'Changing statistic aggregation to {self.read_instance.timeseries_stat} to match timeseries statistic aggregation.'
+                show_message(self.read_instance, msg)
                 self.read_instance.cb_statistic_aggregation.setCurrentText(self.read_instance.timeseries_stat)
 
             # allow handling updates to the configuration bar again
