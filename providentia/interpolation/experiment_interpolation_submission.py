@@ -176,8 +176,6 @@ class SubmitInterpolation(object):
                 
                 msg += f"The experiment '{experiment_to_process}' is not in {self.exp_to_interp_root}."
 
-            # take first functional directory 
-            if exp_dir is None:
                 print(msg)
                 continue
 
