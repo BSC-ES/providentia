@@ -53,18 +53,19 @@ def read_netcdf_data(tuple_arguments):
     # assign arguments from tuple to variables
     relevant_file, station_references, station_names, speci,\
     observations_data_label, data_label, data_labels, reading_ghost, ghost_data_vars_to_read,\
-    metadata_dtype, metadata_vars_to_read, logger, default_qa, filter_read = tuple_arguments
+    metadata_dtype, metadata_vars_to_read, logger, default_qa, filter_read, network = tuple_arguments
 
     start = time.time()
 
     # wrap shared arrays as numpy arrays to more easily manipulate the data
     data_in_memory = np.frombuffer(shared_memory_vars['data_in_memory'], dtype=np.float32).reshape(shared_memory_vars['data_in_memory_shape'][:])
-    if (reading_ghost) & (data_label == observations_data_label): 
+    if (reading_ghost or network == 'actris/actris') & (data_label == observations_data_label): 
         qa = np.frombuffer(shared_memory_vars['qa'], dtype=np.uint8)
         flags = np.frombuffer(shared_memory_vars['flag'], dtype=np.uint8)
-        if not filter_read:
-            ghost_data_in_memory = np.frombuffer(shared_memory_vars['ghost_data_in_memory'], 
-                                                 dtype=np.float32).reshape(shared_memory_vars['ghost_data_in_memory_shape'][:])
+        if reading_ghost:
+            if not filter_read:
+                ghost_data_in_memory = np.frombuffer(shared_memory_vars['ghost_data_in_memory'], 
+                                                    dtype=np.float32).reshape(shared_memory_vars['ghost_data_in_memory_shape'][:])
     timestamp_array = np.frombuffer(shared_memory_vars['timestamp_array'], dtype=np.int64)
 
     # read netCDF frame
@@ -199,7 +200,8 @@ def read_netcdf_data(tuple_arguments):
                     ghost_data_in_memory[ghost_data_var_ii, full_array_station_indices[:, np.newaxis], 
                                         full_array_time_indices[np.newaxis, :]] = \
                         ncdf_root[ghost_data_var][current_file_station_indices, valid_file_time_indices]
-
+        
+        if (reading_ghost) or (network == 'actris/actris'):
             # if some qa flags selected then screen observations
             if qa is not None:
                 if len(qa) > 0:
