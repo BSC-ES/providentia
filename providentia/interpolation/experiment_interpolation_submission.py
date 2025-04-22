@@ -168,16 +168,16 @@ class SubmitInterpolation(object):
             if exp_dir is None: 
                 
                 if self.machine != "local":
-                    msg += f"The experiment '{experiment_to_process}' is in none of the experiment paths defined in settings/interp_experiments.yaml."
+                    msg = f"The experiment '{experiment_to_process}' is in none of the experiment paths defined in settings/interp_experiments.yaml."
+                    print(msg)
 
                 exp_to_interp_path = join(self.exp_to_interp_root, experiment_to_process)
                 if os.path.exists(exp_to_interp_path):
                     exp_dir = exp_to_interp_path
-                
-                msg += f"The experiment '{experiment_to_process}' is not in {self.exp_to_interp_root}."
-
-                print(msg)
-                continue
+                else:
+                    msg = f"The experiment '{experiment_to_process}' is not in {self.exp_to_interp_root}."
+                    print(msg)
+                    continue
 
             # get model bin edges
             r_edges, rho_bins = get_model_bin_radii(experiment_type)
