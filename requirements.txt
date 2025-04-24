@@ -5,16 +5,16 @@
 # conda install -c conda-forge ghostscript
 
 matplotlib==3.9.1
-netCDF4==1.6.5
+netCDF4==1.7.2
 numpy==1.26.4
 pandas==2.2.2
 pyproj==3.6.1
 PyQt5==5.15.11
 seaborn==0.13.2
-scipy==1.12.0
-ConfigArgParse==1.7
-cftime==1.6.3
-KDEpy==1.1.9
+scipy==1.15.2
+ConfigArgParse==1.7 
+cftime==1.6.3 
+KDEpy==1.1.12
 xarray==2024.11.0
 Sphinx==7.2.6
 Sphinx-rtd-theme==2.0.0
