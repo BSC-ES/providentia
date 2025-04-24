@@ -55,8 +55,6 @@ def read_netcdf_data(tuple_arguments):
     observations_data_label, data_label, data_labels, reading_ghost, ghost_data_vars_to_read,\
     metadata_dtype, metadata_vars_to_read, logger, default_qa, filter_read, network = tuple_arguments
 
-    start = time.time()
-
     # wrap shared arrays as numpy arrays to more easily manipulate the data
     data_in_memory = np.frombuffer(shared_memory_vars['data_in_memory'], dtype=np.float32).reshape(shared_memory_vars['data_in_memory_shape'][:])
     if (reading_ghost or network == 'actris/actris') & (data_label == observations_data_label): 
@@ -269,6 +267,11 @@ def read_netcdf_data(tuple_arguments):
                                 meta_val = np.array([''.join(val) for val in meta_val])
                             else:
                                 meta_val = chartostring(meta_val)
+                    
+                    # do str formatting (capitalization) to the country and city metadata
+                    if meta_var_nc in ['city', 'country']:
+                        meta_val = np.char.capitalize(meta_val)
+                        print(metadata_vars_to_read)
 
                 # GHOST metadata
                 else:
