@@ -271,7 +271,6 @@ def read_netcdf_data(tuple_arguments):
                     # do str formatting (capitalization) to the country and city metadata
                     if meta_var_nc in ['city', 'country']:
                         meta_val = np.char.capitalize(meta_val)
-                        print(metadata_vars_to_read)
 
                 # GHOST metadata
                 else:
