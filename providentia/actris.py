@@ -293,7 +293,7 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
     standard_time_pairs = create_time_pairs(standard_time)
 
     tqdm_iter = tqdm(combined_ds_list, bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}',
-                     desc=f"Temporally averaging data ({len(combined_ds_list)})")
+                     desc=f"Temporally averaging data")
     for station_i, station_ds in enumerate(tqdm_iter):
 
         # initialise averaged data
@@ -444,7 +444,7 @@ def get_files_info(files, var, path):
 
     files_info = {}
     tqdm_iter = tqdm(files, bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}',
-                     desc=f"Creating information file ({len(files)})")
+                     desc=f"Creating information file")
     for file in tqdm_iter:
         # open file
         try:
@@ -534,19 +534,25 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
 
     # initialise wavelength
     wavelength = None
-
+    
     errors = {}
     warnings = {}
     tqdm_iter = tqdm(
-        files, bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}', desc=f"Reading data ({len(files)})")
-    for i, file in enumerate(tqdm_iter):
+        files.items(), bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}', desc=f"Reading data")
+    for i, (station, urls) in enumerate(tqdm_iter):
 
         # open file
         try:
-            ds = xr.open_dataset(file)
+            if len(urls) == 1:
+                ds = xr.open_dataset(urls[0])
+            else:
+                ds = xr.open_mfdataset(urls, combine='nested', concat_dim='time')
+                ds = ds.sortby('time')
         except:
-            errors[file] = 'Error opening file'
+            errors[station] = 'Error opening file.'
             continue
+        
+        warnings[station] = ""
 
         # remove time duplicates if any (keep first)
         ds = ds.sel(time=~ds['time'].to_index().duplicated())
@@ -576,7 +582,7 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
         # continue to next file if variable cannot be read
         if not da_var_exists:
             errors[
-                file] = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}'
+                station] = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}.'
             continue
 
         # rename qc dimension
@@ -584,7 +590,7 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
 
         # get lowest level if tower height is in coordinates
         if 'Tower_inlet_height' in list(ds.coords):
-            warnings[file] = f'Taking data from first height (Tower_inlet_height={min(ds.Tower_inlet_height.values)})'
+            warnings[station] += f'Taking data from first height (Tower_inlet_height={min(ds.Tower_inlet_height.values)}). '
             ds = ds.sel(Tower_inlet_height=min(
                 ds.Tower_inlet_height.values), drop=True)
 
@@ -594,7 +600,7 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
             if var == 'sconcbc':
                 wavelength = 880
                 warnings[
-                    file] = f'Wavelength appears in dimensions. Selected wavelength: {wavelength}'
+                    station] += f'Wavelength appears in dimensions. Selected wavelength: {wavelength}. '
             # Get wavelength from variable name for other variables
             else:
                 wavelength = float(re.findall(r'\d+', var)[0])
@@ -615,16 +621,16 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
                     existing_wavelengths = ds.Wavelength.values
 
             if not found_wavelength:
-                warnings[file] = f'Data at {wavelength}nm could not be found. Existing wavelengths: {existing_wavelengths}'
+                warnings[station] += f'Data at {wavelength}nm could not be found. Existing wavelengths: {existing_wavelengths}. '
                 continue
 
         # remove artifact and fraction (sconcoc)
         # TODO: Discuss this
         if 'Artifact' in list(ds.coords):
-            warnings[file] = f'Taking data from first artifact dimension (Artifact={ds.Artifact.values[0]})'
+            warnings[station] += f'Taking data from first artifact dimension (Artifact={ds.Artifact.values[0]}). '
             ds = ds.isel(Artifact=0, drop=True)
         if 'Fraction' in list(ds.coords):
-            warnings[file] = f'Taking data from first fraction dimension (Fraction={ds.Fraction.values[0]})'
+            warnings[station] += f'Taking data from first fraction dimension (Fraction={ds.Fraction.values[0]}). '
             ds = ds.isel(Fraction=0, drop=True)
 
         # read variable
@@ -632,13 +638,13 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
 
         # avoid datasets that do not have defined units
         if 'ebas_unit' not in da_var.attrs:
-            errors[file] = f'No units were defined'
+            errors[station] = f'No units were defined.'
             continue
 
         # avoid datasets that do not have the same units as in variable mapping
         if da_var.attrs['ebas_unit'] != variable_mapping[actris_parameter]['units']:
-            errors[file] = f"Units {da_var.attrs['ebas_unit']} do not match those in variable mapping "
-            errors[file] += f"dictionary ({variable_mapping[actris_parameter]['units']})"
+            errors[station] = f"Units {da_var.attrs['ebas_unit']} do not match those in variable mapping "
+            errors[station] += f"dictionary ({variable_mapping[actris_parameter]['units']})."
             continue
 
         # save metadata
@@ -659,7 +665,7 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
 
         # remove all attributes except units
         da_var.attrs = {key: value for key,
-                        value in da_var.attrs.items() if key == 'ebas_unit'}
+                        value in da_var.attrs.items() if key in ['ebas_unit', 'ebas_station_code']}
 
         # read quality control data
         flag_data = ds[f'{possible_var}_qc'].transpose(
