@@ -1788,7 +1788,7 @@ class ProvidentiaDownload(object):
 
             # filter files by resolution and dates
             self.logger.info('Filtering files by resolution and dates...')
-            files = []
+            files = {}
             for file, attributes in files_info.items():
                 if attributes["resolution"] == resolution:
                     start_date = datetime.strptime(attributes["start_date"], "%Y-%m-%dT%H:%M:%S UTC")
@@ -1798,13 +1798,18 @@ class ProvidentiaDownload(object):
                         file_to_download_start_date = datetime.strptime(file_to_download_yearmonth, "%Y%m")
                         file_to_download_end_date = datetime(file_to_download_start_date.year, file_to_download_start_date.month, 1) + relativedelta(months=1, seconds=-1)
                         if file_to_download_start_date <= end_date and file_to_download_end_date >= start_date:
-                            if file not in files:
-                                files.append(file)
+                            # from filtered files, save those that are provided multiple times
+                            station = attributes["station_reference"]
+                            if station not in files:
+                                files[station] = []
+                            if file not in files[station]:
+                                files[station].append(file)
 
             if len(files) != 0:
-                    
+
                 # get data and metadata for each file within period
-                combined_ds_list, metadata, wavelength = get_data(files, var, actris_parameter, resolution, target_start_date, target_end_date)
+                combined_ds_list, metadata, wavelength = get_data(files, var, actris_parameter, resolution, 
+                                                                  target_start_date, target_end_date)
                 
                 # check if there is data after reading available files
                 if len(combined_ds_list) == 0:
