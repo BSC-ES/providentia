@@ -679,7 +679,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.selected_statistic_aggregation = copy.deepcopy(self.statistic_aggregation)
             self.selected_periodic_statistic_aggregation = copy.deepcopy(self.periodic_statistic_aggregation)
             self.selected_periodic_statistic_mode = copy.deepcopy(self.periodic_statistic_mode)
-            self.selected_timeseries_stat = copy.deepcopy(self.timeseries_statistic_aggregation)
+            self.selected_timeseries_statistic_aggregation = copy.deepcopy(self.timeseries_statistic_aggregation)
 
             # set initial filter species in widgets as empty dictionaries
             self.selected_widget_network = dict()
@@ -806,10 +806,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # update timeseries statistic field
         available_timeseries_statistics = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
         self.mpl_canvas.timeseries_stat.addItems(available_timeseries_statistics)
-        if self.selected_timeseries_stat in available_timeseries_statistics:
-            self.mpl_canvas.timeseries_stat.setCurrentText(self.selected_timeseries_stat)
+        if self.selected_timeseries_statistic_aggregation in available_timeseries_statistics:
+            self.mpl_canvas.timeseries_stat.setCurrentText(self.selected_timeseries_statistic_aggregation)
         else:
-            self.selected_timeseries_stat = self.mpl_canvas.timeseries_stat.currentText()
+            self.selected_timeseries_statistic_aggregation = self.mpl_canvas.timeseries_stat.currentText()
 
         # get available resampling resolutions
         available_resampling_resolutions = get_lower_resolutions(self.selected_resolution)
