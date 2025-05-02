@@ -61,7 +61,7 @@ def sighandler(*unused):
         if os.path.isfile(download.latest_nc_file_path):
             os.remove(download.latest_nc_file_path)
 
-    # remove the output files frojm dtrsync in case it was a download from storage5
+    # remove the output files from dtrsync in case it was a download from storage5
     if download.machine == "storage5":
         time.sleep(3)
             
