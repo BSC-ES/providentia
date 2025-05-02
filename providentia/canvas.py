@@ -391,8 +391,8 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.selected_statistic_mode = self.read_instance.cb_statistic_mode.currentText()
             self.read_instance.statistic_mode = self.read_instance.selected_statistic_mode 
 
-            # update aggregation statistics (timeseries and general)
-            self.update_aggregation_statistics()
+            # update aggregation statistic
+            self.update_aggregation_statistic()
 
             # handle special cases for some chunk statistics
             chunk_stat = self.timeseries_chunk_stat.currentText()
@@ -444,8 +444,8 @@ class MPLCanvas(FigureCanvas):
             # update mouse cursor to a waiting cursor
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-            # update aggregation statistics (timeseries and general)
-            self.update_aggregation_statistics()
+            # update aggregation statistic
+            self.update_aggregation_statistic()
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
@@ -1044,41 +1044,20 @@ class MPLCanvas(FigureCanvas):
             # update mouse cursor to a waiting cursor
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-            # set variable that blocks configuration bar handling updates until all changes
-            # to the timeseries statistic combobox are made
-            self.read_instance.block_config_bar_handling_updates = True
-
             # update statistic
-            self.read_instance.selected_timeseries_stat = self.timeseries_stat.currentText()
-            self.read_instance.timeseries_stat = self.read_instance.selected_timeseries_stat
-
-            # update aggregation statistic if it is different than timeseries statistic
-            if ((self.read_instance.statistic_mode == 'Spatial|Temporal')
-                and (self.read_instance.timeseries_stat != \
-                     self.read_instance.cb_statistic_aggregation.currentText())):
-                msg = f'Timeseries statistic aggregation {self.read_instance.timeseries_stat} cannot be different than '
-                msg += f'statistic aggregation {self.read_instance.cb_statistic_aggregation.currentText()} for Spatial|Temporal mode. '
-                msg += f'Changing statistic aggregation to {self.read_instance.timeseries_stat} to match timeseries statistic aggregation.'
-                show_message(self.read_instance, msg)
-                self.read_instance.cb_statistic_aggregation.setCurrentText(self.read_instance.timeseries_stat)
-
-            # allow handling updates to the configuration bar again
-            self.read_instance.block_config_bar_handling_updates = False
+            self.read_instance.selected_timeseries_statistic_aggregation = self.timeseries_stat.currentText()
+            self.read_instance.timeseries_statistic_aggregation = self.read_instance.selected_timeseries_statistic_aggregation
 
             # update plotted timeseries statistic
             if not self.read_instance.block_MPL_canvas_updates:
-                # update selected data on all active plots
-                if self.read_instance.statistic_mode == 'Spatial|Temporal':
-                    self.update_associated_active_dashboard_plots()
-
+                    
                 # update selected data on timeseries plot
-                elif self.read_instance.statistic_mode in ['Temporal|Spatial', 'Flattened']:
-                    # get selected station data
-                    get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
-                                            networkspecies=[self.read_instance.networkspeci])
+                # get selected station data
+                get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
+                                          networkspecies=[self.read_instance.networkspeci])
 
-                    # update plot                                                                         
-                    self.update_associated_active_dashboard_plot('timeseries')
+                # update plot                                                                         
+                self.update_associated_active_dashboard_plot('timeseries')
 
             # draw changes
             self.figure.canvas.draw_idle()
@@ -3456,18 +3435,13 @@ class MPLCanvas(FigureCanvas):
         else:
             self.timeseries_stat.setEnabled(True)
 
-    def update_aggregation_statistics(self):
-        """ Update general and timeseries aggregation statistic
+    def update_aggregation_statistic(self):
+        """ Update general aggregation statistic
         """
         
         # get statistic
         self.read_instance.selected_statistic_aggregation = self.read_instance.cb_statistic_aggregation.currentText()
-        
-        # update timeseries statistic if it is different than the selected statistic aggregation
-        if ((self.read_instance.selected_statistic_mode == 'Spatial|Temporal')
-            and (self.timeseries_stat.currentText() != self.read_instance.selected_statistic_aggregation)):
-            self.timeseries_stat.setCurrentText(self.read_instance.selected_statistic_aggregation)
-
+    
         # update statistic in memory
         self.read_instance.statistic_aggregation = self.read_instance.selected_statistic_aggregation 
 
