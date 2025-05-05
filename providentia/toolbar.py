@@ -37,7 +37,6 @@ class _Mode(str, Enum):
     def _navigate_mode(self):
         return self.name if self is not _Mode.NONE else None
 
-
 class NavigationToolbar(NavigationToolbar2QT):
     """ Class that updates available buttons on matplotlib toolbar. """
     
@@ -127,23 +126,112 @@ class NavigationToolbar(NavigationToolbar2QT):
                     msg = 'There was an error saving the file.'
                     self.read_instance.logger.info(e)
                     show_message(self.read_instance, msg)
+
+    def check_for_axis_limit_changes(self, previous_state, current_state):
+        """ Method that checks which plot has changed axis limits 
+            and calls harmonize_changed_axis.
+        """
+
+        # check which limit changed
+        for axis, (prev_xlim, prev_ylim) in previous_state.items():
+            new_xlim, new_ylim = current_state[axis]
+
+            # find the different limit
+            if prev_xlim != new_xlim or prev_ylim != new_ylim:
+                self.harmonize_changed_axis(axis)
     
-    def release_zoom(self, event):
-        """ Method inherited from release_zoom that controls
+    def harmonize_changed_axis(self, axis):
+        """ Method that checks which plot is being restored an applies
+            the harmonise_xy_lims_paradigm function if needed. 
+        """
+
+        # iterate through each plot until the one related to the axis is found
+        for plot_type, axes in self.canvas_instance.plot_axes.items():
+            # for periodic plots, check the the axes inside the dictionary
+            if plot_type == "periodic" or plot_type == "periodic-violin":
+                for periodic_type in axes:
+                    if axes[periodic_type] == axis:
+                        break
+            # compare the main axis for the rest of the plots
+            elif axes == axis:
+                break
+
+        # apply harmonize to the plots with time
+        if plot_type in ["periodic", "periodic-violin", "timeseries"]:
+            plot_options = copy.deepcopy(self.canvas_instance.current_plot_options[plot_type])
+            harmonise_xy_lims_paradigm(self.canvas_instance, self.read_instance, self.canvas_instance.plot_axes[plot_type], plot_type, 
+                                        self.canvas_instance.plot_characteristics[plot_type], plot_options, relim=True, autoscale=False)
+                
+    def home(self):
+        """ Method inherited from matplotlib backend_bases home that 
+            restores the original view.
+        """
+        
+        # get all the limits before doing clicking on home
+        previous_state = {axis: (axis.get_xlim(), axis.get_ylim()) for axis in self.canvas_instance.figure.axes}
+
+        super().home()
+
+        # get all the limits after doing clicking on home
+        current_state = {axis: (axis.get_xlim(), axis.get_ylim()) for axis in self.canvas_instance.figure.axes}
+
+        # harmonize axis if needed
+        self.check_for_axis_limit_changes(previous_state, current_state)
+
+    def back(self):
+        """ Method inherited from matplotlib backend_bases back that 
+            moves back up the view lim stack.
+        """
+        
+        # get all the limits before doing clicking on back
+        previous_state = {axis: (axis.get_xlim(), axis.get_ylim()) for axis in self.canvas_instance.figure.axes}
+
+        super().back()
+
+        # get all the limits after doing clicking on back
+        current_state = {axis: (axis.get_xlim(), axis.get_ylim()) for axis in self.canvas_instance.figure.axes}
+
+        # harmonize axis if needed
+        self.check_for_axis_limit_changes(previous_state, current_state)
+    
+    def forward(self):
+        """ Method inherited from matplotlib backend_bases forward that 
+            moves forward in the view lim stack.
+        """
+        
+        # get all the limits before doing clicking on forward
+        previous_state = {axis: (axis.get_xlim(), axis.get_ylim()) for axis in self.canvas_instance.figure.axes}
+
+        super().forward()
+
+        # get all the limits after doing clicking on forward
+        current_state = {axis: (axis.get_xlim(), axis.get_ylim()) for axis in self.canvas_instance.figure.axes}
+
+        # harmonize axis if needed
+        self.check_for_axis_limit_changes(previous_state, current_state)
+
+    def drag_pan(self, event):
+        """ Method inherited from matplotlib backend_bases drag_pan that controls
             the release in zoom.
+        """
+    
+        super().drag_pan(event)
+
+        # harmonize axis if needed
+        self.harmonize_changed_axis(event.inaxes)
+        
+    def release_zoom(self, event):
+        """ Method inherited from matplotlib backend_bases release_zoom that 
+            drags in pan/zoom mode.
         """
 
         super().release_zoom(event)
-        
-        # harmonize axis for the timeseries plot
-        plot_type = "timeseries"
-        if event.inaxes == self.canvas_instance.plot_axes[plot_type]:
-            plot_options = copy.deepcopy(self.canvas_instance.current_plot_options[plot_type])
-            harmonise_xy_lims_paradigm(self.canvas_instance, self.read_instance, self.canvas_instance.plot_axes[plot_type], plot_type, 
-                                    self.canvas_instance.plot_characteristics[plot_type], plot_options, relim=True, autoscale=False)
 
+        # harmonize axis if needed
+        self.harmonize_changed_axis(event.inaxes)
+    
     def save_figure(self):
-        """ Method inherited from save_figure that controls
+        """ Method inherited from matplotlib backend_bases save_figure that controls
             the image creation.
         """
         if self.read_instance.le_minimum_value.text() == '' and self.read_instance.le_minimum_value.text() == '':
