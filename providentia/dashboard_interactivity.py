@@ -249,24 +249,13 @@ class HoverAnnotation(object):
         
         self.canvas_instance = canvas_instance
 
-        #self.canvas_instance.canvas_annotation_vline = set_formatting(QWidget(self.canvas_instance), self.read_instance.formatting_dict['canvas_annotation_vline'])
-
-
         # set up formatting for canvas annotations
         self.canvas_instance.figure.canvas = set_formatting(self.canvas_instance.figure.canvas, 
                                                             self.canvas_instance.read_instance.formatting_dict['canvas_annotation'])
-        #self.canvas_instance.figure.canvas.setToolTipDuration(8000)
 
-        self.canvas_instance.canvas_annotation_vline = QWidget(self.canvas_instance) 
-        self.canvas_instance.canvas_annotation_vline.setStyleSheet('QWidget { border: 2px solid #757575; border-style: dashed}')
+        # set up formatting for canvas annotation vline
+        self.canvas_instance.canvas_annotation_vline = set_formatting(QWidget(self.canvas_instance), self.canvas_instance.read_instance.formatting_dict['canvas_annotation_vline'])
         self.canvas_instance.canvas_annotation_vline.hide()
-
-        # set number of decimal places to round the annotation to
-        self.round_decimal_places = 2 #plot_characteristics['marker_annotate_text']['round_decimal_places']
-
-        # initialise dict with values that are in the middle of x axis per plot type
-        #self.x_middle = {}
-        #self.x_middle[plot_type] = {}
 
         return None
 
@@ -344,9 +333,14 @@ class HoverAnnotation(object):
                         # do no annotate if hidedata is active
                         if len(self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label][plot_element_name]) == 0:
                             continue
-                        line = self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label][plot_element_name][0]
-                        is_contained, annotation_index = line.contains(event)
-                    
+                        line = self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label][plot_element_name]
+                        for n_point, point in enumerate(line):
+                            is_contained, annotation_index = point.contains(event)
+                            if is_contained:
+                                if plot_type == 'fairmode-target':
+                                    annotation_index = {'ind': np.array([n_point], dtype=np.int32)}
+                                break
+
                     if is_contained:
                         break
                 
@@ -360,6 +354,8 @@ class HoverAnnotation(object):
                     func = getattr(self, 'update_{}_annotation'.format(plot_type.replace('-','_')))
                     if plot_type in ['periodic','periodic-violin']:
                         func(annotation_index,resolution)
+                    elif plot_type in ['fairmode-target','scatter','taylor']:
+                        func(annotation_index,data_label)
                     else:
                         func(annotation_index)
 
@@ -379,7 +375,7 @@ class HoverAnnotation(object):
         text_label += ('Reference: {0}\n').format(station_reference)
         text_label += ('Longitude: {0:.2f}\n').format(station_location[0])
         text_label += ('Latitude: {0:.2f}\n').format(station_location[1])
-        text_label += ('{0}: {1:.{2}f}').format(self.canvas_instance.map_z_stat.currentText(), station_value, self.round_decimal_places)
+        text_label += ('{0}: {1:.{2}f}').format(self.canvas_instance.map_z_stat.currentText(), station_value, self.canvas_instance.plot_characteristics['map']['marker_annotate_rounding'])
 
         # update tooltip
         self.canvas_instance.figure.canvas.setToolTip(text_label)
@@ -406,7 +402,7 @@ class HoverAnnotation(object):
             # retrieve time and concentration
             line = self.canvas_instance.plot_elements['timeseries'][self.canvas_instance.plot_elements['timeseries']['active']][data_label]['plot'][0]
             time = line.get_xdata()[annotation_index['ind'][0]]
-            concentration = line.get_ydata()[np.where(line.get_xdata() == time)[0]]
+            concentration = line.get_ydata()[annotation_index['ind'][0]]
 
             # first valid data label?
             if not text_label:
@@ -417,21 +413,14 @@ class HoverAnnotation(object):
                 # add time to annotation text
                 text_label += ("<p style='white-space:pre'><i>Time: {0}</i>").format(time.astype('datetime64[us]').astype(datetime.datetime).strftime("%m/%d/%Y %H:%M:%S"))
 
-            # add data to annotation text for all labels for which there is data
-            if len(concentration) >= 1:
+            # get colour for data label
+            colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
 
-                # get colour for data label
-                colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
+            # convert data label colour to hex code
+            hex_colour = get_hex_code(colour)
 
-                # convert data label colour to hex code
-                hex_colour = get_hex_code(colour)
-
-                # observations
-                if data_label == self.canvas_instance.read_instance.observations_data_label:
-                    text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, data_label, concentration[0], self.round_decimal_places)
-                # experiments
-                else:
-                    text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, data_label, concentration[0], self.round_decimal_places)
+            # add text label
+            text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, data_label, concentration, self.canvas_instance.plot_characteristics['timeseries']['marker_annotate_rounding'])
 
         # end formatting of text label
         text_label += '</p>'
@@ -442,68 +431,64 @@ class HoverAnnotation(object):
 
         return None
 
-    def update_scatter_annotation(self, annotation_index):
+    def update_scatter_annotation(self, annotation_index, data_label):
 
-        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
+        # initialise annotation text
+        text_label = ''
 
-            # for annotate data label
-            if data_label == self.annotate_data_label:
-                
-                # do not annotate if plot is cleared
-                if data_label not in self.canvas_instance.plot_elements['scatter'][self.canvas_instance.plot_elements['scatter']['active']].keys():
-                    continue
+        # do not annotate if plot is cleared
+        if data_label not in self.canvas_instance.plot_elements['scatter'][self.canvas_instance.plot_elements['scatter']['active']].keys():
+            return None
 
-                # retrieve concentrations in x and y axis
-                line = self.canvas_instance.plot_elements['scatter'][self.canvas_instance.plot_elements['scatter']['active']][data_label]['plot'][0]
-                concentration_x = line.get_xdata()[annotation_index['ind'][0]]
-                concentration_y = line.get_ydata()[annotation_index['ind'][0]]
+        # retrieve concentrations in x and y axis
+        line = self.canvas_instance.plot_elements['scatter'][self.canvas_instance.plot_elements['scatter']['active']][data_label]['plot'][0]
+        x = line.get_xdata()[annotation_index['ind'][0]]
+        y = line.get_ydata()[annotation_index['ind'][0]]
 
-                # update location
-                #self.annotation.xy = (concentration_x, concentration_y)
+        # get colour for data label
+        colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
 
-                # update bbox position
-                #if concentration_x > self.x_middle['scatter']:
-                #    self.annotation.set_x(-10)
-                #    self.annotation.set_ha('right')
-                #else:
-                #    self.annotation.set_x(10)
-                #    self.annotation.set_ha('left')
+        # convert data label colour to hex code
+        hex_colour = get_hex_code(colour)
 
-                # create annotation text
-                # experiment label
-                text_label = copy.deepcopy(data_label)
-                # observations label
-                text_label += ('\n{0}: {1:.{2}f}').format('x', concentration_x, self.round_decimal_places)
-                # experiment label
-                text_label += ('\n{0}: {1:.{2}f}').format('y', concentration_y, self.round_decimal_places)
+        # add text label
+        text_label += ('<font color="{0}">{1}</font>').format(hex_colour, data_label)
+        # observations label
+        text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'x', x, self.canvas_instance.plot_characteristics['scatter']['marker_annotate_rounding'])
+        # experiment label
+        text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'y', y, self.canvas_instance.plot_characteristics['scatter']['marker_annotate_rounding'])
 
-        #self.annotation.set_text(text_label)
+        # update tooltip
         self.canvas_instance.figure.canvas.setToolTip(text_label)
 
         return None
 
-    def update_fairmode_target_annotation(self, annotation_index):
+    def update_fairmode_target_annotation(self, annotation_index, data_label):
 
-        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
+        # initialise annotation text
+        text_label = ''
 
-            # for annotate data label
-            if data_label == self.annotate_data_label:
-                # do not annotate if plot is cleared
-                if data_label not in self.canvas_instance.plot_elements['fairmode-target'][self.canvas_instance.plot_elements['fairmode-target']['active']].keys():
-                    continue
+        # do not annotate if plot is cleared
+        if data_label not in self.canvas_instance.plot_elements['fairmode-target'][self.canvas_instance.plot_elements['fairmode-target']['active']].keys():
+            return None
 
-                # retrieve CRMSE / β·RMSᵤ and Mean Bias / β·RMSᵤ
-                line = self.canvas_instance.plot_elements['fairmode-target'][self.canvas_instance.plot_elements['fairmode-target']['active']][data_label]['plot'][0]
-                x = line.get_xdata()[annotation_index['ind'][0]]
-                y = line.get_ydata()[annotation_index['ind'][0]]
+        # retrieve CRMSE / β·RMSᵤ and Mean Bias / β·RMSᵤ
+        line = self.canvas_instance.plot_elements['fairmode-target'][self.canvas_instance.plot_elements['fairmode-target']['active']][data_label]['plot'][annotation_index['ind'][0]]
+        x = line.get_xdata()[0]
+        y = line.get_ydata()[0]
 
-                # create annotation text
-                # experiment label
-                text_label = copy.deepcopy(data_label)
-                # CRMSE
-                text_label += ('\n{0}: {1:.{2}f}').format('CRMSE / β·RMSᵤ', x, self.round_decimal_places)
-                # MB
-                text_label += ('\n{0}: {1:.{2}f}').format('MB / β·RMSᵤ', y, self.round_decimal_places)
+        # get colour for data label
+        colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
+
+        # convert data label colour to hex code
+        hex_colour = get_hex_code(colour)
+
+        # add text label
+        text_label += ('<font color="{0}">{1}</font>').format(hex_colour, data_label)
+        # CRMSE
+        text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'CRMSE / β·RMSᵤ', x, self.canvas_instance.plot_characteristics['fairmode-target']['marker_annotate_rounding'])
+        # MB
+        text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'MB / β·RMSᵤ', y, self.canvas_instance.plot_characteristics['fairmode-target']['marker_annotate_rounding'])
 
         # update tooltip
         self.canvas_instance.figure.canvas.setToolTip(text_label)
@@ -520,7 +505,7 @@ class HoverAnnotation(object):
         for data_label in self.canvas_instance.plot_elements['data_labels_active']:
 
             # skip observations for bias plot
-            if self.canvas_instance.plot_elements['distribution']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
+            if (self.canvas_instance.plot_elements['distribution']['active'] == 'bias') and (data_label == self.canvas_instance.read_instance.observations_data_label):
                 continue
             
             # do not annotate if plot is cleared
@@ -530,7 +515,7 @@ class HoverAnnotation(object):
             # retrieve concentration and density
             line = self.canvas_instance.plot_elements['distribution'][self.canvas_instance.plot_elements['distribution']['active']][data_label]['plot'][0]
             concentration = line.get_xdata()[annotation_index['ind'][0]]
-            density = line.get_ydata()[np.where(line.get_xdata() == concentration)[0]]
+            density = line.get_ydata()[annotation_index['ind'][0]]
 
              # first valid data label?
             if not text_label:
@@ -539,23 +524,16 @@ class HoverAnnotation(object):
                 self.update_vline_position()
 
                 # create annotation text
-                text_label += ("<p style='white-space:pre'><i>{0}: {1:.{2}f}</i>").format(self.canvas_instance.read_instance.species[0], concentration, self.round_decimal_places)
+                text_label += ("<p style='white-space:pre'><i>{0}: {1:.{2}f}</i>").format(self.canvas_instance.read_instance.species[0], concentration, self.canvas_instance.plot_characteristics['distribution']['marker_annotate_rounding'])
 
-            # add data to annotation text for all labels for which there is data
-            if len(density) >= 1:
+            # get colour for data label
+            colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
 
-                # get colour for data label
-                colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
+            # convert data label colour to hex code
+            hex_colour = get_hex_code(colour)
 
-                # convert data label colour to hex code
-                hex_colour = get_hex_code(colour)
-
-                # observations
-                if data_label == self.canvas_instance.read_instance.observations_data_label:
-                    text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, data_label, density[0], self.round_decimal_places)
-                # experiments
-                else:
-                    text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, data_label, density[0], self.round_decimal_places)
+            # add text label
+            text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, data_label, density, self.canvas_instance.plot_characteristics['distribution']['marker_annotate_rounding'])
 
         # update tooltip and show vline
         self.canvas_instance.figure.canvas.setToolTip(text_label)
@@ -563,28 +541,34 @@ class HoverAnnotation(object):
 
         return None
 
-    def update_taylor_annotation(self, annotation_index):
+    def update_taylor_annotation(self, annotation_index, data_label):
         
-        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
-
-            # for annotate data label
-            if data_label == self.annotate_data_label:
+        # initialise annotation text
+        text_label = ''
                 
-                # do not annotate if plot is cleared
-                if data_label not in self.canvas_instance.plot_elements['taylor'][self.canvas_instance.plot_elements['taylor']['active']].keys():
-                    continue
+        # do not annotate if plot is cleared
+        if data_label not in self.canvas_instance.plot_elements['taylor'][self.canvas_instance.plot_elements['taylor']['active']].keys():
+            return None
 
-                # retrieve time and concentration
-                line = self.canvas_instance.plot_elements['taylor'][self.canvas_instance.plot_elements['taylor']['active']][data_label]['plot'][0]
-                corr_stat = line.get_xdata()[annotation_index['ind'][0]]
-                stddev = line.get_ydata()[annotation_index['ind'][0]]
+        # retrieve time and concentration
+        line = self.canvas_instance.plot_elements['taylor'][self.canvas_instance.plot_elements['taylor']['active']][data_label]['plot'][0]
+        corr_stat = line.get_xdata()[annotation_index['ind'][0]]
+        stddev = line.get_ydata()[annotation_index['ind'][0]]
 
-                # create annotation text
-                text_label = copy.deepcopy(data_label)
-                text_label += ('\n{0}: {1:.{2}f}').format(self.canvas_instance.plot_characteristics['taylor']['corr_stat'], 
-                                                        np.cos(corr_stat), self.round_decimal_places)
-                text_label += ('\n{0}: {1:.{2}f}').format('StdDev', stddev, self.round_decimal_places)
-        
+        # get colour for data label
+        colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
+
+        # convert data label colour to hex code
+        hex_colour = get_hex_code(colour)
+
+        # add text label
+        text_label += ('<font color="{0}">{1}</font>').format(hex_colour, data_label)
+        # corr stat
+        text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, self.canvas_instance.plot_characteristics['taylor']['corr_stat'], 
+                                                                                np.cos(corr_stat), self.canvas_instance.plot_characteristics['taylor']['marker_annotate_rounding'])
+        # stddev
+        text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'StdDev', stddev, self.canvas_instance.plot_characteristics['taylor']['marker_annotate_rounding'])
+    
         # update tooltip
         self.canvas_instance.figure.canvas.setToolTip(text_label)
 
@@ -610,7 +594,7 @@ class HoverAnnotation(object):
             # retrieve time and concentration
             line = self.canvas_instance.plot_elements['periodic'][self.canvas_instance.plot_elements['periodic']['active']][data_label]['plot_' + resolution][0]
             time = line.get_xdata()[annotation_index['ind'][0]]
-            concentration = line.get_ydata()[np.where(line.get_xdata() == time)[0]]
+            concentration = line.get_ydata()[annotation_index['ind'][0]]
 
             # first valid data label?
             if not text_label:
@@ -633,21 +617,14 @@ class HoverAnnotation(object):
                         resolution_text = 'Month'
                 text_label += ("<p style='white-space:pre'><i>{0}: {1}</i>").format(resolution_text, time_text)
         
-            # add data to annotation text for all labels for which there is data
-            if len(concentration) >= 1:
+            # get colour for data label
+            colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
 
-                # get colour for data label
-                colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
+            # convert data label colour to hex code
+            hex_colour = get_hex_code(colour)
 
-                # convert data label colour to hex code
-                hex_colour = get_hex_code(colour)
-
-                # observations
-                if data_label == self.canvas_instance.read_instance.observations_data_label:
-                    text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, data_label, concentration[0], self.round_decimal_places)
-                # experiments
-                else:
-                    text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, data_label, concentration[0], self.round_decimal_places)
+            # add text label
+            text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, data_label, concentration, self.canvas_instance.plot_characteristics['periodic']['marker_annotate_rounding'])
 
         # update tooltip and show vline
         self.canvas_instance.figure.canvas.setToolTip(text_label)
@@ -675,7 +652,7 @@ class HoverAnnotation(object):
             # retrieve time and concentration
             line = self.canvas_instance.plot_elements['periodic-violin'][self.canvas_instance.plot_elements['periodic-violin']['active']][data_label]['Median_plot_' + resolution][0]
             time = line.get_xdata()[annotation_index['ind'][0]]
-            concentration = line.get_ydata()[np.where(line.get_xdata() == time)[0]]
+            concentration = line.get_ydata()[annotation_index['ind'][0]]
 
             # first valid data label?
             if not text_label:
@@ -698,21 +675,14 @@ class HoverAnnotation(object):
                         resolution_text = 'Month'
                 text_label += ("<p style='white-space:pre'><i>{0}: {1}</i>").format(resolution_text, time_text)
 
-            # add data to annotation text for all labels for which there is data
-            if len(concentration) >= 1:
+            # get colour for data label
+            colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
 
-                # get colour for data label
-                colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
+            # convert data label colour to hex code
+            hex_colour = get_hex_code(colour)
 
-                # convert data label colour to hex code
-                hex_colour = get_hex_code(colour)
-
-                # observations
-                if data_label == self.canvas_instance.read_instance.observations_data_label:
-                    text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, data_label, concentration[0], self.round_decimal_places)
-                # experiments
-                else:
-                    text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, data_label, concentration[0], self.round_decimal_places)
+            # add text label
+            text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, data_label, concentration, self.canvas_instance.plot_characteristics['periodic-violin']['marker_annotate_rounding'])
 
         # update tooltip and show vline
         self.canvas_instance.figure.canvas.setToolTip(text_label)
@@ -745,32 +715,3 @@ class HoverAnnotation(object):
         self.canvas_instance.canvas_annotation_vline.setGeometry(self.x, ymax_display_qt, 1, vline_length)
 
         return None
-
-    def update_x_middle(self, event, plot_type):
-        """ Function to find middle value in x axis per plot type.
-        """
-
-        # do not annotate if plot has not been made yet
-        if plot_type not in self.canvas_instance.plot_elements:
-            return
-
-        # get current limits on x axis
-        xlim_range = event.get_xlim()
-
-        # transform range into dates for timeseries
-        if plot_type == 'timeseries':
-            xdata_range = [num2date(xlim) for xlim in xlim_range]
-        else:
-            xdata_range = xlim_range
-            
-        # get value/date in the middle of range
-        x_middle = xdata_range[0] + (xdata_range[1] - xdata_range[0])/2
-
-        # save into dictionary
-        if 'periodic' in plot_type:
-            for resolution in self.canvas_instance.read_instance.relevant_temporal_resolutions:
-                if event == self.canvas_instance.plot_axes[plot_type][resolution]:
-                    self.x_middle[plot_type][resolution] = x_middle
-                    break
-        else:
-            self.x_middle[plot_type] = x_middle
