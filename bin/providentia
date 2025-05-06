@@ -153,11 +153,7 @@ if [[ "${OS}" =~ "Windows" ]] ; then
     python_ver="3"
 fi
 
-#ln -s /Users/denebowdalo/anaconda3/envs/providentia-env_2.4.0/bin/python3 Provi
-
-#python_command="python$python_ver -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
-
-python_command="./Provi -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
+python_command="python$python_ver -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
 
 # use clean mode and exit
 if [[ $PARSED =~ "--clean" ]]; then
@@ -455,10 +451,12 @@ else
         if ! conda config --show channels 2>/dev/null | grep -q 'conda-forge'; then
             conda config --append channels conda-forge
         fi
-        conda create -c conda-forge -n providentia-env_v2.4.0 --override-channels
+        conda create -c conda-forge -n providentia-env_v2.4.0 -y python=3.11.5 --override-channels
         conda activate providentia-env_v2.4.0
         conda install -c conda-forge cartopy -y --override-channels
         conda install -c conda-forge jupyterlab -y --override-channels
+        conda install -c conda-forge KDEpy -y --override-channels
+
         pip install -r requirements.txt
         active_env=true
     fi
