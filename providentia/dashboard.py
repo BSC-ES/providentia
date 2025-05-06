@@ -1219,54 +1219,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # create gridspec and add it to a list
             canvas_instance.plot_axes[changed_plot_type] = [canvas_instance.figure.add_subplot(inner_gs[i, j]) for i in range(nrows) for j in range(ncols)]
 
-        # setup annotations
-        #if changed_plot_type in ['periodic', 'periodic-violin']:
-            # create annotation on hover
-            #for resolution in canvas_instance.plot_axes[changed_plot_type].keys():
-                #annotation = HoverAnnotation(canvas_instance, 
-                #                             changed_plot_type, 
-                #                             canvas_instance.plot_axes[changed_plot_type][resolution],
-                #                             canvas_instance.plot_characteristics[changed_plot_type], 
-                #                             add_vline=True)
-                #canvas_instance.annotations[changed_plot_type][resolution] = annotation.annotation
-                #canvas_instance.annotations_lock[changed_plot_type][resolution] = False
-                #canvas_instance.annotations_vline[changed_plot_type][resolution] = annotation.vline
-            
-                # connect axis to xlim change on zoom
-                #canvas_instance.plot_axes[changed_plot_type][resolution].callbacks.connect(
-                #    'xlim_changed', lambda event: annotation.update_x_middle(event, changed_plot_type))
-            
-            # connect axis to hover function
-            #canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
-            #    lambda event: annotation.hover_periodic_annotation(event, changed_plot_type))
-            
-        #elif changed_plot_type in ['timeseries', 'scatter', 'distribution', 'fairmode-target']:
-            
-            # add vertical line to timeseries and distribution plots
-        #    if changed_plot_type in ['timeseries', 'distribution']:
-        #        add_vline = True
-        #    else:
-        #        add_vline = False
-
-            # create annotation on hover
-        #    annotation = HoverAnnotation(canvas_instance, 
-        #                                 changed_plot_type, 
-        #                                 canvas_instance.plot_axes[changed_plot_type],
-        #                                 canvas_instance.plot_characteristics[changed_plot_type], 
-        #                                 add_vline=add_vline)
-        #    #canvas_instance.annotations[changed_plot_type] = annotation.annotation
-        #    canvas_instance.annotations_lock[changed_plot_type] = False
-            #if add_vline:
-            #    canvas_instance.annotations_vline[changed_plot_type] = annotation.vline
-
-            # connect axis to xlim change on zoom
-            #canvas_instance.plot_axes[changed_plot_type].callbacks.connect(
-            #    'xlim_changed', lambda event: annotation.update_x_middle(event, changed_plot_type))
-            
-            # connect axis to hover function
-        #    canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
-        #        lambda event: annotation.hover_annotation(event, changed_plot_type))
-
     def handle_data_selection_update(self):
         """ Function which handles update of data selection
             and MPL canvas upon pressing of READ button.

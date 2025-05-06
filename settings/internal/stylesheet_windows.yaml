@@ -320,8 +320,11 @@
                                       "font-style": "normal", 
                                       "font-size": "9.5pt", 
                                       "color": "black",
-                                      "border": "1px solid black",
-                                      "border-radius": "8px"}},
+                                      "border": "1px solid black"}},
+
+    "canvas_annotation_vline":   {"QWidget": {
+                                      "border": "2px solid #757575",
+                                      "border-style": "dashed"}},
 
     "canvas_cover":              {"QWidget": {
                                       "background-color": "white"}}
