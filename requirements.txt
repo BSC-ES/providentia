@@ -14,7 +14,6 @@ seaborn==0.13.2
 scipy==1.15.2
 ConfigArgParse==1.7 
 cftime==1.6.3 
-KDEpy==1.1.12
 xarray==2024.11.0
 Sphinx==7.2.6
 Sphinx-rtd-theme==2.0.0
