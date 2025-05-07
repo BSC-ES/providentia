@@ -8,6 +8,8 @@ import cartopy
 import cartopy.feature as cfeature
 import matplotlib
 import matplotlib as mpl 
+import matplotlib.dates as mdates
+import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 from matplotlib.dates import num2date
 from matplotlib import ticker
@@ -407,6 +409,20 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             for ax in relevant_axs_active:
                 ax.xaxis.set_ticks(xticks)
 
+            # get the date format to create the margin
+            clip_left = mdates.date2num(left)
+            clip_right = mdates.date2num(right)
+
+            # create the rectangle that will define the margin
+            clip_rect = mpatches.Rectangle(
+                (clip_left, ax.get_ylim()[0]),
+                clip_right - clip_left,
+                ax.get_ylim()[1] - ax.get_ylim()[0],       
+                transform=ax.transData
+            )
+
+            # set the margin
+            canvas_instance.timeseries_plot[0].set_clip_path(clip_rect)
 
 def set_axis_title(read_instance, relevant_axis, title, plot_characteristics):
     """ Set title of plot axis.
