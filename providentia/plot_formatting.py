@@ -345,59 +345,64 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                 left = xlim[0]
                 right = xlim[1]
 
-            # get steps for all data labels
-            steps = pd.date_range(left, right, freq=read_instance.active_frequency_code)
-
+           
             # get number of months and days
             n_months = (12*(right.year - left.year) + (right.month - left.month))
             n_days = (right - left).days
 
-            # get months that are complete
-            months_start = pd.date_range(left, right, freq='MS')
-            if Version(matplotlib.__version__) < Version("3.9"):
-                months_end = pd.date_range(left, right, freq='M')
-            else:
-                months_end = pd.date_range(left, right, freq='ME')
-            if months_start.size > 1:
-                if (right - months_end[-1]).days >= 1:
-                    months = months_start[:-1]
+            first_step = plot_characteristics['xtick_alteration']['first_step']
+            last_step = plot_characteristics['xtick_alteration']['last_step']
+            n_slices = plot_characteristics['xtick_alteration']['n_slices']
+
+            # if there's more than 3 months, define time slices as the first day of the month
+            if n_months >= 3:
+
+                # get the first and last days of each month
+                months_start = pd.date_range(left, right, freq='MS')
+                if Version(matplotlib.__version__) < Version("3.9"):
+                    months_end = pd.date_range(left, right, freq='M')
                 else:
-                    months = months_start
+                    months_end = pd.date_range(left, right, freq='ME')
+
+                # set steps as the start of the months
+                steps = months_start
+
+                # remove last day if there's less than a 15 days difference
+                if last_step and 0 <= (right - months_end[-1]).days <= 15:
+                    steps = steps[:-1]
+
+                # remove first day if there's less than a 15 days difference
+                if first_step and 0 <= (months_start[0] - left).days <= 15:
+                    steps = steps[1:]
+
+                # get xticks
+                slices = int(np.ceil(len(steps) / int(n_slices)))
+                xticks = steps[0::slices]
+
+                # transform to numpy.datetime64
+                if not isinstance(xticks[0], np.datetime64):
+                    xticks = [np.datetime64(x, 'D') for x in xticks]
+                if not isinstance(right, np.datetime64):
+                    right = np.datetime64(right)
+
+                # add last step to xticks
+                if last_step and (xticks[-1] != right):
+                    xticks = np.append(xticks, right)
+                
+                # add first step to xticks
+                if first_step and (xticks[0] != left):
+                    xticks = np.insert(xticks, 0, left)
+            
+            #  if there's less than 3 months, define time slices as the result of the pandas data_range
             else:
-                months = months_start
+                xticks = pd.date_range(left, right, periods=n_slices+int(first_step)+int(last_step))
 
             # show hours if number of days is less than 7
             if n_days < 7:
                 ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d %H:%M'))
             else:
                 ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d'))
-
-            # define time slices
-            if n_months >= 3:
-                steps = months
-            slices = int(np.ceil(len(steps) / int(plot_characteristics['xtick_alteration']['n_slices'])))
-
-            # use default axes if the number of timesteps is lower than the number of slices
-            if slices >= 1:
-                xticks = steps[0::slices]
-            else:
-                xticks = ax.xaxis.get_ticklabels()
-
-            # transform to numpy.datetime64
-            if not isinstance(xticks[0], np.datetime64):
-                xticks = [x.to_datetime64() for x in xticks]
-            if not isinstance(right, np.datetime64):
-                right = np.datetime64(right)
-
-            # add last step to xticks
-            if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != right):
-                xticks = np.append(xticks, right)
             
-            # add first step to xticks
-            if plot_characteristics['xtick_alteration']['first_step']:
-                xticks = np.insert(xticks, 0, left)
-                
-
             # set modified xticks
             for ax in relevant_axs_active:
                 ax.xaxis.set_ticks(xticks)
