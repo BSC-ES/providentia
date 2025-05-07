@@ -1,0 +1,1839 @@
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/25/YD/5K/25YD-5KNP.nc:
+  end_date: 2018-06-29T10:30:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2013-11-20T12:15:00 UTC
+  station_reference: ES0028U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2C/U5/6K/2CU5-6K6Z.nc:
+  end_date: 2000-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 1999-01-01T00:00:00 UTC
+  station_reference: CZ0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - nitrogen_dioxide
+  - nitrogen_dioxide_qc
+  - nitrogen_dioxide_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2D/RM/ZB/2DRM-ZBNZ.nc:
+  end_date: 2023-01-03T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2015-12-29T07:00:00 UTC
+  station_reference: DE0007R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2N/77/C5/2N77-C57A.nc:
+  end_date: 2023-08-29T13:00:00 UTC
+  resolution: hourly
+  start_date: 2023-06-23T18:00:00 UTC
+  station_reference: FR0056U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3K/6Y/KF/3K6Y-KFCS.nc:
+  end_date: 2009-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2005-01-01T00:00:00 UTC
+  station_reference: DE0002R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3U/SC/HZ/3USC-HZYH.nc:
+  end_date: 2003-01-06T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2001-01-01T07:00:00 UTC
+  station_reference: NO0047R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3V/A6/YC/3VA6-YCVY.nc:
+  end_date: 2013-12-31T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2008-01-28T07:00:00 UTC
+  station_reference: ES0009R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/48/PZ/PX/48PZ-PXZJ.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  station_reference: GB0048R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - hydrochloric_acid
+  - hydrochloric_acid_qc
+  - hydrochloric_acid_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - nitrous_acid
+  - nitrous_acid_qc
+  - nitrous_acid_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/49/7G/73/497G-73Q8.nc:
+  end_date: 1996-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 1995-01-01T07:00:00 UTC
+  station_reference: CZ0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4C/RT/XB/4CRT-XB3W.nc:
+  end_date: 2020-12-30T11:40:00 UTC
+  resolution: monthly
+  start_date: 2013-01-02T10:30:00 UTC
+  station_reference: GB0014R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4P/CK/8C/4PCK-8CCG.nc:
+  end_date: 2000-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 1986-01-01T07:00:00 UTC
+  station_reference: HU0002R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4X/FX/SZ/4XFX-SZUD.nc:
+  end_date: 2013-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2009-01-01T00:00:00 UTC
+  station_reference: NL0007R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4Z/YY/CH/4ZYY-CHTA.nc:
+  end_date: 2023-01-03T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2015-12-29T07:00:00 UTC
+  station_reference: DE0002R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/56/AK/69/56AK-69X5.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2010-01-01T00:00:00 UTC
+  station_reference: DE0009R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5C/9T/V6/5C9T-V6HC.nc:
+  end_date: 2023-01-03T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2015-12-29T07:00:00 UTC
+  station_reference: DE0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5S/7C/VJ/5S7C-VJ6Z.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2016-01-01T00:00:00 UTC
+  station_reference: NL0091R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5X/NF/HB/5XNF-HBGH.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2018-01-01T00:00:00 UTC
+  station_reference: SE0022R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/67/XT/BM/67XT-BMRM.nc:
+  end_date: 2016-01-26T08:00:00 UTC
+  resolution: Unrecognised (P0000-00-28T00:00:00)
+  start_date: 2011-12-20T08:00:00 UTC
+  station_reference: BE0014R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6F/EX/DA/6FEX-DAJ6.nc:
+  end_date: 1996-01-01T09:00:00 UTC
+  resolution: daily
+  start_date: 1991-01-01T07:00:00 UTC
+  station_reference: LT0015R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6F/N6/HN/6FN6-HNB2.nc:
+  end_date: 2015-12-29T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2013-12-08T07:00:00 UTC
+  station_reference: DE0007R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6Q/PE/25/6QPE-25QY.nc:
+  end_date: 2012-12-31T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2012-08-20T07:00:00 UTC
+  station_reference: ES0014R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/75/TA/UP/75TA-UPUK.nc:
+  end_date: 2012-01-02T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2011-01-04T00:00:00 UTC
+  station_reference: DE0009R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/78/E2/R8/78E2-R87M.nc:
+  end_date: 2011-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2010-01-01T00:00:00 UTC
+  station_reference: DE0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7A/RR/B7/7ARR-B7K5.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  station_reference: GB0048R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7D/FD/SJ/7DFD-SJJJ.nc:
+  end_date: 2007-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2005-01-01T00:00:00 UTC
+  station_reference: IT0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7P/CV/V3/7PCV-V3KF.nc:
+  end_date: 2021-01-01T08:00:00 UTC
+  resolution: daily
+  start_date: 2011-01-01T08:00:00 UTC
+  station_reference: SK0006R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7W/J6/3K/7WJ6-3K7J.nc:
+  end_date: 2015-12-29T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2013-12-08T07:00:00 UTC
+  station_reference: DE0002R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7Z/G5/G3/7ZG5-G38K.nc:
+  end_date: 2020-12-28T10:50:00 UTC
+  resolution: monthly
+  start_date: 2015-12-30T10:00:00 UTC
+  station_reference: SE0020R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/88/PY/QD/88PY-QDTS.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2002-01-01T06:00:00 UTC
+  station_reference: SE0014R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8A/UT/74/8AUT-748P.nc:
+  end_date: 2009-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2005-01-01T00:00:00 UTC
+  station_reference: DE0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8G/AB/S2/8GAB-S2KZ.nc:
+  end_date: 2005-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 1996-01-01T00:00:00 UTC
+  station_reference: IT0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8H/D4/WS/8HD4-WSS3.nc:
+  end_date: 2023-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2014-01-01T07:00:00 UTC
+  station_reference: NO0039R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Q/JH/KZ/8QJH-KZYM.nc:
+  end_date: 2017-12-26T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-28T00:00:00)
+  start_date: 2016-10-04T00:00:00 UTC
+  station_reference: BE0014R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8U/7D/SR/8U7D-SRH8.nc:
+  end_date: 2013-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2012-01-01T07:00:00 UTC
+  station_reference: HU0002R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9X/VX/W7/9XVX-W7A5.nc:
+  end_date: 2007-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2005-01-01T00:00:00 UTC
+  station_reference: DE0003R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Z/RW/NZ/9ZRW-NZHG.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2022-01-03T00:00:00 UTC
+  station_reference: ES0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/A4/7C/YZ/A47C-YZ9P.nc:
+  end_date: 2022-01-03T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2013-12-31T07:00:00 UTC
+  station_reference: ES0008R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AB/J7/ZS/ABJ7-ZSBN.nc:
+  end_date: 2019-01-01T09:00:00 UTC
+  resolution: daily
+  start_date: 2013-01-01T09:00:00 UTC
+  station_reference: MD0013R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AG/3A/NH/AG3A-NH9R.nc:
+  end_date: 2004-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 1993-01-01T07:00:00 UTC
+  station_reference: NO0041R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AU/9N/7B/AU9N-7BWP.nc:
+  end_date: 2009-03-24T06:00:00 UTC
+  resolution: hourly
+  start_date: 2006-06-01T16:00:00 UTC
+  station_reference: NL0011R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AV/5J/K9/AV5J-K94R.nc:
+  end_date: 2020-12-31T03:00:00 UTC
+  resolution: daily
+  start_date: 2011-01-01T03:00:00 UTC
+  station_reference: AM0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/B5/DM/5G/B5DM-5GCG.nc:
+  end_date: 2015-12-29T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2013-12-03T07:00:00 UTC
+  station_reference: DE0008R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BG/2J/FT/BG2J-FTRP.nc:
+  end_date: 1997-01-01T10:00:00 UTC
+  resolution: daily
+  start_date: 1994-01-01T10:00:00 UTC
+  station_reference: IT0004R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BJ/T5/AW/BJT5-AW8Z.nc:
+  end_date: 2014-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2013-01-01T07:00:00 UTC
+  station_reference: HU0002R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BK/34/CS/BK34-CSB2.nc:
+  end_date: 2012-12-31T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2012-06-04T07:00:00 UTC
+  station_reference: ES0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BM/42/RV/BM42-RVS4.nc:
+  end_date: 2021-01-01T11:55:00 UTC
+  resolution: monthly
+  start_date: 2013-02-02T13:40:00 UTC
+  station_reference: GB0006R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BN/XN/X6/BNXN-X6TY.nc:
+  end_date: 2022-12-27T01:11:00 UTC
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  start_date: 2022-02-08T00:00:00 UTC
+  station_reference: FR0049U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/C6/N7/8F/C6N7-8FT3.nc:
+  end_date: 2011-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2009-01-01T07:00:00 UTC
+  station_reference: HU0002R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CD/6S/PX/CD6S-PXBE.nc:
+  end_date: 2022-01-03T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2013-12-31T07:00:00 UTC
+  station_reference: ES0009R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CJ/TF/UR/CJTF-URXS.nc:
+  end_date: 2021-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2014-01-01T07:00:00 UTC
+  station_reference: NO0015R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CJ/US/Q9/CJUS-Q9QY.nc:
+  end_date: 2020-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2019-01-01T07:00:00 UTC
+  station_reference: HU0002R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CP/HG/E6/CPHG-E6ZV.nc:
+  end_date: 2021-01-01T08:00:00 UTC
+  resolution: daily
+  start_date: 2011-01-01T08:00:00 UTC
+  station_reference: SK0006R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CY/S7/TA/CYS7-TAB8.nc:
+  end_date: 2021-06-21T10:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2017-05-22T14:30:00 UTC
+  station_reference: FR0020R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/D2/8D/DJ/D28D-DJ4M.nc:
+  end_date: 2016-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2014-01-01T07:00:00 UTC
+  station_reference: NO0056R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/D8/SF/95/D8SF-955K.nc:
+  end_date: 1995-04-11T06:00:00 UTC
+  resolution: daily
+  start_date: 1995-01-01T06:00:00 UTC
+  station_reference: PL0002R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DA/FZ/7N/DAFZ-7N2G.nc:
+  end_date: 2023-05-31T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-42T00:00:00)
+  start_date: 2020-07-09T00:00:00 UTC
+  station_reference: ES0045R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DU/FV/85/DUFV-85Y6.nc:
+  end_date: 2018-01-01T06:00:00 UTC
+  resolution: daily
+  start_date: 1993-01-01T06:00:00 UTC
+  station_reference: SE0012R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/E5/VE/WA/E5VE-WA5F.nc:
+  end_date: 1997-07-01T09:00:00 UTC
+  resolution: daily
+  start_date: 1997-01-01T09:00:00 UTC
+  station_reference: LV0016R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/E5/YH/WE/E5YH-WEBE.nc:
+  end_date: 2003-01-06T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 1997-01-01T07:00:00 UTC
+  station_reference: NO0056R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EU/PQ/BE/EUPQ-BE64.nc:
+  end_date: 2023-08-21T04:00:00 UTC
+  resolution: hourly
+  start_date: 2020-07-09T00:00:00 UTC
+  station_reference: FR0050U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EY/YA/5G/EYYA-5GJW.nc:
+  end_date: 2014-01-01T06:00:00 UTC
+  resolution: daily
+  start_date: 2008-01-01T06:00:00 UTC
+  station_reference: PL0005R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/F6/3D/MT/F63D-MTME.nc:
+  end_date: 1995-04-11T06:00:00 UTC
+  resolution: daily
+  start_date: 1995-01-01T06:00:00 UTC
+  station_reference: PL0004R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/F6/ME/7T/F6ME-7TCD.nc:
+  end_date: 2015-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  station_reference: NL0007R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FK/GS/AW/FKGS-AW7T.nc:
+  end_date: 2016-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2013-01-01T00:00:00 UTC
+  station_reference: GB0036R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FN/7B/AC/FN7B-AC8R.nc:
+  end_date: 2023-01-17T10:35:02 UTC
+  resolution: Unrecognised (P0000-00-28T00:00:00)
+  start_date: 2017-12-26T00:00:00 UTC
+  station_reference: BE0014R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FY/5S/43/FY5S-43B2.nc:
+  end_date: 2013-12-23T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-21T00:00:00)
+  start_date: 2011-05-16T00:00:00 UTC
+  station_reference: ES0033U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FY/6U/2S/FY6U-2SQQ.nc:
+  end_date: 1992-12-02T08:00:00 UTC
+  resolution: daily
+  start_date: 1992-12-01T08:00:00 UTC
+  station_reference: SE0012R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FZ/8Y/KF/FZ8Y-KFAE.nc:
+  end_date: 2022-03-14T23:00:00 UTC
+  resolution: Unrecognised (P0000-00-21T00:00:00)
+  start_date: 2011-02-18T00:00:00 UTC
+  station_reference: ES1778R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/G9/8C/9Q/G98C-9Q9T.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2009-03-03T00:00:00 UTC
+  station_reference: IT0039R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GC/R2/9N/GCR2-9NBH.nc:
+  end_date: 2014-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2013-01-01T00:00:00 UTC
+  station_reference: DE0002R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - hydrochloric_acid
+  - hydrochloric_acid_qc
+  - hydrochloric_acid_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GH/MQ/NU/GHMQ-NUSB.nc:
+  end_date: 1996-01-01T00:00:00 UTC
+  resolution: monthly
+  start_date: 1993-01-01T00:00:00 UTC
+  station_reference: DK0008R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GK/XB/JN/GKXB-JN8F.nc:
+  end_date: 2022-01-01T01:00:00 UTC
+  resolution: hourly
+  start_date: 2020-11-03T12:00:00 UTC
+  station_reference: FR0042U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GP/CZ/FM/GPCZ-FMHA.nc:
+  end_date: 2007-12-31T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2004-08-02T00:00:00 UTC
+  station_reference: ES0009R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H2/UM/GV/H2UM-GVRR.nc:
+  end_date: 2004-07-12T00:00:00 UTC
+  resolution: daily
+  start_date: 2004-07-05T00:00:00 UTC
+  station_reference: ES0008R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H5/YE/7E/H5YE-7E9F.nc:
+  end_date: 2022-12-27T00:33:00 UTC
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  start_date: 2022-01-25T00:00:00 UTC
+  station_reference: FR0051U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HD/KA/6G/HDKA-6GAN.nc:
+  end_date: 2008-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2007-01-01T00:00:00 UTC
+  station_reference: IT0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HH/6S/3K/HH6S-3K2Z.nc:
+  end_date: 2016-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2014-01-01T07:00:00 UTC
+  station_reference: NO0042G
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HV/GQ/Q2/HVGQ-Q2KR.nc:
+  end_date: 2013-12-22T05:00:00 UTC
+  resolution: Unrecognised (P0000-00-03T00:00:00)
+  start_date: 2012-01-01T05:00:00 UTC
+  station_reference: GE0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/J5/58/NH/J558-NH6Q.nc:
+  end_date: 2007-02-02T15:27:00 UTC
+  resolution: hourly
+  start_date: 2006-06-08T08:10:00 UTC
+  station_reference: IT0004R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/J9/EX/QX/J9EX-QXVJ.nc:
+  end_date: 2023-07-17T00:00:00 UTC
+  resolution: daily
+  start_date: 2023-04-14T00:00:00 UTC
+  station_reference: ES0040U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JB/RU/RR/JBRU-RRV8.nc:
+  end_date: 2013-12-31T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2007-01-01T07:00:00 UTC
+  station_reference: ES0008R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JS/84/HB/JS84-HBHZ.nc:
+  end_date: 2020-07-08T10:00:00 UTC
+  resolution: hourly
+  start_date: 2020-03-13T00:00:00 UTC
+  station_reference: FR0053U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/K2/UM/NQ/K2UM-NQ2S.nc:
+  end_date: 1996-01-01T06:00:00 UTC
+  resolution: daily
+  start_date: 1995-01-01T06:00:00 UTC
+  station_reference: PL0003R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/K2/XG/B3/K2XG-B3HQ.nc:
+  end_date: 2023-01-03T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2015-12-29T07:00:00 UTC
+  station_reference: DE0003R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KJ/93/VA/KJ93-VAQR.nc:
+  end_date: 2021-05-28T23:00:00 UTC
+  resolution: Unrecognised (P0000-00-28T00:00:00)
+  start_date: 2011-02-15T00:00:00 UTC
+  station_reference: ES0022R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KP/NU/MQ/KPNU-MQ6A.nc:
+  end_date: 2022-01-03T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2014-01-01T07:00:00 UTC
+  station_reference: ES0014R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KS/KS/E2/KSKS-E242.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2016-01-01T00:00:00 UTC
+  station_reference: FR0054U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KU/2T/U5/KU2T-U5JX.nc:
+  end_date: 2020-12-31T23:00:00 UTC
+  resolution: hourly
+  start_date: 2018-12-20T11:00:00 UTC
+  station_reference: GB0062U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MD/GY/FG/MDGY-FGE4.nc:
+  end_date: 2023-01-01T01:00:00 UTC
+  resolution: hourly
+  start_date: 2019-12-04T12:00:00 UTC
+  station_reference: FR0055U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MG/AB/75/MGAB-75XF.nc:
+  end_date: 2011-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 1996-01-01T07:00:00 UTC
+  station_reference: DK0031R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MK/8A/5F/MK8A-5FG2.nc:
+  end_date: 2013-12-30T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2012-09-12T00:00:00 UTC
+  station_reference: ES0011R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MR/44/NB/MR44-NBK2.nc:
+  end_date: 2011-01-01T03:00:00 UTC
+  resolution: daily
+  start_date: 2009-01-01T03:00:00 UTC
+  station_reference: AM0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N4/F4/PV/N4F4-PVBW.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2022-01-03T00:00:00 UTC
+  station_reference: ES0008R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N9/KA/27/N9KA-27DG.nc:
+  end_date: 2021-12-30T10:00:00 UTC
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  start_date: 2017-03-14T10:00:00 UTC
+  station_reference: CH0053R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NE/NA/3E/NENA-3EBP.nc:
+  end_date: 2007-03-01T01:00:00 UTC
+  resolution: hourly
+  start_date: 2006-06-01T01:00:00 UTC
+  station_reference: CH0002R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NF/BD/ZN/NFBD-ZNBC.nc:
+  end_date: 2022-01-26T10:00:00 UTC
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  start_date: 2013-01-09T10:00:00 UTC
+  station_reference: CH0002R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NU/GT/28/NUGT-28AP.nc:
+  end_date: 2010-05-25T07:00:00 UTC
+  resolution: hourly
+  start_date: 2009-11-01T01:00:00 UTC
+  station_reference: FI0038U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NU/NJ/CK/NUNJ-CKNT.nc:
+  end_date: 2020-11-22T05:00:00 UTC
+  resolution: hourly
+  start_date: 2019-01-01T11:00:00 UTC
+  station_reference: GB0023U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NX/CT/E7/NXCT-E7GB.nc:
+  end_date: 2020-08-03T05:00:00 UTC
+  resolution: daily
+  start_date: 2014-02-24T05:00:00 UTC
+  station_reference: GE0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NX/XG/ND/NXXG-NDAJ.nc:
+  end_date: 2015-12-29T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2013-12-03T07:00:00 UTC
+  station_reference: DE0009R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/P7/9U/2C/P79U-2CUK.nc:
+  end_date: 2012-01-02T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2011-01-04T00:00:00 UTC
+  station_reference: DE0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/P9/PG/RP/P9PG-RPGF.nc:
+  end_date: 2022-01-11T10:00:00 UTC
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  start_date: 2013-01-08T10:00:00 UTC
+  station_reference: CH0005R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/P9/Y8/8C/P9Y8-8C77.nc:
+  end_date: 1999-12-31T14:00:00 UTC
+  resolution: daily
+  start_date: 1995-01-01T07:00:00 UTC
+  station_reference: CZ0003R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PE/3P/3P/PE3P-3PD5.nc:
+  end_date: 2016-10-04T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-28T00:00:00)
+  start_date: 2015-12-29T00:00:00 UTC
+  station_reference: BE0014R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q3/DQ/69/Q3DQ-69KJ.nc:
+  end_date: 2022-01-01T01:00:00 UTC
+  resolution: hourly
+  start_date: 2020-03-10T15:00:00 UTC
+  station_reference: FR0041U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QA/AM/ES/QAAM-ESKN.nc:
+  end_date: 2022-12-19T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-21T00:00:00)
+  start_date: 2014-01-13T00:00:00 UTC
+  station_reference: ES0034U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QU/B5/CV/QUB5-CVXF.nc:
+  end_date: 2023-07-03T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-18T00:00:00)
+  start_date: 2021-05-20T00:00:00 UTC
+  station_reference: ES0043U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QU/WT/88/QUWT-88UW.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 1993-01-01T06:00:00 UTC
+  station_reference: SE0005R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QV/BR/4N/QVBR-4N3K.nc:
+  end_date: 2016-01-01T06:00:00 UTC
+  resolution: daily
+  start_date: 1993-01-01T06:00:00 UTC
+  station_reference: SE0011R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R9/DZ/U5/R9DZ-U5YQ.nc:
+  end_date: 2015-12-29T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2013-12-03T07:00:00 UTC
+  station_reference: DE0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RB/TX/6A/RBTX-6AZY.nc:
+  end_date: 2012-01-01T05:00:00 UTC
+  resolution: Unrecognised (P0000-00-03T00:00:00)
+  start_date: 2009-01-01T05:00:00 UTC
+  station_reference: GE0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RP/CW/BB/RPCW-BBA2.nc:
+  end_date: 2023-01-03T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2015-12-29T07:00:00 UTC
+  station_reference: DE0008R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RV/WM/PQ/RVWM-PQBU.nc:
+  end_date: 2015-12-29T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2013-12-03T07:00:00 UTC
+  station_reference: DE0003R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SS/CD/E6/SSCD-E6W2.nc:
+  end_date: 2007-01-01T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2004-08-02T00:00:00 UTC
+  station_reference: ES0008R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SZ/JZ/33/SZJZ-33NU.nc:
+  end_date: 2016-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 1996-01-01T00:00:00 UTC
+  station_reference: NL0091R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/T2/4H/B2/T24H-B26R.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2022-01-01T00:00:00 UTC
+  station_reference: GB1055R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+  - hydrochloric_acid
+  - hydrochloric_acid_qc
+  - hydrochloric_acid_ebasmetadata
+  - nitric_acid
+  - nitric_acid_qc
+  - nitric_acid_ebasmetadata
+  - nitrous_acid
+  - nitrous_acid_qc
+  - nitrous_acid_ebasmetadata
+  - sulphur_dioxide
+  - sulphur_dioxide_qc
+  - sulphur_dioxide_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/T4/VZ/T3/T4VZ-T3XH.nc:
+  end_date: 2003-12-12T12:00:00 UTC
+  resolution: daily
+  start_date: 2002-03-22T12:00:00 UTC
+  station_reference: ES1778R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TA/N7/AZ/TAN7-AZ93.nc:
+  end_date: 2022-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2011-10-11T00:00:00 UTC
+  station_reference: IT0037R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TM/PP/WK/TMPP-WKZM.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2016-01-01T06:00:00 UTC
+  station_reference: SE0020R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TN/XH/JU/TNXH-JU52.nc:
+  end_date: 2022-12-28T22:59:00 UTC
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  start_date: 2022-01-27T00:00:00 UTC
+  station_reference: FR0048U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UG/CS/QH/UGCS-QHVQ.nc:
+  end_date: 1994-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 1993-01-01T07:00:00 UTC
+  station_reference: NL0002R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UH/ME/FG/UHME-FGA3.nc:
+  end_date: 2018-01-23T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-28T00:00:00)
+  start_date: 2017-12-26T00:00:00 UTC
+  station_reference: BE0014R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UQ/XC/E5/UQXC-E5N2.nc:
+  end_date: 2020-12-30T10:05:00 UTC
+  resolution: monthly
+  start_date: 2013-01-01T09:40:00 UTC
+  station_reference: GB0013R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/US/4S/54/US4S-54YK.nc:
+  end_date: 2022-12-19T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-21T00:00:00)
+  start_date: 2011-05-16T00:00:00 UTC
+  station_reference: ES0035U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UX/QE/NR/UXQE-NRY3.nc:
+  end_date: 2021-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2016-01-01T00:00:00 UTC
+  station_reference: GB1055R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VG/76/XY/VG76-XY6M.nc:
+  end_date: 2009-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2006-01-01T00:00:00 UTC
+  station_reference: NL0007R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VT/2H/5U/VT2H-5U26.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2022-01-03T00:00:00 UTC
+  station_reference: ES0014R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VX/YW/DW/VXYW-DW79.nc:
+  end_date: 2016-01-04T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2014-06-09T07:00:00 UTC
+  station_reference: NO1665R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/W3/M5/49/W3M5-49F2.nc:
+  end_date: 2012-01-03T08:00:00 UTC
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  start_date: 2010-12-21T08:00:00 UTC
+  station_reference: BE0014R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/W7/YQ/E9/W7YQ-E9MZ.nc:
+  end_date: 2023-01-01T00:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2022-01-03T00:00:00 UTC
+  station_reference: ES0009R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WH/GW/GM/WHGW-GMWG.nc:
+  end_date: 2022-01-03T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2013-12-31T07:00:00 UTC
+  station_reference: ES0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/X6/Z9/5X/X6Z9-5X6W.nc:
+  end_date: 2023-01-03T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2015-12-29T07:00:00 UTC
+  station_reference: DE0009R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XM/GH/9Q/XMGH-9QKD.nc:
+  end_date: 2021-01-06T11:30:00 UTC
+  resolution: monthly
+  start_date: 2013-01-09T10:10:00 UTC
+  station_reference: GB0054R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XX/3T/WB/XX3T-WBC3.nc:
+  end_date: 2002-01-01T06:00:00 UTC
+  resolution: daily
+  start_date: 1993-01-01T06:00:00 UTC
+  station_reference: SE0002R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y5/BV/DY/Y5BV-DYKS.nc:
+  end_date: 2014-01-01T06:00:28 UTC
+  resolution: daily
+  start_date: 2013-12-31T06:00:28 UTC
+  station_reference: FI0036R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y5/E4/9F/Y5E4-9FEQ.nc:
+  end_date: 2013-12-31T07:00:00 UTC
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  start_date: 2013-01-01T07:00:00 UTC
+  station_reference: ES0001R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YM/RM/44/YMRM-44YC.nc:
+  end_date: 2016-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 2014-01-01T07:00:00 UTC
+  station_reference: NO0002R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YP/C6/KS/YPC6-KSKX.nc:
+  end_date: 2022-02-07T09:00:00 UTC
+  resolution: Unrecognised (P0000-00-11T00:00:00)
+  start_date: 2011-02-14T11:00:00 UTC
+  station_reference: ES0019U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZD/4E/TP/ZD4E-TP54.nc:
+  end_date: 2001-01-01T07:00:00 UTC
+  resolution: daily
+  start_date: 1997-01-01T07:00:00 UTC
+  station_reference: DK0008R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZF/XX/DV/ZFXX-DVE5.nc:
+  end_date: 2009-01-01T00:00:00 UTC
+  resolution: daily
+  start_date: 2005-01-01T00:00:00 UTC
+  station_reference: DE0007R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia
+  - ammonia_qc
+  - ammonia_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZQ/96/X5/ZQ96-X5NF.nc:
+  end_date: 2019-03-01T10:00:00 UTC
+  resolution: hourly
+  start_date: 2016-09-01T00:00:00 UTC
+  station_reference: FR0052U
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZS/MG/HB/ZSMG-HBUB.nc:
+  end_date: 2024-01-01T00:00:00 UTC
+  resolution: hourly
+  start_date: 2016-01-01T00:00:00 UTC
+  station_reference: NL0091R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - ammonia_nmol_per_mol
+  - ammonia_nmol_per_mol_qc
+  - ammonia_nmol_per_mol_ebasmetadata
+  - ammonia_ug_N_per_m3
+  - ammonia_ug_N_per_m3_qc
+  - ammonia_ug_N_per_m3_ebasmetadata

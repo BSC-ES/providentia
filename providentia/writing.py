@@ -582,7 +582,7 @@ def export_configuration(prv, cname, separator="||"):
                 calibration_factor += '{} ({}), '.format(exp, factor)
         options['section'].update({'calibration_factor': calibration_factor})
 
-    # statistc_aggregation
+    # statistic_aggregation
     if prv.statistic_aggregation != merged_defaults['statistic_aggregation'][prv.statistic_mode]:
         options['section'].update({'statistic_aggregation': prv.statistic_aggregation})
 
