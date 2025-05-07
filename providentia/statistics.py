@@ -160,16 +160,18 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             if len(canvas_instance.station_inds[networkspeci]) == 1:
                 canvas_instance.selected_station_data[networkspeci]['timeseries'] = data_array[:,0,:]
             else:
-                if (read_instance.offline) or (read_instance.interactive):
-                    timeseries_stat = read_instance.timeseries_statistic_aggregation
-                else:
-                    timeseries_stat = canvas_instance.timeseries_stat.currentText()
-                aggregated_data = aggregation(data_array, timeseries_stat, axis=1)
-                canvas_instance.selected_station_data[networkspeci]['timeseries'] = aggregated_data
+                canvas_instance.selected_station_data[networkspeci]['timeseries'] = aggregation(data_array, read_instance.timeseries_statistic_aggregation, axis=1)
 
             # save data per station
             if read_instance.statistic_mode == 'Spatial|Temporal':
-                canvas_instance.selected_station_data[networkspeci]['per_station'] = canvas_instance.selected_station_data[networkspeci]['timeseries'][:,np.newaxis,:]
+                # if statistic aggregation is the same as the timeseries statistic aggregation then can take the timeseries
+                if read_instance.statistic_aggregation == read_instance.timeseries_statistic_aggregation:
+                    canvas_instance.selected_station_data[networkspeci]['per_station'] = canvas_instance.selected_station_data[networkspeci]['timeseries'][:,np.newaxis,:]
+                # otherwise do aggregation
+                else:
+                    aggregated_data = aggregation(data_array, read_instance.statistic_aggregation, axis=1)
+                    canvas_instance.selected_station_data[networkspeci]['per_station'] = aggregated_data[:,np.newaxis,:]
+
             elif read_instance.statistic_mode in ['Temporal|Spatial', 'Flattened']:
                 canvas_instance.selected_station_data[networkspeci]['per_station'] = data_array
 

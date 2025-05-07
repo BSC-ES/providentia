@@ -244,7 +244,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         super().save_figure(self)
 
     def conf_dialogs(self):
-        """ Pop window for selecting configuration file. If file selcted, pops an
+        """ Pop window for selecting configuration file. If file selected, pops an
             input dialog for the user to select which section wants to load. Calls
             reload_conf to reset the fields.
         """

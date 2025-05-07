@@ -168,18 +168,16 @@ class SubmitInterpolation(object):
             if exp_dir is None: 
                 
                 if self.machine != "local":
-                    msg += f"The experiment '{experiment_to_process}' is in none of the experiment paths defined in settings/interp_experiments.yaml."
+                    msg = f"The experiment '{experiment_to_process}' is in none of the experiment paths defined in settings/interp_experiments.yaml."
+                    print(msg)
 
                 exp_to_interp_path = join(self.exp_to_interp_root, experiment_to_process)
                 if os.path.exists(exp_to_interp_path):
                     exp_dir = exp_to_interp_path
-                
-                msg += f"The experiment '{experiment_to_process}' is not in {self.exp_to_interp_root}."
-
-            # take first functional directory 
-            if exp_dir is None:
-                print(msg)
-                continue
+                else:
+                    msg = f"The experiment '{experiment_to_process}' is not in {self.exp_to_interp_root}."
+                    print(msg)
+                    continue
 
             # get model bin edges
             r_edges, rho_bins = get_model_bin_radii(experiment_type)
@@ -602,8 +600,11 @@ class SubmitInterpolation(object):
                 str_to_write = str_to_write.replace(ch,'\{}'.format(ch))
         
             # write arguments str to current file
-            arguments_file.write('python -u {}/interpolation/experiment_interpolation.py {}\n'.format(self.working_directory, 
-                                                                                        str_to_write))
+            command = 'python -u {}/interpolation/experiment_interpolation.py {}\n'.format(self.working_directory, 
+                                                                                           str_to_write)
+            if self.machine == 'nord4':
+                command = 'nord3_singu_es {}'.format(command)
+            arguments_file.write(command)
 
             # iterate n lines written    
             n_lines_written += 1
@@ -860,6 +861,8 @@ class SubmitInterpolation(object):
     
     def run_command(self, commands):
         arguments_list = commands.strip().split()
+        if self.machine == 'nord4':
+            arguments_list.insert(0, 'nord3_singu_es')
         result = subprocess.run(arguments_list, capture_output=True, text=True)
         if result.returncode != 0:
             error = result.stderr

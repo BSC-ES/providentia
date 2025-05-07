@@ -298,27 +298,40 @@ class ProvConfiguration:
             # parse qa
 
             from GHOST_standards import providentia_defaults
+            
+            if self.read_instance.network == ['actris/actris']:
+                defaults = {
+                    "flag": [],
+                    "qa_standard": ["Invalid Data Provider Flags - GHOST Decreed"],
+                    "qa_non_negative": ["Invalid Data Provider Flags - GHOST Decreed"]
+                }
+            else:
+                defaults = providentia_defaults
 
             # set default qa codes (can differ per GHOST version)
             self.read_instance.default_qa_standard = [self.read_instance.standard_QA_name_to_QA_code[qa_name] 
-                                                      for qa_name in providentia_defaults['qa_standard']]
+                                                      for qa_name in defaults['qa_standard']]
             self.read_instance.default_qa_non_negative = [self.read_instance.standard_QA_name_to_QA_code[qa_name] 
-                                                          for qa_name in providentia_defaults['qa_non_negative']]
+                                                          for qa_name in defaults['qa_non_negative']]
 
             # if not None then set QA by that given
             if value is not None:
                 # if conf has only 1 QA
                 if isinstance(value, int):
-                    return [value]
+                    value = [value]
                 # empty string
                 elif value == "":
-                    return []
+                    value = []
                 # if the QAs are written with their names
                 elif isinstance(value, str):
-                    return sorted([self.read_instance.standard_QA_name_to_QA_code[q.strip()] for q in value.split(",")])
+                    value = sorted([self.read_instance.standard_QA_name_to_QA_code[q.strip()] for q in value.split(",")])
                 # list of integer codes
                 else:
-                    return sorted(list(value))
+                    value = sorted(list(value))
+                # if we have an ACTRIS network, keep only qa that can be applied
+                if self.read_instance.network == ['actris/actris']:
+                    value = [val for val in value if val in [6, 7]]
+                return value
             # otherwise, set default QA per species (set later)
             else:
                 # set qa to be empty dict (to be later filled)
@@ -328,6 +341,15 @@ class ProvConfiguration:
             # parse flags
 
             from GHOST_standards import providentia_defaults
+
+            if self.read_instance.network == ['actris/actris']:
+                defaults = {
+                    "flag": [],
+                    "qa_standard": ["Invalid Data Provider Flags - GHOST Decreed"],
+                    "qa_non_negative": ["Invalid Data Provider Flags - GHOST Decreed"]
+                }
+            else:
+                defaults = providentia_defaults
 
             # if not None then set flags by that given
             if value is not None:
@@ -345,7 +367,7 @@ class ProvConfiguration:
                     return sorted(list(value))
             # otherwise, set default flags
             else:
-                return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[flag_name] for flag_name in providentia_defaults['flag']])
+                return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[flag_name] for flag_name in defaults['flag']])
 
         elif key in ['add_qa','subtract_qa']:
             # parse add/subtract qa
