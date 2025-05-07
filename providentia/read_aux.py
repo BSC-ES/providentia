@@ -53,18 +53,17 @@ def read_netcdf_data(tuple_arguments):
     # assign arguments from tuple to variables
     relevant_file, station_references, station_names, speci,\
     observations_data_label, data_label, data_labels, reading_ghost, ghost_data_vars_to_read,\
-    metadata_dtype, metadata_vars_to_read, logger, default_qa, filter_read = tuple_arguments
-
-    start = time.time()
+    metadata_dtype, metadata_vars_to_read, logger, default_qa, filter_read, network = tuple_arguments
 
     # wrap shared arrays as numpy arrays to more easily manipulate the data
     data_in_memory = np.frombuffer(shared_memory_vars['data_in_memory'], dtype=np.float32).reshape(shared_memory_vars['data_in_memory_shape'][:])
-    if (reading_ghost) & (data_label == observations_data_label): 
+    if (reading_ghost or network == 'actris/actris') & (data_label == observations_data_label): 
         qa = np.frombuffer(shared_memory_vars['qa'], dtype=np.uint8)
         flags = np.frombuffer(shared_memory_vars['flag'], dtype=np.uint8)
-        if not filter_read:
-            ghost_data_in_memory = np.frombuffer(shared_memory_vars['ghost_data_in_memory'], 
-                                                 dtype=np.float32).reshape(shared_memory_vars['ghost_data_in_memory_shape'][:])
+        if reading_ghost:
+            if not filter_read:
+                ghost_data_in_memory = np.frombuffer(shared_memory_vars['ghost_data_in_memory'], 
+                                                    dtype=np.float32).reshape(shared_memory_vars['ghost_data_in_memory_shape'][:])
     timestamp_array = np.frombuffer(shared_memory_vars['timestamp_array'], dtype=np.int64)
 
     # read netCDF frame
@@ -199,7 +198,8 @@ def read_netcdf_data(tuple_arguments):
                     ghost_data_in_memory[ghost_data_var_ii, full_array_station_indices[:, np.newaxis], 
                                         full_array_time_indices[np.newaxis, :]] = \
                         ncdf_root[ghost_data_var][current_file_station_indices, valid_file_time_indices]
-
+        
+        if (reading_ghost) or (network == 'actris/actris'):
             # if some qa flags selected then screen observations
             if qa is not None:
                 if len(qa) > 0:
@@ -267,6 +267,10 @@ def read_netcdf_data(tuple_arguments):
                                 meta_val = np.array([''.join(val) for val in meta_val])
                             else:
                                 meta_val = chartostring(meta_val)
+                    
+                    # do str formatting (capitalization) to the country and city metadata
+                    if meta_var_nc in ['city', 'country']:
+                        meta_val = np.char.capitalize(meta_val)
 
                 # GHOST metadata
                 else:
@@ -626,20 +630,20 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
     # check if start/end date are valid values, if not, return with no valid obs. files
     if (not valid_date(start_date)) or (not valid_date(end_date)):
         msg = f'One of start date ({start_date}) or end date ({end_date}) are not valid.'
-        show_message(instance, msg)
+        show_message(instance, msg, print=True)
         return
 
     # check end date is > start date, if not, return with no valid obs. files
     if int(start_date) >= int(end_date):
         msg = f'Start date ({start_date}) exceeds end date ({end_date}).'
-        show_message(instance, msg)
+        show_message(instance, msg, print=True)
         return
 
     # check start date and end date are both within if valid date range (19000101 - 20500101),
     # if not, return with no valid obs. files
     if (int(start_date) < 19000101) or (int(end_date) < 19000101) or (int(start_date) >= 20500101) or (int(end_date) >= 20500101):
         msg = f'One of start date ({start_date}) or end date ({end_date}) are not valid.'
-        show_message(instance, msg)
+        show_message(instance, msg, print=True)
         return 
 
     # get start date on first of month

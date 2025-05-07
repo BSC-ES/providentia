@@ -26,7 +26,7 @@ from .configuration import ProvConfiguration
 from .dashboard_elements import ComboBox, QVLine, InputDialog
 from .dashboard_elements import set_formatting
 from .dashboard_interactivity import HoverAnnotation
-from .fields_menus import (init_experiments, init_flags, init_qa, init_metadata, init_multispecies, init_period, 
+from .fields_menus import (init_experiments, init_flags, init_qa, update_qa, init_metadata, init_multispecies, init_period, 
                            init_representativity, metadata_conf, multispecies_conf, representativity_conf, period_conf, 
                            update_metadata_fields, update_period_fields, update_representativity_fields)
 from .plot_aux import get_taylor_diagram_ghelper
@@ -77,7 +77,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
-        provconf = ProvConfiguration(self, **kwargs)
+        self.provconf = ProvConfiguration(self, **kwargs)
 
         # update variables from config file (if available)
         self.from_conf = False
@@ -149,10 +149,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # update variables from defined config file
         if self.current_config:
             for k, val in self.current_config.items():
-                setattr(self, k, provconf.parse_parameter(k, val))
+                setattr(self, k, self.provconf.parse_parameter(k, val))
 
         # now all variables have been parsed, check validity of those, throwing errors where necessary
-        provconf.check_validity()
+        self.provconf.check_validity()
 
         # get operating system specific formatting
         if self.operating_system == 'Mac':
@@ -679,7 +679,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.selected_statistic_aggregation = copy.deepcopy(self.statistic_aggregation)
             self.selected_periodic_statistic_aggregation = copy.deepcopy(self.periodic_statistic_aggregation)
             self.selected_periodic_statistic_mode = copy.deepcopy(self.periodic_statistic_mode)
-            self.selected_timeseries_stat = copy.deepcopy(self.timeseries_statistic_aggregation)
+            self.selected_timeseries_statistic_aggregation = copy.deepcopy(self.timeseries_statistic_aggregation)
 
             # set initial filter species in widgets as empty dictionaries
             self.selected_widget_network = dict()
@@ -734,12 +734,12 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         else:
             self.selected_network = self.cb_network.currentText()
 
-        # turn off some features if using non-GHOST data
-        if check_for_ghost(self.selected_network):
+        # turn off some features if using non-GHOST data (on for ACTRIS)
+        if check_for_ghost(self.selected_network) or self.selected_network == 'actris/actris':
             self.enable_ghost_buttons()
         else:
             self.disable_ghost_buttons()
-
+        
         # update resolution field
         available_resolutions = list(self.available_observation_data[self.selected_network].keys())
         # set order of available resolutions
@@ -806,10 +806,10 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # update timeseries statistic field
         available_timeseries_statistics = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
         self.mpl_canvas.timeseries_stat.addItems(available_timeseries_statistics)
-        if self.selected_timeseries_stat in available_timeseries_statistics:
-            self.mpl_canvas.timeseries_stat.setCurrentText(self.selected_timeseries_stat)
+        if self.selected_timeseries_statistic_aggregation in available_timeseries_statistics:
+            self.mpl_canvas.timeseries_stat.setCurrentText(self.selected_timeseries_statistic_aggregation)
         else:
-            self.selected_timeseries_stat = self.mpl_canvas.timeseries_stat.currentText()
+            self.selected_timeseries_statistic_aggregation = self.mpl_canvas.timeseries_stat.currentText()
 
         # get available resampling resolutions
         available_resampling_resolutions = get_lower_resolutions(self.selected_resolution)
@@ -965,6 +965,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # changed param
             if event_source == self.cb_network:
                 self.selected_network = changed_param
+                # ensure that QA defaults have been updated if network has changed (i.e. to or from ACTRIS)
+                update_qa(self)
 
             elif event_source == self.cb_resolution:
                 self.selected_resolution = changed_param

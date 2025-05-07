@@ -61,7 +61,7 @@ def sighandler(*unused):
         if os.path.isfile(download.latest_nc_file_path):
             os.remove(download.latest_nc_file_path)
 
-    # remove the output files frojm dtrsync in case it was a download from storage5
+    # remove the output files from dtrsync in case it was a download from storage5
     if download.machine == "storage5":
         time.sleep(3)
             
@@ -287,13 +287,7 @@ class ProvidentiaDownload(object):
                     else:
                         error = f"Error: It is not possible to download experiments from the zenodo webpage."
                         self.logger.error(error)
-                        sys.exit(1) 
-            
-            # raise an error if there are no valid experiments                                
-            else:
-                error = "Error: No experiments available to be downloaded."
-                self.logger.error(error)
-                sys.exit(1)           
+                        sys.exit(1)         
            
             # iterate the experiments download
             for experiment in self.experiments.keys():
@@ -1793,8 +1787,8 @@ class ProvidentiaDownload(object):
                 continue
 
             # filter files by resolution and dates
-            self.logger.info('    Filtering files by resolution and dates...')
-            files = []
+            self.logger.info('Filtering files by resolution and dates...')
+            files = {}
             for file, attributes in files_info.items():
                 if attributes["resolution"] == resolution:
                     start_date = datetime.strptime(attributes["start_date"], "%Y-%m-%dT%H:%M:%S UTC")
@@ -1804,13 +1798,23 @@ class ProvidentiaDownload(object):
                         file_to_download_start_date = datetime.strptime(file_to_download_yearmonth, "%Y%m")
                         file_to_download_end_date = datetime(file_to_download_start_date.year, file_to_download_start_date.month, 1) + relativedelta(months=1, seconds=-1)
                         if file_to_download_start_date <= end_date and file_to_download_end_date >= start_date:
-                            if file not in files:
-                                files.append(file)
+                            # from filtered files, save those that are provided multiple times
+                            station = attributes["station_reference"]
+                            if station not in files:
+                                files[station] = []
+                            if file not in files[station]:
+                                files[station].append(file)
 
             if len(files) != 0:
-                    
+
                 # get data and metadata for each file within period
-                combined_ds_list, metadata, wavelength = get_data(files, var, actris_parameter, resolution, target_start_date, target_end_date)
+                combined_ds_list, metadata, wavelength = get_data(files, var, actris_parameter, resolution, 
+                                                                  target_start_date, target_end_date)
+                
+                # check if there is data after reading available files
+                if len(combined_ds_list) == 0:
+                    self.logger.info('No data were found')
+                    continue
 
                 # get flag dimension per station
                 N_flag_codes_dims = []
@@ -1838,14 +1842,8 @@ class ProvidentiaDownload(object):
                     combined_ds_list_corrected_flag.append(ds)
             
                 # combine and create new dataset
-                self.logger.info('    Combining files...')
-                try:
-                    combined_ds = xr.concat(combined_ds_list_corrected_flag, 
-                                            dim='station', 
-                                            combine_attrs='drop_conflicts')
-                except Exception as error:
-                    self.logger.info(f'Error: Datasets could not be combined - {error}')
-                    continue
+                self.logger.info('Combining files...')
+                combined_ds = temporally_average_data(combined_ds_list_corrected_flag, resolution, var, self.ghost_version, target_start_date, target_end_date)
                 
                 # add metadata
                 for key, value in metadata[resolution].items():
@@ -1874,7 +1872,7 @@ class ProvidentiaDownload(object):
                 combined_ds.attrs['application_area'] = 'Monitoring atmospheric composition'
                 combined_ds.attrs['domain'] = 'Atmosphere'
                 combined_ds.attrs['observed_layer'] = 'Land surface'
-                        
+
                 # save data per year and month
                 path = join(self.nonghost_root, f'actris/actris/{resolution}/{var}')
                 if not os.path.isdir(path):
@@ -1884,9 +1882,8 @@ class ProvidentiaDownload(object):
                     for month, ds_month in ds_year.groupby('time.month'):
                         filename = f"{path}/{var}_{year}{month:02d}.nc"
                         if filename in files_to_download:
-                            combined_ds_yearmonth_unaveraged = combined_ds.sel(time=f"{year}-{month:02d}")
-                            combined_ds_yearmonth = temporally_average_data(combined_ds_yearmonth_unaveraged, resolution, year, month, var, self.ghost_version)
-    
+                            combined_ds_yearmonth = combined_ds.sel(time=f"{year}-{month:02d}")
+
                             # add title to attrs
                             extra_info = ''
                             wavelength_var = is_wavelength_var(actris_parameter)
@@ -1910,7 +1907,7 @@ class ProvidentiaDownload(object):
                             # current_n_stations = len(combined_ds_yearmonth.station)
                             # n_stations_diff = previous_n_stations - current_n_stations
                             # if n_stations_diff > 0:
-                            #     self.logger.info(f'    Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
+                            #     self.logger.info(f'Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
                             
                             # remove file if it exists
                             if os.path.isfile(filename):
@@ -1921,13 +1918,13 @@ class ProvidentiaDownload(object):
 
                             # change permissions
                             os.system("chmod 777 {}".format(filename))
-                            self.logger.info(f"    Saved: {filename}")
+                            self.logger.info(f"Saved: {filename}")
                             saved_files += 1
                             
-                self.logger.info(f'    Total number of saved files: {saved_files}')
+                self.logger.info(f'Total number of saved files: {saved_files}')
 
             else:
-                self.logger.info('    No files were found')
+                self.logger.info('No files were found')
 
 def main(**kwargs):
     """ Main function when running download function. """
