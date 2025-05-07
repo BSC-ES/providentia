@@ -104,7 +104,6 @@ export SLURM_EXPORT_ENV=ALL
 # workaround to stop driver conflict issue 
 #export QT_QPA_PLATFORM_PLUGIN_PATH=/gpfs/home/bsc/${USER}/.conda/envs/providentia-env/lib/python3.9/site-packages/PyQt5/Qt5/plugins
 
-
 # update key arguments for job submission
 OTHEROPTS=""
 while [ $# -gt 0 ]; do
@@ -378,7 +377,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
 
     # load modules from conda environment
     active_env=false
-    module load ANACONDA/5.0.1
+    module load Miniconda3/23.9.0-0
     eval "$(conda shell.bash hook)"
     conda config --set env_prompt '($(basename {default_env})) '
     if ! { conda config --show-sources | grep '/gpfs/projects/bsc32/repository/apps/conda_envs/'; } >/dev/null 2>&1; then
@@ -426,9 +425,9 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
             else
                 echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
                 if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
-                    eval "${salloc_command} ${account_option} ${queue_option} srun ${python_command}"
+                    eval "${salloc_command} ${account_option} ${queue_option} srun nord3_singu_es ${python_command}"
                 else
-                    eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun ${python_command}"
+                    eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun nord3_singu_es ${python_command}"
                 fi
             fi
         fi
@@ -441,18 +440,21 @@ else
     # load modules from conda environment
     active_env=false
     eval "$(conda shell.bash hook)"
-    if { conda env list | grep 'providentia-env_2.4.0'; } >/dev/null 2>&1; then 
+    if { conda env list | grep 'providentia-env_v2.4.0'; } >/dev/null 2>&1; then 
         echo "Activating environment..."
-        conda activate providentia-env_2.4.0
+        conda activate providentia-env_v2.4.0
         active_env=true
     else
         # create environment if it does not exist
-        echo "Environment providentia-env_2.4.0 does not exist."; 
+        echo "Environment providentia-env_v2.4.0 does not exist."; 
         echo "Creating environment..."
-        conda create -n providentia-env_2.4.0 -y python=3.11.5
-        conda activate providentia-env_2.4.0
-        conda install -c conda-forge cartopy -y
-        conda install -c conda-forge jupyterlab -y
+        if ! conda config --show channels 2>/dev/null | grep -q 'conda-forge'; then
+            conda config --append channels conda-forge
+        fi
+        conda create -c conda-forge -n providentia-env_v2.4.0 --override-channels
+        conda activate providentia-env_v2.4.0
+        conda install -c conda-forge cartopy -y --override-channels
+        conda install -c conda-forge jupyterlab -y --override-channels
         pip install -r requirements.txt
         active_env=true
     fi

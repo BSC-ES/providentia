@@ -1,0 +1,141 @@
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/89/GZ/SD/89GZ-SDHJ.nc:
+  end_date: 2023-01-03T00:00:00 UTC
+  resolution: monthly
+  start_date: 2022-01-04T00:00:00 UTC
+  station_reference: IT0019R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - aluminium
+  - aluminium_qc
+  - aluminium_ebasmetadata
+  - antimony
+  - antimony_qc
+  - antimony_ebasmetadata
+  - arsenic
+  - arsenic_qc
+  - arsenic_ebasmetadata
+  - barium
+  - barium_qc
+  - barium_ebasmetadata
+  - cadmium
+  - cadmium_qc
+  - cadmium_ebasmetadata
+  - chromium
+  - chromium_qc
+  - chromium_ebasmetadata
+  - cobalt
+  - cobalt_qc
+  - cobalt_ebasmetadata
+  - copper
+  - copper_qc
+  - copper_ebasmetadata
+  - iron
+  - iron_qc
+  - iron_ebasmetadata
+  - lanthanum
+  - lanthanum_qc
+  - lanthanum_ebasmetadata
+  - lead
+  - lead_qc
+  - lead_ebasmetadata
+  - manganese
+  - manganese_qc
+  - manganese_ebasmetadata
+  - molybdenum
+  - molybdenum_qc
+  - molybdenum_ebasmetadata
+  - nickel
+  - nickel_qc
+  - nickel_ebasmetadata
+  - strontium
+  - strontium_qc
+  - strontium_ebasmetadata
+  - tin
+  - tin_qc
+  - tin_ebasmetadata
+  - titanium
+  - titanium_qc
+  - titanium_ebasmetadata
+  - vanadium
+  - vanadium_qc
+  - vanadium_ebasmetadata
+  - zinc
+  - zinc_qc
+  - zinc_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AZ/DJ/4X/AZDJ-4XB6.nc:
+  end_date: 2022-01-04T00:00:00 UTC
+  resolution: monthly
+  start_date: 2020-12-31T00:00:00 UTC
+  station_reference: IT0019R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - aluminium
+  - aluminium_qc
+  - aluminium_ebasmetadata
+  - titanium
+  - titanium_qc
+  - titanium_ebasmetadata
+  - vanadium
+  - vanadium_qc
+  - vanadium_ebasmetadata
+  - manganese
+  - manganese_qc
+  - manganese_ebasmetadata
+  - iron
+  - iron_qc
+  - iron_ebasmetadata
+  - cobalt
+  - cobalt_qc
+  - cobalt_ebasmetadata
+  - copper
+  - copper_qc
+  - copper_ebasmetadata
+  - zinc
+  - zinc_qc
+  - zinc_ebasmetadata
+  - strontium
+  - strontium_qc
+  - strontium_ebasmetadata
+  - molybdenum
+  - molybdenum_qc
+  - molybdenum_ebasmetadata
+  - antimony
+  - antimony_qc
+  - antimony_ebasmetadata
+  - barium
+  - barium_qc
+  - barium_ebasmetadata
+  - lanthanum
+  - lanthanum_qc
+  - lanthanum_ebasmetadata
+  - lead
+  - lead_qc
+  - lead_ebasmetadata
+  - chromium
+  - chromium_qc
+  - chromium_ebasmetadata
+  - nickel
+  - nickel_qc
+  - nickel_ebasmetadata
+  - cadmium
+  - cadmium_qc
+  - cadmium_ebasmetadata
+  - arsenic
+  - arsenic_qc
+  - arsenic_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PW/WA/BY/PWWA-BYPP.nc:
+  end_date: 2020-12-31T00:00:00 UTC
+  resolution: monthly
+  start_date: 2017-01-01T00:00:00 UTC
+  station_reference: IT0019R
+  statistics: arithmetic mean
+  variables:
+  - time_bnds
+  - metadata_time_bnds
+  - manganese
+  - manganese_qc
+  - manganese_ebasmetadata
