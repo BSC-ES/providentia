@@ -268,8 +268,8 @@ def read_netcdf_data(tuple_arguments):
                             else:
                                 meta_val = chartostring(meta_val)
                     
-                    # do str formatting (capitalization) to the country and city metadata
-                    if meta_var_nc in ['city', 'country']:
+                    # do str formatting (capitalization) to the metadata
+                    if isinstance(meta_val,str):
                         meta_val = np.char.capitalize(meta_val)
 
                 # GHOST metadata
