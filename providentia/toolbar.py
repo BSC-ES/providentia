@@ -112,6 +112,7 @@ class NavigationToolbar(NavigationToolbar2QT):
                 matplotlib.rcParams['savefig.directory'] = (os.path.dirname(fname))
                 try:
                     if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                        self.read_instance.cursor_function = 'save_data'
                         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
                     if chose_npz:
                         export_data_npz(self.read_instance, fname, input_dialogue=True)
@@ -119,7 +120,7 @@ class NavigationToolbar(NavigationToolbar2QT):
                         export_configuration(self.read_instance, fname)
                     else:
                         export_netcdf(self.read_instance, fname, input_dialogue=True)
-                    if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+                    if self.read_instance.cursor_function == 'save_data':
                         QtWidgets.QApplication.restoreOverrideCursor()
                     msg = 'The data was successfully saved in {}.'.format(fname)
                     show_message(self.read_instance, msg)
