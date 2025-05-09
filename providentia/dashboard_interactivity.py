@@ -5,14 +5,16 @@ import datetime
 import math
 import time
 
-import matplotlib
+from matplotlib.dates import num2date
 from matplotlib.lines import Line2D
 from matplotlib.widgets import _SelectorWidget
 import numpy as np
 from packaging.version import Version
 import pandas as pd
+from PyQt5.QtWidgets import QToolTip, QWidget
 
-from .plot_aux import get_map_extent
+from .dashboard_elements import set_formatting
+from .plot_aux import get_map_extent, get_hex_code
 from .plot_formatting import harmonise_xy_lims_paradigm
 
 
@@ -203,15 +205,10 @@ def legend_picker_func(canvas_instance, event):
                         # get active (absolute / bias)
                         active = canvas_instance.plot_elements[plot_type]['active']
 
-                        #print(plot_type, active, visible)
-
                         # change visibility of plot elements (if data label in plot elements dictionary)
                         if data_label in canvas_instance.plot_elements[plot_type][active]:
                             for element_type in canvas_instance.plot_elements[plot_type][active][data_label]:
                                 for plot_element in canvas_instance.plot_elements[plot_type][active][data_label][element_type]:
-                                    #if plot_type == 'periodic':
-                                        #print(plot_element)
-
                                     if visible:
                                         plot_element.set_visible(True)
                                     else:
@@ -248,601 +245,119 @@ def legend_picker_func(canvas_instance, event):
 
 class HoverAnnotation(object):
 
-    def __init__(self, canvas_instance, plot_type, ax, plot_characteristics, add_vline=False):
+    def __init__(self, canvas_instance, add_vline=False):
         
         self.canvas_instance = canvas_instance
-        
-        # get reference coordinates
-        if plot_type == 'map':
-            xycoords = canvas_instance.datacrs._as_mpl_transform(ax)
-        else:
-            xycoords = 'data'
 
-        # create annotation
-        # using matplotlib < 3.3.0, text corresponds to s
-        annotation_dict = {"xy": [0, 0], 
-                           "xycoords": xycoords, 
-                           "bbox": {**plot_characteristics['marker_annotate_bbox']},
-                           "arrowprops": {**plot_characteristics['marker_annotate_arrowprops']}}
-        if Version(matplotlib.__version__) >= Version("3.3"):
-            annotation_dict["text"] = ""
-        else:
-            annotation_dict["s"] = ""
-        self.annotation = ax.annotate(**{**annotation_dict, **plot_characteristics['marker_annotate']})
-        
-        # set number of decimal places to round the annotation to
-        self.round_decimal_places = plot_characteristics['marker_annotate_text']['round_decimal_places']
+        # set up formatting for canvas annotations
+        self.canvas_instance.figure.canvas = set_formatting(self.canvas_instance.figure.canvas, 
+                                                            self.canvas_instance.read_instance.formatting_dict['canvas_annotation'])
 
-        # hide when it is initialised
-        self.annotation.set_visible(False)
-
-        # add to elements for legend picking
-        canvas_instance.annotation_elements.extend([self.annotation])
-
-        # add vertical line
-        if add_vline:
-            self.vline = ax.axvline(0, 
-                **plot_characteristics['marker_annotate_vline'])
-            self.vline.set_visible(False)
-            canvas_instance.annotation_elements.extend([self.vline])
-
-        # initialise dict with values that are in the middle of x axis per plot type
-        self.x_middle = {}
-        self.x_middle[plot_type] = {}
+        # set up formatting for canvas annotation vline
+        self.canvas_instance.canvas_annotation_vline = set_formatting(QWidget(self.canvas_instance), self.canvas_instance.read_instance.formatting_dict['canvas_annotation_vline'])
+        self.canvas_instance.canvas_annotation_vline.hide()
 
         return None
 
-    def get_hover_item(self, plot_type, event):
-
-        is_contained = False
-        annotation_index = None
-        line_index = None
-        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
-
-            # skip observations for bias plot
-            if ((plot_type in ['timeseries', 'distribution']) 
-                and (self.canvas_instance.plot_elements[plot_type]['active'] == 'bias')
-                and (data_label == self.canvas_instance.read_instance.observations_data_label)):
-                continue
-
-            # do not annotate if plot is cleared
-            if data_label not in self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']].keys():
-                continue
-            
-            # do no annotate if hidedata is active
-            if len(self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label]['plot']) == 0:
-                continue
-            
-            # iterate through multiple lines in FAIRMODE target since it is constructed dot by dot,
-            # in other cases line index will always be 0 (only one line)
-            if plot_type == 'fairmode-target':
-                lines = self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label]['plot']
-            else:
-                lines = [self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label]['plot'][0]]
-            for line_index, line in enumerate(lines):
-                is_contained, annotation_index = line.contains(event)
-                if is_contained:
-                    self.annotate_data_label = data_label
-                    return is_contained, annotation_index, line_index
-        
-        return is_contained, annotation_index, line_index
-                          
-    def hover_annotation(self, event, plot_type):
-        """ Function that annotates on hover in timeseries, scatter, distribution, Taylor and FAIRMODE plots.
+    def hover_annotation(self, event):
+        """ Function that annotates on hover in timeseries, scatter, distribution, taylor and FAIRMODE target plots.
         """
 
-        # activate hover over plot
-        if (plot_type in self.canvas_instance.read_instance.active_dashboard_plots):
-            if event.inaxes == self.canvas_instance.plot_axes[plot_type]:
-                search_plot = plot_type.replace('-','_') if plot_type in ['fairmode-target', 'fairmode-statsummary'] else plot_type
-                if ((hasattr(self.canvas_instance.plot, search_plot + '_plot')) 
-                    and (plot_type in self.canvas_instance.plot_elements)
-                    and (self.canvas_instance.annotations_lock[plot_type] == False)):
+        #hide annotation and vline
+        self.canvas_instance.figure.canvas.setToolTip('')
+        QToolTip.hideText()
+        self.canvas_instance.canvas_annotation_vline.hide()
 
-                    # lock annotation
-                    self.canvas_instance.annotations_lock[plot_type] = True
+        # identify which axis is currently being hovered over
+        plot_type = None
+        for test_plot_type in self.canvas_instance.plot_axes:
 
-                    # find item on hover
-                    is_contained, annotation_index, line_index = self.get_hover_item(plot_type, event)
+            if not plot_type:
+                if test_plot_type in ['periodic','periodic-violin']:
+                    if hasattr(self.canvas_instance.read_instance, 'relevant_temporal_resolutions'):
+                        for resolution in self.canvas_instance.read_instance.relevant_temporal_resolutions:
+                            if event.inaxes == self.canvas_instance.plot_axes[test_plot_type][resolution]:
+                                plot_type = copy.deepcopy(test_plot_type)
+                                break
+                else:
+                    if event.inaxes == self.canvas_instance.plot_axes[test_plot_type]:
+                        plot_type = copy.deepcopy(test_plot_type)
+                        break
+
+        # if an axis is being hovered over then now check if a point is being hovered over
+        if plot_type:
+
+            # add active axis to self
+            if plot_type in ['periodic','periodic-violin']:
+                self.ax = self.canvas_instance.plot_axes[plot_type][resolution]
+            else:
+                self.ax = self.canvas_instance.plot_axes[plot_type]
+
+            # activate hover over plot
+            if plot_type == 'map':
+                search_plot = 'stations_scatter'
+            elif plot_type == 'periodic':
+                search_plot = 'periodic_plots'
+            elif plot_type == 'periodic-violin':
+                search_plot = 'violin_plot'
+            else:
+                search_plot = '{}_plot'.format(plot_type.replace('-','_'))
+
+            # get plot element name
+            if plot_type == 'periodic':
+                plot_element_name = 'plot_{}'.format(resolution)
+            elif plot_type == 'periodic-violin':
+                plot_element_name = 'Median_plot_{}'.format(resolution)
+            else:
+                plot_element_name = 'plot'
+
+            if ((hasattr(self.canvas_instance.plot, search_plot)) and (plot_type in self.canvas_instance.plot_elements)):
+
+                is_contained = False
+
+                for data_label in self.canvas_instance.plot_elements['data_labels_active']:
+
+                    # skip observations for bias plot
+                    if ((plot_type in ['timeseries', 'distribution','periodic','periodic-violin']) 
+                        and (self.canvas_instance.plot_elements[plot_type]['active'] == 'bias')
+                        and (data_label == self.canvas_instance.read_instance.observations_data_label)):
+                        continue
+
+                    # do not annotate if plot is cleared
+                    if data_label not in self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']].keys():
+                        continue
+                    
+                    if plot_type == 'map':
+                        is_contained, annotation_index = self.canvas_instance.plot.stations_scatter.contains(event)
+                    else:
+                        # do no annotate if hidedata is active
+                        if len(self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label][plot_element_name]) == 0:
+                            continue
+                        line = self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label][plot_element_name]
+                        for n_point, point in enumerate(line):
+                            is_contained, annotation_index = point.contains(event)
+                            if is_contained:
+                                if plot_type == 'fairmode-target':
+                                    annotation_index = {'ind': np.array([n_point], dtype=np.int32)}
+                                break
 
                     if is_contained:
-                        # update annotation if hovered
-                        func = getattr(self, 'update_' + search_plot + '_annotation')
-                        func(annotation_index, line_index)
-                        self.annotation.set_visible(True)
-                        if hasattr(self, 'vline'):
-                            self.vline.set_visible(True)
-                    else:
-                        # hide annotation if not hovered
-                        if self.annotation.get_visible():
-                            self.annotation.set_visible(False)
-                            if hasattr(self, 'vline'):
-                                self.vline.set_visible(False)
-
-                    # draw changes
-                    self.canvas_instance.figure.canvas.draw_idle()
-                        
-                    # unlock annotation 
-                    self.canvas_instance.annotations_lock[plot_type] = False
-
-        return None
-    
-    def update_x_middle(self, event, plot_type):
-        """ Function to find middle value in x axis per plot type.
-        """
-
-        # do not annotate if plot has not been made yet
-        if plot_type not in self.canvas_instance.plot_elements:
-            return
-
-        # get current limits on x axis
-        xlim_range = event.get_xlim()
-
-        # transform range into dates for timeseries
-        if plot_type == 'timeseries':
-            xdata_range = [matplotlib.dates.num2date(xlim) for xlim in xlim_range]
-        else:
-            xdata_range = xlim_range
-            
-        # get value/date in the middle of range
-        x_middle = xdata_range[0] + (xdata_range[1] - xdata_range[0])/2
-
-        # save into dictionary
-        if 'periodic' in plot_type:
-            for resolution in self.canvas_instance.read_instance.relevant_temporal_resolutions:
-                if event == self.canvas_instance.plot_axes[plot_type][resolution]:
-                    self.x_middle[plot_type][resolution] = x_middle
-                    break
-        else:
-            self.x_middle[plot_type] = x_middle
-
-    def update_timeseries_annotation(self, annotation_index, line_index):
-        """ Update annotation for each timeseries point that is hovered. """
-    
-        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
-
-            # for annotate data label
-            if data_label == self.annotate_data_label:
+                        break
                 
-                # skip observations for bias plot
-                if self.canvas_instance.plot_elements['timeseries']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
-                    continue
-                
-                # do not annotate if plot is cleared
-                if data_label not in self.canvas_instance.plot_elements['timeseries'][self.canvas_instance.plot_elements['timeseries']['active']].keys():
-                    continue
-
-                # retrieve time and concentration
-                line = self.canvas_instance.plot_elements['timeseries'][self.canvas_instance.plot_elements['timeseries']['active']][data_label]['plot'][0]
-                time = line.get_xdata()[annotation_index['ind'][0]]
-                concentration = line.get_ydata()[annotation_index['ind'][0]]
-
-                # update location
-                self.annotation.xy = (time, concentration)
-                self.vline.set_xdata([time])
-
-                # update bbox position
-                if time > np.datetime64(self.x_middle['timeseries']):
-                    self.annotation.set_ha('right')
-                else:
-                    self.annotation.set_ha('left')
-
-                # create annotation text
-                text_label = ('Time: {0}').format(time.astype('datetime64[us]').astype(datetime.datetime).strftime("%m/%d/%Y %H:%M:%S"))
-        
-        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
-            
-            # skip observations for bias plot
-            if self.canvas_instance.plot_elements['timeseries']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
-                continue
-
-            # do not annotate if plot is cleared
-            if data_label not in self.canvas_instance.plot_elements['timeseries'][self.canvas_instance.plot_elements['timeseries']['active']].keys():
-                continue
-
-            # retrieve concentration
-            line = self.canvas_instance.plot_elements['timeseries'][self.canvas_instance.plot_elements['timeseries']['active']][data_label]['plot'][0]
-            concentration = line.get_ydata()[np.where(line.get_xdata() == time)[0]]
-
-            # for all labels if there is data
-            if len(concentration) >= 1:
-                text_label += ('\n{0}: {1:.{2}f}').format(data_label, concentration[0], self.round_decimal_places)
-
-        self.annotation.set_text(text_label)
-
-        return None
-
-    def update_scatter_annotation(self, annotation_index, line_index):
-
-        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
-
-            # for annotate data label
-            if data_label == self.annotate_data_label:
-                
-                # do not annotate if plot is cleared
-                if data_label not in self.canvas_instance.plot_elements['scatter'][self.canvas_instance.plot_elements['scatter']['active']].keys():
-                    continue
-
-                # retrieve concentrations in x and y axis
-                line = self.canvas_instance.plot_elements['scatter'][self.canvas_instance.plot_elements['scatter']['active']][data_label]['plot'][0]
-                concentration_x = line.get_xdata()[annotation_index['ind'][0]]
-                concentration_y = line.get_ydata()[annotation_index['ind'][0]]
-
-                # update location
-                self.annotation.xy = (concentration_x, concentration_y)
-
-                # update bbox position
-                if concentration_x > self.x_middle['scatter']:
-                    self.annotation.set_x(-10)
-                    self.annotation.set_ha('right')
-                else:
-                    self.annotation.set_x(10)
-                    self.annotation.set_ha('left')
-
-                # create annotation text
-                # experiment label
-                text_label = copy.deepcopy(data_label)
-                # observations label
-                text_label += ('\n{0}: {1:.{2}f}').format('x', concentration_x, self.round_decimal_places)
-                # experiment label
-                text_label += ('\n{0}: {1:.{2}f}').format('y', concentration_y, self.round_decimal_places)
-
-        self.annotation.set_text(text_label)
-
-        return None
-
-    def update_fairmode_target_annotation(self, annotation_index, line_index):
-
-        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
-
-            # for annotate data label
-            if data_label == self.annotate_data_label:
-                # do not annotate if plot is cleared
-                if data_label not in self.canvas_instance.plot_elements['fairmode-target'][self.canvas_instance.plot_elements['fairmode-target']['active']].keys():
-                    continue
-
-                # retrieve CRMSE / β·RMSᵤ and Mean Bias / β·RMSᵤ
-                line = self.canvas_instance.plot_elements['fairmode-target'][self.canvas_instance.plot_elements['fairmode-target']['active']][data_label]['plot'][line_index]
-                x = line.get_xdata()[annotation_index['ind'][0]]
-                y = line.get_ydata()[annotation_index['ind'][0]]
-
-                # update location
-                self.annotation.xy = (x, y)
-
-                # update bbox position
-                if x > self.x_middle['fairmode-target']:
-                    self.annotation.set_x(-10)
-                    self.annotation.set_ha('right')
-                else:
-                    self.annotation.set_x(10)
-                    self.annotation.set_ha('left')
-
-                # create annotation text
-                # experiment label
-                text_label = copy.deepcopy(data_label)
-                # observations label
-                text_label += ('\n{0}: {1:.{2}f}').format('CRMSE / β·RMSᵤ', x, self.round_decimal_places)
-                # experiment label
-                text_label += ('\n{0}: {1:.{2}f}').format('MB / β·RMSᵤ', y, self.round_decimal_places)
-
-        self.annotation.set_text(text_label)
-
-        return None
-    
-    def update_distribution_annotation(self, annotation_index, line_index):
-        """ Update annotation for each distribution point that is hovered. """
-        
-        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
-
-            # for annotate data label
-            if data_label == self.annotate_data_label:
-                
-                # skip observations for bias plot
-                if self.canvas_instance.plot_elements['distribution']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
-                    continue
-                
-                # do not annotate if plot is cleared
-                if data_label not in self.canvas_instance.plot_elements['distribution'][self.canvas_instance.plot_elements['distribution']['active']].keys():
-                    continue
-
-                # retrieve time and concentration
-                line = self.canvas_instance.plot_elements['distribution'][self.canvas_instance.plot_elements['distribution']['active']][data_label]['plot'][0]
-                concentration = line.get_xdata()[annotation_index['ind'][0]]
-                density = line.get_ydata()[annotation_index['ind'][0]]
-
-                # update location
-                self.annotation.xy = (concentration, density)
-                self.vline.set_xdata([concentration])
-
-                # update bbox position
-                if concentration > self.x_middle['distribution']:
-                    self.annotation.set_x(-10)
-                    self.annotation.set_ha('right')
-                else:
-                    self.annotation.set_x(10)
-                    self.annotation.set_ha('left')
-
-                # create annotation text
-                text_label = ('{0}: {1:.3f}').format(self.canvas_instance.read_instance.species[0], concentration)
-        
-        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
-            
-            # skip observations for bias plot
-            if self.canvas_instance.plot_elements['distribution']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
-                continue
-
-            # do not annotate if plot is cleared
-            if data_label not in self.canvas_instance.plot_elements['distribution'][self.canvas_instance.plot_elements['distribution']['active']].keys():
-                continue
-
-            # retrieve density
-            line = self.canvas_instance.plot_elements['distribution'][self.canvas_instance.plot_elements['distribution']['active']][data_label]['plot'][0]
-            density = line.get_ydata()[np.where(line.get_xdata() == concentration)[0]]
-
-            # for all labels if there is data
-            if len(density) >= 1:
-                text_label += ('\n{0}: {1:.3f}').format(data_label, density[0])
-   
-        self.annotation.set_text(text_label)
-
-        return None
-
-    def update_taylor_annotation(self, annotation_index, line_index):
-        
-        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
-
-            # for annotate data label
-            if data_label == self.annotate_data_label:
-                
-                # do not annotate if plot is cleared
-                if data_label not in self.canvas_instance.plot_elements['taylor'][self.canvas_instance.plot_elements['taylor']['active']].keys():
-                    continue
-
-                # retrieve time and concentration
-                line = self.canvas_instance.plot_elements['taylor'][self.canvas_instance.plot_elements['taylor']['active']][data_label]['plot'][0]
-                corr_stat = line.get_xdata()[annotation_index['ind'][0]]
-                stddev = line.get_ydata()[annotation_index['ind'][0]]
-
-                # update location
-                self.annotation.xy = (corr_stat, stddev)
-
-                # update bbox position
-                corr_stat_middle = line.get_xdata()[math.floor((len(line.get_xdata()) - 1)/2)]
-                if corr_stat > corr_stat_middle:
-                    self.annotation.set_x(-10)
-                    self.annotation.set_ha('right')
-                else:
-                    self.annotation.set_x(10)
-                    self.annotation.set_ha('left')
-
-                # create annotation text
-                text_label = copy.deepcopy(data_label)
-                text_label += ('\n{0}: {1:.{2}f}').format(self.canvas_instance.plot_characteristics['taylor']['corr_stat'], 
-                                                        np.cos(corr_stat), self.round_decimal_places)
-                text_label += ('\n{0}: {1:.{2}f}').format('StdDev', stddev, self.round_decimal_places)
-        
-        self.annotation.set_text(text_label)
-
-        return None
-
-    def hover_periodic_annotation(self, event, plot_type):
-        """ Function that annotates on hover in periodic and periodic violin plots.
-        """
-
-        # activate hover over periodic plot
-        if (plot_type in self.canvas_instance.read_instance.active_dashboard_plots):
-            if hasattr(self.canvas_instance.read_instance, 'relevant_temporal_resolutions'):
-                for resolution in self.canvas_instance.read_instance.relevant_temporal_resolutions:
-                    if event.inaxes == self.canvas_instance.plot_axes[plot_type][resolution]:
-                        search_plot = 'periodic_plots' if plot_type == 'periodic' else 'violin_plot'
-                        if ((hasattr(self.canvas_instance.plot, search_plot)) and (plot_type in self.canvas_instance.plot_elements)
-                            and (self.canvas_instance.annotations_lock[plot_type][resolution] == False)):
-
-                            # lock annotation
-                            self.canvas_instance.annotations_lock[plot_type][resolution] = True
-                            is_contained = False
-
-                            for data_label in self.canvas_instance.plot_elements['data_labels_active']:
-
-                                # skip observations for bias plot
-                                if self.canvas_instance.plot_elements[plot_type]['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
-                                    continue
-
-                                # do not annotate if plot is cleared
-                                if data_label not in self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']].keys():
-                                    continue
-                                
-                                if plot_type == 'periodic':
-                                    line = self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label]['plot_' + resolution][0]
-                                else:
-                                    line = self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label]['Median_plot_' + resolution][0]
-                                is_contained, annotation_index = line.contains(event)
-                                if is_contained:
-                                    self.annotate_data_label = data_label
-                                    break
-                            
-                            if is_contained:
-                                # update annotation if hovered
-                                if plot_type == 'periodic':
-                                    self.update_periodic_annotation(annotation_index, resolution)
-                                else:
-                                    self.update_periodic_violin_annotation(annotation_index, resolution)
-                                self.canvas_instance.annotations[plot_type][resolution].set_visible(True)
-                                self.canvas_instance.annotations_vline[plot_type][resolution].set_visible(True)
-                            else:
-                                # hide annotation if not hovered
-                                if self.canvas_instance.annotations[plot_type][resolution].get_visible():
-                                    self.canvas_instance.annotations[plot_type][resolution].set_visible(False)
-                                    self.canvas_instance.annotations_vline[plot_type][resolution].set_visible(False)
-                                    
-                            # draw changes
-                            self.canvas_instance.figure.canvas.draw_idle()
-                                
-                            # unlock annotation 
-                            self.canvas_instance.annotations_lock[plot_type][resolution] = False
-
-        return None
-
-    def update_periodic_annotation(self, annotation_index, resolution):
-        """ Update annotation for each periodic point that is hovered. """
-
-        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
-
-            # for annotate data label
-            if data_label == self.annotate_data_label:
-                
-                # skip observations for bias plot
-                if self.canvas_instance.plot_elements['periodic']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
-                    continue
-                
-                # do not annotate if plot is cleared
-                if data_label not in self.canvas_instance.plot_elements['periodic'][self.canvas_instance.plot_elements['periodic']['active']].keys():
-                    continue
-
-                # retrieve time and concentration
-                line = self.canvas_instance.plot_elements['periodic'][self.canvas_instance.plot_elements['periodic']['active']][data_label]['plot_' + resolution][0]
-                time = line.get_xdata()[annotation_index['ind'][0]]
-                concentration = line.get_ydata()[annotation_index['ind'][0]]
-
-                # update location
-                self.canvas_instance.annotations['periodic'][resolution].xy = (time, concentration)
-                self.canvas_instance.annotations_vline['periodic'][resolution].set_xdata([time])
-
-                # update bbox position
-                if time > self.x_middle['periodic'][resolution]:
-                    self.canvas_instance.annotations['periodic'][resolution].set_x(-10)
-                    self.canvas_instance.annotations['periodic'][resolution].set_ha('right')
-                else:
-                    self.canvas_instance.annotations['periodic'][resolution].set_x(10)
-                    self.canvas_instance.annotations['periodic'][resolution].set_ha('left')
-
-                # create annotation text
-                if resolution == 'hour':
-                    resolution_text = 'Hour'
-                    time_text = time
-                else:
-                    time_options = [self.canvas_instance.temporal_axis_mapping_dict['long'][resolution][xtick] 
-                                    for xtick in self.canvas_instance.periodic_xticks[resolution]]
-                    time_text = time_options[time-1]
-                    if resolution == 'dayofweek':
-                        resolution_text = 'Day'
-                    elif resolution == 'month':
-                        resolution_text = 'Month'
-                text_label = ('{0}: {1}').format(resolution_text, time_text)
-        
-        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
-            
-            # skip observations for bias plot
-            if self.canvas_instance.plot_elements['periodic']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
-                continue
-
-            # do not annotate if plot is cleared
-            if data_label not in self.canvas_instance.plot_elements['periodic'][self.canvas_instance.plot_elements['periodic']['active']].keys():
-                continue
-
-            # retrieve concentration
-            line = self.canvas_instance.plot_elements['periodic'][self.canvas_instance.plot_elements['periodic']['active']][data_label]['plot_' + resolution][0]
-            concentration = line.get_ydata()[np.where(line.get_xdata() == time)[0]]
-            
-            # for all labels if there is data
-            if len(concentration) >= 1:
-                text_label += ('\n{0}: {1:.{2}f}').format(data_label, concentration[0], self.round_decimal_places)
-
-        self.canvas_instance.annotations['periodic'][resolution].set_text(text_label)
-
-        return None
-    
-    def update_periodic_violin_annotation(self, annotation_index, resolution):
-        """ Update annotation for each periodic violin point that is hovered. """
-
-        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
-
-            # for annotate data label
-            if data_label == self.annotate_data_label:
-                
-                # skip observations for bias plot
-                if self.canvas_instance.plot_elements['periodic-violin']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
-                    continue
-                
-                # do not annotate if plot is cleared
-                if data_label not in self.canvas_instance.plot_elements['periodic-violin'][self.canvas_instance.plot_elements['periodic-violin']['active']].keys():
-                    continue
-
-                # retrieve time and concentration
-                line = self.canvas_instance.plot_elements['periodic-violin'][self.canvas_instance.plot_elements['periodic-violin']['active']][data_label]['Median_plot_' + resolution][0]
-                time = line.get_xdata()[annotation_index['ind'][0]]
-                concentration = line.get_ydata()[annotation_index['ind'][0]]
-
-                # update location
-                self.canvas_instance.annotations['periodic-violin'][resolution].xy = (time, concentration)
-                self.canvas_instance.annotations_vline['periodic-violin'][resolution].set_xdata([time])
-
-                # update bbox position
-                if time > self.x_middle['periodic-violin'][resolution]:
-                    self.canvas_instance.annotations['periodic-violin'][resolution].set_x(-10)
-                    self.canvas_instance.annotations['periodic-violin'][resolution].set_ha('right')
-                else:
-                    self.canvas_instance.annotations['periodic-violin'][resolution].set_x(10)
-                    self.canvas_instance.annotations['periodic-violin'][resolution].set_ha('left')
-
-                # create annotation text
-                if resolution == 'hour':
-                    resolution_text = 'Hour'
-                    time_text = time
-                else:
-                    time_options = [self.canvas_instance.temporal_axis_mapping_dict['long'][resolution][xtick] 
-                                    for xtick in self.canvas_instance.periodic_xticks[resolution]]
-                    time_text = time_options[time-1]
-                    if resolution == 'dayofweek':
-                        resolution_text = 'Day'
-                    elif resolution == 'month':
-                        resolution_text = 'Month'
-                text_label = ('{0}: {1}').format(resolution_text, time_text)
-        
-        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
-            
-            # skip observations for bias plot
-            if self.canvas_instance.plot_elements['periodic-violin']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
-                continue
-
-            # do not annotate if plot is cleared
-            if data_label not in self.canvas_instance.plot_elements['periodic-violin'][self.canvas_instance.plot_elements['periodic-violin']['active']].keys():
-                continue
-
-            # retrieve concentration
-            line = self.canvas_instance.plot_elements['periodic-violin'][self.canvas_instance.plot_elements['periodic-violin']['active']][data_label]['Median_plot_' + resolution][0]
-            concentration = line.get_ydata()[np.where(line.get_xdata() == time)[0]]
-            
-            # for all labels if there is data
-            if len(concentration) >= 1:
-                text_label += ('\n{0}: {1:.{2}f}').format(data_label, concentration[0], self.round_decimal_places)
-
-        self.canvas_instance.annotations['periodic-violin'][resolution].set_text(text_label)
-
-        return None
-
-    def hover_map_annotation(self, event):
-        """ Function that annotates on hover in map.
-        """
-
-        if event.inaxes == self.canvas_instance.plot_axes['map']:
-
-            # activate hover over map
-            if (hasattr(self.canvas_instance.plot, 'stations_scatter')):
-
-                is_contained, annotation_index = self.canvas_instance.plot.stations_scatter.contains(event)
-                
+                # point is being hovered over?
                 if is_contained:
-                    # update annotation if hovered
-                    self.update_map_annotation(annotation_index)
-                    self.annotation.set_visible(True)
-                else:
-                    # hide annotation if not hovered
-                    if self.annotation.get_visible():
-                        self.annotation.set_visible(False)
+                    # add event coordinates to self (handling pixel scaling)
+                    self.x = round(event.x / self.canvas_instance.read_instance.devicePixelRatio())
+                    self.y = round(event.y / self.canvas_instance.read_instance.devicePixelRatio())
 
-                # draw changes
-                self.canvas_instance.figure.canvas.draw_idle()
+                    # update annotation and show vline
+                    func = getattr(self, 'update_{}_annotation'.format(plot_type.replace('-','_')))
+                    if plot_type in ['periodic','periodic-violin']:
+                        func(annotation_index,resolution)
+                    elif plot_type in ['fairmode-target','scatter','taylor']:
+                        func(annotation_index,data_label)
+                    else:
+                        func(annotation_index)
 
         return None
 
@@ -855,27 +370,348 @@ class HoverAnnotation(object):
         station_location = self.canvas_instance.plot.stations_scatter.get_offsets()[annotation_index['ind'][0]]
         station_value = self.canvas_instance.z_statistic[annotation_index['ind'][0]]
 
-        # update location
-        self.annotation.xy = station_location
-
-        # update bbox position
-        self.canvas_instance.read_instance.map_extent = get_map_extent(self.canvas_instance)
-        lat_min = self.canvas_instance.read_instance.map_extent[2]
-        lat_max = self.canvas_instance.read_instance.map_extent[3]
-        if station_location[1] > ((lat_max + lat_min) / 2):
-            self.annotation.set_y(-10)
-            self.annotation.set_va('top')
-        else:
-            self.annotation.set_y(10)
-            self.annotation.set_va('bottom')
-
         # create annotation text
         text_label = ('Station: {0}\n').format(station_name)
         text_label += ('Reference: {0}\n').format(station_reference)
         text_label += ('Longitude: {0:.2f}\n').format(station_location[0])
         text_label += ('Latitude: {0:.2f}\n').format(station_location[1])
-        text_label += ('{0}: {1:.{2}f}').format(self.canvas_instance.map_z_stat.currentText(), station_value, self.round_decimal_places)
-        self.annotation.set_text(text_label)
+        text_label += ('{0}: {1:.{2}f}').format(self.canvas_instance.map_z_stat.currentText(), station_value, self.canvas_instance.plot_characteristics['map']['marker_annotate_rounding'])
+
+        # update tooltip
+        self.canvas_instance.figure.canvas.setToolTip(text_label)
 
         return None
-       
+
+    def update_timeseries_annotation(self, annotation_index):
+        """ Update annotation for each timeseries point that is hovered. """
+
+        # initialise annotation text
+        text_label = ''
+
+        #iterate through active data labels
+        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
+            
+            # skip observations for bias plot
+            if self.canvas_instance.plot_elements['timeseries']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
+                continue
+
+            # do not annotate if plot is cleared
+            if data_label not in self.canvas_instance.plot_elements['timeseries'][self.canvas_instance.plot_elements['timeseries']['active']].keys():
+                continue
+
+            # retrieve time and concentration
+            line = self.canvas_instance.plot_elements['timeseries'][self.canvas_instance.plot_elements['timeseries']['active']][data_label]['plot'][0]
+            time = line.get_xdata()[annotation_index['ind'][0]]
+            concentration = line.get_ydata()[annotation_index['ind'][0]]
+
+            # first valid data label?
+            if not text_label:
+
+                # update vline position
+                self.update_vline_position()
+
+                # add time to annotation text
+                text_label += ("<p style='white-space:pre'><i>Time: {0}</i>").format(time.astype('datetime64[us]').astype(datetime.datetime).strftime("%m/%d/%Y %H:%M:%S"))
+
+            # get colour for data label
+            colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
+
+            # convert data label colour to hex code
+            hex_colour = get_hex_code(colour)
+
+            # add text label
+            text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, data_label, concentration, self.canvas_instance.plot_characteristics['timeseries']['marker_annotate_rounding'])
+
+        # end formatting of text label
+        text_label += '</p>'
+
+        # update tooltip and show vline
+        self.canvas_instance.figure.canvas.setToolTip(text_label)
+        self.canvas_instance.canvas_annotation_vline.show()
+
+        return None
+
+    def update_scatter_annotation(self, annotation_index, data_label):
+
+        # initialise annotation text
+        text_label = ''
+
+        # do not annotate if plot is cleared
+        if data_label not in self.canvas_instance.plot_elements['scatter'][self.canvas_instance.plot_elements['scatter']['active']].keys():
+            return None
+
+        # retrieve concentrations in x and y axis
+        line = self.canvas_instance.plot_elements['scatter'][self.canvas_instance.plot_elements['scatter']['active']][data_label]['plot'][0]
+        x = line.get_xdata()[annotation_index['ind'][0]]
+        y = line.get_ydata()[annotation_index['ind'][0]]
+
+        # get colour for data label
+        colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
+
+        # convert data label colour to hex code
+        hex_colour = get_hex_code(colour)
+
+        # add text label
+        text_label += ('<font color="{0}">{1}</font>').format(hex_colour, data_label)
+        # observations label
+        text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'x', x, self.canvas_instance.plot_characteristics['scatter']['marker_annotate_rounding'])
+        # experiment label
+        text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'y', y, self.canvas_instance.plot_characteristics['scatter']['marker_annotate_rounding'])
+
+        # update tooltip
+        self.canvas_instance.figure.canvas.setToolTip(text_label)
+
+        return None
+
+    def update_fairmode_target_annotation(self, annotation_index, data_label):
+
+        # initialise annotation text
+        text_label = ''
+
+        # do not annotate if plot is cleared
+        if data_label not in self.canvas_instance.plot_elements['fairmode-target'][self.canvas_instance.plot_elements['fairmode-target']['active']].keys():
+            return None
+
+        # retrieve CRMSE / β·RMSᵤ and Mean Bias / β·RMSᵤ
+        line = self.canvas_instance.plot_elements['fairmode-target'][self.canvas_instance.plot_elements['fairmode-target']['active']][data_label]['plot'][annotation_index['ind'][0]]
+        x = line.get_xdata()[0]
+        y = line.get_ydata()[0]
+
+        # get colour for data label
+        colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
+
+        # convert data label colour to hex code
+        hex_colour = get_hex_code(colour)
+
+        # add text label
+        text_label += ('<font color="{0}">{1}</font>').format(hex_colour, data_label)
+        # CRMSE
+        text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'CRMSE / β·RMSᵤ', x, self.canvas_instance.plot_characteristics['fairmode-target']['marker_annotate_rounding'])
+        # MB
+        text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'MB / β·RMSᵤ', y, self.canvas_instance.plot_characteristics['fairmode-target']['marker_annotate_rounding'])
+
+        # update tooltip
+        self.canvas_instance.figure.canvas.setToolTip(text_label)
+
+        return None
+    
+    def update_distribution_annotation(self, annotation_index):
+        """ Update annotation for each distribution point that is hovered. """
+        
+        # initialise annotation text
+        text_label = ''
+
+        #iterate through active data labels
+        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
+
+            # skip observations for bias plot
+            if (self.canvas_instance.plot_elements['distribution']['active'] == 'bias') and (data_label == self.canvas_instance.read_instance.observations_data_label):
+                continue
+            
+            # do not annotate if plot is cleared
+            if data_label not in self.canvas_instance.plot_elements['distribution'][self.canvas_instance.plot_elements['distribution']['active']].keys():
+                continue
+
+            # retrieve concentration and density
+            line = self.canvas_instance.plot_elements['distribution'][self.canvas_instance.plot_elements['distribution']['active']][data_label]['plot'][0]
+            concentration = line.get_xdata()[annotation_index['ind'][0]]
+            density = line.get_ydata()[annotation_index['ind'][0]]
+
+             # first valid data label?
+            if not text_label:
+
+                # update vline position
+                self.update_vline_position()
+
+                # create annotation text
+                text_label += ("<p style='white-space:pre'><i>{0}: {1:.{2}f}</i>").format(self.canvas_instance.read_instance.species[0], concentration, self.canvas_instance.plot_characteristics['distribution']['marker_annotate_rounding'])
+
+            # get colour for data label
+            colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
+
+            # convert data label colour to hex code
+            hex_colour = get_hex_code(colour)
+
+            # add text label
+            text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, data_label, density, self.canvas_instance.plot_characteristics['distribution']['marker_annotate_rounding'])
+
+        # update tooltip and show vline
+        self.canvas_instance.figure.canvas.setToolTip(text_label)
+        self.canvas_instance.canvas_annotation_vline.show()
+
+        return None
+
+    def update_taylor_annotation(self, annotation_index, data_label):
+        
+        # initialise annotation text
+        text_label = ''
+                
+        # do not annotate if plot is cleared
+        if data_label not in self.canvas_instance.plot_elements['taylor'][self.canvas_instance.plot_elements['taylor']['active']].keys():
+            return None
+
+        # retrieve time and concentration
+        line = self.canvas_instance.plot_elements['taylor'][self.canvas_instance.plot_elements['taylor']['active']][data_label]['plot'][0]
+        corr_stat = line.get_xdata()[annotation_index['ind'][0]]
+        stddev = line.get_ydata()[annotation_index['ind'][0]]
+
+        # get colour for data label
+        colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
+
+        # convert data label colour to hex code
+        hex_colour = get_hex_code(colour)
+
+        # add text label
+        text_label += ('<font color="{0}">{1}</font>').format(hex_colour, data_label)
+        # corr stat
+        text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, self.canvas_instance.plot_characteristics['taylor']['corr_stat'], 
+                                                                                np.cos(corr_stat), self.canvas_instance.plot_characteristics['taylor']['marker_annotate_rounding'])
+        # stddev
+        text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'StdDev', stddev, self.canvas_instance.plot_characteristics['taylor']['marker_annotate_rounding'])
+    
+        # update tooltip
+        self.canvas_instance.figure.canvas.setToolTip(text_label)
+
+        return None
+
+    def update_periodic_annotation(self, annotation_index, resolution):
+        """ Update annotation for each periodic point that is hovered. """
+
+        # initialise annotation text
+        text_label = ''
+
+        #iterate through active data labels
+        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
+                
+            # skip observations for bias plot
+            if self.canvas_instance.plot_elements['periodic']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
+                continue
+            
+            # do not annotate if plot is cleared
+            if data_label not in self.canvas_instance.plot_elements['periodic'][self.canvas_instance.plot_elements['periodic']['active']].keys():
+                continue
+
+            # retrieve time and concentration
+            line = self.canvas_instance.plot_elements['periodic'][self.canvas_instance.plot_elements['periodic']['active']][data_label]['plot_' + resolution][0]
+            time = line.get_xdata()[annotation_index['ind'][0]]
+            concentration = line.get_ydata()[annotation_index['ind'][0]]
+
+            # first valid data label?
+            if not text_label:
+
+                # update vline position
+                self.update_vline_position()
+
+                # create annotation text
+                if resolution == 'hour':
+                    resolution_text = 'Hour'
+                    time_text = time
+                else:
+                    time_options = [self.canvas_instance.temporal_axis_mapping_dict['long'][resolution][xtick] 
+                                    for xtick in self.canvas_instance.periodic_xticks[resolution]]
+                    if resolution == 'dayofweek':
+                        time_text = time_options[time]
+                        resolution_text = 'Day'
+                    elif resolution == 'month':
+                        time_text = time_options[time-1]
+                        resolution_text = 'Month'
+                text_label += ("<p style='white-space:pre'><i>{0}: {1}</i>").format(resolution_text, time_text)
+        
+            # get colour for data label
+            colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
+
+            # convert data label colour to hex code
+            hex_colour = get_hex_code(colour)
+
+            # add text label
+            text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, data_label, concentration, self.canvas_instance.plot_characteristics['periodic']['marker_annotate_rounding'])
+
+        # update tooltip and show vline
+        self.canvas_instance.figure.canvas.setToolTip(text_label)
+        self.canvas_instance.canvas_annotation_vline.show()
+
+        return None
+    
+    def update_periodic_violin_annotation(self, annotation_index, resolution):
+        """ Update annotation for each periodic violin point that is hovered. """
+
+        # initialise annotation text
+        text_label = ''
+
+        #iterate through active data labels
+        for data_label in self.canvas_instance.plot_elements['data_labels_active']:
+
+            # skip observations for bias plot
+            if self.canvas_instance.plot_elements['periodic-violin']['active'] == 'bias' and data_label == self.canvas_instance.read_instance.observations_data_label:
+                continue
+            
+            # do not annotate if plot is cleared
+            if data_label not in self.canvas_instance.plot_elements['periodic-violin'][self.canvas_instance.plot_elements['periodic-violin']['active']].keys():
+                continue
+
+            # retrieve time and concentration
+            line = self.canvas_instance.plot_elements['periodic-violin'][self.canvas_instance.plot_elements['periodic-violin']['active']][data_label]['Median_plot_' + resolution][0]
+            time = line.get_xdata()[annotation_index['ind'][0]]
+            concentration = line.get_ydata()[annotation_index['ind'][0]]
+
+            # first valid data label?
+            if not text_label:
+
+                # update vline position
+                self.update_vline_position()
+
+                # create annotation text
+                if resolution == 'hour':
+                    resolution_text = 'Hour'
+                    time_text = time
+                else:
+                    time_options = [self.canvas_instance.temporal_axis_mapping_dict['long'][resolution][xtick] 
+                                    for xtick in self.canvas_instance.periodic_xticks[resolution]]
+                    if resolution == 'dayofweek':
+                        time_text = time_options[time]
+                        resolution_text = 'Day'
+                    elif resolution == 'month':
+                        time_text = time_options[time-1]
+                        resolution_text = 'Month'
+                text_label += ("<p style='white-space:pre'><i>{0}: {1}</i>").format(resolution_text, time_text)
+
+            # get colour for data label
+            colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
+
+            # convert data label colour to hex code
+            hex_colour = get_hex_code(colour)
+
+            # add text label
+            text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, data_label, concentration, self.canvas_instance.plot_characteristics['periodic-violin']['marker_annotate_rounding'])
+
+        # update tooltip and show vline
+        self.canvas_instance.figure.canvas.setToolTip(text_label)
+        self.canvas_instance.canvas_annotation_vline.show()
+
+        return None
+    
+    def update_vline_position(self):
+        """Function to update vline position 
+        """
+
+        # get current canvas width / height
+        canvas_width, canvas_height = self.canvas_instance.figure.canvas.get_width_height()
+
+        # get axis ylim (in data coordinates)
+        ylim = self.ax.get_ylim()
+
+        # transform matplotlib ylim data coordinates to display coordinates, handling pixel scaling
+        ymin_display_mpl = round(self.ax.transData.transform([0,ylim[0]])[1] / self.canvas_instance.read_instance.devicePixelRatio())
+        ymax_display_mpl = round(self.ax.transData.transform([0,ylim[1]])[1] / self.canvas_instance.read_instance.devicePixelRatio())
+        
+        # transform matplotlib display coordinates to Qt display coordinates                
+        ymin_display_qt = int(canvas_height - ymin_display_mpl)
+        ymax_display_qt = int(canvas_height - ymax_display_mpl)
+
+        # calculate length of vline to plot
+        vline_length = ymin_display_qt - ymax_display_qt 
+
+        # update vline position 
+        self.canvas_instance.canvas_annotation_vline.setGeometry(self.x, ymax_display_qt, 1, vline_length)
+
+        return None
