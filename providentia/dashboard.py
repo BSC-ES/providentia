@@ -1234,7 +1234,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             return
 
         # update mouse cursor to a waiting cursor
-        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         # clear previously selected relative/absolute station indices
         self.mpl_canvas.relative_selected_station_inds = np.array([], dtype=np.int64)
@@ -1393,7 +1394,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
             # restore mouse cursor to normal if have no valid data after read
             if self.invalid_read:
-                QtWidgets.QApplication.restoreOverrideCursor()
+                if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+                    QtWidgets.QApplication.restoreOverrideCursor()
                 return
 
             # update fields available for filtering
@@ -1483,7 +1485,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     self.mpl_canvas.handle_temporal_colocate_update()
 
         # restore mouse cursor to normal
-        QtWidgets.QApplication.restoreOverrideCursor()
+        if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+            QtWidgets.QApplication.restoreOverrideCursor()
 
     @QtCore.pyqtSlot()
     def reset_options(self):
@@ -1493,7 +1496,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             return
 
         # set mouse cursor to hourglass
-        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         # reset representativity fields        
         init_representativity(self)
@@ -1525,7 +1529,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             update_metadata_fields(self)
 
         # Restore mouse cursor to normal
-        QtWidgets.QApplication.restoreOverrideCursor()
+        if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+            QtWidgets.QApplication.restoreOverrideCursor()
 
     def disable_ghost_buttons(self):
         """ Disable button related only to ghost data. """

@@ -19,7 +19,7 @@ import numpy as np
 from packaging.version import Version
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtWidgets
 from weakref import WeakKeyDictionary
 
 from .calculate import Stats, ExpBias
@@ -291,7 +291,9 @@ class MPLCanvas(FigureCanvas):
         if not hasattr(self.read_instance, 'data_in_memory'):
             return
 
-        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        # update mouse cursor to a waiting cursor
+        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         if self.filter_data is None:
             self.filter_data = DataFilter(self.read_instance)
@@ -299,7 +301,9 @@ class MPLCanvas(FigureCanvas):
             self.filter_data.filter_all()
             self.update_active_map()
 
-        QtWidgets.QApplication.restoreOverrideCursor()
+        # restore mouse cursor to normal
+        if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+            QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -330,7 +334,8 @@ class MPLCanvas(FigureCanvas):
                 if len(self.relative_selected_station_inds) > 0:
                     
                     # update mouse cursor to a waiting cursor
-                    QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+                    if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
                     # update associated plots with selected stations
                     self.update_associated_active_dashboard_plots()
@@ -342,7 +347,8 @@ class MPLCanvas(FigureCanvas):
                     self.figure.canvas.draw_idle()
 
                     # restore mouse cursor to normal
-                    QtWidgets.QApplication.restoreOverrideCursor()
+                    if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+                        QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -377,7 +383,8 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.block_config_bar_handling_updates = True
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # update mode
             self.read_instance.selected_statistic_mode = self.read_instance.cb_statistic_mode.currentText()
@@ -418,7 +425,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()   
+            if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.restoreOverrideCursor()   
 
         return None
 
@@ -435,7 +443,8 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.block_config_bar_handling_updates = True
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # update aggregation statistic
             self.update_aggregation_statistic()
@@ -450,7 +459,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -463,7 +473,8 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_MPL_canvas_updates:
             
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # if only have < 2 data arrays in memory, no colocation is possible,
             # therefore set colocation to be False, and return
@@ -518,7 +529,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -1039,7 +1051,8 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:  
         
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # update statistic
             self.read_instance.selected_timeseries_statistic_aggregation = self.timeseries_stat.currentText()
@@ -1060,7 +1073,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -1073,7 +1087,8 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
             
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the timeseries chunk statistic combobox are made
@@ -1099,7 +1114,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
@@ -1112,7 +1128,8 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the periodic statistic combobox are made
@@ -1152,7 +1169,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -1165,7 +1183,8 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all
             # changes to the statistic combobox are made
@@ -1203,7 +1222,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -1257,7 +1277,8 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
             
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary statistics combobox are made
@@ -1322,7 +1343,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.restoreOverrideCursor()
 
     @QtCore.pyqtSlot()
     def handle_statsummary_cycle_update(self):
@@ -1330,7 +1352,8 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
             
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary periodic cycle combobox are made
@@ -1368,7 +1391,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
@@ -1381,7 +1405,8 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary periodic aggregation combobox are made
@@ -1402,7 +1427,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
@@ -1415,7 +1441,8 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary periodic mode combobox are made
@@ -1436,7 +1463,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
@@ -1446,7 +1474,8 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the classification combobox are made
@@ -1466,7 +1495,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
@@ -1477,7 +1507,8 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the classification combobox are made
@@ -1497,7 +1528,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if QtWidgets.QApplication.overrideCursor() == QtCore.Qt.WaitCursor:
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
