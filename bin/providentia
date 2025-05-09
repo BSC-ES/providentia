@@ -451,10 +451,13 @@ else
         if ! conda config --show channels 2>/dev/null | grep -q 'conda-forge'; then
             conda config --append channels conda-forge
         fi
-        conda create -c conda-forge -n providentia-env_v2.4.0 --override-channels
+        conda create -c conda-forge -n providentia-env_v2.4.0 -y python=3.11.5 --override-channels
         conda activate providentia-env_v2.4.0
         conda install -c conda-forge cartopy -y --override-channels
         conda install -c conda-forge jupyterlab -y --override-channels
+        conda install -c conda-forge ghostscript -y --override-channels
+        conda install -c conda-forge KDEpy -y --override-channels
+
         pip install -r requirements.txt
         active_env=true
     fi
