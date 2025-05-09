@@ -1,90 +1,332 @@
 {
-    "title_menu":                {"font": {"style": ".AppleSystemUIFont", "size": 12.0, "bold": true}, 
-                                  "height": 20, 
-                                  "color": "black"},
+    "menu_title":                {"QLabel":  {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "font-weight": "bold", 
+                                      "height": "20", 
+                                      "color": "black"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "label_menu":                {"font": {"style": ".AppleSystemUIFont", "size": 11.0},
-                                  "height": 20, "width": 90,
-                                  "color": "black"},
+    "menu_label":                {"QLabel": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "height": "20", 
+                                      "width": "90",
+                                      "color": "black"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "button_menu":               {"font": {"style": ".AppleSystemUIFont", "size": 11.0}, 
-                                  "height": 20, "width": 90,
-                                  "color": "black", "background-color": "white"},
+    "menu_button":               {"QPushButton": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "height": "20", 
+                                      "width": "90", 
+                                      "color": "black", 
+                                      "background-color": "white"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "checkbox_menu":             {"font": {"style": ".AppleSystemUIFont", "size": 11.0},
-                                  "height": 20, "width": 90,
-                                  "color": "black"},
+    "menu_button_disabled":      {"QPushButton": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "height": "20", 
+                                      "width": "90", 
+                                      "color": "black", 
+                                      "background-color": "#DCDCDC"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "combobox_menu":             {"font": {"style": ".AppleSystemUIFont", "size": 11.0},
-                                  "height": 20, "width": 90,
-                                  "color": "black", "background-color": "white", 
-                                  "selection-color": "white", "selection-background-color": "grey",
-                                  "border": {"colour": "lightgrey", "size": 1}},
+    "menu_checkbox":             {"QCheckBox": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "height": "20", 
+                                      "width": "90",
+                                      "color": "black"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "checkable_combobox_menu":   {"font": {"style": ".AppleSystemUIFont", "size": 11.0},
-                                  "height": 20, "width": 230,
-                                  "color": "black", "background-color": "white", 
-                                  "selection-color": "white", "selection-background-color": "grey",
-                                  "border": {"colour": "lightgrey", "size": 1}},
+    "menu_combobox":             {"QComboBox": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "height": "20", 
+                                      "width": "90",
+                                      "color": "black", 
+                                      "background-color": "white", 
+                                      "selection-color": "white", 
+                                      "selection-background-color": "grey",
+                                      "border": "1px solid lightgrey"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "lineedit_menu":             {"font": {"style": ".AppleSystemUIFont", "size": 11.0},
-                                  "height": 20, "width": 90,
-                                  "color": "black",
-                                  "border": {"colour": "lightgrey", "size": 1}},
+    "menu_checkable_combobox":   {"QComboBox": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "height": "20", 
+                                      "width": "230",
+                                      "color": "black", 
+                                      "background-color": "white", 
+                                      "selection-color": "white", 
+                                      "selection-background-color": "grey",
+                                      "border": "1px solid lightgrey"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "switch_menu":               {"font": {"style": ".AppleSystemUIFont", "size": 11},
-                                  "height": 20, "width": 50, "color": "black", 
-                                  "border": {"colour": "white", "size": 1}},
+    "menu_lineedit":             {"QLineEdit": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "height": "20", 
+                                      "width": "90",
+                                      "color": "black",
+                                      "border": "1px solid lightgrey"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "title_popup":               {"font": {"style": ".AppleSystemUIFont", "size": 13, "bold": true}, 
-                                  "height": 23, 
-                                  "color": "black"},
+    "popup_title":               {"QLabel": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "13pt", 
+                                      "font-weight": "bold",
+                                      "height": "23", 
+                                      "color": "black"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "subtitle_popup":            {"font": {"style": ".AppleSystemUIFont", "size": 13, "bold": true},  
-                                  "height": 23, 
-                                  "color": "black"},
+    "popup_subtitle":            {"QLabel": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "11pt", 
+                                      "font-weight": "bold",  
+                                      "height": "23", 
+                                      "color": "black"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "button_popup":              {"font": {"style": ".AppleSystemUIFont", "size": 11.0}, 
-                                  "height": 20, 
-                                  "color": "black"},
+    "popup_label":               {"QLabel": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "height": "18", 
+                                      "color": "black"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "navigation_button_popup":   {"font": {"style": ".AppleSystemUIFont", "size": 11.0}, 
-                                  "height": 20, 
-                                  "color": "black"},
+    "popup_label_column_header": {"QLabel": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "italic", 
+                                      "font-size": "9.5pt", 
+                                      "height": "18", 
+                                      "color": "black"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "checkbox_popup":            {"font": {"style": ".AppleSystemUIFont", "size": 11.0}, 
-                                  "height": 18, 
-                                  "color": "black"},
+    "popup_button":              {"QPushButton": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt",  
+                                      "height": "20", 
+                                      "color": "black"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "rangebox_label_popup":      {"font": {"style": ".AppleSystemUIFont", "size": 11.0}, 
-                                  "height": 18, 
-                                  "color": "black"},
-                                
-    "rangebox_popup":            {"font": {"style": ".AppleSystemUIFont", "size": 11.0}, 
-                                  "height": 18, 
-                                  "max_width": 90, 
-                                  "color": "black"},
+    "popup_button_navigation":   {"QPushButton": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt",  
+                                      "height": "20", 
+                                      "width": "80",
+                                      "color": "black"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "multispecies_popup":        {"font": {"style": ".AppleSystemUIFont", "size": 11.0}, 
-                                  "height": 18, 
-                                  "color": "black"},
+    "popup_button_select":       {"QPushButton": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt",  
+                                      "height": "20", 
+                                      "width": "100",
+                                      "color": "black"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "column_header_label_popup": {"font": {"style": ".AppleSystemUIFont", "size": 11.0, "italic": true}, 
-                                  "height": 18, 
-                                  "color": "black"},
+    "popup_checkbox":            {"QCheckBox": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "height": "18", 
+                                      "color": "black"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "tooltip":                   {"font": {"style": ".AppleSystemUIFont", "size": 10}},
+    "popup_combobox":            {"QComboBox": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "height": "18", 
+                                      "width": "100",
+                                      "color": "black", 
+                                      "background-color": "white", 
+                                      "selection-color": "white", 
+                                      "selection-background-color": "grey",
+                                      "border": "1px solid lightgrey"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "settings_container":        {"background-color": "white", 
-                                  "border": {"colour": "lightgrey", "size": 1}, 
-                                  "border-radius": 5, "padding": 5},
+    "popup_lineedit_multispecies":{"QLineEdit": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "height": "18", 
+                                      "width": "100", 
+                                      "color": "black"},   
+                                   "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "settings_icon":             {"border": null},
+    "popup_lineedit_rangebox":   {"QLineEdit": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "height": "18", 
+                                      "width": "75", 
+                                      "color": "black"},   
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
 
-    "save_icon":                 {"border": null},
+    "settings_label":            {"QLabel": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "font-weight": "bold"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
+
+    "settings_sublabel":         {"QLabel": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
+
+    "settings_sublabel_slider":  {"QLabel": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "italic", 
+                                      "font-size": "9.5pt"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
+
+    "settings_container":        {"QWidget": {
+                                      "background-color": "white", 
+                                      "border": "1px solid lightgrey", 
+                                      "border-radius": "5px", 
+                                      "padding": "5px"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
+
+   "settings_icon":              {"QPushButton": {
+                                      "border": "None"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
+
+    "save_icon":                 {"QPushButton": {
+                                      "border": "None"},
+                                  "QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
+
+    "canvas_annotation":         {"QToolTip": {
+                                      "font-family": ".AppleSystemUIFont", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black",
+                                      "border": "1px solid black"}},
+
+    "canvas_annotation_vline":   {"QWidget": {
+                                      "border": "2px solid #757575",
+                                      "border-style": "dashed"}},
+
+    "canvas_cover":              {"QWidget": {
+                                      "background-color": "white"}}
     
-    "settings_label":            {"font": {"style": ".AppleSystemUIFont", "size": 9.5, "bold": true}},
-
-    "canvas_cover":             {"background-color": "white"}
-
 }
