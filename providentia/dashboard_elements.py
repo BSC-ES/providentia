@@ -207,6 +207,7 @@ class CheckableComboBox(QtWidgets.QComboBox):
         # prevent popup from closing when clicking on an item
         self.view().viewport().installEventFilter(self)
 
+    @QtCore.pyqtSlot()
     def fixCursorPosition(self):
         """ Move (invisible) cursor to first position to avoid cutting off the start. """
 
@@ -270,6 +271,7 @@ class CheckableComboBox(QtWidgets.QComboBox):
         self.killTimer(event.timerId())
         self.closeOnLineEditClick = False
 
+    @QtCore.pyqtSlot()
     def updateText(self):
         
         texts = []
