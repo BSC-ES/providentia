@@ -504,7 +504,6 @@ class PopUpWindow(QtWidgets.QWidget):
         # return horizontally concatenated menu type grids
         return horizontal_parent
 
-    @QtCore.pyqtSlot()
     def open_new_page(self):
         """ Function to open new page in pop-up window. """
 
@@ -523,7 +522,6 @@ class PopUpWindow(QtWidgets.QWidget):
         # close current pop-up page
         self.close()
 
-    @QtCore.pyqtSlot()
     def root_page(self):
         """ Function that returns pop-up window to root menu level page. """
 
@@ -536,7 +534,6 @@ class PopUpWindow(QtWidgets.QWidget):
         # close current pop-up page
         self.close()
 
-    @QtCore.pyqtSlot()
     def previous_page(self):
         """ Function that returns pop-up window to previous menu level page. """
 
@@ -550,7 +547,6 @@ class PopUpWindow(QtWidgets.QWidget):
         # close current pop-up page
         self.close()
 
-    @QtCore.pyqtSlot()
     def select_all(self):
         """ Function to select all checkboxes. """
 
@@ -558,7 +554,6 @@ class PopUpWindow(QtWidgets.QWidget):
             for checkbox_ii, checkbox in enumerate(self.page_memory['checkboxes'][element]):
                 self.page_memory['checkboxes'][element][checkbox_ii].setCheckState(QtCore.Qt.Checked)
 
-    @QtCore.pyqtSlot()
     def clear_all(self):
         """ Function to clear all checkboxes. """
 
@@ -566,7 +561,6 @@ class PopUpWindow(QtWidgets.QWidget):
             for checkbox_ii, checkbox in enumerate(self.page_memory['checkboxes'][element]):
                 self.page_memory['checkboxes'][element][checkbox_ii].setCheckState(QtCore.Qt.Unchecked)
 
-    @QtCore.pyqtSlot()
     def select_all_default(self):
         """ Function to select all default selected checkboxes. """
 
@@ -586,7 +580,6 @@ class PopUpWindow(QtWidgets.QWidget):
             for default_ind in default_inds:
                 self.page_memory['checkboxes'][element][default_ind].setCheckState(QtCore.Qt.Checked)
 
-    @QtCore.pyqtSlot()
     def add_multispecies_widgets(self):
         """ Function to add new line to pop-up window. """
         
@@ -650,7 +643,6 @@ class PopUpWindow(QtWidgets.QWidget):
         self.update_multispecies_fields(label_ii)
         self.read_instance.multispecies_initialisation = False
 
-    @QtCore.pyqtSlot()
     def handle_filter_species_change(self):
         """ Function to add or remote filter species after clicking on apply button. """
         
@@ -781,7 +773,6 @@ class PopUpWindow(QtWidgets.QWidget):
 
         self.read_instance.block_config_bar_handling_updates = False
 
-    @QtCore.pyqtSlot(str)
     def handle_multispecies_params_change(self, changed_param):
         """ Function which handles interactive updates of multispecies filtering fields. """
         
@@ -822,7 +813,6 @@ class PopUpWindow(QtWidgets.QWidget):
             # update multispecies filtering fields
             self.update_multispecies_fields(label_ii)
 
-    @QtCore.pyqtSlot()
     def closeEvent(self, event):
         """ Function to get status of current page upon closing of pop-up window. """
 
