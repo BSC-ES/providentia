@@ -3,6 +3,7 @@
 # conda install -c conda-forge cartopy
 # conda install -c conda-forge jupyterlab
 # conda install -c conda-forge ghostscript
+# conda install -c conda-forge KDEpy
 
 matplotlib==3.9.1
 netCDF4==1.7.2
@@ -27,4 +28,4 @@ myst-parser==3.0.1
 PyYAML==6.0.1
 python-dotenv==1.0.1
 paramiko==3.4.0
-memray==1.17.1 
+memray==1.17.1

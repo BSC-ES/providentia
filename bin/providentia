@@ -455,6 +455,7 @@ else
         conda activate providentia-env_v2.4.0
         conda install -c conda-forge cartopy -y --override-channels
         conda install -c conda-forge jupyterlab -y --override-channels
+        conda install -c conda-forge ghostscript -y --override-channels
         conda install -c conda-forge KDEpy -y --override-channels
 
         pip install -r requirements.txt
