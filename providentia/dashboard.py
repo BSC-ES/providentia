@@ -42,6 +42,7 @@ from .warnings_prv import show_message
 
 from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 
+
 # set font DPI for uniform dashboard appearance across systems
 os.environ["QT_FONT_DPI"] = "96"
 # enable high DPI pixmaps
@@ -212,6 +213,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         
         return super(ProvidentiaMainWindow, self).moveEvent(event)
 
+    @QtCore.pyqtSlot()
     def get_geometry(self):
         """ Update current geometry of main Providentia window and buttons. """
 
@@ -626,6 +628,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.show()
             self.showMaximized()
 
+    @QtCore.pyqtSlot(dict)
     def generate_pop_up_window(self, menu_root):
         """ Generate pop up window. """
         
@@ -946,6 +949,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
 
+    @QtCore.pyqtSlot(str)
     def handle_config_bar_params_change(self, changed_param):
         """ Function which handles interactive updates of combo box fields. """
 
@@ -1219,6 +1223,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # create gridspec and add it to a list
             canvas_instance.plot_axes[changed_plot_type] = [canvas_instance.figure.add_subplot(inner_gs[i, j]) for i in range(nrows) for j in range(ncols)]
 
+    @QtCore.pyqtSlot()
     def handle_data_selection_update(self):
         """ Function which handles update of data selection
             and MPL canvas upon pressing of READ button.
@@ -1480,6 +1485,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # restore mouse cursor to normal
         QtWidgets.QApplication.restoreOverrideCursor()
 
+    @QtCore.pyqtSlot()
     def reset_options(self):
         """ Reset all filter fields to initial values. """
 
@@ -1596,7 +1602,6 @@ def main(**kwargs):
     q_app.setApplicationName("Providentia")
     q_app.setApplicationDisplayName("Providentia")
     q_app.setDesktopFileName("Providentia")
-
 
     # open Providentia
     ProvidentiaMainWindow(**kwargs)
