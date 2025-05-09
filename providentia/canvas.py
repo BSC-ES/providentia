@@ -19,7 +19,7 @@ import numpy as np
 from packaging.version import Version
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
-from PyQt5 import QtCore, QtWidgets 
+from PyQt5 import QtCore, QtWidgets, QtGui
 from weakref import WeakKeyDictionary
 
 from .calculate import Stats, ExpBias
@@ -78,15 +78,6 @@ class MPLCanvas(FigureCanvas):
 
         # initialise Plot class
         self.plot = Plot(read_instance=self.read_instance, canvas_instance=self)
-
-        # initialise annotations
-        self.annotations = dict()
-        self.annotations_lock = dict()
-        self.annotations_vline = dict()
-        for plot_type in ['periodic', 'periodic-violin']:
-            self.annotations[plot_type] = dict()
-            self.annotations_lock[plot_type] = dict()
-            self.annotations_vline[plot_type] = dict()
 
         # setup gridding of canvas
         self.gridspec = gridspec.GridSpec(self.gridspec_nrows, self.gridspec_ncols)
@@ -157,7 +148,6 @@ class MPLCanvas(FigureCanvas):
 
         # create rest of plot axes (default: timeseries, statsummary, distribution, periodic)
         # also show plot type buttons
-        self.annotation_elements = []
         for position, plot_type in enumerate(self.read_instance.active_dashboard_plots):
             
             # update plot axis
@@ -193,11 +183,10 @@ class MPLCanvas(FigureCanvas):
         self.lasso_active = False
         self.station_pick = self.figure.canvas.mpl_connect('button_press_event', self.station_select)
 
-        # setup station annotations
-        self.annotations['map'] = HoverAnnotation(self, 'map', self.plot_axes['map'], self.plot_characteristics['map'])
-        self.map_annotation_disconnect = False
-        self.map_annotation_event = self.figure.canvas.mpl_connect('motion_notify_event', 
-            self.annotations['map'].hover_map_annotation)
+        # setup canvas annotations
+        self.canvas_annotation = HoverAnnotation(self)
+        self.canvas_annotation_event = self.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                      self.canvas_annotation.hover_annotation)
 
         # setup zoom on scroll wheel on map
         self.zoom_map_event = self.figure.canvas.mpl_connect('scroll_event', lambda event: zoom_map_func(self, event))
@@ -294,6 +283,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    @QtCore.pyqtSlot()
     def handle_data_filter_update(self):
         """ Function which handles updates of data filtering. """
 
@@ -313,6 +303,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    @QtCore.pyqtSlot()
     def handle_resampling_update(self):
         """ Function which handles updates of resampling. """
         
@@ -373,6 +364,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
     
+    @QtCore.pyqtSlot()
     def handle_statistic_mode_update(self):
         """ Function that handles the update of the MPL canvas
             when we change the statistical calculation mode
@@ -430,6 +422,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    @QtCore.pyqtSlot()
     def handle_statistic_aggregation_update(self):
         """ Function that handles the update of the MPL canvas
             when we change the aggregation statistic
@@ -461,6 +454,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    @QtCore.pyqtSlot()
     def handle_temporal_colocate_update(self):
         """ Function that handles the update of the MPL canvas
             with colocated data upon checking of the temporal colocate checkbox.
@@ -846,6 +840,7 @@ class MPLCanvas(FigureCanvas):
                 if plot_type not in ['metadata', 'fairmode-statsummary']:
                     self.update_plot_options(plot_types=[plot_type])
 
+
     def get_plot_type_position(self, plot_type):
         """ Function that returns numeric position of plot type within the dashboard
         """
@@ -958,6 +953,7 @@ class MPLCanvas(FigureCanvas):
         
         return None
 
+    @QtCore.pyqtSlot()
     def handle_map_z_statistic_update(self):
         """ Function which handles update of map z statistic upon interaction with map comboboxes. """
 
@@ -1034,6 +1030,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    @QtCore.pyqtSlot()
     def handle_timeseries_statistic_update(self):
         """ Function that handles update of plotted timeseries statistic
             upon interaction with timeseries statistic combobox.
@@ -1067,6 +1064,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    @QtCore.pyqtSlot()
     def handle_timeseries_chunk_statistic_update(self):
         """ Function that handles update of plotted timeseries chunk statistic
             upon interaction with timeseries chunk statistic/resolution comboboxes.
@@ -1105,6 +1103,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
     
+    @QtCore.pyqtSlot()
     def handle_periodic_statistic_update(self):
         """ Function that handles update of plotted periodic statistic
             upon interaction with periodic statistic combobox.
@@ -1157,6 +1156,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    @QtCore.pyqtSlot()
     def handle_taylor_correlation_statistic_update(self):
         """ Function that handles update of correlation statistic
             upon interaction with Taylor diagram statistic combobox.
@@ -1248,6 +1248,7 @@ class MPLCanvas(FigureCanvas):
         else:
             self.statsummary_stat.lineEdit().setText('')
 
+    @QtCore.pyqtSlot()
     def handle_statsummary_statistics_update(self):
         """ Function that handles update of plotted statsummary statistics
             upon interaction with statistic comboboxes.
@@ -1323,6 +1324,7 @@ class MPLCanvas(FigureCanvas):
             # restore mouse cursor to normal
             QtWidgets.QApplication.restoreOverrideCursor()
 
+    @QtCore.pyqtSlot()
     def handle_statsummary_cycle_update(self):
 
         if not self.read_instance.block_config_bar_handling_updates:
@@ -1370,6 +1372,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
     
+    @QtCore.pyqtSlot()
     def handle_statsummary_periodic_aggregation_update(self):
         """ Function that handles update of plotted statsummary periodic aggregation statistic
             upon interaction with combobox.
@@ -1403,6 +1406,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
     
+    @QtCore.pyqtSlot()
     def handle_statsummary_periodic_mode_update(self):
         """ Function that handles update of plotted statsummary periodic aggregation mode
             upon interaction with combobox.
@@ -1436,6 +1440,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
     
+    @QtCore.pyqtSlot()
     def handle_fairmode_target_classification_update(self):
 
         if not self.read_instance.block_config_bar_handling_updates:
@@ -1466,6 +1471,7 @@ class MPLCanvas(FigureCanvas):
         return None
     
     # TODO CHANGE
+    @QtCore.pyqtSlot()
     def handle_fairmode_statsummary_classification_update(self):
 
         if not self.read_instance.block_config_bar_handling_updates:
@@ -1562,23 +1568,23 @@ class MPLCanvas(FigureCanvas):
 
             elif plot_type == 'timeseries':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
-                    self.remove_axis_objects(objects, elements_to_skip=[self.annotations_vline['timeseries']])
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'periodic':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
-                    self.remove_axis_objects(objects, elements_to_skip=self.annotations_vline['periodic'].values())
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'periodic-violin':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists, 
                                 ax_to_remove.collections]:
-                    self.remove_axis_objects(objects, elements_to_skip=self.annotations_vline['periodic-violin'].values())
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'metadata':
                 self.remove_axis_objects(ax_to_remove.texts)
 
             elif plot_type == 'distribution':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
-                    self.remove_axis_objects(objects, elements_to_skip=[self.annotations_vline['distribution']])
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'statsummary':
                 self.remove_axis_objects(ax_to_remove.tables)
@@ -1590,7 +1596,7 @@ class MPLCanvas(FigureCanvas):
             elif plot_type == 'fairmode-target':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists, 
                                 ax_to_remove.patches, ax_to_remove.texts]:
-                    self.remove_axis_objects(objects, elements_to_skip=[self.annotations['fairmode-target']])
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'fairmode-statsummary':
                 self.remove_axis_objects(ax_to_remove.lines)
@@ -1600,14 +1606,6 @@ class MPLCanvas(FigureCanvas):
             self.plot_elements[plot_type]['absolute'] = {}
             if 'bias' in self.plot_elements[plot_type]:
                 del self.plot_elements[plot_type]['bias']
-
-        # hide annotation boxes and lines
-        for element in self.annotation_elements:
-            if isinstance(element, dict):
-                for val in element.values():
-                    val.set_visible(False)
-            else:
-                element.set_visible(False)
 
         return None
 
@@ -1646,6 +1644,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    @QtCore.pyqtSlot()
     def select_all_stations(self):
         """ Function that selects/unselects all plotted stations
             (and associated plots) upon ticking of checkbox.
@@ -1708,6 +1707,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    @QtCore.pyqtSlot()
     def select_intersect_stations(self):
         """ Function that selects/unselects intersection of
             stations and all experiment domains (and associated plots)
@@ -1797,6 +1797,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    @QtCore.pyqtSlot()
     def select_extent_stations(self):
         """ Function that selects/unselects the
             stations for the current map extent (and associated plots)
@@ -2054,28 +2055,24 @@ class MPLCanvas(FigureCanvas):
 
         # LAYOUT OPTIONS #
         # add position 2 plot selector
-        self.read_instance.cb_position_2 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_2 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['menu_combobox'])
         self.read_instance.cb_position_2.setToolTip('Select plot type in top right position')
         self.read_instance.cb_position_2.currentTextChanged.connect(self.read_instance.handle_layout_update)
-        # self.read_instance.cb_position_2.hide()
 
         # add position 3 plot selector
-        self.read_instance.cb_position_3 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_3 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['menu_combobox'])
         self.read_instance.cb_position_3.setToolTip('Select plot type in bottom left position')
         self.read_instance.cb_position_3.currentTextChanged.connect(self.read_instance.handle_layout_update)
-        # self.read_instance.cb_position_3.hide()
 
         # add position 4 plot selector
-        self.read_instance.cb_position_4 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_4 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['menu_combobox'])
         self.read_instance.cb_position_4.setToolTip('Select plot type in bottom centre position')
         self.read_instance.cb_position_4.currentTextChanged.connect(self.read_instance.handle_layout_update)
-        # self.read_instance.cb_position_4.hide()
 
         # add position 5 plot selector
-        self.read_instance.cb_position_5 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_5 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['menu_combobox'])
         self.read_instance.cb_position_5.setToolTip('Select plot type in bottom right position')
         self.read_instance.cb_position_5.currentTextChanged.connect(self.read_instance.handle_layout_update)
-        # self.read_instance.cb_position_5.hide()
 
         # MAP SETTINGS MENU #
         # create map settings menu
@@ -2327,6 +2324,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    @QtCore.pyqtSlot()
     def interactive_elements_button_func(self):
         """ Function to show and hide elements in setting menus. """
 
@@ -2357,6 +2355,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    @QtCore.pyqtSlot()
     def update_markersize_func(self):
         """ Function to handle the update of the markers size. """
 
@@ -2383,6 +2382,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    @QtCore.pyqtSlot()
     def update_opacity_func(self):
         """ Function to handle the update of the markers opacity. """
 
@@ -2403,6 +2403,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    @QtCore.pyqtSlot()
     def update_linewidth_func(self):
         """ Function to handle the update of the lines widths. """
 
@@ -2421,6 +2422,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    @QtCore.pyqtSlot()
     def update_smooth_window_func(self):
         
         # get source
@@ -2434,6 +2436,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
+    @QtCore.pyqtSlot()
     def update_smooth_min_points_func(self):
         
         # get source
@@ -2447,6 +2450,7 @@ class MPLCanvas(FigureCanvas):
 
         return None
     
+    @QtCore.pyqtSlot()
     def update_plot_option(self):
         """ Function to handle the update of the plot options. """
 
@@ -3145,16 +3149,12 @@ class MPLCanvas(FigureCanvas):
         if isinstance(ax, dict):
             for sub_ax in ax.values():
                 for line in sub_ax.lines:
-                    if line not in self.annotation_elements:
-                        line.set_linewidth(linewidth)
+                    line.set_linewidth(linewidth)
         else:
             for line in ax.lines:
-                if line not in self.annotation_elements:
-                    if (((plot_type == 'scatter') and ((list(line.get_xdata()) == [0, 0.5])
-                        or (list(line.get_xdata()) == [0, 1])))):
-                        continue
-                    else:
-                        line.set_linewidth(linewidth)
+                if (((plot_type == 'scatter') and ((list(line.get_xdata()) == [0, 0.5])
+                    or (list(line.get_xdata()) == [0, 1])))):
+                    continue
                 else:
                     line.set_linewidth(linewidth)
 
@@ -3267,6 +3267,7 @@ class MPLCanvas(FigureCanvas):
         if figure_path:
             return figure_path
 
+    @QtCore.pyqtSlot()
     def save_axis_figure_func(self):
         """ Function to save each plot figure. """
         

@@ -321,30 +321,7 @@
           "marker_selected": { "s": 8, "alpha": 1.0 },
           "marker_unselected": { "s": 4, "alpha": 0.4 },
           "plot": { "s": 4, "picker": 1 },
-          "marker_annotate":
-            {
-              "xytext": [0, 0],
-              "textcoords": "offset points",
-              "size": 8,
-              "ha": "center",
-              "zorder": 100,
-            },
-          "marker_annotate_bbox":
-            {
-              "boxstyle": "round",
-              "linewidth": 0.5,
-              "facecolor": "white",
-              "edgecolor": "#757575",
-            },
-          "marker_annotate_arrowprops":
-            {
-              "frac": 1,
-              "headwidth": 10,
-              "shrink": 0.1,
-              "color": "#757575",
-              "edgecolor": "#5e5e5e",
-            },
-          "marker_annotate_text": { "round_decimal_places": 2 },
+          "marker_annotate_rounding": 2,
         },
       "offline":
         {
@@ -522,33 +499,7 @@
           "annotate_text": { "fontsize": 8 },
           "smooth": { "format": { "linewidth": 1.0 } },
           "plot": { "markersize": 2 },
-          "marker_annotate":
-            {
-              "xytext": [0, 0],
-              "textcoords": "offset points",
-              "size": 8,
-              "ha": "left",
-              "va": "center",
-              "zorder": 100,
-            },
-          "marker_annotate_bbox":
-            {
-              "boxstyle": "round",
-              "linewidth": 0.5,
-              "facecolor": "white",
-              "edgecolor": "#757575",
-            },
-          "marker_annotate_arrowprops":
-            {
-              "frac": 1,
-              "headwidth": 10,
-              "shrink": 0.1,
-              "color": "#757575",
-              "edgecolor": "#5e5e5e",
-            },
-          "marker_annotate_vline":
-            { "color": "#757575", "linewidth": 0.5, "linestyle": "--" },
-          "marker_annotate_text": { "round_decimal_places": 2 },
+          "marker_annotate_rounding": 2,
         },
       "offline":
         {
@@ -705,33 +656,7 @@
           "ytick_params": { "labelsize": 7 },
           "annotate_text": { "fontsize": 8 },
           "plot": { "markersize": 3, "linewidth": 0.5 },
-          "marker_annotate":
-            {
-              "xytext": [0, 0],
-              "textcoords": "offset points",
-              "size": 8,
-              "ha": "left",
-              "va": "center",
-              "zorder": 100,
-            },
-          "marker_annotate_bbox":
-            {
-              "boxstyle": "round",
-              "linewidth": 0.5,
-              "facecolor": "white",
-              "edgecolor": "#757575",
-            },
-          "marker_annotate_arrowprops":
-            {
-              "frac": 1,
-              "headwidth": 10,
-              "shrink": 0.1,
-              "color": "#757575",
-              "edgecolor": "#5e5e5e",
-            },
-          "marker_annotate_vline":
-            { "color": "#757575", "linewidth": 0.5, "linestyle": "--" },
-          "marker_annotate_text": { "round_decimal_places": 2 },
+          "marker_annotate_rounding": 2,
         },
       "offline":
         {
@@ -873,33 +798,7 @@
               "violin": { "linewidth": 0.5 },
               "median": { "marker": "o", "markersize": 3, "linewidth": 0.5 },
             },
-          "marker_annotate":
-            {
-              "xytext": [0, 0],
-              "textcoords": "offset points",
-              "size": 8,
-              "ha": "left",
-              "va": "center",
-              "zorder": 100,
-            },
-          "marker_annotate_bbox":
-            {
-              "boxstyle": "round",
-              "linewidth": 0.5,
-              "facecolor": "white",
-              "edgecolor": "#757575",
-            },
-          "marker_annotate_arrowprops":
-            {
-              "frac": 1,
-              "headwidth": 10,
-              "shrink": 0.1,
-              "color": "#757575",
-              "edgecolor": "#5e5e5e",
-            },
-          "marker_annotate_vline":
-            { "color": "#757575", "linewidth": 0.5, "linestyle": "--" },
-          "marker_annotate_text": { "round_decimal_places": 2 },
+          "marker_annotate_rounding": 2,
         },
       "offline":
         {
@@ -1083,33 +982,7 @@
           "ytick_params": { "labelsize": 7 },
           "annotate_text": { "fontsize": 8 },
           "plot": { "linewidth": 1 },
-          "marker_annotate":
-            {
-              "xytext": [0, 0],
-              "textcoords": "offset points",
-              "size": 8,
-              "ha": "left",
-              "va": "center",
-              "zorder": 100,
-            },
-          "marker_annotate_bbox":
-            {
-              "boxstyle": "round",
-              "linewidth": 0.5,
-              "facecolor": "white",
-              "edgecolor": "#757575",
-            },
-          "marker_annotate_arrowprops":
-            {
-              "frac": 1,
-              "headwidth": 10,
-              "shrink": 0.1,
-              "color": "#757575",
-              "edgecolor": "#5e5e5e",
-            },
-          "marker_annotate_vline":
-            { "color": "#757575", "linewidth": 0.5, "linestyle": "--" },
-          "marker_annotate_text": { "round_decimal_places": 2 },
+          "marker_annotate_rounding": 2,
         },
       "offline":
         {
@@ -1272,31 +1145,7 @@
           "ytick_params": { "labelsize": 7 },
           "annotate_text": { "fontsize": 8 },
           "plot": { "markersize": 2, "alpha": 0.5 },
-          "marker_annotate":
-            {
-              "xytext": [0, 0],
-              "textcoords": "offset points",
-              "size": 8,
-              "ha": "left",
-              "va": "center",
-              "zorder": 100,
-            },
-          "marker_annotate_bbox":
-            {
-              "boxstyle": "round",
-              "linewidth": 0.5,
-              "facecolor": "white",
-              "edgecolor": "#757575",
-            },
-          "marker_annotate_arrowprops":
-            {
-              "frac": 1,
-              "headwidth": 10,
-              "shrink": 0.1,
-              "color": "#757575",
-              "edgecolor": "#5e5e5e",
-            },
-          "marker_annotate_text": { "round_decimal_places": 2 },
+          "marker_annotate_rounding": 2,
           "max_points": 100000,
         },
       "offline":
@@ -2022,31 +1871,7 @@
           "xytick_params": { "fontsize": 7 },
           "rtick_params": { "fontsize": 7 },
           "annotate_text": { "fontsize": 8 },
-          "marker_annotate":
-            {
-              "xytext": [0, 0],
-              "textcoords": "offset points",
-              "size": 8,
-              "ha": "left",
-              "va": "center",
-              "zorder": 100,
-            },
-          "marker_annotate_bbox":
-            {
-              "boxstyle": "round",
-              "linewidth": 0.5,
-              "facecolor": "white",
-              "edgecolor": "#757575",
-            },
-          "marker_annotate_arrowprops":
-            {
-              "frac": 1,
-              "headwidth": 10,
-              "shrink": 0.1,
-              "color": "#757575",
-              "edgecolor": "#5e5e5e",
-            },
-          "marker_annotate_text": { "round_decimal_places": 2 },
+          "marker_annotate_rounding": 2,
           "plot": { "markersize": 6 },
         },
       "offline":
@@ -2299,31 +2124,7 @@
           "ytick_params": { "labelsize": 7 },
           "plot": { "markersize": 5 },
           "annotate_text": { "fontsize": 8 },
-          "marker_annotate":
-            {
-              "xytext": [0, 0],
-              "textcoords": "offset points",
-              "size": 8,
-              "ha": "left",
-              "va": "center",
-              "zorder": 100,
-            },
-          "marker_annotate_bbox":
-            {
-              "boxstyle": "round",
-              "linewidth": 0.5,
-              "facecolor": "white",
-              "edgecolor": "#757575",
-            },
-          "marker_annotate_arrowprops":
-            {
-              "frac": 1,
-              "headwidth": 10,
-              "shrink": 0.1,
-              "color": "#757575",
-              "edgecolor": "#5e5e5e",
-            },
-          "marker_annotate_text": { "round_decimal_places": 2 },
+          "marker_annotate_rounding": 2,
         },
       "offline":
         {
@@ -2563,30 +2364,7 @@
       "plot_options": ["individual"],
       "dashboard":
         {
-          "marker_annotate":
-            {
-              "xytext": [0, 0],
-              "textcoords": "offset points",
-              "size": 8,
-              "ha": "center",
-              "zorder": 100,
-            },
-          "marker_annotate_bbox":
-            {
-              "boxstyle": "round",
-              "linewidth": 0.5,
-              "facecolor": "white",
-              "edgecolor": "#757575",
-            },
-          "marker_annotate_arrowprops":
-            {
-              "frac": 1,
-              "headwidth": 10,
-              "shrink": 0.1,
-              "color": "#757575",
-              "edgecolor": "#5e5e5e",
-            },
-          "marker_annotate_text": { "round_decimal_places": 2 },
+          "marker_annotate_rounding": 2,
           "auxiliar":
             {
               "row_title": { "fontsize": 7.7 },
