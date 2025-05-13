@@ -337,8 +337,6 @@ class ExperimentInterpolation(object):
 
     def create_grid_domain_edge_polygon(self):
 
-        print("enters create_grid_domain_edge_polygon",self.yearmonth)
-
         """ Create grid domain edge polygon from model netCDF file.
             This is handled differently for regular grids (i.e. following lines of longitude/latitude), 
             and non-regular grids (e.g. lambert-conformal).
