@@ -19,7 +19,7 @@ import numpy as np
 from packaging.version import Version
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtWidgets
 from weakref import WeakKeyDictionary
 
 from .calculate import Stats, ExpBias
@@ -283,7 +283,6 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
-    @QtCore.pyqtSlot()
     def handle_data_filter_update(self):
         """ Function which handles updates of data filtering. """
 
@@ -291,7 +290,10 @@ class MPLCanvas(FigureCanvas):
         if not hasattr(self.read_instance, 'data_in_memory'):
             return
 
-        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        # update mouse cursor to a waiting cursor
+        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+            self.read_instance.cursor_function = 'handle_data_filter_update'
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         if self.filter_data is None:
             self.filter_data = DataFilter(self.read_instance)
@@ -299,11 +301,12 @@ class MPLCanvas(FigureCanvas):
             self.filter_data.filter_all()
             self.update_active_map()
 
-        QtWidgets.QApplication.restoreOverrideCursor()
+        # restore mouse cursor to normal
+        if self.read_instance.cursor_function == 'handle_data_filter_update':
+            QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
-    @QtCore.pyqtSlot()
     def handle_resampling_update(self):
         """ Function which handles updates of resampling. """
         
@@ -330,7 +333,9 @@ class MPLCanvas(FigureCanvas):
                 if len(self.relative_selected_station_inds) > 0:
                     
                     # update mouse cursor to a waiting cursor
-                    QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+                    if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                        self.read_instance.cursor_function = 'handle_resampling_update'
+                        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
                     # update associated plots with selected stations
                     self.update_associated_active_dashboard_plots()
@@ -342,7 +347,8 @@ class MPLCanvas(FigureCanvas):
                     self.figure.canvas.draw_idle()
 
                     # restore mouse cursor to normal
-                    QtWidgets.QApplication.restoreOverrideCursor()
+                    if self.read_instance.cursor_function == 'handle_resampling_update':
+                        QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -364,7 +370,6 @@ class MPLCanvas(FigureCanvas):
 
         return None
     
-    @QtCore.pyqtSlot()
     def handle_statistic_mode_update(self):
         """ Function that handles the update of the MPL canvas
             when we change the statistical calculation mode
@@ -377,7 +382,9 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.block_config_bar_handling_updates = True
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_statistic_mode_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # update mode
             self.read_instance.selected_statistic_mode = self.read_instance.cb_statistic_mode.currentText()
@@ -418,11 +425,11 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()   
+            if self.read_instance.cursor_function == 'handle_statistic_mode_update':
+                QtWidgets.QApplication.restoreOverrideCursor()   
 
         return None
 
-    @QtCore.pyqtSlot()
     def handle_statistic_aggregation_update(self):
         """ Function that handles the update of the MPL canvas
             when we change the aggregation statistic
@@ -435,7 +442,9 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.block_config_bar_handling_updates = True
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_statistic_aggregation_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # update aggregation statistic
             self.update_aggregation_statistic()
@@ -450,11 +459,11 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_statistic_aggregation_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
-    @QtCore.pyqtSlot()
     def handle_temporal_colocate_update(self):
         """ Function that handles the update of the MPL canvas
             with colocated data upon checking of the temporal colocate checkbox.
@@ -463,7 +472,9 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_MPL_canvas_updates:
             
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_temporal_colocate_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # if only have < 2 data arrays in memory, no colocation is possible,
             # therefore set colocation to be False, and return
@@ -479,6 +490,8 @@ class MPLCanvas(FigureCanvas):
                 self.read_instance.block_MPL_canvas_updates = True
                 self.read_instance.ch_colocate.setCheckState(QtCore.Qt.Unchecked)
                 self.read_instance.block_MPL_canvas_updates = False
+                if self.read_instance.cursor_function == 'handle_temporal_colocate_update':
+                    QtWidgets.QApplication.restoreOverrideCursor()
                 return
 
             # else, if have loaded experiment data, check if colocate checkbox is checked or unchecked
@@ -518,7 +531,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_temporal_colocate_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -687,6 +701,7 @@ class MPLCanvas(FigureCanvas):
         
         # redraw plot
         self.figure.canvas.draw()
+        # flush events so can see map selection immediately 
         self.figure.canvas.flush_events()
 
     def update_associated_active_dashboard_plot(self, plot_type):
@@ -953,7 +968,6 @@ class MPLCanvas(FigureCanvas):
         
         return None
 
-    @QtCore.pyqtSlot()
     def handle_map_z_statistic_update(self):
         """ Function which handles update of map z statistic upon interaction with map comboboxes. """
 
@@ -1030,7 +1044,6 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
-    @QtCore.pyqtSlot()
     def handle_timeseries_statistic_update(self):
         """ Function that handles update of plotted timeseries statistic
             upon interaction with timeseries statistic combobox.
@@ -1039,7 +1052,9 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:  
         
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_timeseries_statistic_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # update statistic
             self.read_instance.selected_timeseries_statistic_aggregation = self.timeseries_stat.currentText()
@@ -1060,11 +1075,11 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_timeseries_statistic_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
-    @QtCore.pyqtSlot()
     def handle_timeseries_chunk_statistic_update(self):
         """ Function that handles update of plotted timeseries chunk statistic
             upon interaction with timeseries chunk statistic/resolution comboboxes.
@@ -1073,7 +1088,9 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
             
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_timeseries_chunk_statistic_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the timeseries chunk statistic combobox are made
@@ -1099,11 +1116,11 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_timeseries_chunk_statistic_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
-    @QtCore.pyqtSlot()
     def handle_periodic_statistic_update(self):
         """ Function that handles update of plotted periodic statistic
             upon interaction with periodic statistic combobox.
@@ -1112,7 +1129,9 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_periodic_statistic_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the periodic statistic combobox are made
@@ -1152,11 +1171,11 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_periodic_statistic_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
-    @QtCore.pyqtSlot()
     def handle_taylor_correlation_statistic_update(self):
         """ Function that handles update of correlation statistic
             upon interaction with Taylor diagram statistic combobox.
@@ -1165,7 +1184,9 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_taylor_correlation_statistic_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all
             # changes to the statistic combobox are made
@@ -1203,7 +1224,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_taylor_correlation_statistic_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -1248,7 +1270,6 @@ class MPLCanvas(FigureCanvas):
         else:
             self.statsummary_stat.lineEdit().setText('')
 
-    @QtCore.pyqtSlot()
     def handle_statsummary_statistics_update(self):
         """ Function that handles update of plotted statsummary statistics
             upon interaction with statistic comboboxes.
@@ -1257,7 +1278,9 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
             
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_statsummary_statistics_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary statistics combobox are made
@@ -1322,15 +1345,17 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_statsummary_statistics_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
-    @QtCore.pyqtSlot()
     def handle_statsummary_cycle_update(self):
 
         if not self.read_instance.block_config_bar_handling_updates:
             
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_statsummary_cycle_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary periodic cycle combobox are made
@@ -1368,11 +1393,11 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_statsummary_cycle_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
-    @QtCore.pyqtSlot()
     def handle_statsummary_periodic_aggregation_update(self):
         """ Function that handles update of plotted statsummary periodic aggregation statistic
             upon interaction with combobox.
@@ -1381,7 +1406,9 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_statsummary_periodic_aggregation_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary periodic aggregation combobox are made
@@ -1402,11 +1429,11 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_statsummary_periodic_aggregation_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
-    @QtCore.pyqtSlot()
     def handle_statsummary_periodic_mode_update(self):
         """ Function that handles update of plotted statsummary periodic aggregation mode
             upon interaction with combobox.
@@ -1415,7 +1442,9 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_statsummary_periodic_mode_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary periodic mode combobox are made
@@ -1436,17 +1465,19 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_statsummary_periodic_mode_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
-    @QtCore.pyqtSlot()
     def handle_fairmode_target_classification_update(self):
 
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_fairmode_target_classification_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the classification combobox are made
@@ -1466,18 +1497,20 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_fairmode_target_classification_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
     # TODO CHANGE
-    @QtCore.pyqtSlot()
     def handle_fairmode_statsummary_classification_update(self):
 
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_fairmode_statsummary_classification_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the classification combobox are made
@@ -1497,7 +1530,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_fairmode_statsummary_classification_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
@@ -1644,7 +1678,6 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
-    @QtCore.pyqtSlot()
     def select_all_stations(self):
         """ Function that selects/unselects all plotted stations
             (and associated plots) upon ticking of checkbox.
@@ -1665,6 +1698,11 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.block_MPL_canvas_updates = False
                     return
             
+            # set mouse cursor to hourglass
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.cursor_function = 'select_all_stations'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
 
@@ -1705,9 +1743,12 @@ class MPLCanvas(FigureCanvas):
             # draw changes
             self.figure.canvas.draw_idle()
 
+            # Restore mouse cursor to normal
+            if self.cursor_function == 'select_all_stations':
+                QtWidgets.QApplication.restoreOverrideCursor()
+
         return None
 
-    @QtCore.pyqtSlot()
     def select_intersect_stations(self):
         """ Function that selects/unselects intersection of
             stations and all experiment domains (and associated plots)
@@ -1728,6 +1769,11 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
                     self.read_instance.block_MPL_canvas_updates = False
                     return
+            
+            # set mouse cursor to hourglass
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.cursor_function = 'select_intersect_stations'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
             
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
@@ -1795,9 +1841,12 @@ class MPLCanvas(FigureCanvas):
             # draw changes
             self.figure.canvas.draw_idle()
 
+            # Restore mouse cursor to normal
+            if self.cursor_function == 'select_intersect_stations':
+                QtWidgets.QApplication.restoreOverrideCursor()
+
         return None
 
-    @QtCore.pyqtSlot()
     def select_extent_stations(self):
         """ Function that selects/unselects the
             stations for the current map extent (and associated plots)
@@ -1819,6 +1868,11 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.block_MPL_canvas_updates = False
                     return
                 
+            # set mouse cursor to hourglass
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.cursor_function = 'select_extent_stations'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
             # get map extent (in data coords)
             self.read_instance.map_extent = get_map_extent(self)
 
@@ -1878,6 +1932,10 @@ class MPLCanvas(FigureCanvas):
             # draw changes
             self.figure.canvas.draw_idle()
 
+            # Restore mouse cursor to normal
+            if self.cursor_function == 'select_extent_stations':
+                QtWidgets.QApplication.restoreOverrideCursor()
+
         return None
 
     def station_select(self, event):
@@ -1902,6 +1960,11 @@ class MPLCanvas(FigureCanvas):
         else:
             self.figure.canvas.widgetlock(self.station_pick)
         
+        # set mouse cursor to hourglass
+        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+            self.cursor_function = 'station_select'
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
         # unselect all/intersect/extent checkboxes
         self.unselect_map_checkboxes()
 
@@ -1945,6 +2008,9 @@ class MPLCanvas(FigureCanvas):
 
             # if have zero stations selected then return, doing nothing to selection
             if len(absolute_selected_station_inds) == 0:
+                # restore mouse cursor to normal
+                if self.cursor_function == 'station_select':
+                    QtWidgets.QApplication.restoreOverrideCursor()
                 return 
 
             # update absolute indices of selected stations
@@ -1973,6 +2039,10 @@ class MPLCanvas(FigureCanvas):
         # unlock canvas drawing
         if self.figure.canvas.widgetlock.isowner(self.station_pick):
             self.figure.canvas.widgetlock.release(self.station_pick)
+
+        # restore mouse cursor to normal
+        if self.cursor_function == 'station_select':
+            QtWidgets.QApplication.restoreOverrideCursor()
         
     def onlassoselect(self, verts):
         """ Function that handles station selection upon lasso selection with left click.
@@ -1987,6 +2057,11 @@ class MPLCanvas(FigureCanvas):
         # check if have any plotted stations on map, if not, return
         if len(self.active_map_valid_station_inds) == 0:
             return
+
+        # set mouse cursor to hourglass
+        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+            self.cursor_function = 'onlassoselect'
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         # unselect all/intersect/extent checkboxes
         self.unselect_map_checkboxes()
@@ -2035,6 +2110,10 @@ class MPLCanvas(FigureCanvas):
 
         # draw changes
         self.figure.canvas.draw_idle()
+
+        # restore mouse cursor to normal
+        if self.cursor_function == 'onlassoselect':
+            QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -2324,7 +2403,6 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
-    @QtCore.pyqtSlot()
     def interactive_elements_button_func(self):
         """ Function to show and hide elements in setting menus. """
 
@@ -2355,7 +2433,6 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
-    @QtCore.pyqtSlot()
     def update_markersize_func(self):
         """ Function to handle the update of the markers size. """
 
@@ -2382,7 +2459,6 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
-    @QtCore.pyqtSlot()
     def update_opacity_func(self):
         """ Function to handle the update of the markers opacity. """
 
@@ -2403,7 +2479,6 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
-    @QtCore.pyqtSlot()
     def update_linewidth_func(self):
         """ Function to handle the update of the lines widths. """
 
@@ -2422,7 +2497,6 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
-    @QtCore.pyqtSlot()
     def update_smooth_window_func(self):
         
         # get source
@@ -2436,7 +2510,6 @@ class MPLCanvas(FigureCanvas):
 
         return None
 
-    @QtCore.pyqtSlot()
     def update_smooth_min_points_func(self):
         
         # get source
@@ -2450,7 +2523,6 @@ class MPLCanvas(FigureCanvas):
 
         return None
     
-    @QtCore.pyqtSlot()
     def update_plot_option(self):
         """ Function to handle the update of the plot options. """
 
@@ -3267,7 +3339,6 @@ class MPLCanvas(FigureCanvas):
         if figure_path:
             return figure_path
 
-    @QtCore.pyqtSlot()
     def save_axis_figure_func(self):
         """ Function to save each plot figure. """
         
