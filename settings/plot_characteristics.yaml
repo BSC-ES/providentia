@@ -489,7 +489,7 @@
           "labelright": false,
           "labelleft": true,
         },
-      "xtick_alteration": { "define": true, "last_step": true, "first_step": true },
+      "xtick_alteration": { "define": true, "last_step": true, "first_step": true, "overlap": 15  },
       "smooth": { "window": 10, "min_points_percentage": 50 },
       "plot":
         {
