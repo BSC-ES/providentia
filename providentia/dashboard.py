@@ -213,7 +213,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         
         return super(ProvidentiaMainWindow, self).moveEvent(event)
 
-    @QtCore.pyqtSlot()
     def get_geometry(self):
         """ Update current geometry of main Providentia window and buttons. """
 
@@ -628,7 +627,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             self.show()
             self.showMaximized()
 
-    @QtCore.pyqtSlot(dict)
     def generate_pop_up_window(self, menu_root):
         """ Generate pop up window. """
         
@@ -949,7 +947,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
         # unset variable to allow interactive handling from now
         self.block_config_bar_handling_updates = False
 
-    @QtCore.pyqtSlot(str)
     def handle_config_bar_params_change(self, changed_param):
         """ Function which handles interactive updates of combo box fields. """
 
@@ -1223,7 +1220,6 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             # create gridspec and add it to a list
             canvas_instance.plot_axes[changed_plot_type] = [canvas_instance.figure.add_subplot(inner_gs[i, j]) for i in range(nrows) for j in range(ncols)]
 
-    @QtCore.pyqtSlot()
     def handle_data_selection_update(self):
         """ Function which handles update of data selection
             and MPL canvas upon pressing of READ button.
@@ -1234,7 +1230,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             return
 
         # update mouse cursor to a waiting cursor
-        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+            self.cursor_function = 'handle_data_selection_update'
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         # clear previously selected relative/absolute station indices
         self.mpl_canvas.relative_selected_station_inds = np.array([], dtype=np.int64)
@@ -1371,6 +1369,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             else:
                 self.mpl_canvas.top_right_canvas_cover.show() 
                 self.mpl_canvas.lower_canvas_cover.show()
+            #update to show covers immediately
             self.mpl_canvas.figure.canvas.draw_idle()  
             self.mpl_canvas.figure.canvas.flush_events()
 
@@ -1393,7 +1392,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
             # restore mouse cursor to normal if have no valid data after read
             if self.invalid_read:
-                QtWidgets.QApplication.restoreOverrideCursor()
+                if self.cursor_function == 'handle_data_selection_update':
+                    QtWidgets.QApplication.restoreOverrideCursor()
                 return
 
             # update fields available for filtering
@@ -1483,9 +1483,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
                     self.mpl_canvas.handle_temporal_colocate_update()
 
         # restore mouse cursor to normal
-        QtWidgets.QApplication.restoreOverrideCursor()
+        if self.cursor_function == 'handle_data_selection_update':
+            QtWidgets.QApplication.restoreOverrideCursor()
 
-    @QtCore.pyqtSlot()
     def reset_options(self):
         """ Reset all filter fields to initial values. """
 
@@ -1493,7 +1493,9 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             return
 
         # set mouse cursor to hourglass
-        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+            self.cursor_function = 'reset_options'
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         # reset representativity fields        
         init_representativity(self)
@@ -1525,7 +1527,8 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
             update_metadata_fields(self)
 
         # Restore mouse cursor to normal
-        QtWidgets.QApplication.restoreOverrideCursor()
+        if self.cursor_function == 'reset_options':
+            QtWidgets.QApplication.restoreOverrideCursor()
 
     def disable_ghost_buttons(self):
         """ Disable button related only to ghost data. """
