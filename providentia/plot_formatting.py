@@ -355,6 +355,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             first_step = plot_characteristics['xtick_alteration']['first_step']
             last_step = plot_characteristics['xtick_alteration']['last_step']
             n_slices = plot_characteristics['xtick_alteration']['n_slices']
+            overlap = plot_characteristics['xtick_alteration']['overlap']
 
             # if there's more than 3 months, define time slices as the first day of the month
             if n_months >= 3:
@@ -369,16 +370,16 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                 # set steps as the start of the months
                 steps = months_start
 
-                # remove last day if there's less than a 15 days difference
-                if last_step and 0 <= (right - months_end[-1]).days <= 15:
+                # remove last day if there's less than a n days difference
+                if last_step and 0 < (right - months_end[-1]).days <= overlap:
                     steps = steps[:-1]
 
-                # remove first day if there's less than a 15 days difference
-                if first_step and 0 <= (months_start[0] - left).days <= 15:
+                # remove first day if there's less than a n days difference
+                if first_step and 0 < (months_start[0] - left).days <= overlap:
                     steps = steps[1:]
 
                 # get xticks
-                slices = int(np.ceil(len(steps) / int(n_slices)))
+                slices = int(np.ceil(len(steps) / int(n_slices+1)))
                 xticks = steps[0::slices]
 
                 # transform to numpy.datetime64
@@ -397,7 +398,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             
             #  if there's less than 3 months, define time slices as the result of the pandas data_range
             else:
-                xticks = pd.date_range(left, right, periods=n_slices+int(first_step)+int(last_step))
+                xticks = pd.date_range(left, right, periods=n_slices+1+int(first_step)+int(last_step))
 
             # show hours if number of days is less than 7
             if n_days < 7:
