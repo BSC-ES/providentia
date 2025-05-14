@@ -344,7 +344,7 @@ class HoverAnnotation(object):
                         for n_point, point in enumerate(line):
                             is_contained, annotation_index = point.contains(event)
                             if is_contained:
-                                if plot_type == 'fairmode-target':
+                                if plot_type in ['fairmode-target', 'fairmode-statsummary']:
                                     annotation_index = {'ind': np.array([n_point], dtype=np.int32)}
                                 break
 
