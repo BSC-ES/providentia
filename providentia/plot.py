@@ -686,7 +686,7 @@ class Plot:
                 self.get_markersize(relevant_axis, 'timeseries', networkspeci, plot_characteristics, data=ts)
 
             # make timeseries plot
-            self.timeseries_plot = relevant_axis.plot(ts, 
+            self.canvas_instance.timeseries_plot = relevant_axis.plot(ts, 
                                                       color=self.read_instance.plotting_params[data_label]['colour'], 
                                                       **plot_characteristics['plot'])
 
@@ -699,7 +699,7 @@ class Plot:
 
             # track plot elements if using dashboard 
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
-                self.track_plot_elements(data_label, 'timeseries', 'plot', self.timeseries_plot, bias=bias)
+                self.track_plot_elements(data_label, 'timeseries', 'plot', self.canvas_instance.timeseries_plot, bias=bias)
 
     def make_periodic(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options, zstat=None):
         """ Make period or period-violin plot.
