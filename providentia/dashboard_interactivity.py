@@ -279,6 +279,11 @@ class HoverAnnotation(object):
                             if event.inaxes == self.canvas_instance.plot_axes[test_plot_type][resolution]:
                                 plot_type = copy.deepcopy(test_plot_type)
                                 break
+                elif test_plot_type == 'fairmode-statsummary':
+                    for i in range(len(self.canvas_instance.plot_axes[test_plot_type])):
+                        if event.inaxes == self.canvas_instance.plot_axes[test_plot_type][i]:
+                            plot_type = copy.deepcopy(test_plot_type)
+                            break
                 else:
                     if event.inaxes == self.canvas_instance.plot_axes[test_plot_type]:
                         plot_type = copy.deepcopy(test_plot_type)
@@ -290,6 +295,8 @@ class HoverAnnotation(object):
             # add active axis to self
             if plot_type in ['periodic','periodic-violin']:
                 self.ax = self.canvas_instance.plot_axes[plot_type][resolution]
+            elif plot_type == 'fairmode-statsummary':
+                self.ax = self.canvas_instance.plot_axes[plot_type][i]
             else:
                 self.ax = self.canvas_instance.plot_axes[plot_type]
 
@@ -354,7 +361,7 @@ class HoverAnnotation(object):
                     func = getattr(self, 'update_{}_annotation'.format(plot_type.replace('-','_')))
                     if plot_type in ['periodic','periodic-violin']:
                         func(annotation_index,resolution)
-                    elif plot_type in ['fairmode-target','scatter','taylor']:
+                    elif plot_type in ['fairmode-target','fairmode-statsummary','scatter','taylor']:
                         func(annotation_index,data_label)
                     else:
                         func(annotation_index)
@@ -489,6 +496,38 @@ class HoverAnnotation(object):
         text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'CRMSE / β·RMSᵤ', x, self.canvas_instance.plot_characteristics['fairmode-target']['marker_annotate_rounding'])
         # MB
         text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'MB / β·RMSᵤ', y, self.canvas_instance.plot_characteristics['fairmode-target']['marker_annotate_rounding'])
+
+        # update tooltip
+        self.canvas_instance.figure.canvas.setToolTip(text_label)
+
+        return None
+    
+    def update_fairmode_statsummary_annotation(self, annotation_index, data_label):
+
+        # initialise annotation text
+        text_label = ''
+
+        # do not annotate if plot is cleared
+        if data_label not in self.canvas_instance.plot_elements['fairmode-statsummary'][self.canvas_instance.plot_elements['fairmode-statsummary']['active']].keys():
+            return None
+
+        # retrieve CRMSE / β·RMSᵤ and Mean Bias / β·RMSᵤ
+        line = self.canvas_instance.plot_elements['fairmode-statsummary'][self.canvas_instance.plot_elements['fairmode-statsummary']['active']][data_label]['plot'][annotation_index['ind'][0]]
+        x = line.get_xdata()[0]
+        y = line.get_ydata()[0]
+
+        # get colour for data label
+        colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
+
+        # convert data label colour to hex code
+        hex_colour = get_hex_code(colour)
+
+        # add text label
+        text_label += ('<font color="{0}">{1}</font>').format(hex_colour, data_label)
+        # CRMSE
+        text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'CRMSE / β·RMSᵤ', x, self.canvas_instance.plot_characteristics['fairmode-statsummary']['marker_annotate_rounding'])
+        # MB
+        text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'MB / β·RMSᵤ', y, self.canvas_instance.plot_characteristics['fairmode-statsummary']['marker_annotate_rounding'])
 
         # update tooltip
         self.canvas_instance.figure.canvas.setToolTip(text_label)
