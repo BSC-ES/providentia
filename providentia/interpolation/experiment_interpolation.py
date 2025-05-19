@@ -337,8 +337,6 @@ class ExperimentInterpolation(object):
 
     def create_grid_domain_edge_polygon(self):
 
-        print("enters create_grid_domain_edge_polygon",self.yearmonth)
-
         """ Create grid domain edge polygon from model netCDF file.
             This is handled differently for regular grids (i.e. following lines of longitude/latitude), 
             and non-regular grids (e.g. lambert-conformal).
@@ -736,7 +734,7 @@ class ExperimentInterpolation(object):
                         file_time_dt = pd.to_datetime([t.replace(microsecond=0) for t in file_time_dt])
                     else:
                         # bug fix for newer versions of cftime
-                        file_time_dt = file_time_dt.astype('datetime64[ns]')
+                        file_time_dt = file_time_dt.astype('datetime64[s]')
                         file_time_dt = pd.to_datetime([t for t in file_time_dt])
 
                 # get file start and end datetime
