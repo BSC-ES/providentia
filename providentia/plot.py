@@ -686,7 +686,7 @@ class Plot:
                 self.get_markersize(relevant_axis, 'timeseries', networkspeci, plot_characteristics, data=ts)
 
             # make timeseries plot
-            self.timeseries_plot = relevant_axis.plot(ts, 
+            self.canvas_instance.timeseries_plot = relevant_axis.plot(ts, 
                                                       color=self.read_instance.plotting_params[data_label]['colour'], 
                                                       **plot_characteristics['plot'])
 
@@ -699,7 +699,7 @@ class Plot:
 
             # track plot elements if using dashboard 
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
-                self.track_plot_elements(data_label, 'timeseries', 'plot', self.timeseries_plot, bias=bias)
+                self.track_plot_elements(data_label, 'timeseries', 'plot', self.canvas_instance.timeseries_plot, bias=bias)
 
     def make_periodic(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options, zstat=None):
         """ Make period or period-violin plot.
@@ -2245,7 +2245,7 @@ class Plot:
                 statistics_list.pop(1)
 
             # create list for track_plot_elements
-            fairmode_statsummary_plot = []
+            self.fairmode_statsummary_plot = []
 
             # apply configuration to each row
             for i, (row, fairmode_data) in enumerate(zip(subplots,statistics_list)):
@@ -2337,7 +2337,7 @@ class Plot:
                         markersize=plot_characteristics["auxiliar"]["station_dots"]["markersize"])
                     
                     # add the dots to the track plot elements list
-                    fairmode_statsummary_plot.append(stations_dots[0])
+                    self.fairmode_statsummary_plot.append(stations_dots[0])
                     
                     # remove it from the data plotted in the middle zone
                     fairmode_data = fairmode_data[~right_zone_mask] if isinstance(fairmode_data,np.ndarray) else np.array([])
@@ -2382,7 +2382,7 @@ class Plot:
                             markersize=plot_characteristics["auxiliar"]["station_dots"]["markersize"])
                         
                         # add the dot to the track plot elements list
-                        fairmode_statsummary_plot.append(stations_dots[0])
+                        self.fairmode_statsummary_plot.append(stations_dots[0])
                         
                         # remove it from the data plotted in the middle zone
                         fairmode_data = fairmode_data[~left_zone_mask] if isinstance(fairmode_data,np.ndarray) else np.array([])
@@ -2398,7 +2398,7 @@ class Plot:
                 relevant_axis[i*4 + 1].tick_params(**plot_characteristics["auxiliar"]["station_dots"]["tick_params"])
                 
                 # add the dots to the track plot elements list
-                fairmode_statsummary_plot.append(stations_dots[0])
+                self.fairmode_statsummary_plot.append(stations_dots[0])
 
                 # get the row title
                 row_title = plot_dict["title"]
@@ -2432,7 +2432,7 @@ class Plot:
             # track plot elements if using dashboard 
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
                 self.track_plot_elements(data_label, 'fairmode-statsummary', 'plot', 
-                                         fairmode_statsummary_plot, bias=False)
+                                         self.fairmode_statsummary_plot, bias=False)
                         
         # add title if using dashboard 
         if (not self.read_instance.offline) and (not self.read_instance.interactive):
