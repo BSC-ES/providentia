@@ -132,7 +132,7 @@ class NavigationToolbar(NavigationToolbar2QT):
 
     def check_for_axis_limit_changes(self, previous_state, current_state):
         """ Method that checks which plot has changed axis limits 
-            and calls harmonize_changed_axis.
+            and calls harmonise_changed_axis.
         """
 
         # check which limit changed
@@ -141,9 +141,9 @@ class NavigationToolbar(NavigationToolbar2QT):
 
             # find the different limit
             if prev_xlim != new_xlim or prev_ylim != new_ylim:
-                self.harmonize_changed_axis(axis)
+                self.harmonise_changed_axis(axis)
     
-    def harmonize_changed_axis(self, axis):
+    def harmonise_changed_axis(self, axis):
         """ Method that checks which plot is being restored an applies
             the harmonise_xy_lims_paradigm function if needed. 
         """
@@ -159,7 +159,7 @@ class NavigationToolbar(NavigationToolbar2QT):
             elif axes == axis:
                 break
 
-        # apply harmonize to the plots with time
+        # apply harmonise to the plots with time
         if plot_type in ["periodic", "periodic-violin", "timeseries"]:
             plot_options = copy.deepcopy(self.canvas_instance.current_plot_options[plot_type])
             harmonise_xy_lims_paradigm(self.canvas_instance, self.read_instance, self.canvas_instance.plot_axes[plot_type], plot_type, 
@@ -178,7 +178,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         # get all the limits after doing clicking on home
         current_state = {axis: (axis.get_xlim(), axis.get_ylim()) for axis in self.canvas_instance.figure.axes}
 
-        # harmonize axis if needed
+        # harmonise axis if needed
         self.check_for_axis_limit_changes(previous_state, current_state)
 
     def back(self):
@@ -194,7 +194,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         # get all the limits after doing clicking on back
         current_state = {axis: (axis.get_xlim(), axis.get_ylim()) for axis in self.canvas_instance.figure.axes}
 
-        # harmonize axis if needed
+        # harmonise axis if needed
         self.check_for_axis_limit_changes(previous_state, current_state)
     
     def forward(self):
@@ -210,7 +210,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         # get all the limits after doing clicking on forward
         current_state = {axis: (axis.get_xlim(), axis.get_ylim()) for axis in self.canvas_instance.figure.axes}
 
-        # harmonize axis if needed
+        # harmonise axis if needed
         self.check_for_axis_limit_changes(previous_state, current_state)
 
     def drag_pan(self, event):
@@ -220,8 +220,8 @@ class NavigationToolbar(NavigationToolbar2QT):
     
         super().drag_pan(event)
 
-        # harmonize axis if needed
-        self.harmonize_changed_axis(event.inaxes)
+        # harmonise axis if needed
+        self.harmonise_changed_axis(event.inaxes)
         
     def release_zoom(self, event):
         """ Method inherited from matplotlib backend_bases release_zoom that 
@@ -230,8 +230,8 @@ class NavigationToolbar(NavigationToolbar2QT):
 
         super().release_zoom(event)
 
-        # harmonize axis if needed
-        self.harmonize_changed_axis(event.inaxes)
+        # harmonise axis if needed
+        self.harmonise_changed_axis(event.inaxes)
     
     def save_figure(self):
         """ Method inherited from matplotlib backend_bases save_figure that controls
