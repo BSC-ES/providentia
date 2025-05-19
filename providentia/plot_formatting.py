@@ -423,7 +423,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             )
 
             # set the margin
-            for ts in canvas_instance.timeseries_plot:
+            for ts in canvas_instance.plot.timeseries_plot:
                 ts[0].set_clip_path(clip_rect)
 
 def set_axis_title(read_instance, relevant_axis, title, plot_characteristics):
