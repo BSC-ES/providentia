@@ -29,7 +29,7 @@
               "position_5": { "x": 1800, "y": 530 },
             },
         },
-      "offline":
+      "report":
         {
           "dpi": 300,
           "compression": true,
@@ -39,7 +39,7 @@
     },
   "header":
     {
-      "offline":
+      "report":
         {
           "orientation": "portrait",
           "figure": {},
@@ -105,7 +105,7 @@
             },
           "handles": { "markersize": 7.5 },
         },
-      "interactive":
+      "library":
         {
           "figsize": [8, 1],
           "subplots_adjust":
@@ -225,7 +225,7 @@
           "ylabel": { "ylabel": "" },
           "plot": { "fontsize": 8.0 },
         },
-      "offline":
+      "report":
         {
           "orientation": "landscape",
           "figure": { "ncols": 2, "nrows": 2 },
@@ -250,7 +250,7 @@
           "axis_title": { "fontsize": 12 },
           "plot": { "fontsize": 11 },
         },
-      "interactive":
+      "library":
         {
           "figsize": [5, 5],
           "subplots_adjust":
@@ -323,7 +323,7 @@
           "plot": { "s": 4, "picker": 1 },
           "marker_annotate_rounding": 2,
         },
-      "offline":
+      "report":
         {
           "orientation": "landscape",
           "figure": { "ncols": 2, "nrows": 2 },
@@ -358,7 +358,7 @@
           "annotate_text": { "fontsize": 6 },
           "plot": { "s": "" },
         },
-      "interactive":
+      "library":
         {
           "figsize": [14, 7],
           "subplots_adjust":
@@ -501,7 +501,7 @@
           "plot": { "markersize": 2 },
           "marker_annotate_rounding": 2,
         },
-      "offline":
+      "report":
         {
           "orientation": "landscape",
           "figure": { "ncols": 1, "nrows": 2 },
@@ -546,7 +546,7 @@
           "markersize": { "standard": 2.1, "few_points": 4.0 },
           "plot": { "markersize": "" },
         },
-      "interactive":
+      "library":
         {
           "figsize": [17, 6],
           "subplots_adjust":
@@ -658,7 +658,7 @@
           "plot": { "markersize": 3, "linewidth": 0.5 },
           "marker_annotate_rounding": 2,
         },
-      "offline":
+      "report":
         {
           "orientation": "landscape",
           "figure": { "ncols": 2, "nrows": 2 },
@@ -698,7 +698,7 @@
           "annotate_text": { "fontsize": 6 },
           "plot": { "markersize": 3, "linewidth": 0.5 },
         },
-      "interactive":
+      "library":
         {
           "figsize": [13, 7],
           "subplots_adjust":
@@ -800,7 +800,7 @@
             },
           "marker_annotate_rounding": 2,
         },
-      "offline":
+      "report":
         {
           "orientation": "landscape",
           "figure": { "ncols": 2, "nrows": 2 },
@@ -847,7 +847,7 @@
               "median": { "marker": "o", "markersize": 3, "linewidth": 0.5 },
             },
         },
-      "interactive":
+      "library":
         {
           "figsize": [13, 7],
           "subplots_adjust":
@@ -984,7 +984,7 @@
           "plot": { "linewidth": 1 },
           "marker_annotate_rounding": 2,
         },
-      "offline":
+      "report":
         {
           "orientation": "landscape",
           "figure": { "ncols": 2, "nrows": 3 },
@@ -1027,7 +1027,7 @@
           "annotate_text": { "fontsize": 6 },
           "plot": { "linewidth": 1 },
         },
-      "interactive":
+      "library":
         {
           "figsize": [13, 7],
           "subplots_adjust":
@@ -1148,7 +1148,7 @@
           "marker_annotate_rounding": 2,
           "max_points": 100000,
         },
-      "offline":
+      "report":
         {
           "orientation": "portrait",
           "figure": { "ncols": 1, "nrows": 2 },
@@ -1194,7 +1194,7 @@
           "plot": { "markersize": "" },
           "max_points": 100000,
         },
-      "interactive":
+      "library":
         {
           "figsize": [5, 5],
           "subplots_adjust":
@@ -1297,7 +1297,7 @@
           "ytick_params": { "labelsize": 7 },
           "annotate_text": { "fontsize": 8 },
         },
-      "offline":
+      "report":
         {
           "orientation": "landscape",
           "figure": { "ncols": 2, "nrows": 2 },
@@ -1339,7 +1339,7 @@
             },
           "annotate_text": { "fontsize": 6 },
         },
-      "interactive":
+      "library":
         {
           "figsize": [13, 7],
           "subplots_adjust":
@@ -1438,7 +1438,7 @@
           "multispecies":
             { "yticklabels": { "fontsize": 10, "fontweight": 600 } },
         },
-      "offline":
+      "report":
         {
           "orientation": "portrait",
           "figure": { "ncols": 1, "nrows": 1 },
@@ -1475,7 +1475,7 @@
           "multispecies":
             { "yticklabels": { "fontsize": 10, "fontweight": 600 } },
         },
-      "interactive":
+      "library":
         {
           "figsize": [13, 7],
           "subplots_adjust":
@@ -1562,7 +1562,7 @@
               "cellLoc": "center",
             },
         },
-      "offline":
+      "report":
         {
           "orientation": "portrait",
           "figure": { "ncols": 1, "nrows": 1 },
@@ -1608,7 +1608,7 @@
               "cellLoc": "center",
             },
         },
-      "interactive":
+      "library":
         {
           "figsize": [13, 7],
           "subplots_adjust":
@@ -1693,7 +1693,7 @@
               "cellLoc": "center",
             },
         },
-      "offline":
+      "report":
         {
           "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
           "experiment_bias":
@@ -1737,7 +1737,7 @@
           "plot":
             { "loc": "upper left", "colLoc": "center", "cellLoc": "center" },
         },
-      "interactive":
+      "library":
         {
           "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
           "experiment_bias":
@@ -1874,7 +1874,7 @@
           "marker_annotate_rounding": 2,
           "plot": { "markersize": 6 },
         },
-      "offline":
+      "report":
         {
           "orientation": "portrait",
           "figure": { "ncols": 2, "nrows": 3 },
@@ -1917,7 +1917,7 @@
           "annotate_text": { "fontsize": 6 },
           "plot": { "marker": "o", "linestyle": "None" },
         },
-      "interactive":
+      "library":
         {
           "figsize": [5, 5],
           "subplots_adjust":
@@ -2126,7 +2126,7 @@
           "annotate_text": { "fontsize": 8 },
           "marker_annotate_rounding": 2,
         },
-      "offline":
+      "report":
         {
           "orientation": "portrait",
           "figure": { "ncols": 1, "nrows": 2 },
@@ -2160,7 +2160,7 @@
           "plot": { "markersize": 5 },
           "annotate_text": { "fontsize": 8 },
         },
-      "interactive":
+      "library":
         {
           "figsize": [5, 5],
           "subplots_adjust":
@@ -2377,7 +2377,7 @@
                 },
             },
         },
-      "offline":
+      "report":
         {
           "orientation": "landscape",
           "subplots_adjust": { "left": 0.25, "top": 0.85 },
@@ -2418,7 +2418,7 @@
               "handles": { "markersize": 10, "marker": "o", "color": "white" },
             },
         },
-      "interactive":
+      "library":
         {
           "figsize": [10, 5],
           "subplots_adjust": { "left": 0.3 },

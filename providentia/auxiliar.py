@@ -41,7 +41,7 @@ def expand_plot_characteristics(plot_characteristics, mode):
         Active mode
     """
 
-    keys_to_remove = ["dashboard", "offline", "interactive", "tests"]
+    keys_to_remove = ["dashboard", "report", "library", "tests"]
     for plot_type in plot_characteristics:
         # get all keys
         plot_type_characteristics = plot_characteristics[plot_type]
@@ -62,7 +62,7 @@ def expand_plot_characteristics(plot_characteristics, mode):
                     plot_type_characteristics[key] = value
                 # remove options from plot options if they do not apply to active mode
                 if key == 'plot_options':
-                    if mode != 'offline':
+                    if mode != 'report':
                         if 'obs' in value:
                             value.remove('obs')
                         if 'individual' in value:

@@ -152,7 +152,7 @@ def get_land_polygon_resolution(selection):
 def update_plotting_parameters(instance):
     """ Function that updates plotting parameters (colour and zorder) for data labels.
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
     """
 
@@ -554,9 +554,9 @@ def create_chunked_timeseries(read_instance, canvas_instance, chunk_stat, chunk_
                               networkspeci, cut_data_labels, bias):
     """ Create statistical timeseries data by chunk resolution
 
-    :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+    :param read_instance: Instance of class Dashboard or Report
     :type read_instance: object
-    :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+    :param canvas_instance: Instance of class MPLCanvas or Report
     :type canvas_instance: object
     :param chunk_stat: Chunk statistic
     :type chunk_stat: str

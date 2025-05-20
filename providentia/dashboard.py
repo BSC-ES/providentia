@@ -50,7 +50,7 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
-class ProvidentiaMainWindow(QtWidgets.QWidget):
+class Dashboard(QtWidgets.QWidget):
     """ Class that generates Providentia dashboard. """
 
     # create signals that are fired upon resizing/moving of main Providentia window
@@ -60,7 +60,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
     def __init__(self, **kwargs):
 
         # allow access to methods of parent class QtWidgets.QWidget
-        super(ProvidentiaMainWindow, self).__init__()
+        super(Dashboard, self).__init__()
 
         # load statistical yamls
         self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
@@ -204,14 +204,14 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         self.resized.emit()
 
-        return super(ProvidentiaMainWindow, self).resizeEvent(event)
+        return super(Dashboard, self).resizeEvent(event)
 
     def moveEvent(self, event):
         """ Function to overwrite default PyQt5 moveEvent function --> for calling get_geometry. """
         
         self.move.emit()
         
-        return super(ProvidentiaMainWindow, self).moveEvent(event)
+        return super(Dashboard, self).moveEvent(event)
 
     def get_geometry(self):
         """ Update current geometry of main Providentia window and buttons. """
@@ -1214,7 +1214,7 @@ class ProvidentiaMainWindow(QtWidgets.QWidget):
 
         # initialise polar axis for Taylor plots
         if changed_plot_type == 'taylor':
-            canvas_instance.plot.taylor_polar_relevant_axis = canvas_instance.plot_axes[changed_plot_type].get_aux_axes(PolarAxes.PolarTransform())
+            canvas_instance.plotting.taylor_polar_relevant_axis = canvas_instance.plot_axes[changed_plot_type].get_aux_axes(PolarAxes.PolarTransform())
         
         elif changed_plot_type == "fairmode-statsummary":
             # create gridspec and add it to a list
@@ -1607,5 +1607,5 @@ def main(**kwargs):
     q_app.setDesktopFileName("Providentia")
 
     # open Providentia
-    ProvidentiaMainWindow(**kwargs)
+    Dashboard(**kwargs)
     sys.exit(q_app.exec_())

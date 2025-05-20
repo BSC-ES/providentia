@@ -1,19 +1,20 @@
 """ Providentia Configuration Module """
 
+import ast
 import configparser
 import copy
 from datetime import datetime
+import logging
 import os
+from packaging.version import Version
 import platform
 import socket
 import sys
+import time
 import yaml
 
-import logging
 import numpy as np
-from packaging.version import Version
 import pandas as pd
-import ast
 
 from providentia.auxiliar import CURRENT_PATH, join
 
@@ -29,7 +30,19 @@ interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'int
 # set MACHINE to be the hub, workstation or local machine
 if MACHINE not in ['nord3v2', 'mn5', 'nord4']:
     hostname = os.environ.get('HOSTNAME', '')
-    ip = socket.gethostbyname(socket.gethostname())
+    
+    #setup retrial system for getting ip address as occasionaly breaks
+    retry = 0
+    while True:
+        try:
+            ip = socket.gethostbyname(socket.gethostname())
+        except:
+            if retry == 3:
+                break
+            else:
+                retry+=1
+                time.sleep(1)
+
     if "bscearth" in hostname:
         MACHINE = "workstation"
     elif "transfer" in hostname:
@@ -486,7 +499,7 @@ class ProvConfiguration:
             # map_extent empty?
             if not value:
                 # if dashboard, if map extent not defined then fix to global default extent
-                if (not self.read_instance.offline) and (not self.read_instance.interactive):
+                if (not self.read_instance.report) and (not self.read_instance.library):
                     return [-180, 180, -90, 90]
             # otherwise parse it
             else:
@@ -933,7 +946,7 @@ class ProvConfiguration:
                 for field_name, fields in self.read_instance.fields_per_section.items()}
           
         # check have network information, 
-        # if offline, throw message, stating are using default instead
+        # if report, throw message, stating are using default instead
         # in download mode of non interpolated experiments is allowed to not have network, so continue
         if not self.read_instance.network and not (self.read_instance.download and not self.read_instance.interpolated):
             # default = ['GHOST']
@@ -946,7 +959,7 @@ class ProvConfiguration:
             self.read_instance.network = default
 
         # check have species information, TODO REFACTOR INTERPOLATION STUFF
-        # if offline, throw message, stating are using default instead
+        # if report, throw message, stating are using default instead
         # in download mode is allowed to not pass any species, so continue
         if (not self.read_instance.species and not self.read_instance.download and not self.read_instance.interpolation):
             if self.read_instance.interpolation:
@@ -995,7 +1008,7 @@ class ProvConfiguration:
                     previous_is_ghost = is_ghost
 
         # check have resolution information, TODO when refactoring init change this way of checking defaults
-        # if offline, throw message, stating are using default instead
+        # if report, throw message, stating are using default instead
         if (not self.read_instance.resolution and not self.read_instance.download):
             if self.read_instance.interpolation:
                 default = ["hourly", "hourly_instantaneous", "daily", "monthly"]
@@ -1007,7 +1020,7 @@ class ProvConfiguration:
             self.read_instance.resolution = default
 
         # check start_date format, TODO START DATE IS DIFFERENT IN INTERPOLATION (check in the refactoring)
-        # if offline, throw message, stating are using default instead
+        # if report, throw message, stating are using default instead
         if not self.read_instance.start_date:
             if self.read_instance.interpolation:
                 default = '201801'
@@ -1040,7 +1053,7 @@ class ProvConfiguration:
                         sys.exit(1)
 
         # check end_date  format, TODO START DATE IS DIFFERENT IN INTERPOLATION (check in the refactoring)
-        # if offline, throw message, stating are using default instead
+        # if report, throw message, stating are using default instead
         if not self.read_instance.end_date:
             if self.read_instance.interpolation:
                 default = '201901'
@@ -1073,7 +1086,7 @@ class ProvConfiguration:
                         sys.exit(1)
 
         # check have interp_n_neighbours information, TODO ONLY FOR INTERPOLATION
-        # if offline, throw message, stating are using default instead
+        # if report, throw message, stating are using default instead
         # TODO CHANGE THE MESSAGE WHEN ITS DEFAULT AND WHEN ITS BECAUSE I DIDNT PUT THE NAME
         if self.read_instance.interpolation and not self.read_instance.interp_n_neighbours:
             default = default_values['interp_n_neighbours']
@@ -1098,7 +1111,7 @@ class ProvConfiguration:
 
         # check have domain information, TODO ONLY FOR INTERPOLATION
         # TODO think if we need one separated variable for this one because it is already included on experiments
-        # if offline, throw message, stating are using default instead
+        # if report, throw message, stating are using default instead
         if self.read_instance.experiments and self.default_domain:
             default = default_values['domain']
             msg = "Domain (domain) was not defined in the configuration file. Using '{}' as default.".format(default)
@@ -1107,7 +1120,7 @@ class ProvConfiguration:
 
         # check have ensemble_options information, TODO ONLY FOR INTERPOLATION
         # TODO think if we need one separated variable for this one because it is already included on experiments
-        # if offline, throw message, stating are using default instead
+        # if report, throw message, stating are using default instead
         # TODO maybe think this a bit better, if i dont pass it it should check better if i already passed it in experiments and so
         if self.read_instance.experiments and self.default_ensemble_options:
             if self.read_instance.interpolation:
@@ -1227,14 +1240,14 @@ class ProvConfiguration:
             self.read_instance.calibration_factor = calibration_factor_dict
 
         # check have statistic_mode information,
-        # if offline, throw message, stating are using default instead
+        # if report, throw message, stating are using default instead
         # TODO not needed in interpolation 
         if not self.read_instance.statistic_mode and not self.read_instance.interpolation:
             default = default_values['statistic_mode']
             self.read_instance.statistic_mode = default
 
         # check have statistic_aggregation information,
-        # if offline, throw message, stating are using default instead
+        # if report, throw message, stating are using default instead
         # TODO not needed in interpolation 
         if not self.read_instance.interpolation:
             default = default_values['statistic_aggregation'][self.read_instance.statistic_mode]
@@ -1246,7 +1259,7 @@ class ProvConfiguration:
                     self.read_instance.statistic_aggregation = default
 
         # check have periodic_statistic_mode information,
-        # if offline, throw message, stating are using default instead
+        # if report, throw message, stating are using default instead
         # TODO not needed in interpolation 
         if not self.read_instance.periodic_statistic_mode and not self.read_instance.interpolation:
             #default = 'Cycle'
@@ -1254,14 +1267,14 @@ class ProvConfiguration:
             self.read_instance.periodic_statistic_mode = default
 
         # check have periodic_statistic_aggregation information,
-        # if offline, throw message, stating are using default instead
+        # if report, throw message, stating are using default instead
         # TODO not needed in interpolation 
         if not self.read_instance.periodic_statistic_aggregation and not self.read_instance.interpolation:
             default = default_values['periodic_statistic_aggregation']
             self.read_instance.periodic_statistic_aggregation = default
 
         # check have timeseries_statistic_aggregation information,
-        # if offline, throw message, stating are using default instead
+        # if report, throw message, stating are using default instead
         # TODO not needed in interpolation 
         if not self.read_instance.timeseries_statistic_aggregation and not self.read_instance.interpolation:
             default = default_values['timeseries_statistic_aggregation']
@@ -1280,7 +1293,7 @@ class ProvConfiguration:
                     self.read_instance.logger.error(error)
                     sys.exit(1)
 
-        if (len(self.read_instance.active_dashboard_plots) != 4) and (not self.read_instance.offline) & (not self.read_instance.interactive):
+        if (len(self.read_instance.active_dashboard_plots) != 4) and (not self.read_instance.report) & (not self.read_instance.library):
             error = 'Error: there must be 4 "active_dashboard_plots"'
             self.read_instance.logger.error(error)
             sys.exit(1)
@@ -1460,7 +1473,7 @@ class ProvConfiguration:
 
         # if are using dashboard then just take first network/species pair, as multivar not supported yet
         if ((len(self.read_instance.network) > 1) and (len(self.read_instance.species) > 1) and 
-            (not self.read_instance.offline) and (not self.read_instance.interactive) and (not self.read_instance.download) and (not self.read_instance.interpolation)):
+            (not self.read_instance.report) and (not self.read_instance.library) and (not self.read_instance.download) and (not self.read_instance.interpolation)):
              
             msg = 'Multiple networks/species are not supported in the dashboard. First ones will be taken.'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
@@ -1537,11 +1550,11 @@ class ProvConfiguration:
             # default path (the file name depends on the mode)
             else:
                 # get the mode being used right now
-                mode_list = ["offline", "interactive", "download", "interpolation"] 
+                mode_list = ["report", "library", "download", "interpolation"] 
                 mode = "dashboard"
                 for temp_mode in mode_list:
                     if getattr(self.read_instance, temp_mode) is True:
-                        mode = temp_mode if temp_mode != "interactive" else "notebook"
+                        mode = temp_mode if temp_mode != "library" else "notebook"
                 file_path = join(PROVIDENTIA_ROOT, 'logs', mode, filename)
 
             # redirect output to a file
@@ -1771,7 +1784,7 @@ def write_conf(section, subsection, fpath, opts):
 
 def load_conf(self, fpath=None):
     """ Load existing configurations from file
-        for running offline Providentia.
+        for running Providentia.
     """
     sys.path.append(join(PROVIDENTIA_ROOT, 'providentia'))
     from configuration import read_conf
