@@ -29,7 +29,7 @@ from .dashboard_elements import set_formatting
 from .dashboard_interactivity import HoverAnnotation
 from .dashboard_interactivity import legend_picker_func, picker_block_func, zoom_map_func
 from .filter import DataFilter
-from .plot import Plot
+from .plotting import Plotting
 from .plot_aux import get_map_extent
 from .plot_formatting import format_axis, harmonise_xy_lims_paradigm, log_validity, set_axis_label, set_axis_title
 from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
@@ -76,8 +76,8 @@ class MPLCanvas(FigureCanvas):
         # initialise some key vars
         self.filter_data = None
 
-        # initialise Plot class
-        self.plot = Plot(read_instance=self.read_instance, canvas_instance=self)
+        # initialise Plotting class
+        self.plotting = Plotting(read_instance=self.read_instance, canvas_instance=self)
 
         # setup gridding of canvas
         self.gridspec = gridspec.GridSpec(self.gridspec_nrows, self.gridspec_ncols)
@@ -129,9 +129,9 @@ class MPLCanvas(FigureCanvas):
         for plot_type in self.all_plots:
             # for plot types with zstat, initialise with default zstat (Mean)
             if plot_type in ['map', 'periodic']:
-                self.plot.set_plot_characteristics([plot_type], zstat='Mean', data_labels=['dummy'])
+                self.plotting.set_plot_characteristics([plot_type], zstat='Mean', data_labels=['dummy'])
             else:
-                self.plot.set_plot_characteristics([plot_type], data_labels=['dummy'])
+                self.plotting.set_plot_characteristics([plot_type], data_labels=['dummy'])
             self.current_plot_options[plot_type] = []
             self.previous_plot_options[plot_type] = []
 
@@ -570,9 +570,9 @@ class MPLCanvas(FigureCanvas):
             zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
 
         # plot map for zstat --> updating active map valid station indices and setting up plot picker
-        self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.plot_characteristics['map'], 
-                           self.current_plot_options['map'], zstat=zstat, labela=self.map_z1.currentText(), 
-                           labelb=self.map_z2.currentText())
+        self.plotting.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.plot_characteristics['map'], 
+                               self.current_plot_options['map'], zstat=zstat, labela=self.map_z1.currentText(), 
+                               labelb=self.map_z2.currentText())
         
         # update absolute selected plotted station indices with respect to new active map valid station indices
         self.absolute_selected_station_inds = np.array(
@@ -721,11 +721,11 @@ class MPLCanvas(FigureCanvas):
 
                 # get plotting function for specific plot
                 if plot_type == 'statsummary':
-                    func = getattr(self.plot, 'make_table')
+                    func = getattr(self.plotting, 'make_table')
                 elif plot_type in ['fairmode-target', 'fairmode-statsummary']:
-                    func = getattr(self.plot, 'make_{}'.format(plot_type.replace('-','_')))
+                    func = getattr(self.plotting, 'make_{}'.format(plot_type.replace('-','_')))
                 else:
-                    func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
+                    func = getattr(self.plotting, 'make_{}'.format(plot_type.split('-')[0]))
 
                 # get timeseries chunking info
                 if plot_type == 'timeseries':
@@ -946,7 +946,7 @@ class MPLCanvas(FigureCanvas):
         self.remove_axis_objects(self.plot_axes['map'].patches, types_to_remove=[matplotlib.patches.Polygon])
 
         # create grid edge polygons for experiments in memory
-        grid_edge_polygons = self.plot.make_experiment_domain_polygons()
+        grid_edge_polygons = self.plotting.make_experiment_domain_polygons()
 
         # plot grid edge polygons on map
         for grid_edge_polygon in grid_edge_polygons:
@@ -956,7 +956,7 @@ class MPLCanvas(FigureCanvas):
         """ Function that updates legend. """
 
         # create legend element handles
-        legend_plot_characteristics = self.plot.make_legend_handles(copy.deepcopy(self.plot_characteristics['legend']))
+        legend_plot_characteristics = self.plotting.make_legend_handles(copy.deepcopy(self.plot_characteristics['legend']))
 
         # plot legend
         self.legend = self.plot_axes['legend'].legend(**legend_plot_characteristics['plot'], 
@@ -1577,7 +1577,7 @@ class MPLCanvas(FigureCanvas):
             axs_to_remove = ax
         else:
             if plot_type == 'taylor':
-                axs_to_remove.append(self.plot.taylor_polar_relevant_axis)
+                axs_to_remove.append(self.plotting.taylor_polar_relevant_axis)
             axs_to_remove.append(ax)
 
         # iterate through axes
@@ -2893,11 +2893,11 @@ class MPLCanvas(FigureCanvas):
 
                                 # get plotting function for specific plot
                                 if plot_type == 'statsummary':
-                                    func = getattr(self.plot, 'make_table')
+                                    func = getattr(self.plotting, 'make_table')
                                 elif plot_type in ['fairmode-target', 'fairmode-statsummary']:
-                                    func = getattr(self.plot, 'make_{}'.format(plot_type.replace('-','_')))
+                                    func = getattr(self.plotting, 'make_{}'.format(plot_type.replace('-','_')))
                                 else:
-                                    func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
+                                    func = getattr(self.plotting, 'make_{}'.format(plot_type.split('-')[0]))
 
                                 # call function to update plot
                                 # periodic plot
@@ -2969,11 +2969,11 @@ class MPLCanvas(FigureCanvas):
 
                                 # get plotting function for specific plot
                                 if plot_type == 'statsummary':
-                                    func = getattr(self.plot, 'make_table')
+                                    func = getattr(self.plotting, 'make_table')
                                 elif plot_type in ['fairmode-target', 'fairmode-statsummary']:
-                                    func = getattr(self.plot, 'make_{}'.format(plot_type.replace('-','_')))
+                                    func = getattr(self.plotting, 'make_{}'.format(plot_type.replace('-','_')))
                                 else:
-                                    func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
+                                    func = getattr(self.plotting, 'make_{}'.format(plot_type.split('-')[0]))
 
                                 # call function to update plot
                                 # periodic plot
@@ -3084,7 +3084,7 @@ class MPLCanvas(FigureCanvas):
                         line.set_markersize(markersize)
             else:
                 if plot_type == 'taylor':
-                    for line in self.plot.taylor_polar_relevant_axis.lines:
+                    for line in self.plotting.taylor_polar_relevant_axis.lines:
                         line.set_markersize(markersize)
                 else:
                     for line in ax.lines:

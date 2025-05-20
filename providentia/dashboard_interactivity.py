@@ -311,7 +311,7 @@ class HoverAnnotation(object):
             else:
                 plot_element_name = 'plot'
 
-            if ((hasattr(self.canvas_instance.plot, search_plot)) and (plot_type in self.canvas_instance.plot_elements)):
+            if ((hasattr(self.canvas_instance.plotting, search_plot)) and (plot_type in self.canvas_instance.plot_elements)):
 
                 is_contained = False
 
@@ -328,7 +328,7 @@ class HoverAnnotation(object):
                         continue
                     
                     if plot_type == 'map':
-                        is_contained, annotation_index = self.canvas_instance.plot.stations_scatter.contains(event)
+                        is_contained, annotation_index = self.canvas_instance.plotting.stations_scatter.contains(event)
                     else:
                         # do no annotate if hidedata is active
                         if len(self.canvas_instance.plot_elements[plot_type][self.canvas_instance.plot_elements[plot_type]['active']][data_label][plot_element_name]) == 0:
@@ -367,7 +367,7 @@ class HoverAnnotation(object):
         # retrieve stations references and coordinates
         station_name = self.canvas_instance.read_instance.station_names[self.canvas_instance.read_instance.networkspeci][self.canvas_instance.active_map_valid_station_inds[annotation_index['ind'][0]]]
         station_reference = self.canvas_instance.read_instance.station_references[self.canvas_instance.read_instance.networkspeci][self.canvas_instance.active_map_valid_station_inds[annotation_index['ind'][0]]]
-        station_location = self.canvas_instance.plot.stations_scatter.get_offsets()[annotation_index['ind'][0]]
+        station_location = self.canvas_instance.plotting.stations_scatter.get_offsets()[annotation_index['ind'][0]]
         station_value = self.canvas_instance.z_statistic[annotation_index['ind'][0]]
 
         # create annotation text

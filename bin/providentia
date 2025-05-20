@@ -63,7 +63,7 @@ IFS=$'\n\t'
 # An option followed by double colons '::' means that its argument is optional.
 # See `man getopt'.
 SHORT=uc:t:J:q:m:V
-LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,clean,section:,ghost_version:,conf:,config:,config_dir:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,exp_to_interp_root:,generate_file_tree,gft,disable_file_tree,dft,offline,interactive,download,dl,interpolation,interp,interpolate,notebook,slurm_job_id:,network:,species:,resolution:,start_date:,end_date:,observations_data_label:,experiments:,domain:,ensemble_options:,forecast_day:,forecast:,qa:,flags:,add_qa:,subtract_qa:,add_flags:,subtract_flags:,temporal_colocation:,spatial_colocation:,spatial_colocation_tolerance:,spatial_colocation_station_reference:,spatial_colocation_station_name:,spatial_colocation_longitude_latitude:,spatial_colocation_measurement_altitude:,spatial_colocation_validation:,spatial_colocation_validation_tolerance:,map_extent:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,harmonise_summary:,harmonise_stations:,active_dashboard_plots:,resampling_resolution:,statistic_mode:,statistic_aggregation:,periodic_statistic_mode:,periodic_statistic_aggregation:,timeseries_statistic_aggregation:,plot_characteristics_filename:,interp_multiprocessing:,interp_n_neighbours:,interp_reverse_vertical_orientation:,interp_chunk_size:,interp_job_array_limit:,logfile::
+LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,clean,section:,ghost_version:,conf:,config:,config_dir:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,exp_to_interp_root:,generate_file_tree,gft,disable_file_tree,dft,report,reports,offline,download,dl,interpolation,interp,interpolate,notebook,nb,jupyter,slurm_job_id:,network:,species:,resolution:,start_date:,end_date:,observations_data_label:,experiments:,domain:,ensemble_options:,forecast_day:,forecast:,qa:,flags:,add_qa:,subtract_qa:,add_flags:,subtract_flags:,temporal_colocation:,spatial_colocation:,spatial_colocation_tolerance:,spatial_colocation_station_reference:,spatial_colocation_station_name:,spatial_colocation_longitude_latitude:,spatial_colocation_measurement_altitude:,spatial_colocation_validation:,spatial_colocation_validation_tolerance:,map_extent:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,harmonise_summary:,harmonise_stations:,active_dashboard_plots:,resampling_resolution:,statistic_mode:,statistic_aggregation:,periodic_statistic_mode:,periodic_statistic_aggregation:,timeseries_statistic_aggregation:,plot_characteristics_filename:,interp_multiprocessing:,interp_n_neighbours:,interp_reverse_vertical_orientation:,interp_chunk_size:,interp_job_array_limit:,logfile::
 
 # parse arguments
 PARSED=$(getopt --options ${SHORT} \
@@ -161,8 +161,8 @@ if [[ $PARSED =~ "--clean" ]]; then
     exit 0
 fi
 
-# avoid x11 forwarding when creating offline reports or doing interpolations
-if [[ $PARSED =~ "--offline" || $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" || $PARSED =~ "--download" || $PARSED =~ "--dl" ]]; then
+# avoid x11 forwarding when creating reports or doing interpolations
+if [[ $PARSED =~ "--report" || $PARSED =~ "--reports" || $PARSED =~ "--offline" || $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" || $PARSED =~ "--download" || $PARSED =~ "--dl" ]]; then
     salloc_command="salloc -t $time -c $cores -J $jobname"
 else
     salloc_command="salloc -t $time -c $cores -J $jobname --x11"
@@ -182,7 +182,7 @@ if [[ $PARSED =~ "--interactive" ]]; then
 fi
 
 # if using notebook mode then 
-if [[ $PARSED =~ "--notebook" ]]; then
+if [[ $PARSED =~ "--notebook" || $PARSED =~ "--nb" || $PARSED =~ "--jupyter" ]]; then
     notebook=true
 else
     notebook=false
