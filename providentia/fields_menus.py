@@ -9,7 +9,7 @@ import pandas as pd
 def init_flags(instance):
     """ Initialise internal structure to store selected flags.
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
     """
 
@@ -32,7 +32,7 @@ def init_flags(instance):
 def init_qa(instance):
     """ Initialise internal structure to store selected qa.
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
     """
 
@@ -81,7 +81,7 @@ def update_qa(instance):
 def init_experiments(instance):
     """ Initialise internal structure to store selected experiments.
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
     """
 
@@ -103,7 +103,7 @@ def init_experiments(instance):
 def init_multispecies(instance):
     """ Initialise internal structure to store multispecies fields.
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
     """
 
@@ -130,7 +130,7 @@ def init_multispecies(instance):
 def init_representativity(instance):
     """ Initialise internal structure to store representativity fields.
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
     """
 
@@ -153,7 +153,7 @@ def init_representativity(instance):
 def init_period(instance):
     """ Initialise internal structure to store period fields.
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
     """
 
@@ -173,7 +173,7 @@ def init_period(instance):
 def init_metadata(instance):
     """ Initialise internal structure to store metadata.
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
     """
 
@@ -266,7 +266,7 @@ def init_metadata(instance):
 def update_representativity_fields(instance):
     """ Update the data representativity menu upon read.
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
     """
  
@@ -305,7 +305,7 @@ def update_representativity_fields(instance):
 def update_period_fields(instance):
     """ Update the data period menu upon read.
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
     """
 
@@ -346,7 +346,7 @@ def update_metadata_fields(instance):
         then if the same field still exists then the settings (i.e. bounds or
         checkbox selection) are copied across, rather than setting to the default.
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
     """
 
@@ -473,7 +473,7 @@ def multispecies_conf(instance):
     """ Function used when loading from a configuration file. 
         Sets defined multispecies filtering variables, rest of variables are set to default. 
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
     """
 
@@ -512,7 +512,7 @@ def representativity_conf(instance):
     """ Function used when loading from a configuration file. 
         Sets defined representativity filter variables, rest of variables are set to default. 
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
     """
 
@@ -525,7 +525,7 @@ def period_conf(instance):
     """ Function used when loading from a configuration file. 
         Sets defined period filter variables, rest of variables are set to default. 
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
     """
 
@@ -541,7 +541,7 @@ def metadata_conf(instance):
     """ Function used when loading from a configuration file. 
         Sets defined metadata filter variables, rest of variables are set to default.
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
     """
 

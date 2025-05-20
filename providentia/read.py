@@ -65,15 +65,15 @@ class DataReader:
                 msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots. '
                 msg += 'Plots will only be created when period is longer than 2 timesteps.'
                 show_message(self.read_instance, msg)
-                if (self.read_instance.from_conf) and (not self.read_instance.offline) and (not self.read_instance.interactive):
+                if (self.read_instance.from_conf) and (not self.read_instance.report) and (not self.read_instance.library):
                     error = 'Error: Providentia will not be launched.'
                     self.read_instance.logger.error(error)
                     sys.exit(1) 
-                elif (self.read_instance.offline):
-                    error = 'Error: Offline report will not be created.'
+                elif (self.read_instance.report):
+                    error = 'Error: Report will not be created.'
                     self.read_instance.logger.error(error)
                     sys.exit(1) 
-                elif (self.read_instance.interactive):
+                elif (self.read_instance.library):
                     error = 'Error: Data cannot be read.'
                     self.read_instance.logger.error(error)
                     sys.exit(1) 
@@ -142,7 +142,7 @@ class DataReader:
         if 'reset' in operations:  
 
             # uninitialise filter object
-            if (not self.read_instance.offline) and (not self.read_instance.interactive):
+            if (not self.read_instance.report) and (not self.read_instance.library):
                 self.read_instance.mpl_canvas.filter_data = None
 
             # data
@@ -230,7 +230,7 @@ class DataReader:
                     # delete from instance all invalid fields from the configuration file
                     for section_invalid_fields in self.read_instance.invalid_fields.values():
                         for k in section_invalid_fields:
-                            # control if the atribute exists because in offline mode the subsection ones are not set yet
+                            # control if the atribute exists because in report mode the subsection ones are not set yet
                             if hasattr(self.read_instance, k):
                                 delattr(self.read_instance, k)                 
 

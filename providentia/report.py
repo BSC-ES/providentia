@@ -1,4 +1,4 @@
-""" Class to generate offline reports """
+""" Class to generate Providentia reports """
 
 import copy
 import os
@@ -21,7 +21,7 @@ from .fields_menus import (init_metadata, init_period, init_representativity, me
                            update_metadata_fields, update_period_fields, update_representativity_fields,
                            period_conf, representativity_conf)
 from .filter import DataFilter
-from .plot import Plot
+from .plotting import Plotting
 from .plot_aux import get_taylor_diagram_ghelper, set_map_extent, reorder_pdf_pages
 from .plot_formatting import format_plot_options, format_axis, harmonise_xy_lims_paradigm, set_axis_label, set_axis_title
 from .read import DataReader
@@ -38,8 +38,8 @@ PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 fairmode_settings = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
 
 
-class ProvidentiaOffline:
-    """ Class to create Providentia offline reports. """
+class Report:
+    """ Class to create Providentia reports. """
 
     # make sure that we are not using Qt5 backend with matplotlib
     matplotlib.use('Agg')
@@ -60,7 +60,7 @@ class ProvidentiaOffline:
         # update self with command line arguments
         self.commandline_arguments = copy.deepcopy(kwargs)
 
-        self.logger.info("Starting Providentia offline...")
+        self.logger.info("Creating a Providentia Report...")
 
         # update variables from config file
         if self.config != '':  
@@ -176,11 +176,11 @@ class ProvidentiaOffline:
             if self.plot_characteristics_filename == '':
                 self.plot_characteristics_filename = join(PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')
             plot_characteristics = yaml.safe_load(open(self.plot_characteristics_filename))
-            self.plot_characteristics_templates = expand_plot_characteristics(plot_characteristics, 'offline')
+            self.plot_characteristics_templates = expand_plot_characteristics(plot_characteristics, 'report')
             self.plot_characteristics = {}
 
-            # initialise Plot class
-            self.plot = Plot(read_instance=self, canvas_instance=self)
+            # initialise Plotting class
+            self.plotting = Plotting(read_instance=self, canvas_instance=self)
 
             # add general plot characteristics to self
             for k, val in self.plot_characteristics_templates['general'].items():
@@ -278,7 +278,7 @@ class ProvidentiaOffline:
             self.plots_to_make = list(self.summary_plots_to_make)
             self.plots_to_make.extend(x for x in self.station_plots_to_make
                                       if x not in self.summary_plots_to_make)
-            self.plot.set_plot_characteristics(self.plots_to_make)
+            self.plotting.set_plot_characteristics(self.plots_to_make)
             
             # define dictionary to store plot figures per page
             self.plot_dictionary = {}
@@ -341,8 +341,8 @@ class ProvidentiaOffline:
                     self.subsections = [self.section]
 
             # make header
-            self.plot.set_plot_characteristics(['header'])
-            self.plot.make_header(self.pdf, self.plot_characteristics['header'])
+            self.plotting.set_plot_characteristics(['header'])
+            self.plotting.make_header(self.pdf, self.plot_characteristics['header'])
 
             # create variables to keep track of minimum and maximum data ranges across subsections
             self.data_range_min_summary = {networkspeci:np.inf for networkspeci in self.networkspecies}
@@ -796,7 +796,7 @@ class ProvidentiaOffline:
                         set_obs = False
                     else:
                         set_obs = True
-                    plot_characteristics['legend'] = self.plot.make_legend_handles(plot_characteristics['legend'], 
+                    plot_characteristics['legend'] = self.plotting.make_legend_handles(plot_characteristics['legend'], 
                                                                                    set_obs=set_obs)
                     fig.legend(**plot_characteristics['legend']['plot'])
 
@@ -1502,8 +1502,8 @@ class ProvidentiaOffline:
                     set_map_extent(self, relevant_axis, self.map_extent)
 
                 # make map plot
-                self.plot.make_map(relevant_axis, networkspeci, self.plot_characteristics[plot_type], plot_options,
-                                   zstat=zstat, labela=z1_label, labelb=z2_label)
+                self.plotting.make_map(relevant_axis, networkspeci, self.plot_characteristics[plot_type], plot_options,
+                                       zstat=zstat, labela=z1_label, labelb=z2_label)
 
                 # save plot information for later formatting 
                 if z2_label == '':
@@ -1670,9 +1670,9 @@ class ProvidentiaOffline:
 
                 # get plotting function
                 if base_plot_type in ['fairmode-target', 'fairmode-statsummary']:
-                    func = getattr(self.plot, 'make_{}'.format(base_plot_type.replace('-','_')))
+                    func = getattr(self.plotting, 'make_{}'.format(base_plot_type.replace('-','_')))
                 else:
-                    func = getattr(self.plot, 'make_{}'.format(base_plot_type.split('-')[0]))
+                    func = getattr(self.plotting, 'make_{}'.format(base_plot_type.split('-')[0]))
 
                 if base_plot_type == 'periodic':
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
@@ -1876,13 +1876,13 @@ class ProvidentiaOffline:
                 
                 if base_plot_type == 'statsummary':
                     # make statsummary
-                    func = getattr(self.plot, 'make_table')
+                    func = getattr(self.plotting, 'make_table')
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
                          plot_options, statsummary=True, subsection=self.subsection, 
                          plotting_paradigm=plotting_paradigm, stats_df=stats_df)
                 else:
                     # make table/heatmap
-                    func = getattr(self.plot, 'make_{}'.format(base_plot_type))
+                    func = getattr(self.plotting, 'make_{}'.format(base_plot_type))
                     func(relevant_axis, networkspeci, data_labels, self.plot_characteristics[plot_type], 
                          plot_options, subsection=self.subsection, plotting_paradigm=plotting_paradigm, 
                          stats_df=stats_df)
@@ -1971,4 +1971,4 @@ class ProvidentiaOffline:
 def main(**kwargs):
     """ Main function when running offine reports. """
    
-    ProvidentiaOffline(**kwargs)
+    Report(**kwargs)

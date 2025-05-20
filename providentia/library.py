@@ -1,9 +1,11 @@
-""" Class to create interactive session"""
+""" Class to create library session"""
 
 import copy
 import datetime
 import json
 import os
+import random
+import subprocess
 import sys
 import yaml
 
@@ -21,7 +23,7 @@ from .fields_menus import (init_metadata, init_period, init_representativity, me
                            update_metadata_fields, update_period_fields, update_representativity_fields,
                            period_conf, representativity_conf)
 from .filter import DataFilter
-from .plot import Plot
+from .plotting import Plotting
 from .plot_aux import get_taylor_diagram_ghelper
 from .plot_formatting import (format_plot_options, format_axis, set_axis_label, set_axis_title, 
                               harmonise_xy_lims_paradigm)
@@ -50,15 +52,16 @@ try:
 except NameError:
     jupyter_session = False
 
-class Interactive:
-    """ Class to create interactive Providentia session."""
+class Library:
+    """ Class for Providentia Library mode"""
 
-    def __init__(self, **kwargs):
+    def __init__(self, config, **kwargs):
 
+        # set config to self
+        self.config = config
+
+        # set kwargs to self
         self.kwargs = kwargs
-
-        # set mode as interactive
-        self.kwargs['interactive'] = True
 
         # load statistical yamls
         self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
@@ -84,13 +87,13 @@ class Interactive:
             if self.tests:
                 mode = 'tests'
             else:
-                mode = 'interactive'
+                mode = 'library'
             self.plot_characteristics_filename = join(PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')
         plot_characteristics = yaml.safe_load(open(self.plot_characteristics_filename))
         self.plot_characteristics_templates = expand_plot_characteristics(plot_characteristics, mode)
 
-        # initialise Plot class
-        self.plot = Plot(read_instance=self, canvas_instance=self)
+        # initialise Plotting class
+        self.plotting = Plotting(read_instance=self, canvas_instance=self)
 
         # add general plot characteristics to self
         for k, val in self.plot_characteristics_templates['general'].items():
@@ -117,7 +120,7 @@ class Interactive:
             return
 
         # filter
-        self.reset_filter(initialise=True)
+        self.reset(initialise=True)
 
         # set variable to know if data is in intial state or not
         self.initialised = True
@@ -130,8 +133,8 @@ class Interactive:
         # read data
         self.datareader.read_setup(['reset'])
 
-    def filter(self):
-        """ Wrapper method to filter data. """
+    def apply_filter(self):
+        """ method to apply filters to data. """
 
         self.logger.info('Filtering data')
 
@@ -141,7 +144,139 @@ class Interactive:
         # get selected station data
         get_selected_station_data(read_instance=self, canvas_instance=self, networkspecies=self.networkspecies)
 
-    def reset_filter(self, initialise=False):
+    def filter(self, field, limit=None, keep=None, remove=None, lower=None, upper=None):
+        """ Wrapper method to filter data.
+
+        :param field: field to filter by
+        :type field: str
+        :param limit: limit for filtering representativity fields
+        :type limit: str, optional
+        :param keep: data to keep
+        :type keep: str, optional
+        :param remove: data to remove
+        :type remove: str, optional
+        :param lower: lower bound to retain data
+        :type lower: str, optional
+        :param upper: upper bound to retain data
+        :type upper: str, optional
+        """
+
+        # variable to know if to filter or not
+        do_filter = False
+
+        # make sure keep and remove arguments are lists
+        if keep is not None:
+            if type(keep) == str:
+                keep = [keep]
+        if remove is not None:
+            if type(remove) == str:
+                remove = [remove]
+
+        # field is a represenativity field?
+        if field in self.representativity_menu['rangeboxes']['map_vars']:
+            do_filter = True
+
+            field_index = self.representativity_menu['rangeboxes']['map_vars'].index(field)
+            # ensure limit is set for field
+            if limit is not None:
+                self.representativity_menu['rangeboxes']['current_lower'][field_index] = limit
+            else:
+                msg = "When filtering by representativity field: {}, 'limit' must be passed as an argument.".format(field)
+                show_message(self, msg)
+                return
+
+        # field is a period field?
+        elif field == 'period':
+            do_filter = True
+
+            # if neither keep or remove are defined, filtering cannot be done
+            if (keep is None) and (remove is None): 
+                msg = "When filtering by a period field, 'keep' or 'remove' must be passed as arguments."
+                show_message(self, msg)
+                return
+
+            if keep is not None:
+                new_keep = copy.deepcopy(self.period_menu['checkboxes']['keep_selected'])
+                for item in keep:
+                    if item not in new_keep:
+                        new_keep.append(item)
+                self.period_menu['checkboxes']['keep_selected'] = new_keep
+            if remove is not None:
+                new_remove = copy.deepcopy(self.period_menu['checkboxes']['remove_selected'])
+                for item in remove:
+                    if item not in new_remove:
+                        new_remove.append(item)
+                self.period_menu['checkboxes']['remove_selected'] = new_remove
+
+        # fields is a metadata field?
+        else:
+            for menu_type in self.metadata_types:
+                if field in self.metadata_menu[menu_type]['rangeboxes']['labels']:
+                    do_filter = True
+
+                    # if neither lower or upper are defined, filtering cannot be done
+                    if (lower is None) and (upper is None): 
+                        msg = "When filtering by a numeric metadata field, 'lower' or 'upper' must be passed as arguments."
+                        show_message(self, msg)
+                        return
+
+                    field_index = self.metadata_menu[menu_type]['rangeboxes']['labels'].index(field)
+                    if lower is not None:
+                        self.metadata_menu[menu_type]['rangeboxes']['current_lower'][field_index] = lower
+                    if upper is not None:
+                        self.metadata_menu[menu_type]['rangeboxes']['current_upper'][field_index] = upper           
+                    if field not in self.metadata_menu[menu_type]['rangeboxes']['apply_selected']:
+                        self.metadata_menu[menu_type]['rangeboxes']['apply_selected'].append(field)
+                    break
+
+                elif field in self.metadata_menu[menu_type]['navigation_buttons']['labels']:
+                    do_filter = True
+
+                    # if neither keep or remove are defined, filtering cannot be done
+                    if (keep is None) and (remove is None): 
+                        msg = "When filtering by a text period field, 'keep' or 'remove' must be passed as arguments."
+                        show_message(self, msg)
+                        return
+
+                    if keep is not None:
+                        new_keep = copy.deepcopy(self.metadata_menu[menu_type][field]['checkboxes']['keep_selected'])
+                        for item in keep:
+                            if item not in new_keep:
+                                new_keep.append(item)
+                        self.metadata_menu[menu_type][field]['checkboxes']['keep_selected'] = new_keep
+                    if remove is not None:
+                        new_remove = copy.deepcopy(self.metadata_menu[menu_type][field]['checkboxes']['remove_selected'])
+                        for item in remove:
+                            if item not in new_remove:
+                                new_remove.append(item)
+                        self.metadata_menu[menu_type][field]['checkboxes']['remove_selected'] = new_remove
+                    break
+
+        # do filtering?
+        if do_filter: 
+            self.apply_filter()
+        # otherwise set warning that field was not found
+        else:
+            msg = '{} not available for filtering.'.format(field)
+            show_message(self, msg)
+        
+    def filter_station(self, station):
+        """ Wrapper method to filter specific station/s.
+
+        :param station: Station reference
+        :type station: str
+        """
+        
+        if type(station) == 'str':
+            stations_to_keep = [station]
+        else:
+            stations_to_keep = station
+        self.metadata_menu['STATION MISCELLANEOUS']['station_reference']['checkboxes']['keep_selected'] = stations_to_keep
+
+        # filter for station/s    
+        self.apply_filter()
+
+    def reset(self, initialise=False):
         """ Wrapper method to reset filter data.
 
         :param initialise: Indicates whether to reset data to initial state when class was initialised 
@@ -175,7 +310,7 @@ class Interactive:
             metadata_conf(self)
             
         # re-filter 
-        self.filter()
+        self.apply_filter()
 
         # set variable to know if data is in intial state or not
         if initialise:
@@ -183,11 +318,10 @@ class Interactive:
         else:
             self.initialised = False
 
-    def make_plot(self, plot, data_labels=None, labela='', labelb='', title=None, xlabel=None, ylabel=None, 
-                  cb=True, legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, 
-                  domain=False, hidedata=False, logx=False, logy=False, multispecies=False, regression=False, 
-                  smooth=False, threshold=False, plot_options=None, save=False, return_plot=False, format=None,
-                  width=None, height=None):
+    def plot(self, plot, data_labels=None, labela='', labelb='', title=None, xlabel=None, ylabel=None, cb=True, 
+             legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, domain=False, 
+             hidedata=False, logx=False, logy=False, multispecies=False, regression=False, smooth=False, 
+             threshold=False, plot_options=None, save=False, return_plot=False, format=None, width=None, height=None):
         """ Wrapper method to make a Providentia plot.
 
         :param plot: Plot type
@@ -428,7 +562,7 @@ class Interactive:
 
         # set plot characteristics
         self.plot_characteristics = dict()
-        valid_plot = self.plot.set_plot_characteristics([plot_type], format=format, data_labels=data_labels)
+        valid_plot = self.plotting.set_plot_characteristics([plot_type], format=format, data_labels=data_labels)
 
         # if after setting plot charateristics it has been determined plot is not valid, then return
         if not valid_plot:
@@ -493,11 +627,11 @@ class Interactive:
             fig.subplots_adjust(**self.plot_characteristics[plot_type]['subplots_adjust'])
         # get plotting function
         if base_plot_type == 'statsummary':
-            func = getattr(self.plot, 'make_table')
+            func = getattr(self.plotting, 'make_table')
         elif base_plot_type in ['fairmode-target', 'fairmode-statsummary']:
-            func = getattr(self.plot, 'make_{}'.format(base_plot_type.replace('-','_')))
+            func = getattr(self.plotting, 'make_{}'.format(base_plot_type.replace('-','_')))
         elif base_plot_type != 'legend':
-            func = getattr(self.plot, 'make_{}'.format(base_plot_type.split('-')[0]))
+            func = getattr(self.plotting, 'make_{}'.format(base_plot_type.split('-')[0]))
          
         # set boolean on whether to plot obs in legend or not, and relevant data labels (data labels plotted)
         if (base_plot_type == 'scatter') or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
@@ -518,7 +652,7 @@ class Interactive:
             
         # legend plot (on its own axis)
         if base_plot_type == 'legend':
-            legend_handles = self.make_legend(plot_type, data_labels=data_labels, set_obs=set_obs_legend)
+            legend_handles = self.legend(plot_type, data_labels=data_labels, set_obs=set_obs_legend)
             relevant_ax.legend(**legend_handles)
 
         # map plot
@@ -567,7 +701,7 @@ class Interactive:
                 kwargs['subsection'] = ss
                 self.set_config(**kwargs)
                 # filter data
-                self.reset_filter(initialise=True)
+                self.reset(initialise=True)
                 for ns in networkspecies:
                     for dl in relevant_data_labels:
                         stats_per_data_label = []
@@ -614,9 +748,9 @@ class Interactive:
             kwargs['subsection'] = orig_ss
             self.set_config(**kwargs)
             if is_initial:
-                self.reset_filter(initialise=True)
+                self.reset(initialise=True)
             else:
-                self.reset_filter()
+                self.reset()
 
         # make heatmap / table plot
         elif base_plot_type in ['heatmap','table']:  
@@ -635,7 +769,7 @@ class Interactive:
                 kwargs['subsection'] = ss
                 self.set_config(**kwargs)
                 # filter data
-                self.reset_filter(initialise=True)
+                self.reset(initialise=True)
                 for ns in networkspecies:
                     stat_per_data_labels = []
                     for dl in relevant_data_labels:
@@ -675,9 +809,9 @@ class Interactive:
             kwargs['subsection'] = orig_ss
             self.set_config(**kwargs)
             if is_initial:
-                self.reset_filter(initialise=True)
+                self.reset(initialise=True)
             else:
-                self.reset_filter()
+                self.reset()
 
         # make timeseries plot
         elif base_plot_type == 'timeseries':
@@ -827,7 +961,7 @@ class Interactive:
                         valid_legend = False
 
                 if valid_legend:
-                    legend_handles = self.make_legend(plot_type, data_labels=data_labels, set_obs=set_obs_legend)
+                    legend_handles = self.legend(plot_type, data_labels=data_labels, set_obs=set_obs_legend)
                     if base_plot_type in ['periodic', 'periodic-violin']:
                         try:
                             ax_to_plot = self.plot_characteristics[plot_type]['legend']['handles']['ax']
@@ -842,7 +976,7 @@ class Interactive:
                         relevant_ax[ax_to_plot].legend(**legend_handles)
                     else:
                         if base_plot_type == 'fairmode-target':
-                            msg = "Data labels legend cannot be plotted, create single legend using make_plot function."
+                            msg = "Data labels legend cannot be plotted, create standalone legend using plot('legend')"
                             show_message(self, msg)
                         elif base_plot_type == 'fairmode-statsummary':
                             relevant_ax[3].legend(**legend_handles)
@@ -851,7 +985,7 @@ class Interactive:
 
         # make colourbar (embedded on plot axis)
         if 'cb' in self.plot_characteristics[plot_type]:
-            cb_ax = self.make_colourbar(fig, relevant_ax, zstat, speci, plot_type)
+            cb_ax = self.colourbar(fig, relevant_ax, zstat, speci, plot_type)
             # hide colourbar if requested, we still need to create it to get the correct cmap / bounds in the maps
             if not cb:
                 cb_ax.set_visible(False)
@@ -874,7 +1008,7 @@ class Interactive:
         else:
             plt.show()
 
-    def make_colourbar(self, fig, plot_ax, stat, speci, plot_type):
+    def colourbar(self, fig, plot_ax, stat, speci, plot_type):
         """ Wrapper method to make colourbar.
 
         :param fig: Figure
@@ -898,7 +1032,7 @@ class Interactive:
 
         return cb_ax
     
-    def make_legend(self, plot_type, data_labels=None, set_obs=True):
+    def legend(self, plot_type, data_labels=None, set_obs=True):
         """ Wrapper method to make legend.
 
         :param plot_type: Plot type
@@ -920,11 +1054,11 @@ class Interactive:
             show_message(self, msg)
             return
 
-        legend_handles = self.plot.make_legend_handles(legend_characteristics, data_labels=data_labels, set_obs=set_obs)
+        legend_handles = self.plotting.make_legend_handles(legend_characteristics, data_labels=data_labels, set_obs=set_obs)
         
         return legend_handles['plot']
 
-    def calculate_stat(self, stat, labela='', labelb='', per_station=False):
+    def statistic(self, stat, labela='', labelb='', per_station=False):
         """ Wrapper method to calculate statistic/s.
 
         :param stat: Statistic
@@ -1113,138 +1247,12 @@ class Interactive:
             with open(conf, "r") as f:
                 self.logger.info(f.read())
 
-    def select_station(self, station):
-        """ Wrapper method to select specific station/s.
+    def __str__(self):
+        """ set active config as __str__."""
 
-        :param station: Station reference
-        :type station: str
-        """
-        
-        if type(station) == 'str':
-            stations_to_keep = [station]
-        else:
-            stations_to_keep = station
-        self.metadata_menu['STATION MISCELLANEOUS']['station_reference']['checkboxes']['keep_selected'] = stations_to_keep
+        self.print_config(conf=self.config)
+        return ''
 
-        # filter for station/s    
-        self.filter()
-
-    def apply_filter(self, field, limit=None, keep=None, remove=None, lower=None, upper=None):
-        """ Wrapper method to select specific station/s.
-
-        :param field: field to filter by
-        :type field: str
-        :param limit: limit for filtering representativity fields
-        :type limit: str, optional
-        :param keep: data to keep
-        :type keep: str, optional
-        :param remove: data to remove
-        :type remove: str, optional
-        :param lower: lower bound to retain data
-        :type lower: str, optional
-        :param upper: upper bound to retain data
-        :type upper: str, optional
-        """
-
-        # variable to know if to filter or not
-        do_filter = False
-
-        # make sure keep and remove arguments are lists
-        if keep is not None:
-            if type(keep) == str:
-                keep = [keep]
-        if remove is not None:
-            if type(remove) == str:
-                remove = [remove]
-
-        # field is a represenativity field?
-        if field in self.representativity_menu['rangeboxes']['map_vars']:
-            do_filter = True
-
-            field_index = self.representativity_menu['rangeboxes']['map_vars'].index(field)
-            # ensure limit is set for field
-            if limit is not None:
-                self.representativity_menu['rangeboxes']['current_lower'][field_index] = limit
-            else:
-                msg = "When filtering by representativity field: {}, 'limit' must be passed as an argument.".format(field)
-                show_message(self, msg)
-                return
-
-        # field is a period field?
-        elif field == 'period':
-            do_filter = True
-
-            # if neither keep or remove are defined, filtering cannot be done
-            if (keep is None) and (remove is None): 
-                msg = "When filtering by a period field, 'keep' or 'remove' must be passed as arguments."
-                show_message(self, msg)
-                return
-
-            if keep is not None:
-                new_keep = copy.deepcopy(self.period_menu['checkboxes']['keep_selected'])
-                for item in keep:
-                    if item not in new_keep:
-                        new_keep.append(item)
-                self.period_menu['checkboxes']['keep_selected'] = new_keep
-            if remove is not None:
-                new_remove = copy.deepcopy(self.period_menu['checkboxes']['remove_selected'])
-                for item in remove:
-                    if item not in new_remove:
-                        new_remove.append(item)
-                self.period_menu['checkboxes']['remove_selected'] = new_remove
-
-        # fields is a metadata field?
-        else:
-            for menu_type in self.metadata_types:
-                if field in self.metadata_menu[menu_type]['rangeboxes']['labels']:
-                    do_filter = True
-
-                    # if neither lower or upper are defined, filtering cannot be done
-                    if (lower is None) and (upper is None): 
-                        msg = "When filtering by a numeric metadata field, 'lower' or 'upper' must be passed as arguments."
-                        show_message(self, msg)
-                        return
-
-                    field_index = self.metadata_menu[menu_type]['rangeboxes']['labels'].index(field)
-                    if lower is not None:
-                        self.metadata_menu[menu_type]['rangeboxes']['current_lower'][field_index] = lower
-                    if upper is not None:
-                        self.metadata_menu[menu_type]['rangeboxes']['current_upper'][field_index] = upper           
-                    if field not in self.metadata_menu[menu_type]['rangeboxes']['apply_selected']:
-                        self.metadata_menu[menu_type]['rangeboxes']['apply_selected'].append(field)
-                    break
-
-                elif field in self.metadata_menu[menu_type]['navigation_buttons']['labels']:
-                    do_filter = True
-
-                    # if neither keep or remove are defined, filtering cannot be done
-                    if (keep is None) and (remove is None): 
-                        msg = "When filtering by a text period field, 'keep' or 'remove' must be passed as arguments."
-                        show_message(self, msg)
-                        return
-
-                    if keep is not None:
-                        new_keep = copy.deepcopy(self.metadata_menu[menu_type][field]['checkboxes']['keep_selected'])
-                        for item in keep:
-                            if item not in new_keep:
-                                new_keep.append(item)
-                        self.metadata_menu[menu_type][field]['checkboxes']['keep_selected'] = new_keep
-                    if remove is not None:
-                        new_remove = copy.deepcopy(self.metadata_menu[menu_type][field]['checkboxes']['remove_selected'])
-                        for item in remove:
-                            if item not in new_remove:
-                                new_remove.append(item)
-                        self.metadata_menu[menu_type][field]['checkboxes']['remove_selected'] = new_remove
-                    break
-
-        # do filtering?
-        if do_filter: 
-            self.filter()
-        # otherwise set warning that field was not found
-        else:
-            msg = '{} not available for filtering.'.format(field)
-            show_message(self, msg)
-        
     def save(self, fname='', format='nc'):
         """ Wrapper method to save current data/ metadata in memory.
 
@@ -1273,7 +1281,7 @@ class Interactive:
 
         self.logger.info('Data saved to {}'.format(fname))
 
-    def get_data(self, format='nc'):
+    def data(self, format='nc'):
         """ Wrapper method return data / metadata in specific format.
 
         :param format: File format, defaults to 'nc'
@@ -1315,7 +1323,7 @@ class Interactive:
 
         return data
 
-    def get_var(self, var=''):
+    def variable(self, var=''):
         """ Wrapper method to return specific data / metadata variable.
 
         :param var: Variable name, defaults to ''
@@ -1330,7 +1338,7 @@ class Interactive:
             show_message(self, msg)
             return 
         else:
-            data = self.get_data(format='nc')
+            data = self.data(format='nc')
             if var not in data.variables.keys():
                 # try adding networkspeci to variable, if just have 1 networkspecies
                 if len(self.networkspecies) == 1:
@@ -1343,4 +1351,44 @@ class Interactive:
             else:
                 var_data = data[var][:]
                 return var_data
-            
+
+def download(config, **kwargs):
+    """ Wrapper function for initialising Download class"""
+    from .download import Download
+    kwargs['config'] = config
+    kwargs['download'] = True
+    provi = Download(**kwargs)
+    provi.run()
+    return provi
+
+def interpolate(config, **kwargs):
+    """ Wrapper function for initialising Interpolate class"""
+    from .interpolation import experiment_interpolation_submission as interpolation
+    kwargs['config'] = config
+    kwargs['interpolation'] = True
+    kwargs['library'] = True   
+    unique_id = '{number:06}'.format(number=random.randint(0, 999999))
+    kwargs['slurm_job_id'] = unique_id  
+    # save original stdout
+    orig_stdout = sys.stdout
+    # redirict stdout to file
+    sys.stdout = open('logs/interpolation/management_logs/{}.out'.format(unique_id), 'w')
+    # do interpolation
+    interpolation.main(**kwargs)
+    # reset stdout
+    sys.stdout = orig_stdout
+    print(sys.stdout)
+
+def load(config, **kwargs):
+    """ Wrapper function for initialising Library class"""
+    kwargs['library'] = True
+    provi = Library(config, **kwargs)
+    return provi     
+
+def report(config, **kwargs):
+    """ Wrapper function for initialising Report class"""
+    from .report import Report
+    kwargs['config'] = config
+    kwargs['report'] = True
+    provi = Report(**kwargs)
+    return provi

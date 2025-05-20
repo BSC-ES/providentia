@@ -29,7 +29,7 @@ class Providentia(object):
         self.parser = parser
 
     def getargs(self, args):
-        """ Return arguments to be passed to the dashboard. """
+        """ Return arguments to be passed to the different Providentia modes """
 
         req = vars(args)
         # print help if no args
@@ -52,18 +52,15 @@ class Providentia(object):
 
             LOG.info(res)
 
-            if args.offline:
-                from . import offline as offline
-                offline.main(**res)
+            if args.report:
+                from .report import main
             elif args.interpolation:
-                from .interpolation import experiment_interpolation_submission as interpolation
-                interpolation.main(**res)
+                from .interpolation.experiment_interpolation_submission import main
             elif args.download:
-                from . import download as download
-                download.main(**res)
+                from .download import main
             else:
-                from . import dashboard as dashboard
-                dashboard.main(**res)
+                from .dashboard import main
+            main(**res)
 
         except Exception as err:
             LOG.error('Unhandled exception on Providentia: %s' % err, exc_info=True)
