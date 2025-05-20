@@ -92,9 +92,9 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                                autoscale_y=False, bias_centre=False, harmonise=True):
     """ Harmonise xy limits across paradigm of plot type, unless axis limits have been defined.
     
-        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+        :param canvas_instance: Instance of class MPLCanvas or Report
         :type canvas_instance: object
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
         :param relevant_axs: relevant axes
         :type relevant_axs: list
@@ -149,8 +149,8 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
         mapped_resolutions = read_instance.relevant_temporal_resolutions*(int(len(relevant_axs)/len(
             read_instance.relevant_temporal_resolutions)))
 
-    # remove any axes from relevant_axs which are not active (only for offline and interactive)
-    if (read_instance.offline) or (read_instance.interactive):
+    # remove any axes from relevant_axs which are not active (only for report and library)
+    if (read_instance.report) or (read_instance.library):
         relevant_axs_active = []
         mapped_resolutions_active = []
         for ax_ii, ax in enumerate(relevant_axs):
@@ -401,7 +401,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
 def set_axis_title(read_instance, relevant_axis, title, plot_characteristics):
     """ Set title of plot axis.
 
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
         :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
@@ -491,9 +491,9 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
     """ Function that handles formatting of a plot axis,
         based on given plot options.
 
-        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+        :param canvas_instance: Instance of class MPLCanvas or Report
         :type canvas_instance: object
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
         :param relevant_axs: relevant axes
         :type relevant_axs: list
@@ -593,9 +593,9 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
                 last_row_on_page=True, map_extent=False, relevant_temporal_resolutions=None):
     """ Format a plotting axis.
     
-        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+        :param canvas_instance: Instance of class MPLCanvas or Report
         :type canvas_instance: object
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
         :param ax: axis object
         :type ax: object
@@ -603,11 +603,11 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
         :type base_plot_type: str  
         :param plot_characteristics: plot characteristics
         :type plot_characteristics: dict
-        :param col_ii: column index (for offline report)
+        :param col_ii: column index (for reports)
         :type col_ii: int
-        :param last_valid_row: boolean informing if last valid row to plot on (for offline report)
+        :param last_valid_row: boolean informing if last valid row to plot on (for reports)
         :type last_valid_row: boolean
-        :param last_row_on_page: boolean informing if last valid row on page (for offline report)
+        :param last_row_on_page: boolean informing if last valid row on page (for reports)
         :type last_row_on_page: boolean
         :param map_extent: list of map extent bounds [lonmin, lonmax, latmin, latmax]
         :type map_extent: list

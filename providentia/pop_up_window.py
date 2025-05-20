@@ -885,7 +885,7 @@ class PopUpWindow(QtWidgets.QWidget):
         """ Function to update filter species after launching the dashboard with a configuration file or 
             by editing the fields in the multispecies filtering tab in the dashboard. 
 
-            :param instance: Instance of class ProvidentiaMainWindow
+            :param instance: Instance of class Dashboard
             :type instance: object
             :param label_ii: Corresponding widget line in dashboard
             :type label_ii: int

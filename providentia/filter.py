@@ -138,7 +138,7 @@ class DataFilter:
             speci = networkspeci.split('|')[1]
 
             # get lower/upper data bounds
-            if (self.read_instance.offline) or (self.read_instance.interactive):
+            if (self.read_instance.report) or (self.read_instance.library):
                 lower_bound = self.read_instance.lower_bound[speci]
                 upper_bound = self.read_instance.upper_bound[speci]
             else:
@@ -164,11 +164,11 @@ class DataFilter:
         """ Filter data for selected periods (keeping or removing data, as defined). """
 
         keeps, removes = [], []
-        if (self.read_instance.offline) or (self.read_instance.interactive):
+        if (self.read_instance.report) or (self.read_instance.library):
             if hasattr(self.read_instance, 'period'):
                 keeps, removes = split_options(self.read_instance, self.read_instance.period)
             else:
-                # Get period if apply_filter is used in interactive mode
+                # Get period if apply_filter is used in library mode
                 if self.read_instance.period_menu['checkboxes']['keep_selected']:
                     keeps = self.read_instance.period_menu['checkboxes']['keep_selected']
                 if self.read_instance.period_menu['checkboxes']['remove_selected']:
@@ -442,7 +442,7 @@ class DataFilter:
             except ValueError as e:
                 msg = "Error in metadata fields. The field of '{}' should be numeric.".format(meta_var)
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
-                if (not self.read_instance.offline) and (not self.read_instance.interactive):
+                if (not self.read_instance.report) and (not self.read_instance.library):
                     self.read_instance.metadata_menu[metadata_type]['rangeboxes']['apply_selected'].remove(meta_var)
                 return False
         else:

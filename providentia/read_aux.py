@@ -429,7 +429,7 @@ def get_yearmonths_to_read(available_yearmonths, start_date_to_read, end_date_to
 def get_default_qa(instance, speci):
     """ Return the default qa flags according to GHOST standards. 
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
         :return: QA flags' codes in list
         :rtype: list
@@ -476,7 +476,7 @@ def get_ghost_observational_tree(instance):
         storing a list of start YYYYMM yearmonths per:
         network / resolution / matrix / speci
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
         :return: GHOST observational tree dictionary
         :rtype: dict
@@ -546,7 +546,7 @@ def get_nonghost_observational_tree(instance):
         storing a list of start YYYYMM yearmonths per:
         network / resolution / matrix / speci
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
         :return: non-GHOST observational tree dictionary
         :rtype: dict
@@ -614,7 +614,7 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
     """ Iterate through observational dictionary tree and return 
         a dictionary of available data in the selected daterange
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
         :param start_date: start date (e.g. "20201101")
         :type start_date: str
@@ -677,7 +677,7 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
     """ Get valid experiments for daterange, and selected parameters.
         Update experiment pop-up with valid experiments.
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
         :param start_date: start date (e.g. "20201101")
         :type start_date: str
@@ -756,7 +756,7 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
                         instance.available_experiment_data[network][resolution][speci][experiment] = valid_file_yearmonths
 
     # set list of experiment names to add on experiments pop-up
-    if (not instance.offline) and (not instance.interactive):
+    if (not instance.report) and (not instance.library):
         experiments_to_add = np.array(sorted(experiments_to_add))
         instance.experiments_menu['checkboxes']['labels'] = experiments_to_add
         instance.experiments_menu['checkboxes']['map_vars'] = experiments_to_add
