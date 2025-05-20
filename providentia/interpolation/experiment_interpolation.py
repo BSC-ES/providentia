@@ -735,7 +735,7 @@ class ExperimentInterpolation(object):
                         file_time_dt = pd.to_datetime([t.replace(microsecond=0) for t in file_time_dt])
                     else:
                         # bug fix for newer versions of cftime
-                        file_time_dt = file_time_dt.astype('datetime64[ns]')
+                        file_time_dt = file_time_dt.astype('datetime64[s]')
                         file_time_dt = pd.to_datetime([t for t in file_time_dt])
 
                 # get file start and end datetime
