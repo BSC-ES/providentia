@@ -41,9 +41,9 @@ def linear_regression(canvas_instance, read_instance, relevant_axis, networkspec
                       plot_characteristics, plot_options):
     """ Add linear regression to plot.
 
-        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+        :param canvas_instance: Instance of class MPLCanvas or Report
         :type canvas_instance: object
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
         :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
@@ -93,17 +93,17 @@ def linear_regression(canvas_instance, read_instance, relevant_axis, networkspec
                                                  **plot_characteristics['regression'])
             
             # track plot elements if using dashboard 
-            if (not read_instance.offline) and (not read_instance.interactive) :
-                canvas_instance.plot.track_plot_elements(data_label, base_plot_type, 'regression', regression_line, bias=False)
+            if (not read_instance.report) and (not read_instance.library) :
+                canvas_instance.plotting.track_plot_elements(data_label, base_plot_type, 'regression', regression_line, bias=False)
 
 
 def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
            plot_characteristics, plot_options, chunk_stat=None, chunk_resolution=None):
     """ Add smooth line to plot.
 
-        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+        :param canvas_instance: Instance of class MPLCanvas or Report
         :type canvas_instance: object
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
         :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
@@ -136,7 +136,7 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
         bias = False
 
     # get chunking stat and resolution in dashboard
-    if (not read_instance.offline) and (not read_instance.interactive):
+    if (not read_instance.report) and (not read_instance.library):
         chunk_stat = canvas_instance.timeseries_chunk_stat.currentText()
         chunk_resolution = canvas_instance.timeseries_chunk_resolution.currentText()
         chunk_stat = None if chunk_stat == 'None' else chunk_stat
@@ -187,17 +187,17 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
                                          **plot_characteristics['smooth']['format'])
 
         # track plot elements if using dashboard 
-        if (not read_instance.offline) and (not read_instance.interactive):
-            canvas_instance.plot.track_plot_elements(data_label, base_plot_type, 'smooth', smooth_line, bias=bias)
+        if (not read_instance.report) and (not read_instance.library):
+            canvas_instance.plotting.track_plot_elements(data_label, base_plot_type, 'smooth', smooth_line, bias=bias)
 
 
 def threshold(canvas_instance, read_instance, relevant_axis, networkspeci, base_plot_type, 
               plot_characteristics):
     """ Add threshold line/s to plot.
 
-        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+        :param canvas_instance: Instance of class MPLCanvas or Report
         :type canvas_instance: object
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
         :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
@@ -222,18 +222,17 @@ def threshold(canvas_instance, read_instance, relevant_axis, networkspeci, base_
                                                **plot_characteristics['threshold_line'])
 
     # track plot elements if using dashboard 
-    if (not read_instance.offline) and (not read_instance.interactive):
-        canvas_instance.plot.track_plot_elements('ALL', base_plot_type, 'threshold', 
-                                                 [threshold_line], bias=False)
+    if (not read_instance.report) and (not read_instance.library):
+        canvas_instance.plotting.track_plot_elements('ALL', base_plot_type, 'threshold', [threshold_line], bias=False)
 
 
 def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
                plot_characteristics, plot_options, plot_z_statistic_sign='absolute'):
     """ Add statistical annotations to plot.
 
-        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+        :param canvas_instance: Instance of class MPLCanvas or Report
         :type canvas_instance: object
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
         :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
@@ -257,9 +256,9 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
     # add annotation text
     if base_plot_type == 'fairmode-target':
         bias = False
-        if hasattr(canvas_instance.plot, 'faimode_target_annotate_text'):
-            str_to_annotate = canvas_instance.plot.faimode_target_annotate_text
-            colours = canvas_instance.plot.faimode_target_annotate_colour
+        if hasattr(canvas_instance.plotting, 'faimode_target_annotate_text'):
+            str_to_annotate = canvas_instance.plotting.faimode_target_annotate_text
+            colours = canvas_instance.plotting.faimode_target_annotate_colour
     else:
         # get stats wished to be annotated
         stats = plot_characteristics['annotate_stats']
@@ -359,8 +358,8 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
         relevant_axis.add_artist(bbox)
 
         # track plot elements if using dashboard 
-        if (not read_instance.offline) and (not read_instance.interactive):
-            canvas_instance.plot.track_plot_elements('ALL', base_plot_type, 'annotate', [bbox], bias=bias)
+        if (not read_instance.report) and (not read_instance.library):
+            canvas_instance.plotting.track_plot_elements('ALL', base_plot_type, 'annotate', [bbox], bias=bias)
     else:
         msg = '{} could not be annotated'.format(base_plot_type)
         show_message(read_instance, msg)
@@ -369,7 +368,7 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
 def experiment_domain(canvas_instance, relevant_axis, data_labels, map_extent):
     """ Plot experiment domain extents on map
 
-        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+        :param canvas_instance: Instance of class MPLCanvas or Report
         :type canvas_instance: object
         :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
@@ -380,7 +379,7 @@ def experiment_domain(canvas_instance, relevant_axis, data_labels, map_extent):
     """
 
     #get experiment domain polygons
-    grid_edge_polygons = canvas_instance.plot.make_experiment_domain_polygons(data_labels=data_labels) 
+    grid_edge_polygons = canvas_instance.plotting.make_experiment_domain_polygons(data_labels=data_labels) 
 
     # plot grid edge polygons on map
     for grid_edge_polygon in grid_edge_polygons:

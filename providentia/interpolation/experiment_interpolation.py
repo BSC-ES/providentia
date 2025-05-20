@@ -51,6 +51,8 @@ class ExperimentInterpolation(object):
         
         self.log_file_str = 'STARTING INTERPOLATION\n'
 
+        self.log_file_str += str(submit_args)
+
         # set variables from input keywords
         self.model_temporal_resolution            = submit_args['model_temporal_resolution']
         self.speci_to_process                     = submit_args['speci_to_process']
@@ -336,9 +338,6 @@ class ExperimentInterpolation(object):
             self.mod_speci_units = self.standard_parameter_speci['standard_units']
 
     def create_grid_domain_edge_polygon(self):
-
-        print("enters create_grid_domain_edge_polygon",self.yearmonth)
-
         """ Create grid domain edge polygon from model netCDF file.
             This is handled differently for regular grids (i.e. following lines of longitude/latitude), 
             and non-regular grids (e.g. lambert-conformal).

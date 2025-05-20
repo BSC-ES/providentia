@@ -31,9 +31,9 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
                               station_index=None, data_range_min=None, data_range_max=None, stddev_max=None):
     """ Function that takes full data array and cuts it for selected stations, per network / species, per data label.
 
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
-        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+        :param canvas_instance: Instance of class MPLCanvas or Report
         :type canvas_instance: object
         :param networkspecies: List of networkspeci strings
         :type networkspecies: list
@@ -258,7 +258,7 @@ def get_station_inds(read_instance, canvas_instance, networkspeci, station_index
     if station_index is not None:
         station_inds = np.array([station_index])
     else:
-        if (read_instance.offline) or (read_instance.interactive):
+        if (read_instance.report) or (read_instance.library):
             if read_instance.temporal_colocation:
                 station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][read_instance.observations_data_label]
             else:
@@ -271,9 +271,9 @@ def get_station_inds(read_instance, canvas_instance, networkspeci, station_index
 def group_periodic(read_instance, canvas_instance, networkspeci):
     """ Function that groups data into periodic chunks
 
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
-        :param canvas_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param canvas_instance: Instance of class Dashboard or Report
         :type canvas_instance: object
         :param networkspeci: Current networkspeci (e.g. EBAS|sconco3)
         :type networkspeci: str
@@ -731,7 +731,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
                               only_label=False):
     """ Function that generates neccessary detail to crate colourbar.
 
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
         :param zstat: Statistic
         :type zstat: str
@@ -962,7 +962,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
 def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, speci):
     """ Function that generates colourbar.
 
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
         :param axs: list of relevant axes
         :type axs: list
