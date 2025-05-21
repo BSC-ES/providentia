@@ -2199,9 +2199,6 @@ class Plot:
 
         # iterate through data labels
         for data_label in cut_data_labels:
-            # continue for observations data label
-            if data_label == self.read_instance.observations_data_label:
-                continue
 
             # get experiment data
             experiment_data = data[valid_data_labels.index(data_label), :, :]
@@ -2249,9 +2246,17 @@ class Plot:
 
             # create list for track_plot_elements
             self.fairmode_statsummary_plot = []
-
+            
             # apply configuration to each row
             for i, (row, fairmode_data) in enumerate(zip(subplots,statistics_list)):
+
+                # for the two firsts rows, skip the experiments
+                if i < 2 and data_label != self.read_instance.observations_data_label:
+                    continue
+
+                # skip the observations all the rows but the two first ones
+                if i >= 2 and data_label == self.read_instance.observations_data_label:
+                    continue
 
                 # get row dictionary
                 plot_dict = subplots[row]
@@ -2265,14 +2270,6 @@ class Plot:
                 
                 # add dashed line on the left
                 relevant_axis[i*4 + 3].spines['left'].set_linestyle((10, (8, 5)))                  
-
-                # add units to the first two rows
-                if 'units' in plot_dict:
-                    relevant_axis[i*4 + 3].text(
-                        *plot_characteristics["auxiliar"]["units"]["position"], 
-                        plot_dict['units'], 
-                        fontsize=plot_characteristics["auxiliar"]["units"]["fontsize"],
-                        fontweight=plot_characteristics["auxiliar"]["units"]["fontweight"])
                 
                 # configure color of the row and the dot on the right for rows 3 to 8
                 if 'range_style' in plot_dict:
@@ -2409,34 +2406,48 @@ class Plot:
                 # write the threshold on the exceedances row title
                 if row == "observed exceedances":
                     row_title = row_title.format(exc_threshold)
-
-                # add row title
-                relevant_axis[i*4 + 0].text(
-                    *plot_characteristics["auxiliar"]["row_title"]["position"], 
-                    row_title, 
-                    **plot_characteristics["auxiliar"]["row_title"], 
-                    transform=relevant_axis[i*4 + 0].transAxes)
-           
-                # add left description
-                relevant_axis[i*4 + 0].text(
-                    *plot_characteristics["auxiliar"]["description"]["position"], 
-                    plot_dict["description"], 
-                    **plot_characteristics["auxiliar"]["description"], 
-                    transform=relevant_axis[i*4 + 0].transAxes)
-
-                # add separator
-                if "separator" in plot_dict:
-                    relevant_axis[i*4 + 0].text(
-                        *plot_characteristics["auxiliar"]["separator"]["position"], 
-                        plot_characteristics["auxiliar"]["separator_text"], 
-                        **plot_characteristics["auxiliar"]["separator"], 
-                        transform=relevant_axis[i*4 + 0].transAxes)
             
             # track plot elements if using dashboard 
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
-                self.track_plot_elements(data_label, 'fairmode-statsummary', 'plot', 
-                                         self.fairmode_statsummary_plot, bias=False)
+                self.track_plot_elements(data_label, 'fairmode-statsummary', 'plot', self.fairmode_statsummary_plot, bias=False)
                         
+        # plot the row titles, descriptions, separators and units
+        for i, (row, fairmode_data) in enumerate(zip(subplots,statistics_list)):
+            # get row dictionary
+            plot_dict = subplots[row]
+
+            # get the row title
+            row_title = plot_dict["title"]
+
+            # add units to the first two rows
+            if 'units' in plot_dict:
+                relevant_axis[i*4 + 3].text(
+                    *plot_characteristics["auxiliar"]["units"]["position"], 
+                    plot_dict['units'], 
+                    fontsize=plot_characteristics["auxiliar"]["units"]["fontsize"])
+                
+            # add row title
+            relevant_axis[i*4 + 0].text(
+                *plot_characteristics["auxiliar"]["row_title"]["position"], 
+                row_title, 
+                **plot_characteristics["auxiliar"]["row_title"], 
+                transform=relevant_axis[i*4 + 0].transAxes)
+        
+            # add left description
+            relevant_axis[i*4 + 0].text(
+                *plot_characteristics["auxiliar"]["description"]["position"], 
+                plot_dict["description"], 
+                **plot_characteristics["auxiliar"]["description"], 
+                transform=relevant_axis[i*4 + 0].transAxes)
+
+            # add separator
+            if "separator" in plot_dict:
+                relevant_axis[i*4 + 0].text(
+                    *plot_characteristics["auxiliar"]["separator"]["position"], 
+                    plot_characteristics["auxiliar"]["separator_text"], 
+                    **plot_characteristics["auxiliar"]["separator"], 
+                    transform=relevant_axis[i*4 + 0].transAxes)
+
         # add title if using dashboard 
         if (not self.read_instance.offline) and (not self.read_instance.interactive):
             set_axis_title(self.read_instance, relevant_axis, fairmode_settings[speci]['title'], plot_characteristics)
