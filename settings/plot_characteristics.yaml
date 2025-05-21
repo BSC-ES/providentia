@@ -2337,14 +2337,12 @@
               "position": [-3.3, 0.5],
               "va": "center",
               "ha": "left",
-              "fontweight": "light",
             },
           "description":
             {
               "position": [-6.5, 0.95],
               "va": "top",
               "ha": "left",
-              "fontweight": "light",
               "fontsize": 8,
             },
           "separator":
@@ -2352,10 +2350,8 @@
               "position": [-3.6, -1.8],
               "va": "bottom",
               "ha": "center",
-              "fontweight": "light",
               "fontsize": 8,
             },
-          "units": { "fontweight": "light" },
           "right_dot": { "x": 0, "y": 0 },
           "right_dot_colors": { "green": "#4cff00", "red": "#ff0000" },
           "station_dots": { "marker": "o", "color": "#1111ff" },
