@@ -2251,7 +2251,7 @@
         {
           "subplots":
             {
-              "observed mean":
+              "observed_mean":
                 {
                   "title": "Observed\nmean",
                   "x_axis_limits": [0, 100],
@@ -2259,7 +2259,7 @@
                   "left_dashed_zone_linestyle": "none",
                   "description": "Observations",
                 },
-              "observed exceedances":
+              "observed_exceedances":
                 {
                   "title": "Observed\nexceedences\n(> {} ugm-³)",
                   "x_axis_limits": [0, 100],
@@ -2268,7 +2268,7 @@
                   "description": "",
                   "separator": True,
                 },
-              "temporal bias":
+              "temporal_bias":
                 {
                   "title": "Bias Norm",
                   "x_axis_limits": [-2, 2],
@@ -2276,7 +2276,7 @@
                   "left_dashed_zone_linestyle": [10, [8, 5]],
                   "description": "Time",
                 },
-              "temporal correlation":
+              "temporal_correlation":
                 {
                   "title": "1-R Norm",
                   "x_axis_limits": [0, 2],
@@ -2284,7 +2284,7 @@
                   "left_dashed_zone_linestyle": "none",
                   "description": "",
                 },
-              "temporal std":
+              "temporal_std":
                 {
                   "title": "StDev Norm",
                   "x_axis_limits": [-2, 2],
@@ -2292,7 +2292,7 @@
                   "left_dashed_zone_linestyle": [10, [8, 5]],
                   "description": "",
                 },
-              "temporal highest percentile":
+              "temporal_highest_percentile":
                 {
                   "title": "Hperc Norm",
                   "x_axis_limits": [-2, 2],
@@ -2301,7 +2301,7 @@
                   "description": "",
                   "separator": True,
                 },
-              "averaged spatial correlation":
+              "averaged_spatial_correlation":
                 {
                   "title": "1-R Norm",
                   "x_axis_limits": [0, 2],
@@ -2309,7 +2309,7 @@
                   "left_dashed_zone_linestyle": "none",
                   "description": "Space",
                 },
-              "averaged standard deviation":
+              "averaged_standard_deviation":
                 {
                   "title": "StDev Norm",
                   "x_axis_limits": [-2, 2],
