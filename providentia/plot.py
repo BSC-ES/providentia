@@ -2400,12 +2400,6 @@ class Plot:
                 # add the dots to the track plot elements list
                 self.fairmode_statsummary_plot.append(stations_dots[0])
 
-                # get the row title
-                row_title = plot_dict["title"]
-               
-                # write the threshold on the exceedances row title
-                if row == "observed exceedances":
-                    row_title = row_title.format(exc_threshold)
             
             # track plot elements if using dashboard 
             if (not self.read_instance.offline) and (not self.read_instance.interactive):
@@ -2418,6 +2412,10 @@ class Plot:
 
             # get the row title
             row_title = plot_dict["title"]
+
+            # write the threshold on the exceedances row title
+            if row == "observed_exceedances":
+                row_title = row_title.format(exc_threshold)
 
             # add units to the first two rows
             if 'units' in plot_dict:
