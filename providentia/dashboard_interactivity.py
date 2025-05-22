@@ -360,6 +360,9 @@ class HoverAnnotation(object):
                     self.x = round(event.x / self.canvas_instance.read_instance.devicePixelRatio())
                     self.y = round(event.y / self.canvas_instance.read_instance.devicePixelRatio())
 
+                    # add xdata event to self
+                    self.xdata = event.xdata
+
                     # update annotation and show vline
                     func = getattr(self, 'update_{}_annotation'.format(plot_type.replace('-','_')))
                     if plot_type in ['periodic','periodic-violin']:
@@ -516,8 +519,10 @@ class HoverAnnotation(object):
 
         # retrieve CRMSE / β·RMSᵤ and Mean Bias / β·RMSᵤ
         line = self.canvas_instance.plot_elements['fairmode-statsummary'][self.canvas_instance.plot_elements['fairmode-statsummary']['active']][data_label]['plot'][annotation_index['ind'][0]]
-        x = line.get_xdata()[0]
-        y = line.get_ydata()[0]
+        
+        # get closest value to the point currently hovered
+        x = line.get_xdata()
+        closest_value = min(x, key=lambda i: abs(i - self.xdata))
 
         # get colour for data label
         colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']
@@ -526,11 +531,11 @@ class HoverAnnotation(object):
         hex_colour = get_hex_code(colour)
 
         # add text label
-        text_label += ('<font color="{0}">{1}</font>').format(hex_colour, data_label)
+        text_label += f'<font color="{hex_colour}">{data_label}</font>'
+
         # CRMSE
-        text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'CRMSE / β·RMSᵤ', x, self.canvas_instance.plot_characteristics['fairmode-statsummary']['marker_annotate_rounding'])
-        # MB
-        text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'MB / β·RMSᵤ', y, self.canvas_instance.plot_characteristics['fairmode-statsummary']['marker_annotate_rounding'])
+        rounding = self.canvas_instance.plot_characteristics['fairmode-statsummary']['marker_annotate_rounding']
+        text_label += f'<br><font color="{hex_colour}">x: {closest_value:.{rounding}f}</font>'
 
         # update tooltip
         self.canvas_instance.figure.canvas.setToolTip(text_label)
