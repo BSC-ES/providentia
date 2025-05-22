@@ -92,7 +92,6 @@ class DataFilter:
 
                     # get filter conditions
                     if ':' in upper_limit and ':' in lower_limit:
-                        self.read_instance.logger.info('Upper and lower bounds are :, no data filter will be applied for {0}'.format(filter_networkspeci))
                         return
                     if ':' in upper_limit:
                         if '=' in lower_limit:
