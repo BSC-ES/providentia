@@ -252,9 +252,12 @@ class HoverAnnotation(object):
         # set up formatting for canvas annotations
         self.canvas_instance.figure.canvas = set_formatting(self.canvas_instance.figure.canvas, 
                                                             self.canvas_instance.read_instance.formatting_dict['canvas_annotation'])
+        self.canvas_instance.figure.canvas.setToolTip('')
+        QToolTip.hideText()
 
         # set up formatting for canvas annotation vline
-        self.canvas_instance.canvas_annotation_vline = set_formatting(QWidget(self.canvas_instance), self.canvas_instance.read_instance.formatting_dict['canvas_annotation_vline'])
+        self.canvas_instance.canvas_annotation_vline = set_formatting(QWidget(self.canvas_instance), 
+                                                                      self.canvas_instance.read_instance.formatting_dict['canvas_annotation_vline'])
         self.canvas_instance.canvas_annotation_vline.hide()
 
         return None

@@ -18,6 +18,7 @@ import pandas as pd
 
 from providentia.auxiliar import CURRENT_PATH, join
 
+# get BSC machine name (if have one)
 MACHINE = os.environ.get('BSC_MACHINE', 'local')
 
 # get current path and providentia root path
@@ -27,7 +28,7 @@ default_values = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interna
 multispecies_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 
-# set MACHINE to be the hub, workstation or local machine
+# set current MACHINE
 if MACHINE not in ['nord3v2', 'mn5', 'nord4']:
     hostname = os.environ.get('HOSTNAME', '')
     
@@ -36,6 +37,7 @@ if MACHINE not in ['nord3v2', 'mn5', 'nord4']:
     while True:
         try:
             ip = socket.gethostbyname(socket.gethostname())
+            break
         except:
             if retry == 3:
                 break
