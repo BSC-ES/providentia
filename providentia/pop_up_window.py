@@ -672,8 +672,8 @@ class PopUpWindow(QtWidgets.QWidget):
             self.read_instance.selected_widget_network.update({label_ii: copy.deepcopy(self.read_instance.selected_network)})
             self.read_instance.selected_widget_matrix.update({label_ii: self.read_instance.parameter_dictionary[self.read_instance.selected_species]['matrix']})
             self.read_instance.selected_widget_species.update({label_ii: copy.deepcopy(self.read_instance.selected_species)})
-            self.read_instance.selected_widget_lower.update({label_ii: str(np.nan)})
-            self.read_instance.selected_widget_upper.update({label_ii: str(np.nan)})
+            self.read_instance.selected_widget_lower.update({label_ii: ':'})
+            self.read_instance.selected_widget_upper.update({label_ii: ':'})
             self.read_instance.selected_widget_filter_species_fill_value.update({label_ii: str(np.nan)})
             self.read_instance.selected_widget_apply.update({label_ii: False})
 
@@ -683,8 +683,8 @@ class PopUpWindow(QtWidgets.QWidget):
             self.page_memory['multispecies']['network'][label_ii].clear()
             self.page_memory['multispecies']['matrix'][label_ii].clear()
             self.page_memory['multispecies']['species'][label_ii].clear()
-            self.page_memory['multispecies']['current_lower'][label_ii].setText(str(np.nan))
-            self.page_memory['multispecies']['current_upper'][label_ii].setText(str(np.nan))
+            self.page_memory['multispecies']['current_lower'][label_ii].setText(':')
+            self.page_memory['multispecies']['current_upper'][label_ii].setText(':')
             self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii].setText(str(np.nan))
             self.page_memory['multispecies']['apply_selected'][label_ii].setCheckState(QtCore.Qt.Unchecked)
 
@@ -731,11 +731,11 @@ class PopUpWindow(QtWidgets.QWidget):
             self.read_instance.selected_widget_species.update({label_ii: self.page_memory['multispecies']['species'][label_ii].currentText()})
         
         # update current lower
-        if self.read_instance.selected_widget_lower[label_ii] != str(np.nan):
+        if self.read_instance.selected_widget_lower[label_ii] != ':':
             self.page_memory['multispecies']['current_lower'][label_ii].setText(str(self.read_instance.selected_widget_lower[label_ii]))
 
         # update current upper
-        if self.read_instance.selected_widget_upper[label_ii] != str(np.nan):
+        if self.read_instance.selected_widget_upper[label_ii] != ':':
             self.page_memory['multispecies']['current_upper'][label_ii].setText(str(self.read_instance.selected_widget_upper[label_ii]))
 
         # update current fill value
