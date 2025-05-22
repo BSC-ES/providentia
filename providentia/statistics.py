@@ -33,7 +33,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
 
         :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
-        :param canvas_instance: Instance of class MPLCanvas or Report
+        :param canvas_instance: Instance of class Canvas or Report
         :type canvas_instance: object
         :param networkspecies: List of networkspeci strings
         :type networkspecies: list
