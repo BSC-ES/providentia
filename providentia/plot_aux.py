@@ -556,7 +556,7 @@ def create_chunked_timeseries(read_instance, canvas_instance, chunk_stat, chunk_
 
     :param read_instance: Instance of class Dashboard or Report
     :type read_instance: object
-    :param canvas_instance: Instance of class MPLCanvas or Report
+    :param canvas_instance: Instance of class Canvas or Report
     :type canvas_instance: object
     :param chunk_stat: Chunk statistic
     :type chunk_stat: str

@@ -468,8 +468,7 @@ else
         jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
     elif $interpolation; then
         unique_id=$(printf "%06d\n" $((RANDOM % 1000000)))
-        echo "Check submission info in 'logs/interpolation/management_logs/$unique_id.out'"
-        eval "${python_command}" > logs/interpolation/management_logs/$unique_id.out 2>&1 --slurm_job_id=$unique_id
+        eval "${python_command} --slurm_job_id=$unique_id" 2>&1 | tee logs/interpolation/management_logs/$unique_id.out
     else
         eval "${python_command}"
     fi

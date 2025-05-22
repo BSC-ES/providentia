@@ -20,12 +20,11 @@ from packaging.version import Version
 import pandas as pd
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-from .canvas import MPLCanvas
+from .canvas import Canvas
 from .configuration import load_conf
 from .configuration import ProvConfiguration
 from .dashboard_elements import ComboBox, QVLine, InputDialog
 from .dashboard_elements import set_formatting
-from .dashboard_interactivity import HoverAnnotation
 from .fields_menus import (init_experiments, init_flags, init_qa, update_qa, init_metadata, init_multispecies, init_period, 
                            init_representativity, metadata_conf, multispecies_conf, representativity_conf, period_conf, 
                            update_metadata_fields, update_period_fields, update_representativity_fields)
@@ -532,7 +531,7 @@ class Dashboard(QtWidgets.QWidget):
         # Setup MPL canvas of plots
         # set variable that blocks updating of MPL canvas until some data has been read
         self.block_MPL_canvas_updates = True
-        self.mpl_canvas = MPLCanvas(self)
+        self.mpl_canvas = Canvas(self)
 
         # initialise configuration bar fields
         self.config_bar_initialisation = True
