@@ -283,7 +283,10 @@ class Library:
         :type initialise: boolean, optional
         """
 
-        self.logger.info(f'Resetting filter for {self.subsection}')
+        if initialise:
+            self.logger.info(f'Resetting data filters to when class was initialised, loading {self.subsection} subsection filters.')
+        else:
+            self.logger.info(f'Resetting all data filters.')
    
         # initialise structures to store fields        
         init_representativity(self)
@@ -829,11 +832,32 @@ class Library:
             func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
                  plot_options)
 
-        # get number of total available stations, and individual station information if just have 1 station
+        # get relevant station inds
         if self.temporal_colocation:
-            station_inds = self.valid_station_inds_temporal_colocation[networkspeci][self.observations_data_label]
+            inds_array = self.valid_station_inds_temporal_colocation
         else:
-            station_inds = self.valid_station_inds[networkspeci][self.observations_data_label]  
+            inds_array = self.valid_station_inds
+
+        if labela != '':
+            labela_station_inds = inds_array[networkspeci][labela]
+            if labelb == '':
+                station_inds = copy.deepcopy(labela_station_inds)
+            else:
+                labelb_station_inds = inds_array[networkspeci][labelb]
+                station_inds = np.unique([labela_station_inds,labelb_station_inds])
+        else:
+            label_station_inds = []
+            if data_labels:
+                dls = copy.deepcopy(data_labels)
+            else:
+                dls = copy.deepcopy(self.data_labels)
+            for dl in dls:
+                if ('bias' in plot_options) & (dl == self.observations_data_label):
+                    continue
+                label_station_inds.extend(inds_array[networkspeci][dl])
+            station_inds = np.unique(label_station_inds)
+
+        # get number of total available stations, and individual station information if just have 1 station
         n_stations = len(station_inds)
         if n_stations == 1:
             station_ind = station_inds[0]
@@ -877,7 +901,8 @@ class Library:
 
         # set title
         if not title:
-            if zstat is not None:
+
+            if (zstat is not None) & (base_plot_type not in ['statsummary']):
                 if 'axis_title' in self.plot_characteristics[plot_type]:
                     title = self.plot_characteristics[plot_type]['axis_title']['label']
                     if title == '':
@@ -1086,11 +1111,26 @@ class Library:
         # get zstat information 
         zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=stat) 
 
+        # combine basic and expbias stats dicts together
+        stats_dict = {**self.basic_stats, **self.expbias_stats}
+
+        # check desired statistic is defined in stats dict
+        if base_zstat not in stats_dict:
+            msg = f"{base_zstat} not defined in Providentia's statistical library. Cannot calculate statistic."
+            show_message(self, msg)
+            return
+
         # if only 1 label passed and stat is a bias statistic then throw error
-        if (z_statistic_sign == 'bias') & (labelb == ''):
+        elif (z_statistic_sign == 'bias') & (labelb == ''):
               msg = "Calculating a bias statistic, and only 1 label is set. Cannot calculate statistic."
               show_message(self, msg)
               return
+
+        # if calculating bias stat but temporal_colocation is not active, then throw error
+        elif (z_statistic_type == 'expbias') & (not self.temporal_colocation):
+            msg = f'To calculate the experiment bias stat {zstat}, temporal_colocation must be set to True. Cannot calculate statistic.'
+            show_message(self, msg)
+            return
 
         # get networkspeci to calculate for
         networkspeci = self.networkspecies[0]
@@ -1352,6 +1392,11 @@ class Library:
                 var_data = data[var][:]
                 return var_data
 
+def dashboard(**kwargs):
+    """ Wrapper function for initialising Dashboard class"""
+    from .dashboard import main
+    main(**kwargs)
+
 def download(config, **kwargs):
     """ Wrapper function for initialising Download class"""
     from .download import Download
@@ -1377,13 +1422,16 @@ def interpolate(config, **kwargs):
     interpolation.main(**kwargs)
     # reset stdout
     sys.stdout = orig_stdout
-    print(sys.stdout)
 
 def load(config, **kwargs):
     """ Wrapper function for initialising Library class"""
     kwargs['library'] = True
     provi = Library(config, **kwargs)
     return provi     
+
+def notebook():
+    """ Wrapper function for opening Jupyter Notebook"""
+    subprocess.run(['./bin/providentia', '--notebook'])
 
 def report(config, **kwargs):
     """ Wrapper function for initialising Report class"""

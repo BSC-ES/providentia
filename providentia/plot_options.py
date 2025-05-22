@@ -41,7 +41,7 @@ def linear_regression(canvas_instance, read_instance, relevant_axis, networkspec
                       plot_characteristics, plot_options):
     """ Add linear regression to plot.
 
-        :param canvas_instance: Instance of class MPLCanvas or Report
+        :param canvas_instance: Instance of class Canvas or Report
         :type canvas_instance: object
         :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
@@ -101,7 +101,7 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
            plot_characteristics, plot_options, chunk_stat=None, chunk_resolution=None):
     """ Add smooth line to plot.
 
-        :param canvas_instance: Instance of class MPLCanvas or Report
+        :param canvas_instance: Instance of class Canvas or Report
         :type canvas_instance: object
         :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
@@ -195,7 +195,7 @@ def threshold(canvas_instance, read_instance, relevant_axis, networkspeci, base_
               plot_characteristics):
     """ Add threshold line/s to plot.
 
-        :param canvas_instance: Instance of class MPLCanvas or Report
+        :param canvas_instance: Instance of class Canvas or Report
         :type canvas_instance: object
         :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
@@ -230,7 +230,7 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
                plot_characteristics, plot_options, plot_z_statistic_sign='absolute'):
     """ Add statistical annotations to plot.
 
-        :param canvas_instance: Instance of class MPLCanvas or Report
+        :param canvas_instance: Instance of class Canvas or Report
         :type canvas_instance: object
         :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
@@ -368,7 +368,7 @@ def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data
 def experiment_domain(canvas_instance, relevant_axis, data_labels, map_extent):
     """ Plot experiment domain extents on map
 
-        :param canvas_instance: Instance of class MPLCanvas or Report
+        :param canvas_instance: Instance of class Canvas or Report
         :type canvas_instance: object
         :param relevant_axis: Axis to plot on 
         :type relevant_axis: object

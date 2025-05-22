@@ -94,7 +94,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                                autoscale_y=False, bias_centre=False, harmonise=True):
     """ Harmonise xy limits across paradigm of plot type, unless axis limits have been defined.
     
-        :param canvas_instance: Instance of class MPLCanvas or Report
+        :param canvas_instance: Instance of class Canvas or Report
         :type canvas_instance: object
         :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
@@ -423,7 +423,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             )
 
             # set the margin
-            for ts in canvas_instance.plot.timeseries_plot:
+            for ts in canvas_instance.plotting.timeseries_plot:
                 ts[0].set_clip_path(clip_rect)
 
 def set_axis_title(read_instance, relevant_axis, title, plot_characteristics):
@@ -519,7 +519,7 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
     """ Function that handles formatting of a plot axis,
         based on given plot options.
 
-        :param canvas_instance: Instance of class MPLCanvas or Report
+        :param canvas_instance: Instance of class Canvas or Report
         :type canvas_instance: object
         :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
@@ -621,7 +621,7 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
                 last_row_on_page=True, map_extent=False, relevant_temporal_resolutions=None):
     """ Format a plotting axis.
     
-        :param canvas_instance: Instance of class MPLCanvas or Report
+        :param canvas_instance: Instance of class Canvas or Report
         :type canvas_instance: object
         :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object

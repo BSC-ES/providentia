@@ -25,7 +25,6 @@ import pyproj
 import seaborn as sns
 
 from .calculate import ExpBias, Stats
-from .dashboard_interactivity import HoverAnnotation
 from .statistics import (boxplot_inner_fences, calculate_statistic,
                          get_fairmode_data, get_z_statistic_info, get_z_statistic_type)
 from .read_aux import drop_nans, get_valid_metadata
@@ -107,18 +106,29 @@ class Plotting:
                     show_message(self.read_instance, msg)
                     valid_plot_type = False
 
-                # if no experiments are defined, remove all bias plots 
-                elif ('bias' in plot_options) or (z_statistic_sign == 'bias'):
-                    if len(data_labels) == 1:
-                        msg = f'No experiments defined, so {plot_type} bias plot cannot be created.'
+                # remove plots what calculating bias stat but temporal_colocation is not active
+                elif (z_statistic_type == 'expbias') & (not self.read_instance.temporal_colocation):
+                        msg = f'To calculate the experiment bias stat {zstat}, temporal_colocation must be set to True, so {plot_type} plot cannot be created.'
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
-                # if are making an experiment bias plot, and temporal_colocation is off, then remove plot
-                elif (z_statistic_type == 'expbias') & (not self.read_instance.temporal_colocation):
-                    msg = f'To calculate the experiment bias stat {zstat}, temporal_colocation must be set to True, so {plot_type} plot cannot be created.'
-                    show_message(self.read_instance, msg)
-                    valid_plot_type = False
+                # if no experiments are defined, remove all bias plots, or plots with bias statistics 
+                elif ('bias' in plot_options) or (z_statistic_sign == 'bias'):
+                    if len(data_labels) == 1:
+                        msg = f'No experiments defined, so {plot_type} plot cannot be created.'
+                        show_message(self.read_instance, msg)
+                        valid_plot_type = False
+
+                # break loop if the plot type is not valid and remove plot type from lists
+                if not valid_plot_type:
+                    if self.read_instance.report:
+                        if plot_type in self.read_instance.summary_plots_to_make:
+                            self.read_instance.summary_plots_to_make.remove(plot_type)
+                        if plot_type in self.read_instance.station_plots_to_make:
+                            self.read_instance.station_plots_to_make.remove(plot_type)
+                    elif self.read_instance.library:
+                        return valid_plot_type
+                    continue
 
             # add new keys to make plots with stats (map, periodic, heatmap, table)
             if zstat:
@@ -150,15 +160,28 @@ class Plotting:
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
-                if not valid_plot_type:
-                    if self.read_instance.report:
-                        if plot_type in self.read_instance.summary_plots_to_make:
-                            self.read_instance.summary_plots_to_make.remove(plot_type)
-                        if plot_type in self.read_instance.station_plots_to_make:
-                            self.read_instance.station_plots_to_make.remove(plot_type)
-                    elif self.read_instance.library:
-                        return valid_plot_type
-                    continue
+                    # warning for taylor plot if have no experiments
+                    elif (base_plot_type in ['taylor']) & (len(data_labels) == 1):
+                        msg = f'No experiments defined, so {plot_type} cannot be created.'
+                        show_message(self.read_instance, msg)
+                        valid_plot_type = False
+
+                    # warning for timeseries bias plot if the temporal colocation is not active
+                    elif ('timeseries' == base_plot_type) & ('bias' in plot_options) & (not self.read_instance.temporal_colocation):
+                        msg = f'{plot_type} cannot be created as temporal colocation is not active.'
+                        show_message(self.read_instance, msg)
+                        valid_plot_type = False
+
+                    # break loop if the plot type is not valid and remove plot type from lists
+                    if not valid_plot_type:
+                        if self.read_instance.report:
+                            if plot_type in self.read_instance.summary_plots_to_make:
+                                self.read_instance.summary_plots_to_make.remove(plot_type)
+                            if plot_type in self.read_instance.station_plots_to_make:
+                                self.read_instance.station_plots_to_make.remove(plot_type)
+                        elif self.read_instance.library:
+                            return valid_plot_type
+                        continue
 
                 # add information for plot type 
                 # first try get it from custom plot charcteristics, and then from base plot type template 
@@ -201,15 +224,15 @@ class Plotting:
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
-                    # warning for scatter, taylor and fairmode plots if the temporal colocation is not active 
-                    elif (base_plot_type in ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']) & (not self.read_instance.temporal_colocation):
-                        msg = f'{plot_type} cannot be created as temporal colocation is not active.'
+                    # warning for scatter and fairmode plots if have no experiments
+                    elif (base_plot_type in ['scatter', 'fairmode-target', 'fairmode-statsummary']) & (len(data_labels) == 1):
+                        msg = f'No experiments defined, so {plot_type} cannot be created.'
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
-                    # warning for scatter, taylor and fairmode plots if have no experiments
-                    elif (base_plot_type in ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']) & (len(data_labels) == 1):
-                        msg = f'No experiments defined, so {plot_type} cannot be created.'
+                    # warning for scatter and fairmode plots if the temporal colocation is not active 
+                    elif (base_plot_type in ['scatter', 'fairmode-target', 'fairmode-statsummary']) & (not self.read_instance.temporal_colocation):
+                        msg = f'{plot_type} cannot be created as temporal colocation is not active.'
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
@@ -219,22 +242,16 @@ class Plotting:
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
-                    # warning for timeseries bias plot if have no experiments
-                    elif ('timeseries' == base_plot_type) & ('bias' in plot_options) & (len(data_labels) == 1):
-                        msg = f'No experiments defined, so {plot_type} cannot be created.'
-                        show_message(self.read_instance, msg)
-                        valid_plot_type = False
-
-                # break loop if the plot type is not valid and remove plot type from lists
-                if not valid_plot_type:
-                    if self.read_instance.report:
-                        if plot_type in self.read_instance.summary_plots_to_make:
-                            self.read_instance.summary_plots_to_make.remove(plot_type)
-                        if plot_type in self.read_instance.station_plots_to_make:
-                            self.read_instance.station_plots_to_make.remove(plot_type)
-                    elif self.read_instance.library:
-                        return valid_plot_type
-                    continue
+                    # break loop if the plot type is not valid and remove plot type from lists
+                    if not valid_plot_type:
+                        if self.read_instance.report:
+                            if plot_type in self.read_instance.summary_plots_to_make:
+                                self.read_instance.summary_plots_to_make.remove(plot_type)
+                            if plot_type in self.read_instance.station_plots_to_make:
+                                self.read_instance.station_plots_to_make.remove(plot_type)
+                        elif self.read_instance.library:
+                            return valid_plot_type
+                        continue
 
                 # add information for plot type for base plot type 
                 if plot_type in self.canvas_instance.plot_characteristics_templates:
@@ -607,6 +624,9 @@ class Plotting:
             :type chunk_resolution: str
         """
 
+        # create list for timeseries plot
+        self.timeseries_plot = []
+
         # skip making timeseries (points) for report and library mode
         # we do not apply this in the dashboard to avoid being unable to see the points on certain changes
         if ((self.read_instance.report) or (self.read_instance.library)) and ('hidedata' in plot_options):
@@ -658,9 +678,6 @@ class Plotting:
             # track plot elements if using dashboard 
             if (not self.read_instance.report) and (not self.read_instance.library):
                 self.track_plot_elements('ALL', 'timeseries', 'bias_line', [bias_line], bias=bias)
-
-        # create list for timeseries plot
-        self.timeseries_plot = []
 
         # iterate through data labels
         for data_label in cut_data_labels:
