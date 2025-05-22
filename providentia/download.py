@@ -265,8 +265,8 @@ class ProvidentiaDownload(object):
                             self.logger.error(error)
                             sys.exit(1)
 
-                # get orignal species back
-                self.species = main_species
+                    # get orignal species back
+                    self.species = main_species
 
             # when one of those symbols is passed, get all experiments
             if self.experiments == {'*' : '*'}:
