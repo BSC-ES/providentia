@@ -50,7 +50,7 @@ PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 settings_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/canvas_menus.yaml')))
 
 
-class MPLCanvas(FigureCanvas):
+class Canvas(FigureCanvas):
     """ Class that handles the creation and updates of
         a matplotlib canvas, and associated subplots.
     """
