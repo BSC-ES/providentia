@@ -347,9 +347,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                 left = xlim[0]
                 right = xlim[1]
 
-           
-            # get number of months and days
-            n_months = (12*(right.year - left.year) + (right.month - left.month))
+            # get number of days
             n_days = (right - left).days
 
             first_step = plot_characteristics['xtick_alteration']['first_step']
@@ -358,7 +356,7 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             overlap = plot_characteristics['xtick_alteration']['overlap']
 
             # if there's more than 3 months, define time slices as the first day of the month
-            if n_months >= 3:
+            if n_days >= 3 * 30:
 
                 # get the first and last days of each month
                 months_start = pd.date_range(left, right, freq='MS')
@@ -395,14 +393,28 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                 # add first step to xticks
                 if first_step and (xticks[0] != left):
                     xticks = np.insert(xticks, 0, left)
-            
-            #  if there's less than 3 months, define time slices as the result of the pandas data_range
+        
             else:
-                xticks = pd.date_range(left, right, periods=n_slices+1+int(first_step)+int(last_step))
+                # round up the limit hours to the whole hour
+                left = pd.to_datetime(left).ceil('H')   
+                right = pd.to_datetime(right).floor('H')
 
+                # set frequency to hourly when there's less than 7 days 
+                freq = 'h' if n_days < 7 else 'D'
+
+                # get all the dates in the frequency
+                steps = pd.date_range(left, right, freq=freq)  
+
+                # get n_periods dates from all_ticks
+                periods = n_slices + int(first_step) + int(last_step) + 1
+
+                # compute number of ticks to select, it can't exceed available steps
+                n_ticks = min(periods, len(steps))
+                xticks = steps[np.linspace(0, len(steps) - 1, n_ticks, dtype=int)]
+               
             # show hours if number of days is less than 7
             if n_days < 7:
-                ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d %H:%M'))
+                ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d %Hh'))
             else:
                 ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d'))
             
@@ -414,11 +426,14 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
             clip_left = mdates.date2num(left)
             clip_right = mdates.date2num(right)
 
+            # get the len of the original y axis
+            ylen = ax.get_ylim()[1] - ax.get_ylim()[0]
+
             # create the rectangle that will define the margin
             clip_rect = mpatches.Rectangle(
-                (clip_left, ax.get_ylim()[0]),
+                (clip_left, ax.get_ylim()[0] + ylen*0.05),
                 clip_right - clip_left,
-                ax.get_ylim()[1] - ax.get_ylim()[0],       
+                ylen * 0.9,       
                 transform=ax.transData
             )
 
