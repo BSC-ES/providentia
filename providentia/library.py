@@ -1406,8 +1406,8 @@ def download(config, **kwargs):
     provi.run()
     return provi
 
-def interpolate(config, **kwargs):
-    """ Wrapper function for initialising Interpolate class"""
+def interpolation(config, **kwargs):
+    """ Wrapper function for initialising Interpolation class"""
     from .interpolation import experiment_interpolation_submission as interpolation
     kwargs['config'] = config
     kwargs['interpolation'] = True
