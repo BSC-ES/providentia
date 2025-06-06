@@ -222,18 +222,15 @@ class Canvas(FigureCanvas):
         for data_label in self.read_instance.data_labels:
             self.plot_elements['data_labels_active'].append(data_label)
 
+        # add map domain plot option if on first read
+        if (self.read_instance.first_read) & ('domain' not in self.current_plot_options['map']):
+            self.current_plot_options['map'].append('domain')
+
+        # update legend
+        self.update_legend()
+
         # update plotted map z statistic
         self.update_map_z_statistic()
-
-        # plot domain edges on map and legend if have valid data
-        if len(self.active_map_valid_station_inds) > 0:
-
-            # add 'domain' to plot options
-            if 'domain' not in self.current_plot_options['map']:
-                self.current_plot_options['map'].append('domain')
-
-            # update legend
-            self.update_legend()
 
         # uncover map, but hide plotting axes
         self.canvas_cover.hide()
@@ -288,7 +285,7 @@ class Canvas(FigureCanvas):
 
         # return if nothing has been loaded yet
         if not hasattr(self.read_instance, 'data_in_memory'):
-            return
+            return None
 
         # update mouse cursor to a waiting cursor
         if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
@@ -309,11 +306,15 @@ class Canvas(FigureCanvas):
 
     def handle_resampling_update(self):
         """ Function which handles updates of resampling. """
-        
+
+        # return if nothing has been loaded yet
+        if not hasattr(self.read_instance, 'data_in_memory'):
+            return None
+
+        # update resampling resolution
+        self.read_instance.resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
+
         if not self.read_instance.block_MPL_canvas_updates:
-            
-            # update resampling resolution
-            self.read_instance.resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
 
             # remove timeseries chunk resolution if resampling resolution is lower or equal to chunk resolution
             chunk_resolution = self.timeseries_chunk_resolution.currentText()
@@ -468,71 +469,77 @@ class Canvas(FigureCanvas):
         """ Function that handles the update of the MPL canvas
             with colocated data upon checking of the temporal colocate checkbox.
         """
-
-        if not self.read_instance.block_MPL_canvas_updates:
             
-            # update mouse cursor to a waiting cursor
-            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.read_instance.cursor_function = 'handle_temporal_colocate_update'
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        # update mouse cursor to a waiting cursor
+        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+            self.read_instance.cursor_function = 'handle_temporal_colocate_update'
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-            # if only have < 2 data arrays in memory, no colocation is possible,
-            # therefore set colocation to be False, and return
-            invalid = False
-            if self.read_instance.data_labels is None:
-                invalid = True
-            elif len(self.read_instance.data_labels) == 1:
-                invalid = True
-            if invalid:
-                # msg = 'Load experiments before activating the temporal colocation'
-                # show_message(self.read_instance, msg)
-                self.read_instance.temporal_colocation = False
-                self.read_instance.block_MPL_canvas_updates = True
-                self.read_instance.ch_colocate.setCheckState(QtCore.Qt.Unchecked)
-                self.read_instance.block_MPL_canvas_updates = False
-                if self.read_instance.cursor_function == 'handle_temporal_colocate_update':
-                    QtWidgets.QApplication.restoreOverrideCursor()
-                return
+        # else, if have loaded experiment data, check if colocate checkbox is checked or unchecked
+        check_state = self.read_instance.ch_colocate.checkState()
 
-            # else, if have loaded experiment data, check if colocate checkbox is checked or unchecked
-            check_state = self.read_instance.ch_colocate.checkState()
-
-            # update variable to inform plotting functions whether to use colocated data/or not
-            if check_state == QtCore.Qt.Checked:
-                self.read_instance.temporal_colocation = True
+        # update variable to inform plotting functions whether to use colocated data/or not
+        # turn colocation on
+        if check_state == QtCore.Qt.Checked:
+            self.read_instance.temporal_colocation = True
+            # need to update plots?
+            if len(self.read_instance.data_labels) < 2:
+                if self.read_instance.temporal_colocation_active:
+                    update_plots = True
+                else:
+                    update_plots = False
+                self.read_instance.temporal_colocation_active = False
             else:
-                self.read_instance.temporal_colocation = False
+                if self.read_instance.temporal_colocation_active:
+                    update_plots = False
+                else:
+                    update_plots = True
+                self.read_instance.temporal_colocation_active = True
+        # turn colocation off
+        else:
+            self.read_instance.temporal_colocation = False
+            # need to update plots?
+            if self.read_instance.temporal_colocation_active:
+                update_plots = True
+            else:
+                update_plots = False
+            self.read_instance.temporal_colocation_active = False
 
-            # update map z statistic/ periodic statistic comboboxes (without updating canvas)
+        # update layout fields
+        self.read_instance.update_layout_fields(self)
+
+        # update canvas plots (if neccessary) 
+        if (update_plots) or (self.read_instance.performing_read):
             self.read_instance.block_MPL_canvas_updates = True
+            # update plot statistics
             self.handle_map_z_statistic_update()
             self.handle_timeseries_statistic_update()
+            self.handle_resampling_update()
             self.handle_timeseries_chunk_statistic_update()
             self.handle_periodic_statistic_update()
             self.handle_statsummary_statistics_update()
             self.handle_statsummary_cycle_update()
             self.handle_statsummary_periodic_aggregation_update()
             self.handle_statsummary_periodic_mode_update()
-            self.handle_fairmode_target_classification_update()
-
-            # self.handle_taylor_correlation_statistic_update()
+            if self.read_instance.temporal_colocation_active:
+                self.handle_taylor_correlation_statistic_update()
+                self.handle_fairmode_target_classification_update()
             self.read_instance.block_MPL_canvas_updates = False
 
-            # update layout fields
-            self.read_instance.update_layout_fields(self)
+            # if not performing read then update plots
+            if not self.read_instance.performing_read:
+                # update plotted map z statistic
+                self.update_map_z_statistic()
 
-            # update plotted map z statistic
-            self.update_map_z_statistic()
+                # update associated plots with selected stations
+                self.update_associated_active_dashboard_plots()
 
-            # update associated plots with selected stations
-            self.update_associated_active_dashboard_plots()
+                # draw changes
+                self.figure.canvas.draw_idle()
 
-            # draw changes
-            self.figure.canvas.draw_idle()
-
-            # restore mouse cursor to normal
-            if self.read_instance.cursor_function == 'handle_temporal_colocate_update':
-                QtWidgets.QApplication.restoreOverrideCursor()
+        # restore mouse cursor to normal
+        if self.read_instance.cursor_function == 'handle_temporal_colocate_update':
+            QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -887,6 +894,9 @@ class Canvas(FigureCanvas):
                 get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
                                           networkspecies=[self.read_instance.networkspeci])
 
+                # create dictionary of plots to disable
+                plots_to_disable = {}
+
                 # iterate through active_dashboard_plots
                 for plot_type in self.read_instance.active_dashboard_plots:
 
@@ -900,7 +910,7 @@ class Canvas(FigureCanvas):
                         (not self.read_instance.relevant_temporal_resolutions)):
                         msg = 'It is not possible to make periodic plots using annual resolution data.'
                         show_message(self.read_instance, msg)
-                        self.read_instance.handle_layout_update('None', sender=plot_type_position) 
+                        plots_to_disable[plot_type] = plot_type_position
                         continue
                     
                     # if temporal colocation is turned off or there are no experiments, skip scatter plot
@@ -912,7 +922,7 @@ class Canvas(FigureCanvas):
                             else:
                                 msg = f'It is not possible to make {plot_type} plots without loading experiments.'
                             show_message(self.read_instance, msg)
-                            self.read_instance.handle_layout_update('None', sender=plot_type_position)
+                            plots_to_disable[plot_type] = plot_type_position
                             continue
                     
                     if plot_type in ['fairmode-target', 'fairmode-statsummary']:
@@ -920,17 +930,21 @@ class Canvas(FigureCanvas):
                         if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
                             msg = f'Fairmode target plot cannot be created for {speci}.'
                             show_message(self.read_instance, msg)
-                            self.read_instance.handle_layout_update('None', sender=plot_type_position)
+                            plots_to_disable[plot_type] = plot_type_position
                             continue
                         if ((speci in ['sconco3', 'sconcno2'] and self.read_instance.resolution != 'hourly') 
                             or (speci in ['pm10', 'pm2p5'] and (self.read_instance.resolution not in ['hourly', 'daily']))):
                             msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
                             show_message(self.read_instance, msg)
-                            self.read_instance.handle_layout_update('None', sender=plot_type_position)
+                            plots_to_disable[plot_type] = plot_type_position
                             continue
                 
                     # update plot
                     self.update_associated_active_dashboard_plot(plot_type)
+
+                # disable relevant plots
+                for plot_type, plot_type_position in plots_to_disable.items():
+                    self.read_instance.handle_layout_update('None', sender=plot_type_position)
 
                 # un-hide plotting axes
                 self.top_right_canvas_cover.hide() 
@@ -1498,39 +1512,6 @@ class Canvas(FigureCanvas):
 
             # restore mouse cursor to normal
             if self.read_instance.cursor_function == 'handle_fairmode_target_classification_update':
-                QtWidgets.QApplication.restoreOverrideCursor()
-
-        return None
-    
-    # TODO CHANGE
-    def handle_fairmode_statsummary_classification_update(self):
-
-        if not self.read_instance.block_config_bar_handling_updates:
-
-            # update mouse cursor to a waiting cursor
-            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.read_instance.cursor_function = 'handle_fairmode_statsummary_classification_update'
-                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-
-            # set variable that blocks configuration bar handling updates until all changes
-            # to the classification combobox are made
-            self.read_instance.block_config_bar_handling_updates = True
-
-            # update classification type
-            self.plot_characteristics['fairmode-statsummary']['markers']['type'] = self.fairmode_target_classification.currentText()
-            
-            # allow handling updates to the configuration bar again
-            self.read_instance.block_config_bar_handling_updates = False
-
-            # update FAIRMODE target plot
-            if not self.read_instance.block_MPL_canvas_updates:
-                self.update_associated_active_dashboard_plot('fairmode-statsummary')
-
-            # draw changes
-            self.figure.canvas.draw_idle()
-
-            # restore mouse cursor to normal
-            if self.read_instance.cursor_function == 'handle_fairmode_statsummary_classification_update':
                 QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
@@ -2600,9 +2581,9 @@ class Canvas(FigureCanvas):
                     index = orig_plot_options.index(option)
 
                     # if any option other than domain is selected
-                    if 'domain' not in self.current_plot_options[plot_type]:
-
-                        # return if do not have selected station_station_data in memory, then no data has been read
+                    if len([option for option in self.current_plot_options[plot_type] if option != 'domain']) >= 1: 
+                    
+                        # return if do not have selected station_station_data in memory, then no data plotted yet
                         if not hasattr(self, 'selected_station_data'):
                             msg = 'Select at least one station in the plot to apply options.'
                             show_message(self.read_instance, msg)
