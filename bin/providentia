@@ -149,7 +149,7 @@ notebook_alloc_command="sbatch -t $time -c $cores -J $jobname"
 script_dir=$(dirname $(realpath $(dirname $0)))
 
 # use python 3 if not in windows
-if [[ "${OS}" =~ "Windows" ]] ; then 
+if [[ "${OS}" != "Windows" ]] ; then 
     python_ver="3"
 fi
 
