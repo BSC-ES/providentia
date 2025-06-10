@@ -654,11 +654,13 @@ class Dashboard(QtWidgets.QWidget):
             else:
                 self.ch_colocate.setCheckState(QtCore.Qt.Unchecked)
 
-            # set initial time array, yearmonths and data_labels to be None 
+            # set some intital variables to be None 
             self.time_array = None
             self.yearmonths = None
-            self.data_labels = None
-            self.data_labels_raw = None
+            self.data_labels = []
+            self.data_labels_raw = []
+            self.performing_read = False
+            self.networkspeci = None
 
             # set initial station references to be empty dict
             self.station_references = {}
@@ -1240,7 +1242,8 @@ class Dashboard(QtWidgets.QWidget):
 
         # set variable that blocks updating of MPL canvas until all data has been updated
         self.block_MPL_canvas_updates = True
-        
+        self.performing_read = True
+
         # set previous active variables
         self.previous_start_date = self.start_date
         self.previous_end_date = self.end_date
@@ -1438,32 +1441,8 @@ class Dashboard(QtWidgets.QWidget):
                 self.z1_arrays = np.array(self.data_labels)
             self.z2_arrays = np.append([''], self.z1_arrays)
 
-            # update map z statistic comboboxes
-            self.mpl_canvas.handle_map_z_statistic_update()
-
-            # update timeseries statistic combobox
-            self.mpl_canvas.handle_timeseries_statistic_update()
-
-            # update resampling resolution
-            self.mpl_canvas.handle_resampling_update()
-            
-            # update timeseries chunk statistic and resolution comboboxes
-            self.mpl_canvas.handle_timeseries_chunk_statistic_update()
-
-            # update periodic statistic combobox
-            self.mpl_canvas.handle_periodic_statistic_update()
-
-            # update taylor diagram statistic combobox
-            self.mpl_canvas.handle_taylor_correlation_statistic_update()
-
-            # update statsummary statistic comboboxes
-            self.mpl_canvas.handle_statsummary_statistics_update()
-            self.mpl_canvas.handle_statsummary_cycle_update()
-            self.mpl_canvas.handle_statsummary_periodic_aggregation_update()
-            self.mpl_canvas.handle_statsummary_periodic_mode_update()
-
-            # update fairmode target combobox
-            self.mpl_canvas.handle_fairmode_target_classification_update()
+            # update temporal colocation
+            self.mpl_canvas.handle_temporal_colocate_update()
 
             # unselect all/intersect/extent checkboxes
             self.mpl_canvas.unselect_map_checkboxes()
@@ -1475,20 +1454,20 @@ class Dashboard(QtWidgets.QWidget):
             self.mpl_canvas.update_MPL_canvas()
 
             # if first read, then set this now to be False
-            # also, if colocate checkbox is ticked, then apply temporal colocation
             if self.first_read:
                 self.first_read = False
-                if self.ch_colocate.checkState() == QtCore.Qt.Checked:
-                    self.mpl_canvas.handle_temporal_colocate_update()
 
         # restore mouse cursor to normal
         if self.cursor_function == 'handle_data_selection_update':
             QtWidgets.QApplication.restoreOverrideCursor()
 
+        self.performing_read = False
+
     def reset_options(self):
         """ Reset all filter fields to initial values. """
 
-        if self.block_MPL_canvas_updates:
+        # return if canvas updates blocked or not yet read data
+        if (self.block_MPL_canvas_updates) or (not hasattr(self, 'reading_ghost')):
             return
 
         # set mouse cursor to hourglass

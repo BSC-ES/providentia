@@ -294,9 +294,9 @@
       "plot": { "zorder": 3, "linewidth": 0.0, "alpha": null },
       "axis_title": { "label": "" },
       "land_polygon": { "facecolor": "0.85" },
-      "plot_options": ["bias", "obs", "annotate", "domain"],
       "dashboard":
         {
+          "plot_options": ["annotate", "domain"],
           "land_polygon": { "edgecolor": null },
           "base_scale": 1.3,
           "gridlines": { "auto_update": false },
@@ -325,6 +325,7 @@
         },
       "report":
         {
+          "plot_options": ["annotate", "bias", "domain", "obs"],
           "orientation": "landscape",
           "figure": { "ncols": 2, "nrows": 2 },
           "page_title":
@@ -360,6 +361,7 @@
         },
       "library":
         {
+          "plot_options": ["annotate", "domain"],
           "figsize": [14, 7],
           "subplots_adjust":
             {
@@ -475,20 +477,10 @@
           "mew": 0,
           "linestyle": "None",
         },
-      "plot_options":
-        [
-          "bias",
-          "obs",
-          "individual",
-          "annotate",
-          "smooth",
-          "logy",
-          "hidedata",
-          "threshold",
-        ],
       "legend": { "handles": { "marker": "o", "color": "white" } },
       "dashboard":
         {
+          "plot_options": ["annotate", "bias", "hidedata", "logy", "smooth", "threshold"],
           "remove_spines": ["top", "right"],
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "xlabel": { "fontsize": 8 },
@@ -503,6 +495,7 @@
         },
       "report":
         {
+          "plot_options": ["annotate", "bias", "hidedata", "individual", "logy", "obs", "smooth", "threshold"],
           "orientation": "landscape",
           "figure": { "ncols": 1, "nrows": 2 },
           "page_title":
@@ -548,6 +541,7 @@
         },
       "library":
         {
+          "plot_options": ["annotate", "bias", "hidedata", "logy", "smooth", "threshold"],
           "figsize": [17, 6],
           "subplots_adjust":
             {
@@ -645,10 +639,9 @@
       "xtick_params": { "which": "both" },
       "ytick_params": { "which": "both" },
       "plot": { "marker": "o" },
-      "plot_options":
-        ["bias", "obs", "individual", "annotate", "logy", "threshold"],
       "dashboard":
         {
+          "plot_options": ["annotate", "bias", "logy", "threshold"],
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "label": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
@@ -660,6 +653,7 @@
         },
       "report":
         {
+          "plot_options": ["annotate", "bias", "individual", "logy", "obs", "threshold"],
           "orientation": "landscape",
           "figure": { "ncols": 2, "nrows": 2 },
           "page_title":
@@ -700,6 +694,7 @@
         },
       "library":
         {
+          "plot_options": ["annotate", "bias", "logy", "threshold"],
           "figsize": [13, 7],
           "subplots_adjust":
             {
@@ -784,9 +779,9 @@
       "ylabel": { "ylabel": "[measurement_units]" },
       "xtick_params": { "which": "both" },
       "ytick_params": { "which": "both" },
-      "plot_options": ["obs", "individual", "annotate", "logy", "threshold"],
       "dashboard":
         {
+          "plot_options": ["annotate", "logy", "threshold"],
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "label": { "fontsize": 8 },
           "ylabel": { "fontsize": 8 },
@@ -802,6 +797,7 @@
         },
       "report":
         {
+          "plot_options": ["annotate", "individual", "logy", "obs", "threshold"],
           "orientation": "landscape",
           "figure": { "ncols": 2, "nrows": 2 },
           "page_title":
@@ -849,6 +845,7 @@
         },
       "library":
         {
+          "plot_options": ["annotate", "logy", "threshold"],
           "figsize": [13, 7],
           "subplots_adjust":
             {
@@ -970,10 +967,9 @@
           "labelright": false,
           "labelleft": true,
         },
-      "plot_options":
-        ["bias", "obs", "individual", "annotate", "logx", "logy", "threshold"],
       "dashboard":
         {
+          "plot_options": ["annotate", "bias", "logx", "logy", "threshold"],
           "remove_spines": ["top", "right"],
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "xlabel": { "fontsize": 8 },
@@ -986,6 +982,7 @@
         },
       "report":
         {
+          "plot_options": ["annotate", "bias", "individual", "logx", "logy", "obs", "threshold"],
           "orientation": "landscape",
           "figure": { "ncols": 2, "nrows": 3 },
           "page_title":
@@ -1029,6 +1026,7 @@
         },
       "library":
         {
+          "plot_options": ["annotate", "bias", "logx", "logy", "threshold"],
           "figsize": [13, 7],
           "subplots_adjust":
             {
@@ -1125,18 +1123,9 @@
           "labelleft": true,
         },
       "plot": { "marker": "o", "linestyle": "None" },
-      "plot_options":
-        [
-          "individual",
-          "annotate",
-          "regression",
-          "logx",
-          "logy",
-          "hidedata",
-          "threshold",
-        ],
       "dashboard":
         {
+          "plot_options": ["annotate", "hidedata", "logx", "logy", "regression", "threshold"],
           "remove_spines": ["top", "right"],
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "xlabel": { "fontsize": 8 },
@@ -1150,6 +1139,7 @@
         },
       "report":
         {
+          "plot_options": ["annotate", "hidedata", "individual", "logx", "logy", "regression", "threshold"],
           "orientation": "portrait",
           "figure": { "ncols": 1, "nrows": 2 },
           "page_title":
@@ -1196,6 +1186,7 @@
         },
       "library":
         {
+          "plot_options": ["annotate", "hidedata", "logx", "logy", "regression", "threshold"],
           "figsize": [5, 5],
           "subplots_adjust":
             {
@@ -1273,22 +1264,10 @@
       "xlabel": { "xlabel": "" },
       "ylabel": { "ylabel": "[measurement_units]" },
       "xtick_params": { "rotation": 45 },
-      "plot_options":
-        [
-          "obs",
-          "individual",
-          "annotate",
-          "logy",
-          "multispecies",
-          "threshold",
-          "normmedian",
-          "normmean",
-          "normmin",
-          "normmax",
-          "normsum",
-        ],
       "dashboard":
         {
+          "plot_options": ["annotate", "logy", "threshold"],
+          #"plot_options": ["annotate", "logy", "normmedian", "normmean", "normmin", "normmax", "normsum", "threshold"],
           "remove_spines": ["top", "right"],
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "xlabel": { "fontsize": 8 },
@@ -1299,6 +1278,8 @@
         },
       "report":
         {
+          "plot_options": ["annotate", "individual", "logy", "multispecies", "obs", "threshold"],
+          #"plot_options": ["annotate", "individual", "logy", "multispecies", "normmedian", "normmean", "normmin", "normmax", "normsum", "obs", "threshold"],
           "orientation": "landscape",
           "figure": { "ncols": 2, "nrows": 2 },
           "page_title":
@@ -1341,6 +1322,8 @@
         },
       "library":
         {
+          "plot_options": ["annotate", "logy", "multispecies", "threshold"],
+          #"plot_options": ["annotate", "logy", "multispecies", "normmedian", "normmean", "normmin", "normmax", "normsum", "threshold"],
           "figsize": [13, 7],
           "subplots_adjust":
             {
@@ -1425,9 +1408,9 @@
           "n_discrete": 15,
         },
       "cb_label": { "label": "" },
-      "plot_options": ["bias", "annotate", "multispecies"],
       "dashboard":
         {
+          "plot_options": ["annotate", "bias"],
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "xtick_params": { "labelsize": 7 },
           "ytick_params": { "labelsize": 7 },
@@ -1440,6 +1423,7 @@
         },
       "report":
         {
+          "plot_options": ["annotate", "bias", "multispecies"],
           "orientation": "portrait",
           "figure": { "ncols": 1, "nrows": 1 },
           "page_title":
@@ -1477,6 +1461,7 @@
         },
       "library":
         {
+          "plot_options": ["annotate", "bias", "multispecies"],
           "figsize": [13, 7],
           "subplots_adjust":
             {
@@ -1549,9 +1534,9 @@
           "labelleft": false,
         },
       "axis_title": { "label": "" },
-      "plot_options": ["bias", "multispecies"],
       "dashboard":
         {
+          "plot_options": ["bias"],
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "cell_height": 1.3,
           "fontsize": 8.0,
@@ -1565,6 +1550,7 @@
         },
       "report":
         {
+          "plot_options": ["bias", "multispecies"],
           "orientation": "portrait",
           "figure": { "ncols": 1, "nrows": 1 },
           "page_title":
@@ -1611,6 +1597,7 @@
         },
       "library":
         {
+          "plot_options": ["bias", "multispecies"],
           "figsize": [13, 7],
           "subplots_adjust":
             {
@@ -1677,9 +1664,9 @@
           "labelleft": false,
         },
       "axis_title": { "label": "" },
-      "plot_options": ["bias", "multispecies"],
       "dashboard":
         {
+          "plot_options": ["bias"],
           "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
           "experiment_bias":
             ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
@@ -1696,6 +1683,7 @@
         },
       "report":
         {
+          "plot_options": ["bias", "multispecies"],
           "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
           "experiment_bias":
             ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
@@ -1740,6 +1728,7 @@
         },
       "library":
         {
+          "plot_options": ["bias", "multispecies"],
           "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
           "experiment_bias":
             ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
@@ -1863,9 +1852,9 @@
         },
       "axis_title": { "label": "" },
       "plot": { "marker": "o", "linestyle": "None" },
-      "plot_options": ["annotate", "individual"],
       "dashboard":
         {
+          "plot_options": ["annotate"],
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "xylabel": { "fontsize": 8 },
           "rlabel": { "fontsize": 8 },
@@ -1877,6 +1866,7 @@
         },
       "report":
         {
+          "plot_options": ["annotate", "individual"],
           "orientation": "portrait",
           "figure": { "ncols": 2, "nrows": 3 },
           "page_title":
@@ -1920,6 +1910,7 @@
         },
       "library":
         {
+          "plot_options": ["annotate"],
           "figsize": [5, 5],
           "subplots_adjust":
             {
@@ -2114,9 +2105,9 @@
           "labelleft": true,
         },
       "plot": { "markerfacecolor": "None", "linestyle": "None" },
-      "plot_options": ["individual", "annotate"],
       "dashboard":
         {
+          "plot_options": ["annotate"],
           "remove_spines": ["top", "right"],
           "axis_title": { "fontsize": 8.5, "loc": "center" },
           "xlabel": { "fontsize": 8 },
@@ -2129,6 +2120,7 @@
         },
       "report":
         {
+          "plot_options": ["annotate", "individual"],
           "orientation": "portrait",
           "figure": { "ncols": 1, "nrows": 2 },
           "page_title":
@@ -2163,6 +2155,7 @@
         },
       "library":
         {
+          "plot_options": ["annotate"],
           "figsize": [5, 5],
           "subplots_adjust":
             {
@@ -2358,9 +2351,9 @@
           "station_dots": { "marker": "o", "color": "#1111ff" },
           "separator_text": "----------------------------------------------",
         },
-      "plot_options": ["individual"],
       "dashboard":
         {
+          "plot_options": [],
           "marker_annotate_rounding": 2,
           "auxiliar":
             {
@@ -2376,6 +2369,7 @@
         },
       "report":
         {
+          "plot_options": ["individual"],
           "orientation": "landscape",
           "subplots_adjust": { "left": 0.25, "top": 0.85 },
           "figure": { "nrows": 1, "ncols": 1 },
@@ -2417,6 +2411,7 @@
         },
       "library":
         {
+          "plot_options": [],
           "figsize": [10, 5],
           "subplots_adjust": { "left": 0.3 },
           "legend":
