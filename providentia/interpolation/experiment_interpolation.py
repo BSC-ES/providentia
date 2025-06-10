@@ -191,13 +191,21 @@ class ExperimentInterpolation(object):
 
                 # get instance of species variable
                 mod_speci_obj = mod_nc_root[self.speci_to_process]
-    
+
                 # get species units
-                self.mod_speci_units = mod_speci_obj.units
-                 
+                if hasattr(mod_speci_obj, 'units'):
+                    self.mod_speci_units = mod_speci_obj.units
+                else:
+                    self.log_file_str += f"Missing 'units' attribute for variable '{self.speci_to_process}' in file {model_file}\n"
+                    continue
+
                 # get model grid type
-                self.mod_grid_type = mod_speci_obj.grid_mapping
-        
+                if hasattr(mod_speci_obj, 'grid_mapping'):
+                    self.mod_grid_type = mod_speci_obj.grid_mapping
+                else:
+                    self.log_file_str += f"Missing 'grid_mapping' attribute for variable '{self.speci_to_process}' in file {model_file}\n"
+                    continue
+
                 # get x/y grid dimension variable names
                 grid_dimensions = mod_speci_obj.dimensions
 
@@ -212,6 +220,7 @@ class ExperimentInterpolation(object):
                     create_output_logfile(1, self.log_file_str)
                 # else, continue to next file in month
                 else:
+                    self.log_file_str += f"File {model_file} failed with error: {e}. Trying to read next file.\n"
                     continue 
 
             # get indivudual dimension variable names  
