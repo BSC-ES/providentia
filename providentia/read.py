@@ -65,15 +65,15 @@ class DataReader:
                 msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots. '
                 msg += 'Plots will only be created when period is longer than 2 timesteps.'
                 show_message(self.read_instance, msg)
-                if (self.read_instance.from_conf) and (not self.read_instance.offline) and (not self.read_instance.interactive):
+                if (self.read_instance.from_conf) and (not self.read_instance.report) and (not self.read_instance.library):
                     error = 'Error: Providentia will not be launched.'
                     self.read_instance.logger.error(error)
                     sys.exit(1) 
-                elif (self.read_instance.offline):
-                    error = 'Error: Offline report will not be created.'
+                elif (self.read_instance.report):
+                    error = 'Error: Report will not be created.'
                     self.read_instance.logger.error(error)
                     sys.exit(1) 
-                elif (self.read_instance.interactive):
+                elif (self.read_instance.library):
                     error = 'Error: Data cannot be read.'
                     self.read_instance.logger.error(error)
                     sys.exit(1) 
@@ -142,7 +142,7 @@ class DataReader:
         if 'reset' in operations:  
 
             # uninitialise filter object
-            if (not self.read_instance.offline) and (not self.read_instance.interactive):
+            if (not self.read_instance.report) and (not self.read_instance.library):
                 self.read_instance.mpl_canvas.filter_data = None
 
             # data
@@ -230,7 +230,7 @@ class DataReader:
                     # delete from instance all invalid fields from the configuration file
                     for section_invalid_fields in self.read_instance.invalid_fields.values():
                         for k in section_invalid_fields:
-                            # control if the atribute exists because in offline mode the subsection ones are not set yet
+                            # control if the atribute exists because in report mode the subsection ones are not set yet
                             if hasattr(self.read_instance, k):
                                 delattr(self.read_instance, k)                 
 
@@ -774,13 +774,13 @@ class DataReader:
         # create arrays to share across processes (for parallel multiprocessing use)
         # this only works for numerical dtypes, i.e. not strings
         timestamp_array_shared = multiprocessing.RawArray(ctypes.c_int64, len(self.read_instance.timestamp_array))
-        if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels):
+        if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):
             flags_shared = multiprocessing.RawArray(ctypes.c_uint8, len(self.read_instance.flags))
         else:
             flags_shared = None
         # fill arrays
         timestamp_array_shared[:] = self.read_instance.timestamp_array
-        if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels):
+        if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):
             flags_shared[:] = self.read_instance.flags
 
         # create dictionary for saving files to read
@@ -872,7 +872,7 @@ class DataReader:
             else:
                 data_in_memory_shared_shape = (1, len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
             data_in_memory_shared = multiprocessing.RawArray(ctypes.c_float, data_in_memory_shared_shape[0] * data_in_memory_shared_shape[1] * data_in_memory_shared_shape[2])  
-            if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels):
+            if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):
                 qa_shared = multiprocessing.RawArray(ctypes.c_uint8, len(self.read_instance.qa_per_species[speci]))
                 if not filter_read:
                     ghost_data_in_memory_shared_shape = (len(self.read_instance.ghost_data_vars_to_read), len(self.read_instance.station_references[networkspeci]), len(self.read_instance.time_array))
@@ -896,11 +896,13 @@ class DataReader:
                 np.copyto(data_in_memory_shared_np, self.read_instance.data_in_memory[networkspeci][data_label_indices, :, :])
             else:
                 np.copyto(data_in_memory_shared_np, self.read_instance.filter_data_in_memory[networkspeci][:, :])
-            if (self.read_instance.reading_ghost) & (self.read_instance.observations_data_label in data_labels):      
+            
+            if (self.read_instance.reading_ghost or self.read_instance.network[0] == 'actris/actris') & (self.read_instance.observations_data_label in data_labels):      
                 qa_shared[:] = self.read_instance.qa_per_species[speci]
-                if not filter_read:
-                    np.copyto(ghost_data_in_memory_shared_np, self.read_instance.ghost_data_in_memory[networkspeci])  
-
+                if (self.read_instance.reading_ghost):      
+                    if not filter_read:
+                        np.copyto(ghost_data_in_memory_shared_np, self.read_instance.ghost_data_in_memory[networkspeci])  
+            
             # iterate and read species data in all relevant netCDF files (either in serial/parallel)
 
             # read data in parallel
@@ -913,7 +915,8 @@ class DataReader:
             tuple_argument_fields = ['filename', 'station_references', 'station_names', 'speci', 
                                      'observations_data_label', 'data_label', 'data_labels', 
                                      'reading_ghost', 'ghost_data_vars_to_read', 
-                                     'metadata_dtype', 'metadata_vars_to_read', 'default_qa_active', 'filter_read']
+                                     'metadata_dtype', 'metadata_vars_to_read', 'default_qa_active', 'filter_read', 
+                                     'network']
             tuple_arguments = []
 
             for data_label in self.files_to_read[networkspeci]:
@@ -926,7 +929,8 @@ class DataReader:
                                             self.read_instance.metadata_dtype, 
                                             self.read_instance.metadata_vars_to_read,
                                             self.read_instance.logger,
-                                            default_qa_active, filter_read))
+                                            default_qa_active, filter_read, 
+                                            self.read_instance.network[0]))
   
             returned_data = pool.map(read_netcdf_data, tuple_arguments)
 

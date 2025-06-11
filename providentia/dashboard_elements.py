@@ -1,6 +1,6 @@
 """ Functions to create and format PyQT elements"""
 
-
+import copy
 from functools import partial
 import json
 import os
@@ -24,82 +24,81 @@ elif operating_system in ['Windows','MINGW32_NT','MINGW64_NT']:
     formatting_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/stylesheet_windows.yaml')))
 
 
-def set_formatting(PyQt5_obj, format):
+def set_formatting(PyQt5_obj, format, valid_obj=None, disabled=False, extra_arguments={}):
     """ Function that takes a PyQt5 object and applies some defined formatting. """
 
     # initialise style
-    defined_style = ""
+    full_defined_style = ""
 
     # iterate through formatting dictionary and apply defined font modifiers/object formatting values
-    for format_name, format_val in format.items():
-        if format_name == 'font':
-            
-            defined_font = QtGui.QFont(format['font']['style'], int(format['font']['size']))
+    for obj_type in format:
 
-            if 'bold' in format[format_name].keys():
-                defined_font.setBold(format['font']['bold'])
-            
-            if 'italic' in format[format_name].keys():
-                defined_font.setItalic(format['font']['italic'])
+        if valid_obj:
+            if obj_type not in valid_obj:
+                continue
 
-            if 'underline' in format[format_name].keys():
-                defined_font.setUnderline(format['font']['underline'])
-
-            PyQt5_obj.setFont(defined_font)
-
-            if hasattr(PyQt5_obj, 'lineEdit'):
-                PyQt5_obj.lineEdit().setFont(defined_font)
-
-        elif format_name == 'height':
-            PyQt5_obj.setFixedHeight(format_val)
-
-        elif format_name == 'width':
-            PyQt5_obj.setFixedWidth(format_val)
-
-        elif format_name == 'min_height':
-            PyQt5_obj.setMinimumHeight(format_val)
-
-        elif format_name == 'min_width':
-            PyQt5_obj.setMinimumWidth(format_val)
-
-        elif format_name == 'max_height':
-            PyQt5_obj.setMaximumHeight(format_val)
-
-        elif format_name == 'max_width':
-            PyQt5_obj.setMaximumWidth(format_val)
-
-        elif format_name == 'color':
-            defined_style += "color: {};".format(format_val)
-
-        elif format_name == 'background-color':
-            defined_style += "background-color: {};".format(format_val)
-
-        elif format_name == 'selection-color':
-            defined_style += "selection-color: {};".format(format_val)
-
-        elif format_name == 'selection-background-color':
-            defined_style += "selection-background-color: {};".format(format_val)
-
-        elif format_name == 'border':
-            if format_val is not None:
-                defined_style += "border: {}px solid {};".format(format['border']['size'], 
-                                                                 format['border']['colour'])
+        if len(extra_arguments) > 0:
+            if obj_type in extra_arguments:
+                cut_extra_arguments = extra_arguments[obj_type]
             else:
-                defined_style += "border: None;"
+                cut_extra_arguments = copy.deepcopy(extra_arguments)
+        else:
+            cut_extra_arguments = {}
 
-        elif format_name == 'border-radius':
-            defined_style += "border-radius: {}px;".format(format_val)
+        defined_style = ""
 
-        elif format_name == 'padding':
-            defined_style += "padding: {}px;".format(format_val)
+        for format_name, format_val in format[obj_type].items():
+
+            if format_name in cut_extra_arguments:
+                format_val = cut_extra_arguments[format_name]
+                del cut_extra_arguments[format_name]
+
+            if format_name == 'height':
+                 PyQt5_obj.setFixedHeight(int(format_val))
+            elif format_name == 'width':
+                 PyQt5_obj.setFixedWidth(int(format_val))
+            elif format_name == 'min-height':
+                 PyQt5_obj.setMinimumHeight(int(format_val))
+            elif format_name == 'min-width':
+                 PyQt5_obj.setMinimumWidth(int(format_val))
+            elif format_name == 'max-height':
+                 PyQt5_obj.setMaximumHeight(int(format_val))
+            elif format_name == 'max-width':
+                 PyQt5_obj.setMaximumWidth(int(format_val))
+            else:
+                defined_style += "{}: {};".format(format_name, format_val)
+
+        # have remaining extra arguments to add?
+        if len(cut_extra_arguments) > 0:
+            for format_name, format_val in cut_extra_arguments.items():
+                if format_name == 'height':
+                    PyQt5_obj.setFixedHeight(int(format_val))
+                elif format_name == 'width':
+                    PyQt5_obj.setFixedWidth(int(format_val))
+                elif format_name == 'min-height':
+                    PyQt5_obj.setMinimumHeight(int(format_val))
+                elif format_name == 'min-width':
+                    PyQt5_obj.setMinimumWidth(int(format_val))
+                elif format_name == 'max-height':
+                    PyQt5_obj.setMaximumHeight(int(format_val))
+                elif format_name == 'max-width':
+                    PyQt5_obj.setMaximumWidth(int(format_val))
+                else:
+                    defined_style += "{}: {};".format(format_name, format_val)
+
+        if disabled:
+            defined_style = "{}:disabled {{ {} }} ".format(obj_type, defined_style)
+        else:
+            defined_style = "{} {{ {} }} ".format(obj_type, defined_style)
+        full_defined_style += defined_style
 
     # apply style sheet
-    PyQt5_obj.setStyleSheet(defined_style)
+    PyQt5_obj.setStyleSheet(full_defined_style)
 
     return PyQt5_obj
 
 
-def wrap_tooltip_text(tooltip_text, max_width):
+def wrap_tooltip_text(tooltip_text, max_width, format_type):
     """ Function which takes the text for a tooltip and wraps it by the screen pixel width.
         It does this by estimating the pixel width of the tooltip text (as formatted),
         and then gets the ratio exceedance over the screen pixel width.
@@ -108,7 +107,7 @@ def wrap_tooltip_text(tooltip_text, max_width):
         (i.e. the part of the text which first exceeds the screen pixel width).
     """
 
-    tooltip_label = set_formatting(QtWidgets.QLabel(text=tooltip_text), formatting_dict['tooltip'])
+    tooltip_label = set_formatting(QtWidgets.QLabel(text=tooltip_text), formatting_dict[format_type], valid_obj=['QToolTip'])
     tooltip_width = tooltip_label.fontMetrics().boundingRect(tooltip_label.text()).width()
     if tooltip_width > max_width:
         ratio = tooltip_width/max_width
@@ -393,7 +392,7 @@ class MessageBox(QtWidgets.QWidget):
         msg_box.setText(msg)
 
         # add ok button
-        ok_button = set_formatting(QtWidgets.QPushButton("OK"), formatting_dict['button_popup'])
+        ok_button = set_formatting(QtWidgets.QPushButton("OK"), formatting_dict['popup_button'])
         msg_box.addButton(ok_button, QtWidgets.QMessageBox.AcceptRole)
 
         # create wrapper to center

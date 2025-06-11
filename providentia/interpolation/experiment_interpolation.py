@@ -51,6 +51,8 @@ class ExperimentInterpolation(object):
         
         self.log_file_str = 'STARTING INTERPOLATION\n'
 
+        self.log_file_str += str(submit_args)
+
         # set variables from input keywords
         self.model_temporal_resolution            = submit_args['model_temporal_resolution']
         self.speci_to_process                     = submit_args['speci_to_process']
@@ -189,13 +191,21 @@ class ExperimentInterpolation(object):
 
                 # get instance of species variable
                 mod_speci_obj = mod_nc_root[self.speci_to_process]
-    
+
                 # get species units
-                self.mod_speci_units = mod_speci_obj.units
-                 
+                if hasattr(mod_speci_obj, 'units'):
+                    self.mod_speci_units = mod_speci_obj.units
+                else:
+                    self.log_file_str += f"Missing 'units' attribute for variable '{self.speci_to_process}' in file {model_file}\n"
+                    continue
+
                 # get model grid type
-                self.mod_grid_type = mod_speci_obj.grid_mapping
-        
+                if hasattr(mod_speci_obj, 'grid_mapping'):
+                    self.mod_grid_type = mod_speci_obj.grid_mapping
+                else:
+                    self.log_file_str += f"Missing 'grid_mapping' attribute for variable '{self.speci_to_process}' in file {model_file}\n"
+                    continue
+
                 # get x/y grid dimension variable names
                 grid_dimensions = mod_speci_obj.dimensions
 
@@ -210,6 +220,7 @@ class ExperimentInterpolation(object):
                     create_output_logfile(1, self.log_file_str)
                 # else, continue to next file in month
                 else:
+                    self.log_file_str += f"File {model_file} failed with error: {e}. Trying to read next file.\n"
                     continue 
 
             # get indivudual dimension variable names  
@@ -336,9 +347,6 @@ class ExperimentInterpolation(object):
             self.mod_speci_units = self.standard_parameter_speci['standard_units']
 
     def create_grid_domain_edge_polygon(self):
-
-        print("enters create_grid_domain_edge_polygon",self.yearmonth)
-
         """ Create grid domain edge polygon from model netCDF file.
             This is handled differently for regular grids (i.e. following lines of longitude/latitude), 
             and non-regular grids (e.g. lambert-conformal).
@@ -736,7 +744,7 @@ class ExperimentInterpolation(object):
                         file_time_dt = pd.to_datetime([t.replace(microsecond=0) for t in file_time_dt])
                     else:
                         # bug fix for newer versions of cftime
-                        file_time_dt = file_time_dt.astype('datetime64[ns]')
+                        file_time_dt = file_time_dt.astype('datetime64[s]')
                         file_time_dt = pd.to_datetime([t for t in file_time_dt])
 
                 # get file start and end datetime

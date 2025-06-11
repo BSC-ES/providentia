@@ -19,7 +19,7 @@ import numpy as np
 from packaging.version import Version
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
-from PyQt5 import QtCore, QtWidgets 
+from PyQt5 import QtCore, QtWidgets
 from weakref import WeakKeyDictionary
 
 from .calculate import Stats, ExpBias
@@ -29,7 +29,7 @@ from .dashboard_elements import set_formatting
 from .dashboard_interactivity import HoverAnnotation
 from .dashboard_interactivity import legend_picker_func, picker_block_func, zoom_map_func
 from .filter import DataFilter
-from .plot import Plot
+from .plotting import Plotting
 from .plot_aux import get_map_extent
 from .plot_formatting import format_axis, harmonise_xy_lims_paradigm, log_validity, set_axis_label, set_axis_title
 from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
@@ -50,7 +50,7 @@ PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 settings_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/canvas_menus.yaml')))
 
 
-class MPLCanvas(FigureCanvas):
+class Canvas(FigureCanvas):
     """ Class that handles the creation and updates of
         a matplotlib canvas, and associated subplots.
     """
@@ -76,17 +76,8 @@ class MPLCanvas(FigureCanvas):
         # initialise some key vars
         self.filter_data = None
 
-        # initialise Plot class
-        self.plot = Plot(read_instance=self.read_instance, canvas_instance=self)
-
-        # initialise annotations
-        self.annotations = dict()
-        self.annotations_lock = dict()
-        self.annotations_vline = dict()
-        for plot_type in ['periodic', 'periodic-violin']:
-            self.annotations[plot_type] = dict()
-            self.annotations_lock[plot_type] = dict()
-            self.annotations_vline[plot_type] = dict()
+        # initialise Plotting class
+        self.plotting = Plotting(read_instance=self.read_instance, canvas_instance=self)
 
         # setup gridding of canvas
         self.gridspec = gridspec.GridSpec(self.gridspec_nrows, self.gridspec_ncols)
@@ -138,9 +129,9 @@ class MPLCanvas(FigureCanvas):
         for plot_type in self.all_plots:
             # for plot types with zstat, initialise with default zstat (Mean)
             if plot_type in ['map', 'periodic']:
-                self.plot.set_plot_characteristics([plot_type], zstat='Mean', data_labels=['dummy'])
+                self.plotting.set_plot_characteristics([plot_type], zstat='Mean', data_labels=['dummy'])
             else:
-                self.plot.set_plot_characteristics([plot_type], data_labels=['dummy'])
+                self.plotting.set_plot_characteristics([plot_type], data_labels=['dummy'])
             self.current_plot_options[plot_type] = []
             self.previous_plot_options[plot_type] = []
 
@@ -157,7 +148,6 @@ class MPLCanvas(FigureCanvas):
 
         # create rest of plot axes (default: timeseries, statsummary, distribution, periodic)
         # also show plot type buttons
-        self.annotation_elements = []
         for position, plot_type in enumerate(self.read_instance.active_dashboard_plots):
             
             # update plot axis
@@ -193,11 +183,10 @@ class MPLCanvas(FigureCanvas):
         self.lasso_active = False
         self.station_pick = self.figure.canvas.mpl_connect('button_press_event', self.station_select)
 
-        # setup station annotations
-        self.annotations['map'] = HoverAnnotation(self, 'map', self.plot_axes['map'], self.plot_characteristics['map'])
-        self.map_annotation_disconnect = False
-        self.map_annotation_event = self.figure.canvas.mpl_connect('motion_notify_event', 
-            self.annotations['map'].hover_map_annotation)
+        # setup canvas annotations
+        self.canvas_annotation = HoverAnnotation(self)
+        self.canvas_annotation_event = self.figure.canvas.mpl_connect('motion_notify_event', 
+                                                                      self.canvas_annotation.hover_annotation)
 
         # setup zoom on scroll wheel on map
         self.zoom_map_event = self.figure.canvas.mpl_connect('scroll_event', lambda event: zoom_map_func(self, event))
@@ -233,18 +222,15 @@ class MPLCanvas(FigureCanvas):
         for data_label in self.read_instance.data_labels:
             self.plot_elements['data_labels_active'].append(data_label)
 
+        # add map domain plot option if on first read
+        if (self.read_instance.first_read) & ('domain' not in self.current_plot_options['map']):
+            self.current_plot_options['map'].append('domain')
+
+        # update legend
+        self.update_legend()
+
         # update plotted map z statistic
         self.update_map_z_statistic()
-
-        # plot domain edges on map and legend if have valid data
-        if len(self.active_map_valid_station_inds) > 0:
-
-            # add 'domain' to plot options
-            if 'domain' not in self.current_plot_options['map']:
-                self.current_plot_options['map'].append('domain')
-
-            # update legend
-            self.update_legend()
 
         # uncover map, but hide plotting axes
         self.canvas_cover.hide()
@@ -299,9 +285,12 @@ class MPLCanvas(FigureCanvas):
 
         # return if nothing has been loaded yet
         if not hasattr(self.read_instance, 'data_in_memory'):
-            return
+            return None
 
-        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        # update mouse cursor to a waiting cursor
+        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+            self.read_instance.cursor_function = 'handle_data_filter_update'
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         if self.filter_data is None:
             self.filter_data = DataFilter(self.read_instance)
@@ -309,17 +298,23 @@ class MPLCanvas(FigureCanvas):
             self.filter_data.filter_all()
             self.update_active_map()
 
-        QtWidgets.QApplication.restoreOverrideCursor()
+        # restore mouse cursor to normal
+        if self.read_instance.cursor_function == 'handle_data_filter_update':
+            QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
     def handle_resampling_update(self):
         """ Function which handles updates of resampling. """
-        
+
+        # return if nothing has been loaded yet
+        if not hasattr(self.read_instance, 'data_in_memory'):
+            return None
+
+        # update resampling resolution
+        self.read_instance.resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
+
         if not self.read_instance.block_MPL_canvas_updates:
-            
-            # update resampling resolution
-            self.read_instance.resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
 
             # remove timeseries chunk resolution if resampling resolution is lower or equal to chunk resolution
             chunk_resolution = self.timeseries_chunk_resolution.currentText()
@@ -339,7 +334,9 @@ class MPLCanvas(FigureCanvas):
                 if len(self.relative_selected_station_inds) > 0:
                     
                     # update mouse cursor to a waiting cursor
-                    QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+                    if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                        self.read_instance.cursor_function = 'handle_resampling_update'
+                        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
                     # update associated plots with selected stations
                     self.update_associated_active_dashboard_plots()
@@ -351,7 +348,8 @@ class MPLCanvas(FigureCanvas):
                     self.figure.canvas.draw_idle()
 
                     # restore mouse cursor to normal
-                    QtWidgets.QApplication.restoreOverrideCursor()
+                    if self.read_instance.cursor_function == 'handle_resampling_update':
+                        QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -385,14 +383,16 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.block_config_bar_handling_updates = True
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_statistic_mode_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # update mode
             self.read_instance.selected_statistic_mode = self.read_instance.cb_statistic_mode.currentText()
             self.read_instance.statistic_mode = self.read_instance.selected_statistic_mode 
 
-            # update aggregation statistics (timeseries and general)
-            self.update_aggregation_statistics()
+            # update aggregation statistic
+            self.update_aggregation_statistic()
 
             # handle special cases for some chunk statistics
             chunk_stat = self.timeseries_chunk_stat.currentText()
@@ -426,7 +426,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()   
+            if self.read_instance.cursor_function == 'handle_statistic_mode_update':
+                QtWidgets.QApplication.restoreOverrideCursor()   
 
         return None
 
@@ -442,10 +443,12 @@ class MPLCanvas(FigureCanvas):
             self.read_instance.block_config_bar_handling_updates = True
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_statistic_aggregation_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-            # update aggregation statistics (timeseries and general)
-            self.update_aggregation_statistics()
+            # update aggregation statistic
+            self.update_aggregation_statistic()
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
@@ -457,7 +460,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_statistic_aggregation_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -465,65 +469,76 @@ class MPLCanvas(FigureCanvas):
         """ Function that handles the update of the MPL canvas
             with colocated data upon checking of the temporal colocate checkbox.
         """
-
-        if not self.read_instance.block_MPL_canvas_updates:
             
-            # update mouse cursor to a waiting cursor
+        # update mouse cursor to a waiting cursor
+        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+            self.read_instance.cursor_function = 'handle_temporal_colocate_update'
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-            # if only have < 2 data arrays in memory, no colocation is possible,
-            # therefore set colocation to be False, and return
-            invalid = False
-            if self.read_instance.data_labels is None:
-                invalid = True
-            elif len(self.read_instance.data_labels) == 1:
-                invalid = True
-            if invalid:
-                # msg = 'Load experiments before activating the temporal colocation'
-                # show_message(self.read_instance, msg)
-                self.read_instance.temporal_colocation = False
-                self.read_instance.block_MPL_canvas_updates = True
-                self.read_instance.ch_colocate.setCheckState(QtCore.Qt.Unchecked)
-                self.read_instance.block_MPL_canvas_updates = False
-                return
+        # else, if have loaded experiment data, check if colocate checkbox is checked or unchecked
+        check_state = self.read_instance.ch_colocate.checkState()
 
-            # else, if have loaded experiment data, check if colocate checkbox is checked or unchecked
-            check_state = self.read_instance.ch_colocate.checkState()
-
-            # update variable to inform plotting functions whether to use colocated data/or not
-            if check_state == QtCore.Qt.Checked:
-                self.read_instance.temporal_colocation = True
+        # update variable to inform plotting functions whether to use colocated data/or not
+        # turn colocation on
+        if check_state == QtCore.Qt.Checked:
+            self.read_instance.temporal_colocation = True
+            # need to update plots?
+            if len(self.read_instance.data_labels) < 2:
+                if self.read_instance.temporal_colocation_active:
+                    update_plots = True
+                else:
+                    update_plots = False
+                self.read_instance.temporal_colocation_active = False
             else:
-                self.read_instance.temporal_colocation = False
+                if self.read_instance.temporal_colocation_active:
+                    update_plots = False
+                else:
+                    update_plots = True
+                self.read_instance.temporal_colocation_active = True
+        # turn colocation off
+        else:
+            self.read_instance.temporal_colocation = False
+            # need to update plots?
+            if self.read_instance.temporal_colocation_active:
+                update_plots = True
+            else:
+                update_plots = False
+            self.read_instance.temporal_colocation_active = False
 
-            # update map z statistic/ periodic statistic comboboxes (without updating canvas)
+        # update layout fields
+        self.read_instance.update_layout_fields(self)
+
+        # update canvas plots (if neccessary) 
+        if (update_plots) or (self.read_instance.performing_read):
             self.read_instance.block_MPL_canvas_updates = True
+            # update plot statistics
             self.handle_map_z_statistic_update()
             self.handle_timeseries_statistic_update()
+            self.handle_resampling_update()
             self.handle_timeseries_chunk_statistic_update()
             self.handle_periodic_statistic_update()
             self.handle_statsummary_statistics_update()
             self.handle_statsummary_cycle_update()
             self.handle_statsummary_periodic_aggregation_update()
             self.handle_statsummary_periodic_mode_update()
-            self.handle_fairmode_target_classification_update()
-
-            # self.handle_taylor_correlation_statistic_update()
+            if self.read_instance.temporal_colocation_active:
+                self.handle_taylor_correlation_statistic_update()
+                self.handle_fairmode_target_classification_update()
             self.read_instance.block_MPL_canvas_updates = False
 
-            # update layout fields
-            self.read_instance.update_layout_fields(self)
+            # if not performing read then update plots
+            if not self.read_instance.performing_read:
+                # update plotted map z statistic
+                self.update_map_z_statistic()
 
-            # update plotted map z statistic
-            self.update_map_z_statistic()
+                # update associated plots with selected stations
+                self.update_associated_active_dashboard_plots()
 
-            # update associated plots with selected stations
-            self.update_associated_active_dashboard_plots()
+                # draw changes
+                self.figure.canvas.draw_idle()
 
-            # draw changes
-            self.figure.canvas.draw_idle()
-
-            # restore mouse cursor to normal
+        # restore mouse cursor to normal
+        if self.read_instance.cursor_function == 'handle_temporal_colocate_update':
             QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
@@ -562,9 +577,9 @@ class MPLCanvas(FigureCanvas):
             zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
 
         # plot map for zstat --> updating active map valid station indices and setting up plot picker
-        self.plot.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.plot_characteristics['map'], 
-                           self.current_plot_options['map'], zstat=zstat, labela=self.map_z1.currentText(), 
-                           labelb=self.map_z2.currentText())
+        self.plotting.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.plot_characteristics['map'], 
+                               self.current_plot_options['map'], zstat=zstat, labela=self.map_z1.currentText(), 
+                               labelb=self.map_z2.currentText())
         
         # update absolute selected plotted station indices with respect to new active map valid station indices
         self.absolute_selected_station_inds = np.array(
@@ -693,6 +708,7 @@ class MPLCanvas(FigureCanvas):
         
         # redraw plot
         self.figure.canvas.draw()
+        # flush events so can see map selection immediately 
         self.figure.canvas.flush_events()
 
     def update_associated_active_dashboard_plot(self, plot_type):
@@ -712,11 +728,11 @@ class MPLCanvas(FigureCanvas):
 
                 # get plotting function for specific plot
                 if plot_type == 'statsummary':
-                    func = getattr(self.plot, 'make_table')
+                    func = getattr(self.plotting, 'make_table')
                 elif plot_type in ['fairmode-target', 'fairmode-statsummary']:
-                    func = getattr(self.plot, 'make_{}'.format(plot_type.replace('-','_')))
+                    func = getattr(self.plotting, 'make_{}'.format(plot_type.replace('-','_')))
                 else:
-                    func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
+                    func = getattr(self.plotting, 'make_{}'.format(plot_type.split('-')[0]))
 
                 # get timeseries chunking info
                 if plot_type == 'timeseries':
@@ -846,6 +862,7 @@ class MPLCanvas(FigureCanvas):
                 if plot_type not in ['metadata', 'fairmode-statsummary']:
                     self.update_plot_options(plot_types=[plot_type])
 
+
     def get_plot_type_position(self, plot_type):
         """ Function that returns numeric position of plot type within the dashboard
         """
@@ -877,6 +894,9 @@ class MPLCanvas(FigureCanvas):
                 get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
                                           networkspecies=[self.read_instance.networkspeci])
 
+                # create dictionary of plots to disable
+                plots_to_disable = {}
+
                 # iterate through active_dashboard_plots
                 for plot_type in self.read_instance.active_dashboard_plots:
 
@@ -890,7 +910,7 @@ class MPLCanvas(FigureCanvas):
                         (not self.read_instance.relevant_temporal_resolutions)):
                         msg = 'It is not possible to make periodic plots using annual resolution data.'
                         show_message(self.read_instance, msg)
-                        self.read_instance.handle_layout_update('None', sender=plot_type_position) 
+                        plots_to_disable[plot_type] = plot_type_position
                         continue
                     
                     # if temporal colocation is turned off or there are no experiments, skip scatter plot
@@ -902,7 +922,7 @@ class MPLCanvas(FigureCanvas):
                             else:
                                 msg = f'It is not possible to make {plot_type} plots without loading experiments.'
                             show_message(self.read_instance, msg)
-                            self.read_instance.handle_layout_update('None', sender=plot_type_position)
+                            plots_to_disable[plot_type] = plot_type_position
                             continue
                     
                     if plot_type in ['fairmode-target', 'fairmode-statsummary']:
@@ -910,17 +930,21 @@ class MPLCanvas(FigureCanvas):
                         if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
                             msg = f'Fairmode target plot cannot be created for {speci}.'
                             show_message(self.read_instance, msg)
-                            self.read_instance.handle_layout_update('None', sender=plot_type_position)
+                            plots_to_disable[plot_type] = plot_type_position
                             continue
                         if ((speci in ['sconco3', 'sconcno2'] and self.read_instance.resolution != 'hourly') 
                             or (speci in ['pm10', 'pm2p5'] and (self.read_instance.resolution not in ['hourly', 'daily']))):
                             msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
                             show_message(self.read_instance, msg)
-                            self.read_instance.handle_layout_update('None', sender=plot_type_position)
+                            plots_to_disable[plot_type] = plot_type_position
                             continue
                 
                     # update plot
                     self.update_associated_active_dashboard_plot(plot_type)
+
+                # disable relevant plots
+                for plot_type, plot_type_position in plots_to_disable.items():
+                    self.read_instance.handle_layout_update('None', sender=plot_type_position)
 
                 # un-hide plotting axes
                 self.top_right_canvas_cover.hide() 
@@ -936,7 +960,7 @@ class MPLCanvas(FigureCanvas):
         self.remove_axis_objects(self.plot_axes['map'].patches, types_to_remove=[matplotlib.patches.Polygon])
 
         # create grid edge polygons for experiments in memory
-        grid_edge_polygons = self.plot.make_experiment_domain_polygons()
+        grid_edge_polygons = self.plotting.make_experiment_domain_polygons()
 
         # plot grid edge polygons on map
         for grid_edge_polygon in grid_edge_polygons:
@@ -946,7 +970,7 @@ class MPLCanvas(FigureCanvas):
         """ Function that updates legend. """
 
         # create legend element handles
-        legend_plot_characteristics = self.plot.make_legend_handles(copy.deepcopy(self.plot_characteristics['legend']))
+        legend_plot_characteristics = self.plotting.make_legend_handles(copy.deepcopy(self.plot_characteristics['legend']))
 
         # plot legend
         self.legend = self.plot_axes['legend'].legend(**legend_plot_characteristics['plot'], 
@@ -1042,45 +1066,31 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:  
         
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-
-            # set variable that blocks configuration bar handling updates until all changes
-            # to the timeseries statistic combobox are made
-            self.read_instance.block_config_bar_handling_updates = True
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_timeseries_statistic_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # update statistic
-            self.read_instance.selected_timeseries_stat = self.timeseries_stat.currentText()
-            self.read_instance.timeseries_stat = self.read_instance.selected_timeseries_stat
-
-            # update aggregation statistic if it is different than timeseries statistic
-            if ((self.read_instance.statistic_mode == 'Spatial|Temporal')
-                and (self.read_instance.timeseries_stat != \
-                     self.read_instance.cb_statistic_aggregation.currentText())):
-                self.read_instance.cb_statistic_aggregation.setCurrentText(self.read_instance.timeseries_stat)
-
-            # allow handling updates to the configuration bar again
-            self.read_instance.block_config_bar_handling_updates = False
+            self.read_instance.selected_timeseries_statistic_aggregation = self.timeseries_stat.currentText()
+            self.read_instance.timeseries_statistic_aggregation = self.read_instance.selected_timeseries_statistic_aggregation
 
             # update plotted timeseries statistic
             if not self.read_instance.block_MPL_canvas_updates:
-                # update selected data on all active plots
-                if self.read_instance.statistic_mode == 'Spatial|Temporal':
-                    self.update_associated_active_dashboard_plots()
-
+                    
                 # update selected data on timeseries plot
-                elif self.read_instance.statistic_mode in ['Temporal|Spatial', 'Flattened']:
-                    # get selected station data
-                    get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
-                                            networkspecies=[self.read_instance.networkspeci])
+                # get selected station data
+                get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
+                                          networkspecies=[self.read_instance.networkspeci])
 
-                    # update plot                                                                         
-                    self.update_associated_active_dashboard_plot('timeseries')
+                # update plot                                                                         
+                self.update_associated_active_dashboard_plot('timeseries')
 
             # draw changes
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_timeseries_statistic_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -1092,7 +1102,9 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
             
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_timeseries_chunk_statistic_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the timeseries chunk statistic combobox are made
@@ -1118,7 +1130,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_timeseries_chunk_statistic_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
@@ -1130,7 +1143,9 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_periodic_statistic_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the periodic statistic combobox are made
@@ -1170,7 +1185,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_periodic_statistic_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -1182,7 +1198,9 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_taylor_correlation_statistic_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all
             # changes to the statistic combobox are made
@@ -1220,7 +1238,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_taylor_correlation_statistic_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -1273,7 +1292,9 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
             
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_statsummary_statistics_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary statistics combobox are made
@@ -1338,14 +1359,17 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_statsummary_statistics_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
     def handle_statsummary_cycle_update(self):
 
         if not self.read_instance.block_config_bar_handling_updates:
             
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_statsummary_cycle_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary periodic cycle combobox are made
@@ -1383,7 +1407,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_statsummary_cycle_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
@@ -1395,7 +1420,9 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_statsummary_periodic_aggregation_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary periodic aggregation combobox are made
@@ -1416,7 +1443,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_statsummary_periodic_aggregation_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
@@ -1428,7 +1456,9 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_statsummary_periodic_mode_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the statsummary periodic mode combobox are made
@@ -1449,7 +1479,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_statsummary_periodic_mode_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
@@ -1458,7 +1489,9 @@ class MPLCanvas(FigureCanvas):
         if not self.read_instance.block_config_bar_handling_updates:
 
             # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_fairmode_target_classification_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             # set variable that blocks configuration bar handling updates until all changes
             # to the classification combobox are made
@@ -1478,37 +1511,8 @@ class MPLCanvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
-
-        return None
-    
-    # TODO CHANGE
-    def handle_fairmode_statsummary_classification_update(self):
-
-        if not self.read_instance.block_config_bar_handling_updates:
-
-            # update mouse cursor to a waiting cursor
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-
-            # set variable that blocks configuration bar handling updates until all changes
-            # to the classification combobox are made
-            self.read_instance.block_config_bar_handling_updates = True
-
-            # update classification type
-            self.plot_characteristics['fairmode-statsummary']['markers']['type'] = self.fairmode_target_classification.currentText()
-            
-            # allow handling updates to the configuration bar again
-            self.read_instance.block_config_bar_handling_updates = False
-
-            # update FAIRMODE target plot
-            if not self.read_instance.block_MPL_canvas_updates:
-                self.update_associated_active_dashboard_plot('fairmode-statsummary')
-
-            # draw changes
-            self.figure.canvas.draw_idle()
-
-            # restore mouse cursor to normal
-            QtWidgets.QApplication.restoreOverrideCursor()
+            if self.read_instance.cursor_function == 'handle_fairmode_target_classification_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
     
@@ -1554,7 +1558,7 @@ class MPLCanvas(FigureCanvas):
             axs_to_remove = ax
         else:
             if plot_type == 'taylor':
-                axs_to_remove.append(self.plot.taylor_polar_relevant_axis)
+                axs_to_remove.append(self.plotting.taylor_polar_relevant_axis)
             axs_to_remove.append(ax)
 
         # iterate through axes
@@ -1579,23 +1583,23 @@ class MPLCanvas(FigureCanvas):
 
             elif plot_type == 'timeseries':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
-                    self.remove_axis_objects(objects, elements_to_skip=[self.annotations_vline['timeseries']])
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'periodic':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
-                    self.remove_axis_objects(objects, elements_to_skip=self.annotations_vline['periodic'].values())
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'periodic-violin':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists, 
                                 ax_to_remove.collections]:
-                    self.remove_axis_objects(objects, elements_to_skip=self.annotations_vline['periodic-violin'].values())
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'metadata':
                 self.remove_axis_objects(ax_to_remove.texts)
 
             elif plot_type == 'distribution':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
-                    self.remove_axis_objects(objects, elements_to_skip=[self.annotations_vline['distribution']])
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'statsummary':
                 self.remove_axis_objects(ax_to_remove.tables)
@@ -1607,7 +1611,7 @@ class MPLCanvas(FigureCanvas):
             elif plot_type == 'fairmode-target':
                 for objects in [ax_to_remove.lines, ax_to_remove.artists, 
                                 ax_to_remove.patches, ax_to_remove.texts]:
-                    self.remove_axis_objects(objects, elements_to_skip=[self.annotations['fairmode-target']])
+                    self.remove_axis_objects(objects)
 
             elif plot_type == 'fairmode-statsummary':
                 self.remove_axis_objects(ax_to_remove.lines)
@@ -1617,14 +1621,6 @@ class MPLCanvas(FigureCanvas):
             self.plot_elements[plot_type]['absolute'] = {}
             if 'bias' in self.plot_elements[plot_type]:
                 del self.plot_elements[plot_type]['bias']
-
-        # hide annotation boxes and lines
-        for element in self.annotation_elements:
-            if isinstance(element, dict):
-                for val in element.values():
-                    val.set_visible(False)
-            else:
-                element.set_visible(False)
 
         return None
 
@@ -1683,6 +1679,11 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.block_MPL_canvas_updates = False
                     return
             
+            # set mouse cursor to hourglass
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.cursor_function = 'select_all_stations'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
 
@@ -1723,6 +1724,10 @@ class MPLCanvas(FigureCanvas):
             # draw changes
             self.figure.canvas.draw_idle()
 
+            # Restore mouse cursor to normal
+            if self.cursor_function == 'select_all_stations':
+                QtWidgets.QApplication.restoreOverrideCursor()
+
         return None
 
     def select_intersect_stations(self):
@@ -1745,6 +1750,11 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.ch_intersect.setCheckState(QtCore.Qt.Unchecked)
                     self.read_instance.block_MPL_canvas_updates = False
                     return
+            
+            # set mouse cursor to hourglass
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.cursor_function = 'select_intersect_stations'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
             
             # make copy of current full array relative selected stations indices, before selecting new ones
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
@@ -1812,6 +1822,10 @@ class MPLCanvas(FigureCanvas):
             # draw changes
             self.figure.canvas.draw_idle()
 
+            # Restore mouse cursor to normal
+            if self.cursor_function == 'select_intersect_stations':
+                QtWidgets.QApplication.restoreOverrideCursor()
+
         return None
 
     def select_extent_stations(self):
@@ -1835,6 +1849,11 @@ class MPLCanvas(FigureCanvas):
                     self.read_instance.block_MPL_canvas_updates = False
                     return
                 
+            # set mouse cursor to hourglass
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.cursor_function = 'select_extent_stations'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
             # get map extent (in data coords)
             self.read_instance.map_extent = get_map_extent(self)
 
@@ -1894,6 +1913,10 @@ class MPLCanvas(FigureCanvas):
             # draw changes
             self.figure.canvas.draw_idle()
 
+            # Restore mouse cursor to normal
+            if self.cursor_function == 'select_extent_stations':
+                QtWidgets.QApplication.restoreOverrideCursor()
+
         return None
 
     def station_select(self, event):
@@ -1918,6 +1941,11 @@ class MPLCanvas(FigureCanvas):
         else:
             self.figure.canvas.widgetlock(self.station_pick)
         
+        # set mouse cursor to hourglass
+        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+            self.cursor_function = 'station_select'
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
         # unselect all/intersect/extent checkboxes
         self.unselect_map_checkboxes()
 
@@ -1961,6 +1989,9 @@ class MPLCanvas(FigureCanvas):
 
             # if have zero stations selected then return, doing nothing to selection
             if len(absolute_selected_station_inds) == 0:
+                # restore mouse cursor to normal
+                if self.cursor_function == 'station_select':
+                    QtWidgets.QApplication.restoreOverrideCursor()
                 return 
 
             # update absolute indices of selected stations
@@ -1989,6 +2020,10 @@ class MPLCanvas(FigureCanvas):
         # unlock canvas drawing
         if self.figure.canvas.widgetlock.isowner(self.station_pick):
             self.figure.canvas.widgetlock.release(self.station_pick)
+
+        # restore mouse cursor to normal
+        if self.cursor_function == 'station_select':
+            QtWidgets.QApplication.restoreOverrideCursor()
         
     def onlassoselect(self, verts):
         """ Function that handles station selection upon lasso selection with left click.
@@ -2003,6 +2038,11 @@ class MPLCanvas(FigureCanvas):
         # check if have any plotted stations on map, if not, return
         if len(self.active_map_valid_station_inds) == 0:
             return
+
+        # set mouse cursor to hourglass
+        if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+            self.cursor_function = 'onlassoselect'
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         # unselect all/intersect/extent checkboxes
         self.unselect_map_checkboxes()
@@ -2052,6 +2092,10 @@ class MPLCanvas(FigureCanvas):
         # draw changes
         self.figure.canvas.draw_idle()
 
+        # restore mouse cursor to normal
+        if self.cursor_function == 'onlassoselect':
+            QtWidgets.QApplication.restoreOverrideCursor()
+
         return None
 
     def map_selected_station_inds_to_all_available_inds(self, selected_map_inds):
@@ -2071,28 +2115,24 @@ class MPLCanvas(FigureCanvas):
 
         # LAYOUT OPTIONS #
         # add position 2 plot selector
-        self.read_instance.cb_position_2 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_2 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['menu_combobox'])
         self.read_instance.cb_position_2.setToolTip('Select plot type in top right position')
         self.read_instance.cb_position_2.currentTextChanged.connect(self.read_instance.handle_layout_update)
-        # self.read_instance.cb_position_2.hide()
 
         # add position 3 plot selector
-        self.read_instance.cb_position_3 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_3 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['menu_combobox'])
         self.read_instance.cb_position_3.setToolTip('Select plot type in bottom left position')
         self.read_instance.cb_position_3.currentTextChanged.connect(self.read_instance.handle_layout_update)
-        # self.read_instance.cb_position_3.hide()
 
         # add position 4 plot selector
-        self.read_instance.cb_position_4 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_4 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['menu_combobox'])
         self.read_instance.cb_position_4.setToolTip('Select plot type in bottom centre position')
         self.read_instance.cb_position_4.currentTextChanged.connect(self.read_instance.handle_layout_update)
-        # self.read_instance.cb_position_4.hide()
 
         # add position 5 plot selector
-        self.read_instance.cb_position_5 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['combobox_menu'])
+        self.read_instance.cb_position_5 = set_formatting(ComboBox(self), self.read_instance.formatting_dict['menu_combobox'])
         self.read_instance.cb_position_5.setToolTip('Select plot type in bottom right position')
         self.read_instance.cb_position_5.currentTextChanged.connect(self.read_instance.handle_layout_update)
-        # self.read_instance.cb_position_5.hide()
 
         # MAP SETTINGS MENU #
         # create map settings menu
@@ -2541,9 +2581,9 @@ class MPLCanvas(FigureCanvas):
                     index = orig_plot_options.index(option)
 
                     # if any option other than domain is selected
-                    if 'domain' not in self.current_plot_options[plot_type]:
-
-                        # return if do not have selected station_station_data in memory, then no data has been read
+                    if len([option for option in self.current_plot_options[plot_type] if option != 'domain']) >= 1: 
+                    
+                        # return if do not have selected station_station_data in memory, then no data plotted yet
                         if not hasattr(self, 'selected_station_data'):
                             msg = 'Select at least one station in the plot to apply options.'
                             show_message(self.read_instance, msg)
@@ -2834,11 +2874,11 @@ class MPLCanvas(FigureCanvas):
 
                                 # get plotting function for specific plot
                                 if plot_type == 'statsummary':
-                                    func = getattr(self.plot, 'make_table')
+                                    func = getattr(self.plotting, 'make_table')
                                 elif plot_type in ['fairmode-target', 'fairmode-statsummary']:
-                                    func = getattr(self.plot, 'make_{}'.format(plot_type.replace('-','_')))
+                                    func = getattr(self.plotting, 'make_{}'.format(plot_type.replace('-','_')))
                                 else:
-                                    func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
+                                    func = getattr(self.plotting, 'make_{}'.format(plot_type.split('-')[0]))
 
                                 # call function to update plot
                                 # periodic plot
@@ -2910,11 +2950,11 @@ class MPLCanvas(FigureCanvas):
 
                                 # get plotting function for specific plot
                                 if plot_type == 'statsummary':
-                                    func = getattr(self.plot, 'make_table')
+                                    func = getattr(self.plotting, 'make_table')
                                 elif plot_type in ['fairmode-target', 'fairmode-statsummary']:
-                                    func = getattr(self.plot, 'make_{}'.format(plot_type.replace('-','_')))
+                                    func = getattr(self.plotting, 'make_{}'.format(plot_type.replace('-','_')))
                                 else:
-                                    func = getattr(self.plot, 'make_{}'.format(plot_type.split('-')[0]))
+                                    func = getattr(self.plotting, 'make_{}'.format(plot_type.split('-')[0]))
 
                                 # call function to update plot
                                 # periodic plot
@@ -3025,7 +3065,7 @@ class MPLCanvas(FigureCanvas):
                         line.set_markersize(markersize)
             else:
                 if plot_type == 'taylor':
-                    for line in self.plot.taylor_polar_relevant_axis.lines:
+                    for line in self.plotting.taylor_polar_relevant_axis.lines:
                         line.set_markersize(markersize)
                 else:
                     for line in ax.lines:
@@ -3162,16 +3202,12 @@ class MPLCanvas(FigureCanvas):
         if isinstance(ax, dict):
             for sub_ax in ax.values():
                 for line in sub_ax.lines:
-                    if line not in self.annotation_elements:
-                        line.set_linewidth(linewidth)
+                    line.set_linewidth(linewidth)
         else:
             for line in ax.lines:
-                if line not in self.annotation_elements:
-                    if (((plot_type == 'scatter') and ((list(line.get_xdata()) == [0, 0.5])
-                        or (list(line.get_xdata()) == [0, 1])))):
-                        continue
-                    else:
-                        line.set_linewidth(linewidth)
+                if (((plot_type == 'scatter') and ((list(line.get_xdata()) == [0, 0.5])
+                    or (list(line.get_xdata()) == [0, 1])))):
+                    continue
                 else:
                     line.set_linewidth(linewidth)
 
@@ -3452,18 +3488,13 @@ class MPLCanvas(FigureCanvas):
         else:
             self.timeseries_stat.setEnabled(True)
 
-    def update_aggregation_statistics(self):
-        """ Update general and timeseries aggregation statistic
+    def update_aggregation_statistic(self):
+        """ Update general aggregation statistic
         """
         
         # get statistic
         self.read_instance.selected_statistic_aggregation = self.read_instance.cb_statistic_aggregation.currentText()
-        
-        # update timeseries statistic if it is different than the selected statistic aggregation
-        if ((self.read_instance.selected_statistic_mode == 'Spatial|Temporal')
-            and (self.timeseries_stat.currentText() != self.read_instance.selected_statistic_aggregation)):
-            self.timeseries_stat.setCurrentText(self.read_instance.selected_statistic_aggregation)
-
+    
         # update statistic in memory
         self.read_instance.statistic_aggregation = self.read_instance.selected_statistic_aggregation 
 
