@@ -8,7 +8,8 @@ import json
 import scipy
 import yaml
 
-import matplotlib as mpl
+from matplotlib import transforms
+from matplotlib.colors import cnames
 from matplotlib.projections import PolarAxes
 import mpl_toolkits.axisartist.floating_axes as fa
 import mpl_toolkits.axisartist.grid_finder as gf
@@ -151,7 +152,7 @@ def get_land_polygon_resolution(selection):
 def update_plotting_parameters(instance):
     """ Function that updates plotting parameters (colour and zorder) for data labels.
 
-        :param instance: Instance of class ProvidentiaOffline or ProvidentiaMainWindow
+        :param instance: Instance of class Report or Dashboard
         :type instance: object
     """
 
@@ -407,7 +408,7 @@ def merge_cells(table, cells):
     trans = (tpos[-1] - tpos[0])/2
 
     # didn't had to check for ha because I only want ha='center'
-    txts[0].set_transform(mpl.transforms.Affine2D().translate(*trans))
+    txts[0].set_transform(transforms.Affine2D().translate(*trans))
     for txt in txts[1:]:
         txt.set_visible(False)
 
@@ -553,9 +554,9 @@ def create_chunked_timeseries(read_instance, canvas_instance, chunk_stat, chunk_
                               networkspeci, cut_data_labels, bias):
     """ Create statistical timeseries data by chunk resolution
 
-    :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+    :param read_instance: Instance of class Dashboard or Report
     :type read_instance: object
-    :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+    :param canvas_instance: Instance of class Canvas or Report
     :type canvas_instance: object
     :param chunk_stat: Chunk statistic
     :type chunk_stat: str
@@ -645,3 +646,17 @@ def reorder_pdf_pages(read_instance, input_pdf, output_pdf, summary_multispecies
     read_instance.logger.info(f'Writing {output_pdf}')
     with open(output_pdf, "wb") as outputStream:
         output_pdf_file.write(outputStream)
+
+def get_hex_code(colour):
+    """ Convert from colour name or RGB decimal to hexadecimal code"""
+    
+    # convert from colour name to hex code
+    if type(colour) == str:
+        if colour[0] != '#':
+            hex_colour = cnames[colour]
+    # convert from rgb colour (as decimal) to hex code
+    elif type(colour) == tuple:
+        rgb_colour = tuple(round(255*x) for x in colour)
+        hex_colour = f'#{int(round(rgb_colour[0])):02x}{int(round(rgb_colour[1])):02x}{int(round(rgb_colour[2])):02x}'
+
+    return hex_colour

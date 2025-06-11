@@ -65,6 +65,8 @@
     
     "training": ["map-Median", "map-r", "timeseries_annotate", "periodic-Mean_threshold", "statsummary_multispecies", "taylor-r2", "scatter_annotate_individual"],
 
+    "het_chem": ["periodic-Mean"],
+
     "debug": ["timeseries_threshold"]
 
 }
