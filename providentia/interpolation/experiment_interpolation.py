@@ -51,7 +51,7 @@ class ExperimentInterpolation(object):
         
         self.log_file_str = 'STARTING INTERPOLATION\n'
 
-        self.log_file_str += str(submit_args)
+        self.log_file_str += '\n'.join(f"{k}: {v}" for k, v in submit_args.items()) + '\n'
 
         # set variables from input keywords
         self.model_temporal_resolution            = submit_args['model_temporal_resolution']
