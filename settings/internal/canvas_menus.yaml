@@ -41,6 +41,7 @@
       "z_stat_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
           "text": "Statistic",
@@ -49,7 +50,7 @@
       "z_stat":
         {
           "element_type": "combobox",
-          "formatting_dict": "combobox_menu",
+          "formatting_dict": "menu_combobox",
           "fixed_width": 105,
           "relative_position": [-220, 75],
           "function": "handle_map_z_statistic_update",
@@ -58,6 +59,7 @@
       "z1_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 100],
           "text": "Dataset 1",
@@ -66,7 +68,7 @@
       "z1":
         {
           "element_type": "combobox",
-          "formatting_dict": "combobox_menu",
+          "formatting_dict": "menu_combobox",
           "fixed_width": 105,
           "relative_position": [-220, 125],
           "function": "handle_map_z_statistic_update",
@@ -75,6 +77,7 @@
       "z2_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-95, 100],
           "text": "Dataset 2",
@@ -83,7 +86,7 @@
       "z2":
         {
           "element_type": "combobox",
-          "formatting_dict": "combobox_menu",
+          "formatting_dict": "menu_combobox",
           "fixed_width": 105,
           "relative_position": [-95, 125],
           "function": "handle_map_z_statistic_update",
@@ -92,6 +95,7 @@
       "unsel_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 150],
           "text": "Unselected stations",
@@ -100,9 +104,9 @@
       "markersize_unsel_sl_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel_slider",
           "size": [230, 20],
           "relative_position": [-220, 175],
-          "style": "QLabel { font-style: italic; }",
           "text": "Size",
         },
 
@@ -122,9 +126,9 @@
       "opacity_unsel_sl_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel_slider",
           "size": [230, 20],
           "relative_position": [-220, 225],
-          "style": "QLabel { font-style: italic; }",
           "text": "Opacity",
         },
 
@@ -144,6 +148,7 @@
       "sel_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 275],
           "text": "Selected stations",
@@ -152,9 +157,9 @@
       "markersize_sel_sl_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel_slider",
           "size": [230, 20],
           "relative_position": [-220, 300],
-          "style": "QLabel { font-style: italic; }",
           "text": "Size",
         },
 
@@ -174,9 +179,9 @@
       "opacity_sel_sl_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel_slider",
           "size": [230, 20],
           "relative_position": [-220, 350],
-          "style": "QLabel { font-style: italic; }",
           "text": "Opacity",
         },
 
@@ -196,6 +201,7 @@
       "options_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 400],
           "text": "Options",
@@ -204,7 +210,7 @@
       "options":
         {
           "element_type": "checkable_combobox",
-          "formatting_dict": "checkable_combobox_menu",
+          "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
           "relative_position": [-220, 425],
           "object_name": "map_options",
@@ -254,6 +260,7 @@
       "stat_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
           "text": "Spatial aggregation statistic",
@@ -262,7 +269,7 @@
       "stat":
         {
           "element_type": "combobox",
-          "formatting_dict": "combobox_menu",
+          "formatting_dict": "menu_combobox",
           "fixed_width": 105,
           "relative_position": [-220, 75],
           "function": "handle_timeseries_statistic_update",
@@ -271,6 +278,7 @@
       "chunk_stat_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 100],
           "text": "Chunk statistic",
@@ -279,7 +287,7 @@
       "chunk_stat":
         {
           "element_type": "combobox",
-          "formatting_dict": "combobox_menu",
+          "formatting_dict": "menu_combobox",
           "fixed_width": 105,
           "relative_position": [-220, 125],
           "function": "handle_timeseries_chunk_statistic_update",
@@ -288,6 +296,7 @@
       "chunk_resolution_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-95, 100],
           "text": "Chunk resolution",
@@ -296,7 +305,7 @@
       "chunk_resolution":
         {
           "element_type": "combobox",
-          "formatting_dict": "combobox_menu",
+          "formatting_dict": "menu_combobox",
           "fixed_width": 105,
           "relative_position": [-95, 125],
           "function": "handle_timeseries_chunk_statistic_update",
@@ -305,6 +314,7 @@
       "markersize_sl_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 150],
           "text": "Size",
@@ -325,6 +335,7 @@
       "smooth_window_sl_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 200],
           "text": "Smooth window",
@@ -346,6 +357,7 @@
       "smooth_min_points_sl_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 250],
           "text": "Smooth min. points (%)",
@@ -368,6 +380,7 @@
       "smooth_linewidth_sl_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 300],
           "text": "Line width",
@@ -388,6 +401,7 @@
       "options_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 350],
           "text": "Options",
@@ -396,7 +410,7 @@
       "options":
         {
           "element_type": "checkable_combobox",
-          "formatting_dict": "checkable_combobox_menu",
+          "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
           "relative_position": [-220, 375],
           "object_name": "timeseries_options",
@@ -446,6 +460,7 @@
       "stat_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
           "text": "Statistic",
@@ -454,7 +469,7 @@
       "stat":
         {
           "element_type": "combobox",
-          "formatting_dict": "combobox_menu",
+          "formatting_dict": "menu_combobox",
           "fixed_width": 105,
           "relative_position": [-220, 75],
           "function": "handle_periodic_statistic_update",
@@ -463,6 +478,7 @@
       "markersize_sl_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 100],
           "text": "Size",
@@ -483,6 +499,7 @@
       "linewidth_sl_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 150],
           "text": "Line width",
@@ -503,6 +520,7 @@
       "options_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 200],
           "text": "Options",
@@ -511,7 +529,7 @@
       "options":
         {
           "element_type": "checkable_combobox",
-          "formatting_dict": "checkable_combobox_menu",
+          "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
           "relative_position": [-220, 225],
           "object_name": "periodic_options",
@@ -561,6 +579,7 @@
       "markersize_sl_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
           "text": "Size",
@@ -581,6 +600,7 @@
       "linewidth_sl_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 100],
           "text": "Line width",
@@ -601,6 +621,7 @@
       "options_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 150],
           "text": "Options",
@@ -609,7 +630,7 @@
       "options":
         {
           "element_type": "checkable_combobox",
-          "formatting_dict": "checkable_combobox_menu",
+          "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
           "relative_position": [-220, 175],
           "object_name": "periodic_violin_options",
@@ -655,6 +676,25 @@
           "relative_position": [-220, 30],
           "text": "SETTINGS",
         },
+
+      "options_label":
+        {
+          "element_type": "label",
+          "formatting_dict": "settings_sublabel",
+          "size": [230, 20],
+          "relative_position": [-220, 50],
+          "text": "Options",
+        },
+
+      "options":
+        {
+          "element_type": "checkable_combobox",
+          "formatting_dict": "menu_checkable_combobox",
+          "size": [230, 20],
+          "relative_position": [-220, 75],
+          "object_name": "metadata_options",
+          "function": "update_plot_option",
+        },
     },
 
   "distribution":
@@ -699,6 +739,7 @@
       "linewidth_sl_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
           "text": "Line width",
@@ -719,6 +760,7 @@
       "options_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 100],
           "text": "Options",
@@ -727,7 +769,7 @@
       "options":
         {
           "element_type": "checkable_combobox",
-          "formatting_dict": "checkable_combobox_menu",
+          "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
           "relative_position": [-220, 125],
           "object_name": "distribution_options",
@@ -777,6 +819,7 @@
       "markersize_sl_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
           "text": "Size",
@@ -797,6 +840,7 @@
       "regression_linewidth_sl_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 100],
           "text": "Regression line width",
@@ -817,6 +861,7 @@
       "options_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 150],
           "text": "Options",
@@ -825,7 +870,7 @@
       "options":
         {
           "element_type": "checkable_combobox",
-          "formatting_dict": "checkable_combobox_menu",
+          "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
           "relative_position": [-220, 175],
           "object_name": "scatter_options",
@@ -875,6 +920,7 @@
       "stat_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-115, 50],
           "text": "Statistic",
@@ -883,7 +929,7 @@
       "stat":
         {
           "element_type": "checkable_combobox",
-          "formatting_dict": "checkable_combobox_menu",
+          "formatting_dict": "menu_checkable_combobox",
           "fixed_width": 105,
           "relative_position": [-115, 75],
           "function": "handle_statsummary_statistics_update",
@@ -892,6 +938,7 @@
       "cycle_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-240, 50],
           "text": "Periodic cycle",
@@ -900,7 +947,7 @@
       "cycle":
         {
           "element_type": "combobox",
-          "formatting_dict": "combobox_menu",
+          "formatting_dict": "menu_combobox",
           "fixed_width": 105,
           "relative_position": [-240, 75],
           "function": "handle_statsummary_cycle_update",
@@ -909,6 +956,7 @@
       "periodic_mode_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-240, 100],
           "text": "Periodic mode",
@@ -917,7 +965,7 @@
       "periodic_mode":
         {
           "element_type": "combobox",
-          "formatting_dict": "combobox_menu",
+          "formatting_dict": "menu_combobox",
           "fixed_width": 105,
           "relative_position": [-240, 125],
           "function": "handle_statsummary_periodic_mode_update",
@@ -926,6 +974,7 @@
       "periodic_aggregation_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-115, 100],
           "text": "Periodic aggregation",
@@ -934,7 +983,7 @@
       "periodic_aggregation":
         {
           "element_type": "combobox",
-          "formatting_dict": "combobox_menu",
+          "formatting_dict": "menu_combobox",
           "fixed_width": 105,
           "relative_position": [-115, 125],
           "function": "handle_statsummary_periodic_aggregation_update",
@@ -943,6 +992,7 @@
       "options_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-240, 150],
           "text": "Options",
@@ -951,7 +1001,7 @@
       "options":
         {
           "element_type": "checkable_combobox",
-          "formatting_dict": "checkable_combobox_menu",
+          "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
           "relative_position": [-240, 175],
           "object_name": "statsummary_options",
@@ -1001,6 +1051,7 @@
       "options_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
           "text": "Options",
@@ -1009,7 +1060,7 @@
       "options":
         {
           "element_type": "checkable_combobox",
-          "formatting_dict": "checkable_combobox_menu",
+          "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
           "relative_position": [-220, 75],
           "object_name": "boxplot_options",
@@ -1068,7 +1119,7 @@
       "corr_stat":
         {
           "element_type": "combobox",
-          "formatting_dict": "combobox_menu",
+          "formatting_dict": "menu_combobox",
           "fixed_width": 105,
           "relative_position": [-220, 75],
           "function": "handle_taylor_correlation_statistic_update",
@@ -1077,6 +1128,7 @@
       "markersize_sl_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 100],
           "text": "Size",
@@ -1097,6 +1149,7 @@
       "options_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 150],
           "text": "Options",
@@ -1105,7 +1158,7 @@
       "options":
         {
           "element_type": "checkable_combobox",
-          "formatting_dict": "checkable_combobox_menu",
+          "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
           "relative_position": [-220, 175],
           "object_name": "taylor_options",
@@ -1155,6 +1208,7 @@
       "markersize_sl_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 50],
           "text": "Size",
@@ -1184,7 +1238,7 @@
       "classification":
         {
           "element_type": "combobox",
-          "formatting_dict": "combobox_menu",
+          "formatting_dict": "menu_combobox",
           "fixed_width": 105,
           "relative_position": [-220, 125],
           "function": "handle_fairmode_target_classification_update",
@@ -1193,6 +1247,7 @@
       "options_label":
         {
           "element_type": "label",
+          "formatting_dict": "settings_sublabel",
           "size": [230, 20],
           "relative_position": [-220, 150],
           "text": "Options",
@@ -1201,7 +1256,7 @@
       "options":
         {
           "element_type": "checkable_combobox",
-          "formatting_dict": "checkable_combobox_menu",
+          "formatting_dict": "menu_checkable_combobox",
           "size": [230, 20],
           "relative_position": [-220, 175],
           "object_name": "fairmode_target_options",
