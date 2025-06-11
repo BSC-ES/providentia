@@ -31,9 +31,9 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
                               station_index=None, data_range_min=None, data_range_max=None, stddev_max=None):
     """ Function that takes full data array and cuts it for selected stations, per network / species, per data label.
 
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
-        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+        :param canvas_instance: Instance of class Canvas or Report
         :type canvas_instance: object
         :param networkspecies: List of networkspeci strings
         :type networkspecies: list
@@ -160,16 +160,18 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             if len(canvas_instance.station_inds[networkspeci]) == 1:
                 canvas_instance.selected_station_data[networkspeci]['timeseries'] = data_array[:,0,:]
             else:
-                if (read_instance.offline) or (read_instance.interactive):
-                    timeseries_stat = read_instance.timeseries_statistic_aggregation
-                else:
-                    timeseries_stat = canvas_instance.timeseries_stat.currentText()
-                aggregated_data = aggregation(data_array, timeseries_stat, axis=1)
-                canvas_instance.selected_station_data[networkspeci]['timeseries'] = aggregated_data
+                canvas_instance.selected_station_data[networkspeci]['timeseries'] = aggregation(data_array, read_instance.timeseries_statistic_aggregation, axis=1)
 
             # save data per station
             if read_instance.statistic_mode == 'Spatial|Temporal':
-                canvas_instance.selected_station_data[networkspeci]['per_station'] = canvas_instance.selected_station_data[networkspeci]['timeseries'][:,np.newaxis,:]
+                # if statistic aggregation is the same as the timeseries statistic aggregation then can take the timeseries
+                if read_instance.statistic_aggregation == read_instance.timeseries_statistic_aggregation:
+                    canvas_instance.selected_station_data[networkspeci]['per_station'] = canvas_instance.selected_station_data[networkspeci]['timeseries'][:,np.newaxis,:]
+                # otherwise do aggregation
+                else:
+                    aggregated_data = aggregation(data_array, read_instance.statistic_aggregation, axis=1)
+                    canvas_instance.selected_station_data[networkspeci]['per_station'] = aggregated_data[:,np.newaxis,:]
+
             elif read_instance.statistic_mode in ['Temporal|Spatial', 'Flattened']:
                 canvas_instance.selected_station_data[networkspeci]['per_station'] = data_array
 
@@ -256,7 +258,7 @@ def get_station_inds(read_instance, canvas_instance, networkspeci, station_index
     if station_index is not None:
         station_inds = np.array([station_index])
     else:
-        if (read_instance.offline) or (read_instance.interactive):
+        if (read_instance.report) or (read_instance.library):
             if read_instance.temporal_colocation:
                 station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][read_instance.observations_data_label]
             else:
@@ -269,9 +271,9 @@ def get_station_inds(read_instance, canvas_instance, networkspeci, station_index
 def group_periodic(read_instance, canvas_instance, networkspeci):
     """ Function that groups data into periodic chunks
 
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
-        :param canvas_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param canvas_instance: Instance of class Dashboard or Report
         :type canvas_instance: object
         :param networkspeci: Current networkspeci (e.g. EBAS|sconco3)
         :type networkspeci: str
@@ -729,7 +731,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
                               only_label=False):
     """ Function that generates neccessary detail to crate colourbar.
 
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
         :param zstat: Statistic
         :type zstat: str
@@ -960,7 +962,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
 def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, speci):
     """ Function that generates colourbar.
 
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
         :param axs: list of relevant axes
         :type axs: list

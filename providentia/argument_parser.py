@@ -69,13 +69,13 @@ class ProvArgumentParser(object):
                                      default=False,
                                      action='store_true',
                                      help="Whether to disable dynamically creating observational filetrees")
-            self.parser.add_argument("--offline",
-                                     dest="offline",
+            self.parser.add_argument("--report", "--reports", "--offline",
+                                     dest="report",
                                      default=False,
                                      action='store_true',
                                      help="run Providentia report mode")
-            self.parser.add_argument("--notebook",
-                                     help="opens a Jupyter session")
+            self.parser.add_argument("--notebook", "--nb", "--jupyter",
+                                     help="opens a Jupyter Notebook session")
             self.parser.add_argument("--download", "--dl",
                                      dest="download",
                                      default=False,
@@ -188,10 +188,10 @@ class ProvArgumentParser(object):
                                      help="define plot options")
             self.parser.add_argument("--report_summary",
                                      dest="report_summary",
-                                     help="activate summary plots in offline report")
+                                     help="activate summary plots in reports")
             self.parser.add_argument("--report_stations",
                                      dest="report_stations",
-                                     help="activate station specific plots in offline report")
+                                     help="activate station specific plots in reports")
             self.parser.add_argument("--report_title",
                                      dest="report_title",
                                      help="report title")

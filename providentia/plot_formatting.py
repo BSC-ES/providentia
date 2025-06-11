@@ -8,6 +8,8 @@ import cartopy
 import cartopy.feature as cfeature
 import matplotlib
 import matplotlib as mpl 
+import matplotlib.dates as mdates
+import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 from matplotlib.dates import num2date
 from matplotlib import ticker
@@ -92,9 +94,9 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                                autoscale_y=False, bias_centre=False, harmonise=True):
     """ Harmonise xy limits across paradigm of plot type, unless axis limits have been defined.
     
-        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+        :param canvas_instance: Instance of class Canvas or Report
         :type canvas_instance: object
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
         :param relevant_axs: relevant axes
         :type relevant_axs: list
@@ -149,8 +151,8 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
         mapped_resolutions = read_instance.relevant_temporal_resolutions*(int(len(relevant_axs)/len(
             read_instance.relevant_temporal_resolutions)))
 
-    # remove any axes from relevant_axs which are not active (only for offline and interactive)
-    if (read_instance.offline) or (read_instance.interactive):
+    # remove any axes from relevant_axs which are not active (only for report and library)
+    if (read_instance.report) or (read_instance.library):
         relevant_axs_active = []
         mapped_resolutions_active = []
         for ax_ii, ax in enumerate(relevant_axs):
@@ -345,63 +347,104 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
                 left = xlim[0]
                 right = xlim[1]
 
-            # get steps for all data labels
-            steps = pd.date_range(left, right, freq=read_instance.active_frequency_code)
-
-            # get number of months and days
-            n_months = (12*(right.year - left.year) + (right.month - left.month))
+            # get number of days
             n_days = (right - left).days
 
-            # get months that are complete
-            months_start = pd.date_range(left, right, freq='MS')
-            if Version(matplotlib.__version__) < Version("3.9"):
-                months_end = pd.date_range(left, right, freq='M')
-            else:
-                months_end = pd.date_range(left, right, freq='ME')
-            if months_start.size > 1:
-                if (right - months_end[-1]).days >= 1:
-                    months = months_start[:-1]
-                else:
-                    months = months_start
-            else:
-                months = months_start
+            first_step = plot_characteristics['xtick_alteration']['first_step']
+            last_step = plot_characteristics['xtick_alteration']['last_step']
+            n_slices = plot_characteristics['xtick_alteration']['n_slices']
+            overlap = plot_characteristics['xtick_alteration']['overlap']
 
+            # if there's more than 3 months, define time slices as the first day of the month
+            if n_days >= 3 * 30:
+
+                # get the first and last days of each month
+                months_start = pd.date_range(left, right, freq='MS')
+                if Version(matplotlib.__version__) < Version("3.9"):
+                    months_end = pd.date_range(left, right, freq='M')
+                else:
+                    months_end = pd.date_range(left, right, freq='ME')
+
+                # set steps as the start of the months
+                steps = months_start
+
+                # remove last day if there's less than a n days difference
+                if last_step and 0 < (right - months_end[-1]).days <= overlap:
+                    steps = steps[:-1]
+
+                # remove first day if there's less than a n days difference
+                if first_step and 0 < (months_start[0] - left).days <= overlap:
+                    steps = steps[1:]
+
+                # get xticks
+                slices = int(np.ceil(len(steps) / int(n_slices+1)))
+                xticks = steps[0::slices]
+
+                # transform to numpy.datetime64
+                if not isinstance(xticks[0], np.datetime64):
+                    xticks = [np.datetime64(x, 'D') for x in xticks]
+                if not isinstance(right, np.datetime64):
+                    right = np.datetime64(right)
+
+                # add last step to xticks
+                if last_step and (xticks[-1] != right):
+                    xticks = np.append(xticks, right)
+                
+                # add first step to xticks
+                if first_step and (xticks[0] != left):
+                    xticks = np.insert(xticks, 0, left)
+        
+            else:
+                # round up the limit hours to the whole hour
+                left = pd.to_datetime(left).ceil('H')   
+                right = pd.to_datetime(right).floor('H')
+
+                # set frequency to hourly when there's less than 7 days 
+                freq = 'h' if n_days < 7 else 'D'
+
+                # get all the dates in the frequency
+                steps = pd.date_range(left, right, freq=freq)  
+
+                # get n_periods dates from all_ticks
+                periods = n_slices + int(first_step) + int(last_step) + 1
+
+                # compute number of ticks to select, it can't exceed available steps
+                n_ticks = min(periods, len(steps))
+                xticks = steps[np.linspace(0, len(steps) - 1, n_ticks, dtype=int)]
+               
             # show hours if number of days is less than 7
             if n_days < 7:
-                ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d %H:%M'))
+                ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d %Hh'))
             else:
                 ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d'))
-
-            # define time slices
-            if n_months >= 3:
-                steps = months
-            slices = int(np.ceil(len(steps) / int(plot_characteristics['xtick_alteration']['n_slices'])))
-
-            # use default axes if the number of timesteps is lower than the number of slices
-            if slices >= 1:
-                xticks = steps[0::slices]
-            else:
-                xticks = ax.xaxis.get_ticks()
-
-            # transform to numpy.datetime64
-            if not isinstance(xticks[0], np.datetime64):
-                xticks = [x.to_datetime64() for x in xticks]
-            if not isinstance(right, np.datetime64):
-                right = np.datetime64(right)
-
-            # add last step to xticks
-            if plot_characteristics['xtick_alteration']['last_step'] and (xticks[-1] != right):
-                xticks = np.append(xticks, right)
-
+            
             # set modified xticks
             for ax in relevant_axs_active:
                 ax.xaxis.set_ticks(xticks)
 
+            # get the date format to create the margin
+            clip_left = mdates.date2num(left)
+            clip_right = mdates.date2num(right)
+
+            # get the len of the original y axis
+            ylen = ax.get_ylim()[1] - ax.get_ylim()[0]
+
+            # create the rectangle that will define the margin
+            clip_rect = mpatches.Rectangle(
+                (clip_left, ax.get_ylim()[0] + ylen*0.05),
+                clip_right - clip_left,
+                ylen * 0.9,       
+                transform=ax.transData
+            )
+
+            # set the margin
+            for ts in canvas_instance.plotting.timeseries_plot:
+                ts[0].set_clip_path(clip_rect)
 
 def set_axis_title(read_instance, relevant_axis, title, plot_characteristics):
     """ Set title of plot axis.
 
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
         :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
@@ -491,9 +534,9 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
     """ Function that handles formatting of a plot axis,
         based on given plot options.
 
-        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+        :param canvas_instance: Instance of class Canvas or Report
         :type canvas_instance: object
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
         :param relevant_axs: relevant axes
         :type relevant_axs: list
@@ -593,9 +636,9 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
                 last_row_on_page=True, map_extent=False, relevant_temporal_resolutions=None):
     """ Format a plotting axis.
     
-        :param canvas_instance: Instance of class MPLCanvas or ProvidentiaOffline
+        :param canvas_instance: Instance of class Canvas or Report
         :type canvas_instance: object
-        :param read_instance: Instance of class ProvidentiaMainWindow or ProvidentiaOffline
+        :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
         :param ax: axis object
         :type ax: object
@@ -603,11 +646,11 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
         :type base_plot_type: str  
         :param plot_characteristics: plot characteristics
         :type plot_characteristics: dict
-        :param col_ii: column index (for offline report)
+        :param col_ii: column index (for reports)
         :type col_ii: int
-        :param last_valid_row: boolean informing if last valid row to plot on (for offline report)
+        :param last_valid_row: boolean informing if last valid row to plot on (for reports)
         :type last_valid_row: boolean
-        :param last_row_on_page: boolean informing if last valid row on page (for offline report)
+        :param last_row_on_page: boolean informing if last valid row on page (for reports)
         :type last_row_on_page: boolean
         :param map_extent: list of map extent bounds [lonmin, lonmax, latmin, latmax]
         :type map_extent: list

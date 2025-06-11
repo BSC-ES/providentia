@@ -4,7 +4,7 @@ def show_message(read_instance, msg, from_conf=None, deactivate=False, print=Fal
     if deactivate:
         return
 
-    if (read_instance.offline) or (read_instance.interactive) or (read_instance.interpolation) or (read_instance.download) or print:
+    if (read_instance.report) or (read_instance.library) or (read_instance.interpolation) or (read_instance.download) or print:
        read_instance.logger.warning('Warning: ' + msg)
     
     else:

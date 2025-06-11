@@ -25,7 +25,6 @@ import pyproj
 import seaborn as sns
 
 from .calculate import ExpBias, Stats
-from .dashboard_interactivity import HoverAnnotation
 from .statistics import (boxplot_inner_fences, calculate_statistic,
                          get_fairmode_data, get_z_statistic_info, get_z_statistic_type)
 from .read_aux import drop_nans, get_valid_metadata
@@ -43,7 +42,7 @@ PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 fairmode_settings = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
 
 
-class Plot:
+class Plotting:
     """ Class that makes plots and handles plot configuration options when defined. """
 
     def __init__(self, read_instance=None, canvas_instance=None):
@@ -98,8 +97,8 @@ class Plot:
             # get zstat information from plot_type
             zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type)
             
-            # check if plot type is correct for offline and interactive modes
-            if (self.read_instance.offline) or (self.read_instance.interactive):
+            # check if plot type is correct for report and library modes
+            if (self.read_instance.report) or (self.read_instance.library):
 
                 # remove plots where setting 'obs' and 'bias' options together
                 if ('obs' in plot_options) & ('bias' in plot_options): 
@@ -107,18 +106,29 @@ class Plot:
                     show_message(self.read_instance, msg)
                     valid_plot_type = False
 
-                # if no experiments are defined, remove all bias plots 
-                elif ('bias' in plot_options) or (z_statistic_sign == 'bias'):
-                    if len(data_labels) == 1:
-                        msg = f'No experiments defined, so {plot_type} bias plot cannot be created.'
+                # remove plots what calculating bias stat but temporal_colocation is not active
+                elif (z_statistic_type == 'expbias') & (not self.read_instance.temporal_colocation):
+                        msg = f'To calculate the experiment bias stat {zstat}, temporal_colocation must be set to True, so {plot_type} plot cannot be created.'
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
-                # if are making an experiment bias plot, and temporal_colocation is off, then remove plot
-                elif (z_statistic_type == 'expbias') & (not self.read_instance.temporal_colocation):
-                    msg = f'To calculate the experiment bias stat {zstat}, temporal_colocation must be set to True, so {plot_type} plot cannot be created.'
-                    show_message(self.read_instance, msg)
-                    valid_plot_type = False
+                # if no experiments are defined, remove all bias plots, or plots with bias statistics 
+                elif ('bias' in plot_options) or (z_statistic_sign == 'bias'):
+                    if len(data_labels) == 1:
+                        msg = f'No experiments defined, so {plot_type} plot cannot be created.'
+                        show_message(self.read_instance, msg)
+                        valid_plot_type = False
+
+                # break loop if the plot type is not valid and remove plot type from lists
+                if not valid_plot_type:
+                    if self.read_instance.report:
+                        if plot_type in self.read_instance.summary_plots_to_make:
+                            self.read_instance.summary_plots_to_make.remove(plot_type)
+                        if plot_type in self.read_instance.station_plots_to_make:
+                            self.read_instance.station_plots_to_make.remove(plot_type)
+                    elif self.read_instance.library:
+                        return valid_plot_type
+                    continue
 
             # add new keys to make plots with stats (map, periodic, heatmap, table)
             if zstat:
@@ -128,8 +138,8 @@ class Plot:
                 # combine basic and expbias stats dicts together
                 stats_dict = {**self.read_instance.basic_stats, **self.read_instance.expbias_stats}
                 
-                # check if plot type is correct for offline and interactive modes
-                if (self.read_instance.offline) or (self.read_instance.interactive):
+                # check if plot type is correct for report and library modes
+                if (self.read_instance.report) or (self.read_instance.library):
 
                     # check all defined plot options are allowed for current plot type
                     invalid_plot_options = [plot_option for plot_option in plot_options if plot_option not in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options']]
@@ -150,15 +160,28 @@ class Plot:
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
-                if not valid_plot_type:
-                    if self.read_instance.offline:
-                        if plot_type in self.read_instance.summary_plots_to_make:
-                            self.read_instance.summary_plots_to_make.remove(plot_type)
-                        if plot_type in self.read_instance.station_plots_to_make:
-                            self.read_instance.station_plots_to_make.remove(plot_type)
-                    elif self.read_instance.interactive:
-                        return valid_plot_type
-                    continue
+                    # warning for taylor plot if have no experiments
+                    elif (base_plot_type in ['taylor']) & (len(data_labels) == 1):
+                        msg = f'No experiments defined, so {plot_type} cannot be created.'
+                        show_message(self.read_instance, msg)
+                        valid_plot_type = False
+
+                    # warning for timeseries bias plot if the temporal colocation is not active
+                    elif ('timeseries' == base_plot_type) & ('bias' in plot_options) & (not self.read_instance.temporal_colocation):
+                        msg = f'{plot_type} cannot be created as temporal colocation is not active.'
+                        show_message(self.read_instance, msg)
+                        valid_plot_type = False
+
+                    # break loop if the plot type is not valid and remove plot type from lists
+                    if not valid_plot_type:
+                        if self.read_instance.report:
+                            if plot_type in self.read_instance.summary_plots_to_make:
+                                self.read_instance.summary_plots_to_make.remove(plot_type)
+                            if plot_type in self.read_instance.station_plots_to_make:
+                                self.read_instance.station_plots_to_make.remove(plot_type)
+                        elif self.read_instance.library:
+                            return valid_plot_type
+                        continue
 
                 # add information for plot type 
                 # first try get it from custom plot charcteristics, and then from base plot type template 
@@ -191,8 +214,8 @@ class Plot:
                 # get base plot type (without options)
                 base_plot_type = plot_type.split('_')[0] 
 
-                # check if plot type is correct for offline and interactive modes
-                if (self.read_instance.offline) or (self.read_instance.interactive):
+                # check if plot type is correct for report and library modes
+                if (self.read_instance.report) or (self.read_instance.library):
 
                     # check all defined plot options are allowed for current plot type
                     invalid_plot_options = [plot_option for plot_option in plot_options if plot_option not in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options']]
@@ -201,15 +224,15 @@ class Plot:
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
-                    # warning for scatter, taylor and fairmode plots if the temporal colocation is not active 
-                    elif (base_plot_type in ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']) & (not self.read_instance.temporal_colocation):
-                        msg = f'{plot_type} cannot be created as temporal colocation is not active.'
+                    # warning for scatter and fairmode plots if have no experiments
+                    elif (base_plot_type in ['scatter', 'fairmode-target', 'fairmode-statsummary']) & (len(data_labels) == 1):
+                        msg = f'No experiments defined, so {plot_type} cannot be created.'
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
-                    # warning for scatter, taylor and fairmode plots if have no experiments
-                    elif (base_plot_type in ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']) & (len(data_labels) == 1):
-                        msg = f'No experiments defined, so {plot_type} cannot be created.'
+                    # warning for scatter and fairmode plots if the temporal colocation is not active 
+                    elif (base_plot_type in ['scatter', 'fairmode-target', 'fairmode-statsummary']) & (not self.read_instance.temporal_colocation):
+                        msg = f'{plot_type} cannot be created as temporal colocation is not active.'
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
@@ -219,22 +242,16 @@ class Plot:
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
-                    # warning for timeseries bias plot if have no experiments
-                    elif ('timeseries' == base_plot_type) & ('bias' in plot_options) & (len(data_labels) == 1):
-                        msg = f'No experiments defined, so {plot_type} cannot be created.'
-                        show_message(self.read_instance, msg)
-                        valid_plot_type = False
-
-                # break loop if the plot type is not valid and remove plot type from lists
-                if not valid_plot_type:
-                    if self.read_instance.offline:
-                        if plot_type in self.read_instance.summary_plots_to_make:
-                            self.read_instance.summary_plots_to_make.remove(plot_type)
-                        if plot_type in self.read_instance.station_plots_to_make:
-                            self.read_instance.station_plots_to_make.remove(plot_type)
-                    elif self.read_instance.interactive:
-                        return valid_plot_type
-                    continue
+                    # break loop if the plot type is not valid and remove plot type from lists
+                    if not valid_plot_type:
+                        if self.read_instance.report:
+                            if plot_type in self.read_instance.summary_plots_to_make:
+                                self.read_instance.summary_plots_to_make.remove(plot_type)
+                            if plot_type in self.read_instance.station_plots_to_make:
+                                self.read_instance.station_plots_to_make.remove(plot_type)
+                        elif self.read_instance.library:
+                            return valid_plot_type
+                        continue
 
                 # add information for plot type for base plot type 
                 if plot_type in self.canvas_instance.plot_characteristics_templates:
@@ -258,8 +275,8 @@ class Plot:
                 elif self.canvas_instance.plot_characteristics[plot_type]['orientation'] == 'portrait':
                     self.canvas_instance.plot_characteristics[plot_type]['figure']['figsize'] = self.canvas_instance.portrait_figsize
 
-        # return valid plot type if interactive mode
-        if self.read_instance.interactive:
+        # return valid plot type if library mode
+        if self.read_instance.library:
             return valid_plot_type
 
     def make_legend_handles(self, plot_characteristics_legend, data_labels=None, set_obs=True):
@@ -516,12 +533,12 @@ class Plot:
         plot_txt = relevant_axis.text(0.0, 1.0, str_to_plot, transform=relevant_axis.transAxes, **plot_characteristics['plot'])
 
         # modify limit to wrap text as axis width in pixels
-        if self.read_instance.offline: 
+        if self.read_instance.report: 
             
             # get axis dimensions in pixels
             ax_width_px = relevant_axis.bbox.width * plot_characteristics['figure']['nrows']
             
-        elif self.read_instance.interactive:
+        elif self.read_instance.library:
 
             # get axis dimensions in pixels
             ax_width_px = relevant_axis.bbox.width
@@ -540,7 +557,7 @@ class Plot:
         plot_txt._get_wrap_line_width = lambda: ax_width_px
 
         # track plot elements if using dashboard 
-        if (not self.read_instance.offline) and (not self.read_instance.interactive):
+        if (not self.read_instance.report) and (not self.read_instance.library):
             self.track_plot_elements(self.read_instance.observations_data_label, 'metadata', 'plot', [plot_txt], bias=False)
 
     def make_map(self, relevant_axis, networkspeci, plot_characteristics, plot_options, zstat=None, labela='', 
@@ -568,8 +585,8 @@ class Plot:
                                                                          networkspeci, zstat, [labela], [labelb], 
                                                                          map=True)
 
-        # get marker size (for offline and interactive)
-        if (self.read_instance.offline) or (self.read_instance.interactive):
+        # get marker size (for report and library)
+        if (self.read_instance.report) or (self.read_instance.library):
             self.get_markersize(relevant_axis, 'map', networkspeci, plot_characteristics, 
                                 active_map_valid_station_inds=active_map_valid_station_inds)
         # if using dashboard make z_statistic and active_map_valid_station_inds class variables
@@ -584,7 +601,7 @@ class Plot:
                                                       **plot_characteristics['plot'])
         
         # track plot elements if using dashboard 
-        if (not self.read_instance.offline) and (not self.read_instance.interactive):
+        if (not self.read_instance.report) and (not self.read_instance.library):
             self.track_plot_elements(self.read_instance.observations_data_label, 'map', 'plot', [self.stations_scatter], bias=False)
 
     def make_timeseries(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options, 
@@ -607,9 +624,12 @@ class Plot:
             :type chunk_resolution: str
         """
 
-        # skip making timeseries (points) for offline and interactive mode
+        # create list for timeseries plot
+        self.timeseries_plot = []
+
+        # skip making timeseries (points) for report and library mode
         # we do not apply this in the dashboard to avoid being unable to see the points on certain changes
-        if ((self.read_instance.offline) or (self.read_instance.interactive)) and ('hidedata' in plot_options):
+        if ((self.read_instance.report) or (self.read_instance.library)) and ('hidedata' in plot_options):
             return
 
         # if 'obs' in plot_options, set data labels to just observations data label
@@ -631,7 +651,7 @@ class Plot:
         cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
         # get chunking stat and resolution in dashboard
-        if (not self.read_instance.offline) and (not self.read_instance.interactive):
+        if (not self.read_instance.report) and (not self.read_instance.library):
             chunk_stat = self.canvas_instance.timeseries_chunk_stat.currentText()
             chunk_resolution = self.canvas_instance.timeseries_chunk_resolution.currentText()
             chunk_stat = None if chunk_stat == 'None' else chunk_stat
@@ -656,7 +676,7 @@ class Plot:
                plot_characteristics['bias_line']['y'] = self.read_instance.expbias_stats[chunk_stat]['minimum_bias']
             bias_line = relevant_axis.axhline(**plot_characteristics['bias_line'])
             # track plot elements if using dashboard 
-            if (not self.read_instance.offline) and (not self.read_instance.interactive):
+            if (not self.read_instance.report) and (not self.read_instance.library):
                 self.track_plot_elements('ALL', 'timeseries', 'bias_line', [bias_line], bias=bias)
 
         # iterate through data labels
@@ -681,25 +701,25 @@ class Plot:
             else:
                 ts = timeseries_data[data_label]
             
-            # get marker size (for offline and interactive)
-            if (self.read_instance.offline) or (self.read_instance.interactive):
+            # get marker size (for report and library)
+            if (self.read_instance.report) or (self.read_instance.library):
                 self.get_markersize(relevant_axis, 'timeseries', networkspeci, plot_characteristics, data=ts)
 
             # make timeseries plot
-            self.timeseries_plot = relevant_axis.plot(ts, 
+            self.timeseries_plot.append(relevant_axis.plot(ts, 
                                                       color=self.read_instance.plotting_params[data_label]['colour'], 
-                                                      **plot_characteristics['plot'])
+                                                      **plot_characteristics['plot']))
 
             # update maximum smooth value
-            if (not self.read_instance.offline) and (not self.read_instance.interactive):
+            if (not self.read_instance.report) and (not self.read_instance.library):
                 self.canvas_instance.timeseries_smooth_window_sl.setMaximum(len(ts))
                 # To get straight line
                 # if self.canvas_instance.timeseries_smooth_window_sl.value() != (len(ts)*2 - 1):
                 #     self.canvas_instance.timeseries_smooth_window_sl.setMaximum(int(len(ts)*2 - 1))
 
             # track plot elements if using dashboard 
-            if (not self.read_instance.offline) and (not self.read_instance.interactive):
-                self.track_plot_elements(data_label, 'timeseries', 'plot', self.timeseries_plot, bias=bias)
+            if (not self.read_instance.report) and (not self.read_instance.library):
+                self.track_plot_elements(data_label, 'timeseries', 'plot', self.timeseries_plot[-1], bias=bias)
 
     def make_periodic(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options, zstat=None):
         """ Make period or period-violin plot.
@@ -853,7 +873,7 @@ class Plot:
                         violins.extend(limit_plot)
 
                     # track plot elements if using dashboard 
-                    if (not self.read_instance.offline) and (not self.read_instance.interactive):
+                    if (not self.read_instance.report) and (not self.read_instance.library):
                         self.track_plot_elements(data_label, 'periodic-violin', 'violin_plot_{}'.format(relevant_temporal_resolution), violins, bias=False)
                         self.track_plot_elements(data_label, 'periodic-violin', 'Median_plot_{}'.format(relevant_temporal_resolution), median_plots, bias=False)
 
@@ -871,7 +891,7 @@ class Plot:
                     for mb in minimum_bias:
                         bias_lines += [relevant_sub_ax.axhline(y=mb, **plot_characteristics['bias_line'])]
                     # track plot elements if using dashboard 
-                    if (not self.read_instance.offline) and (not self.read_instance.interactive):
+                    if (not self.read_instance.report) and (not self.read_instance.library):
                         self.track_plot_elements('ALL', 'periodic', 'bias_line_{}'.format(relevant_temporal_resolution), 
                                                  bias_lines, bias=bias)
 
@@ -900,7 +920,7 @@ class Plot:
                                                                **plot_characteristics['plot'])
 
                     # track plot elements if using dashboard 
-                    if (not self.read_instance.offline) and (not self.read_instance.interactive):
+                    if (not self.read_instance.report) and (not self.read_instance.library):
                         self.track_plot_elements(data_label, 'periodic', 'plot_{}'.format(relevant_temporal_resolution), self.periodic_plots, bias=bias)
 
     def make_distribution(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options,
@@ -972,7 +992,7 @@ class Plot:
         if bias:
             bias_line = [relevant_axis.axhline(**plot_characteristics['bias_line'])]
             # track plot elements if using dashboard 
-            if (not self.read_instance.offline) and (not self.read_instance.interactive):
+            if (not self.read_instance.report) and (not self.read_instance.library):
                 self.track_plot_elements('ALL', 'distribution', 'bias_line', bias_line, bias=bias)
             if self.read_instance.observations_data_label in cut_data_labels:
                 cut_data_labels.remove(self.read_instance.observations_data_label)
@@ -1123,7 +1143,7 @@ class Plot:
                                                             **plot_characteristics['plot'])
 
                 # track plot elements if using dashboard 
-                if (not self.read_instance.offline) and (not self.read_instance.interactive):
+                if (not self.read_instance.report) and (not self.read_instance.library):
                     self.track_plot_elements(data_label, 'distribution', 'plot', self.distribution_plot, bias=bias)
 
         # if have made PDFs for violin plot then return it
@@ -1162,9 +1182,9 @@ class Plot:
             relevant_axis.plot([0, 0.5], [0, 1], transform=relevant_axis.transAxes, 
                                **plot_characteristics['2:1_line'])
 
-        # skip making scatter for offline and interactive mode
+        # skip making scatter for report and library mode
         # we do not apply this in the dashboard to avoid being unable to see the points on certain changes
-        if ((self.read_instance.offline) or (self.read_instance.interactive)) and ('hidedata' in plot_options):
+        if ((self.read_instance.report) or (self.read_instance.library)) and ('hidedata' in plot_options):
             return
         
         # get valid data labels for networkspeci
@@ -1200,8 +1220,8 @@ class Plot:
             if subset:
                 experiment_data = experiment_data[inds_subset]
 
-            # get marker size (for offline and interactive)
-            if (self.read_instance.offline) or (self.read_instance.interactive):
+            # get marker size (for report and library)
+            if (self.read_instance.report) or (self.read_instance.library):
                 self.get_markersize(relevant_axis, 'scatter', networkspeci, plot_characteristics, data=observations_data)
 
             # create scatter plot
@@ -1210,7 +1230,7 @@ class Plot:
                                                    **plot_characteristics['plot'])
 
             # track plot elements if using dashboard 
-            if (not self.read_instance.offline) and (not self.read_instance.interactive):
+            if (not self.read_instance.report) and (not self.read_instance.library):
                 self.track_plot_elements(data_label, 'scatter', 'plot', self.scatter_plot, bias=False)
 
     def make_boxplot(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
@@ -1335,7 +1355,7 @@ class Plot:
                         patch.set(facecolor='white')
 
                     # track plot elements if using dashboard 
-                    if (not self.read_instance.offline) and (not self.read_instance.interactive):
+                    if (not self.read_instance.report) and (not self.read_instance.library):
                         self.track_plot_elements(data_label, 'boxplot', 'plot', boxplot, bias=False)
 
         # set xticklabels 
@@ -1390,7 +1410,7 @@ class Plot:
             :type zstat: str
             :param subsection: Currently active subsection
             :type subsection: str
-            :param plotting_paradigm: Plotting paradigm (summary or station in offline reports)
+            :param plotting_paradigm: Plotting paradigm (summary or station report)
             :type plotting_paradigm: str
             :param stats_df: Dataframe of previously calculated statistics, default is None
             :param stats_df: pandas dataframe
@@ -1539,7 +1559,7 @@ class Plot:
                 tick.set_verticalalignment("center")
 
         # track plot elements if using dashboard 
-        if (not self.read_instance.offline) and (not self.read_instance.interactive):
+        if (not self.read_instance.report) and (not self.read_instance.library):
             self.track_plot_elements(self.read_instance.observations_data_label, 'heatmap', 'plot', heatmap, bias=bias)
 
     def make_table(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options,
@@ -1562,7 +1582,7 @@ class Plot:
             :type statsummary: boolean
             :param subsection: Currently active subsection
             :type subsection: str
-            :param plotting_paradigm: Plotting paradigm (summary or station in offline reports)
+            :param plotting_paradigm: Plotting paradigm (summary or station report)
             :type plotting_paradigm: str
             :param stats_df: Dataframe of previously calculated statistics, default is None
             :param stats_df: pandas dataframe
@@ -1635,8 +1655,8 @@ class Plot:
         else: 
             stats_df = stats_df.applymap(lambda x: round_decimal_places(x, decimal_places))
 
-        # offline reports
-        if (self.read_instance.offline) or (self.read_instance.interactive):
+        # reports
+        if (self.read_instance.report) or (self.read_instance.library):
             
             # get relevant data
             if 'multispecies' not in plot_options:
@@ -1657,7 +1677,7 @@ class Plot:
             stats_df = stats_df.reset_index()
 
             # hide subsections from station plots or if there is only 1 section
-            if (self.read_instance.offline) or (self.read_instance.interactive):
+            if (self.read_instance.report) or (self.read_instance.library):
                 if plotting_paradigm == 'station' or len(np.unique(subsections)) == 1:
                     stats_df = stats_df.drop(columns='subsections')
         
@@ -1743,7 +1763,7 @@ class Plot:
                                     **plot_characteristics['plot'])
 
         # merge cells in networkspecies and subsections columns (if any)
-        if (self.read_instance.offline) or (self.read_instance.interactive):
+        if (self.read_instance.report) or (self.read_instance.library):
             column_ii = 0
             for column, rows in zip(['networkspecies', 'subsections'], (networkspecies, subsections)):
                 if column in stats_df.columns:
@@ -1769,7 +1789,7 @@ class Plot:
             table.auto_set_column_width(np.arange(-1, len(col_labels)+1))
 
         # track plot elements if using dashboard 
-        if (not self.read_instance.offline) and (not self.read_instance.interactive):
+        if (not self.read_instance.report) and (not self.read_instance.library):
             if statsummary:
                 self.track_plot_elements(self.read_instance.observations_data_label, 'statsummary', 'plot', [table], bias=bias)
             else:
@@ -1799,7 +1819,7 @@ class Plot:
             :type stddev_max: float
         """
 
-        if (self.read_instance.offline) or (self.read_instance.interactive):
+        if (self.read_instance.report) or (self.read_instance.library):
             self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(
                 PolarAxes.PolarTransform(apply_theta_transforms=False))
 
@@ -1861,7 +1881,7 @@ class Plot:
             grid_locator1=gl1, tick_formatter1=tf1)
 
         # update axis position and size in dashboard
-        if (not self.read_instance.offline) and (not self.read_instance.interactive):
+        if (not self.read_instance.report) and (not self.read_instance.library):
 
             # find Taylor plot position in layout
             for plot_position in range(2, 6):
@@ -1945,21 +1965,6 @@ class Plot:
         ref_y = np.zeros_like(ref_x) + reference_stddev
         self.taylor_polar_relevant_axis.plot(ref_x, ref_y, **plot_characteristics['contours']['style']['obs'])
 
-        # set up annotations
-        if (not self.read_instance.offline) and (not self.read_instance.interactive):
-            # create annotation on hover
-            annotation = HoverAnnotation(self.canvas_instance, 
-                                        'taylor', 
-                                        self.taylor_polar_relevant_axis,
-                                        plot_characteristics, 
-                                        add_vline=False)
-            self.canvas_instance.annotations['taylor'] = annotation.annotation
-            self.canvas_instance.annotations_lock['taylor'] = False
-
-            # connect axis to hover function
-            self.canvas_instance.figure.canvas.mpl_connect('motion_notify_event', 
-                lambda event: annotation.hover_annotation(event, 'taylor'))
-
         # add models
         for data_label, stddev, corr_stat in zip(stats_df.index, 
                                                  stats_df[xylabel], 
@@ -1973,7 +1978,7 @@ class Plot:
                                                                     label=data_label) 
 
             # track plot elements if using dashboard 
-            if (not self.read_instance.offline) and (not self.read_instance.interactive):
+            if (not self.read_instance.report) and (not self.read_instance.library):
                 self.track_plot_elements(data_label, 'taylor', 'plot', self.taylor_plot, bias=False)
 
         return True
@@ -1987,8 +1992,8 @@ class Plot:
                                                      self.read_instance.resolution, data_labels)
         
         # skip making plot if there is no valid data
-        # interactive and offline modes are already handling this in advance
-        if (not self.read_instance.offline) and (not self.read_instance.interactive) and (not any(valid_station_idxs)):
+        # library and report modes are already handling this in advance
+        if (not self.read_instance.report) and (not self.read_instance.library) and (not any(valid_station_idxs)):
             msg = 'No valid data to create FAIRMODE target plot after filtering by coverage.'
             show_message(self.read_instance, msg)
             relevant_axis.set_visible(False)
@@ -2122,7 +2127,7 @@ class Plot:
                 self.fairmode_target_plot.append(stations_dots[0])
 
             # track plot elements if using dashboard 
-            if (not self.read_instance.offline) and (not self.read_instance.interactive):
+            if (not self.read_instance.report) and (not self.read_instance.library):
                 self.track_plot_elements(data_label, 'fairmode-target', 'plot', self.fairmode_target_plot, bias=False)
 
             # add MQI90
@@ -2177,7 +2182,7 @@ class Plot:
                              **plot_characteristics['markers']['legend'])
 
         # add title if using dashboard 
-        if (not self.read_instance.offline) and (not self.read_instance.interactive):
+        if (not self.read_instance.report) and (not self.read_instance.library):
             set_axis_title(self.read_instance, relevant_axis, fairmode_settings[speci]['title'], 
                            plot_characteristics)
 
@@ -2211,9 +2216,6 @@ class Plot:
 
         # iterate through data labels
         for data_label in cut_data_labels:
-            # continue for observations data label
-            if data_label == self.read_instance.observations_data_label:
-                continue
 
             # get experiment data
             experiment_data = data[valid_data_labels.index(data_label), :, :]
@@ -2260,10 +2262,18 @@ class Plot:
                 statistics_list.pop(1)
 
             # create list for track_plot_elements
-            fairmode_statsummary_plot = []
-
+            self.fairmode_statsummary_plot = []
+            
             # apply configuration to each row
             for i, (row, fairmode_data) in enumerate(zip(subplots,statistics_list)):
+
+                # for the two firsts rows, skip the experiments
+                if i < 2 and data_label != self.read_instance.observations_data_label:
+                    continue
+
+                # skip the observations all the rows but the two first ones
+                if i >= 2 and data_label == self.read_instance.observations_data_label:
+                    continue
 
                 # get row dictionary
                 plot_dict = subplots[row]
@@ -2277,14 +2287,6 @@ class Plot:
                 
                 # add dashed line on the left
                 relevant_axis[i*4 + 3].spines['left'].set_linestyle((10, (8, 5)))                  
-
-                # add units to the first two rows
-                if 'units' in plot_dict:
-                    relevant_axis[i*4 + 3].text(
-                        *plot_characteristics["auxiliar"]["units"]["position"], 
-                        plot_dict['units'], 
-                        fontsize=plot_characteristics["auxiliar"]["units"]["fontsize"],
-                        fontweight=plot_characteristics["auxiliar"]["units"]["fontweight"])
                 
                 # configure color of the row and the dot on the right for rows 3 to 8
                 if 'range_style' in plot_dict:
@@ -2352,7 +2354,7 @@ class Plot:
                         markersize=plot_characteristics["auxiliar"]["station_dots"]["markersize"])
                     
                     # add the dots to the track plot elements list
-                    fairmode_statsummary_plot.append(stations_dots[0])
+                    self.fairmode_statsummary_plot.append(stations_dots[0])
                     
                     # remove it from the data plotted in the middle zone
                     fairmode_data = fairmode_data[~right_zone_mask] if isinstance(fairmode_data,np.ndarray) else np.array([])
@@ -2397,7 +2399,7 @@ class Plot:
                             markersize=plot_characteristics["auxiliar"]["station_dots"]["markersize"])
                         
                         # add the dot to the track plot elements list
-                        fairmode_statsummary_plot.append(stations_dots[0])
+                        self.fairmode_statsummary_plot.append(stations_dots[0])
                         
                         # remove it from the data plotted in the middle zone
                         fairmode_data = fairmode_data[~left_zone_mask] if isinstance(fairmode_data,np.ndarray) else np.array([])
@@ -2413,44 +2415,57 @@ class Plot:
                 relevant_axis[i*4 + 1].tick_params(**plot_characteristics["auxiliar"]["station_dots"]["tick_params"])
                 
                 # add the dots to the track plot elements list
-                fairmode_statsummary_plot.append(stations_dots[0])
+                self.fairmode_statsummary_plot.append(stations_dots[0])
 
-                # get the row title
-                row_title = plot_dict["title"]
-               
-                # write the threshold on the exceedances row title
-                if row == "observed exceedances":
-                    row_title = row_title.format(exc_threshold)
-
-                # add row title
-                relevant_axis[i*4 + 0].text(
-                    *plot_characteristics["auxiliar"]["row_title"]["position"], 
-                    row_title, 
-                    **plot_characteristics["auxiliar"]["row_title"], 
-                    transform=relevant_axis[i*4 + 0].transAxes)
-           
-                # add left description
-                relevant_axis[i*4 + 0].text(
-                    *plot_characteristics["auxiliar"]["description"]["position"], 
-                    plot_dict["description"], 
-                    **plot_characteristics["auxiliar"]["description"], 
-                    transform=relevant_axis[i*4 + 0].transAxes)
-
-                # add separator
-                if "separator" in plot_dict:
-                    relevant_axis[i*4 + 0].text(
-                        *plot_characteristics["auxiliar"]["separator"]["position"], 
-                        plot_characteristics["auxiliar"]["separator_text"], 
-                        **plot_characteristics["auxiliar"]["separator"], 
-                        transform=relevant_axis[i*4 + 0].transAxes)
             
             # track plot elements if using dashboard 
-            if (not self.read_instance.offline) and (not self.read_instance.interactive):
+            if (not self.read_instance.report) and (not self.read_instance.library):
                 self.track_plot_elements(data_label, 'fairmode-statsummary', 'plot', 
-                                         fairmode_statsummary_plot, bias=False)
+                                         self.fairmode_statsummary_plot, bias=False)
                         
+        # plot the row titles, descriptions, separators and units
+        for i, (row, fairmode_data) in enumerate(zip(subplots,statistics_list)):
+            # get row dictionary
+            plot_dict = subplots[row]
+
+            # get the row title
+            row_title = plot_dict["title"]
+
+            # write the threshold on the exceedances row title
+            if row == "observed_exceedances":
+                row_title = row_title.format(exc_threshold)
+
+            # add units to the first two rows
+            if 'units' in plot_dict:
+                relevant_axis[i*4 + 3].text(
+                    *plot_characteristics["auxiliar"]["units"]["position"], 
+                    plot_dict['units'], 
+                    fontsize=plot_characteristics["auxiliar"]["units"]["fontsize"])
+                
+            # add row title
+            relevant_axis[i*4 + 0].text(
+                *plot_characteristics["auxiliar"]["row_title"]["position"], 
+                row_title, 
+                **plot_characteristics["auxiliar"]["row_title"], 
+                transform=relevant_axis[i*4 + 0].transAxes)
+        
+            # add left description
+            relevant_axis[i*4 + 0].text(
+                *plot_characteristics["auxiliar"]["description"]["position"], 
+                plot_dict["description"], 
+                **plot_characteristics["auxiliar"]["description"], 
+                transform=relevant_axis[i*4 + 0].transAxes)
+
+            # add separator
+            if "separator" in plot_dict:
+                relevant_axis[i*4 + 0].text(
+                    *plot_characteristics["auxiliar"]["separator"]["position"], 
+                    plot_characteristics["auxiliar"]["separator_text"], 
+                    **plot_characteristics["auxiliar"]["separator"], 
+                    transform=relevant_axis[i*4 + 0].transAxes)
+
         # add title if using dashboard 
-        if (not self.read_instance.offline) and (not self.read_instance.interactive):
+        if (not self.read_instance.report) and (not self.read_instance.library):
             set_axis_title(self.read_instance, relevant_axis, fairmode_settings[speci]['title'], plot_characteristics)
 
 
