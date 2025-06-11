@@ -6,7 +6,6 @@ import random
 import subprocess
 import sys
 import time
-from pydoc import locate
 import numpy as np
 import multiprocessing
 
@@ -119,6 +118,9 @@ class SubmitInterpolation(object):
         sys.path.append(join(PROVIDENTIA_ROOT, 'providentia', 'dependencies','unit-converter'))
         import unit_converter
 
+        #initialise current line number for printing output
+        self.current_line = -1
+
     def gather_arguments(self):
         ''' Gather list of arguments for all unique tasks to process, as defined in the configuration file. '''
 
@@ -168,16 +170,16 @@ class SubmitInterpolation(object):
             if exp_dir is None: 
                 
                 if self.machine != "local":
-                    msg += f"The experiment '{experiment_to_process}' is in none of the experiment paths defined in settings/interp_experiments.yaml."
+                    msg = f"The experiment '{experiment_to_process}' is in none of the experiment paths defined in settings/interp_experiments.yaml."
+                    print(msg)
 
                 exp_to_interp_path = join(self.exp_to_interp_root, experiment_to_process)
                 if os.path.exists(exp_to_interp_path):
                     exp_dir = exp_to_interp_path
-                
-                msg += f"The experiment '{experiment_to_process}' is not in {self.exp_to_interp_root}."
-
-                print(msg)
-                continue
+                else:
+                    msg = f"The experiment '{experiment_to_process}' is not in {self.exp_to_interp_root}."
+                    print(msg)
+                    continue
 
             # get model bin edges
             r_edges, rho_bins = get_model_bin_radii(experiment_type)
@@ -751,6 +753,9 @@ class SubmitInterpolation(object):
         # time start of interpolation jobs
         interpolation_start = time.time()
 
+        # print current output to console if in library mode
+        self.stdout_to_console()
+
         # submit slurm script
         submit_complete = False
         while submit_complete == False:
@@ -858,6 +863,9 @@ class SubmitInterpolation(object):
                 print('THE FOLLOWING INTERPOLATION TASKS FAILED: {}'.format(failed_tasks))
             if len(not_finished_tasks) > 0:
                 print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
+
+        # print finalised output to console if in library mode
+        self.stdout_to_console()
     
     def run_command(self, commands):
         arguments_list = commands.strip().split()
@@ -884,7 +892,10 @@ class SubmitInterpolation(object):
             n_cpus = self.n_cpus
             msg = f'Using {n_cpus} CPUs.'
         print(msg)
-        
+
+        # print current output to console if in library mode
+        self.stdout_to_console()
+
         # launch interpolation
         commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(
             self.working_directory, argument) for argument in self.arguments]
@@ -924,6 +935,29 @@ class SubmitInterpolation(object):
             if len(not_finished_tasks) > 0:
                 print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
     
+        # print finalised output to console if in library mode
+        self.stdout_to_console()
+
+    def stdout_to_console(self):
+        ''' Function to print stdout to console in library mode'''
+
+        #library mode?
+        if self.library:
+            #flush stdout
+            sys.stdout.flush()
+            #get current stdout
+            current_stdout = sys.stdout
+            #restore stdout to console
+            sys.stdout = sys.__stdout__
+            #open management logfile and print contents
+            with open('logs/interpolation/management_logs/{}.out'.format(self.slurm_job_id), 'r') as f:
+                for line_ii, line in enumerate(f):
+                    #only print line if not previously printed
+                    if line_ii > self.current_line:
+                        print(line.rstrip('\n'))
+                        self.current_line = line_ii 
+            #restore stdout to file
+            sys.stdout = current_stdout
 
 def main(**kwargs):
 

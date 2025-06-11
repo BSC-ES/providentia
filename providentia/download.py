@@ -38,47 +38,7 @@ interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'int
 mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 
 
-def check_time(size, file_size):
-    if (time.time() - download.ncfile_dl_start_time) > download.timeoutLimit:
-        error = 'Download timeout, try later.'
-        download.logger.error(error)
-        sys.exit(1)
-        
-        
-def sighandler(*unused):
-    download.logger.info('\nKeyboard Interrupt. Stopping execution.')
-    
-    # close connection, if it exists
-    if hasattr(download, 'ssh') and download.ssh is not None:
-        download.logger.info("\nClosing ssh connection...")
-        download.ssh.close()
-        if hasattr(download, 'sftp'):
-            download.sftp.close()
-
-    # delete the las downloaded nc file to avoid corrupted files
-    if hasattr(download,'latest_nc_file_path'):
-        download.logger.info(f"\nDeleting last file to avoid corruption: {download.latest_nc_file_path}...")
-        if os.path.isfile(download.latest_nc_file_path):
-            os.remove(download.latest_nc_file_path)
-
-    # remove the output files frojm dtrsync in case it was a download from storage5
-    if download.machine == "storage5":
-        time.sleep(3)
-            
-        for file in os.listdir(PROVIDENTIA_ROOT):
-            if file.startswith("dtrsync_"):
-                os.remove(join(PROVIDENTIA_ROOT,file)) 
-
-    # delete temp dir if necessary
-    temp_dir = join(download.ghost_root,'.temp')
-    if os.path.exists(temp_dir):
-        download.logger.info(f"\nDeleting {temp_dir}")
-        shutil.rmtree(temp_dir)
-    
-    download.logger.info("\nExiting...")
-    sys.exit()
-
-class ProvidentiaDownload(object):
+class Download(object):
     def __init__(self, **kwargs):
 
         # get providentia start time
@@ -192,7 +152,7 @@ class ProvidentiaDownload(object):
             self.provconf.check_validity(deactivate_warning=True)
 
             # from here generate control if user stopped execution
-            signal.signal(signal.SIGINT, sighandler)
+            signal.signal(signal.SIGINT, self.sighandler)
             
             # only the local download iterates through the networks
             if self.machine in "local":
@@ -265,8 +225,8 @@ class ProvidentiaDownload(object):
                             self.logger.error(error)
                             sys.exit(1)
 
-                # get orignal species back
-                self.species = main_species
+                    # get orignal species back
+                    self.species = main_species
 
             # when one of those symbols is passed, get all experiments
             if self.experiments == {'*' : '*'}:
@@ -599,7 +559,7 @@ class ProvidentiaDownload(object):
                             # initialize the timeout and get the file
                             self.ncfile_dl_start_time = time.time()
                             remote_path = join(remote_dir,nc_file)
-                            self.sftp.get(remote_path, local_path, callback=check_time)
+                            self.sftp.get(remote_path, local_path, callback=self.check_time)
 
             return initial_check_nc_files
         
@@ -753,7 +713,7 @@ class ProvidentiaDownload(object):
                             # initialize the timeout and get the file
                             self.ncfile_dl_start_time = time.time()
                             remote_path = join(remote_dir,nc_file)
-                            self.sftp.get(remote_path, local_path, callback=check_time)
+                            self.sftp.get(remote_path, local_path, callback=self.check_time)
                        
             return initial_check_nc_files
 
@@ -1093,7 +1053,7 @@ class ProvidentiaDownload(object):
                             # initialize the timeout and get the file
                             self.ncfile_dl_start_time = time.time()
                             remote_path = join(remote_dir,nc_file)
-                            self.sftp.get(remote_path, local_path, callback=check_time) 
+                            self.sftp.get(remote_path, local_path, callback=self.check_time) 
             
             return initial_check_nc_files
 
@@ -1363,7 +1323,7 @@ class ProvidentiaDownload(object):
                             # initialize the timeout and get the file
                             self.ncfile_dl_start_time = time.time()
                             remote_path = join(remote_dir, nc_file)
-                            self.sftp.get(remote_path, local_path, callback=check_time) 
+                            self.sftp.get(remote_path, local_path, callback=self.check_time) 
             
             return initial_check_nc_files
 
@@ -1788,7 +1748,7 @@ class ProvidentiaDownload(object):
 
             # filter files by resolution and dates
             self.logger.info('Filtering files by resolution and dates...')
-            files = []
+            files = {}
             for file, attributes in files_info.items():
                 if attributes["resolution"] == resolution:
                     start_date = datetime.strptime(attributes["start_date"], "%Y-%m-%dT%H:%M:%S UTC")
@@ -1798,13 +1758,18 @@ class ProvidentiaDownload(object):
                         file_to_download_start_date = datetime.strptime(file_to_download_yearmonth, "%Y%m")
                         file_to_download_end_date = datetime(file_to_download_start_date.year, file_to_download_start_date.month, 1) + relativedelta(months=1, seconds=-1)
                         if file_to_download_start_date <= end_date and file_to_download_end_date >= start_date:
-                            if file not in files:
-                                files.append(file)
+                            # from filtered files, save those that are provided multiple times
+                            station = attributes["station_reference"]
+                            if station not in files:
+                                files[station] = []
+                            if file not in files[station]:
+                                files[station].append(file)
 
             if len(files) != 0:
-                    
+
                 # get data and metadata for each file within period
-                combined_ds_list, metadata, wavelength = get_data(files, var, actris_parameter, resolution, target_start_date, target_end_date)
+                combined_ds_list, metadata, wavelength = get_data(files, var, actris_parameter, resolution, 
+                                                                  target_start_date, target_end_date)
                 
                 # check if there is data after reading available files
                 if len(combined_ds_list) == 0:
@@ -1921,9 +1886,51 @@ class ProvidentiaDownload(object):
             else:
                 self.logger.info('No files were found')
 
+
+    def check_time(self, size, file_size):
+        if (time.time() - self.ncfile_dl_start_time) > self.timeoutLimit:
+            error = 'Download timeout, try later.'
+            self.logger.error(error)
+            sys.exit(1)
+            
+            
+    def sighandler(self, *unused):
+        self.logger.info('\nKeyboard Interrupt. Stopping execution.')
+        
+        # close connection, if it exists
+        if hasattr(self, 'ssh'): 
+            if self.ssh is not None:
+                self.logger.info("\nClosing ssh connection...")
+                self.ssh.close()
+                if hasattr(self, 'sftp'):
+                    self.sftp.close()
+
+        # delete the las downloaded nc file to avoid corrupted files
+        if hasattr(self, 'latest_nc_file_path'):
+            self.logger.info(f"\nDeleting last file to avoid corruption: {self.latest_nc_file_path}...")
+            if os.path.isfile(self.latest_nc_file_path):
+                os.remove(self.latest_nc_file_path)
+
+        # remove the output files from dtrsync in case it was a download from storage5
+        if self.machine == "storage5":
+            time.sleep(3)
+                
+            for file in os.listdir(PROVIDENTIA_ROOT):
+                if file.startswith("dtrsync_"):
+                    os.remove(join(PROVIDENTIA_ROOT,file)) 
+
+        # delete temp dir if necessary
+        temp_dir = join(self.ghost_root,'.temp')
+        if os.path.exists(temp_dir):
+            self.logger.info(f"\nDeleting {temp_dir}")
+            shutil.rmtree(temp_dir)
+        
+        self.logger.info("\nExiting...")
+        sys.exit()
+
+
 def main(**kwargs):
     """ Main function when running download function. """
-    # initialise break blocker
-    global download  
-    download = ProvidentiaDownload(**kwargs)
+
+    download = Download(**kwargs)
     download.run()

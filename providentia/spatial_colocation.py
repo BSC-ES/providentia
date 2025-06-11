@@ -96,9 +96,19 @@ class SpatialColocation:
         if self.read_instance.spatial_colocation_station_reference:
             self.by_station_reference()
 
+        # if for any networkspecies there are no stations left to check, return as no more intersections are possible
+        for networkspeci in self.non_intersecting_indices:
+            if len(self.non_intersecting_indices[networkspeci]) == 0:
+                return
+
         # by station name (if still have indices unaccounted for)?
         if self.read_instance.spatial_colocation_station_name:
             self.by_station_name()
+
+        # if for any networkspecies there are no stations left to check, return as no more intersections are possible
+        for networkspeci in self.non_intersecting_indices:
+            if len(self.non_intersecting_indices[networkspeci]) == 0:
+                return
 
         # by measurement position: longitude, latitude and option for measurement_altitude (if still have indices unaccounted for)?
         if self.read_instance.spatial_colocation_longitude_latitude:

@@ -10,7 +10,7 @@ GENERATE_OUTPUT = False
 def read_data(inst, path):
 
     # get data in memory in xarray format
-    data = inst.get_data(format='xr')
+    data = inst.data(format='xr')
     try:
         generated_output = data['EBAS|sconco3_data'].values
     except:
@@ -31,7 +31,7 @@ def read_data(inst, path):
 def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
 
     # make plot
-    fig = inst.make_plot(plot_type, plot_options=plot_options, return_plot=True)
+    fig = inst.plot(plot_type, plot_options=plot_options, return_plot=True)
 
     # check that a figure has been returned
     assert (type(fig) == matplotlib.figure.Figure)
@@ -182,5 +182,5 @@ def check_filter_data(inst, statistic_mode, network_type, filter):
         assert True
     
     # Reset filter and check original data
-    inst.reset_filter(initialise=True)
+    inst.reset(initialise=True)
     read_data(inst, orig_path)

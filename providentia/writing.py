@@ -27,7 +27,7 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
         in memory to .npy file. 
 
         :prv: Instance of providentia 
-        :type prv: instance of ProvidentiaMainWindow / Interactive
+        :type prv: instance of Dashboard / Library
         :fname: Name of the file to save
         :type fname: str
         :input_dialogue: boolean informing whether to open input prompt to ask if to filter data or not
@@ -159,7 +159,7 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
     """ Write data and metadata to netcdf file. 
     
         :prv: Instance of providentia
-        :type prv: instance of ProvidentiaMainWindow / Interactive
+        :type prv: instance of Dashboard / Library
         :fname: Name of the file to save
         :type fname: str
         :input_dialogue: boolean informing whether to open input prompt to ask if to filter data or not
@@ -222,10 +222,7 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
     fout = Dataset(fname, 'w', format="NETCDF4")
 
     # file contents
-    if prv.interactive:
-        fout.title = 'Saved data from Providentia interactive.'
-    else:
-        fout.title = 'Saved data from the Providentia dashboard.'
+    fout.title = 'Saved data from Providentia'
     fout.institution = 'Barcelona Supercomputing Center'
     fout.source = 'Providentia'
     if prv.reading_ghost:
@@ -501,7 +498,7 @@ def export_configuration(prv, cname, separator="||"):
         and send them to write_conf.
 
         :prv: Instance of providentia
-        :type prv: instance of ProvidentiaMainWindow / Interactive
+        :type prv: instance of Dashboard / Library
         :cname: Name for the configuration file
         :type cname: str
         :separator: delimiter for keep/remove fields
@@ -582,7 +579,7 @@ def export_configuration(prv, cname, separator="||"):
                 calibration_factor += '{} ({}), '.format(exp, factor)
         options['section'].update({'calibration_factor': calibration_factor})
 
-    # statistc_aggregation
+    # statistic_aggregation
     if prv.statistic_aggregation != merged_defaults['statistic_aggregation'][prv.statistic_mode]:
         options['section'].update({'statistic_aggregation': prv.statistic_aggregation})
 
