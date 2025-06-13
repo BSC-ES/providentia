@@ -181,7 +181,6 @@ class ExperimentInterpolation(object):
         """
 
         for model_file_ii, model_file in enumerate(self.model_files):
-            
             try:
                 # load instance of model file netCDF
                 mod_nc_root = Dataset(model_file)
@@ -197,17 +196,141 @@ class ExperimentInterpolation(object):
                     self.mod_speci_units = mod_speci_obj.units
                 else:
                     self.log_file_str += f"Missing 'units' attribute for variable '{self.speci_to_process}' in file {model_file}\n"
-                    continue
+                    create_output_logfile(1, self.log_file_str)
 
                 # get model grid type
                 if hasattr(mod_speci_obj, 'grid_mapping'):
                     self.mod_grid_type = mod_speci_obj.grid_mapping
                 else:
                     self.log_file_str += f"Missing 'grid_mapping' attribute for variable '{self.speci_to_process}' in file {model_file}\n"
-                    continue
+                    create_output_logfile(1, self.log_file_str)
 
                 # get x/y grid dimension variable names
                 grid_dimensions = mod_speci_obj.dimensions
+
+                # get indivudual dimension variable names  
+                # standard (no vertical dimension)
+                self.have_vertical_dimension = False
+                self.have_bin_dimension = False
+                if len(mod_speci_obj.shape) == 3:
+                    self.x_varname = mod_speci_obj.dimensions[2]
+                    self.y_varname = mod_speci_obj.dimensions[1]
+                # mapped size distribution variable, with bin dimension
+                elif (len(mod_speci_obj.shape) == 4) & ('vconcaerobin' in self.original_speci_to_process):
+                    self.have_bin_dimension = True
+                    self.x_varname = mod_speci_obj.dimensions[3]
+                    self.y_varname = mod_speci_obj.dimensions[2]
+                # with vertical dimension
+                elif len(mod_speci_obj.shape) == 4:
+                    self.have_vertical_dimension = True
+                    self.x_varname = mod_speci_obj.dimensions[3]
+                    self.y_varname = mod_speci_obj.dimensions[2]
+                    self.z_varname = mod_speci_obj.dimensions[1]
+                    
+                    # check if vertical dimension goes up or down to get correct index for surface
+                    mod_vert_obj = mod_nc_root[self.z_varname]
+                    direction = mod_vert_obj.positive
+                    
+                    # if direction == 'up', surface index is location of mininum value in z var
+                    if direction == 'up':
+                        if self.interp_reverse_vertical_orientation:
+                            self.z_index = np.argmax(mod_vert_obj[:])
+                        else:
+                            self.z_index = np.argmin(mod_vert_obj[:])
+                    # if direction == 'down', surface index is location of maximum value in z var
+                    elif direction == 'down':
+                        if self.interp_reverse_vertical_orientation:
+                            self.z_index = np.argmin(mod_vert_obj[:])
+                        else:
+                            self.z_index = np.argmax(mod_vert_obj[:])
+                    # if cannot determine a surface index, terminate process
+                    else: 
+                        self.log_file_str += 'Cannot determine surface index in vertical dimension. Terminating process.'
+                        create_output_logfile(1, self.log_file_str)
+
+                # check if species grid dimensions are named correctly, and in correct BSC standard order
+                # if not terminate process
+                # this is done by checking the variable names of the x, y (and z if required) dimensions
+                # X dimension is valid if 'lon' is contained within name, or is == 'x'
+                if ('lon' not in self.x_varname) & (self.x_varname != 'x'):
+                    self.log_file_str += 'X dimension incorrectly named. Terminating process.'
+                    create_output_logfile(1, self.log_file_str)
+                # Y dimension is valid if 'lat' is contained within name, or is == 'y'
+                if ('lat' not in self.y_varname) & (self.y_varname != 'y'):
+                    self.log_file_str += 'Y dimension incorrectly named. Terminating process.'
+                    create_output_logfile(1, self.log_file_str)
+                # Z dimension is valid if == 'z' or 'lev' or 'alt' or 'height'
+                if self.have_vertical_dimension:
+                    if ((self.z_varname != 'lev') & (self.z_varname != 'z') & (self.z_varname != 'alt')
+                        & (self.z_varname != 'height')):
+                        self.log_file_str += 'Z dimension incorrectly named. Terminating process.'
+                        create_output_logfile(1, self.log_file_str)
+
+                # get instances of x/y grid dimension variables
+                mod_lon_obj = mod_nc_root[self.x_varname]
+                mod_lat_obj = mod_nc_root[self.y_varname]
+
+                # get size of x/y grid dimensions
+                self.x_N = mod_lon_obj.size
+                self.y_N = mod_lat_obj.size
+
+                # get 1D x/y values
+                self.x = mod_lon_obj[:]
+                self.y = mod_lat_obj[:]
+
+                # get name of longitude/latitude grid centre coordinate variables
+                if hasattr(mod_speci_obj, 'coordinates'):
+                    grid_centre_coordinates = mod_speci_obj.coordinates.split(' ')
+                else:
+                    self.log_file_str += f"Missing 'coordinates' attribute for variable '{self.speci_to_process}' in file {model_file}\n"
+                    create_output_logfile(1, self.log_file_str)
+                
+                lon_centre_varname = grid_centre_coordinates[1] 
+                lat_centre_varname = grid_centre_coordinates[0]
+
+                # check if species grid centre coordinate are named correctly, and in correct BSC standard order
+                # if not terminate process
+                # longitude coordinate is valid if 'lon' is contained within name
+                if ('lon' not in lon_centre_varname):
+                    self.log_file_str += 'Longitude grid centre coordinate incorrectly named. Terminating process.'
+                    create_output_logfile(1, self.log_file_str)
+                # latitude coordinate is valid if 'lat' is contained within name
+                if ('lat' not in lat_centre_varname):
+                    self.log_file_str += 'Latitude grid centre coordinate incorrectly named. Terminating process.'
+                    create_output_logfile(1, self.log_file_str)
+
+                # get longitude and latitude grid centre values
+                self.mod_lons_centre = np.float32(mod_nc_root[lon_centre_varname][:])
+                self.mod_lats_centre = np.float32(mod_nc_root[lat_centre_varname][:])
+                
+                # check if there are coordinates to remap
+                lons_to_remap = self.mod_lons_centre[np.where(self.mod_lons_centre > 180.0)]
+                lats_to_remap = self.mod_lats_centre[np.where(self.mod_lats_centre > 90.0)]
+                self.coords_remapping = False
+                if len(lons_to_remap) > 0 or len(lats_to_remap) > 0:
+                    if self.mod_grid_type == 'crs':
+                        # correct model grid longitude/latitude centre variables to be between -180:180 and -90:90 respectively
+                        self.mod_lons_centre[np.where(self.mod_lons_centre > 180.0)] = self.mod_lons_centre[np.where(self.mod_lons_centre > 180.0)] - 360.0
+                        self.mod_lats_centre[np.where(self.mod_lats_centre > 90.0)] = self.mod_lats_centre[np.where(self.mod_lats_centre > 90.0)] - 180.0
+                        
+                        # sort coordinates
+                        self.mod_lons_centre = sorted(self.mod_lons_centre)
+                        self.mod_lats_centre = sorted(self.mod_lats_centre) 
+
+                        # set variable for values reassignation later
+                        self.coords_remapping = True    
+                    else: 
+                        self.log_file_str += 'Cannot handle grid of type: {} with these coordinates. Please remap. Terminating process'.format(self.mod_grid_type)
+                        create_output_logfile(1, self.log_file_str)
+                
+                # close model netCDF root
+                mod_nc_root.close()
+
+                # get the last valid model file
+                self.valid_model_file = copy.deepcopy(model_file)
+
+                # break out of for loop, now that have read a valid model file in the month
+                break
 
             except Exception as e:
                 # in case of exception close model netCDF root
@@ -221,126 +344,7 @@ class ExperimentInterpolation(object):
                 # else, continue to next file in month
                 else:
                     self.log_file_str += f"File {model_file} failed with error: {e}. Trying to read next file.\n"
-                    continue 
-
-            # get indivudual dimension variable names  
-            # standard (no vertical dimension)
-            self.have_vertical_dimension = False
-            self.have_bin_dimension = False
-            if len(mod_speci_obj.shape) == 3:
-                self.x_varname = mod_speci_obj.dimensions[2]
-                self.y_varname = mod_speci_obj.dimensions[1]
-            # mapped size distribution variable, with bin dimension
-            elif (len(mod_speci_obj.shape) == 4) & ('vconcaerobin' in self.original_speci_to_process):
-                self.have_bin_dimension = True
-                self.x_varname = mod_speci_obj.dimensions[3]
-                self.y_varname = mod_speci_obj.dimensions[2]
-            # with vertical dimension
-            elif len(mod_speci_obj.shape) == 4:
-                self.have_vertical_dimension = True
-                self.x_varname = mod_speci_obj.dimensions[3]
-                self.y_varname = mod_speci_obj.dimensions[2]
-                self.z_varname = mod_speci_obj.dimensions[1]
-                
-                # check if vertical dimension goes up or down to get correct index for surface
-                mod_vert_obj = mod_nc_root[self.z_varname]
-                direction = mod_vert_obj.positive
-                
-                # if direction == 'up', surface index is location of mininum value in z var
-                if direction == 'up':
-                    if self.interp_reverse_vertical_orientation:
-                        self.z_index = np.argmax(mod_vert_obj[:])
-                    else:
-                        self.z_index = np.argmin(mod_vert_obj[:])
-                # if direction == 'down', surface index is location of maximum value in z var
-                elif direction == 'down':
-                    if self.interp_reverse_vertical_orientation:
-                        self.z_index = np.argmin(mod_vert_obj[:])
-                    else:
-                        self.z_index = np.argmax(mod_vert_obj[:])
-                # if cannot determine a surface index, terminate process
-                else: 
-                    self.log_file_str += 'Cannot determine surface index in vertical dimension. Terminating process.'
-                    create_output_logfile(1, self.log_file_str)
-
-            # check if species grid dimensions are named correctly, and in correct BSC standard order
-            # if not terminate process
-            # this is done by checking the variable names of the x, y (and z if required) dimensions
-            # X dimension is valid if 'lon' is contained within name, or is == 'x'
-            if ('lon' not in self.x_varname) & (self.x_varname != 'x'):
-                self.log_file_str += 'X dimension incorrectly named. Terminating process.'
-                create_output_logfile(1, self.log_file_str)
-            # Y dimension is valid if 'lat' is contained within name, or is == 'y'
-            if ('lat' not in self.y_varname) & (self.y_varname != 'y'):
-                self.log_file_str += 'Y dimension incorrectly named. Terminating process.'
-                create_output_logfile(1, self.log_file_str)
-            # Z dimension is valid if == 'z' or 'lev' or 'alt' or 'height'
-            if self.have_vertical_dimension:
-                if ((self.z_varname != 'lev') & (self.z_varname != 'z') & (self.z_varname != 'alt')
-                    & (self.z_varname != 'height')):
-                    self.log_file_str += 'Z dimension incorrectly named. Terminating process.'
-                    create_output_logfile(1, self.log_file_str)
-
-            # get instances of x/y grid dimension variables
-            mod_lon_obj = mod_nc_root[self.x_varname]
-            mod_lat_obj = mod_nc_root[self.y_varname]
-
-            # get size of x/y grid dimensions
-            self.x_N = mod_lon_obj.size
-            self.y_N = mod_lat_obj.size
-
-            # get 1D x/y values
-            self.x = mod_lon_obj[:]
-            self.y = mod_lat_obj[:]
-
-            # get name of longitude/latitude grid centre coordinate variables
-            grid_centre_coordinates = mod_speci_obj.coordinates.split(' ')
-            lon_centre_varname = grid_centre_coordinates[1] 
-            lat_centre_varname = grid_centre_coordinates[0]
-
-            # check if species grid centre coordinate are named correctly, and in correct BSC standard order
-            # if not terminate process
-            # longitude coordinate is valid if 'lon' is contained within name
-            if ('lon' not in lon_centre_varname):
-                self.log_file_str += 'Longitude grid centre coordinate incorrectly named. Terminating process.'
-                create_output_logfile(1, self.log_file_str)
-            # latitude coordinate is valid if 'lat' is contained within name
-            if ('lat' not in lat_centre_varname):
-                self.log_file_str += 'Latitude grid centre coordinate incorrectly named. Terminating process.'
-                create_output_logfile(1, self.log_file_str)
-
-            # get longitude and latitude grid centre values
-            self.mod_lons_centre = np.float32(mod_nc_root[lon_centre_varname][:])
-            self.mod_lats_centre = np.float32(mod_nc_root[lat_centre_varname][:])
-            
-            # check if there are coordinates to remap
-            lons_to_remap = self.mod_lons_centre[np.where(self.mod_lons_centre > 180.0)]
-            lats_to_remap = self.mod_lats_centre[np.where(self.mod_lats_centre > 90.0)]
-            self.coords_remapping = False
-            if len(lons_to_remap) > 0 or len(lats_to_remap) > 0:
-                if self.mod_grid_type == 'crs':
-                    # correct model grid longitude/latitude centre variables to be between -180:180 and -90:90 respectively
-                    self.mod_lons_centre[np.where(self.mod_lons_centre > 180.0)] = self.mod_lons_centre[np.where(self.mod_lons_centre > 180.0)] - 360.0
-                    self.mod_lats_centre[np.where(self.mod_lats_centre > 90.0)] = self.mod_lats_centre[np.where(self.mod_lats_centre > 90.0)] - 180.0
-                    
-                    # sort coordinates
-                    self.mod_lons_centre = sorted(self.mod_lons_centre)
-                    self.mod_lats_centre = sorted(self.mod_lats_centre) 
-
-                    # set variable for values reassignation later
-                    self.coords_remapping = True    
-                else: 
-                    self.log_file_str += 'Cannot handle grid of type: {} with these coordinates. Please remap. Terminating process'.format(self.mod_grid_type)
-                    create_output_logfile(1, self.log_file_str)
-            
-            # close model netCDF root
-            mod_nc_root.close()
-
-            # get the last valid model file
-            self.valid_model_file = copy.deepcopy(model_file)
-
-            # break out of for loop, now that have read a valid model file in the month
-            break
+                    continue
 
         # correct units in case of having bin dimension
         if self.have_bin_dimension:
