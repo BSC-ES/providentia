@@ -1,0 +1,36 @@
+pm10: particulate_matter_10um  
+pm10du: dust  
+pm2p5: particulate_matter_2.5um  
+pm2p5ec: total_elementary_carbon  
+pm2p5nh4: pm2.5_ammonium  
+pm2p5no3: pm2.5_nitrate  
+pm2p5so4: pm2.5_sulphate  
+sconchcho: formaldehyde  
+sconcglyox: glyoxal  
+sconcco: carbon_monoxide  
+sconcnh3: ammonia
+sconcno: nitrogen_monoxide  
+sconcno2: nitrogen_dioxide  
+sconco3: ozone  
+sconcso2: sulphur_dioxide  
+
+# "alder_pollen",
+# "birch_pollen",
+# "grass_pollen",
+# "mugwort_pollen",
+# "olive_pollen",
+# "ragweed_pollen",
+
+# "secondary_inorganic_aerosol",
+# "pm2.5_total_organic_matter",
+# "pm10_sea_salt_dry",
+# "pm10_wildfires",
+# "peroxyacyl_nitrates",
+
+# "non_methane_vocs",
+# # per akest Non-methane volatile organic compounds (VOCs)
+# #'sconcnmvoc',  'long_parameter_name':'total non-methane volatile organic compounds'
+# #'sconcvoc',    'long_parameter_name':'total volatile organic compounds',  
+
+# "residential_elementary_carbon", "total_elementary_carbon",
+# # per akest pm2p5ec ('PM2.5 elemental carbon') pero no estic segura 

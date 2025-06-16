@@ -1,0 +1,21 @@
+{
+  "cams_europe_air_quality":
+    {
+      "experiments":
+        [
+          "ensemble",
+          "chimere",
+          "dehm",
+          "emep",
+          "euradim",
+          "gemaq",
+          "lotos",
+          "match",
+          "minni",
+          "monarch",
+          "silam",
+        ],
+      "resolution": "hourly",
+      "domain": ["regional", "eu"],
+    },
+}
