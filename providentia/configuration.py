@@ -807,13 +807,16 @@ class ProvConfiguration:
     
     # TODO use inheritance in the future 
     # TODO add more checking, for now only this is enough
-    def check_experiment_interpolation(self, full_experiment, deactivate_warning):
+    def check_non_interpolated_experiment(self, full_experiment, deactivate_warning):
         # TODO Check if i can only import one time
         from warnings_prv import show_message
 
         """ Checks if experiment, domain and ensemble option combination works 
         for interpolation or the download of non interpolated experiments
         Returns if experiment if valid and the experiment type (if there is one) """
+
+        # get the cams possible datasets
+        experiment_options = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_dataset.yaml')))
         
         # get the splitted experiment
         experiment, domain, ensemble_option = full_experiment.split('-')
@@ -825,40 +828,42 @@ class ProvConfiguration:
         # search if the experiment id is in the interp_experiments file
         # initialize experiment search variables
         experiment_exists = False
-        msg = ""
 
-        # for HPC machines, search in interp_experiments
-        # if it's local interpolation, don't enter
-        if not (self.read_instance.machine == "local" and self.read_instance.interpolation is True):
+        # for HPC machines download (copy), search in interp_experiments
+        if self.read_instance.machine != "local" and self.read_instance.download is True:
             for experiment_type, experiment_dict in interp_experiments.items():
                 if experiment in experiment_dict["experiments"]:
                     experiment_exists = True
                     break
             
-            msg += f"Cannot find the experiment ID '{experiment}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
+            msg = f"Cannot find the experiment ID '{experiment}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
 
-        # get directory from data_paths if it doesn't exists in the interp_experiments file 
-        # if executed from the hpc machines and want to do a download, don't enter
-        if experiment_exists is False and not (self.read_instance.machine != "local" and self.read_instance.download is True):
-            # get the path to the non interpolated experiments
-            # in the current machine if it is an intepolation
+        if self.read_instance.machine == "local":
+            # check if it's a valid cams experiment
+            for dataset in experiment_options:
+                if experiment.startswith(dataset):
+                    return True, [full_experiment]
+            # get directory from data_paths if it doesn't exists in the interp_experiments file if it's a local interpolation
             if self.read_instance.interpolation is True:
-                exp_to_interp_path = join(self.read_instance.exp_to_interp_root, experiment)
-                if os.path.exists(exp_to_interp_path):
-                    experiment_exists = True
-            # in the remote machine if it is a local download
-            else:
-                # connect to the remote machine
-                self.read_instance.connect()        
-                # get all possible experiments
-                exp_to_interp_path = join(self.read_instance.exp_to_interp_remote_path,experiment,domain)
-                try:
-                    self.read_instance.sftp.stat(exp_to_interp_path)
-                    experiment_exists = True
-                except FileNotFoundError:
-                    pass     
+                # get the path to the non interpolated experiments
+                # in the current machine if it is an intepolation
+                if self.read_instance.interpolation is True:
+                    exp_to_interp_path = join(self.read_instance.exp_to_interp_root, experiment)
+                    if os.path.exists(exp_to_interp_path):
+                        experiment_exists = True
+                # in the remote machine if it is a local download
+                else:
+                    # connect to the remote machine
+                    self.read_instance.connect()        
+                    # get all possible experiments
+                    exp_to_interp_path = join(self.read_instance.exp_to_interp_remote_path,experiment,domain)
+                    try:
+                        self.read_instance.sftp.stat(exp_to_interp_path)
+                        experiment_exists = True
+                    except FileNotFoundError:
+                        pass   
             
-            msg += f"Cannot find the {experiment} experiment with the {domain} domain in '{self.read_instance.exp_to_interp_root}'."
+            msg = f"Cannot find the {experiment} experiment with the {domain} domain in '{self.read_instance.exp_to_interp_root}'."
 
         # if experiment does not exist, exit
         # supressed warning deactivation
@@ -868,7 +873,7 @@ class ProvConfiguration:
         return experiment_exists, [full_experiment]
     
     # TODO maybe remove this one and keep the download check since its much cleaner
-    def check_experiment_download(self, full_experiment, deactivate_warning):
+    def check_interpolated_experiment(self, full_experiment, deactivate_warning):
         """ Check individual experiment and get list of options."""
 
         # TODO Check if i can only import one time
@@ -1004,7 +1009,7 @@ class ProvConfiguration:
                 else:
                     is_ghost = check_for_ghost(network)
                     if is_ghost != previous_is_ghost:
-                        error = 'Error: "network" must be all GHOST or non-GHOST'
+                        error = 'Error: "network" must be all GHOST or non-GHOST.'
                         self.read_instance.logger.error(error)
                         sys.exit(1)
                     previous_is_ghost = is_ghost
@@ -1158,9 +1163,9 @@ class ProvConfiguration:
         # TODO do it using heritage
         # if the current mode is interpolation or the experiment i want to download is not interpolated
         if self.read_instance.interpolation or (self.read_instance.download and self.read_instance.interpolated is False):
-            check_experiment_fun = self.check_experiment_interpolation
+            check_experiment_fun = self.check_non_interpolated_experiment
         elif self.read_instance.download:
-            check_experiment_fun = self.check_experiment_download
+            check_experiment_fun = self.check_interpolated_experiment
         else:
             check_experiment_fun = self.check_experiment
 
@@ -1170,35 +1175,33 @@ class ProvConfiguration:
         correct_experiments = {}
 
         # TODO keep the check only in download or configuration
-        # in case of zenodo download don't even check
-        if not (self.read_instance.download and self.read_instance.bsc_download_choice == "n"): 
-            # join experiments
-            for exp_i, experiment in enumerate(self.read_instance.exp_ids):
-                # experiment, domain, ensemble_options
-                if self.combined_domain and self.combined_ensemble_options:
-                    final_experiments += [f'{experiment}-{domain}-{ens_opt}' for domain in self.read_instance.domain for ens_opt in self.read_instance.ensemble_options]
-                else:
-                    if self.combined_domain or self.combined_ensemble_options:
-                        # experiment-ensemble_options, domain
-                        if self.combined_domain:
-                            final_experiments += [f'{experiment}-{domain}-{self.read_instance.ensemble_options[exp_i]}' for domain in self.read_instance.domain]
-                        # experiment-domain, ensemble_options 
-                        else:
-                            final_experiments += [f'{experiment}-{self.read_instance.domain[exp_i]}-{ens_opt}' for ens_opt in self.read_instance.ensemble_options]
-                    # experiment-domain-ensemble_options
-                    else:
-                        final_experiments.append(f'{experiment}-{self.read_instance.domain[exp_i]}-{self.read_instance.ensemble_options[exp_i]}')
 
-            for exp_i, experiment in enumerate(final_experiments):
-                # TODO change boolean name
-                exp_is_valid, valid_exp_list = check_experiment_fun(experiment, deactivate_warning)
-                if exp_is_valid:
-                    for valid_exp in valid_exp_list:
-                        if self.read_instance.alias_flag:
-                            correct_experiments[valid_exp] = self.read_instance.alias[exp_i]
-                        else:
-                            correct_experiments[valid_exp] = valid_exp
-        
+        # join experiments
+        for exp_i, experiment in enumerate(self.read_instance.exp_ids):
+            # experiment, domain, ensemble_options
+            if self.combined_domain and self.combined_ensemble_options:
+                final_experiments += [f'{experiment}-{domain}-{ens_opt}' for domain in self.read_instance.domain for ens_opt in self.read_instance.ensemble_options]
+            else:
+                if self.combined_domain or self.combined_ensemble_options:
+                    # experiment-ensemble_options, domain
+                    if self.combined_domain:
+                        final_experiments += [f'{experiment}-{domain}-{self.read_instance.ensemble_options[exp_i]}' for domain in self.read_instance.domain]
+                    # experiment-domain, ensemble_options 
+                    else:
+                        final_experiments += [f'{experiment}-{self.read_instance.domain[exp_i]}-{ens_opt}' for ens_opt in self.read_instance.ensemble_options]
+                # experiment-domain-ensemble_options
+                else:
+                    final_experiments.append(f'{experiment}-{self.read_instance.domain[exp_i]}-{self.read_instance.ensemble_options[exp_i]}')
+
+        for exp_i, experiment in enumerate(final_experiments):
+            exp_is_valid, valid_exp_list = check_experiment_fun(experiment, deactivate_warning)
+            if exp_is_valid:
+                for valid_exp in valid_exp_list:
+                    if self.read_instance.alias_flag:
+                        correct_experiments[valid_exp] = self.read_instance.alias[exp_i]
+                    else:
+                        correct_experiments[valid_exp] = valid_exp
+    
         # if experiments were passed and there's no valid experiment, show warning
         if self.read_instance.experiments != [] and correct_experiments == {}:
             msg = 'No experiment data available.'
