@@ -243,11 +243,9 @@ class Download(object):
                     if self.bsc_download_choice == 'y':
                         # get function to download experiment depending on the configuration file field
                         download_experiment_fun = self.download_experiment if self.interpolated is True else self.download_non_interpolated_experiment
-                    # download from the zenodo webpage
+                    # download from the cams webpage
                     else:
-                        error = f"Error: It is not possible to download experiments from the zenodo webpage."
-                        self.logger.error(error)
-                        sys.exit(1)         
+                        download_experiment_fun = self.download_cams_experiment
            
             # iterate the experiments download
             for experiment in self.experiments.keys():
@@ -1486,7 +1484,6 @@ class Download(object):
                                 nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble_options,nc_files))
                            
                         else:
-                            # TODO delete this in the future
                             error = "It is not possible to copy this nc file type yet. Please, contact the developers.", nc_files
                             self.logger.error(error)
                             sys.exit(1)
@@ -1886,7 +1883,100 @@ class Download(object):
             else:
                 self.logger.info('No files were found')
 
+    def download_cams_experiment(self, experiment, initial_check, files_to_download=None):
+        if not initial_check:   
+            # print current_experiment
+            self.logger.info('\n'+'-'*40)
+            self.logger.info(f"\nDownloading {experiment} experiment data from the Atmosphere Data Store...")
 
+        # get the dataset info
+        experiment_options = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_dataset.yaml')))
+
+        # get experiment id and the domain
+        dataset_expid, domain, ensemble_options = experiment.split("-")
+        
+        # get the CAMS dataset and the experiment name
+        dataset, exp_id = dataset_expid.rsplit('_', 1)
+
+        # make sure dataset is a possible option
+        if not dataset in ["cams_europe_air_quality"]:
+            msg = f"The CAMS experiment must start with a valid dataset name. No valid dataset found in '{exp_id}'."
+            show_message(self, msg, deactivate=initial_check)
+            return
+
+        # make sure the experiment is available in the dataset
+        if exp_id not in experiment_options[dataset]["experiments"]:
+            msg = f"Cannot find the {exp_id} experiment in the {dataset} dataset."    
+            show_message(self, msg, deactivate=initial_check)
+            return
+
+        # check if the resolution is the correct one for the dataset
+        if self.resolution != experiment_options[dataset]["resolution"]:
+            msg = (
+            f"The current resolution '{self.resolution}' is not valid for the CAMS '{dataset}' dataset. "
+            f"It must be '{experiment_options[dataset]['resolution']}'.")            
+            show_message(self, msg, deactivate=initial_check)
+            return
+
+        # check if the domain is the correct one for the dataset
+        if domain != experiment_options[dataset]["domain"]:
+            msg = (
+            f"The current domain '{domain}' is not valid for the CAMS '{dataset}' dataset. "
+            f"It must be '{', '.join(experiment_options[dataset]['domain'])}'.")            
+            show_message(self, msg, deactivate=initial_check)
+            return
+
+        # only ensemble options allmembers and 000 are valid
+        if ensemble_options not in ['000', 'allmembers']:
+            msg = (
+            f"The current ensemble option '{ensemble_options}' is not valid for the CAMS '{dataset}' dataset. "
+            f"It must be '000' or 'allmembers'.")            
+            show_message(self, msg, deactivate=initial_check)
+            return
+
+        # get the ghost to cams vocabulary mapping
+        parameters_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'ghost_cams_variables.yaml')))
+        
+        # iterate through the species
+        for species in self.species: 
+            if species not in parameters_dict:
+                msg = f"The current species '{species}' is not valid for the CAMS '{dataset}' dataset. "           
+                show_message(self, msg, deactivate=initial_check)
+                continue
+            
+            # get the species in the cams vocabulary
+            cams_species = parameters_dict[species]
+
+            print(self.start_date.isoformat())
+
+            request = {
+            "variable": [cams_species],
+            "model": [exp_id],
+            "level": ["0"],
+            "date": ["2025-06-11/2025-06-11"],
+            "type": ["forecast"],
+            "time": ["00:00"],
+            "leadtime_hour": list(range(0,24)),
+            "data_format": "netcdf_zip"
+            }
+            
+
+            
+            
+                # # if no species were found, then show the message
+                # if species_exists is False:
+                #     msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain for {species} species at {resolution} resolution"
+                #     show_message(self, msg, deactivate=initial_check)
+                #     continue
+
+                # # add the path with the resolution and species combination to the list
+                # res_spec_dir.append(res_spec)
+                        
+
+
+
+
+     
     def check_time(self, size, file_size):
         if (time.time() - self.ncfile_dl_start_time) > self.timeoutLimit:
             error = 'Download timeout, try later.'
