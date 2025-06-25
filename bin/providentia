@@ -82,7 +82,9 @@ if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--int
     
     # define qos in interpolation
     if [ "${BSC_MACHINE}" == "mn5" ]; then
-        queue="gp_bsces" #TODO Check if i can "gp_debug"
+        queue="gp_bsces"
+    elif [ "${BSC_MACHINE}" == "grace" ]; then
+        queue="ngp_bsces"
     else
         queue="bsc_es"
     fi
@@ -93,6 +95,8 @@ else
     # define qos in every mode but interpolation
     if [ "${BSC_MACHINE}" == "mn5" ]; then
         queue="gp_debug"
+    elif [ "${BSC_MACHINE}" == "grace" ]; then
+        queue="ngp_debug"
     else
         queue="debug"
     fi 
@@ -149,7 +153,7 @@ notebook_alloc_command="sbatch -t $time -c $cores -J $jobname"
 script_dir=$(dirname $(realpath $(dirname $0)))
 
 # use python 3 if not in windows
-if [[ "${OS}" =~ "Windows" ]] ; then 
+if [[ "${OS}" != "Windows" ]] ; then 
     python_ver="3"
 fi
 
@@ -203,7 +207,7 @@ else
 fi
 
 # determine if need to just execute python if have allocation made (i.e. are in debug mode)
-VALID_HOSTS="p9login1 login0 login1 login2 login3 login4 glogin1 glogin2 glogin3 glogin4"
+VALID_HOSTS="p9login1 login0 login1 login2 login3 login4 glogin1 glogin2 glogin3 glogin4 nglogin1 nglogin2 nglogin3 nglogin4"
 HOST=`hostname`
 if [[ " $VALID_HOSTS " =~ .*\ $HOST\ .* ]]; then
     debugexec=false
@@ -428,6 +432,70 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
                     eval "${salloc_command} ${account_option} ${queue_option} srun nord3_singu_es ${python_command}"
                 else
                     eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun nord3_singu_es ${python_command}"
+                fi
+            fi
+        fi
+    fi
+
+
+# NG Grace
+elif [ "${BSC_MACHINE}" == "grace" ]; then
+    echo "INFO: Running on ${BSC_MACHINE}..."
+
+    # load modules from conda environment
+    active_env=false
+    module load miniforge
+    eval "$(conda shell.bash hook)"
+    conda config --set env_prompt '($(basename {default_env})) '
+    if ! { conda config --show-sources | grep '/gpfs/projects/bsc32/repository/apps/conda_envs/'; } >/dev/null 2>&1; then
+        conda config --append envs_dirs /gpfs/projects/bsc32/repository/apps/conda_envs/
+    fi
+    if { conda env list | grep 'providentia-env_v2.5.0-grace'; } >/dev/null 2>&1; then 
+        echo "Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v2.5.0-grace..."
+        conda activate providentia-env_v2.5.0-grace
+        active_env=true
+    else 
+        echo "Environment not found in /gpfs/projects/bsc32/repository/apps/conda_envs/"
+    fi
+
+    if $active_env; then
+        if $notebook; then
+            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+            echo "Starting jupyter session."
+            echo "Check 'notebook.out' for information on how to connect to session."
+            
+            if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+                eval "${notebook_alloc_command} ${account_option} ${queue_option} bin/notebook.sh"
+            else
+                eval "${notebook_alloc_command} ${account_option} ${constraint_option} ${queue_option} bin/notebook.sh"
+            fi
+
+        elif $debug; then
+            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+            echo "Entering debug mode"
+            if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+                eval "${salloc_command} ${account_option} ${queue_option}"
+            else
+                eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option}"
+            fi
+        
+        elif $interpolation; then
+            echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
+            echo "Loading dependencies..."
+            eval "${load_command}"
+            jobid=$(eval "sbatch ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
+            echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
+
+        else
+            if $debugexec; then
+                eval "srun ${account_option} ${python_command}"
+            else
+                echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
+                if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
+                    echo  "${salloc_command} ${account_option} ${queue_option} srun ${python_command}"
+                    eval "${salloc_command} ${account_option} ${queue_option} srun ${python_command}"
+                else
+                    eval "${salloc_command} ${account_option} ${constraint_option} ${queue_option} srun ${python_command}"
                 fi
             fi
         fi
