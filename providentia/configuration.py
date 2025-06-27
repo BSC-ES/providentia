@@ -1170,11 +1170,8 @@ class ProvConfiguration:
             check_experiment_fun = self.check_experiment
 
         # temp dictionary to store experiments
-        # TODO change names
         final_experiments = []
         correct_experiments = {}
-
-        # TODO keep the check only in download or configuration
 
         # join experiments
         for exp_i, experiment in enumerate(self.read_instance.exp_ids):
@@ -1201,7 +1198,7 @@ class ProvConfiguration:
                         correct_experiments[valid_exp] = self.read_instance.alias[exp_i]
                     else:
                         correct_experiments[valid_exp] = valid_exp
-    
+        
         # if experiments were passed and there's no valid experiment, show warning
         if self.read_instance.experiments != [] and correct_experiments == {}:
             msg = 'No experiment data available.'

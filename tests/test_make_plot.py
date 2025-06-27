@@ -1,5 +1,5 @@
 import warnings
-from .aux_functions import make_plot
+from .aux_functions import plot
 import providentia as prv
 import pytest
 
@@ -94,6 +94,7 @@ def test_make_scatter(inst, statistic_mode, network_type):
     plot(inst, statistic_mode, network_type, 'scatter', ['regression'])
 
 
+# FAIRMODE target plot cannot be created for od5050aero
 @pytest.mark.parametrize("inst, statistic_mode, network_type", [possibilities[2]])
 def test_make_fairmode_target(inst, statistic_mode, network_type):
     plot(inst, statistic_mode, network_type, 'fairmode-target')
