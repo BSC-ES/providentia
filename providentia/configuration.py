@@ -281,7 +281,7 @@ class ProvConfiguration:
                 # treat leaving the field blank as default
                 if value == '':
                     return self.var_defaults[key]
-                # parse multiple species only in interpolation and download
+                # parse multiple resolutions only in interpolation and download
                 if self.read_instance.interpolation or self.read_instance.download:
                     return [res.strip() for res in value.split(',')]
                 else:        

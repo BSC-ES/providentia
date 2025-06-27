@@ -508,7 +508,7 @@ else
     # load modules from conda environment
     active_env=false
     eval "$(conda shell.bash hook)"
-    if { conda env list | grep 'providentia-env_v2.4.0'; } >/dev/null 2>&1; then 
+    if { conda env list | grep -w '^providentia-env_v2.4.0'; } >/dev/null 2>&1; then 
         echo "Activating environment..."
         conda activate providentia-env_v2.4.0
         active_env=true
