@@ -54,7 +54,6 @@ class Download(object):
         self.prv_password = env.get("PRV_PWD")
 
         # get user preference over GHOST download, overwrite and origin update (ACTRIS)
-        self.bsc_download_choice = env.get("BSC_DL_CHOICE")
         self.overwrite_choice = env.get("OVERWRITE")
         self.origin_update_choice = env.get("ORIGIN_UPDATE")
 
@@ -130,10 +129,6 @@ class Download(object):
                         os.system(f"sudo mkdir -p {path}")
                         os.system(f"sudo chmod o+w {path}")
 
-            # initialise type of download
-            if not self.bsc_download_choice:
-                self.confirm_bsc_download()
-
             # initialise ssh 
             self.ssh = None
 
@@ -183,49 +178,31 @@ class Download(object):
                         if filter_species is not None:
                             self.species = [filter_species]
 
-                        # get the files to be downloaded, check if they files were already downloaded and download if not
-                        # download from the remote machine
-                        if self.bsc_download_choice == 'y':
-                            # GHOST
-                            if check_for_ghost(network):
-                                initial_check_nc_files = self.download_ghost_network_sftp(network, initial_check=True)
-                                files_to_download = self.select_files_to_download(initial_check_nc_files)
-                                if not initial_check_nc_files or files_to_download:
-                                    self.download_ghost_network_sftp(network, initial_check=False, files_to_download=files_to_download)
-                            # ACTRIS
-                            elif network == 'actris/actris':
-                                error = f"Error: It is not possible to download files from the ACTRIS network from BSC machines. Set BSC_DL_CHOICE=n in .env file."
-                                self.logger.error(error)
-                                sys.exit(1)
-                            # non-GHOST
-                            else:
-                                initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
-                                files_to_download = self.select_files_to_download(initial_check_nc_files)
-                                if not initial_check_nc_files or files_to_download:
-                                    self.download_nonghost_network(network, initial_check=False, files_to_download=files_to_download)
-
-                        # download from the zenodo webpage
-                        elif self.bsc_download_choice == 'n':
-                            # GHOST
-                            if check_for_ghost(network):
-                                initial_check_nc_files = self.download_ghost_network_zenodo(network, initial_check=True)
-                                files_to_download = self.select_files_to_download(initial_check_nc_files)
-                                if not initial_check_nc_files or files_to_download:
-                                    self.download_ghost_network_zenodo(network, initial_check=False, files_to_download=files_to_download)
-                            # ACTRIS
-                            elif network == 'actris/actris':
-                                self.download_actris_network()
-                            # non-GHOST
-                            else:
-                                error = f"Error: It is not possible to download files from the non-GHOST network {network} from the zenodo webpage."
-                                self.logger.error(error)
-                                sys.exit(1)
-                        
-                        # download option invalid
+                        # get the files to be downloaded, check if they were already downloaded 
+                        # GHOST
+                        if check_for_ghost(network):
+                            # ask whether the user wants to download from the zenodo or bsc machine
+                            bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
+                            while bsc_download.lower() not in ['','y','n']:
+                                bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
+                            
+                            # get the zenodo or bsc machine depending on the user answer
+                            download_ghost = self.download_ghost_network_sftp if bsc_download.lower() in ['','y'] else self.download_ghost_network_zenodo
+                            
+                            # download GHOST network
+                            initial_check_nc_files = download_ghost(network, initial_check=True)
+                            files_to_download = self.select_files_to_download(initial_check_nc_files)
+                            if not initial_check_nc_files or files_to_download:
+                                download_ghost(network, initial_check=False, files_to_download=files_to_download)
+                        # ACTRIS
+                        elif network == 'actris/actris':
+                            self.download_actris_network()
+                        # non-GHOST
                         else:
-                            error = "Error: Download option not valid, check your .env file."
-                            self.logger.error(error)
-                            sys.exit(1)
+                            initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
+                            files_to_download = self.select_files_to_download(initial_check_nc_files)
+                            if not initial_check_nc_files or files_to_download:
+                                self.download_nonghost_network(network, initial_check=False, files_to_download=files_to_download)
 
                     # get orignal species back
                     self.species = main_species
@@ -241,14 +218,9 @@ class Download(object):
                     download_experiment_fun = self.copy_non_interpolated_experiment
                 # local experiment download
                 else:
-                    # download from the bsc machines
-                    if self.bsc_download_choice == 'y':
-                        # get function to download experiment depending on the configuration file field
-                        download_experiment_fun = self.download_experiment if self.interpolated is True else self.download_non_interpolated_experiment
-                    # download from the cams webpage
-                    else:
-                        download_experiment_fun = self.download_cams_experiment
-           
+                    # get function to download experiment depending on the configuration file field
+                    download_experiment_fun = self.download_experiment if self.interpolated is True else self.download_non_interpolated_experiment
+
             # iterate the experiments download
             for experiment in self.experiments.keys():
                 initial_check_nc_files = download_experiment_fun(experiment, initial_check=True)
@@ -381,23 +353,7 @@ class Download(object):
                     if prv_password is not None:
                         f.write(f"PRV_PWD={self.prv_password}\n")
 
-                print(f"\nRemote machine credentials saved on {join(PROVIDENTIA_ROOT, '.env')}\n")
-
-    def confirm_bsc_download(self):
-        # get user choice regarding bsc downloads
-        self.bsc_download_choice = None
-        while self.bsc_download_choice not in ['y','n']:
-            self.bsc_download_choice = input("\nDo you want to download from BSC remote machine (y/n)? ").lower()
-
-        remind_txt = None
-        while remind_txt not in ['y','n']:
-            remind_txt = input("\nDo you want to remember your decision (y/n)? ").lower() 
-        
-        if remind_txt == 'y':
-            with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
-                f.write(f"BSC_DL_CHOICE={self.bsc_download_choice}\n")
-            
-            print(f"\nBSC download choice saved on {join(PROVIDENTIA_ROOT, '.env')}")
+                self.logger.info(f"\nRemote machine credentials saved on {join(PROVIDENTIA_ROOT, '.env')}\n")
                     
     def select_files_to_download(self, nc_files_to_download):
         """ Returns the files that are not already downloaded. """
