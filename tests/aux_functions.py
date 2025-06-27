@@ -10,6 +10,7 @@ GENERATE_OUTPUT = False
 def read_data(inst, path):
 
     # get data in memory in xarray format
+    inst.print_config()
     data = inst.data(format='xr')
     try:
         generated_output = data['EBAS|sconco3_data'].values
@@ -28,7 +29,7 @@ def read_data(inst, path):
     assert (generated_output.size != 0)
 
 
-def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
+def plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
 
     # make plot
     fig = inst.plot(plot_type, plot_options=plot_options, return_plot=True)
