@@ -5,8 +5,10 @@ import shutil
 from base64 import decodebytes
 import copy
 from dotenv import dotenv_values
+import json 
 import numpy as np
 import paramiko 
+import re 
 import requests
 import signal
 import subprocess
@@ -466,7 +468,7 @@ class Download(object):
         not_available_resolutions = set(self.resolution) - set(self.nonghost_available_resolutions)
         if not_available_resolutions:
             available_resolutions = set(self.resolution) - not_available_resolutions
-            msg = f"The resolution/s {', '.join(not_available_resolutions)} could not be found on {join(PROVIDENTIA_ROOT,'settings','init_prov.yaml')} nonghost_available_resolutions list."
+            msg = f"The resolution/s {', '.join(available_resolutions)} could not be found on {join(PROVIDENTIA_ROOT,'settings','init_prov.yaml')} nonghost_available_resolutions list."
             msg += "\nPlease, add the necessary resolutions to the list and execute again."
             show_message(self, msg, deactivate=initial_check)
             return
@@ -1617,6 +1619,23 @@ class Download(object):
                 zip_network = line.split("/")[-1][:-5]
                 self.zenodo_ghost_available_networks[zip_network] = zip_file_url
 
+    def fetch_cams_dates(self, url):
+        
+        # send HTTP GET request and get
+        response = requests.get(url)
+
+        # get the info for all the fields
+        fields_info = re.findall(r'(\{"name":".*?".*?)(?=\,{"name":)', response.text, re.DOTALL)
+
+        # get the date field minimum and maximum
+        for field in fields_info:
+            if '"name":"date"' in field:
+                # transform the str to a dict
+                field_dict = json.loads(field)
+                
+                # get the mininimum start date and maximum end date
+                return field_dict["details"]["minStart"], field_dict["details"]["maxEnd"]
+
     def get_all_networks(self):
         # get user input to know which kind of network wants
         download_source = None
@@ -1899,7 +1918,7 @@ class Download(object):
         dataset, exp_id = dataset_expid.rsplit('_', 1)
 
         # make sure dataset is a possible option
-        if not dataset in ["cams_europe_air_quality"]:
+        if dataset not in experiment_options:
             msg = f"The CAMS experiment must start with a valid dataset name. No valid dataset found in '{exp_id}'."
             show_message(self, msg, deactivate=initial_check)
             return
@@ -1910,56 +1929,115 @@ class Download(object):
             show_message(self, msg, deactivate=initial_check)
             return
 
-        # check if the resolution is the correct one for the dataset
-        if self.resolution != experiment_options[dataset]["resolution"]:
-            msg = (
-            f"The current resolution '{self.resolution}' is not valid for the CAMS '{dataset}' dataset. "
-            f"It must be '{experiment_options[dataset]['resolution']}'.")            
-            show_message(self, msg, deactivate=initial_check)
-            return
-
         # check if the domain is the correct one for the dataset
-        if domain != experiment_options[dataset]["domain"]:
+        if domain not in experiment_options[dataset]["domain"]:
+            possible_domains = "', '".join(experiment_options[dataset]['domain'])
             msg = (
-            f"The current domain '{domain}' is not valid for the CAMS '{dataset}' dataset. "
-            f"It must be '{', '.join(experiment_options[dataset]['domain'])}'.")            
+            f"The current domain '{domain}' is not valid for the CAMS '{dataset}' dataset."
+            f"It must be '{possible_domains}'.")            
             show_message(self, msg, deactivate=initial_check)
             return
 
         # only ensemble options allmembers and 000 are valid
         if ensemble_options not in ['000', 'allmembers']:
             msg = (
-            f"The current ensemble option '{ensemble_options}' is not valid for the CAMS '{dataset}' dataset. "
+            f"The current ensemble option '{ensemble_options}' is not valid for the CAMS '{dataset}' dataset."
             f"It must be '000' or 'allmembers'.")            
             show_message(self, msg, deactivate=initial_check)
             return
 
+        min_start_date, max_end_date = self.fetch_cams_dates(experiment_options[dataset]['url'])
+
+        # get dates in cams format
+        cams_start_date = datetime.strptime(self.start_date, "%Y%m%d").strftime("%Y-%m-%d")
+        cams_end_date = datetime.strptime(self.end_date, "%Y%m%d").strftime("%Y-%m-%d")
+
+        # check if the start date is within limits
+        if datetime.strptime(min_start_date, "%Y-%m-%d") > datetime.strptime(cams_start_date, "%Y-%m-%d"):
+            cams_start_date = min_start_date
+            
+        # check if the end date is within limits
+        if datetime.strptime(max_end_date, "%Y-%m-%d") < datetime.strptime(cams_end_date, "%Y-%m-%d"):
+            cams_end_date = max_end_date
+
         # get the ghost to cams vocabulary mapping
         parameters_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'ghost_cams_variables.yaml')))
         
-        # iterate through the species
-        for species in self.species: 
-            if species not in parameters_dict:
-                msg = f"The current species '{species}' is not valid for the CAMS '{dataset}' dataset. "           
+        # iterate throught the resolutions
+        for resolution in self.resolution:
+
+            # check if the resolution is the correct one for the dataset
+            if resolution != experiment_options[dataset]["resolution"]:
+                msg = (
+                f"The current resolution '{resolution}' is not valid for the CAMS '{dataset}' dataset. "
+                f"It must be '{experiment_options[dataset]['resolution']}'.")            
                 show_message(self, msg, deactivate=initial_check)
                 continue
             
-            # get the species in the cams vocabulary
-            cams_species = parameters_dict[species]
-
-            print(self.start_date.isoformat())
-
-            request = {
-            "variable": [cams_species],
-            "model": [exp_id],
-            "level": ["0"],
-            "date": ["2025-06-11/2025-06-11"],
-            "type": ["forecast"],
-            "time": ["00:00"],
-            "leadtime_hour": list(range(0,24)),
-            "data_format": "netcdf_zip"
-            }
+            # iterate through the species
+            for species in self.species: 
+                if species not in parameters_dict:
+                    msg = f"The current species '{species}' is not valid for the CAMS '{dataset}' dataset. "           
+                    show_message(self, msg, deactivate=initial_check)
+                    continue
             
+                # get the species in the cams vocabulary
+                cams_species = parameters_dict[species]
+
+                cams_dataset = dataset.replace('_','-')
+
+                request = {
+                "variable": [cams_species],
+                "model": [exp_id],
+                "level": ["0"],
+                "date": [f"{cams_start_date}/{cams_end_date}"],
+                "type": ["forecast"],
+                "time": ["00:00"],
+                "leadtime_hour": list(range(0,24)),
+                "data_format": "netcdf_zip"
+                }
+
+                import cdsapi
+                import logging
+                
+                # create cdsapirc file in case it was not created
+                cdsapirc_file = join(os.getenv("HOME"),'.cdsapirc')
+                print("Creating file")
+                if not os.path.isfile(cdsapirc_file):
+                    with open(cdsapirc_file, "w") as f:
+                        f.write("url: https://ads.atmosphere.copernicus.eu/api\n")
+                        f.write("key: 6101c82f-6d0b-4278-ac89-82743a81502c\n")
+
+                if not initial_check:
+                    print()
+                    client = cdsapi.Client()
+                    client = cdsapi.Client(retry_max=1, #info_callback=self.logger.info, 
+                                        # warning_callback=self.logger.info, error_callback=self.logger.info, debug_callback=self.logger.info,
+                                        quiet=True) #, url="https://ads.atmosphere.copernicus.eu/api", key="6101c82f-6d0b-4278-ac89-82743a81502c") # no se puede con esto pq tenemos el new que te dice que no se puede sin un archivo cdsapi
+                    try:
+                        result = client.retrieve(cams_dataset, request)
+                    except requests.exceptions.HTTPError as err:
+                        if err.response.status_code == 400: # Bad Request
+                            print(err)
+                            pass
+                        elif err.response.status_code == 500: # Connection Error
+                            # print(f"Status Code: {err.response.status_code}")
+                            # print(f"Reason: {print(err)}")
+                            # print(f"URL: {err.response.url}")
+                            print("There was an an error:")
+                            print(f"\n{err}\n")
+                            print("Try later.")
+                            continue
+                        else:
+                            print(err)
+                    
+                    # print(f"Status Code: {err.response.status_code}")
+                    # print(f"Reason: {print(err)}")
+                    # print(f"URL: {err.response.url}")
+                    # print(f"Full Error: {err}")
+                    
+                    result.download(target="./paula")
+                            
 
             
             

@@ -13,6 +13,8 @@ sconcno: nitrogen_monoxide
 sconcno2: nitrogen_dioxide  
 sconco3: ozone  
 sconcso2: sulphur_dioxide  
+sconcnmvoc: non_methane_vocs
+sconcpan: peroxyacyl_nitrates 
 
 # "alder_pollen",
 # "birch_pollen",
@@ -25,12 +27,4 @@ sconcso2: sulphur_dioxide
 # "pm2.5_total_organic_matter",
 # "pm10_sea_salt_dry",
 # "pm10_wildfires",
-# "peroxyacyl_nitrates",
-
-# "non_methane_vocs",
-# # per akest Non-methane volatile organic compounds (VOCs)
-# #'sconcnmvoc',  'long_parameter_name':'total non-methane volatile organic compounds'
-# #'sconcvoc',    'long_parameter_name':'total volatile organic compounds',  
-
-# "residential_elementary_carbon", "total_elementary_carbon",
-# # per akest pm2p5ec ('PM2.5 elemental carbon') pero no estic segura 
+# "residential_elementary_carbon"

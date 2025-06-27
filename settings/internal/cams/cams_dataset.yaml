@@ -1,5 +1,5 @@
 {
-  "cams_europe_air_quality":
+  "cams_europe_air_quality_forecasts":
     {
       "experiments":
         [
@@ -17,5 +17,6 @@
         ],
       "resolution": "hourly",
       "domain": ["regional", "eu"],
+      "url": "https://ads.atmosphere.copernicus.eu/datasets/cams-europe-air-quality-forecasts?tab=download",
     },
 }
