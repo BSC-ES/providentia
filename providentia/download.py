@@ -218,8 +218,15 @@ class Download(object):
                     download_experiment_fun = self.copy_non_interpolated_experiment
                 # local experiment download
                 else:
-                    # get function to download experiment depending on the configuration file field
-                    download_experiment_fun = self.download_experiment if self.interpolated is True else self.download_non_interpolated_experiment
+                    # CAMS experiment
+                    if self.dataset:
+                        download_experiment_fun = self.download_cams_experiment
+                    # interpolated experiment
+                    elif self.interpolated:
+                        download_experiment_fun = self.download_experiment
+                    # non-interpolated experiment
+                    else:
+                        download_experiment_fun = self.download_non_interpolated_experiment 
 
             # iterate the experiments download
             for experiment in self.experiments.keys():
@@ -1868,28 +1875,25 @@ class Download(object):
         experiment_options = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_dataset.yaml')))
 
         # get experiment id and the domain
-        dataset_expid, domain, ensemble_options = experiment.split("-")
-        
-        # get the CAMS dataset and the experiment name
-        dataset, exp_id = dataset_expid.rsplit('_', 1)
+        exp_id, domain, ensemble_options = experiment.split("-")
 
         # make sure dataset is a possible option
-        if dataset not in experiment_options:
+        if self.dataset not in experiment_options:
             msg = f"The CAMS experiment must start with a valid dataset name. No valid dataset found in '{exp_id}'."
             show_message(self, msg, deactivate=initial_check)
             return
 
         # make sure the experiment is available in the dataset
-        if exp_id not in experiment_options[dataset]["experiments"]:
-            msg = f"Cannot find the {exp_id} experiment in the {dataset} dataset."    
+        if exp_id not in experiment_options[self.dataset]["experiments"]:
+            msg = f"Cannot find the {exp_id} experiment in the {self.dataset} dataset."    
             show_message(self, msg, deactivate=initial_check)
             return
 
         # check if the domain is the correct one for the dataset
-        if domain not in experiment_options[dataset]["domain"]:
-            possible_domains = "', '".join(experiment_options[dataset]['domain'])
+        if domain not in experiment_options[self.dataset]["domain"]:
+            possible_domains = "', '".join(experiment_options[self.dataset]['domain'])
             msg = (
-            f"The current domain '{domain}' is not valid for the CAMS '{dataset}' dataset."
+            f"The current domain '{domain}' is not valid for the CAMS '{self.dataset}' dataset."
             f"It must be '{possible_domains}'.")            
             show_message(self, msg, deactivate=initial_check)
             return
@@ -1897,12 +1901,12 @@ class Download(object):
         # only ensemble options allmembers and 000 are valid
         if ensemble_options not in ['000', 'allmembers']:
             msg = (
-            f"The current ensemble option '{ensemble_options}' is not valid for the CAMS '{dataset}' dataset."
+            f"The current ensemble option '{ensemble_options}' is not valid for the CAMS '{self.dataset}' dataset."
             f"It must be '000' or 'allmembers'.")            
             show_message(self, msg, deactivate=initial_check)
             return
 
-        min_start_date, max_end_date = self.fetch_cams_dates(experiment_options[dataset]['url'])
+        min_start_date, max_end_date = self.fetch_cams_dates(experiment_options[self.dataset]['url'])
 
         # get dates in cams format
         cams_start_date = datetime.strptime(self.start_date, "%Y%m%d").strftime("%Y-%m-%d")
@@ -1923,24 +1927,22 @@ class Download(object):
         for resolution in self.resolution:
 
             # check if the resolution is the correct one for the dataset
-            if resolution != experiment_options[dataset]["resolution"]:
+            if resolution != experiment_options[self.dataset]["resolution"]:
                 msg = (
-                f"The current resolution '{resolution}' is not valid for the CAMS '{dataset}' dataset. "
-                f"It must be '{experiment_options[dataset]['resolution']}'.")            
+                f"The current resolution '{resolution}' is not valid for the CAMS '{self.dataset}' dataset. "
+                f"It must be '{experiment_options[self.dataset]['resolution']}'.")            
                 show_message(self, msg, deactivate=initial_check)
                 continue
             
             # iterate through the species
             for species in self.species: 
                 if species not in parameters_dict:
-                    msg = f"The current species '{species}' is not valid for the CAMS '{dataset}' dataset. "           
+                    msg = f"The current species '{species}' is not valid for the CAMS '{self.dataset}' dataset. "           
                     show_message(self, msg, deactivate=initial_check)
                     continue
             
                 # get the species in the cams vocabulary
                 cams_species = parameters_dict[species]
-
-                cams_dataset = dataset.replace('_','-')
 
                 request = {
                 "variable": [cams_species],
@@ -1971,7 +1973,7 @@ class Download(object):
                                         # warning_callback=self.logger.info, error_callback=self.logger.info, debug_callback=self.logger.info,
                                         quiet=True) #, url="https://ads.atmosphere.copernicus.eu/api", key="6101c82f-6d0b-4278-ac89-82743a81502c") # no se puede con esto pq tenemos el new que te dice que no se puede sin un archivo cdsapi
                     try:
-                        result = client.retrieve(cams_dataset, request)
+                        result = client.retrieve(self.dataset, request)
                     except requests.exceptions.HTTPError as err:
                         if err.response.status_code == 400: # Bad Request
                             print(err)
@@ -2005,12 +2007,6 @@ class Download(object):
 
                 # # add the path with the resolution and species combination to the list
                 # res_spec_dir.append(res_spec)
-                        
-
-
-
-
-     
     def check_time(self, size, file_size):
         if (time.time() - self.ncfile_dl_start_time) > self.timeoutLimit:
             error = 'Download timeout, try later.'
