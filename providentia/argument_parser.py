@@ -114,6 +114,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--ensemble_options",
                                      dest="ensemble_options",
                                      help="ensemble options of the experiment")
+            self.parser.add_argument("--dataset",
+                            dest="dataset",
+                            help="CAMS dataset")
             self.parser.add_argument("--forecast_day",
                                      dest="forecast_day",
                                      help="day of the model forecast to analyse")
