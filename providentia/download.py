@@ -220,20 +220,18 @@ class Download(object):
                 else:
                     # CAMS experiment
                     if self.dataset:
-                        download_experiment_fun = self.download_cams_experiment
-                    # interpolated experiment
-                    elif self.interpolated:
-                        download_experiment_fun = self.download_experiment
-                    # non-interpolated experiment
+                        for experiment in self.experiments:
+                            self.download_cams_experiment(experiment)
+                    # BSC machines
                     else:
-                        download_experiment_fun = self.download_non_interpolated_experiment 
-
-            # iterate the experiments download
-            for experiment in self.experiments.keys():
-                initial_check_nc_files = download_experiment_fun(experiment, initial_check=True)
-                files_to_download = self.select_files_to_download(initial_check_nc_files)
-                if not initial_check_nc_files or files_to_download:
-                    download_experiment_fun(experiment, initial_check=False, files_to_download=files_to_download)
+                        download_experiment_fun = self.download_experiment if self.interpolated else self.download_non_interpolated_experiment
+                 
+                        # iterate the experiments download
+                        for experiment in self.experiments.keys():
+                            initial_check_nc_files = download_experiment_fun(experiment, initial_check=True)
+                            files_to_download = self.select_files_to_download(initial_check_nc_files)
+                            if not initial_check_nc_files or files_to_download:
+                                download_experiment_fun(experiment, initial_check=False, files_to_download=files_to_download)
 
             # remove section variables from memory
             for k in self.section_opts:
@@ -1865,11 +1863,12 @@ class Download(object):
             else:
                 self.logger.info('No files were found')
 
-    def download_cams_experiment(self, experiment, initial_check, files_to_download=None):
-        if not initial_check:   
-            # print current_experiment
-            self.logger.info('\n'+'-'*40)
-            self.logger.info(f"\nDownloading {experiment} experiment data from the Atmosphere Data Store...")
+    def download_cams_experiment(self, experiment): 
+        import cdsapi
+
+        # print current_experiment
+        self.logger.info('\n'+'-'*40)
+        self.logger.info(f"\nDownloading {experiment} experiment data from the Atmosphere Data Store...")
 
         # get the dataset info
         experiment_options = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_dataset.yaml')))
@@ -1880,13 +1879,13 @@ class Download(object):
         # make sure dataset is a possible option
         if self.dataset not in experiment_options:
             msg = f"The CAMS experiment must start with a valid dataset name. No valid dataset found in '{exp_id}'."
-            show_message(self, msg, deactivate=initial_check)
+            show_message(self, msg)
             return
 
         # make sure the experiment is available in the dataset
         if exp_id not in experiment_options[self.dataset]["experiments"]:
             msg = f"Cannot find the {exp_id} experiment in the {self.dataset} dataset."    
-            show_message(self, msg, deactivate=initial_check)
+            show_message(self, msg)
             return
 
         # check if the domain is the correct one for the dataset
@@ -1895,7 +1894,7 @@ class Download(object):
             msg = (
             f"The current domain '{domain}' is not valid for the CAMS '{self.dataset}' dataset."
             f"It must be '{possible_domains}'.")            
-            show_message(self, msg, deactivate=initial_check)
+            show_message(self, msg)
             return
 
         # only ensemble options allmembers and 000 are valid
@@ -1903,7 +1902,7 @@ class Download(object):
             msg = (
             f"The current ensemble option '{ensemble_options}' is not valid for the CAMS '{self.dataset}' dataset."
             f"It must be '000' or 'allmembers'.")            
-            show_message(self, msg, deactivate=initial_check)
+            show_message(self, msg)
             return
 
         min_start_date, max_end_date = self.fetch_cams_dates(experiment_options[self.dataset]['url'])
@@ -1931,14 +1930,14 @@ class Download(object):
                 msg = (
                 f"The current resolution '{resolution}' is not valid for the CAMS '{self.dataset}' dataset. "
                 f"It must be '{experiment_options[self.dataset]['resolution']}'.")            
-                show_message(self, msg, deactivate=initial_check)
+                show_message(self, msg)
                 continue
             
             # iterate through the species
             for species in self.species: 
                 if species not in parameters_dict:
                     msg = f"The current species '{species}' is not valid for the CAMS '{self.dataset}' dataset. "           
-                    show_message(self, msg, deactivate=initial_check)
+                    show_message(self, msg)
                     continue
             
                 # get the species in the cams vocabulary
@@ -1954,65 +1953,57 @@ class Download(object):
                 "leadtime_hour": list(range(0,24)),
                 "data_format": "netcdf_zip"
                 }
-
-                import cdsapi
-                import logging
                 
                 # create cdsapirc file in case it was not created
                 cdsapirc_file = join(os.getenv("HOME"),'.cdsapirc')
-                print("Creating file")
                 if not os.path.isfile(cdsapirc_file):
-                    with open(cdsapirc_file, "w") as f:
-                        f.write("url: https://ads.atmosphere.copernicus.eu/api\n")
-                        f.write("key: 6101c82f-6d0b-4278-ac89-82743a81502c\n")
 
-                if not initial_check:
-                    print()
-                    client = cdsapi.Client()
-                    client = cdsapi.Client(retry_max=1, #info_callback=self.logger.info, 
-                                        # warning_callback=self.logger.info, error_callback=self.logger.info, debug_callback=self.logger.info,
-                                        quiet=True) #, url="https://ads.atmosphere.copernicus.eu/api", key="6101c82f-6d0b-4278-ac89-82743a81502c") # no se puede con esto pq tenemos el new que te dice que no se puede sin un archivo cdsapi
-                    try:
-                        result = client.retrieve(self.dataset, request)
-                    except requests.exceptions.HTTPError as err:
-                        if err.response.status_code == 400: # Bad Request
-                            print(err)
-                            pass
-                        elif err.response.status_code == 500: # Connection Error
-                            # print(f"Status Code: {err.response.status_code}")
-                            # print(f"Reason: {print(err)}")
-                            # print(f"URL: {err.response.url}")
-                            print("There was an an error:")
-                            print(f"\n{err}\n")
-                            print("Try later.")
-                            continue
-                        else:
-                            print(err)
+                    create_file = input(f"'.cdsapirc' file not found. Creating it at {cdsapirc_file}. Do you agree? ([y]/n)").lower()
+                    while create_file not in ['','y','n']:
+                        create_file = input(f"'.cdsapirc' file not found. Creating it at {cdsapirc_file}. Do you agree? ([y]/n)").lower()
+
+                    if create_file in ['', 'y']: 
+                        with open(cdsapirc_file, "w") as f:
+                            f.write("url: https://ads.atmosphere.copernicus.eu/api\n")
+                            f.write("key: 6101c82f-6d0b-4278-ac89-82743a81502c\n") # TODO get eh user key
+                    else:
+                        self.logger.error("Error: Cannot proceed without '.cdsapirc'. CAMS experiment data download requires this file.")
+                        sys.exit(1)
+
+                # create client
+                self.logger.info('')
+                client = cdsapi.Client()
+                client = cdsapi.Client(retry_max=1, quiet=True)
+
+                # make the request
+                try:
+                    result = client.retrieve(self.dataset, request)
+                except requests.exceptions.HTTPError as err:
+                    # bad request
+                    if err.response.status_code == 400: 
+                        self.logger.info("\nBad request (400): The server could not understand the request.")
+                        self.logger.info(f"Details: {err}")
+                    # connection error
+                    elif err.response.status_code == 500: 
+                        self.logger.info("\nServer error (500): The server encountered an error while processing the request.")
+                        self.logger.info(f"Details: {err}")
+                        self.logger.info("Please try again later.")
+                        return
+                    else:
+                        self.logger.info(f"\nUnexpected error ({err.response.status_code}):")
+                        self.logger.info(f"Details: {err}")
                     
-                    # print(f"Status Code: {err.response.status_code}")
-                    # print(f"Reason: {print(err)}")
-                    # print(f"URL: {err.response.url}")
-                    # print(f"Full Error: {err}")
-                    
-                    result.download(target="./paula")
+                    continue
+
+                # download to the directory  
+                result.download(target="./paula") # TODO: change directory
                             
 
-            
-            
-                # # if no species were found, then show the message
-                # if species_exists is False:
-                #     msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain for {species} species at {resolution} resolution"
-                #     show_message(self, msg, deactivate=initial_check)
-                #     continue
-
-                # # add the path with the resolution and species combination to the list
-                # res_spec_dir.append(res_spec)
     def check_time(self, size, file_size):
         if (time.time() - self.ncfile_dl_start_time) > self.timeoutLimit:
             error = 'Download timeout, try later.'
             self.logger.error(error)
             sys.exit(1)
-            
             
     def sighandler(self, *unused):
         self.logger.info('\nKeyboard Interrupt. Stopping execution.')
