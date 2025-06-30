@@ -1027,10 +1027,6 @@ class Download(object):
         # get experiment id and the domain
         exp_id, domain, ensemble_options = experiment.split("-")
 
-        # get stat if it is an ensemble statistic
-        if not ensemble_options.isdigit() or ensemble_options == 'allmembers': 
-            stat = ensemble_options.split("_",1)[-1]
-
         # initialise warning message and experiment exists boolean
         msg = ""
         experiment_exists = False
@@ -1126,7 +1122,7 @@ class Download(object):
                         res_spec = join(remote_dir,resolution,species)
                     # if it is an ensemble statistic
                     else:
-                        res_spec = join(remote_dir,resolution,"ensemble-stats",species+"_"+stat)
+                        res_spec = join(remote_dir,resolution,"ensemble-stats",species+"_"+ensemble_options)
   
                     self.sftp.stat(res_spec)
                     species_exists = True
@@ -1141,7 +1137,7 @@ class Download(object):
                                     res_spec = join(remote_dir,resolution, mapping_speci)
                                 # if it is an ensemble statistic
                                 else:
-                                    res_spec = join(remote_dir,resolution, "ensemble-stats", species + "_" + stat)
+                                    res_spec = join(remote_dir,resolution, "ensemble-stats", species + "_" + ensemble_options)
   
                                 self.sftp.stat(res_spec)  
                                 species_exists = True
@@ -1217,7 +1213,7 @@ class Download(object):
                         species = species.split("_",1)[0]
 
                         # filter the nc files to only get the ones that have the correct species and stats
-                        nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == stat, nc_files))
+                        nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == ensemble_options, nc_files))
                 
                 # if there is no options with the ensemble option, tell the user
                 if nc_files == []:
@@ -1241,7 +1237,7 @@ class Download(object):
                     if ensemble_options.isdigit() or ensemble_options == 'allmembers':
                         local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,species)
                     else:
-                        local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+stat)
+                        local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+ensemble_options)
                     
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
