@@ -43,25 +43,91 @@
         {
           "orientation": "portrait",
           "figure": {},
-          "page_title":
-            {
-              "x": 0.5,
-              "y": 0.80,
-              "size": 20,
-              "ha": "center",
-              "va": "top",
-              "wrap": true,
+          "dark_mode": true,
+          "variables": {
+            "network": {
+              "active": true,
+              "key": "Network",
+              "value": ""
             },
-          "page_text":
-            {
-              "x": 0.5,
-              "y": 0.75,
-              "weight": "light",
-              "size": 15,
-              "ha": "center",
-              "va": "top",
-              "wrap": true,
+            "species":  {
+              "active": true,
+              "key": "Species",
+              "value": ""
             },
+            "resolution":  {
+              "active": true,
+              "key": "Temporal resolution",
+              "value": ""
+            },
+            "dates": {
+              "active": true,
+              "key": "Date range",
+              "value": ""
+            },
+            "experiments": {
+              "active": true,
+              "key": "Experiments",
+              "value": ""   
+            },
+            "temporal_colocation": {
+              "active": false,
+              "key": "Temporal colocation",
+              "value": ""
+            },
+            "spatial_colocation": {
+              "active": false,
+              "key": "Spatial colocation",
+              "value": ""
+            },
+            "filter_species": {
+              "active": true,
+              "key": "Filter species",
+              "value": ""
+            },
+            "calibration": {
+              "active": false,
+              "key": "Calibration factor",
+              "value": ""
+            },
+            "subsections": {
+              "active": true,
+              "key": "Subsections",
+              "value": ""
+            }
+          },
+          "keys":
+            {
+              "fontsize": 7,
+              "va": "bottom",
+              "color": {
+                "dark_mode": "#93f3e5",
+                "light_mode": "#213970",
+              },
+              "x": 0.10
+            },
+          "values":
+            {
+              "fontsize": 7,
+              "va": "bottom",
+              "color": {
+                "dark_mode": "white",
+                "light_mode": "black",
+              },
+              "x": 0.35
+            },
+          "spacing": 0.025,
+          "max_len": 56,
+          "y_end": 0.17,
+          "logo": {
+            "x": 0.10,
+            "y": 0.85,
+            "scale": 0.25,
+            "path": {
+              "dark_mode": "", # 'assets/logo_caliope_dark.png',
+              "light_mode": "", # 'assets/logo_caliope.png'
+            }
+          },
         },
     },
   "legend":
