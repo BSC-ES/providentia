@@ -2565,6 +2565,16 @@
         },
         "tests": {
           "plot_options": [],
+          "figsize": [5, 5], 
+          "auxiliar":
+            {
+              "units": { "position": [-0.19, -0.8], "fontsize": 9 },
+              "station_dots":
+                {
+                  "tick_params": { "axis": "x", "labelsize": 10 },
+                  "markersize": 4,
+                },
+            },
         }
     },
 }
