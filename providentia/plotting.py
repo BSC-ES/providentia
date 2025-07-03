@@ -8,6 +8,7 @@ import yaml
 
 import cartopy
 import cartopy.crs as ccrs
+from datetime import datetime
 from KDEpy import FFTKDE
 from itertools import groupby
 import matplotlib
@@ -20,6 +21,7 @@ import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 from packaging.version import Version
+from PIL import Image
 import pandas as pd
 import pyproj
 import seaborn as sns
@@ -356,6 +358,64 @@ class Plotting:
             
         return grid_edge_polygons
 
+    def draw_line(self, fig, key, value, plot_characteristics, y, spacing, max_len):
+        """ Add key-value line to PDF
+
+            :param fig: Cover page
+            :type fig: plt.figure
+            :param key: Key of line
+            :type key: str
+            :param value: Value of line
+            :type value: str
+            :param plot_characteristics: 
+            :type plot_characteristics: dict
+            :param y: Y position of last line
+            :type y: float
+            :param spacing: Spacing between lines
+            :type spacing: float
+            :param max_len: Maximum characters in value
+            :type max_len: int
+        """
+
+        # calculate number of lines for value if it is more than max length characters
+        value = str(value)
+        lines = [value[i:i + max_len] for i in range(0, len(value), max_len)]
+        n_lines = len(lines)
+
+        # add key
+        fig.text(y=y + (n_lines - 1) * spacing, s=f"{key}:", **plot_characteristics['keys'])
+
+        # add value, wrapped when too long        
+        for j, line in enumerate(reversed(lines)):
+            fig.text(y=y + j * spacing, s=line, **plot_characteristics['values'])
+
+        return n_lines
+    
+    def format_value(self, value):
+        """ Convert list or array into string
+
+            :param value: Value
+            :type value: list, np.ndarray, str
+        """
+
+        if isinstance(value, (list, np.ndarray)):
+            return ', '.join(map(str, value))
+        return value
+
+    def get_key_by_bsc_name(self, standard_parameters, bsc_name):
+        """ Get GHOST standard parameter key name by BSC speci name
+
+            :param standard_parameters: GHOST standard parameters dictionary
+            :type standard_parameters: dict
+            :param bsc_name: BSC speci name
+            :type bsc_name: str
+        """
+
+        for key, value in standard_parameters.items():
+            if value.get('bsc_parameter_name') == bsc_name:
+                return key
+        return None
+
     def make_header(self, pdf, plot_characteristics):
         """ Make header.
         
@@ -363,23 +423,47 @@ class Plotting:
             :type plot_characteristics: dict
         """
 
-        # create header page
-        page = plt.figure(**plot_characteristics['figure'])
+        # load external image as background
+        if plot_characteristics['dark_mode']:
+            bg_image_path = 'assets/report_dark.png'
+            for key in ['keys', 'values']:
+                plot_characteristics[key]['color'] = plot_characteristics[key]['color']['dark_mode']
+            logo_image_path = plot_characteristics['logo']['path']['dark_mode']
+        else:
+            bg_image_path = 'assets/report.png'
+            for key in ['keys', 'values']:
+                plot_characteristics[key]['color'] = plot_characteristics[key]['color']['light_mode']
+            logo_image_path = plot_characteristics['logo']['path']['light_mode']
+        
+        # add background image
+        bg_img = Image.open(join(PROVIDENTIA_ROOT, bg_image_path))
+        dpi = self.canvas_instance.dpi
+        fig_width, fig_height = bg_img.size[0] / dpi, bg_img.size[1] / dpi
+        fig = plt.figure(figsize=(fig_width, fig_height), dpi=dpi)
+        ax = fig.add_axes([0, 0, 1, 1])
+        ax.axis('off')
+        ax.imshow(bg_img)
 
-        # get logo
-        logo_path = join(PROVIDENTIA_ROOT, 'assets/logoline.png')
-        logo = mpimg.imread(logo_path)
+        # add logo image if path is defined
+        if logo_image_path:
+            logo_img = Image.open(join(PROVIDENTIA_ROOT, logo_image_path))
 
-        # place logo on top center
-        page_width, page_height = page.get_size_inches()
-        xo = (page_width * page.dpi) / 2 + 500
-        yo = page_height * page.dpi * 2 + 700
-        page.figimage(logo, xo=int(xo), yo=int(yo))
-
-        # set header title
-        plot_characteristics['page_title']['s'] = self.read_instance.report_title 
-        plot_characteristics['page_title']['transform'] = page.transFigure
-        page.text(**plot_characteristics['page_title'])
+            # resize logo to scale of the background width (1/4 by default)
+            bg_width, bg_height = bg_img.size
+            scale = plot_characteristics['logo']['scale']
+            logo_new_width = int(bg_width * scale)
+            aspect_ratio = logo_img.height / logo_img.width
+            logo_new_height = int(logo_new_width * aspect_ratio)
+            logo_img_resized = logo_img.resize((logo_new_width, logo_new_height))
+            logo_array = np.asarray(logo_img_resized)
+            logo_ax = fig.add_axes([
+                plot_characteristics['logo']['x'],
+                plot_characteristics['logo']['y'],
+                scale,
+                logo_new_height / bg_height
+            ])
+            logo_ax.imshow(logo_array)
+            logo_ax.axis('off')
 
         # if len of network or species uniques is 1, set that instead of long list of duplicates
         _, idx = np.unique(self.read_instance.network, return_index=True)
@@ -387,42 +471,58 @@ class Plotting:
         _, idx = np.unique(self.read_instance.species, return_index=True)
         species_to_write = np.array(self.read_instance.species)[np.sort(idx)]
 
-        # set header main text
-        txt = 'Network : {}\n' \
-              'Species : {}\n' \
-              'Temporal Resolution : {}\n' \
-              'Date Range : {} - {}\n' \
-              'Experiments : {}\n' \
-              'Temporal Colocation : {}\n' \
-              'Spatial Colocation : {}\n' \
-              .format(network_to_write,
-                      species_to_write,
-                      self.read_instance.resolution,
-                      self.read_instance.start_date,
-                      self.read_instance.end_date,
-                      list(self.read_instance.experiments.values()),
-                      self.read_instance.temporal_colocation,
-                      self.read_instance.spatial_colocation 
-                      )
+        # get key from standard parameters as name for species
+        from GHOST_standards import standard_parameters
+        species = []
+        for speci in species_to_write:
+            species.append(self.get_key_by_bsc_name(standard_parameters, speci))
+        
+        # format date
+        start_date = datetime.strptime(self.read_instance.start_date, "%Y%m%d").strftime("%d/%m/%Y")
+        end_date = datetime.strptime(self.read_instance.end_date, "%Y%m%d").strftime("%d/%m/%Y")
+        dates = f"{start_date} - {end_date}"
 
-        # add filter species to header if have it set
-        if self.read_instance.filter_species: 
-            txt += 'Filter Species : {}\n'.format(self.read_instance.filter_species)
+        variable_values = {
+            'network': self.format_value(network_to_write),
+            'species': self.format_value(species),
+            'resolution': self.read_instance.resolution.capitalize().replace('_', ' '),
+            'dates': dates,
+            'experiments': self.format_value(list(self.read_instance.experiments.values())),
+            'temporal_colocation': self.read_instance.temporal_colocation,
+            'spatial_colocation': self.read_instance.spatial_colocation,
+            'filter_species': self.format_value(list(self.read_instance.filter_species.keys())),
+            'calibration': getattr(self.read_instance, 'calibration_factor', ''),
+            'subsections': self.format_value(self.read_instance.subsections)
+        }
 
-        # add calibration factor to header if have it set
-        if hasattr(self.read_instance, 'calibration_factor'):
-            if self.read_instance.calibration_factor: 
-                txt += 'Calibration : {}\n'.format(self.read_instance.calibration_factor)
+        visible_items = []
+        for key, value in variable_values.items():
+            if not value:
+                continue
+            if plot_characteristics['variables'][key]['active']:
+                if plot_characteristics['variables'][key]['value']:
+                    value = plot_characteristics['variables'][key]['value']
+                visible_items.append((key, value))
 
-        # add subsections to header
-        txt += 'Subsections : {}\n'.format(self.read_instance.subsections)
+        # add key: value as line
+        spacing = plot_characteristics['spacing']
+        max_len = plot_characteristics['max_len']
+        y = plot_characteristics['y_end']
+        for key, value in reversed(visible_items):
+            n_lines = self.draw_line(
+                fig,
+                plot_characteristics['variables'][key]['key'],
+                value,
+                plot_characteristics,
+                y,
+                spacing,
+                max_len
+            )
+            y += n_lines * spacing 
 
-        plot_characteristics['page_text']['s'] = txt   
-        plot_characteristics['page_text']['transform'] = page.transFigure
-        page.text(**plot_characteristics['page_text'])
-
-        pdf.savefig(page, dpi=self.canvas_instance.dpi)
-        plt.close(page)
+        # save and close
+        pdf.savefig(fig)
+        plt.close(fig)
 
     def make_metadata(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         """ Make metadata summary plot.
