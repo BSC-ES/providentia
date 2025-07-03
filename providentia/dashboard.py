@@ -728,6 +728,8 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_network in available_networks:
             self.cb_network.setCurrentText(self.selected_network)
         else:
+            msg = f'Selected network {self.selected_network} is not available. Choosing {self.cb_network.currentText()} as it is the first option in the dropdown.'
+            show_message(self, msg)
             self.selected_network = self.cb_network.currentText()
 
         # turn off some features if using non-GHOST data (on for ACTRIS)
