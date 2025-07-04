@@ -897,13 +897,14 @@ class Dashboard(QtWidgets.QWidget):
                     if plot_type not in canvas_instance.layout_options:
                         canvas_instance.layout_options.append(plot_type)       
 
-            if 'fairmode-target' in canvas_instance.layout_options and hasattr(self, 'selected_species'):
-                if self.selected_species not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
-                    canvas_instance.layout_options.remove('fairmode-target')   
-                if ((self.selected_species in ['sconco3', 'sconcno2'] and self.selected_resolution != 'hourly') 
-                    or (self.selected_species in ['pm10', 'pm2p5'] and (self.selected_resolution not in ['hourly', 'daily']))):
-                    canvas_instance.layout_options.remove('fairmode-target')
-            
+            for plot_type in ['fairmode-target', 'fairmode-statsummary']:
+                if plot_type in canvas_instance.layout_options and hasattr(self, 'selected_species'):
+                    if self.selected_species not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
+                        canvas_instance.layout_options.remove(plot_type)   
+                    if ((self.selected_species in ['sconco3', 'sconcno2'] and self.selected_resolution != 'hourly') 
+                        or (self.selected_species in ['pm10', 'pm2p5'] and (self.selected_resolution not in ['hourly', 'daily']))):
+                        canvas_instance.layout_options.remove(plot_type)
+
         # order alphabetically
         layout_options = sorted(canvas_instance.layout_options)
 
