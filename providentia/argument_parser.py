@@ -86,7 +86,10 @@ class ProvArgumentParser(object):
                                      help='runs Providentia Interpolation') 
             self.parser.add_argument("--slurm_job_id",
                                      dest="slurm_job_id",
-                                     help="id of the interpolation sbatch job")                
+                                     help="id of the interpolation sbatch job")     
+            self.parser.add_argument("--cpus-per-task",
+                                     dest="cpus_per_task",
+                                     help="number of CPUs used in interpolation")                
             self.parser.add_argument("--network",
                                      dest="network",
                                      help="define network to load (e.g. 'EBAS', 'EEA_AQ_eReporting'")
