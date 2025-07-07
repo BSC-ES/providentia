@@ -2,16 +2,17 @@
 
 This page is only useful to those who want to create their own reports. Users can choose which plots these reports will have, as you will see below.
 
+![Screenshot_from_2025-02-12_17-17-38](uploads/7b86bb624cf19186c7fbed228e5486c6/Screenshot_from_2025-02-12_17-17-38.png)
+
 ## Plot types
 
-The standard plot types consist of: maps (`map`), metadata summary (`metadata`), timeseries (`timeseries`), periodic plots (`periodic`), periodic violin plots (`periodic-violin`), box plots (`boxplot`), distribution plots (`distribution`), scatter plots (`scatter`), heat maps (`heatmap`), tables that give one stat per subsection per experiment (`table`) and tables that give multiple stats per experiment (`statsummary`).
+The standard plot types consist of: maps (`map`), metadata summary (`metadata`), timeseries (`timeseries`), periodic plots (`periodic`), periodic violin plots (`periodic-violin`), box plots (`boxplot`), distribution plots (`distribution`), scatter plots (`scatter`), heat maps (`heatmap`), tables that give one stat per subsection per experiment (`table`), tables that give multiple stats per experiment (`statsummary`), Taylor Diagrams (`taylor`), and FAIRMODE plots (`fairmode-target` and `fairmode-statsummary`).
 
-Some of these plots involve calculating a specific statistic, namely: `map`, `periodic`, `heatmap` and `table`. This statistic is defined by aggregating the `-[stat]` field to the plot type will make a plot of the required type for the specific type of statistic set. `[stat]` should be replaced with any of the base statistic names (e.g. p5, Mean), or experiment bias names. For example to show the median values spatially, `map-p50` would be set as the plot name, or `map-r2` to show the coefficient of determination. The available statistic names are documented in `settings/basic_stats_dict.yaml` and `settings/experiment_bias_stats_dict.yaml` for reference.
+Some of these plots involve calculating a specific statistic, namely: `map`, `periodic`, `heatmap`, `taylor` and `table`. This statistic is defined by aggregating the `-[stat]` field to the plot type will make a plot of the required type for the specific type of statistic set. `[stat]` should be replaced with any of the base statistic names (e.g. p5, Mean), or experiment bias names. For example to show the median values spatially, `map-p50` would be set as the plot name, or `map-r2` to show the coefficient of determination. The available statistic names are documented in `settings/basic_stats.yaml` and `settings/experiment_bias_stats.yaml` for reference. For the Taylor diagram, only `r`and `r2`can be used.
 
 The timeseries can also be used to show how statistics vary in time. In order to do this, we need to add `-[stat]` and the temporal resolution after the plot type name (e.g. `timeseries-Mean-daily`, `timeseries-r2-monthly`, `timeseries-r-annual`).
 
-For the `metadata` plot the metadata displayed is set to a default list of metadata fields. For the `statsummary` plot the statistics displayed are set to a default list of absolute and bias statistics. These default options can be changed in either the
-`settings/plot_characteristics_dashboard.yaml` and `settings/plot_characteristics_offline.yaml` files, depending on which mode Providentia is being ran in.
+For the `metadata` plot the metadata displayed is set to a default list of metadata fields. For the `statsummary` plot the statistics displayed are set to a default list of absolute and bias statistics. These default options can be changed in `settings/plot_characteristics.yaml`.
 
 ### Map (`map`)
 
@@ -31,7 +32,7 @@ For the `metadata` plot the metadata displayed is set to a default list of metad
 
 ### Periodic violin (`periodic-violin`)
 
-![Periodic_violin](uploads/bcd66dd9858dc03c3bde612cbb5e3ba6/Periodic_violin.png)
+![Periodic-violin](uploads/40d4e1088919f36b8e860227a8e2e306/Periodic-violin.png)
 
 ### Boxplot (`boxplot`)
 
@@ -57,6 +58,18 @@ For the `metadata` plot the metadata displayed is set to a default list of metad
 
 ![Statsummary](uploads/88448c8e7dd9ef8515c03d5363df00da/Statsummary.png)
 
+### Taylor diagram (`taylor`)
+
+![taylor](uploads/cd19c29c0d2c39a202a993bbd2ed8e58/taylor.png)
+
+### FAIRMODE target (`fairmode-target`)
+
+![fairmode-target](uploads/08e92dddacc60ce427fb4a38a68143d9/fairmode-target.png)
+
+### FAIRMODE statistics summary (`fairmode-statsummary`)
+
+![fairmode-statsummary](uploads/72e1c4c7d6e180ff880eaa8c34ac2645/fairmode-statsummary.png)
+
 ## Plot options
 
 It is possible to create advanced plots by adding one or more of the following words to each basic plot type or choosing the options in the dashboard:
@@ -75,7 +88,7 @@ The extension `_individual` allows users to disaggregate the plots and see the p
 
 ### Add annotations (`_annotate`)
 
-If the configuration option `_annotate` is added, a box will be created on the plots to show several statistical data. The style and position of this box, as well as the statistics, can be defined by the user in plot characteristics under ``settings`` by changing the parameter `annotate_stats`.
+If the configuration option `_annotate` is added, a box will be created on the plots to show several statistical data. The style and position of this box, as well as the statistics, can be defined by the user in `plot_characteristics.yaml` under `settings` by changing the parameter `annotate_stats`.
 
 ![Screenshot_from_2022-10-04_16-17-04](uploads/906536e687e29f3e8a4ccf760485d884/Screenshot_from_2022-10-04_16-17-04.jpg)
 
@@ -120,3 +133,9 @@ The option `_hidedata` needs to be accompanied by `_smooth` in the `timeseries` 
 Adding `_domain` will add the model grid on top of the map.
 
 ![domain](uploads/4dd8180f18b54e2a3c6d4e0e39827d0c/domain.png)
+
+### Add threshold line (`_threshold`)
+
+Adding `_threshold` will add a line indicating the exceedances.
+
+![Screenshot_from_2025-02-12_16-51-00](uploads/938911dbdd8f3cb9956bf759d0398219/Screenshot_from_2025-02-12_16-51-00.png)
