@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redirecting Output to a File &mdash; Providentia 2.3.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=c3c8ae58"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reference" href="reference.html" />
+    <link rel="prev" title="Multispecies filtering" href="Multispecies-filtering.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Tool setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modes.html">Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="other-topics.html">Other topics</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Command-line-configuration.html">Command line configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Data-flags-and-QA-names-and-codes.html">Data flags and QA names and codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Representativity-filters.html">Representativity filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Saved-file-formats.html">Saved file formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Create-your-own-data-network.html">Create your own data network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Mounting-esarchive.html">Mounting esarchive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Colocation.html">Colocation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Multispecies-filtering.html">Multispecies filtering</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Redirecting Output to a File</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#supported-modes">Supported Modes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usage">Usage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#default-logging">Default Logging</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#custom-log-filename">Custom Log Filename</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#custom-log-file-path">Custom Log File Path</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="evolution.html">Evolution</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="other-topics.html">Other topics</a></li>
+      <li class="breadcrumb-item active">Redirecting Output to a File</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Redirecting-output-to-a-file.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="redirecting-output-to-a-file">
+<h1>Redirecting Output to a File<a class="headerlink" href="#redirecting-output-to-a-file" title="Link to this heading"></a></h1>
+<p>Providentia provides the option to save its output in a log file.</p>
+<section id="supported-modes">
+<h2>Supported Modes<a class="headerlink" href="#supported-modes" title="Link to this heading"></a></h2>
+<p>The logging feature is available in the following modes:</p>
+<ul class="simple">
+<li><p><strong>Dashboard</strong></p></li>
+<li><p><strong>Report</strong></p></li>
+<li><p><strong>Notebook</strong></p></li>
+<li><p><strong>Download</strong></p></li>
+</ul>
+<p>It is <strong>not available</strong> in the <strong>Interpolation</strong> mode.</p>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h2>
+<p>To enable logging, use the <code class="docutils literal notranslate"><span class="pre">--logfile</span></code> argument when running Providentia from the command line in <strong>Dashboard</strong>, <strong>Report</strong>, and <strong>Download</strong> modes.</p>
+<p>To enable logging in a notebook, set the <code class="docutils literal notranslate"><span class="pre">logfile</span></code> argument when calling <code class="docutils literal notranslate"><span class="pre">Interactive</span></code>, as explained below. In this case, each Providentia object will be linked to a single log file.</p>
+<section id="default-logging">
+<h3>Default Logging<a class="headerlink" href="#default-logging" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./bin/providentia<span class="w"> </span>--logfile
+</pre></div>
+</div>
+<p>In the notebook mode, the command looks like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Interactive</span><span class="p">(</span><span class="n">conf</span><span class="o">=</span><span class="s1">&#39;debug.conf&#39;</span><span class="p">,</span><span class="n">logfile</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This command will create a log file inside the <code class="docutils literal notranslate"><span class="pre">logs</span></code> folder within the directory corresponding to the active mode. For example, logs generated in dashboard mode will be saved in <code class="docutils literal notranslate"><span class="pre">logs/dashboard</span></code>. The log files are named with a timestamp in the format <code class="docutils literal notranslate"><span class="pre">%Y%m%d%H%M%S.log</span></code>, such as <code class="docutils literal notranslate"><span class="pre">20250313123045.log</span></code>.</p>
+</section>
+<section id="custom-log-filename">
+<h3>Custom Log Filename<a class="headerlink" href="#custom-log-filename" title="Link to this heading"></a></h3>
+<p>If you want to specify a custom filename, you can provide it as an argument:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./bin/providentia<span class="w"> </span>--logfile<span class="o">=</span>custom_filename
+</pre></div>
+</div>
+<p>In the notebook mode, it is like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Interactive</span><span class="p">(</span><span class="n">conf</span><span class="o">=</span><span class="s1">&#39;debug.conf&#39;</span><span class="p">,</span><span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;custom_filename&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will save the log file with the name <code class="docutils literal notranslate"><span class="pre">custom_filename</span></code> inside the default <code class="docutils literal notranslate"><span class="pre">logs</span></code> folder.</p>
+</section>
+<section id="custom-log-file-path">
+<h3>Custom Log File Path<a class="headerlink" href="#custom-log-file-path" title="Link to this heading"></a></h3>
+<p>You can also define a custom file path, absolute or relative:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./bin/providentia<span class="w"> </span>--logfile<span class="o">=</span>/custom/path/custom_filename
+</pre></div>
+</div>
+<p>In the notebook mode, it is like this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Interactive</span><span class="p">(</span><span class="n">conf</span><span class="o">=</span><span class="s1">&#39;debug.conf&#39;</span><span class="p">,</span><span class="n">logfile</span><span class="o">=</span><span class="s1">&#39;/custom/path/custom_filename&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will save the log file in <code class="docutils literal notranslate"><span class="pre">/custom/path/</span></code> with the name <code class="docutils literal notranslate"><span class="pre">custom_filename</span></code>. Ensure that the specified path exists, Providentia will not create non-existent directories.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Multispecies-filtering.html" class="btn btn-neutral float-left" title="Multispecies filtering" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="reference.html" class="btn btn-neutral float-right" title="Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2024, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
