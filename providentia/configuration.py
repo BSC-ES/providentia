@@ -8,6 +8,7 @@ import logging
 import os
 from packaging.version import Version
 import platform
+import math
 import socket
 import sys
 import time
@@ -633,7 +634,11 @@ class ProvConfiguration:
             # treat leaving the field blank as default
             if value == '':
                 return self.var_defaults[key]
-            
+        
+        elif key == 'cpus_per_task':
+            if value is not None:
+                return math.ceil(float(value))
+        
         # if no special parsing treatment for variable, simply return value
         return value
 
@@ -1520,7 +1525,15 @@ class ProvConfiguration:
             msg = 'During interpolation multiprocessing must be turned on for local runs, activating.'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.interp_multiprocessing = True
-    
+
+            if self.read_instance.cpus_per_task is not None:
+                if 1 <= self.read_instance.cpus_per_task <= self.read_instance.available_cpus:
+                    self.read_instance.n_cpus = self.read_instance.cpus_per_task
+                else:
+                    default = self.read_instance.available_cpus
+                    msg = "Number of cores cannot be superior than number of available cpus ({}) or less than 1. Using '{}' as default.".format(default, default)
+                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+
     def switch_logging(self):
         # create logger
         self.read_instance.logger = logging.getLogger("")
