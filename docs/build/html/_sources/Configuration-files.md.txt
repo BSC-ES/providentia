@@ -89,6 +89,7 @@ It is **mandatory** to define sections to launch Providentia. Their names must b
 | forecast | ✗ | Indicates if data comes from forecast, this affects how the timesteps are taken in the interpolation. |
 | forecast_day | ✗ | Day of the model forecast to analyse. |
 | interp_multiprocessing | ✗ | Use multiprocessing instead of greasy to interpolate in HPC machines. |
+| interpolated | ✗ | Indicates if the experiments are interpolated or to interpolate. If the variable is False, this can be used to download non-interpolated experiments into local machines. |
   
 Defining a list of experiments is optional since the user might only want to check the observations data.
 
@@ -96,7 +97,7 @@ In the reports, a report will be created per section. In the dashboard and using
 
 #### Use of non-GHOST networks
 
-Providentia can be used both with GHOST and non-GHOST netCDF files. Users should add the path to their network in `settings/nonghost_files.yaml`. In the configuration file, you can refer to non-GHOST files like:
+Providentia can be used both with GHOST and non-GHOST netCDF files. Users should add the path to their network in `settings/init_prov.yaml`. In the configuration file, you can refer to non-GHOST files like:
 
 ```
 network = port_barcelona/port-barcelona
