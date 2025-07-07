@@ -886,8 +886,8 @@ class SubmitInterpolation(object):
             n_cpus = max(1, int(self.n_cpus * 0.50))
             msg = f'Using {n_cpus} out of {self.n_cpus} available CPUs to'
             msg += ' ensure that other processes keep running. \nIf you encounter any problems'
-            msg += ' consider reducing the number of CPUS by defining n_cpus \nin your'
-            msg += ' configuration file (e.g. n_cpus = 2).'
+            msg += ' consider reducing the number of CPUS by running Providentia using'
+            msg += ' --cores (./bin/providentia --cores=2).'
         else:
             n_cpus = self.n_cpus
             msg = f'Using {n_cpus} CPUs.'
