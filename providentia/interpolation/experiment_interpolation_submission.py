@@ -882,12 +882,17 @@ class SubmitInterpolation(object):
         
         # if n_cpus hasn't been defined, use 1 or half of the available CPUS to 
         # avoid having to kill other processes locally
-        if (self.machine == 'local') and (self.n_cpus == self.available_cpus):  
-            n_cpus = max(1, int(self.n_cpus * 0.50))
-            msg = f'Using {n_cpus} out of {self.n_cpus} available CPUs to'
-            msg += ' ensure that other processes keep running. \nIf you encounter any problems'
-            msg += ' consider reducing the number of CPUS by running Providentia using'
-            msg += ' --cores (./bin/providentia --cores=2).'
+        if self.machine == 'local':
+            # if it is not the default value (defined in bin/providentia), then use value passed through --cores
+            if self.n_cpus != 12:
+                n_cpus = self.n_cpus
+                msg = f'Using {n_cpus} CPUs.'
+            else:
+                n_cpus = max(1, int(self.n_cpus * 0.50))
+                msg = f'Using {n_cpus} out of {self.n_cpus} available CPUs to'
+                msg += ' ensure that other processes keep running. \nIf you encounter any problems'
+                msg += ' consider reducing the number of CPUS by running Providentia using'
+                msg += ' --cores (./bin/providentia --cores=2).'
         else:
             n_cpus = self.n_cpus
             msg = f'Using {n_cpus} CPUs.'
