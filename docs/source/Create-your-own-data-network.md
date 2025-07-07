@@ -21,16 +21,24 @@ You can learn more about how to create your own datasets with the following tuto
 - Create monthly datasets from CSIC:
 https://earth.bsc.es/gitlab/es/NES/-/blob/master/tutorials/2.Creation/2.5.Create_Points_CSIC.ipynb
 
-Providentia will be able to find these datasets if they are saved in the directory `/esarchive/obs/`. The data path must be included in `settings/nonghost_files.yaml`. As an example, the path to the data from CSIC (`/esarchive/obs/csic/csic/monthly/sconcnh3/`) correspond in this dictionary to:
+Providentia will be able to find these datasets if they are stored in the path specified in the `nonghost_root` key under the corresponding machine in the `settings/data_paths.yaml` file. The name of the network must be included in the `nonghost_available_networks` list in `settings/init_prov.yaml`. For example, in the nord3v2 machine, to get the data from CSIC stored at this location: `/esarchive/obs/csic/csic/monthly/sconcnh3/`, you would need to modify the configuration files as follows.
+
+Update `data_paths.yaml` so it stores the dataset directory:
 
 ```
-"csic/csic": {
-    "monthly": ["sconcnh3"]
- }
+"nord3v2": {
+        "nonghost_root": "/esarchive/obs",
+        ...
+    },
+
 ```
 
-The next time you use Providentia you must use the argument `--gft`, to regenerate the internal file tree to account for the new network.
+Update `init_prov.yaml` by adding the corresponding data network to the `nonghost_available_networks` list:
 
+```
+'nonghost_available_networks': [..., 'csic/csic']
+
+```
 If you then launch the dashboard and select any period in 2019, you will see that you can select CSIC as a network. If you want to use a configuration file to launch it or create reports, then you will need to write:
 
 ```

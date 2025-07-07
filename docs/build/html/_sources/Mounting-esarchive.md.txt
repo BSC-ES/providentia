@@ -12,6 +12,10 @@ Next, add the following line to the `/etc/fstab` file (changing your BSC usernam
 
 `sshfs#bscXXXXXX@dt01.bsc.es:/gpfs/archive/bsc32/esarchive /localdir/tomount/esarchive fuse defaults,allow_other,reconnect,ro 0 0`
 
+Install sshfs if it is not in your computer yet:
+
+`sudo apt-get install sshfs`
+
 The esarchive can finally be mounted by:
 
 `sudo mount -av `

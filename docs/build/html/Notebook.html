@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notebook &mdash; Providentia 2.3.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=c3c8ae58"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Topics in depth" href="topics-in-depth.html" />
+    <link rel="prev" title="Library" href="Library.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Tool setup</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modes.html">Modes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Interpolation.html">Interpolation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Report.html">Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Download.html">Download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Notebook</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#launching-a-jupyter-notebook">Launching a Jupyter notebook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#importing-providentia">Importing Providentia</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="evolution.html">Evolution</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modes.html">Modes</a></li>
+      <li class="breadcrumb-item active">Notebook</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Notebook.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="notebook">
+<h1>Notebook<a class="headerlink" href="#notebook" title="Link to this heading"></a></h1>
+<p>As the library mode allows the importing of Providentia as a module, it follows that Providentia can therefore also be used in a Jupyter notebook. This type of interactive working is growing ever more popular, and thus it is important that Providentia can adapt to this type of operation.</p>
+<section id="launching-a-jupyter-notebook">
+<h2>Launching a Jupyter notebook<a class="headerlink" href="#launching-a-jupyter-notebook" title="Link to this heading"></a></h2>
+<p>A Jupyter notebook can be launched with the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">notebook</span>
+</pre></div>
+</div>
+<p>This will either start a job if you are using a machine with SLURM, or directly open Jupyter notebooks. In the first case, a file named <code class="docutils literal notranslate"><span class="pre">notebook.out</span></code> will be created. Information in the file will then allow for a connection to a Jupyter notebook to be set up. Firstly, an SSH tunnel from the local machine needs to be set up, by pasting a given command into a Linux/MacOS terminal or equivalent (i.e. PuTTY on Windows), e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Create</span> <span class="n">an</span> <span class="n">SSH</span> <span class="n">tunnel</span> <span class="n">via</span> <span class="n">terminal</span> <span class="n">on</span> <span class="n">your</span> <span class="n">local</span> <span class="n">machine</span><span class="p">:</span>
+<span class="n">ssh</span> <span class="o">-</span><span class="n">N</span> <span class="o">-</span><span class="n">L</span> <span class="mi">8825</span><span class="p">:</span><span class="n">s04r1b14</span><span class="p">:</span><span class="mi">8825</span> <span class="n">bsc32025</span><span class="nd">@nord4</span><span class="o">.</span><span class="n">bsc</span><span class="o">.</span><span class="n">es</span>
+</pre></div>
+</div>
+<p>Secondly, the notebook can than be accessed via a web browser following information from the bottom of the file, e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>To access the server, open this file in a browser:
+        file:///.statelite/tmpfs/gpfs/home/bsc32/bsc32025/.local/share/jupyter/runtime/jpserver-800644-open.html
+    Or copy and paste one of these URLs:
+        http://s04r1b14:8825/lab?token=57a994dfaecf92e5aefd1d5dbc5a9831fb8060f873fd8181
+     or http://127.0.0.1:8825/lab?token=57a994dfaecf92e5aefd1d5dbc5a9831fb8060f873fd8181
+</pre></div>
+</div>
+<p>One additional step is also needed inside the notebook if wishing to embed plots:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+</pre></div>
+</div>
+<p>This is a magic function that allows for the rendering of figures directly in the notebook.<br />
+NOTE: This must set after the importing of the module.</p>
+<p>A template Jupyter notebook, demonstrating some of the Providentia interactive features can be found in <code class="docutils literal notranslate"><span class="pre">notebooks/interactive_template.ipynb</span></code>.</p>
+</section>
+<section id="importing-providentia">
+<h2>Importing Providentia<a class="headerlink" href="#importing-providentia" title="Link to this heading"></a></h2>
+<p>If the notebook you are running is not inside the Providentia home directory, in order to import from Providentia, then it is necessary to add these lines to your code first:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">provdir</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">provdir</span></code> is the path where your Providentia code exists.</p>
+<p>You will also need to load the necessary modules for it to function, for this you can run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">provdir</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">load_modules</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>After the import you will have full access to the backend of Providentia and all of its functions as described in the following sections.</p>
+<p>NOTE: In the future we will allow for Providentia to be imported as a module on the BSC machines, making this step redundant.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Library.html" class="btn btn-neutral float-left" title="Library" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="topics-in-depth.html" class="btn btn-neutral float-right" title="Topics in depth" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2024, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

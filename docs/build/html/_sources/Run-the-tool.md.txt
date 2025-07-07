@@ -2,7 +2,7 @@
 
 ## Running the tool on a BSC machine
 
-If you are on Nord3v2 or Marenostrum 5, you should request an interactive session:
+If you are on Nord4 or Marenostrum 5, this will request an interactive session:
 
 ```
 ./bin/providentia
@@ -72,13 +72,29 @@ More details can be found in the [interpolation section](Interpolation).
 
 ## Running the tool on a personal machine
 
-If you do not have access to the BSC machines, you will need to define the directories where your data is stored. You can do this by editing the file `settings/data_paths.yaml` and defining `ghost_root`, `nonghost_root` and `exp_root` under `local`. For instance:
+If you do not have access to the BSC machines, you can define the directories where your data is stored. You can do this by editing the file `settings/data_paths.yaml` and defining `ghost_root`, `nonghost_root` and `exp_root` under `local`. For instance:
 
 ```
-'ghost_root': '/data/providentia/obs/ghost/'
-'nonghost_root': '/data/providentia/obs/nonghost/'
-'exp_root': '/data/providentia/exp/'
+    "local": {
+        "ghost_root": "/data/providentia/obs/ghost/",
+        "nonghost_root": "/data/providentia/obs/nonghost/",
+        "exp_root": "/data/providentia/exp/",
+        "exp_to_interp_root": "/data/providentia/exp_to_interp"
+    }
 ```
+
+By default these paths are set as:
+
+```
+    "local": {
+        "ghost_root": "~/data/providentia/obs/ghost", 
+        "nonghost_root": "~/data/providentia/obs/nonghost", 
+        "exp_root": "~/data/providentia/exp",
+        "exp_to_interp_root": "~/data/providentia/exp_to_interp"
+    }
+```
+
+where `~` corresponds to `/home/{username}`.
 
 You should download the data that you need from the BSC systems to the local machine. To do this, you can use the [download mode](Download).
 
@@ -102,5 +118,15 @@ conda install -n base conda=24.4.0 conda-build=24.3.0
 ```
 
 Check what the latest versions of [conda](https://github.com/conda/conda/releases) and [conda-build](https://github.com/conda/conda-build/releases) are.
+
+# Redirecting log output to a file  
+
+Providentia allows saving its output to a log file using the `--logfile` option:  
+
+```bash
+./bin/providentia --logfile <filename>
+```
+
+More details [here](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Redirecting-output-to-a-file).
 
 Enjoy!

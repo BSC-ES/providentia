@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Run the tool &mdash; Providentia 2.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
@@ -60,12 +60,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#running-the-tool-on-a-personal-machine">Running the tool on a personal machine</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#redirecting-log-output-to-a-file">Redirecting log output to a file</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modes.html">Modes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a></li>
 <li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="evolution.html">Evolution</a></li>
 </ul>
 
         </div>
@@ -97,7 +99,7 @@
 <h1>Run the tool<a class="headerlink" href="#run-the-tool" title="Link to this heading"></a></h1>
 <section id="running-the-tool-on-a-bsc-machine">
 <h2>Running the tool on a BSC machine<a class="headerlink" href="#running-the-tool-on-a-bsc-machine" title="Link to this heading"></a></h2>
-<p>If you are on Nord3v2 or Marenostrum 5, you should request an interactive session:</p>
+<p>If you are on Nord4 or Marenostrum 5, this will request an interactive session:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span>
 </pre></div>
 </div>
@@ -154,12 +156,25 @@
 </section>
 <section id="running-the-tool-on-a-personal-machine">
 <h2>Running the tool on a personal machine<a class="headerlink" href="#running-the-tool-on-a-personal-machine" title="Link to this heading"></a></h2>
-<p>If you do not have access to the BSC machines, you will need to define the directories where your data is stored. You can do this by editing the file <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code> and defining <code class="docutils literal notranslate"><span class="pre">ghost_root</span></code>, <code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code> and <code class="docutils literal notranslate"><span class="pre">exp_root</span></code> under <code class="docutils literal notranslate"><span class="pre">local</span></code>. For instance:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;ghost_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/obs/ghost/&#39;</span>
-<span class="s1">&#39;nonghost_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/obs/nonghost/&#39;</span>
-<span class="s1">&#39;exp_root&#39;</span><span class="p">:</span> <span class="s1">&#39;/data/providentia/exp/&#39;</span>
+<p>If you do not have access to the BSC machines, you can define the directories where your data is stored. You can do this by editing the file <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code> and defining <code class="docutils literal notranslate"><span class="pre">ghost_root</span></code>, <code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code> and <code class="docutils literal notranslate"><span class="pre">exp_root</span></code> under <code class="docutils literal notranslate"><span class="pre">local</span></code>. For instance:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="s2">&quot;local&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;ghost_root&quot;</span><span class="p">:</span> <span class="s2">&quot;/data/providentia/obs/ghost/&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nonghost_root&quot;</span><span class="p">:</span> <span class="s2">&quot;/data/providentia/obs/nonghost/&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;exp_root&quot;</span><span class="p">:</span> <span class="s2">&quot;/data/providentia/exp/&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;exp_to_interp_root&quot;</span><span class="p">:</span> <span class="s2">&quot;/data/providentia/exp_to_interp&quot;</span>
+    <span class="p">}</span>
 </pre></div>
 </div>
+<p>By default these paths are set as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="s2">&quot;local&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;ghost_root&quot;</span><span class="p">:</span> <span class="s2">&quot;~/data/providentia/obs/ghost&quot;</span><span class="p">,</span> 
+        <span class="s2">&quot;nonghost_root&quot;</span><span class="p">:</span> <span class="s2">&quot;~/data/providentia/obs/nonghost&quot;</span><span class="p">,</span> 
+        <span class="s2">&quot;exp_root&quot;</span><span class="p">:</span> <span class="s2">&quot;~/data/providentia/exp&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;exp_to_interp_root&quot;</span><span class="p">:</span> <span class="s2">&quot;~/data/providentia/exp_to_interp&quot;</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">~</span></code> corresponds to <code class="docutils literal notranslate"><span class="pre">/home/{username}</span></code>.</p>
 <p>You should download the data that you need from the BSC systems to the local machine. To do this, you can use the <a class="reference internal" href="Download.html"><span class="doc std std-doc">download mode</span></a>.</p>
 <p>If it is the first time that you launch Providentia, an environment called <code class="docutils literal notranslate"><span class="pre">providentia-env</span></code> will be created with all the necessary dependencies. If for some reason you want to create the environment from scratch, you can use:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">environment</span><span class="o">.</span><span class="n">yaml</span>
@@ -175,8 +190,16 @@
 </pre></div>
 </div>
 <p>Check what the latest versions of <a class="reference external" href="https://github.com/conda/conda/releases">conda</a> and <a class="reference external" href="https://github.com/conda/conda-build/releases">conda-build</a> are.</p>
-<p>Enjoy!</p>
 </section>
+</section>
+<section id="redirecting-log-output-to-a-file">
+<h1>Redirecting log output to a file<a class="headerlink" href="#redirecting-log-output-to-a-file" title="Link to this heading"></a></h1>
+<p>Providentia allows saving its output to a log file using the <code class="docutils literal notranslate"><span class="pre">--logfile</span></code> option:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./bin/providentia<span class="w"> </span>--logfile<span class="w"> </span>&lt;filename&gt;
+</pre></div>
+</div>
+<p>More details <a class="reference external" href="https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Redirecting-output-to-a-file">here</a>.</p>
+<p>Enjoy!</p>
 </section>
 
 

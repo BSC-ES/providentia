@@ -1,7 +1,7 @@
 Reference
 ---------
 
-.. automodule:: providentia.interactive
+.. automodule:: providentia.library
    :members:
    :undoc-members:
    :show-inheritance:
