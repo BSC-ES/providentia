@@ -75,11 +75,11 @@ if [[ $? -ne 0 ]]; then
     exit 2
 fi
 
+# define default number of cores
+cores="12"
+
 # set qos depending on the mode and machine
 if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" ]]; then
-    # define core as one when it is interpolation
-    cores="1"
-    
     # define qos in interpolation
     if [ "${BSC_MACHINE}" == "mn5" ]; then
         queue="gp_bsces"
@@ -88,10 +88,7 @@ if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--int
     else
         queue="bsc_es"
     fi
-else
-    # define core as twelve if it is not an interpolation
-    cores="12"
-    
+else    
     # define qos in every mode but interpolation
     if [ "${BSC_MACHINE}" == "mn5" ]; then
         queue="gp_debug"
@@ -147,6 +144,7 @@ done
 account_option="--account=bsc32"
 queue_option="--qos=$queue"
 memory_option="--mem=$mem"
+cores_option="--cpus-per-task=$cores"
 constraint_option="--constraint=$constraint"
 load_command="source bin/load_modules.sh"
 notebook_alloc_command="sbatch -t $time -c $cores -J $jobname"
@@ -165,9 +163,11 @@ if [[ $PARSED =~ "--clean" ]]; then
     exit 0
 fi
 
-# avoid x11 forwarding when creating reports or doing interpolations
-if [[ $PARSED =~ "--report" || $PARSED =~ "--reports" || $PARSED =~ "--offline" || $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" || $PARSED =~ "--download" || $PARSED =~ "--dl" ]]; then
+# Avoid x11 forwarding when creating reports or doing interpolations
+if [[ $PARSED =~ "--report" || $PARSED =~ "--reports" || $PARSED =~ "--offline" || $PARSED =~ "--download" || $PARSED =~ "--dl" ]]; then
     salloc_command="salloc -t $time -c $cores -J $jobname"
+elif [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" ]]; then
+    salloc_command="salloc -t $time -c 1 -J $jobname"
 else
     salloc_command="salloc -t $time -c $cores -J $jobname --x11"
 fi
@@ -283,7 +283,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
             echo "Loading dependencies..."
             eval "${load_command}"
-            jobid=$(eval "sbatch ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
+            jobid=$(eval "sbatch ${cores_option} ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
             echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
 
         else
@@ -328,7 +328,7 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
             echo "Loading dependencies..."
             eval "${load_command}"
-            jobid=$(eval "sbatch ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
+            jobid=$(eval "sbatch ${cores_option} ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
             echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
 
     else
@@ -420,7 +420,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
             echo "Loading dependencies..."
             eval "${load_command}"
-            jobid=$(eval "sbatch ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
+            jobid=$(eval "sbatch ${cores_option} ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
             echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
 
         else
@@ -483,7 +483,7 @@ elif [ "${BSC_MACHINE}" == "grace" ]; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
             echo "Loading dependencies..."
             eval "${load_command}"
-            jobid=$(eval "sbatch ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
+            jobid=$(eval "sbatch ${cores_option} ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
             echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
 
         else
