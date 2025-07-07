@@ -2,11 +2,7 @@
 
 ## Editing the plot style from the configuration files
 
-If you want to edit the style of your plots, you will need to **edit it in one of the following files** and launch the tool again:
-
-* Plots in the dashboard: `settings/plot_characteristics_dashboard.yaml`
-* Plots in the reports: `settings/plot_characteristics_offline.yaml`
-* Plots in the library: `settings/plot_characteristics_interactive.yaml`
+If you want to edit the style of your plots, you will need to **edit it in `settings/plot_characteristics.yaml` and launch the tool again.
 
 ### Setting the map coastline resolution
 
