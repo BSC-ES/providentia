@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Plot types and options &mdash; Providentia 2.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
@@ -64,6 +64,9 @@
 <li class="toctree-l4"><a class="reference internal" href="#heatmap-heatmap">Heatmap (<code class="docutils literal notranslate"><span class="pre">heatmap</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#table-table">Table (<code class="docutils literal notranslate"><span class="pre">table</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#statistics-summary-statsummary">Statistics summary (<code class="docutils literal notranslate"><span class="pre">statsummary</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#taylor-diagram-taylor">Taylor diagram (<code class="docutils literal notranslate"><span class="pre">taylor</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairmode-target-fairmode-target">FAIRMODE target (<code class="docutils literal notranslate"><span class="pre">fairmode-target</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fairmode-statistics-summary-fairmode-statsummary">FAIRMODE statistics summary (<code class="docutils literal notranslate"><span class="pre">fairmode-statsummary</span></code>)</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#plot-options">Plot options</a><ul>
@@ -77,6 +80,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#get-plot-by-more-than-one-network-species-multispecies">Get plot by more than one network species (<code class="docutils literal notranslate"><span class="pre">_multispecies</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hide-points-and-only-show-regression-smooth-lines-hidedata">Hide points and only show regression / smooth lines (<code class="docutils literal notranslate"><span class="pre">_hidedata</span></code>)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#show-the-model-grid-in-the-maps-domain">Show the model grid in the maps (<code class="docutils literal notranslate"><span class="pre">_domain</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#add-threshold-line-threshold">Add threshold line (<code class="docutils literal notranslate"><span class="pre">_threshold</span></code>)</a></li>
 </ul>
 </li>
 </ul>
@@ -87,6 +91,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="evolution.html">Evolution</a></li>
 </ul>
 
         </div>
@@ -117,13 +122,13 @@
   <section id="plot-types-and-options">
 <h1>Plot types and options<a class="headerlink" href="#plot-types-and-options" title="Link to this heading"></a></h1>
 <p>This page is only useful to those who want to create their own reports. Users can choose which plots these reports will have, as you will see below.</p>
+<p><img alt="Screenshot_from_2025-02-12_17-17-38" src="_images/Screenshot_from_2025-02-12_17-17-38.png" /></p>
 <section id="plot-types">
 <h2>Plot types<a class="headerlink" href="#plot-types" title="Link to this heading"></a></h2>
-<p>The standard plot types consist of: maps (<code class="docutils literal notranslate"><span class="pre">map</span></code>), metadata summary (<code class="docutils literal notranslate"><span class="pre">metadata</span></code>), timeseries (<code class="docutils literal notranslate"><span class="pre">timeseries</span></code>), periodic plots (<code class="docutils literal notranslate"><span class="pre">periodic</span></code>), periodic violin plots (<code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>), box plots (<code class="docutils literal notranslate"><span class="pre">boxplot</span></code>), distribution plots (<code class="docutils literal notranslate"><span class="pre">distribution</span></code>), scatter plots (<code class="docutils literal notranslate"><span class="pre">scatter</span></code>), heat maps (<code class="docutils literal notranslate"><span class="pre">heatmap</span></code>), tables that give one stat per subsection per experiment (<code class="docutils literal notranslate"><span class="pre">table</span></code>) and tables that give multiple stats per experiment (<code class="docutils literal notranslate"><span class="pre">statsummary</span></code>).</p>
-<p>Some of these plots involve calculating a specific statistic, namely: <code class="docutils literal notranslate"><span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">heatmap</span></code> and <code class="docutils literal notranslate"><span class="pre">table</span></code>. This statistic is defined by aggregating the <code class="docutils literal notranslate"><span class="pre">-[stat]</span></code> field to the plot type will make a plot of the required type for the specific type of statistic set. <code class="docutils literal notranslate"><span class="pre">[stat]</span></code> should be replaced with any of the base statistic names (e.g. p5, Mean), or experiment bias names. For example to show the median values spatially, <code class="docutils literal notranslate"><span class="pre">map-p50</span></code> would be set as the plot name, or <code class="docutils literal notranslate"><span class="pre">map-r2</span></code> to show the coefficient of determination. The available statistic names are documented in <code class="docutils literal notranslate"><span class="pre">settings/basic_stats_dict.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">settings/experiment_bias_stats_dict.yaml</span></code> for reference.</p>
+<p>The standard plot types consist of: maps (<code class="docutils literal notranslate"><span class="pre">map</span></code>), metadata summary (<code class="docutils literal notranslate"><span class="pre">metadata</span></code>), timeseries (<code class="docutils literal notranslate"><span class="pre">timeseries</span></code>), periodic plots (<code class="docutils literal notranslate"><span class="pre">periodic</span></code>), periodic violin plots (<code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>), box plots (<code class="docutils literal notranslate"><span class="pre">boxplot</span></code>), distribution plots (<code class="docutils literal notranslate"><span class="pre">distribution</span></code>), scatter plots (<code class="docutils literal notranslate"><span class="pre">scatter</span></code>), heat maps (<code class="docutils literal notranslate"><span class="pre">heatmap</span></code>), tables that give one stat per subsection per experiment (<code class="docutils literal notranslate"><span class="pre">table</span></code>), tables that give multiple stats per experiment (<code class="docutils literal notranslate"><span class="pre">statsummary</span></code>), Taylor Diagrams (<code class="docutils literal notranslate"><span class="pre">taylor</span></code>), and FAIRMODE plots (<code class="docutils literal notranslate"><span class="pre">fairmode-target</span></code> and <code class="docutils literal notranslate"><span class="pre">fairmode-statsummary</span></code>).</p>
+<p>Some of these plots involve calculating a specific statistic, namely: <code class="docutils literal notranslate"><span class="pre">map</span></code>, <code class="docutils literal notranslate"><span class="pre">periodic</span></code>, <code class="docutils literal notranslate"><span class="pre">heatmap</span></code>, <code class="docutils literal notranslate"><span class="pre">taylor</span></code> and <code class="docutils literal notranslate"><span class="pre">table</span></code>. This statistic is defined by aggregating the <code class="docutils literal notranslate"><span class="pre">-[stat]</span></code> field to the plot type will make a plot of the required type for the specific type of statistic set. <code class="docutils literal notranslate"><span class="pre">[stat]</span></code> should be replaced with any of the base statistic names (e.g. p5, Mean), or experiment bias names. For example to show the median values spatially, <code class="docutils literal notranslate"><span class="pre">map-p50</span></code> would be set as the plot name, or <code class="docutils literal notranslate"><span class="pre">map-r2</span></code> to show the coefficient of determination. The available statistic names are documented in <code class="docutils literal notranslate"><span class="pre">settings/basic_stats.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">settings/experiment_bias_stats.yaml</span></code> for reference. For the Taylor diagram, only <code class="docutils literal notranslate"><span class="pre">r</span></code>and <code class="docutils literal notranslate"><span class="pre">r2</span></code>can be used.</p>
 <p>The timeseries can also be used to show how statistics vary in time. In order to do this, we need to add <code class="docutils literal notranslate"><span class="pre">-[stat]</span></code> and the temporal resolution after the plot type name (e.g. <code class="docutils literal notranslate"><span class="pre">timeseries-Mean-daily</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries-r2-monthly</span></code>, <code class="docutils literal notranslate"><span class="pre">timeseries-r-annual</span></code>).</p>
-<p>For the <code class="docutils literal notranslate"><span class="pre">metadata</span></code> plot the metadata displayed is set to a default list of metadata fields. For the <code class="docutils literal notranslate"><span class="pre">statsummary</span></code> plot the statistics displayed are set to a default list of absolute and bias statistics. These default options can be changed in either the
-<code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics_dashboard.yaml</span></code> and <code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics_offline.yaml</span></code> files, depending on which mode Providentia is being ran in.</p>
+<p>For the <code class="docutils literal notranslate"><span class="pre">metadata</span></code> plot the metadata displayed is set to a default list of metadata fields. For the <code class="docutils literal notranslate"><span class="pre">statsummary</span></code> plot the statistics displayed are set to a default list of absolute and bias statistics. These default options can be changed in <code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics.yaml</span></code>.</p>
 <section id="map-map">
 <h3>Map (<code class="docutils literal notranslate"><span class="pre">map</span></code>)<a class="headerlink" href="#map-map" title="Link to this heading"></a></h3>
 <p><img alt="Map" src="_images/Map.png" /></p>
@@ -142,7 +147,7 @@
 </section>
 <section id="periodic-violin-periodic-violin">
 <h3>Periodic violin (<code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>)<a class="headerlink" href="#periodic-violin-periodic-violin" title="Link to this heading"></a></h3>
-<p><img alt="Periodic_violin" src="_images/Periodic_violin.png" /></p>
+<p><img alt="Periodic-violin" src="_images/Periodic-violin.png" /></p>
 </section>
 <section id="boxplot-boxplot">
 <h3>Boxplot (<code class="docutils literal notranslate"><span class="pre">boxplot</span></code>)<a class="headerlink" href="#boxplot-boxplot" title="Link to this heading"></a></h3>
@@ -168,6 +173,18 @@
 <h3>Statistics summary (<code class="docutils literal notranslate"><span class="pre">statsummary</span></code>)<a class="headerlink" href="#statistics-summary-statsummary" title="Link to this heading"></a></h3>
 <p><img alt="Statsummary" src="_images/Statsummary.png" /></p>
 </section>
+<section id="taylor-diagram-taylor">
+<h3>Taylor diagram (<code class="docutils literal notranslate"><span class="pre">taylor</span></code>)<a class="headerlink" href="#taylor-diagram-taylor" title="Link to this heading"></a></h3>
+<p><img alt="taylor" src="_images/taylor.png" /></p>
+</section>
+<section id="fairmode-target-fairmode-target">
+<h3>FAIRMODE target (<code class="docutils literal notranslate"><span class="pre">fairmode-target</span></code>)<a class="headerlink" href="#fairmode-target-fairmode-target" title="Link to this heading"></a></h3>
+<p><img alt="fairmode-target" src="_images/fairmode-target.png" /></p>
+</section>
+<section id="fairmode-statistics-summary-fairmode-statsummary">
+<h3>FAIRMODE statistics summary (<code class="docutils literal notranslate"><span class="pre">fairmode-statsummary</span></code>)<a class="headerlink" href="#fairmode-statistics-summary-fairmode-statsummary" title="Link to this heading"></a></h3>
+<p><img alt="fairmode-statsummary" src="_images/fairmode-statsummary.png" /></p>
+</section>
 </section>
 <section id="plot-options">
 <h2>Plot options<a class="headerlink" href="#plot-options" title="Link to this heading"></a></h2>
@@ -184,7 +201,7 @@
 </section>
 <section id="add-annotations-annotate">
 <h3>Add annotations (<code class="docutils literal notranslate"><span class="pre">_annotate</span></code>)<a class="headerlink" href="#add-annotations-annotate" title="Link to this heading"></a></h3>
-<p>If the configuration option <code class="docutils literal notranslate"><span class="pre">_annotate</span></code> is added, a box will be created on the plots to show several statistical data. The style and position of this box, as well as the statistics, can be defined by the user in plot characteristics under <code class="docutils literal notranslate"><span class="pre">settings</span></code> by changing the parameter <code class="docutils literal notranslate"><span class="pre">annotate_stats</span></code>.</p>
+<p>If the configuration option <code class="docutils literal notranslate"><span class="pre">_annotate</span></code> is added, a box will be created on the plots to show several statistical data. The style and position of this box, as well as the statistics, can be defined by the user in <code class="docutils literal notranslate"><span class="pre">plot_characteristics.yaml</span></code> under <code class="docutils literal notranslate"><span class="pre">settings</span></code> by changing the parameter <code class="docutils literal notranslate"><span class="pre">annotate_stats</span></code>.</p>
 <p><img alt="Screenshot_from_2022-10-04_16-17-04" src="_images/Screenshot_from_2022-10-04_16-17-04.jpg" /></p>
 </section>
 <section id="get-the-bias-of-the-data-bias">
@@ -221,6 +238,11 @@
 <h3>Show the model grid in the maps (<code class="docutils literal notranslate"><span class="pre">_domain</span></code>)<a class="headerlink" href="#show-the-model-grid-in-the-maps-domain" title="Link to this heading"></a></h3>
 <p>Adding <code class="docutils literal notranslate"><span class="pre">_domain</span></code> will add the model grid on top of the map.</p>
 <p><img alt="domain" src="_images/domain.png" /></p>
+</section>
+<section id="add-threshold-line-threshold">
+<h3>Add threshold line (<code class="docutils literal notranslate"><span class="pre">_threshold</span></code>)<a class="headerlink" href="#add-threshold-line-threshold" title="Link to this heading"></a></h3>
+<p>Adding <code class="docutils literal notranslate"><span class="pre">_threshold</span></code> will add a line indicating the exceedances.</p>
+<p><img alt="Screenshot_from_2025-02-12_16-51-00" src="_images/Screenshot_from_2025-02-12_16-51-00.png" /></p>
 </section>
 </section>
 </section>
