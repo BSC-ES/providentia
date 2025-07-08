@@ -93,11 +93,11 @@ class Report:
 
         # if some filename has not been provided through the configuration file use default names
         if len(self.filenames) != len(self.parent_section_names):
-            msg = 'Report filename/s (report_filename) has not been defined in '
-            msg += 'configuration file for one or more sections.'
-            self.logger.info(msg)
+            msg = 'Warning: Report filename/s (report_filename) has not been defined in '
+            msg += 'configuration file for one or more sections. '
             if len(self.parent_section_names) == 1:
                 self.filenames.append(self.report_filename)
+                msg += f'Setting filename to be {self.report_filename}.'
             else:
                 self.filenames = []
                 for i, parent_section in enumerate(self.parent_section_names):
@@ -106,7 +106,9 @@ class Report:
                     else:
                         # add a number next to the filename to avoid overwriting
                         self.filenames.append(f'{self.report_filename}_{i}')
-
+                msg += f'Setting filenames to be {self.filenames}.'
+            self.logger.info(msg)
+        
         # select section if passed through command line arguments
         if "section" in self.commandline_arguments.keys():
             if self.commandline_arguments["section"] in self.all_sections:
@@ -204,6 +206,7 @@ class Report:
                 continue
             
             # check if report type is valid
+            print('###################', self.report_type)
             if self.report_type not in self.report_plots.keys():
                 error = 'Error: The report type {0} cannot be found in settings/report_plots.yaml. '.format(self.report_type)
                 error += 'The available report types are {0}. Select one or create your own.'.format(list(self.report_plots.keys()))
