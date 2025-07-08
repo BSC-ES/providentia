@@ -206,7 +206,6 @@ class Report:
                 continue
             
             # check if report type is valid
-            print('###################', self.report_type)
             if self.report_type not in self.report_plots.keys():
                 error = 'Error: The report type {0} cannot be found in settings/report_plots.yaml. '.format(self.report_type)
                 error += 'The available report types are {0}. Select one or create your own.'.format(list(self.report_plots.keys()))
