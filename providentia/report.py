@@ -91,20 +91,6 @@ class Report:
             self.logger.error(error)
             sys.exit(1)
 
-        # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
-        # if have filetree flags, then these overwrite any defaults
-        gft = False
-        if self.generate_file_tree:
-            gft = True
-        elif self.disable_file_tree:
-            gft = False
-        # by default generate filetree on MN5
-        elif self.machine in ['mn5', 'nord4', 'dust']:
-            gft = True
-        # by default generate filetree locally
-        elif self.filetree_type == 'local':
-            gft = True
-
         # if some filename has not been provided through the configuration file use default names
         if len(self.filenames) != len(self.parent_section_names):
             msg = 'Report filename/s (report_filename) has not been defined in '
