@@ -329,20 +329,20 @@ class Canvas(FigureCanvas):
                     self.timeseries_chunk_stat.setCurrentText("None")
                     self.timeseries_chunk_resolution.setCurrentText("None")
 
+            # update mouse cursor to a waiting cursor
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_resampling_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
+            # resample data
+            do_resampling(self.read_instance)
+
+            # update data filters
+            self.handle_data_filter_update()
+
             # if have selected stations on map, then now remake plots
             if hasattr(self, 'relative_selected_station_inds'):
                 if len(self.relative_selected_station_inds) > 0:
-                    
-                    # update mouse cursor to a waiting cursor
-                    if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                        self.read_instance.cursor_function = 'handle_resampling_update'
-                        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-
-                    # resample data
-                    do_resampling(self.read_instance)
-
-                    # update data filters
-                    self.handle_data_filter_update()
 
                     # update associated plots with selected stations
                     self.update_associated_active_dashboard_plots()
@@ -350,12 +350,12 @@ class Canvas(FigureCanvas):
                     # update timeseries chunk resolution
                     self.handle_timeseries_chunk_statistic_update()
 
-                    # draw changes
-                    self.figure.canvas.draw_idle()
+            # draw changes
+            self.figure.canvas.draw_idle()
 
-                    # restore mouse cursor to normal
-                    if self.read_instance.cursor_function == 'handle_resampling_update':
-                        QtWidgets.QApplication.restoreOverrideCursor()
+            # restore mouse cursor to normal
+            if self.read_instance.cursor_function == 'handle_resampling_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 

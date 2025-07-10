@@ -8,6 +8,7 @@ import traceback
 
 import matplotlib
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
+from matplotlib.transforms import Bbox
 from packaging.version import Version
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -51,7 +52,8 @@ class NavigationToolbar(NavigationToolbar2QT):
             ('Save data', 'Save current instance of data and metadata', '', 'save_data'),
             ('Load data', 'Load toolbar selections from configuration file', '', 'conf_dialogs'),
             (None, None, None, None),
-            ('Home', 'Reset original view', 'home', 'home'),
+            ('World', 'Set world view', 'world', 'world'),
+            ('Home', 'Set to original view', 'home', 'home'),
             ('Back', 'Back to previous view', 'back', 'back'),
             ('Forward', 'Forward to next view', 'forward', 'forward'),
             (None, None, None, None),
@@ -69,7 +71,8 @@ class NavigationToolbar(NavigationToolbar2QT):
         actions = self.findChildren(QtWidgets.QAction)
         self._actions['save_data'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/save_icon.png")))
         self._actions['conf_dialogs'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/conf_icon.png")))
-        self._actions['home'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/world_icon.png")))
+        self._actions['world'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/world_icon.png")))
+        self._actions['home'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/original_view_icon.png")))
         self._actions['zoom'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/zoom_icon.png")))
         self._actions['connect_lasso'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/lasso_icon.png")))
         self._actions['save_figure'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/save_fig_icon.png")))
@@ -161,6 +164,20 @@ class NavigationToolbar(NavigationToolbar2QT):
             harmonise_xy_lims_paradigm(self.read_instance, self.canvas_instance, self.canvas_instance.plot_axes[plot_type], plot_type, 
                                        self.canvas_instance.plot_characteristics[plot_type], plot_options, relim=True, autoscale=False)
                 
+    def world(self):
+        """ Method that sets the world view in the map.
+        """
+
+        self._nav_stack.back()
+        self.set_history_buttons()
+        ax = self.canvas_instance.plot_axes['map']
+        ax.set_extent([-180, 180, -90, 90])
+        self.push_current()
+        self.canvas.draw_idle()
+
+        # update map extent
+        self.read_instance.map_extent = get_map_extent(self.canvas_instance)
+
     def home(self):
         """ Method inherited from matplotlib backend_bases home that 
             restores the original view.
