@@ -7,6 +7,7 @@ Modes
 
    Interpolation.md
    Dashboard.md
-   Offline-reports.md
-   Interactive-mode.md
+   Report.md
    Download.md
+   Library.md
+   Notebook.md

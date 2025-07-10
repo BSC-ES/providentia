@@ -8,6 +8,7 @@ import logging
 import os
 from packaging.version import Version
 import platform
+import math
 import socket
 import sys
 import time
@@ -644,7 +645,11 @@ class ProvConfiguration:
             # treat leaving the field blank as default
             if value == '':
                 return self.var_defaults[key]
-            
+        
+        elif key == 'cpus_per_task':
+            if value is not None:
+                return math.ceil(float(value))
+        
         # if no special parsing treatment for variable, simply return value
         return value
 
@@ -1188,39 +1193,34 @@ class ProvConfiguration:
             check_experiment_fun = self.check_experiment
 
         # temp dictionary to store experiments
-        # TODO change names
         final_experiments = []
         correct_experiments = {}
 
-        # TODO keep the check only in download or configuration
-        # in case of zenodo download don't even check
-        if not (self.read_instance.download and self.read_instance.bsc_download_choice == "n"): 
-            # join experiments
-            for exp_i, experiment in enumerate(self.read_instance.exp_ids):
-                # experiment, domain, ensemble_options
-                if self.combined_domain and self.combined_ensemble_options:
-                    final_experiments += [f'{experiment}-{domain}-{ens_opt}' for domain in self.read_instance.domain for ens_opt in self.read_instance.ensemble_options]
-                else:
-                    if self.combined_domain or self.combined_ensemble_options:
-                        # experiment-ensemble_options, domain
-                        if self.combined_domain:
-                            final_experiments += [f'{experiment}-{domain}-{self.read_instance.ensemble_options[exp_i]}' for domain in self.read_instance.domain]
-                        # experiment-domain, ensemble_options 
-                        else:
-                            final_experiments += [f'{experiment}-{self.read_instance.domain[exp_i]}-{ens_opt}' for ens_opt in self.read_instance.ensemble_options]
-                    # experiment-domain-ensemble_options
+        # join experiments
+        for exp_i, experiment in enumerate(self.read_instance.exp_ids):
+            # experiment, domain, ensemble_options
+            if self.combined_domain and self.combined_ensemble_options:
+                final_experiments += [f'{experiment}-{domain}-{ens_opt}' for domain in self.read_instance.domain for ens_opt in self.read_instance.ensemble_options]
+            else:
+                if self.combined_domain or self.combined_ensemble_options:
+                    # experiment-ensemble_options, domain
+                    if self.combined_domain:
+                        final_experiments += [f'{experiment}-{domain}-{self.read_instance.ensemble_options[exp_i]}' for domain in self.read_instance.domain]
+                    # experiment-domain, ensemble_options 
                     else:
-                        final_experiments.append(f'{experiment}-{self.read_instance.domain[exp_i]}-{self.read_instance.ensemble_options[exp_i]}')
+                        final_experiments += [f'{experiment}-{self.read_instance.domain[exp_i]}-{ens_opt}' for ens_opt in self.read_instance.ensemble_options]
+                # experiment-domain-ensemble_options
+                else:
+                    final_experiments.append(f'{experiment}-{self.read_instance.domain[exp_i]}-{self.read_instance.ensemble_options[exp_i]}')
 
-            for exp_i, experiment in enumerate(final_experiments):
-                # TODO change boolean name
-                exp_is_valid, valid_exp_list = check_experiment_fun(experiment, deactivate_warning)
-                if exp_is_valid:
-                    for valid_exp in valid_exp_list:
-                        if self.read_instance.alias_flag:
-                            correct_experiments[valid_exp] = self.read_instance.alias[exp_i]
-                        else:
-                            correct_experiments[valid_exp] = valid_exp
+        for exp_i, experiment in enumerate(final_experiments):
+            exp_is_valid, valid_exp_list = check_experiment_fun(experiment, deactivate_warning)
+            if exp_is_valid:
+                for valid_exp in valid_exp_list:
+                    if self.read_instance.alias_flag:
+                        correct_experiments[valid_exp] = self.read_instance.alias[exp_i]
+                    else:
+                        correct_experiments[valid_exp] = valid_exp
         
         # if experiments were passed and there's no valid experiment, show warning
         if self.read_instance.experiments != [] and correct_experiments == {}:
@@ -1554,7 +1554,15 @@ class ProvConfiguration:
             msg = 'During interpolation multiprocessing must be turned on for local runs, activating.'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.interp_multiprocessing = True
-    
+
+            if self.read_instance.cpus_per_task is not None:
+                if 1 <= self.read_instance.cpus_per_task <= self.read_instance.available_cpus:
+                    self.read_instance.n_cpus = self.read_instance.cpus_per_task
+                else:
+                    default = self.read_instance.available_cpus
+                    msg = "Number of cores cannot be superior than number of available cpus ({}) or less than 1. Using '{}' as default.".format(default, default)
+                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+
     def switch_logging(self):
         # create logger
         self.read_instance.logger = logging.getLogger("")
