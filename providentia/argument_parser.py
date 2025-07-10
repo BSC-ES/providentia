@@ -114,12 +114,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--ensemble_options",
                                      dest="ensemble_options",
                                      help="ensemble options of the experiment")
-            self.parser.add_argument("--forecast_day",
-                                     dest="forecast_day",
-                                     help="day of the model forecast to analyse")
             self.parser.add_argument("--forecast",
                                      dest="forecast",
-                                     help="indicates if data comes from forecast")
+                                     help="set part of forecast data desired")
             self.parser.add_argument("--qa",
                                      dest="qa",
                                      help="list of qa flags (numbers or text) to use to filter data")
@@ -243,6 +240,15 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--interp_multiprocessing",
                                      dest="interp_multiprocessing",
                                      help="use multiprocessing instead of greasy to interpolate in HPC machines")
+            self.parser.add_argument("--interp_spinup_timesteps",
+                                     dest="interp_spinup_timesteps",
+                                     help="number of timesteps to skip for spinup at start of each experiment file")
+            self.parser.add_argument("--interp_experiment_downsampling",
+                                     dest="interp_experiment_downsampling",
+                                     help="statistic to use for downsampling the experiment data")
+            self.parser.add_argument("--interp_experiment_upsampling",
+                                     dest="interp_experiment_upsampling",
+                                     help="set how the upsampling of experiment data should be done")
             self.parser.add_argument("--logfile",
                                      dest="logfile",
                                      action='store_true',
