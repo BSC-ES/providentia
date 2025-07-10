@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Configuration files &mdash; Providentia 2.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
@@ -66,6 +66,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="evolution.html">Evolution</a></li>
 </ul>
 
         </div>
@@ -281,13 +282,17 @@
 <td><p>✗</p></td>
 <td><p>Use multiprocessing instead of greasy to interpolate in HPC machines.</p></td>
 </tr>
+<tr class="row-even"><td><p>interpolated</p></td>
+<td><p>✗</p></td>
+<td><p>Indicates if the experiments are interpolated or to interpolate. If the variable is False, this can be used to download non-interpolated experiments into local machines.</p></td>
+</tr>
 </tbody>
 </table>
 <p>Defining a list of experiments is optional since the user might only want to check the observations data.</p>
 <p>In the reports, a report will be created per section. In the dashboard and using Providentia as a library, you will only be able to load one section or subsection at a time.</p>
 <section id="use-of-non-ghost-networks">
 <h4>Use of non-GHOST networks<a class="headerlink" href="#use-of-non-ghost-networks" title="Link to this heading"></a></h4>
-<p>Providentia can be used both with GHOST and non-GHOST netCDF files. Users should add the path to their network in <code class="docutils literal notranslate"><span class="pre">settings/nonghost_files.yaml</span></code>. In the configuration file, you can refer to non-GHOST files like:</p>
+<p>Providentia can be used both with GHOST and non-GHOST netCDF files. Users should add the path to their network in <code class="docutils literal notranslate"><span class="pre">settings/init_prov.yaml</span></code>. In the configuration file, you can refer to non-GHOST files like:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">port_barcelona</span><span class="o">/</span><span class="n">port</span><span class="o">-</span><span class="n">barcelona</span>
 </pre></div>
 </div>
