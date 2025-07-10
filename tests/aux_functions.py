@@ -10,6 +10,7 @@ GENERATE_OUTPUT = False
 def read_data(inst, path):
 
     # get data in memory in xarray format
+    inst.print_config()
     data = inst.data(format='xr')
     try:
         generated_output = data['EBAS|sconco3_data'].values
@@ -28,7 +29,7 @@ def read_data(inst, path):
     assert (generated_output.size != 0)
 
 
-def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
+def plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
 
     # make plot
     fig = inst.plot(plot_type, plot_options=plot_options, return_plot=True)
@@ -86,7 +87,7 @@ def make_plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
         assert assert_frame_equal(generated_output, expected_output) is None
 
     elif base_plot_type in ['timeseries', 'distribution', 'periodic', 'scatter', 
-                            'periodic-violin', 'fairmode-target']:
+                            'periodic-violin', 'fairmode-target', 'fairmode-statsummary']:
 
         # iterate through plotted lines
         for axis_i, axis in enumerate(fig.axes):
