@@ -6,6 +6,7 @@ from PIL import Image
 
 import cartopy
 import cartopy.feature as cfeature
+from datetime import datetime
 import matplotlib
 import matplotlib as mpl 
 import matplotlib.dates as mdates
@@ -357,6 +358,8 @@ def harmonise_xy_lims_paradigm(read_instance, canvas_instance, relevant_axs, bas
 
             # if there's more than 3 months, define time slices as the first day of the month
             if n_days >= 3 * 30:
+                # remove hours, minutes and seconds from the right and end dates
+                left, right = datetime(left.year, left.month, left.day), datetime(right.year, right.month, right.day)
 
                 # get the first and last days of each month
                 months_start = pd.date_range(left, right, freq='MS')
@@ -805,9 +808,6 @@ def format_axis(read_instance, canvas_instance, ax, base_plot_type, plot_charact
             # add gridlines ?
             if 'gridlines' in plot_characteristics_vars:
                 gridlines_characteristics = plot_characteristics['gridlines']
-                if Version(cartopy.__version__) >= Version("0.23"):
-                    if 'auto_update' in plot_characteristics['gridlines'].keys():
-                        gridlines_characteristics.pop('auto_update', None)
                 ax_to_format.gridlines(crs=canvas_instance.datacrs, 
                                        **gridlines_characteristics)
 

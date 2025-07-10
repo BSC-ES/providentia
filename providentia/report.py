@@ -91,27 +91,13 @@ class Report:
             self.logger.error(error)
             sys.exit(1)
 
-        # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
-        # if have filetree flags, then these overwrite any defaults
-        gft = False
-        if self.generate_file_tree:
-            gft = True
-        elif self.disable_file_tree:
-            gft = False
-        # by default generate filetree on MN5
-        elif self.machine in ['mn5', 'nord4']:
-            gft = True
-        # by default generate filetree locally
-        elif self.filetree_type == 'local':
-            gft = True
-
         # if some filename has not been provided through the configuration file use default names
         if len(self.filenames) != len(self.parent_section_names):
-            msg = 'Report filename/s (report_filename) has not been defined in '
-            msg += 'configuration file for one or more sections.'
-            self.logger.info(msg)
+            msg = 'Warning: Report filename/s (report_filename) has not been defined in '
+            msg += 'configuration file for one or more sections. '
             if len(self.parent_section_names) == 1:
                 self.filenames.append(self.report_filename)
+                msg += f'Setting filename to be {self.report_filename}.'
             else:
                 self.filenames = []
                 for i, parent_section in enumerate(self.parent_section_names):
@@ -120,7 +106,9 @@ class Report:
                     else:
                         # add a number next to the filename to avoid overwriting
                         self.filenames.append(f'{self.report_filename}_{i}')
-
+                msg += f'Setting filenames to be {self.filenames}.'
+            self.logger.info(msg)
+        
         # select section if passed through command line arguments
         if "section" in self.commandline_arguments.keys():
             if self.commandline_arguments["section"] in self.all_sections:

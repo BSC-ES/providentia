@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Create your own data network &mdash; Providentia 2.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
@@ -59,10 +59,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Mounting-esarchive.html">Mounting esarchive</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Multispecies-filtering.html">Multispecies filtering</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Evolution.html">Evolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Redirecting-output-to-a-file.html">Redirecting Output to a File</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="evolution.html">Evolution</a></li>
 </ul>
 
         </div>
@@ -107,13 +108,20 @@
 <li><p>Create monthly datasets from CSIC:
 https://earth.bsc.es/gitlab/es/NES/-/blob/master/tutorials/2.Creation/2.5.Create_Points_CSIC.ipynb</p></li>
 </ul>
-<p>Providentia will be able to find these datasets if they are saved in the directory <code class="docutils literal notranslate"><span class="pre">/esarchive/obs/</span></code>. The data path must be included in <code class="docutils literal notranslate"><span class="pre">settings/nonghost_files.yaml</span></code>. As an example, the path to the data from CSIC (<code class="docutils literal notranslate"><span class="pre">/esarchive/obs/csic/csic/monthly/sconcnh3/</span></code>) correspond in this dictionary to:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;csic/csic&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;monthly&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;sconcnh3&quot;</span><span class="p">]</span>
- <span class="p">}</span>
+<p>Providentia will be able to find these datasets if they are stored in the path specified in the <code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code> key under the corresponding machine in the <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code> file. The name of the network must be included in the <code class="docutils literal notranslate"><span class="pre">nonghost_available_networks</span></code> list in <code class="docutils literal notranslate"><span class="pre">settings/init_prov.yaml</span></code>. For example, in the nord3v2 machine, to get the data from CSIC stored at this location: <code class="docutils literal notranslate"><span class="pre">/esarchive/obs/csic/csic/monthly/sconcnh3/</span></code>, you would need to modify the configuration files as follows.</p>
+<p>Update <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code> so it stores the dataset directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;nord3v2&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;nonghost_root&quot;</span><span class="p">:</span> <span class="s2">&quot;/esarchive/obs&quot;</span><span class="p">,</span>
+        <span class="o">...</span>
+    <span class="p">},</span>
+
 </pre></div>
 </div>
-<p>The next time you use Providentia you must use the argument <code class="docutils literal notranslate"><span class="pre">--gft</span></code>, to regenerate the internal file tree to account for the new network.</p>
+<p>Update <code class="docutils literal notranslate"><span class="pre">init_prov.yaml</span></code> by adding the corresponding data network to the <code class="docutils literal notranslate"><span class="pre">nonghost_available_networks</span></code> list:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;nonghost_available_networks&#39;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="s1">&#39;csic/csic&#39;</span><span class="p">]</span>
+
+</pre></div>
+</div>
 <p>If you then launch the dashboard and select any period in 2019, you will see that you can select CSIC as a network. If you want to use a configuration file to launch it or create reports, then you will need to write:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">csic</span><span class="o">/</span><span class="n">csic</span>
 

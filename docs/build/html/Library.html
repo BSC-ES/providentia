@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Library &mdash; Providentia 2.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
@@ -21,7 +21,9 @@
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Notebook" href="Notebook.html" />
+    <link rel="prev" title="Download" href="Download.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -43,13 +45,39 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup.html">Tool setup</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modes.html">Modes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modes.html">Modes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Interpolation.html">Interpolation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Report.html">Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Download.html">Download</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#importing-providentia">Importing Providentia</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#features">Features</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#accessing-the-providentia-modes">Accessing the Providentia modes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#library-reading-and-filtering-data-from-a-conf-file">Library: Reading and filtering data from a .conf file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#library-reset-filter">Library: Reset filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#library-applying-filters">Library: Applying filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#library-filtering-for-specific-station-s">Library: Filtering for specific station/s</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#library-print-active-conf-file">Library: Print active .conf file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#library-calculate-statistics">Library: Calculate statistics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#library-saving-data">Library: Saving data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#library-accessing-data-in-memory">Library: Accessing data in memory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#library-accessing-specific-variable-in-memory">Library: Accessing specific variable in memory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#library-plotting">Library: Plotting</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Notebook.html">Notebook</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a></li>
 <li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="evolution.html">Evolution</a></li>
 </ul>
 
         </div>
@@ -66,6 +94,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modes.html">Modes</a></li>
       <li class="breadcrumb-item active">Library</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/Library.md.txt" rel="nofollow"> View page source</a>
@@ -78,79 +107,85 @@
              
   <section id="library">
 <h1>Library<a class="headerlink" href="#library" title="Link to this heading"></a></h1>
-<p>The library was designed for users to exploit the powerful backend of Providentia, allowing the use of the Providentia functions, as well as allowing for the running in Jupyter notebooks.</p>
-<p>Providentia can be used as a library in any script, through simply importing the Interactive class as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">providentia</span> <span class="kn">import</span> <span class="n">Interactive</span>
+<p>The library was designed for users to exploit the powerful backend of Providentia, allowing the use of the Providentia functionalities directly in your own scripts.</p>
+<p>The Providentia library can be used in any script, through simply importing Providentia as a module:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">providentia</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">prv</span>
 </pre></div>
 </div>
-<section id="using-providentia-in-your-own-scripts">
-<h2>Using Providentia in your own scripts<a class="headerlink" href="#using-providentia-in-your-own-scripts" title="Link to this heading"></a></h2>
-<p>If your script is not inside the Providentia directory, in order to import from Providentia, then it is necessary to add these lines to your code first:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<section id="importing-providentia">
+<h2>Importing Providentia<a class="headerlink" href="#importing-providentia" title="Link to this heading"></a></h2>
+<p>If the script you are running is not inside the Providentia home directory, in order to import from Providentia, then it is necessary to add these lines to your code first:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">provdir</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">provdir</span></code> is the path where your Providentia code exists.</p>
 <p>You will also need to load the necessary modules for it to function, for this you can run:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">provdir</span><span class="o">/</span><span class="n">load_modules</span><span class="o">.</span><span class="n">sh</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">provdir</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">load_modules</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
 <p>After the import you will have full access to the backend of Providentia and all of its functions as described in the following sections.</p>
 <p>NOTE: In the future we will allow for Providentia to be imported as a module on the BSC machines, making this step redundant.</p>
 </section>
-<section id="starting-a-jupyter-notebook">
-<h2>Starting a Jupyter notebook<a class="headerlink" href="#starting-a-jupyter-notebook" title="Link to this heading"></a></h2>
-<p>A Jupyter notebook to use the library functions can also be now easily launched with the following command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">interactive</span>
-</pre></div>
-</div>
-<p>This will either start a job if you are using a machine with SLURM, or directly open Jupyter notebooks. In the first case, a file named <code class="docutils literal notranslate"><span class="pre">interactive.out</span></code> will be created. Information in the file will then allow for a connection to a Jupyter notebook to be set up. Firstly, an SSH tunnel from the local machine needs to be set up, by pasting a given command into a Linux/MacOS terminal or equivalent (i.e. PuTTY on Windows), e.g.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Create</span> <span class="n">an</span> <span class="n">SSH</span> <span class="n">tunnel</span> <span class="n">via</span> <span class="n">terminal</span> <span class="n">on</span> <span class="n">your</span> <span class="n">local</span> <span class="n">machine</span><span class="p">:</span>
-<span class="n">ssh</span> <span class="o">-</span><span class="n">N</span> <span class="o">-</span><span class="n">L</span> <span class="mi">8825</span><span class="p">:</span><span class="n">s04r1b14</span><span class="p">:</span><span class="mi">8825</span> <span class="n">bsc32025</span><span class="nd">@nord4</span><span class="o">.</span><span class="n">bsc</span><span class="o">.</span><span class="n">es</span>
-</pre></div>
-</div>
-<p>Secondly, the notebook can than be accessed via a web browser following information from the bottom of the file, e.g.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>To access the server, open this file in a browser:
-        file:///.statelite/tmpfs/gpfs/home/bsc32/bsc32025/.local/share/jupyter/runtime/jpserver-800644-open.html
-    Or copy and paste one of these URLs:
-        http://s04r1b14:8825/lab?token=57a994dfaecf92e5aefd1d5dbc5a9831fb8060f873fd8181
-     or http://127.0.0.1:8825/lab?token=57a994dfaecf92e5aefd1d5dbc5a9831fb8060f873fd8181
-</pre></div>
-</div>
-<p>One additional step is also needed inside the notebook if wishing to embed plots:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
-</pre></div>
-</div>
-<p>This is a magic function that allows for the rendering of figures directly in the notebook.<br />
-NOTE: This must set after the importing of the Interactive class.</p>
-<p>A template Jupyter notebook, demonstrating some of the Providentia interactive features can be found in <code class="docutils literal notranslate"><span class="pre">notebooks/interactive_template.ipynb</span></code>.</p>
-</section>
 <section id="features">
 <h2>Features<a class="headerlink" href="#features" title="Link to this heading"></a></h2>
-<p>The library gives access to the entirety of the Providentia backend. This therefore includes reading, filtering, plotting, writing, etc. After importing the Providentia Interactive class, the class methods are then accessible. In the following sections, each of these methods will be described.</p>
-<section id="reading-and-filtering-data-from-a-conf-file">
-<h3>Reading and filtering data from a .conf file<a class="headerlink" href="#reading-and-filtering-data-from-a-conf-file" title="Link to this heading"></a></h3>
-<p>As a first step, data needs to be read and filtered appropriately.
-In order to let Providentia know what data is wanted to be read, and what filters to apply, this is all defined in a .conf file (the same as used in the dashboard and report modes). A class instance is created by the following line:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">Interactive</span><span class="p">(</span><span class="n">conf</span><span class="o">=</span><span class="s1">&#39;interactive_template.conf&#39;</span><span class="p">)</span>
+<p>Importing Providentia gives access to the entirety of the Providentia backend. This includes use of all of the different Providentia modes directly in your own scripts, such as interpolation, report etc, as well as all the smaller functions that Providentia performs, such as reading, filtering, plotting, writing, etc. through the library mode.</p>
+<section id="accessing-the-providentia-modes">
+<h3>Accessing the Providentia modes<a class="headerlink" href="#accessing-the-providentia-modes" title="Link to this heading"></a></h3>
+<p>Each of the different Providentia modes can be used through the Providentia module, as well as would normally executed via command line.</p>
+<p>After importing Providentia, each mode has its own function which can be called as follows:</p>
+<p><strong>Interpolation</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">interpolation</span><span class="p">(</span><span class="s1">&#39;interactive_template.conf&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Dashboard</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">prv</span><span class="o">.</span><span class="n">dashboard</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Report</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="s1">&#39;interactive_template.conf&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Download</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="s1">&#39;interactive_template.conf&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Library</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;interactive_template.conf&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Notebook</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">notebook</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The Interpolation, Report, Download and Library modes each require a .conf filename to be passed when calling the function.</p>
+<p>You can pass any arguments you wish when calling each function to override what is set in the loaded .conf file.</p>
+<p>The Report, Download and Library modes each return a class instance which can be used to access to access class methods and attributes.</p>
+<p>The Library mode was specifically designed for this purpose with access to all Providentia sub-functions such as reading, filtering plotting etc. The following sections will discuss</p>
+</section>
+<section id="library-reading-and-filtering-data-from-a-conf-file">
+<h3>Library: Reading and filtering data from a .conf file<a class="headerlink" href="#library-reading-and-filtering-data-from-a-conf-file" title="Link to this heading"></a></h3>
+<p>As a first step, data needs to be read and filtered appropriately.</p>
+<p>In order to let Providentia know what data is wanted to be read, and what filters to apply, this is all defined in a .conf file (the same as used in the dashboard and report modes). A class instance is created by the following line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;interactive_template.conf&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">provi</span></code> is the class instance, which can access all of the class variables and methods.</p>
 <p>Only one section-subsection pair in the .conf can be read and filtered by the library at one time, with the exception in the creation of plots with the <code class="docutils literal notranslate"><span class="pre">multispecies</span></code> option (see plotting section). Where there is more than one pair defined in the file, the specific pair wished to be read can be set by passing the section and/or subsection arguments, e.g.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">Interactive</span><span class="p">(</span><span class="n">conf</span><span class="o">=</span><span class="s1">&#39;interactive_template.conf&#39;</span><span class="p">,</span> <span class="n">section</span><span class="o">=</span><span class="s1">&#39;OTHERSECTION&#39;</span><span class="p">,</span> <span class="n">subsection</span><span class="o">=</span><span class="s1">&#39;OTHERSUBSECTION&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;interactive_template.conf&#39;</span><span class="p">,</span> <span class="n">section</span><span class="o">=</span><span class="s1">&#39;OTHERSECTION&#39;</span><span class="p">,</span> <span class="n">subsection</span><span class="o">=</span><span class="s1">&#39;OTHERSUBSECTION&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>If there are multiple section and subsection pairs in the .conf file, and a specific pair is not explicitly set to be read, then simply the first pair is taken to be read.</p>
 <p>When wanting to change any data or filters applied to the data, simply update the appropriate the .conf and reinitiate the class instance.</p>
 <p>If wanting to overwrite any arguments in the .conf file, directly in the script, each argument can be simply passed when initiating the class instance, e.g.:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">Interactive</span><span class="p">(</span><span class="n">conf</span><span class="o">=</span><span class="s1">&#39;interactive_template.conf&#39;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s1">&#39;EANET&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span> <span class="o">=</span> <span class="n">prv</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;interactive_template.conf&#39;</span><span class="p">,</span> <span class="n">network</span><span class="o">=</span><span class="s1">&#39;EANET&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
-<section id="reset-filter">
-<h3>Reset filter<a class="headerlink" href="#reset-filter" title="Link to this heading"></a></h3>
+<section id="library-reset-filter">
+<h3>Library: Reset filter<a class="headerlink" href="#library-reset-filter" title="Link to this heading"></a></h3>
 <p>After data has been read and filtered, it will stay filtered until it is reset. This can be done by the following method:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">reset_filter</span><span class="p">()</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>If at any point wanting to return to the state when the Interactive class was initialised, this can be done by adding the following argument to the method:</p>
@@ -158,42 +193,42 @@ In order to let Providentia know what data is wanted to be read, and what filter
 </pre></div>
 </div>
 </section>
-<section id="applying-specific-filter">
-<h3>Applying specific filter<a class="headerlink" href="#applying-specific-filter" title="Link to this heading"></a></h3>
+<section id="library-applying-filters">
+<h3>Library: Applying filters<a class="headerlink" href="#library-applying-filters" title="Link to this heading"></a></h3>
 <p>If wanting to apply a filter not set in the .conf, this can be done using the following method:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">field</span></code> is the field to filter by. The fields to filter by can be representativity fields, period fields or metadata fields.</p>
 <p>If the field is numeric, lower and upper limits to retain data between can be set as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">28</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">31</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">28</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">31</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>NOTE: it is not mandatory to pass <code class="docutils literal notranslate"><span class="pre">lower</span></code> and <code class="docutils literal notranslate"><span class="pre">upper</span></code> arguments together.</p>
 <p>If the field is textual, values to keep and remove associated data with can be set as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;Spain&#39;</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;Spain&#39;</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>If multiple values are wanted to be removed concurrently, the arguments passed should be lists.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Spain&#39;</span><span class="p">,</span><span class="s1">&#39;France&#39;</span><span class="p">])</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Spain&#39;</span><span class="p">,</span><span class="s1">&#39;France&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>NOTE: it is not mandatory to pass <code class="docutils literal notranslate"><span class="pre">keep</span></code> and <code class="docutils literal notranslate"><span class="pre">remove</span></code> arguments together.</p>
 <p>For the specific case of representativity fields, the argument passed should be <code class="docutils literal notranslate"><span class="pre">limit</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">rep_field</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">rep_field</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
-<section id="filtering-for-specific-station-s">
-<h3>Filtering for specific station/s<a class="headerlink" href="#filtering-for-specific-station-s" title="Link to this heading"></a></h3>
+<section id="library-filtering-for-specific-station-s">
+<h3>Library: Filtering for specific station/s<a class="headerlink" href="#library-filtering-for-specific-station-s" title="Link to this heading"></a></h3>
 <p>If wanting to filter data for a specific station or stations, the following convenience method can also be used (rather than using <code class="docutils literal notranslate"><span class="pre">apply_filter</span></code>):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">select_station</span><span class="p">(</span><span class="n">station</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">filter_station</span><span class="p">(</span><span class="n">station</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">station</span></code> can be a str <code class="docutils literal notranslate"><span class="pre">station_reference</span></code> of one station of interest, or can be a list of multiple stations of interest. This will then subsequently mean the data in memory is filtered for the relevant station or stations.</p>
 </section>
-<section id="print-active-conf-file">
-<h3>Print active .conf file<a class="headerlink" href="#print-active-conf-file" title="Link to this heading"></a></h3>
+<section id="library-print-active-conf-file">
+<h3>Library: Print active .conf file<a class="headerlink" href="#library-print-active-conf-file" title="Link to this heading"></a></h3>
 <p>If wanting to visually print the .conf file that is currently active this can be done by:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">print_config</span><span class="p">()</span>
 </pre></div>
@@ -203,10 +238,10 @@ In order to let Providentia know what data is wanted to be read, and what filter
 </pre></div>
 </div>
 </section>
-<section id="calculate-statistics">
-<h3>Calculate statistics<a class="headerlink" href="#calculate-statistics" title="Link to this heading"></a></h3>
+<section id="library-calculate-statistics">
+<h3>Library: Calculate statistics<a class="headerlink" href="#library-calculate-statistics" title="Link to this heading"></a></h3>
 <p>In order to calculate statistics for a dataset, this can done via the following method:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stat_calc</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">calculate_stat</span><span class="p">(</span><span class="n">stat</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;OBS&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stat_calc</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">statistic</span><span class="p">(</span><span class="n">stat</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;OBS&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">stat</span></code> is the statistic wished to be calculated, and <code class="docutils literal notranslate"><span class="pre">labela</span></code> is the name of the observations/experiment data (this can be an alias set in the .conf or the original dataset name). The statistic returned will be one summary value, which can be formulated in differing ways, e.g. taking a median time series across all stations and then calculating the statistic, or calculating the statistic across all stations and then taking the median. This formulation can be set by changing the statistical mode in the .conf, for which more information can be found <a class="reference internal" href="Statistics.html"><span class="doc std std-doc">here</span></a>.</p>
@@ -221,8 +256,8 @@ In order to let Providentia know what data is wanted to be read, and what filter
 </pre></div>
 </div>
 </section>
-<section id="saving-data">
-<h3>Saving data<a class="headerlink" href="#saving-data" title="Link to this heading"></a></h3>
+<section id="library-saving-data">
+<h3>Library: Saving data<a class="headerlink" href="#library-saving-data" title="Link to this heading"></a></h3>
 <p>The data which has been read and filtered can be saved out using the following method:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;nc&#39;</span><span class="p">)</span>
 </pre></div>
@@ -234,32 +269,32 @@ In order to let Providentia know what data is wanted to be read, and what filter
 </div>
 <p>If <code class="docutils literal notranslate"><span class="pre">fname</span></code> is not provided then one is generated automatically, and saved in the directory <code class="docutils literal notranslate"><span class="pre">saved_data</span></code>.</p>
 </section>
-<section id="accessing-data-in-memory">
-<h3>Accessing data in memory<a class="headerlink" href="#accessing-data-in-memory" title="Link to this heading"></a></h3>
+<section id="library-accessing-data-in-memory">
+<h3>Library: Accessing data in memory<a class="headerlink" href="#library-accessing-data-in-memory" title="Link to this heading"></a></h3>
 <p>As well as being able to save data out, data can be returned directly in memory in specific formats, via the following method:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;xr&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;xr&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">format</span></code> is the format of the returned data, and can be <code class="docutils literal notranslate"><span class="pre">nc</span></code> (netCDF), <code class="docutils literal notranslate"><span class="pre">np</span></code> (numpy) or <code class="docutils literal notranslate"><span class="pre">xr</span></code> (xarray).</p>
 <p>The returned variable will contain all read data and metadata variables available. Therefore, if reading a GHOST network you can expect the metadata to be more substantial.</p>
 </section>
-<section id="accessing-specific-variable-in-memory">
-<h3>Accessing specific variable in memory<a class="headerlink" href="#accessing-specific-variable-in-memory" title="Link to this heading"></a></h3>
+<section id="library-accessing-specific-variable-in-memory">
+<h3>Library: Accessing specific variable in memory<a class="headerlink" href="#library-accessing-specific-variable-in-memory" title="Link to this heading"></a></h3>
 <p>If wanting to extract a specific variable in memory, rather than the entire read dataset, this can be done using the following method:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">var_data</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">get_var</span><span class="p">(</span><span class="n">var</span><span class="o">=</span><span class="s1">&#39;myvar&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">var_data</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">variable</span><span class="p">(</span><span class="n">var</span><span class="o">=</span><span class="s1">&#39;myvar&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">var</span></code> is the name of the variable wished to be read.</p>
 </section>
-<section id="plotting">
-<h3>Plotting<a class="headerlink" href="#plotting" title="Link to this heading"></a></h3>
+<section id="library-plotting">
+<h3>Library: Plotting<a class="headerlink" href="#library-plotting" title="Link to this heading"></a></h3>
 <p>All plot types that are available in other modes of Providentia are available through the library, with the addition of the option to plot the legend as a standalone plot. All plots can be made using the method:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span><span class="n">plot_type</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">plot_type</span></code> is the plot type wished to be made (all types stated later in this section).</p>
 <p>All plots have been tailored to appear nice in Jupyter notebooks, but any plot settings can be modified by the user, per plot type, in:<br />
-<code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics_interactive.yaml</span></code></p>
+<code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics.yaml</span></code></p>
 <section id="plot-customisation">
 <h4>Plot customisation<a class="headerlink" href="#plot-customisation" title="Link to this heading"></a></h4>
 <p>There are numerous arguments to the plot method that can be used to customise the plots, each of which are subsequently detailed.</p>
@@ -300,7 +335,7 @@ In order to let Providentia know what data is wanted to be read, and what filter
 </section>
 <section id="custom-formatting">
 <h5>Custom formatting<a class="headerlink" href="#custom-formatting" title="Link to this heading"></a></h5>
-<p>To have more granular control of the plot formatting, and overwrite specific variables set in <code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics_interactive.yaml</span></code>, the <code class="docutils literal notranslate"><span class="pre">format</span></code> argument can be used to pass a dictionary which sets specific plot type format variables to overwrite, e.g.:</p>
+<p>To have more granular control of the plot formatting, and overwrite specific variables set in <code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics.yaml</span></code>, the <code class="docutils literal notranslate"><span class="pre">format</span></code> argument can be used to pass a dictionary which sets specific plot type format variables to overwrite, e.g.:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">format</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;figsize&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">14</span><span class="p">,</span><span class="mi">7</span><span class="p">],</span> <span class="s2">&quot;xtick_params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;labelsize&quot;</span><span class="p">:</span> <span class="mi">22</span><span class="p">}}</span>
 </pre></div>
 </div>
@@ -321,7 +356,7 @@ In order to let Providentia know what data is wanted to be read, and what filter
 <h5>Saving / returning plot object in memory<a class="headerlink" href="#saving-returning-plot-object-in-memory" title="Link to this heading"></a></h5>
 <p>Rather than viewing the plot on the screen, it can be returned in memory, or saved to a file.</p>
 <p>To return the plot in memory, this can be done as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plot_obj</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span><span class="n">plot_type</span><span class="p">,</span> <span class="n">return_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plot_obj</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span><span class="p">,</span> <span class="n">return_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">plot_obj</span></code> is the object of the plot returned.</p>
@@ -338,7 +373,7 @@ In order to let Providentia know what data is wanted to be read, and what filter
 <section id="id1">
 <h5>legend<a class="headerlink" href="#id1" title="Link to this heading"></a></h5>
 <p>The legend plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span><span class="s1">&#39;legend&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;legend&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>It has no available plot options.</p>
@@ -346,7 +381,7 @@ In order to let Providentia know what data is wanted to be read, and what filter
 <section id="metadata">
 <h5>metadata<a class="headerlink" href="#metadata" title="Link to this heading"></a></h5>
 <p>The metadata plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>It has no available plot options.</p>
@@ -354,12 +389,12 @@ In order to let Providentia know what data is wanted to be read, and what filter
 <section id="map">
 <h5>map<a class="headerlink" href="#map" title="Link to this heading"></a></h5>
 <p>The map plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span><span class="s1">&#39;map-stat&#39;</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;OBS&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;map-stat&#39;</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;OBS&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where stat is the statistic to be plotted per station on the map, and <code class="docutils literal notranslate"><span class="pre">labela</span></code> is the data label of the dataset to calculate the statistics with.</p>
 <p>By adding <code class="docutils literal notranslate"><span class="pre">labelb</span></code> to the plot arguments, you can turn the plot type into a bias plot:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span><span class="s1">&#39;map-stat&#39;</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;OBS&#39;</span><span class="p">,</span> <span class="n">labelb</span><span class="o">=</span><span class="s1">&#39;MONARCH&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;map-stat&#39;</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;OBS&#39;</span><span class="p">,</span> <span class="n">labelb</span><span class="o">=</span><span class="s1">&#39;MONARCH&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>For bias statistics for which a subtraction is involved, it is always done as <code class="docutils literal notranslate"><span class="pre">datasetb</span> <span class="pre">-</span> <span class="pre">dataseta</span></code>.</p>
@@ -374,7 +409,7 @@ In order to let Providentia know what data is wanted to be read, and what filter
 <section id="timeseries">
 <h5>timeseries<a class="headerlink" href="#timeseries" title="Link to this heading"></a></h5>
 <p>The timeseries plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span><span class="s1">&#39;timeseries&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;timeseries&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The available plot options are:<br />
@@ -383,7 +418,7 @@ In order to let Providentia know what data is wanted to be read, and what filter
 <section id="periodic">
 <h5>periodic<a class="headerlink" href="#periodic" title="Link to this heading"></a></h5>
 <p>The periodic plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span><span class="s1">&#39;periodic-stat&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;periodic-stat&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">stat</span></code> is the statistic that is wanted to be plotted.</p>
@@ -393,7 +428,7 @@ In order to let Providentia know what data is wanted to be read, and what filter
 <section id="periodic-violin">
 <h5>periodic-violin<a class="headerlink" href="#periodic-violin" title="Link to this heading"></a></h5>
 <p>The periodic-violin plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span><span class="s1">&#39;periodic-violin&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;periodic-violin&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The available plot options are:<br />
@@ -402,7 +437,7 @@ In order to let Providentia know what data is wanted to be read, and what filter
 <section id="distribution">
 <h5>distribution<a class="headerlink" href="#distribution" title="Link to this heading"></a></h5>
 <p>The distribution plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span><span class="s1">&#39;distribution&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;distribution&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The available plot options are:<br />
@@ -411,7 +446,7 @@ In order to let Providentia know what data is wanted to be read, and what filter
 <section id="scatter">
 <h5>scatter<a class="headerlink" href="#scatter" title="Link to this heading"></a></h5>
 <p>The scatter plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span><span class="s1">&#39;scatter&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;scatter&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The available plot options are:<br />
@@ -420,7 +455,7 @@ In order to let Providentia know what data is wanted to be read, and what filter
 <section id="boxplot">
 <h5>boxplot<a class="headerlink" href="#boxplot" title="Link to this heading"></a></h5>
 <p>The boxplot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span><span class="s1">&#39;boxplot&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;boxplot&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The available plot options are:<br />
@@ -429,7 +464,7 @@ In order to let Providentia know what data is wanted to be read, and what filter
 <section id="heatmap">
 <h5>heatmap<a class="headerlink" href="#heatmap" title="Link to this heading"></a></h5>
 <p>The heatmap plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span><span class="s1">&#39;heatmap-stat&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;heatmap-stat&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where <code class="docutils literal notranslate"><span class="pre">stat</span></code> is the statistic that is wanted to be plotted.</p>
@@ -439,7 +474,7 @@ In order to let Providentia know what data is wanted to be read, and what filter
 <section id="table">
 <h5>table<a class="headerlink" href="#table" title="Link to this heading"></a></h5>
 <p>The table plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The available plot options are:<br />
@@ -448,7 +483,7 @@ In order to let Providentia know what data is wanted to be read, and what filter
 <section id="statsummary">
 <h5>statsummary<a class="headerlink" href="#statsummary" title="Link to this heading"></a></h5>
 <p>The statsummary plot can be made as follows:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">make_plot</span><span class="p">(</span><span class="s1">&#39;statsummary&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">provi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;statsummary&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The available plot options are:<br />
@@ -462,7 +497,10 @@ In order to let Providentia know what data is wanted to be read, and what filter
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Download.html" class="btn btn-neutral float-left" title="Download" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Notebook.html" class="btn btn-neutral float-right" title="Notebook" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
