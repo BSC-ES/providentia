@@ -1113,7 +1113,7 @@ class Dashboard(QtWidgets.QWidget):
             if changed_plot_type != 'None':
 
                 # format axis                
-                format_axis(self.mpl_canvas, self.mpl_canvas.read_instance, 
+                format_axis(self.mpl_canvas.read_instance, self.mpl_canvas, 
                             self.mpl_canvas.plot_axes[changed_plot_type], 
                             changed_plot_type, self.mpl_canvas.plot_characteristics[changed_plot_type],
                             map_extent=self.map_extent)
@@ -1236,9 +1236,9 @@ class Dashboard(QtWidgets.QWidget):
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         # clear previously selected relative/absolute station indices
-        self.mpl_canvas.relative_selected_station_inds = np.array([], dtype=np.int64)
-        self.mpl_canvas.absolute_selected_station_inds = np.array([], dtype=np.int64)
-        self.mpl_canvas.absolute_non_selected_station_inds = np.array([], dtype=np.int64)
+        self.mpl_canvas.relative_selected_station_inds = np.array([], dtype=np.int32)
+        self.mpl_canvas.absolute_selected_station_inds = np.array([], dtype=np.int32)
+        self.mpl_canvas.absolute_non_selected_station_inds = np.array([], dtype=np.int32)
 
         # set variable that blocks updating of MPL canvas until all data has been updated
         self.block_MPL_canvas_updates = True
@@ -1409,11 +1409,8 @@ class Dashboard(QtWidgets.QWidget):
                 delattr(self, 'valid_station_inds')
                 delattr(self, 'valid_station_inds_temporal_colocation')
 
+            # update metadata fields
             update_metadata_fields(self)
-            
-            # update relevant/nonrelevant temporal resolutions 
-            self.relevant_temporal_resolutions = get_relevant_temporal_resolutions(self.resolution)
-            self.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(self.resolution)
 
             # if species has changed, or first read, update species specific lower/upper limits
             if (self.first_read) or (self.species[0] != self.previous_species[0]):

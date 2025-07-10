@@ -25,10 +25,10 @@ import pyproj
 import seaborn as sns
 
 from .calculate import ExpBias, Stats
-from .statistics import (boxplot_inner_fences, calculate_statistic,
+from .statistics import (boxplot_inner_fences, calculate_statistic, group_periodic,
                          get_fairmode_data, get_z_statistic_info, get_z_statistic_type)
 from .read_aux import drop_nans, get_valid_metadata
-from .plot_aux import (create_chunked_timeseries, get_multispecies_aliases, 
+from .plot_aux import (create_statistical_timeseries, get_multispecies_aliases, 
                        get_taylor_diagram_ghelper_info, kde_fft, merge_cells, periodic_labels, 
                        periodic_xticks, round_decimal_places, temp_axis_dict)
 from .plot_formatting import set_axis_title
@@ -659,8 +659,8 @@ class Plotting:
         
         # chunk timeseries
         if (chunk_stat is not None) and (chunk_resolution is not None):
-            timeseries_data = create_chunked_timeseries(self.read_instance, self.canvas_instance, chunk_stat, 
-                                                        chunk_resolution, networkspeci, cut_data_labels, bias)
+            timeseries_data = create_statistical_timeseries(self.read_instance, self.canvas_instance, chunk_stat, 
+                                                            chunk_resolution, networkspeci, cut_data_labels, bias)
 
             # if it is a bias chunk statistic, add bias line
             z_statistic_type = get_z_statistic_type(chunk_stat)
@@ -772,7 +772,7 @@ class Plotting:
             relevant_sub_ax.axis('off')
             relevant_sub_ax.set_visible(False)
 
-        # iterate through all relevant temporal aggregation resolutions
+        # iterate through all relevant temporal aggregation 
         for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
 
             # get subplot axis
@@ -781,9 +781,6 @@ class Plotting:
             # un-hide relevant resolution axis
             relevant_sub_ax.axis('on')
             relevant_sub_ax.set_visible(True)
-
-            # set xticks
-            xticks = self.canvas_instance.selected_station_data[networkspeci][relevant_temporal_resolution]['valid_xticks']
 
             # violin plot type?
             if zstat is None:
@@ -818,13 +815,13 @@ class Plotting:
                             violin_fill = plot_characteristics['violin_fill_2+models']
 
                     # make plot of median
-                    median_plots = relevant_sub_ax.plot(xticks, medians[:, data_label_ii], 
+                    median_plots = relevant_sub_ax.plot(self.canvas_instance.unique_periods, medians[:, data_label_ii], 
                                                         color=self.read_instance.plotting_params[data_label]['colour'], 
                                                         zorder=median_zorder, 
                                                         **plot_characteristics['plot']['median'])
 
                     # make violin plot
-                    for period_ii in range(len(xticks)):
+                    for period_ii in range(len(self.canvas_instance.unique_periods)):
 
                         # get x_grid for period
                         x_grid = period_x_grid[period_ii]
@@ -914,7 +911,7 @@ class Plotting:
                         continue
 
                     # make plot
-                    self.periodic_plots = relevant_sub_ax.plot(xticks, stats_calc[:, data_label_ii], 
+                    self.periodic_plots = relevant_sub_ax.plot(self.canvas_instance.unique_periods, stats_calc[:, data_label_ii], 
                                                                color=self.read_instance.plotting_params[data_label]['colour'], 
                                                                zorder=self.read_instance.plotting_params[data_label]['zorder'], 
                                                                **plot_characteristics['plot'])
@@ -1080,8 +1077,14 @@ class Plotting:
                     period_data_range_min = []
                     period_data_range_max = []
                     period_x_grid = []
+
+                    # get grouped data per period
+                    grouped_data = group_periodic(self.read_instance, self.canvas_instance, networkspeci, 
+                                                  violin_resolution, False, 
+                                                  self.canvas_instance.selected_station_data[networkspeci]['active_mode'])
+
                     # iterate through periods
-                    for group in self.canvas_instance.selected_station_data[networkspeci][violin_resolution]['active_mode']:
+                    for group in grouped_data:
                         lower_inner_fence, upper_inner_fence = boxplot_inner_fences(group)
                         min_data = np.nanmin(group)
                         period_data_range_min.append(min_data)
@@ -1090,7 +1093,7 @@ class Plotting:
                 
                 # get data (flattened and drop NaNs)
                 if violin_resolution is not None:
-                    kde_data_grouped = [drop_nans(group[valid_data_labels.index(data_label)].flatten()) for group in self.canvas_instance.selected_station_data[networkspeci][violin_resolution]['active_mode']]
+                    kde_data_grouped = [drop_nans(group[valid_data_labels.index(data_label)].flatten()) for group in grouped_data]
                 else:    
                     kde_data_grouped = [drop_nans(self.canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(data_label),0,:])]
 
@@ -1988,7 +1991,7 @@ class Plotting:
         # resample to daily for PM10 and PM2.5 if data is hourly
         # get MDA8 for ozone if data is hourly
         # finally filter by coverage
-        data, valid_station_idxs = get_fairmode_data(self.canvas_instance, self.read_instance, networkspeci,
+        data, valid_station_idxs = get_fairmode_data(self.read_instance, self.canvas_instance, networkspeci,
                                                      self.read_instance.resolution, data_labels)
         
         # skip making plot if there is no valid data
@@ -2192,7 +2195,7 @@ class Plotting:
         # resample to daily for PM10 and PM2.5 if data is hourly
         # get MDA8 for ozone if data is hourly
         # finally filter by coverage
-        data, valid_station_idxs = get_fairmode_data(self.canvas_instance, self.read_instance, networkspeci,
+        data, valid_station_idxs = get_fairmode_data(self.read_instance, self.canvas_instance, networkspeci,
                                                      self.read_instance.resolution, data_labels)
         observations_data = data[0, :, :]
 

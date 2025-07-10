@@ -1083,7 +1083,7 @@ class Library:
         
         return legend_handles['plot']
 
-    def statistic(self, stat, labela='', labelb='', per_station=False):
+    def statistic(self, stat, labela='', labelb='', per_station=False, period=None, chunk=None):
         """ Wrapper method to calculate statistic/s.
 
         :param stat: Statistic
@@ -1092,9 +1092,13 @@ class Library:
         :type labela: str, optional
         :param labelb: Label of second dataset (if defined then a bias plot is made), defaults to ''
         :type labelb: str, optional
-        :param per_station: Indicates if the station data is per station or for all stations, defaults to False
+        :param per_station: Indicates if to calculate integrated statistic for all stations, or per station, defaults to False
         :type per_station: bool, optional
-        :return: Statistic value
+        :param period: Period to group data into for calculation of statistics. Current options: 'hour', 'dayofweek', 'month' 
+        :type period: str, optional
+        :param chunk: Chunked temporal window to calculate statistics for. Current options: 'daily', 'monthly', 'annual'
+        :type chunk: str, optional
+        :return: Statistic value/s
         :rtype: np.ndarray
         """
 
@@ -1132,16 +1136,21 @@ class Library:
             show_message(self, msg)
             return
 
+        # throw error if both period and chunk are given
+        elif (period is not None) & (chunk is not None):
+            msg = f"Cannot calculate statistic when both 'period' and 'chunk' are given."
+            show_message(self, msg)
+            return
+
         # get networkspeci to calculate for
         networkspeci = self.networkspecies[0]
         if len(self.networkspecies) > 1:
             msg = "More than 1 network or species defined, can only calculate for 1. Taking {}.".format(networkspeci)
             show_message(self, msg)
 
-        if per_station:
-            stat = calculate_statistic(self, self, networkspeci, stat, [labela], [labelb], per_station=True)
-        else:
-            stat = calculate_statistic(self, self, networkspeci, stat, [labela], [labelb])
+        # calculate statistic
+        stat = calculate_statistic(self, self, networkspeci, stat, [labela], [labelb], per_station=per_station, 
+                                   period=period, chunk_resolution=chunk)
         
         return stat
 
