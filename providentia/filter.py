@@ -53,7 +53,7 @@ class DataFilter:
     def reset_data_filter(self):
         """ Resets data arrays to be un-filtered"""
 
-        self.read_instance.data_in_memory_filtered = copy.deepcopy(self.read_instance.data_in_memory)
+        self.read_instance.data_in_memory_filtered = copy.deepcopy(self.read_instance.data_in_memory_resampled)
         self.read_instance.temporal_colocation_nans = {}
         self.read_instance.valid_station_inds = {}
         self.read_instance.valid_station_inds_temporal_colocation = {}
@@ -650,7 +650,7 @@ class DataFilter:
 
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds[networkspeci][data_label] = \
-                        np.arange(len(station_data_availability_number), dtype=np.int64)[station_data_availability_number > 1]
+                        np.arange(len(station_data_availability_number), dtype=np.int32)[station_data_availability_number > 1]
                      
                     # get colocated obs data array if have temporal colocation is active
                     obs_data[self.read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
@@ -663,7 +663,7 @@ class DataFilter:
                     
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = \
-                        np.arange(len(station_data_availability_number), dtype=np.int64)[station_data_availability_number > 1]                    
+                        np.arange(len(station_data_availability_number), dtype=np.int32)[station_data_availability_number > 1]                    
 
             # get equivalent valid station indices for experimental arrays
             # subset observational valid station indices, with experimental array stations with > 1 valid measurements
@@ -687,7 +687,7 @@ class DataFilter:
                     
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds[networkspeci][data_label] = \
-                        valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int64)[station_data_availability_number > 1]]
+                        valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int32)[station_data_availability_number > 1]]
                     
                     # get colocated experimental data array (first subset by valid observational stations)
                     exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),:,:])
@@ -702,7 +702,7 @@ class DataFilter:
                     
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = \
-                        valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int64)[station_data_availability_number > 1]]
+                        valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int32)[station_data_availability_number > 1]]
 
     def apply_calibration_factor(self):
         """ Apply calibration factor to add or subtract a number to the experiments, 

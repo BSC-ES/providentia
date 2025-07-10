@@ -5,6 +5,7 @@ import cftime
 import copy
 import glob
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -51,7 +52,7 @@ class ExperimentInterpolation(object):
         
         self.log_file_str = 'STARTING INTERPOLATION\n'
 
-        self.log_file_str += str(submit_args)
+        self.log_file_str += '\n'.join(f"{k}: {v}" for k, v in submit_args.items()) + '\n'
 
         # set variables from input keywords
         self.model_temporal_resolution            = submit_args['model_temporal_resolution']
@@ -82,12 +83,12 @@ class ExperimentInterpolation(object):
         # get configuration variables from the management_logs
         for variable_key in ["ghost_version", "interp_n_neighbours", 
                              "interp_reverse_vertical_orientation", 
-                             "forecast_day", "exp_root", "ghost_root",
-                             "exp_to_interp_root", "nonghost_root", "forecast"]:
+                             "exp_root", "ghost_root", "exp_to_interp_root", 
+                             "nonghost_root", "forecast"]:
             variable_val_idx = submission_file_txt.index(variable_key+":")+1
             variable_val = submission_file_txt[variable_val_idx]
             # make sure vertical orientiation is a boolean!
-            if variable_key in ["interp_reverse_vertical_orientation", "forecast"]:
+            if variable_key in ["interp_reverse_vertical_orientation"]:
                 setattr(self, variable_key, ast.literal_eval(variable_val))
             else:
                 setattr(self, variable_key, variable_val)
@@ -149,7 +150,7 @@ class ExperimentInterpolation(object):
                                                 .format(exp_dir, self.grid_type,
                                                         self.model_temporal_resolution,
                                                         self.speci_to_process, self.speci_to_process, self.yearmonth)))
-            
+             
             # drop all analysis files ending with '_an.nc' which are not in ensemble-stats
             all_model_files = [f for f in all_model_files if '_an.nc' not in f] 
 
@@ -168,6 +169,47 @@ class ExperimentInterpolation(object):
                                                         self.model_temporal_resolution,
                                                         self.speci_to_process, self.ensemble_option, 
                                                         self.speci_to_process, self.yearmonth, self.ensemble_option)))
+            
+        # if have hour in model fname, and it is not 0 then insert previous file also to get times from previous yearmonth that are offset
+        if not self.ensemble_member:
+            first_file_date = self.model_files[0].replace('_' + self.ensemble_option, '').split('_')[-1][:-3]
+        else:
+            first_file_date = self.model_files[0].split('_')[-1][:-3]  
+        if len(first_file_date) == 10:
+            model_start_hour = int(first_file_date[-2:])
+            if model_start_hour != 0:
+                # get previous month
+                prev_yearmonth = (datetime.datetime.strptime(self.yearmonth, '%Y%m') - relativedelta.relativedelta(months=1)).strftime('%Y%m')
+                # get previous month files
+                if self.ensemble_member:
+                    prev_month_files = np.sort(glob.glob('{}/{}/{}/{}/{}*{}*.nc'\
+                                                        .format(exp_dir, self.grid_type,
+                                                                self.model_temporal_resolution,
+                                                                self.speci_to_process, self.speci_to_process, prev_yearmonth)))
+                else:
+                    prev_month_files_final = np.sort(glob.glob('{}/{}/{}/ensemble-stats/{}_{}/{}*{}*{}.nc'\
+                                                        .format(exp_dir, self.grid_type,
+                                                                self.model_temporal_resolution,
+                                                                self.speci_to_process, self.ensemble_option, 
+                                                                self.speci_to_process, prev_yearmonth, self.ensemble_option)))
+
+                if self.ensemble_member:
+                    # drop all analysis files ending with '_an.nc' which are not in ensemble-stats
+                    prev_month_files = [f for f in prev_month_files if '_an.nc' not in f] 
+
+                    # isolate model files to be only those associated with relevant ensemble option
+                    prev_month_files_final = np.sort([f for f in prev_month_files if '{}-{}_'.format(
+                        self.speci_to_process,self.ensemble_option) in f])
+                    
+                    # if the number of remaining model files is 0, this is because the files
+                    # do not contain an ensemble member number, therefore take all model files
+                    if len(prev_month_files_final) == 0:
+                        prev_month_files_final = prev_month_files
+
+                # if have previous month files, insert last one as first file in all_model_files
+                if len(prev_month_files_final) > 0:
+                    self.model_files = np.insert(self.model_files, 0, prev_month_files_final[-1])
+
         # if have no valid model files, exit
         if len(self.model_files) == 0:
             self.log_file_str += 'No valid model files in {}. Skipping month.'.format(self.yearmonth)
@@ -630,13 +672,13 @@ class ExperimentInterpolation(object):
             resampling = True
 
         # get number of days in month processing
-        days_in_month = monthrange(int(self.year),int(self.month))[1]
+        self.days_in_month = monthrange(int(self.year),int(self.month))[1]
         
         # create monthly time/dy variables
         start_month_dt = datetime.datetime(year=int(self.year), month=int(self.month), day=1, hour=0, minute=0)
         end_month_dt = start_month_dt + relativedelta.relativedelta(months=1)
         if self.temporal_resolution_to_output in ['hourly', 'hourly_instantaneous']:
-            self.yearmonth_time = np.arange(0,days_in_month*24.0)
+            self.yearmonth_time = np.arange(0,self.days_in_month*24.0)
             if Version(pd.__version__) >= Version("2.2"):
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='h', inclusive='left')
             elif Version(pd.__version__) >= Version("1.4"):
@@ -646,7 +688,7 @@ class ExperimentInterpolation(object):
             self.descriptive_temporal_resolution = 'hours'
             self.temporal_resolution_to_output_code = 'H'
         elif self.temporal_resolution_to_output in ['3hourly', '3hourly_instantaneous']:
-            self.yearmonth_time = np.arange(0,days_in_month*24.0,3.0)
+            self.yearmonth_time = np.arange(0,self.days_in_month*24.0,3.0)
             if Version(pd.__version__) >= Version("2.2"):
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='3h', inclusive='left')
             elif Version(pd.__version__) >= Version("1.4"):
@@ -656,7 +698,7 @@ class ExperimentInterpolation(object):
             self.descriptive_temporal_resolution = 'hours'
             self.temporal_resolution_to_output_code = '3H'
         elif self.temporal_resolution_to_output in ['6hourly', '6hourly_instantaneous']:
-            self.yearmonth_time = np.arange(0,days_in_month*24.0,6.0)
+            self.yearmonth_time = np.arange(0,self.days_in_month*24.0,6.0)
             if Version(pd.__version__) >= Version("2.2"):
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='6h', inclusive='left')
             elif Version(pd.__version__) >= Version("1.4"):
@@ -666,16 +708,14 @@ class ExperimentInterpolation(object):
             self.descriptive_temporal_resolution = 'hours'
             self.temporal_resolution_to_output_code = '6H'
         elif self.temporal_resolution_to_output == 'daily':
-            self.yearmonth_time = np.arange(0,days_in_month)
+            self.yearmonth_time = np.arange(0,self.days_in_month)
             if Version(pd.__version__) >= Version("1.4"):
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='D', inclusive='left')
             else:
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='D', closed='left')
             self.descriptive_temporal_resolution = 'days'
             self.temporal_resolution_to_output_code = 'D'
-        # monthly output resolution is initially in hours for processing reasons, this is modified later 
         elif self.temporal_resolution_to_output == 'monthly':
-            # self.yearmonth_time = np.arange(0,days_in_month*24.0)
             self.yearmonth_time = np.arange(0,1)
             if Version(pd.__version__) >= Version("1.4"):
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='MS', inclusive='left')
@@ -683,9 +723,85 @@ class ExperimentInterpolation(object):
                 self.yearmonth_dt = pd.date_range(start_month_dt, end_month_dt, freq='MS', closed='left')
             self.descriptive_temporal_resolution = 'months'
             self.temporal_resolution_to_output_code = 'MS'
-        
-        # create array for storing monthly model data
-        self.monthly_model_data = np.full((len(self.yearmonth_time), self.y_N, self.x_N), np.NaN, dtype=np.float32)
+
+        # if have forecast data, then get the max number of complete forecast days across model files
+        if self.forecast:
+
+            # ititalise max forecast days as 0
+            max_forecast_days = 0
+
+            # iterate and read chunked model files
+            for model_ii, model_file in enumerate(self.model_files):
+                # read in chunked netcdf file
+                mod_nc_root = Dataset(model_file)
+
+                # check if have time dimension in daily file, if do not, do not process file
+                if 'time' not in list(mod_nc_root.dimensions.keys()):
+                    mod_nc_root.close()
+                    continue
+
+                # get date from filename
+                if not self.ensemble_member:
+                    file_date = model_file.replace('_' + self.ensemble_option, '').split('_')[-1][:-3]
+                else:
+                    file_date = model_file.split('_')[-1][:-3]    
+
+                # get file chunk type
+                if len(file_date) == 6:
+                    chunk_type = 'monthly'
+                elif len(file_date) in [8,10]:
+                    chunk_type = 'daily'
+                else:
+                    mod_nc_root.close()
+                    continue
+
+                # cannot have chunked monthly file which has forecast data, so throw an error
+                if chunk_type == 'monthly':
+                    log_file_str += 'File {} is monthly, for which forecast data cannot be processed. Terminating process.'.format(model_file,self.forecast_day)
+                    create_output_logfile(1)
+                # cannot have monthly resolution file which has forecast data, so throw an error
+                elif self.model_temporal_resolution == 'monthly':
+                    log_file_str += 'File {} resolution is monthly, for which forecast data cannot be processed. Terminating process.'.format(model_file,self.forecast_day)
+                    create_output_logfile(1)
+
+                # get number of timesteps in file
+                n_timesteps = mod_nc_root.dimensions['time'].size
+
+                # get number of complete forecast days
+                if self.model_temporal_resolution in ['hourly', 'hourly_instantaneous']:
+                    forecast_days = int(n_timesteps / 24.0)
+                elif self.model_temporal_resolution in ['3hourly', '3hourly_instantaneous']:
+                    forecast_days = int(n_timesteps / (24.0/3.0))
+                elif self.model_temporal_resolution in ['6hourly', '6hourly_instantaneous']:
+                    forecast_days = int(n_timesteps / (24.0/6.0))
+                elif self.model_temporal_resolution == 'daily':
+                    forecast_days = int(n_timesteps)
+
+                # determine if current file has more complete forecast days than the previous maximum
+                if forecast_days > max_forecast_days:
+                    max_forecast_days = forecast_days
+
+                # close model netCDF root
+                mod_nc_root.close()
+
+            # if max forecast days is 1 or less then forecast is not active, as have no forecast data, so deactivate it
+            if max_forecast_days <= 1:
+                self.forecast = None
+                self.forecast_days = 1
+            # otherwise set forecast days  as max forecast days
+            else:
+                self.forecast_days = max_forecast_days
+
+        # else, set forecast days as 1 (as have no forecast)
+        else:        
+            self.forecast_days = 1
+
+        # create array for storing daily monthly model data
+        # if have forecast data, then have an extra dimension for the number of forecast days
+        if self.forecast:
+            self.monthly_model_data = np.full((len(self.yearmonth_time), self.forecast_days, self.y_N, self.x_N), np.NaN, dtype=np.float32)
+        else:
+            self.monthly_model_data = np.full((len(self.yearmonth_time), self.y_N, self.x_N), np.NaN, dtype=np.float32)
 
         # if have mapped size distribution variable: 
         # -- get aeronet bin radius for original variable 
@@ -707,6 +823,7 @@ class ExperimentInterpolation(object):
             
                 # check if have time dimension in daily file, if do not, do not process file
                 if 'time' not in list(mod_nc_root.dimensions.keys()):
+                    mod_nc_root.close()
                     self.log_file_str += 'File {} is corrupt. Skipping.\n'.format(model_file)
                     failed_files += 1
                     continue 
@@ -723,6 +840,13 @@ class ExperimentInterpolation(object):
                 time_units = mod_nc_root['time'].units
                 time_calendar = mod_nc_root['time'].calendar
                 
+                # if have >= spinup timesteps than the number of timesteps in the file, then throw error
+                self.interp_spinup_timesteps = int(self.interp_spinup_timesteps)
+                if self.interp_spinup_timesteps >= len(file_time):
+                    self.log_file_str += "File {} has <= number of timesteps of 'interp_spinup_timesteps':{}. Terminating process.".format(model_file, self.interp_spinup_timesteps)
+                    create_output_logfile(1, self.log_file_str)
+
+                # convert file time to datetime
                 if 'months' in time_units:
                     monthly_start_date = time_units.split(' ')[2]
                     file_time_dt = pd.date_range(start=monthly_start_date, periods=1, freq='MS')
@@ -755,95 +879,106 @@ class ExperimentInterpolation(object):
                                                       day=int(file_date[6:8]), hour=int(file_date[8:10]), minute=0)
                     end_file_dt = start_file_dt + datetime.timedelta(days=1)
                 else:
+                    mod_nc_root.close()
                     self.log_file_str += 'Resolution could not be detected in {}, check the date in the filename as now it shows as "{}".\n'.format(model_file, file_date)
                     failed_files += 1
                     continue
-                
-                # for forecast runs, get timesteps for corresponding forecast day
+
+                # for forceast data, get valid indices of file time per forecast day
                 if self.forecast:
-                    # get indices of file time inside yearmonth, and for the appropriate forecast day
-                    if chunk_type == 'daily':
-                        # get forecast start_dt and end_dt
-                        forecast_start_dt = start_file_dt + datetime.timedelta(days=(int(self.forecast_day) - 1))
-                        forecast_end_dt = end_file_dt + datetime.timedelta(days=(int(self.forecast_day) - 1))
-                        # get indices of file time inside join of yearmonth and forecast day
-                        valid_file_time_inds = np.where((file_time_dt >= start_month_dt) & (file_time_dt < end_month_dt) & (file_time_dt >= forecast_start_dt) & (file_time_dt < forecast_end_dt))[0]
-                    elif chunk_type == 'monthly':
-                        # cannot have monthly file which has forecast data, so if wanting forecast data for day > 1,
-                        # throw an error
-                        if int(self.forecast_day) > 1:
-                            log_file_str += 'File {} is monthly, so does not contain data for forcast day {}. Terminating process.'.format(model_file,self.forecast_day)
-                            create_output_logfile(1)
-                        # get indices of file time inside yearmonth
-                        valid_file_time_inds = np.where((file_time_dt >= start_month_dt) & (file_time_dt < end_month_dt))[0]
-                    
-                # for non-forecast runs, get all timesteps
+
+                    # get indices of file time within each forecast day (excluding spinup timsesteps)
+                    valid_file_time_inds = []
+                    for forecast_day in range(self.forecast_days):
+                        forecast_start_dt = start_file_dt + datetime.timedelta(days=forecast_day)
+                        forecast_end_dt = start_file_dt + datetime.timedelta(days=forecast_day+1)
+                        if forecast_day == 0:
+                            valid_inds = np.where((file_time_dt >= forecast_start_dt) & (file_time_dt < forecast_end_dt) & (file_time_dt >= start_month_dt) & (file_time_dt < end_month_dt))[0]
+                        else:
+                            valid_inds = np.where((file_time_dt >= forecast_start_dt) & (file_time_dt < forecast_end_dt))[0]
+                        valid_file_time_inds.append(np.array([valid_ind for valid_ind in valid_inds if valid_ind >= self.interp_spinup_timesteps]), dtype=np.int32)
+
+                # for non-forecast runs, get all timesteps (excluding spinup timesteps)
                 else:
                     # get indices of file time inside yearmonth
-                    valid_file_time_inds = np.where((file_time_dt >= start_month_dt) & (file_time_dt < end_month_dt))[0]
+                    valid_inds = np.where((file_time_dt >= start_month_dt) & (file_time_dt < end_month_dt))[0]
+                    valid_file_time_inds = np.array([valid_ind for valid_ind in valid_inds if valid_ind >= self.interp_spinup_timesteps], dtype=np.int32)
+
+                # set flag to indicate if have bad time format in file
+                bad_time_format = False
+
+                # iterate through forecast days
+                for forecast_day_ii in range(self.forecast_days):
+
+                    # cut file time dt for only valid times
+                    # for forecast data ensure that this is the refers to the first day of forecast to get the correct time indices 
+                    valid_file_time_dt = file_time_dt[valid_file_time_inds[0]]
+
+                    # read valid data from file for valid indices
+                    # have bin dimension?
+                    if self.have_bin_dimension:
+                        read_data = mod_nc_root[self.speci_to_process][valid_file_time_inds[forecast_day_ii],bin_index,:,:]
+                        
+                        # convert model units from kg m-2 to um3/um2
+                        read_data = 1e6 * read_data / rho_bin
+                        
+                        # transform model bin data to aeronet bin
+                        read_data = read_data * bin_transform_factor
+                    # has vertical dimension 
+                    elif self.have_vertical_dimension:
+                        read_data = mod_nc_root[self.speci_to_process][valid_file_time_inds[forecast_day_ii],self.z_index,:,:] 
+                    # has no vertical dimension?
+                    else:
+                        read_data = mod_nc_root[self.speci_to_process][valid_file_time_inds[forecast_day_ii],:,:]
+
+                    # convert model units to observational units
+                    read_data = read_data * self.conversion_factor
                     
-                # cut file time dt for only valid times
-                file_time_dt = file_time_dt[valid_file_time_inds]
-                
-                # read valid data from file for valid indices
-                # have bin dimension?
-                if self.have_bin_dimension:
-                    read_data = mod_nc_root[self.speci_to_process][valid_file_time_inds,bin_index,:,:]
+                    # set any model values outside GHOST extreme limits for variable to be NaN
+                    read_data[(read_data < self.GHOST_speci_lower_limit) | (read_data > self.GHOST_speci_upper_limit)] = np.NaN 
+
+                    # create xarray for resampling
+                    xr_data = xr.DataArray(dims=("time","latitude","longitude"),
+                                           data=read_data,
+                                           coords=dict(time=valid_file_time_dt, latitude=self.y, longitude=self.x))
                     
-                    # convert model units from kg m-2 to um3/um2
-                    read_data = 1e6 * read_data / rho_bin
+                    # reassign values to correct coordinates if model centre coordinates have been remapped 
+                    # (only in the case of regular grids)
+                    if self.coords_remapping:
+                        # correct 1D arrays
+                        self.x = [x if x <= 180 else x - 360 for x in self.x]
+                        self.y = [y if y <= 90 else y - 180 for y in self.y]
+
+                        # assign and sort coordinates
+                        xr_data = xr_data.assign_coords(longitude=self.x).sortby('longitude')
+                        xr_data = xr_data.assign_coords(latitude=self.y).sortby('latitude')
+
+                    # do resampling (taking mean) to coarser temporal resolution if neccessary
+                    if resampling:
+                        xr_data = xr_data.resample(time=self.temporal_resolution_to_output_code).mean()     
                     
-                    # transform model bin data to aeronet bin
-                    read_data = read_data * bin_transform_factor
-                # has vertical dimension 
-                elif self.have_vertical_dimension:
-                    read_data = mod_nc_root[self.speci_to_process][valid_file_time_inds,self.z_index,:,:] 
-                # has no vertical dimension?
-                else:
-                    read_data = mod_nc_root[self.speci_to_process][valid_file_time_inds,:,:]
+                    # get indices in yearmonth to fill with read data
+                    inds_to_fill = np.isin(self.yearmonth_dt, xr_data.time.values)
+                    if not any(inds_to_fill):
+                        if not bad_time_format:
+                            self.log_file_str += 'Time in model dataset {} is not in standard format: \n {}'.format(model_file, xr_data.time.values)
+                            failed_files += 1
+                            bad_time_format = True
+                        continue
+                    
+                    # fill in data array
+                    if self.forecast:
+                        self.monthly_model_data[inds_to_fill,forecast_day_ii,:,:] = xr_data.values
+                    else:
+                        self.monthly_model_data[inds_to_fill,:,:] = xr_data.values
 
-                # convert model units to observational units
-                read_data = read_data * self.conversion_factor
-                
-                # set any model values outside GHOST extreme limits for variable to be NaN
-                read_data[(read_data < self.GHOST_speci_lower_limit) | (read_data > self.GHOST_speci_upper_limit)] = np.NaN 
-
-                # create xarray for resampling
-                xr_data = xr.DataArray(dims=("time","latitude","longitude"),
-                                       data=read_data,
-                                       coords=dict(time=file_time_dt, latitude=self.y, longitude=self.x))
-                
-                # reassign values to correct coordinates if model centre coordinates have been remapped 
-                # (only in the case of regular grids)
-                if self.coords_remapping:
-                    # correct 1D arrays
-                    self.x = [x if x <= 180 else x - 360 for x in self.x]
-                    self.y = [y if y <= 90 else y - 180 for y in self.y]
-
-                    # assign and sort coordinates
-                    xr_data = xr_data.assign_coords(longitude=self.x).sortby('longitude')
-                    xr_data = xr_data.assign_coords(latitude=self.y).sortby('latitude')
-
-                # do resampling (taking mean) to coarser temporal resolution if neccessary
-                if resampling:
-                    xr_data = xr_data.resample(time=self.temporal_resolution_to_output_code).mean()     
-                
-                # get indices in yearmonth to fill with read data
-                inds_to_fill = np.isin(self.yearmonth_dt, xr_data.time.values)
-                if not any(inds_to_fill):
-                    self.log_file_str += 'Time in model dataset {} is not in standard format: \n {}'.format(model_file, xr_data.time.values)
-                    failed_files += 1
-                    continue
-                
-                # fill in data array
-                self.monthly_model_data[inds_to_fill,:,:] = xr_data.values
+                # close model netCDF root
+                mod_nc_root.close()
 
             except Exception as e:
+                mod_nc_root.close()
                 self.log_file_str += 'File {} is corrupt. Skipping.\n{}'.format(model_file, traceback.format_exc())
                 failed_files += 1
-
-            # close chunked model netcdf
-            mod_nc_root.close()
         
         if failed_files == len(self.model_files):
             self.log_file_str += 'No model dataset could be interpolated.'
@@ -891,7 +1026,6 @@ class ExperimentInterpolation(object):
             mod_x, mod_y, mod_z = pyproj.transform(lla, ecef, flat_mod_lons_centre, flat_mod_lats_centre, flat_mod_alts, 
                                                 radians=False)
 
-
         # stack converted cartesian coordinates for preparation of calculation of nearest neighbour distances 
         # using Scipy cKDTree
         obs_lonlat = np.column_stack((obs_x,obs_y,obs_z))
@@ -906,7 +1040,7 @@ class ExperimentInterpolation(object):
         else:
             dists,idx = tree.query(obs_lonlat,k=int(self.interp_n_neighbours),workers=-1)
         
-        # for n neighbours == 1, do rehsaping of array so doesn't break
+        # for n neighbours == 1, do reshaping of array so doesn't break
         if len(dists.shape) == 1:
             dists = np.reshape(dists,(dists.shape[0],1))
             idx = np.reshape(idx,(idx.shape[0],1))
@@ -923,8 +1057,10 @@ class ExperimentInterpolation(object):
         # set reciprocal distances for all observational points outside model grid extent to be 0
         self.inverse_dists[~obs_inside_model_grid,:] = 0.0
 
-    def write_yearmonth_netCDF(self):
-        """ Write yearmonth netCDF, returning interpolated model data to observational surface stations. """
+    def write_netCDF(self):
+        """ Write netCDF, returning interpolated model data to observational surface stations 
+            for yearmonth.
+        """
 
         # set output directory where observational interpolated monthly model netcdf will be saved
         # GHOST
@@ -950,7 +1086,7 @@ class ExperimentInterpolation(object):
         # file contents
         msg = 'Inverse distance weighting ({} neighbours) interpolated '.format(self.interp_n_neighbours)
         msg += '{} experiment data for the component {} '.format(self.experiment_to_process, 
-                                                                 self.original_speci_to_process)
+                                                                self.original_speci_to_process)
         msg += 'with reference to the measurement stations in the '
         msg += '{} network '.format(self.network_to_interpolate_against)
         msg += 'in {}-{}.'.format(self.year, self.month)
@@ -970,6 +1106,9 @@ class ExperimentInterpolation(object):
                     root_grp.createDimension('model_longitude', self.x_N)
                     root_grp.createDimension('model_latitude', self.y_N)
                     root_grp.createDimension('grid_edge', self.model_grid_outline.shape[0])
+                    # if have forecast data then create forecast data dimension
+                    if self.forecast:
+                        root_grp.createDimension('forecast_day', self.forecast_days)
 
                     # create time variable
                     time_var = root_grp.createVariable('time', 'u4', ('time'))
@@ -1052,7 +1191,10 @@ class ExperimentInterpolation(object):
                     grid_edge_latitude_var.axis = 'Y'
 
                     # create measured variable
-                    measured_var = root_grp.createVariable(self.original_speci_to_process, 'f4', ('station', 'time'))
+                    if self.forecast:
+                        measured_var = root_grp.createVariable(self.original_speci_to_process, 'f4', ('station', 'forecast_day', 'time'))
+                    else:
+                        measured_var = root_grp.createVariable(self.original_speci_to_process, 'f4', ('station', 'time'))
                     # GHOST
                     if self.reading_ghost:
                         measured_var.long_name = self.obs_long_name
@@ -1088,8 +1230,12 @@ class ExperimentInterpolation(object):
                     interp_vals = np.full(len(self.yearmonth_time), np.NaN, dtype=np.float32)
                 else:
                     # get reciprocal model data at N nearest neighbours to observational station 
-                    cut_model_data = self.monthly_model_data[:,self.nearest_neighbour_inds[ii,:int(self.interp_n_neighbours)],
-                                                                                        self.nearest_neighbour_inds[ii,int(self.interp_n_neighbours):]]
+                    if self.forecast:
+                        cut_model_data = self.monthly_model_data[:, :, self.nearest_neighbour_inds[ii,:int(self.interp_n_neighbours)],
+                                                                       self.nearest_neighbour_inds[ii,int(self.interp_n_neighbours):]]
+                    else:
+                        cut_model_data = self.monthly_model_data[:, self.nearest_neighbour_inds[ii,:int(self.interp_n_neighbours)],
+                                                                    self.nearest_neighbour_inds[ii,int(self.interp_n_neighbours):]]
                     
                     # create mask where data == NaN or infinite
                     invalid_mask = ~np.isfinite(cut_model_data)
@@ -1098,7 +1244,7 @@ class ExperimentInterpolation(object):
                     cut_model_data = np.ma.MaskedArray(cut_model_data, mask=invalid_mask)
                     
                     # interpolate masked array across time dimension using interpolated weights per station
-                    interp_vals = np.ma.average(cut_model_data, weights=station_weights, axis=1)
+                    interp_vals = np.ma.average(cut_model_data, weights=station_weights, axis=-1)
 
                 # write measured variable 
                 measured_var[ii,:] = interp_vals
@@ -1107,6 +1253,7 @@ class ExperimentInterpolation(object):
             root_grp.close() 
         
         except Exception as e:
+            self.log_file_str += str(interp_vals.shape)
             self.log_file_str += 'File {} could not be written. Error: {}.\n'.format(netCDF_fname, e)
             create_output_logfile(1, self.log_file_str)
 
@@ -1210,8 +1357,8 @@ if __name__ == "__main__":
         # (using inverse distance weighting interpolation) 
         EI.n_nearest_neighbour_inverse_distance_weights()
 
-        # write out yearmonth netCDF, interpolating model data to surface observational stations
-        EI.write_yearmonth_netCDF()
+        # write out netCDF for yearmonth, interpolating model data to surface observational stations
+        EI.write_netCDF()
 
         # get total time of interpolation
         interpolation_time = time.time() - interpolation_start
