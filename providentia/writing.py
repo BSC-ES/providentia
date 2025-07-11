@@ -11,9 +11,8 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from .configuration import write_conf
-
 from providentia.auxiliar import CURRENT_PATH, join
+from .configuration import write_conf
 
 # get current path and providentia root path
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])

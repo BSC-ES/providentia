@@ -881,7 +881,7 @@ class SubmitInterpolation(object):
             print(f"Error in submission using the following args {result.args[3:-1]}: {error}")
 
     def submit_job_multiprocessing(self):
-        
+
         # if n_cpus hasn't been defined, use 1 or half of the available CPUS to 
         # avoid having to kill other processes locally
         if self.machine == 'local':

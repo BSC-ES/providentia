@@ -20,14 +20,14 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from getpass import getpass
 
+from .actris import (get_files_path, temporally_average_data, get_data,
+                     get_files_per_var, is_wavelength_var, get_files_to_download,
+                     get_files_info, parameters_dict)
+from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import ProvConfiguration, load_conf
 from .read_aux import check_for_ghost
 from .warnings_prv import show_message
 
-from providentia.auxiliar import CURRENT_PATH, join
-from providentia.actris import (get_files_path, temporally_average_data, get_data,
-                                get_files_per_var, is_wavelength_var, get_files_to_download,
-                                get_files_info, parameters_dict)
 
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 REMOTE_MACHINE = "storage5"

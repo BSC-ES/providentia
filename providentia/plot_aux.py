@@ -20,9 +20,10 @@ from scipy.signal import convolve
 from scipy.signal.windows import gaussian
 from scipy.sparse import coo_matrix
 import seaborn as sns
-from .statistics import calculate_statistic, get_z_statistic_sign
 
 from providentia.auxiliar import CURRENT_PATH, join
+from .statistics import calculate_statistic, get_z_statistic_sign
+
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 

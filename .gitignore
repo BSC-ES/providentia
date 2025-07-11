@@ -5,6 +5,7 @@ providentia.egg-info
 .eggs
 .coverage
 __pycache__
+bin/Mac/*
 plots/*
 reports/*
 saved_data/*
