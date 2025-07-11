@@ -77,6 +77,7 @@ fi
 
 # define default number of cores
 cores="12"
+coresexplicit=false
 
 # set qos depending on the mode and machine
 if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" ]]; then
@@ -123,7 +124,9 @@ while [ $# -gt 0 ]; do
                     exit 0
                     ;;
         -c|--cores) shift
-                    cores=$OPTARG;;
+                    cores=$OPTARG
+                    coresexplicit=true
+                    ;;
         -t|--time) shift
                     time=$OPTARG;;
         -J|--jobname) shift
@@ -145,6 +148,7 @@ account_option="--account=bsc32"
 queue_option="--qos=$queue"
 memory_option="--mem=$mem"
 cores_option="--cpus-per-task=$cores"
+cores_explicit_option="--cores-explicit=$coresexplicit"
 constraint_option="--constraint=$constraint"
 load_command="source bin/load_modules.sh"
 notebook_alloc_command="sbatch -t $time -c $cores -J $jobname"
@@ -536,7 +540,7 @@ else
         jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
     elif $interpolation; then
         unique_id=$(printf "%06d\n" $((RANDOM % 1000000)))
-        eval "${python_command} ${cores_option} --slurm_job_id=$unique_id" 2>&1 | tee logs/interpolation/management_logs/$unique_id.out
+        eval "${python_command} ${cores_option} ${cores_explicit_option} --slurm_job_id=$unique_id" 2>&1 | tee logs/interpolation/management_logs/$unique_id.out
     else
         eval "${python_command}"
     fi
