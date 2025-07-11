@@ -20,6 +20,7 @@ from packaging.version import Version
 import pandas as pd
 from PyQt5 import QtCore, QtWidgets, QtGui
 
+from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 from .canvas import Canvas
 from .configuration import load_conf
 from .configuration import ProvConfiguration
@@ -38,8 +39,6 @@ from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, gene
                        temporal_resolution_order_dict, get_lower_resolutions)
 from .toolbar import NavigationToolbar
 from .warnings_prv import show_message
-
-from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 
 
 # set font DPI for uniform dashboard appearance across systems
@@ -1533,18 +1532,6 @@ class Dashboard(QtWidgets.QWidget):
 def main(**kwargs):
     """ Main function. """
     
-    if sys.platform.startswith('darwin'):
-        # Set app name, if PyObjC is installed
-        # Python 2 has PyObjC preinstalled
-        # Python 3: pip3 install pyobjc-framework-Cocoa
-        from Foundation import NSBundle
-        bundle = NSBundle.mainBundle()
-        if bundle:
-            app_name = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-            app_info = bundle.localizedInfoDictionary() or bundle.infoDictionary()
-            if app_info:       
-                app_info['CFBundleName'] = app_name
-
     # pause briefly to allow QT modules time to correctly initilise
     time.sleep(0.1)
 
@@ -1579,6 +1566,7 @@ def main(**kwargs):
     p.setColor(QtGui.QPalette.Text, QtGui.QColor(*dcp['Text']))
     q_app.setPalette(p)
     
+    # set application name and icon
     q_app.setWindowIcon(QtGui.QIcon(join(PROVIDENTIA_ROOT, 'assets/logo.icns')))
     q_app.setApplicationName("Providentia")
     q_app.setApplicationDisplayName("Providentia")
