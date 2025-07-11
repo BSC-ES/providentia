@@ -885,10 +885,11 @@ class SubmitInterpolation(object):
         # if n_cpus hasn't been defined, use 1 or half of the available CPUS to 
         # avoid having to kill other processes locally
         if self.machine == 'local':
-            # if it is not the default value (defined in bin/providentia), then use value passed through --cores
-            if self.n_cpus != 12:
+            # use value passed through --cores in terminal
+            if self.cores_explicit:
                 n_cpus = self.n_cpus
                 msg = f'Using {n_cpus} CPUs.'
+            # use default value not passed through --cores (available cpus by 2)
             else:
                 n_cpus = max(1, int(self.n_cpus * 0.50))
                 msg = f'Using {n_cpus} out of {self.n_cpus} available CPUs to'

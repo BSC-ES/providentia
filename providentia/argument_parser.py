@@ -89,7 +89,10 @@ class ProvArgumentParser(object):
                                      help="id of the interpolation sbatch job")     
             self.parser.add_argument("--cpus-per-task",
                                      dest="cpus_per_task",
-                                     help="number of CPUs used in interpolation")                
+                                     help="number of CPUs used in interpolation")
+            self.parser.add_argument("--cores-explicit",
+                                     dest="cores_explicit",
+                                     help="define if cores has been passed through command line")       
             self.parser.add_argument("--network",
                                      dest="network",
                                      help="define network to load (e.g. 'EBAS', 'EEA_AQ_eReporting'")
