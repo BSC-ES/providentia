@@ -88,8 +88,8 @@ class ExperimentInterpolation(object):
                              "nonghost_root"]:
             variable_val_idx = submission_file_txt.index(variable_key+":")+1
             variable_val = submission_file_txt[variable_val_idx]
-            # make sure vertical orientiation is a boolean!
-            if variable_key in ["interp_reverse_vertical_orientation"]:
+            # make sure some variables are correct types
+            if variable_key in ["interp_reverse_vertical_orientation", "forecast"]:
                 setattr(self, variable_key, ast.literal_eval(variable_val))
             else:
                 setattr(self, variable_key, variable_val)
@@ -771,12 +771,12 @@ class ExperimentInterpolation(object):
 
                 # cannot have chunked monthly file which has forecast data, so throw an error
                 if chunk_type == 'monthly':
-                    log_file_str += 'File {} is monthly, for which forecast data cannot be processed. Terminating process.'.format(model_file,self.forecast_day)
-                    create_output_logfile(1)
+                    self.log_file_str += 'File {} is monthly, for which forecast data cannot be processed. Terminating process.'.format(model_file)
+                    create_output_logfile(1, self.log_file_str)
                 # cannot have monthly resolution file which has forecast data, so throw an error
                 elif self.model_temporal_resolution == 'monthly':
-                    log_file_str += 'File {} resolution is monthly, for which forecast data cannot be processed. Terminating process.'.format(model_file,self.forecast_day)
-                    create_output_logfile(1)
+                    self.log_file_str += 'File {} resolution is monthly, for which forecast data cannot be processed. Terminating process.'.format(model_file)
+                    create_output_logfile(1, self.log_file_str)
 
                 # get number of timesteps in file
                 n_timesteps = mod_nc_root.dimensions['time'].size
