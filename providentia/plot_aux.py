@@ -120,9 +120,9 @@ def periodic_xticks():
         :rtype: dict
     """
 
-    return {'hour': np.arange(24, dtype=np.int64), 
-            'dayofweek': np.arange(7, dtype=np.int64), 
-            'month': np.arange(1, 13, dtype=np.int64)}
+    return {'hour': np.arange(24, dtype=np.int8), 
+            'dayofweek': np.arange(7, dtype=np.int8), 
+            'month': np.arange(1, 13, dtype=np.int8)}
 
 
 def periodic_labels():
@@ -550,8 +550,8 @@ def get_map_extent(canvas_instance):
     return map_extent
 
 
-def create_chunked_timeseries(read_instance, canvas_instance, chunk_stat, chunk_resolution, 
-                              networkspeci, cut_data_labels, bias):
+def create_statistical_timeseries(read_instance, canvas_instance, chunk_stat, chunk_resolution, 
+                                  networkspeci, cut_data_labels, bias):
     """ Create statistical timeseries data by chunk resolution
 
     :param read_instance: Instance of class Dashboard or Report
@@ -571,19 +571,19 @@ def create_chunked_timeseries(read_instance, canvas_instance, chunk_stat, chunk_
     """
     
     z_statistic_sign = get_z_statistic_sign(chunk_stat)
-    if z_statistic_sign == 'bias' or bias:
+
+    if (z_statistic_sign == 'bias') or (bias):
         if read_instance.observations_data_label in cut_data_labels:
             cut_data_labels.remove(read_instance.observations_data_label)
         stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, chunk_stat, 
                                          [read_instance.observations_data_label]*len(cut_data_labels), 
-                                         cut_data_labels, chunking=True, chunk_resolution=chunk_resolution)
+                                         cut_data_labels, chunk_resolution=chunk_resolution)
         
     else:
         stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, 
-                                         chunk_stat, cut_data_labels, [], chunking=True, 
-                                         chunk_resolution=chunk_resolution)
+                                         chunk_stat, cut_data_labels, [], chunk_resolution=chunk_resolution)
 
-    chunk_dates = canvas_instance.selected_station_data[networkspeci]["timeseries_chunks"][chunk_resolution]['valid_xticks']
+    chunk_dates = canvas_instance.grouped_ts_index
     timeseries_data = pd.DataFrame(index=chunk_dates, columns=cut_data_labels, dtype=np.float64)
 
     for chunk_date_idx, chunk_date in enumerate(chunk_dates):

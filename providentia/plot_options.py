@@ -6,7 +6,7 @@ import numpy as np
 from .read_aux import drop_nans
 from .statistics import calculate_statistic, get_z_statistic_info, exceedance_lim
 from .warnings_prv import show_message
-from .plot_aux import create_chunked_timeseries
+from .plot_aux import create_statistical_timeseries
 
 
 def log_axes(relevant_axis, log_ax, plot_characteristics, undo=False):
@@ -37,14 +37,14 @@ def log_axes(relevant_axis, log_ax, plot_characteristics, undo=False):
             relevant_axis.set_yscale('linear')
         
 
-def linear_regression(canvas_instance, read_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
+def linear_regression(read_instance, canvas_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
                       plot_characteristics, plot_options):
     """ Add linear regression to plot.
 
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
         :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
+        :param canvas_instance: Instance of class Canvas or Report
+        :type canvas_instance: object
         :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
         :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
@@ -97,14 +97,14 @@ def linear_regression(canvas_instance, read_instance, relevant_axis, networkspec
                 canvas_instance.plotting.track_plot_elements(data_label, base_plot_type, 'regression', regression_line, bias=False)
 
 
-def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
+def smooth(read_instance, canvas_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
            plot_characteristics, plot_options, chunk_stat=None, chunk_resolution=None):
     """ Add smooth line to plot.
 
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
         :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
+        :param canvas_instance: Instance of class Canvas or Report
+        :type canvas_instance: object
         :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
         :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
@@ -144,9 +144,8 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
     
     # chunk timeseries
     if (chunk_stat is not None) and (chunk_resolution is not None):
-        timeseries_data = create_chunked_timeseries(read_instance, canvas_instance, chunk_stat, 
-                                                    chunk_resolution, networkspeci, cut_data_labels, 
-                                                    bias)
+        timeseries_data = create_statistical_timeseries(read_instance, canvas_instance, chunk_stat, 
+                                                        chunk_resolution, networkspeci, cut_data_labels, bias)
     # normal timeseries
     else:
         timeseries_data = canvas_instance.selected_station_data[networkspeci]["timeseries"]
@@ -191,14 +190,14 @@ def smooth(canvas_instance, read_instance, relevant_axis, networkspeci, data_lab
             canvas_instance.plotting.track_plot_elements(data_label, base_plot_type, 'smooth', smooth_line, bias=bias)
 
 
-def threshold(canvas_instance, read_instance, relevant_axis, networkspeci, base_plot_type, 
+def threshold(read_instance, canvas_instance, relevant_axis, networkspeci, base_plot_type, 
               plot_characteristics):
     """ Add threshold line/s to plot.
 
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
         :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
+        :param canvas_instance: Instance of class Canvas or Report
+        :type canvas_instance: object
         :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
         :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
@@ -226,14 +225,14 @@ def threshold(canvas_instance, read_instance, relevant_axis, networkspeci, base_
         canvas_instance.plotting.track_plot_elements('ALL', base_plot_type, 'threshold', [threshold_line], bias=False)
 
 
-def annotation(canvas_instance, read_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
+def annotation(read_instance, canvas_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
                plot_characteristics, plot_options, plot_z_statistic_sign='absolute'):
     """ Add statistical annotations to plot.
 
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
         :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
+        :param canvas_instance: Instance of class Canvas or Report
+        :type canvas_instance: object
         :param relevant_axis: Axis to plot on 
         :type relevant_axis: object
         :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 

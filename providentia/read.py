@@ -15,7 +15,7 @@ import pandas as pd
 
 from .plot_aux import update_plotting_parameters
 from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_yearmonths_to_read, 
-                       init_shared_vars_read_netcdf_data, read_netcdf_data, read_netcdf_metadata)
+                       init_shared_vars_read_netcdf_data, read_netcdf_data, read_netcdf_metadata, do_resampling)
 from .spatial_colocation import SpatialColocation
 from .warnings_prv import show_message
 
@@ -985,3 +985,6 @@ class DataReader:
 
                 self.read_instance.logger.error(error)
                 sys.exit(1) 
+
+        # do resampling of data (if necessary)
+        do_resampling(self.read_instance)

@@ -36,8 +36,7 @@
   "domain": null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
   "ensemble_options": null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
   "interpolated": True, # from download mode
-  "forecast": True,
-  "forecast_day": 1,
+  "forecast": [],
   "experiment_types": [], # TODO remove if changed # interpolation
   "qa": null,
   "flags": null,
@@ -81,6 +80,9 @@
   "interp_chunk_size": 16,
   "interp_job_array_limit": 100,
   "interp_multiprocessing": False,
+  "interp_spinup_timesteps": 0,
+  "interp_experiment_downsampling": "mean",
+  "interp_experiment_upsampling": null,
   "logfile": False,
   "fixed_section_vars":
     [
@@ -118,7 +120,6 @@
       "domain",
       "ensemble_options",
       "forecast",
-      "forecast_day",
       "experiment_types",
       "temporal_colocation",
       "spatial_colocation",
@@ -142,6 +143,9 @@
       "interp_chunk_size",
       "interp_job_array_limit",
       "interp_multiprocessing",
+      "interp_spinup_timesteps",
+      "interp_experiment_downsampling",
+      "interp_experiment_upsampling"
     ],
   "non_writing_vars":
     [
@@ -170,12 +174,16 @@
       "network",
       "species",
       "resolution",
+      "resampling_resolution",
+      "statistic_mode",
+      "statistic_aggregation",
       "start_date",
       "end_date",
       "alias_flag",
       "experiments",
       "exp_ids",
       "experiment_types",
+      "forecast",
       "qa",
       "flags",
       "add_qa",
@@ -190,7 +198,6 @@
       "lower_bound",
       "upper_bound",
       "active_dashboard_plots",
-      "statistic_aggregation",
       "plot_characteristics_filename",
     ],
   "tests": False,
