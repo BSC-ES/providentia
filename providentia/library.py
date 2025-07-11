@@ -530,20 +530,26 @@ class Library:
             show_message(self, msg)
             return
         
-        # do not make FAIRMODE target plot if species not in list or resolution not hourly
         if base_plot_type in ['fairmode-target','fairmode-statsummary']:
+            # warning for fairmode plots if species aren't PM2.5, PM10, NO2 or O3
             if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
                 msg = f'Fairmode target plot cannot be created for {speci}.'
                 show_message(self, msg)
                 return
-            if ((speci in ['sconco3', 'sconcno2'] and self.resolution != 'hourly') 
-                or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
+            # get active temporal resolution
+            if str(self.resampling_resolution) != 'None':
+                resolution = self.resampling_resolution
+            else:
+                resolution = self.resolution
+            # warning for fairmode plots if resolution is not hourly or daily
+            if ((speci in ['sconco3', 'sconcno2'] and resolution != 'hourly') 
+                or (speci in ['pm10', 'pm2p5'] and (resolution not in ['hourly', 'daily']))):
                 msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
                 show_message(self, msg)
                 return
             
             # skip making plot if there is no valid data
-            data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
+            data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.data_labels)
             if not any(valid_station_idxs):
                 self.logger.info(f'No data after filtering by coverage for {speci}.')
                 return
