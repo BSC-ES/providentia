@@ -348,7 +348,7 @@ def group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolutio
 
 def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, data_labels_a, 
                         data_labels_b, map=False, per_station=False, period=None, chunk_resolution=None, 
-                        reduction=True):
+                        reduction=True, mask=None):
     """Function that calculates a statistic for data labels, either absolute or bias, 
        for different aggregation modes.
     """
@@ -379,10 +379,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
             # get relevant station indices
             if per_station:
-                if read_instance.temporal_colocation:
-                    station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][read_instance.observations_data_label]
-                else:
-                    station_inds = read_instance.valid_station_inds[networkspeci][read_instance.observations_data_label] 
+                station_inds = canvas_instance.station_inds[networkspeci]
 
             elif map:
                 # if have just data_labels_a, station indices are simply those relevant for data_labels_a
@@ -433,6 +430,10 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
             # otherwise take active mode
             else:
                 data_array_a = canvas_instance.selected_station_data[networkspeci]['active_mode'][indices_a]
+
+        # if need to mask data, then do so
+        if mask is not None:
+            data_array_a[mask] = np.NaN
 
         # if need to temporally chunk data, then do so
         if chunk_resolution is not None:
@@ -526,6 +527,10 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 else:
                     data_array_b = canvas_instance.selected_station_data[networkspeci]['active_mode'][indices_b]
             
+            # if need to mask data, then do so
+            if mask is not None:
+                data_array_b[mask] = np.NaN
+
             # if need to temporally chunk data, then do so
             if chunk_resolution is not None:
                 data_array_b = group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolution, per_station, data_array_b)
@@ -1194,9 +1199,14 @@ def exceedance_lim(networkspeci):
         return np.NaN
 
 
-def get_fairmode_data(read_instance, canvas_instance, networkspeci, resolution, 
-                      data_labels):
+def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels):
     
+    # get active temporal resolution
+    if str(read_instance.resampling_resolution) != 'None':
+        resolution = read_instance.resampling_resolution
+    else:
+        resolution = read_instance.resolution
+
     # get coverage
     speci = networkspeci.split('|')[1]
     coverage = fairmode_settings[speci]['coverage']
@@ -1207,18 +1217,20 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, resolution,
     # temporally colocate data (if active)
     if read_instance.temporal_colocation:
         data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
-    
-    # get selected station indices
-    selected_station_inds = get_station_inds(read_instance, canvas_instance, networkspeci, None)
 
     # get data cut for relevant stations
-    data_array = data_array[:,selected_station_inds,:]
+    data_array = data_array[:,canvas_instance.station_inds[networkspeci],:]
 
-    # make sure days with less than 75% coverage are nan
+    # if hourly data then make sure days with less than 75% coverage are nan
     if resolution == 'hourly':
-        # reshape data to count the hourly nans per day
+
+        # get number of days
         num_days = data_array.shape[-1] // 24
+
+        # reshape data array to have days as time dimension
         daily_data = data_array.reshape(data_array.shape[0], data_array.shape[1], num_days, 24)  
+
+        # get number of non-nan hours per day
         non_nan_count = np.count_nonzero(~np.isnan(daily_data), axis=-1)
 
         # get days that need to be nan because there are at least 25% of the hours per day that are nan
@@ -1227,15 +1239,18 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, resolution,
 
         # convert days with less than 75% coverage to nan
         days_to_nan_expanded = np.repeat(days_to_nan, 24, axis=-1)
-        data_array[days_to_nan_expanded] = np.nan
+        data_array[days_to_nan_expanded] = np.NaN
 
     # get indices of valid stations
     obs_representativity = Stats.calculate_data_avail_fraction(data_array[0, :, :])
     valid_station_idxs = obs_representativity >= coverage
 
-    # resample to daily for PM2.5 and PM10
+    # do some extra processing for hourly resolution data
     if resolution == 'hourly':
+
+        # resample PM10/PM2.5 data to daily
         if speci in ['pm2p5', 'pm10']:
+
             # flatten networkspecies dimension for creation of pandas dataframe
             data_array_reduced = data_array.reshape(data_array.shape[0]*data_array.shape[1], data_array.shape[2])
             
@@ -1255,10 +1270,12 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, resolution,
             # get valid data labels for networkspeci
             valid_data_labels = canvas_instance.selected_station_data_labels[networkspeci]
 
-            # calculate MDA8
+            # calculate MDA8 (applying mask for days with less than 75% coverage)
             stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, 'MDA8', 
-                                             valid_data_labels, [], per_station=True, chunk_resolution='daily')
+                                             valid_data_labels, [], per_station=True, chunk_resolution='daily',
+                                             mask=days_to_nan_expanded)
             
+            # reshape data array
             data_array = np.transpose(stats_calc, (1, 2, 0))
 
     # filter by valid stations
