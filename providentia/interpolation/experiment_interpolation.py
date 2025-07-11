@@ -771,12 +771,12 @@ class ExperimentInterpolation(object):
 
                 # cannot have chunked monthly file which has forecast data, so throw an error
                 if chunk_type == 'monthly':
-                    log_file_str += 'File {} is monthly, for which forecast data cannot be processed. Terminating process.'.format(model_file,self.forecast_day)
-                    create_output_logfile(1)
+                    self.log_file_str += 'File {} is monthly, for which forecast data cannot be processed. Terminating process.'.format(model_file)
+                    create_output_logfile(1, self.log_file_str)
                 # cannot have monthly resolution file which has forecast data, so throw an error
                 elif self.model_temporal_resolution == 'monthly':
-                    log_file_str += 'File {} resolution is monthly, for which forecast data cannot be processed. Terminating process.'.format(model_file,self.forecast_day)
-                    create_output_logfile(1)
+                    self.log_file_str += 'File {} resolution is monthly, for which forecast data cannot be processed. Terminating process.'.format(model_file)
+                    create_output_logfile(1, self.log_file_str)
 
                 # get number of timesteps in file
                 n_timesteps = mod_nc_root.dimensions['time'].size
