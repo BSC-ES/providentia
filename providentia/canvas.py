@@ -22,6 +22,7 @@ from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtWidgets
 from weakref import WeakKeyDictionary
 
+from providentia.auxiliar import CURRENT_PATH, join
 from .calculate import Stats, ExpBias
 from .canvas_menus import SettingsMenu
 from .dashboard_elements import ComboBox
@@ -36,8 +37,6 @@ from .plot_options import annotation, linear_regression, log_axes, smooth, thres
 from .read_aux import get_lower_resolutions, do_resampling
 from .statistics import *
 from .warnings_prv import show_message
-
-from providentia.auxiliar import CURRENT_PATH, join
 
 # make sure that we are using Qt5 backend with matplotlib
 matplotlib.use('Qt5Agg')

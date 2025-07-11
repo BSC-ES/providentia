@@ -26,6 +26,7 @@ import pandas as pd
 import pyproj
 import seaborn as sns
 
+from providentia.auxiliar import CURRENT_PATH, join
 from .calculate import ExpBias, Stats
 from .statistics import (boxplot_inner_fences, calculate_statistic, group_periodic,
                          get_fairmode_data, get_z_statistic_info, get_z_statistic_type)
@@ -35,7 +36,6 @@ from .plot_aux import (create_statistical_timeseries, get_multispecies_aliases,
                        periodic_xticks, round_decimal_places, temp_axis_dict)
 from .plot_formatting import set_axis_title
 from .warnings_prv import show_message
-from providentia.auxiliar import CURRENT_PATH, join
 
 # speed up transformations in cartopy
 pyproj.set_use_global_context()

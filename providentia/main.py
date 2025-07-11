@@ -17,7 +17,7 @@ from __future__ import print_function
 import logging
 import sys
 
-from providentia.argument_parser import ProvArgumentParser
+from .argument_parser import ProvArgumentParser
 
 logging.basicConfig(level=logging.WARNING)
 LOG = logging.getLogger(__name__)
