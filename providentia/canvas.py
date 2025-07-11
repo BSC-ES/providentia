@@ -33,7 +33,7 @@ from .plotting import Plotting
 from .plot_aux import get_map_extent
 from .plot_formatting import format_axis, harmonise_xy_lims_paradigm, log_validity, set_axis_label, set_axis_title
 from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
-from .read_aux import get_lower_resolutions
+from .read_aux import get_lower_resolutions, do_resampling
 from .statistics import *
 from .warnings_prv import show_message
 
@@ -171,7 +171,7 @@ class Canvas(FigureCanvas):
         self.read_instance.update_layout_fields(self)
 
         # initialise variable of valid station indices plotted on map as empty list
-        self.active_map_valid_station_inds = np.array([], dtype=np.int64)
+        self.active_map_valid_station_inds = np.array([], dtype=np.int32)
 
         # setup blocker for picker events
         self.axes_enter_event = self.figure.canvas.mpl_connect('axes_enter_event', lambda event: picker_block_func(self, event))
@@ -193,7 +193,7 @@ class Canvas(FigureCanvas):
 
         # format axes for map, legend and active_dashboard_plots
         for plot_type in ['map', 'legend'] + self.read_instance.active_dashboard_plots:
-            format_axis(self, self.read_instance, self.plot_axes[plot_type], plot_type, 
+            format_axis(self.read_instance, self, self.plot_axes[plot_type], plot_type, 
                         self.plot_characteristics[plot_type], map_extent=self.read_instance.map_extent)
 
         # create covers to hide parts of canvas when updating / plotting
@@ -212,9 +212,9 @@ class Canvas(FigureCanvas):
         """
 
         # reset relative index lists of selected station on map as empty lists
-        self.previous_relative_selected_station_inds = np.array([], dtype=np.int64)
-        self.relative_selected_station_inds = np.array([], dtype=np.int64)
-        self.absolute_selected_station_inds = np.array([], dtype=np.int64)
+        self.previous_relative_selected_station_inds = np.array([], dtype=np.int32)
+        self.relative_selected_station_inds = np.array([], dtype=np.int32)
+        self.absolute_selected_station_inds = np.array([], dtype=np.int32)
 
         # reset plot_elements
         self.plot_elements = {}
@@ -307,12 +307,12 @@ class Canvas(FigureCanvas):
     def handle_resampling_update(self):
         """ Function which handles updates of resampling. """
 
+        # update resampling resolution
+        self.read_instance.resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
+
         # return if nothing has been loaded yet
         if not hasattr(self.read_instance, 'data_in_memory'):
             return None
-
-        # update resampling resolution
-        self.read_instance.resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
 
         if not self.read_instance.block_MPL_canvas_updates:
 
@@ -329,14 +329,20 @@ class Canvas(FigureCanvas):
                     self.timeseries_chunk_stat.setCurrentText("None")
                     self.timeseries_chunk_resolution.setCurrentText("None")
 
+            # update mouse cursor to a waiting cursor
+            if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
+                self.read_instance.cursor_function = 'handle_resampling_update'
+                QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
+            # resample data
+            do_resampling(self.read_instance)
+
+            # update data filters
+            self.handle_data_filter_update()
+
             # if have selected stations on map, then now remake plots
             if hasattr(self, 'relative_selected_station_inds'):
                 if len(self.relative_selected_station_inds) > 0:
-                    
-                    # update mouse cursor to a waiting cursor
-                    if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                        self.read_instance.cursor_function = 'handle_resampling_update'
-                        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
                     # update associated plots with selected stations
                     self.update_associated_active_dashboard_plots()
@@ -344,12 +350,12 @@ class Canvas(FigureCanvas):
                     # update timeseries chunk resolution
                     self.handle_timeseries_chunk_statistic_update()
 
-                    # draw changes
-                    self.figure.canvas.draw_idle()
+            # draw changes
+            self.figure.canvas.draw_idle()
 
-                    # restore mouse cursor to normal
-                    if self.read_instance.cursor_function == 'handle_resampling_update':
-                        QtWidgets.QApplication.restoreOverrideCursor()
+            # restore mouse cursor to normal
+            if self.read_instance.cursor_function == 'handle_resampling_update':
+                QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
 
@@ -585,7 +591,7 @@ class Canvas(FigureCanvas):
         self.absolute_selected_station_inds = np.array(
             [np.where(self.active_map_valid_station_inds == selected_ind)[0][0] for selected_ind in
              self.relative_selected_station_inds if selected_ind in self.active_map_valid_station_inds],
-            dtype=np.int64)
+            dtype=np.int32)
 
         # if have no valid active map indices, reset absolute/relative
         # selected station indices to be empty lists
@@ -601,9 +607,9 @@ class Canvas(FigureCanvas):
 
             # clear previously selected relative/absolute station indices
             self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
-            self.relative_selected_station_inds = np.array([], dtype=np.int64)
-            self.absolute_selected_station_inds = np.array([], dtype=np.int64)
-            self.absolute_non_selected_station_inds = np.array([], dtype=np.int64)
+            self.relative_selected_station_inds = np.array([], dtype=np.int32)
+            self.absolute_selected_station_inds = np.array([], dtype=np.int32)
+            self.absolute_non_selected_station_inds = np.array([], dtype=np.int32)
 
         # else, if any of the currently selected stations are not in the current active map
         # valid station indices --> unselect selected stations (and associated plots)
@@ -617,8 +623,8 @@ class Canvas(FigureCanvas):
                 
                 # reset relative/absolute selected station indices to be empty lists
                 self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
-                self.relative_selected_station_inds = np.array([], dtype=np.int64)
-                self.absolute_selected_station_inds = np.array([], dtype=np.int64)
+                self.relative_selected_station_inds = np.array([], dtype=np.int32)
+                self.absolute_selected_station_inds = np.array([], dtype=np.int32)
 
             # get absolute non-selected station inds
             self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
@@ -842,10 +848,10 @@ class Canvas(FigureCanvas):
                 # reset axes limits (harmonising across subplots for periodic plots) 
                 if plot_type not in ['map', 'taylor', 'fairmode-statsummary']:
                     if plot_type == 'scatter':
-                        harmonise_xy_lims_paradigm(self, self.read_instance, ax, plot_type, 
+                        harmonise_xy_lims_paradigm(self.read_instance, self, ax, plot_type, 
                                                 self.plot_characteristics[plot_type], plot_options, relim=True)
                     else:
-                        harmonise_xy_lims_paradigm(self, self.read_instance, ax, plot_type, 
+                        harmonise_xy_lims_paradigm(self.read_instance, self, ax, plot_type, 
                                                 self.plot_characteristics[plot_type], plot_options, relim=True, autoscale=True)
 
                 # set axes labels
@@ -1705,10 +1711,10 @@ class Canvas(FigureCanvas):
 
             # if checkbox is unchecked then unselect all plotted stations
             elif check_state == QtCore.Qt.Unchecked:
-                self.relative_selected_station_inds = np.array([], dtype=np.int64)
+                self.relative_selected_station_inds = np.array([], dtype=np.int32)
 
             # update absolute selected station indices (indices relative to plotted stations on map)
-            self.absolute_selected_station_inds = np.arange(len(self.relative_selected_station_inds), dtype=np.int64)
+            self.absolute_selected_station_inds = np.arange(len(self.relative_selected_station_inds), dtype=np.int32)
 
             # get absolute non-selected station inds
             self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
@@ -1761,10 +1767,10 @@ class Canvas(FigureCanvas):
 
             # if checkbox is unchecked then unselect all plotted stations
             if check_state == QtCore.Qt.Unchecked:
-                self.relative_selected_station_inds = np.array([], dtype=np.int64)
-                self.absolute_selected_station_inds = np.array([], dtype=np.int64)
+                self.relative_selected_station_inds = np.array([], dtype=np.int32)
+                self.absolute_selected_station_inds = np.array([], dtype=np.int32)
                 self.absolute_non_selected_station_inds = np.arange(len(self.relative_selected_station_inds),
-                                                                    dtype=np.int64)
+                                                                    dtype=np.int32)
 
             # else, if checkbox is checked then select all stations which intersect with all loaded experiment domains
             elif check_state == QtCore.Qt.Checked:
@@ -1773,8 +1779,8 @@ class Canvas(FigureCanvas):
                 if len(self.read_instance.data_labels) == 1:
                     self.relative_selected_station_inds = copy.deepcopy(self.active_map_valid_station_inds)
                     self.absolute_selected_station_inds = np.arange(len(self.relative_selected_station_inds),
-                                                                    dtype=np.int64)
-                    self.absolute_non_selected_station_inds = np.array([], dtype=np.int64)
+                                                                    dtype=np.int32)
+                    self.absolute_non_selected_station_inds = np.array([], dtype=np.int32)
                 # else, define list of lists to get intersection between (active_map_valid_station_inds, 
                 # and valid station indices associated with each loaded experiment array)
                 else:
@@ -1794,7 +1800,7 @@ class Canvas(FigureCanvas):
                     # get absolute selected station indices (indices relative to plotted stations on map)
                     self.absolute_selected_station_inds = \
                         np.array([np.where(self.active_map_valid_station_inds == selected_ind)[0][0] for selected_ind
-                                  in self.relative_selected_station_inds], dtype=np.int64)
+                                  in self.relative_selected_station_inds], dtype=np.int32)
                     
                     #get absolute non-selected station inds
                     self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
@@ -1892,12 +1898,12 @@ class Canvas(FigureCanvas):
 
             # if checkbox is unchecked then unselect all plotted stations
             elif check_state == QtCore.Qt.Unchecked:
-                self.relative_selected_station_inds = np.array([], dtype=np.int64)
+                self.relative_selected_station_inds = np.array([], dtype=np.int32)
 
             # get absolute selected station indices (indices relative to plotted stations on map)
             self.absolute_selected_station_inds = \
                 np.array([np.where(self.active_map_valid_station_inds == selected_ind)[0][0] for selected_ind
-                            in self.relative_selected_station_inds], dtype=np.int64)
+                            in self.relative_selected_station_inds], dtype=np.int32)
 
             # get absolute unselected station indices
             self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
@@ -1976,7 +1982,7 @@ class Canvas(FigureCanvas):
             
             # if more than 1 point selected, limit this to be just nearest point
             if len(absolute_selected_station_inds) > 1:
-                absolute_selected_station_inds = np.array([absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,absolute_selected_station_inds,:],axis=1))]], dtype=np.int64)
+                absolute_selected_station_inds = np.array([absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,absolute_selected_station_inds,:],axis=1))]], dtype=np.int32)
 
         # handle left click event
         if event.button is MouseButton.LEFT:
@@ -2072,7 +2078,7 @@ class Canvas(FigureCanvas):
             self.absolute_selected_station_inds = np.arange(len(self.active_map_valid_station_inds))[np.all(np.any(sub_abs_vals<=tolerance,axis=0),axis=1)]
             # if more than 1 point selected, limit this to be just nearest point
             if len(self.absolute_selected_station_inds) > 1:
-                self.absolute_selected_station_inds = np.array([self.absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,self.absolute_selected_station_inds,:],axis=1))]], dtype=np.int64)
+                self.absolute_selected_station_inds = np.array([self.absolute_selected_station_inds[np.argmin(np.sum(sub_abs_vals[0,self.absolute_selected_station_inds,:],axis=1))]], dtype=np.int32)
 
         # get absolute non-selected station inds
         self.absolute_non_selected_station_inds = np.nonzero(~np.in1d(range(len(self.active_map_valid_station_inds)),
@@ -2678,8 +2684,8 @@ class Canvas(FigureCanvas):
                             if isinstance(self.plot_axes[plot_type], dict):
                                 for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
                                     if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
-                                        annotation(self, 
-                                                   self.read_instance, 
+                                        annotation(self.read_instance, 
+                                                   self, 
                                                    sub_ax,
                                                    self.read_instance.networkspeci,
                                                    self.read_instance.data_labels, 
@@ -2689,8 +2695,8 @@ class Canvas(FigureCanvas):
                                                    plot_z_statistic_sign=z_statistic_sign)
                                         break
                             else:
-                                annotation(self, 
-                                           self.read_instance, 
+                                annotation(self.read_instance, 
+                                           self, 
                                            self.plot_axes[plot_type], 
                                            self.read_instance.networkspeci,
                                            self.read_instance.data_labels, 
@@ -2709,8 +2715,8 @@ class Canvas(FigureCanvas):
                                 show_message(self.read_instance, msg)
                                 self.update_option_on_combobox(event_source, index)
                                 return None
-                            smooth(self, 
-                                   self.read_instance, 
+                            smooth(self.read_instance, 
+                                   self, 
                                    self.plot_axes[plot_type], 
                                    self.read_instance.networkspeci,
                                    self.read_instance.data_labels, 
@@ -2752,8 +2758,8 @@ class Canvas(FigureCanvas):
                     # option 'regression'
                     elif option == 'regression':
                         if not undo:
-                            linear_regression(self, 
-                                              self.read_instance, 
+                            linear_regression(self.read_instance, 
+                                              self, 
                                               self.plot_axes[plot_type], 
                                               self.read_instance.networkspeci,
                                               self.read_instance.data_labels, 
@@ -2767,19 +2773,19 @@ class Canvas(FigureCanvas):
                             if isinstance(self.plot_axes[plot_type], dict):
                                 for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
                                     if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
-                                        threshold(self, 
-                                        self.read_instance, 
-                                        sub_ax, 
-                                        self.read_instance.networkspeci, 
-                                        plot_type,
-                                        self.plot_characteristics[plot_type])
+                                        threshold(self.read_instance, 
+                                                  self,       
+                                                  sub_ax, 
+                                                  self.read_instance.networkspeci, 
+                                                  plot_type,
+                                                  self.plot_characteristics[plot_type])
                             else:
-                                threshold(self, 
-                                    self.read_instance, 
-                                    self.plot_axes[plot_type], 
-                                    self.read_instance.networkspeci, 
-                                    plot_type,
-                                    self.plot_characteristics[plot_type])
+                                threshold(self.read_instance, 
+                                          self, 
+                                          self.plot_axes[plot_type], 
+                                          self.read_instance.networkspeci, 
+                                          plot_type,
+                                          self.plot_characteristics[plot_type])
 
                     # option 'bias'
                     elif option == 'bias':
@@ -2989,11 +2995,11 @@ class Canvas(FigureCanvas):
                     # reset axes limits (harmonising across subplots for periodic plots) 
                     if plot_type not in ['map', 'taylor', 'fairmode-statsummary']:
                         if plot_type == 'scatter':
-                            harmonise_xy_lims_paradigm(self, self.read_instance, self.plot_axes[plot_type], plot_type, 
+                            harmonise_xy_lims_paradigm(self.read_instance, self, self.plot_axes[plot_type], plot_type, 
                                                        self.plot_characteristics[plot_type], 
                                                        self.current_plot_options[plot_type], relim=True)
                         else:
-                            harmonise_xy_lims_paradigm(self, self.read_instance, self.plot_axes[plot_type], plot_type, 
+                            harmonise_xy_lims_paradigm(self.read_instance, self, self.plot_axes[plot_type], plot_type, 
                                                        self.plot_characteristics[plot_type], 
                                                        self.current_plot_options[plot_type], relim=True, autoscale=True)                       
 
@@ -3022,31 +3028,31 @@ class Canvas(FigureCanvas):
                 if isinstance(self.plot_axes[plot_type], dict):
                     for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
                         if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
-                            annotation(self, self.read_instance, sub_ax, self.read_instance.networkspeci, data_labels, 
+                            annotation(self.read_instance, self, sub_ax, self.read_instance.networkspeci, data_labels, 
                                        plot_type, self.plot_characteristics[plot_type], plot_options,
                                        plot_z_statistic_sign=z_statistic_sign)
                             break
                 else:
-                    annotation(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,
+                    annotation(self.read_instance, self, self.plot_axes[plot_type], self.read_instance.networkspeci,
                                data_labels, plot_type, self.plot_characteristics[plot_type], plot_options,
                                plot_z_statistic_sign=z_statistic_sign)
 
             elif plot_option == 'smooth':
-                smooth(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,
+                smooth(self.read_instance, self, self.plot_axes[plot_type], self.read_instance.networkspeci,
                        data_labels_alt, plot_type, self.plot_characteristics[plot_type], plot_options)
             
             elif plot_option == 'threshold':
                 if isinstance(self.plot_axes[plot_type], dict):
                     for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
                         if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
-                            threshold(self, self.read_instance, sub_ax, self.read_instance.networkspeci, 
+                            threshold(self.read_instance, self, sub_ax, self.read_instance.networkspeci, 
                                         plot_type, self.plot_characteristics[plot_type])
                 else:
-                    threshold(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci, 
+                    threshold(self.read_instance, self, self.plot_axes[plot_type], self.read_instance.networkspeci, 
                             plot_type, self.plot_characteristics[plot_type])
                 
             elif plot_option == 'regression':
-                linear_regression(self, self.read_instance, self.plot_axes[plot_type], self.read_instance.networkspeci,
+                linear_regression(self.read_instance, self, self.plot_axes[plot_type], self.read_instance.networkspeci,
                                   data_labels_alt, plot_type, self.plot_characteristics[plot_type], plot_options)
 
     def update_markersize(self, ax, plot_type, markersize, event_source):
