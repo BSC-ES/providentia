@@ -67,6 +67,6 @@
 
     "het_chem": ["periodic-Mean"],
 
-    "debug": ["timeseries_threshold"]
+    "debug": ["fairmode-target", "fairmode-statsummary"]
 
 }
