@@ -12,6 +12,7 @@ from matplotlib.transforms import Bbox
 from packaging.version import Version
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import ProvConfiguration
 from .configuration import load_conf
 from .dashboard_elements import InputDialog
@@ -23,7 +24,6 @@ from .read_aux import generate_file_trees
 from .warnings_prv import show_message
 from .writing import export_configuration, export_data_npz, export_netcdf
 
-from providentia.auxiliar import CURRENT_PATH, join
 
 class _Mode(str, Enum):
 

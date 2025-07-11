@@ -10,12 +10,12 @@ import numpy as np
 import pandas as pd
 import ast
 
+from providentia.auxiliar import CURRENT_PATH, join
 from .calculate import Stats, ExpBias
 from .configuration import split_options
 from .statistics import get_z_statistic_info, exceedance_lim
 from .warnings_prv import show_message
 
-from providentia.auxiliar import CURRENT_PATH, join
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 

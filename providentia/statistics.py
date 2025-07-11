@@ -15,11 +15,11 @@ import numpy as np
 import pandas as pd
 import scipy.stats as st
 
+from providentia.auxiliar import CURRENT_PATH, join
 from .calculate import Stats, ExpBias
 from .read_aux import (drop_nans, get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
                        get_frequency_code, get_lower_resolutions)
 
-from providentia.auxiliar import CURRENT_PATH, join
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
