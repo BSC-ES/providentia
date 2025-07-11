@@ -1554,14 +1554,14 @@ class ProvConfiguration:
             msg = 'During interpolation multiprocessing must be turned on for local runs, activating.'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.interp_multiprocessing = True
-
-            if self.read_instance.cpus_per_task is not None:
-                if 1 <= self.read_instance.cpus_per_task <= self.read_instance.available_cpus:
-                    self.read_instance.n_cpus = self.read_instance.cpus_per_task
-                else:
-                    default = self.read_instance.available_cpus
-                    msg = "Number of cores cannot be superior than number of available cpus ({}) or less than 1. Using '{}' as default.".format(default, default)
-                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            if 1 <= self.read_instance.cpus_per_task <= self.read_instance.available_cpus:
+                default = self.read_instance.cpus_per_task
+            else:
+                default = self.read_instance.available_cpus
+                msg = "Number of cores ('{}') cannot be superior than number of available cpus ('{}') ".format(self.read_instance.cpus_per_task, default)
+                msg += "or less than 1. Using '{}' as default.".format(default)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            self.read_instance.n_cpus = default
 
     def switch_logging(self):
         # create logger
