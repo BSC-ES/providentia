@@ -310,6 +310,16 @@ class ProvConfiguration:
                 value = str(value)
                 return value.strip()
         
+        elif key == 'forecast':
+            # parse forecast 
+
+            if isinstance(value, str):
+                # parse multiple forecast variables
+                if ',' in value:
+                    return [fct.strip() for fct in value.split(',')]
+                else:
+                    return [value.strip()]
+
         elif key == 'qa':
             # parse qa
 
@@ -630,7 +640,8 @@ class ProvConfiguration:
         
         elif key in ['statistic_mode','statistic_aggregation','periodic_statistic_mode','periodic_statistic_aggregation',
                      'timeseries_statistic_aggregation','interp_n_neighbours','interp_reverse_vertical_orientation',
-                     'interp_chunk_size','interp_job_array_limit', 'interp_multiprocessing']:
+                     'interp_chunk_size','interp_job_array_limit','interp_multiprocessing','interp_spinup_timesteps',
+                     'interp_experiment_downsampling','interp_experiment_upsampling']:
             # treat leaving the field blank as default
             if value == '':
                 return self.var_defaults[key]
@@ -956,7 +967,6 @@ class ProvConfiguration:
         # if report, throw message, stating are using default instead
         # in download mode of non interpolated experiments is allowed to not have network, so continue
         if not self.read_instance.network and not (self.read_instance.download and not self.read_instance.interpolated):
-            # default = ['GHOST']
             if self.read_instance.interpolation:
                 default = self.read_instance.ghost_available_networks
             else:
@@ -1020,7 +1030,6 @@ class ProvConfiguration:
             if self.read_instance.interpolation:
                 default = ["hourly", "hourly_instantaneous", "daily", "monthly"]
             else:
-                #default = 'monthly'
                 default = default_values['resolution']
             msg = "Resolution (resolution) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
@@ -1030,7 +1039,7 @@ class ProvConfiguration:
         # if report, throw message, stating are using default instead
         if not self.read_instance.start_date:
             if self.read_instance.interpolation:
-                default = '201801'
+                default = default_values['start_date'][:6]
             else:
                 default = default_values['start_date']
             msg = "Start date (start_date) was not defined in the configuration file. Using '{}' as default.".format(default)
@@ -1063,7 +1072,7 @@ class ProvConfiguration:
         # if report, throw message, stating are using default instead
         if not self.read_instance.end_date:
             if self.read_instance.interpolation:
-                default = '201901'
+                default = default_values['end_date'][:6]
             else:
                 default = default_values['end_date']
             msg = "End date (end_date) was not defined in the configuration file. Using '{}' as default.".format(default)
@@ -1100,7 +1109,21 @@ class ProvConfiguration:
             msg = "Number of neighbours (interp_n_neighbours) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.interp_n_neighbours = default
-    
+
+        # check have correct interp_experiment_downsampling information
+        if self.read_instance.interpolation and self.read_instance.interp_experiment_downsampling:
+            if self.read_instance.interp_experiment_downsampling not in ['mean','median']:
+                default = default_values['interp_experiment_downsampling']
+                error = "Error: interp_experiment_downsampling must be 'mean' or 'median'. Using '{}' as default.".format(default)
+                self.read_instance.logger.error(error) 
+
+        # check have correct interp_experiment_upsampling information
+        if self.read_instance.interpolation and self.read_instance.interp_experiment_upsampling:
+            if self.read_instance.interp_experiment_upsampling not in ['fill','gaps']:
+                default = default_values['interp_experiment_upsampling']
+                error = "Error: interp_experiment_upsampling must be 'mean' or 'median'. Using '{}' as default.".format(default)
+                self.read_instance.logger.error(error) 
+
         # TODO MAYBE CHANGE THIS initialization to somewhere else or take it from another place
         # TODO and should it be provconf or no????
         # initialise possible domains
@@ -1264,7 +1287,6 @@ class ProvConfiguration:
         # if report, throw message, stating are using default instead
         # TODO not needed in interpolation 
         if not self.read_instance.periodic_statistic_mode and not self.read_instance.interpolation:
-            #default = 'Cycle'
             default = default_values['periodic_statistic_mode']
             self.read_instance.periodic_statistic_mode = default
 
@@ -1430,6 +1452,13 @@ class ProvConfiguration:
                 self.read_instance.qa = self.read_instance.qa_per_species[list(self.read_instance.qa_per_species.keys())[0]]
             else:
                 self.read_instance.qa_per_species = {speci:self.read_instance.qa for speci in species_plus_filter_species}
+
+        # for forecast, do not allow dayN and daily to be provided together 
+        if self.read_instance.forecast:
+            if (len(self.read_instance.forecast) > 1) & ('daily' in self.read_instance.forecast):
+                error = 'Error: "forecast" variable cannot contain both "dayN" and "daily".'
+                self.read_instance.logger.error(error)
+                sys.exit(1)
 
         # add to qa
         if self.read_instance.add_qa:

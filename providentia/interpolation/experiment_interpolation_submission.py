@@ -90,10 +90,12 @@ class SubmitInterpolation(object):
 
         # TODO Hardcoded
         interp_print_variables = ['ghost_version', 'start_date', 'end_date', 'experiments', 
-                                  'species', 'network', 'resolution', 'forecast', 'forecast_day', 
-                                  'interp_n_neighbours', 'interp_reverse_vertical_orientation', 
-                                  'interp_chunk_size', 'interp_job_array_limit', 'exp_root', 
-                                  'ghost_root', 'nonghost_root', 'exp_to_interp_root', 'interp_multiprocessing']
+                                  'species', 'network', 'resolution', 'forecast',
+                                  'interp_spinup_timesteps', 'interp_experiment_downsampling',
+                                  'interp_experiment_upsampling', 'interp_n_neighbours', 
+                                  'interp_reverse_vertical_orientation', 'interp_chunk_size', 
+                                  'interp_job_array_limit', 'exp_root', 'ghost_root', 'nonghost_root', 
+                                  'exp_to_interp_root', 'interp_multiprocessing']
 
         # print variables used, if all species are used print "All Species"        
         print("\nVariables used for the interpolation:\n")
