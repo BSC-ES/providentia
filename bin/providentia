@@ -155,7 +155,12 @@ if [[ "${OS}" != "Windows" ]] ; then
     python_ver="3"
 fi
 
-python_command="python$python_ver -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
+# if using Mac, then use Providentia executable (in order to rename application name)
+if [[ "${OS}" == "Mac" ]] ; then
+    python_command="./bin/Mac/Providentia -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
+else
+    python_command="python$python_ver -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
+fi
 
 # use clean mode and exit
 if [[ $PARSED =~ "--clean" ]]; then
@@ -528,6 +533,14 @@ else
 
         pip install -r requirements.txt
         active_env=true
+    fi
+
+    # if are using Mac then create a Providentia executable (if does not already exist)
+    if [[ "${OS}" == "Mac" ]] ; then
+        python_exe=$(eval "which python")
+        if [[ ! -f bin/Mac/Providentia ]]; then
+            cp "${python_exe}" bin/Mac/Providentia
+        fi
     fi
 
     if $notebook; then

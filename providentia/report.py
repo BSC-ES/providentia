@@ -15,6 +15,7 @@ from packaging.version import Version
 import pandas as pd
 from pypdf import PdfReader
 
+from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 from .configuration import load_conf
 from .configuration import ProvConfiguration
 from .fields_menus import (init_metadata, init_period, init_representativity, metadata_conf,
@@ -30,8 +31,6 @@ from .read_aux import (generate_file_trees, get_lower_resolutions,
                        get_valid_experiments, get_valid_obs_files_in_date_range)
 from .statistics import (calculate_statistic, get_fairmode_data,
                          generate_colourbar, get_selected_station_data, get_z_statistic_info)
-
-from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 from .warnings_prv import show_message
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])

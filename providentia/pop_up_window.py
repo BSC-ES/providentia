@@ -10,11 +10,11 @@ import yaml
 import numpy as np
 from PyQt5 import QtCore, QtWidgets
 
+from providentia.auxiliar import CURRENT_PATH, join
 from .read_aux import get_default_qa
 from .dashboard_elements import set_formatting, wrap_tooltip_text, ComboBox
 from .warnings_prv import show_message
 
-from providentia.auxiliar import CURRENT_PATH, join
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 # get operating system specific formatting
