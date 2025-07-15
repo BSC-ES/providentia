@@ -675,6 +675,7 @@ class Dashboard(QtWidgets.QWidget):
             self.selected_periodic_statistic_aggregation = copy.deepcopy(self.periodic_statistic_aggregation)
             self.selected_periodic_statistic_mode = copy.deepcopy(self.periodic_statistic_mode)
             self.selected_timeseries_statistic_aggregation = copy.deepcopy(self.timeseries_statistic_aggregation)
+            self.selected_filter_species = copy.deepcopy(self.filter_species)
 
             # set initial filter species in widgets as empty dictionaries
             self.selected_widget_network = dict()
@@ -1257,6 +1258,7 @@ class Dashboard(QtWidgets.QWidget):
         self.previous_flags = self.flags
         self.previous_data_labels = self.data_labels
         self.previous_data_labels_raw = self.data_labels_raw
+        self.previous_filter_species = self.filter_species
         self.mpl_canvas.previous_plot_options = copy.deepcopy(self.mpl_canvas.current_plot_options) 
 
         # set new active variables as selected variables from menu
@@ -1274,6 +1276,7 @@ class Dashboard(QtWidgets.QWidget):
         self.networkspeci = self.networkspecies[0]
         self.data_labels = [self.observations_data_label] + list(self.experiments.values())
         self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
+        self.filter_species = copy.deepcopy(self.selected_filter_species)
         # remove bias plot options if have no experiments loaded
         if len(self.data_labels) == 1:
             for plot_type in self.mpl_canvas.all_plots:
