@@ -1593,9 +1593,13 @@ class Download(object):
             if '"name":"date"' in field:
                 # transform the str to a dict
                 field_dict = json.loads(field)
-                
+
+                # convert to datetime format
+                minstart = datetime.strptime(field_dict["details"]["minStart"], '%Y-%m-%d')
+                maxend = datetime.strptime(field_dict["details"]["maxEnd"], '%Y-%m-%d')
+
                 # get the mininimum start date and maximum end date
-                return field_dict["details"]["minStart"], field_dict["details"]["maxEnd"]
+                return minstart, maxend
 
     def get_all_networks(self):
         # get user input to know which kind of network wants
@@ -1907,17 +1911,27 @@ class Download(object):
 
         min_start_date, max_end_date = self.fetch_cams_dates(experiment_options[self.dataset]['url'])
 
-        # get dates in cams format
-        cams_start_date = datetime.strptime(self.start_date, "%Y%m%d").strftime("%Y-%m-%d")
-        cams_end_date = datetime.strptime(self.end_date, "%Y%m%d").strftime("%Y-%m-%d")
+        # convert the selected dates to datetetime
+        cams_start_date = datetime.strptime(self.start_date, "%Y%m%d")
+        cams_end_date = datetime.strptime(self.end_date, "%Y%m%d")
+
+        # if the minimum date is over the end date
+        if min_start_date > cams_end_date or max_end_date < cams_start_date:
+            msg = "The selected dates are unavailable. Please choose dates between {min_start_date.strftime('%Y-%m-%d')} and {max_end_date.strftime('%Y-%m-%d')}."
+            show_message(self, msg)
+            return
 
         # check if the start date is within limits
-        if datetime.strptime(min_start_date, "%Y-%m-%d") > datetime.strptime(cams_start_date, "%Y-%m-%d"):
+        if min_start_date > cams_start_date:
             cams_start_date = min_start_date
             
         # check if the end date is within limits
-        if datetime.strptime(max_end_date, "%Y-%m-%d") < datetime.strptime(cams_end_date, "%Y-%m-%d"):
+        if max_end_date < cams_end_date:
             cams_end_date = max_end_date
+
+        # convert the dates to str cams format
+        cams_start_date = cams_start_date.strftime('%Y-%m-%d')
+        cams_end_date = cams_end_date.strftime('%Y-%m-%d')
 
         # get the ghost to cams vocabulary mapping
         parameters_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'ghost_cams_variables.yaml')))
