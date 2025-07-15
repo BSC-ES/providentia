@@ -722,6 +722,47 @@ class Canvas(FigureCanvas):
         if hasattr(self, 'relative_selected_station_inds'):
             if len(self.relative_selected_station_inds) > 0:
 
+                # get numeric position of plot type in dashboard
+                plot_type_position = self.get_plot_type_position(plot_type)
+
+                # if there are no temporal resolutions (only yearly), skip periodic plots
+                if ((plot_type in ['periodic', 'periodic-violin']) and 
+                    (not self.read_instance.relevant_temporal_resolutions)):
+                    msg = 'It is not possible to make periodic plots using annual resolution data.'
+                    show_message(self.read_instance, msg)
+                    self.read_instance.handle_layout_update('None', sender=plot_type_position)
+                    return
+                
+                # if temporal colocation is turned off or there are no experiments, skip scatter plot
+                if plot_type in ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']:
+                    if ((not self.read_instance.temporal_colocation) 
+                        or ((self.read_instance.temporal_colocation) and (len(self.read_instance.data_labels) == 1))):
+                        if (not self.read_instance.temporal_colocation):
+                            msg = f'It is not possible to make {plot_type} plots without activating the temporal colocation.'
+                        else:
+                            msg = f'It is not possible to make {plot_type} plots without loading experiments.'
+                        show_message(self.read_instance, msg)
+                        self.read_instance.handle_layout_update('None', sender=plot_type_position)
+                        return
+                
+                if plot_type in ['fairmode-target', 'fairmode-statsummary']:
+                    speci = self.read_instance.networkspeci.split('|')[1]
+                    if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
+                        msg = f'Fairmode target plot cannot be created for {speci}.'
+                        show_message(self.read_instance, msg)
+                        self.read_instance.handle_layout_update('None', sender=plot_type_position)
+                        return
+                    if str(self.read_instance.resampling_resolution) != 'None':
+                        resolution = self.read_instance.resampling_resolution
+                    else:
+                        resolution = self.read_instance.resolution
+                    if ((speci in ['sconco3', 'sconcno2'] and resolution != 'hourly') 
+                        or (speci in ['pm10', 'pm2p5'] and (resolution not in ['hourly', 'daily']))):
+                        msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
+                        show_message(self.read_instance, msg)
+                        self.read_instance.handle_layout_update('None', sender=plot_type_position)
+                        return
+
                 # clear all previously plotted artists for plot type
                 self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
 
@@ -881,8 +922,6 @@ class Canvas(FigureCanvas):
     def update_associated_active_dashboard_plots(self):
         """ Function that updates all plots associated with selected stations on map. """
 
-        #start = time.time()
-
         # update dashboard plots
         if hasattr(self, 'relative_selected_station_inds'):
             # have no selected stations, so clear all previously plotted artists from selected station plots
@@ -899,57 +938,11 @@ class Canvas(FigureCanvas):
                 get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
                                           networkspecies=[self.read_instance.networkspeci])
 
-                # create dictionary of plots to disable
-                plots_to_disable = {}
-
                 # iterate through active_dashboard_plots
                 for plot_type in self.read_instance.active_dashboard_plots:
-
-                    #plot_start = time.time()
-
-                    # get numeric position of plot type in dashboard
-                    plot_type_position = self.get_plot_type_position(plot_type)
-
-                    # if there are no temporal resolutions (only yearly), skip periodic plots
-                    if ((plot_type in ['periodic', 'periodic-violin']) and 
-                        (not self.read_instance.relevant_temporal_resolutions)):
-                        msg = 'It is not possible to make periodic plots using annual resolution data.'
-                        show_message(self.read_instance, msg)
-                        plots_to_disable[plot_type] = plot_type_position
-                        continue
-                    
-                    # if temporal colocation is turned off or there are no experiments, skip scatter plot
-                    if plot_type in ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']:
-                        if ((not self.read_instance.temporal_colocation) 
-                            or ((self.read_instance.temporal_colocation) and (len(self.read_instance.data_labels) == 1))):
-                            if (not self.read_instance.temporal_colocation):
-                                msg = f'It is not possible to make {plot_type} plots without activating the temporal colocation.'
-                            else:
-                                msg = f'It is not possible to make {plot_type} plots without loading experiments.'
-                            show_message(self.read_instance, msg)
-                            plots_to_disable[plot_type] = plot_type_position
-                            continue
-                    
-                    if plot_type in ['fairmode-target', 'fairmode-statsummary']:
-                        speci = self.read_instance.networkspeci.split('|')[1]
-                        if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
-                            msg = f'Fairmode target plot cannot be created for {speci}.'
-                            show_message(self.read_instance, msg)
-                            plots_to_disable[plot_type] = plot_type_position
-                            continue
-                        if ((speci in ['sconco3', 'sconcno2'] and self.read_instance.resolution != 'hourly') 
-                            or (speci in ['pm10', 'pm2p5'] and (self.read_instance.resolution not in ['hourly', 'daily']))):
-                            msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
-                            show_message(self.read_instance, msg)
-                            plots_to_disable[plot_type] = plot_type_position
-                            continue
-                
+             
                     # update plot
                     self.update_associated_active_dashboard_plot(plot_type)
-
-                # disable relevant plots
-                for plot_type, plot_type_position in plots_to_disable.items():
-                    self.read_instance.handle_layout_update('None', sender=plot_type_position)
 
                 # un-hide plotting axes
                 self.top_right_canvas_cover.hide() 

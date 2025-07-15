@@ -2104,19 +2104,15 @@ class Plotting:
         # resample to daily for PM10 and PM2.5 if data is hourly
         # get MDA8 for ozone if data is hourly
         # finally filter by coverage
-        data, valid_station_idxs = get_fairmode_data(self.read_instance, self.canvas_instance, networkspeci,
-                                                     self.read_instance.resolution, data_labels)
+        data, valid_station_idxs = get_fairmode_data(self.read_instance, self.canvas_instance, networkspeci, data_labels)
         
         # skip making plot if there is no valid data
         # library and report modes are already handling this in advance
         if (not self.read_instance.report) and (not self.read_instance.library) and (not any(valid_station_idxs)):
             msg = 'No valid data to create FAIRMODE target plot after filtering by coverage.'
             show_message(self.read_instance, msg)
-            relevant_axis.set_visible(False)
+            self.read_instance.handle_layout_update('None', sender=self.canvas_instance.get_plot_type_position('fairmode-target'))
             return
-        else:
-            if not relevant_axis.get_visible():
-                relevant_axis.set_visible(True)
         
         observations_data = data[0, :, :]
 
@@ -2308,8 +2304,16 @@ class Plotting:
         # resample to daily for PM10 and PM2.5 if data is hourly
         # get MDA8 for ozone if data is hourly
         # finally filter by coverage
-        data, valid_station_idxs = get_fairmode_data(self.read_instance, self.canvas_instance, networkspeci,
-                                                     self.read_instance.resolution, data_labels)
+        data, valid_station_idxs = get_fairmode_data(self.read_instance, self.canvas_instance, networkspeci, data_labels)
+
+        # skip making plot if there is no valid data
+        # library and report modes are already handling this in advance
+        if (not self.read_instance.report) and (not self.read_instance.library) and (not any(valid_station_idxs)):
+            msg = 'No valid data to create FAIRMODE target plot after filtering by coverage.'
+            show_message(self.read_instance, msg)
+            self.read_instance.handle_layout_update('None', sender=self.canvas_instance.get_plot_type_position('fairmode-statsummary'))
+            return
+
         observations_data = data[0, :, :]
 
         # get settings
