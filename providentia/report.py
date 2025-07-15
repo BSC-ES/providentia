@@ -980,7 +980,6 @@ class Report:
 
         # setup plotting geometry for summary plots per networkspeci (for all subsections)
         if (not self.summary_plot_geometry_setup) & (self.do_plot_geometry_setup):
-            print('PLOT GEOMETRY', self.made_networkspeci_summary_plots)
             self.setup_plot_geometry('summary', networkspeci, self.made_networkspeci_summary_plots)
 
         # if have no valid data across data labels (no observations or experiments), then continue to next networkspeci
