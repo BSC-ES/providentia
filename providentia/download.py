@@ -17,6 +17,7 @@ import time
 from tqdm import tqdm
 import xarray as xr
 import yaml
+import zipfile   
 
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -1917,7 +1918,7 @@ class Download(object):
 
         # if the minimum date is over the end date
         if min_start_date > cams_end_date or max_end_date < cams_start_date:
-            msg = "The selected dates are unavailable. Please choose dates between {min_start_date.strftime('%Y-%m-%d')} and {max_end_date.strftime('%Y-%m-%d')}."
+            msg = f"The selected dates are unavailable. Please choose dates between {min_start_date.strftime('%Y-%m-%d')} and {max_end_date.strftime('%Y-%m-%d')}."
             show_message(self, msg)
             return
 
@@ -1928,10 +1929,6 @@ class Download(object):
         # check if the end date is within limits
         if max_end_date < cams_end_date:
             cams_end_date = max_end_date
-
-        # convert the dates to str cams format
-        cams_start_date = cams_start_date.strftime('%Y-%m-%d')
-        cams_end_date = cams_end_date.strftime('%Y-%m-%d')
 
         # get the ghost to cams vocabulary mapping
         parameters_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'ghost_cams_variables.yaml')))
@@ -1956,17 +1953,6 @@ class Download(object):
             
                 # get the species in the cams vocabulary
                 cams_species = parameters_dict[species]
-
-                request = {
-                "variable": [cams_species],
-                "model": [exp_id],
-                "level": ["0"],
-                "date": [f"{cams_start_date}/{cams_end_date}"],
-                "type": ["forecast"],
-                "time": ["00:00"],
-                "leadtime_hour": list(range(0,24)),
-                "data_format": "netcdf_zip"
-                }
                 
                 # create cdsapirc file in case it was not created
                 cdsapirc_file = join(os.getenv("HOME"),'.cdsapirc')
@@ -1979,39 +1965,72 @@ class Download(object):
                     if create_file in ['', 'y']: 
                         with open(cdsapirc_file, "w") as f:
                             f.write("url: https://ads.atmosphere.copernicus.eu/api\n")
-                            f.write("key: 6101c82f-6d0b-4278-ac89-82743a81502c\n") # TODO get eh user key
+                            f.write("key: 6101c82f-6d0b-4278-ac89-82743a81502c\n") # TODO get the user key
                     else:
                         self.logger.error("Error: Cannot proceed without '.cdsapirc'. CAMS experiment data download requires this file.")
                         sys.exit(1)
 
                 # create client
                 self.logger.info('')
-                client = cdsapi.Client()
                 client = cdsapi.Client(retry_max=1, quiet=True)
 
-                # make the request
-                try:
-                    result = client.retrieve(self.dataset, request)
-                except requests.exceptions.HTTPError as err:
-                    # bad request
-                    if err.response.status_code == 400: 
-                        self.logger.info("\nBad request (400): The server could not understand the request.")
-                        self.logger.info(f"Details: {err}")
-                    # connection error
-                    elif err.response.status_code == 500: 
-                        self.logger.info("\nServer error (500): The server encountered an error while processing the request.")
-                        self.logger.info(f"Details: {err}")
-                        self.logger.info("Please try again later.")
-                        return
-                    else:
-                        self.logger.info(f"\nUnexpected error ({err.response.status_code}):")
-                        self.logger.info(f"Details: {err}")
-                    
-                    continue
+                # get directory structure
+                experiment_dir = f"{self.dataset.replace('-','_')}_{exp_id}"
+                dir_tail = join(experiment_dir, domain, resolution, species)
 
-                # download to the directory  
-                result.download(target="./paula") # TODO: change directory
-                            
+                # create temporal dirs to store the middle tar file with its directories
+                os.makedirs(join(self.exp_to_interp_root,'.temp', dir_tail), exist_ok=True)
+
+                # iterate through the dates
+                current_cams_date = cams_start_date
+                while current_cams_date <= cams_end_date:
+
+                    # create the request
+                    request = {
+                    "variable": [cams_species],
+                    "model": [exp_id],
+                    "level": ["0"],
+                    "date": [f"{current_cams_date.strftime('%Y-%m-%d')}/{current_cams_date.strftime('%Y-%m-%d')}"],
+                    "type": ["forecast"],
+                    "time": ["00:00"],
+                    "leadtime_hour": list(range(0,24)),
+                    "data_format": "netcdf_zip"
+                    }
+
+                    # get file name
+                    file_name = f"{species}_000_{current_cams_date.strftime('%Y%m%d')}.nc"
+
+                    # get temporal and final path
+                    temp_path = join(self.exp_to_interp_root,'.temp', dir_tail, file_name)
+                    experiment_path = join(self.exp_to_interp_root, dir_tail, file_name)
+
+                    # make the request
+                    try:
+                        client.retrieve(self.dataset, request, target=temp_path)
+                    except requests.exceptions.HTTPError as err:
+                        # bad request
+                        if err.response.status_code == 400: 
+                            self.logger.info("\nBad request (400): The server could not understand the request.")
+                            self.logger.info(f"Details: {err}")
+                        # connection error
+                        elif err.response.status_code == 500: 
+                            self.logger.info("\nServer error (500): The server encountered an error while processing the request.")
+                            self.logger.info(f"Details: {err}")
+                            self.logger.info("Please try again later.")
+                            return
+                        else:
+                            self.logger.info(f"\nUnexpected error ({err.response.status_code}):")
+                            self.logger.info(f"Details: {err}")
+
+                    # extract file 
+                    with zipfile.ZipFile(temp_path, 'r') as zip_ref:
+                        zip_ref.extractall(join(self.exp_to_interp_root,'.temp', dir_tail))
+
+                    # move file to the corresponding folder
+                    shutil.move(join(self.exp_to_interp_root,'.temp', dir_tail,'ENS_FORECAST.nc'), experiment_path) 
+
+                    # add one day to the date
+                    current_cams_date += timedelta(days=1)                
 
     def check_time(self, size, file_size):
         if (time.time() - self.ncfile_dl_start_time) > self.timeoutLimit:
