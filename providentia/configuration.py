@@ -486,14 +486,6 @@ class ProvConfiguration:
             else:
                 return []
             
-        elif key == 'dataset':
-            if (isinstance(value, str)):
-                # treat leaving the field blank as default
-                if value == '':
-                    return self.var_defaults[key]
-                value = str(value)
-                return value.strip()
-
         elif key == 'experiments':
             # parse experiments
 
@@ -863,14 +855,10 @@ class ProvConfiguration:
             msg = f"Cannot find the experiment ID '{experiment}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
 
         if self.read_instance.machine == "local":
-            if self.read_instance.dataset is not None:
-                # check if it's a valid cams experiment
-                if self.read_instance.dataset in experiment_options:
-                        return True, [full_experiment]
-                else:
-                    msg = f"The '{self.read_instance.dataset}' dataset is not a valid CAMS dataset."
-                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
-                    return False, []
+            # if it's a cams experiment, the experiment is directly valid
+            if experiment.startswith(tuple(experiment_options.keys())):
+                return True, [full_experiment]
+
             # get directory from data_paths if it doesn't exists in the interp_experiments file if it's a local interpolation
             if self.read_instance.interpolation is True:
                 # get the path to the non interpolated experiments
