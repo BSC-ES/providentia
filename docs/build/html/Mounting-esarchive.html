@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mounting esarchive &mdash; Providentia 2.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
@@ -64,10 +64,11 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Multispecies-filtering.html">Multispecies filtering</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Evolution.html">Evolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Redirecting-output-to-a-file.html">Redirecting Output to a File</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="evolution.html">Evolution</a></li>
 </ul>
 
         </div>
@@ -104,6 +105,8 @@
 <p>Firstly, create a local directory where you want the esarchive to be mounted, e.g. <code class="docutils literal notranslate"><span class="pre">/localdir/tomount/esarchive</span></code></p>
 <p>Next, add the following line to the <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> file (changing your BSC username and local directory):</p>
 <p><code class="docutils literal notranslate"><span class="pre">sshfs#bscXXXXXX&#64;dt01.bsc.es:/gpfs/archive/bsc32/esarchive</span> <span class="pre">/localdir/tomount/esarchive</span> <span class="pre">fuse</span> <span class="pre">defaults,allow_other,reconnect,ro</span> <span class="pre">0</span> <span class="pre">0</span></code></p>
+<p>Install sshfs if it is not in your computer yet:</p>
+<p><code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">sshfs</span></code></p>
 <p>The esarchive can finally be mounted by:</p>
 <p><code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">mount</span> <span class="pre">-av</span> </code></p>
 <p>To unmount the esarchive, the following command can be used:</p>

@@ -15,6 +15,7 @@ from packaging.version import Version
 import pandas as pd
 from pypdf import PdfReader
 
+from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 from .configuration import load_conf
 from .configuration import ProvConfiguration
 from .fields_menus import (init_metadata, init_period, init_representativity, metadata_conf,
@@ -30,8 +31,6 @@ from .read_aux import (generate_file_trees, get_lower_resolutions,
                        get_valid_experiments, get_valid_obs_files_in_date_range)
 from .statistics import (calculate_statistic, get_fairmode_data,
                          generate_colourbar, get_selected_station_data, get_z_statistic_info)
-
-from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 from .warnings_prv import show_message
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
@@ -91,27 +90,13 @@ class Report:
             self.logger.error(error)
             sys.exit(1)
 
-        # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
-        # if have filetree flags, then these overwrite any defaults
-        gft = False
-        if self.generate_file_tree:
-            gft = True
-        elif self.disable_file_tree:
-            gft = False
-        # by default generate filetree on MN5
-        elif self.machine in ['mn5', 'nord4']:
-            gft = True
-        # by default generate filetree locally
-        elif self.filetree_type == 'local':
-            gft = True
-
         # if some filename has not been provided through the configuration file use default names
         if len(self.filenames) != len(self.parent_section_names):
-            msg = 'Report filename/s (report_filename) has not been defined in '
-            msg += 'configuration file for one or more sections.'
-            self.logger.info(msg)
+            msg = 'Warning: Report filename/s (report_filename) has not been defined in '
+            msg += 'configuration file for one or more sections. '
             if len(self.parent_section_names) == 1:
                 self.filenames.append(self.report_filename)
+                msg += f'Setting filename to be {self.report_filename}.'
             else:
                 self.filenames = []
                 for i, parent_section in enumerate(self.parent_section_names):
@@ -120,7 +105,9 @@ class Report:
                     else:
                         # add a number next to the filename to avoid overwriting
                         self.filenames.append(f'{self.report_filename}_{i}')
-
+                msg += f'Setting filenames to be {self.filenames}.'
+            self.logger.info(msg)
+        
         # select section if passed through command line arguments
         if "section" in self.commandline_arguments.keys():
             if self.commandline_arguments["section"] in self.all_sections:
@@ -828,7 +815,7 @@ class Report:
 
         # iterate through subsections
         for subsection_ind, subsection in enumerate(self.subsections):
-
+            
             self.subsection_ind = subsection_ind
             self.subsection = subsection
 
@@ -840,6 +827,12 @@ class Report:
 
             # update the conf options for defined subsection
             if len(self.child_subsection_names) > 0:
+
+                # we save the species to make sure that the species that do not have data after read
+                # are not being set later in parse parameter
+                read_species = copy.deepcopy(self.species)
+                read_networkspecies = copy.deepcopy(self.networkspecies)
+
                 # get subsection variables
                 self.subsection_opts = self.sub_opts[self.subsection]
 
@@ -853,7 +846,13 @@ class Report:
 
                 # update subsection variables
                 for k, val in self.subsection_opts.items():
-                    setattr(self, k, provconf.parse_parameter(k, val, deactivate_warning=True))
+                    value = provconf.parse_parameter(k, val, deactivate_warning=True)
+                    # keep only the species that were available when we read the parent section data
+                    if k == 'species':
+                        value = [speci for speci in value if speci in read_species]
+                    elif k == 'networkspecies':
+                        value = [speci for speci in value if speci in read_networkspecies]
+                    setattr(self, k, value)
 
                 # now all variables have been parsed, check validity of those, throwing errors where necessary
                 provconf.check_validity(deactivate_warning=True)
@@ -955,12 +954,6 @@ class Report:
         # if have 0 relevant stations, continue to next networkspeci
         if self.n_stations == 0:
             self.logger.info('No valid stations for {}, {}. Not making summmary plots'.format(networkspeci, self.subsection))
-            # do not stop if there is any multispecies plot and we are in last subsection
-            # if last subsection has data for 0 stations, it would not create them
-            if (have_multispecies) and (self.subsection == self.subsections[-1]):
-                pass 
-            else:
-                return
         else:
             self.logger.info('Making {}, {} summary plots'.format(networkspeci, self.subsection)) 
 
@@ -985,7 +978,12 @@ class Report:
 
         multispecies_pass = False
 
+        # setup plotting geometry for summary plots per networkspeci (for all subsections)
+        if (not self.summary_plot_geometry_setup) & (self.do_plot_geometry_setup):
+            self.setup_plot_geometry('summary', networkspeci, self.made_networkspeci_summary_plots)
+
         # if have no valid data across data labels (no observations or experiments), then continue to next networkspeci
+        # unless it is the last subsection
         if not self.selected_station_data[networkspeci]: 
             # do not stop if there is any multispecies plot and we are in last subsection
             # if last subsection has data for 0 stations, it would not create them
@@ -993,11 +991,7 @@ class Report:
                 multispecies_pass = True
             else:
                 return
-        
-        # setup plotting geometry for summary plots per networkspeci (for all subsections)
-        if (not self.summary_plot_geometry_setup) & (self.do_plot_geometry_setup):
-            self.setup_plot_geometry('summary', networkspeci, self.made_networkspeci_summary_plots)
-
+  
         # iterate through plots to make
         for plot_type in summary_plots_to_make:
 
@@ -1053,14 +1047,20 @@ class Report:
                     msg = f'Fairmode target summary plot cannot be created for {speci}.'
                     show_message(self, msg)
                     continue
-                if ((speci in ['sconco3', 'sconcno2'] and self.resolution != 'hourly') 
-                    or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
+                # get active temporal resolution
+                if str(self.resampling_resolution) != 'None':
+                    resolution = self.resampling_resolution
+                else:
+                    resolution = self.resolution
+                # warning for fairmode plots if resolution is not hourly or daily
+                if ((speci in ['sconco3', 'sconcno2'] and resolution != 'hourly') 
+                    or (speci in ['pm10', 'pm2p5'] and (resolution not in ['hourly', 'daily']))):
                     msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
                     show_message(self, msg)
                     continue
 
                 # skip making plot if there is no valid data
-                data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
+                data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.data_labels)
                 if not any(valid_station_idxs):
                     self.logger.info(f'No data after filtering by coverage for {speci}.')
                     continue
@@ -1244,7 +1244,7 @@ class Report:
                         continue
 
                     # skip making plot if there is no valid data
-                    data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
+                    data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.data_labels)
                     if not any(valid_station_idxs):
                         self.logger.info(f'No data after filtering by coverage for {speci} in {self.current_station_name}.')
                         continue

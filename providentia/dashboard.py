@@ -20,6 +20,7 @@ from packaging.version import Version
 import pandas as pd
 from PyQt5 import QtCore, QtWidgets, QtGui
 
+from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 from .canvas import Canvas
 from .configuration import load_conf
 from .configuration import ProvConfiguration
@@ -38,8 +39,6 @@ from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, gene
                        temporal_resolution_order_dict, get_lower_resolutions)
 from .toolbar import NavigationToolbar
 from .warnings_prv import show_message
-
-from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 
 
 # set font DPI for uniform dashboard appearance across systems
@@ -676,6 +675,7 @@ class Dashboard(QtWidgets.QWidget):
             self.selected_periodic_statistic_aggregation = copy.deepcopy(self.periodic_statistic_aggregation)
             self.selected_periodic_statistic_mode = copy.deepcopy(self.periodic_statistic_mode)
             self.selected_timeseries_statistic_aggregation = copy.deepcopy(self.timeseries_statistic_aggregation)
+            self.selected_filter_species = copy.deepcopy(self.filter_species)
 
             # set initial filter species in widgets as empty dictionaries
             self.selected_widget_network = dict()
@@ -728,6 +728,8 @@ class Dashboard(QtWidgets.QWidget):
         if self.selected_network in available_networks:
             self.cb_network.setCurrentText(self.selected_network)
         else:
+            msg = f'Selected network {self.selected_network} is not available. Choosing {self.cb_network.currentText()} as it is the first option in the dropdown.'
+            show_message(self, msg)
             self.selected_network = self.cb_network.currentText()
 
         # turn off some features if using non-GHOST data (on for ACTRIS)
@@ -895,13 +897,14 @@ class Dashboard(QtWidgets.QWidget):
                     if plot_type not in canvas_instance.layout_options:
                         canvas_instance.layout_options.append(plot_type)       
 
-            if 'fairmode-target' in canvas_instance.layout_options and hasattr(self, 'selected_species'):
-                if self.selected_species not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
-                    canvas_instance.layout_options.remove('fairmode-target')   
-                if ((self.selected_species in ['sconco3', 'sconcno2'] and self.selected_resolution != 'hourly') 
-                    or (self.selected_species in ['pm10', 'pm2p5'] and (self.selected_resolution not in ['hourly', 'daily']))):
-                    canvas_instance.layout_options.remove('fairmode-target')
-            
+            for plot_type in ['fairmode-target', 'fairmode-statsummary']:
+                if plot_type in canvas_instance.layout_options and hasattr(self, 'selected_species'):
+                    if self.selected_species not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
+                        canvas_instance.layout_options.remove(plot_type)   
+                    if ((self.selected_species in ['sconco3', 'sconcno2'] and self.selected_resolution != 'hourly') 
+                        or (self.selected_species in ['pm10', 'pm2p5'] and (self.selected_resolution not in ['hourly', 'daily']))):
+                        canvas_instance.layout_options.remove(plot_type)
+
         # order alphabetically
         layout_options = sorted(canvas_instance.layout_options)
 
@@ -1113,7 +1116,7 @@ class Dashboard(QtWidgets.QWidget):
             if changed_plot_type != 'None':
 
                 # format axis                
-                format_axis(self.mpl_canvas, self.mpl_canvas.read_instance, 
+                format_axis(self.mpl_canvas.read_instance, self.mpl_canvas, 
                             self.mpl_canvas.plot_axes[changed_plot_type], 
                             changed_plot_type, self.mpl_canvas.plot_characteristics[changed_plot_type],
                             map_extent=self.map_extent)
@@ -1236,9 +1239,9 @@ class Dashboard(QtWidgets.QWidget):
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
         # clear previously selected relative/absolute station indices
-        self.mpl_canvas.relative_selected_station_inds = np.array([], dtype=np.int64)
-        self.mpl_canvas.absolute_selected_station_inds = np.array([], dtype=np.int64)
-        self.mpl_canvas.absolute_non_selected_station_inds = np.array([], dtype=np.int64)
+        self.mpl_canvas.relative_selected_station_inds = np.array([], dtype=np.int32)
+        self.mpl_canvas.absolute_selected_station_inds = np.array([], dtype=np.int32)
+        self.mpl_canvas.absolute_non_selected_station_inds = np.array([], dtype=np.int32)
 
         # set variable that blocks updating of MPL canvas until all data has been updated
         self.block_MPL_canvas_updates = True
@@ -1255,6 +1258,7 @@ class Dashboard(QtWidgets.QWidget):
         self.previous_flags = self.flags
         self.previous_data_labels = self.data_labels
         self.previous_data_labels_raw = self.data_labels_raw
+        self.previous_filter_species = self.filter_species
         self.mpl_canvas.previous_plot_options = copy.deepcopy(self.mpl_canvas.current_plot_options) 
 
         # set new active variables as selected variables from menu
@@ -1272,6 +1276,7 @@ class Dashboard(QtWidgets.QWidget):
         self.networkspeci = self.networkspecies[0]
         self.data_labels = [self.observations_data_label] + list(self.experiments.values())
         self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
+        self.filter_species = copy.deepcopy(self.selected_filter_species)
         # remove bias plot options if have no experiments loaded
         if len(self.data_labels) == 1:
             for plot_type in self.mpl_canvas.all_plots:
@@ -1409,11 +1414,8 @@ class Dashboard(QtWidgets.QWidget):
                 delattr(self, 'valid_station_inds')
                 delattr(self, 'valid_station_inds_temporal_colocation')
 
+            # update metadata fields
             update_metadata_fields(self)
-            
-            # update relevant/nonrelevant temporal resolutions 
-            self.relevant_temporal_resolutions = get_relevant_temporal_resolutions(self.resolution)
-            self.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(self.resolution)
 
             # if species has changed, or first read, update species specific lower/upper limits
             if (self.first_read) or (self.species[0] != self.previous_species[0]):
@@ -1533,18 +1535,6 @@ class Dashboard(QtWidgets.QWidget):
 def main(**kwargs):
     """ Main function. """
     
-    if sys.platform.startswith('darwin'):
-        # Set app name, if PyObjC is installed
-        # Python 2 has PyObjC preinstalled
-        # Python 3: pip3 install pyobjc-framework-Cocoa
-        from Foundation import NSBundle
-        bundle = NSBundle.mainBundle()
-        if bundle:
-            app_name = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-            app_info = bundle.localizedInfoDictionary() or bundle.infoDictionary()
-            if app_info:       
-                app_info['CFBundleName'] = app_name
-
     # pause briefly to allow QT modules time to correctly initilise
     time.sleep(0.1)
 
@@ -1579,6 +1569,7 @@ def main(**kwargs):
     p.setColor(QtGui.QPalette.Text, QtGui.QColor(*dcp['Text']))
     q_app.setPalette(p)
     
+    # set application name and icon
     q_app.setWindowIcon(QtGui.QIcon(join(PROVIDENTIA_ROOT, 'assets/logo.icns')))
     q_app.setApplicationName("Providentia")
     q_app.setApplicationDisplayName("Providentia")

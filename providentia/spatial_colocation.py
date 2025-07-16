@@ -143,7 +143,7 @@ class SpatialColocation:
                 intersect_refs_pos = np.searchsorted(station_references_cut[networkspeci][station_references_sorted], intersecting_station_references)
                 self.intersecting_indices[networkspeci] = np.array(np.append(self.intersecting_indices[networkspeci], 
                                                                              station_references_sorted[intersect_refs_pos]),
-                                                                             dtype=np.int64)
+                                                                             dtype=np.int32)
 
             # validate intersections by longitude/latitude
             self.validate_intersections()
@@ -181,7 +181,7 @@ class SpatialColocation:
                     intersect_names_pos = np.searchsorted(self.read_instance.station_names[networkspeci][station_names_sorted], intersecting_station_names)
                     self.intersecting_indices[networkspeci] = np.array(np.append(self.intersecting_indices[networkspeci], 
                                                                                  station_names_sorted[intersect_names_pos]),
-                                                                                 dtype=np.int64)
+                                                                                 dtype=np.int32)
 
                 # validate intersections by longitude/latitude
                 self.validate_intersections()
@@ -288,8 +288,8 @@ class SpatialColocation:
                     pairwise_intersect_inds[networkspeci] = self.non_intersecting_indices[networkspeci][np.array(self.ns_wtol_inds)]
                 # if have no intersects, then append empty array
                 else:
-                    pairwise_intersect_inds['{}_{}'.format(self.firstnetworkspeci, networkspeci)] = np.array([], dtype=np.int64)
-                    pairwise_intersect_inds[networkspeci] = np.array([], dtype=np.int64)
+                    pairwise_intersect_inds['{}_{}'.format(self.firstnetworkspeci, networkspeci)] = np.array([], dtype=np.int32)
+                    pairwise_intersect_inds[networkspeci] = np.array([], dtype=np.int32)
 
             # get indices (for first networkspeci) where coordinates intersect across all species
             pairwise_intersect_inds_unique, counts = np.unique(pairwise_intersect_inds[self.firstnetworkspeci], return_counts=True)
@@ -305,7 +305,7 @@ class SpatialColocation:
 
                 # append newly found intersecting indices to previously found intersect inds
                 for networkspeci in self.non_intersecting_longitudes:
-                    self.intersecting_indices[networkspeci] = np.array(np.append(self.intersecting_indices[networkspeci], pairwise_intersect_inds[networkspeci]), dtype=np.int64)
+                    self.intersecting_indices[networkspeci] = np.array(np.append(self.intersecting_indices[networkspeci], pairwise_intersect_inds[networkspeci]), dtype=np.int32)
 
             # sort intersecting indices
             self.sort_intersecting_indices()
@@ -325,7 +325,7 @@ class SpatialColocation:
 
             # iterate through stations in first networkspeci, and get longitudes / latitudes of each station across
             # networkspecies
-            stn_inds_to_drop = np.array([], dtype=np.int64)
+            stn_inds_to_drop = np.array([], dtype=np.int32)
             for stn_ii in range(len(self.intersecting_indices[self.firstnetworkspeci])):
                 station_lons = np.array([])
                 station_lats = np.array([])
@@ -351,7 +351,7 @@ class SpatialColocation:
 
             # update intersecting indices
             for networkspeci in self.networkspecies:
-                self.intersecting_indices[networkspeci] = np.array([inter_ii for stn_ii,inter_ii in enumerate(self.intersecting_indices[networkspeci]) if stn_ii not in stn_inds_to_drop], dtype=np.int64)
+                self.intersecting_indices[networkspeci] = np.array([inter_ii for stn_ii,inter_ii in enumerate(self.intersecting_indices[networkspeci]) if stn_ii not in stn_inds_to_drop], dtype=np.int32)
 
     def sort_intersecting_indices(self):
         """ get the order of the first networkspecies in ascending order, and order other networkspecies in the 

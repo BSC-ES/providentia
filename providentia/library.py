@@ -17,6 +17,7 @@ import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 import pandas as pd
 
+from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 from .configuration import load_conf
 from .configuration import ProvConfiguration
 from .fields_menus import (init_metadata, init_period, init_representativity, metadata_conf,
@@ -36,7 +37,6 @@ from .statistics import (calculate_statistic, generate_colourbar, generate_colou
 from .warnings_prv import show_message
 from .writing import export_configuration, export_data_npz, export_netcdf
 
-from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 fairmode_settings = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
@@ -530,20 +530,26 @@ class Library:
             show_message(self, msg)
             return
         
-        # do not make FAIRMODE target plot if species not in list or resolution not hourly
         if base_plot_type in ['fairmode-target','fairmode-statsummary']:
+            # warning for fairmode plots if species aren't PM2.5, PM10, NO2 or O3
             if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
                 msg = f'Fairmode target plot cannot be created for {speci}.'
                 show_message(self, msg)
                 return
-            if ((speci in ['sconco3', 'sconcno2'] and self.resolution != 'hourly') 
-                or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
+            # get active temporal resolution
+            if str(self.resampling_resolution) != 'None':
+                resolution = self.resampling_resolution
+            else:
+                resolution = self.resolution
+            # warning for fairmode plots if resolution is not hourly or daily
+            if ((speci in ['sconco3', 'sconcno2'] and resolution != 'hourly') 
+                or (speci in ['pm10', 'pm2p5'] and (resolution not in ['hourly', 'daily']))):
                 msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
                 show_message(self, msg)
                 return
             
             # skip making plot if there is no valid data
-            data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.resolution, self.data_labels)
+            data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.data_labels)
             if not any(valid_station_idxs):
                 self.logger.info(f'No data after filtering by coverage for {speci}.')
                 return
@@ -1083,7 +1089,7 @@ class Library:
         
         return legend_handles['plot']
 
-    def statistic(self, stat, labela='', labelb='', per_station=False):
+    def statistic(self, stat, labela='', labelb='', per_station=False, period=None, chunk=None):
         """ Wrapper method to calculate statistic/s.
 
         :param stat: Statistic
@@ -1092,9 +1098,13 @@ class Library:
         :type labela: str, optional
         :param labelb: Label of second dataset (if defined then a bias plot is made), defaults to ''
         :type labelb: str, optional
-        :param per_station: Indicates if the station data is per station or for all stations, defaults to False
+        :param per_station: Indicates if to calculate integrated statistic for all stations, or per station, defaults to False
         :type per_station: bool, optional
-        :return: Statistic value
+        :param period: Period to group data into for calculation of statistics. Current options: 'hour', 'dayofweek', 'month' 
+        :type period: str, optional
+        :param chunk: Chunked temporal window to calculate statistics for. Current options: 'daily', 'monthly', 'annual'
+        :type chunk: str, optional
+        :return: Statistic value/s
         :rtype: np.ndarray
         """
 
@@ -1132,16 +1142,21 @@ class Library:
             show_message(self, msg)
             return
 
+        # throw error if both period and chunk are given
+        elif (period is not None) & (chunk is not None):
+            msg = f"Cannot calculate statistic when both 'period' and 'chunk' are given."
+            show_message(self, msg)
+            return
+
         # get networkspeci to calculate for
         networkspeci = self.networkspecies[0]
         if len(self.networkspecies) > 1:
             msg = "More than 1 network or species defined, can only calculate for 1. Taking {}.".format(networkspeci)
             show_message(self, msg)
 
-        if per_station:
-            stat = calculate_statistic(self, self, networkspeci, stat, [labela], [labelb], per_station=True)
-        else:
-            stat = calculate_statistic(self, self, networkspeci, stat, [labela], [labelb])
+        # calculate statistic
+        stat = calculate_statistic(self, self, networkspeci, stat, [labela], [labelb], per_station=per_station, 
+                                   period=period, chunk_resolution=chunk)
         
         return stat
 

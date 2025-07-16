@@ -2,6 +2,7 @@
 #SBATCH --output=/dev/null
 #SBATCH --error=/dev/null
 
+rm -rf ./bin/Mac/*
 rm -rf ./figures/*
 rm -rf ./plots/*
 rm -rf ./reports/*

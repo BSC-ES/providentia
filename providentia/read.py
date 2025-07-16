@@ -13,13 +13,13 @@ from netCDF4 import Dataset, chartostring
 import numpy as np
 import pandas as pd
 
+from providentia.auxiliar import CURRENT_PATH, join
 from .plot_aux import update_plotting_parameters
 from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_yearmonths_to_read, 
-                       init_shared_vars_read_netcdf_data, read_netcdf_data, read_netcdf_metadata)
+                       init_shared_vars_read_netcdf_data, read_netcdf_data, read_netcdf_metadata, do_resampling)
 from .spatial_colocation import SpatialColocation
 from .warnings_prv import show_message
 
-from providentia.auxiliar import CURRENT_PATH, join
 
 class DataReader:
 
@@ -123,10 +123,12 @@ class DataReader:
                     if len(stn_refs) == 0:
                         if networkspeci in self.read_instance.networkspecies:
                             self.read_instance.networkspecies.remove(networkspeci)
+                            self.read_instance.species.remove(networkspeci.split('|')[1])
                             msg = 'There is no available observational data for the network|species: {}. Dropping.'.format(networkspeci)
                             show_message(self.read_instance, msg)
                         elif networkspeci in self.read_instance.filter_networkspecies:
                             self.read_instance.filter_networkspecies.remove(networkspeci)
+                            self.read_instance.filter_species.remove(networkspeci.split('|')[1])
                             msg = 'There is no available observational data for the filter network|species: {}. Dropping.'.format(networkspeci)
                             show_message(self.read_instance, msg)
 
@@ -264,12 +266,12 @@ class DataReader:
                         nonghost_standard_units[speci] = conv_obj.output_standard_units
                     else:
                         nonghost_standard_units[speci] = 'unitless'
-                self.read_instance.measurement_units = {speci:nonghost_standard_units[speci] 
-                                                        for speci in self.read_instance.species}
+                self.read_instance.measurement_units = {speci.split('|')[1]:nonghost_standard_units[speci.split('|')[1]] 
+                                                        for speci in self.read_instance.networkspecies}
             # GHOST
             else:
-                self.read_instance.measurement_units = {speci:self.read_instance.parameter_dictionary[speci]['standard_units'] 
-                                                        for speci in self.read_instance.species}
+                self.read_instance.measurement_units = {speci.split('|')[1]:self.read_instance.parameter_dictionary[speci.split('|')[1]]['standard_units'] 
+                                                        for speci in self.read_instance.networkspecies}
 
             # reset plotting params
             self.read_instance.plotting_params = {}
@@ -643,11 +645,12 @@ class DataReader:
             if len(relevant_files) == 0:
                 if networkspeci in self.read_instance.networkspecies:
                     self.read_instance.networkspecies.remove(networkspeci)
+                    self.read_instance.species.remove(networkspeci.split('|')[1])
                     msg = 'There is no available observational data for the network|species: {}. Dropping.'.format(networkspeci)
                     show_message(self.read_instance, msg)
                 elif networkspeci in self.read_instance.filter_networkspecies:
                     self.read_instance.filter_networkspecies.remove(networkspeci)
-                    del self.read_instance.filter_species[networkspeci]
+                    self.read_instance.filter_species.remove(networkspeci.split('|')[1])
                     msg = 'There is no available observational data for the filter network|species: {}. Dropping.'.format(networkspeci)
                     show_message(self.read_instance, msg)
                 continue
@@ -982,3 +985,6 @@ class DataReader:
 
                 self.read_instance.logger.error(error)
                 sys.exit(1) 
+
+        # do resampling of data (if necessary)
+        do_resampling(self.read_instance)
