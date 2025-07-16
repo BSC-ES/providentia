@@ -113,6 +113,12 @@ class DataReader:
                     self.read_instance.time_array >= datetime.datetime.strptime(start_yyyymm+'01','%Y%m%d')) 
                     for month_ii, start_yyyymm in enumerate(self.read_instance.yearmonths)])
 
+                # get N indices per year
+                self.read_instance.N_inds_per_year = np.array([np.count_nonzero(np.all(
+                    [self.read_instance.time_array >= datetime.datetime.strptime(str(year)+'0101','%Y%m%d'),
+                    self.read_instance.time_array < datetime.datetime.strptime(str(year+1)+'0101','%Y%m%d')], axis=0)) 
+                    for year in np.unique([int(str(yyyymm)[:4]) for yyyymm in self.read_instance.yearmonths])])
+
                 # get unique basic metadata across networkspecies
                 # for this step include filter networkspecies
                 self.read_basic_metadata()
@@ -179,13 +185,15 @@ class DataReader:
                 self.read_instance.ghost_data_vars_to_read = [var for var 
                                                               in self.read_instance.representativity_info['ghost'][resolution]['map_vars'] 
                                                               if 'native' in var]
-                
-                # add annual reprentativity and daytime and seasonal variables
-                self.read_instance.ghost_data_vars_to_read += ['annual_native_representativity_percent', 'season_code']
+                # add annual native representativity percent    
+                self.read_instance.ghost_data_vars_to_read.append('annual_native_representativity_percent') 
+
+                # add periodic code variables
+                self.read_instance.ghost_data_vars_to_read.append('season_code')
                 if self.read_instance.resolution != 'monthly':
-                    self.read_instance.ghost_data_vars_to_read += ['weekday_weekend_code']
+                    self.read_instance.ghost_data_vars_to_read.append('weekday_weekend_code')
                 if self.read_instance.resolution not in ['monthly', 'daily']:
-                    self.read_instance.ghost_data_vars_to_read += ['day_night_code']
+                    self.read_instance.ghost_data_vars_to_read.append('day_night_code')
 
                 # initialise data in memory for GHOST with NaN for these variables
                 self.read_instance.ghost_data_in_memory = {networkspeci:
