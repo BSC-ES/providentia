@@ -168,7 +168,6 @@ class NavigationToolbar(NavigationToolbar2QT):
         """ Method that sets the world view in the map.
         """
 
-        self._nav_stack.back()
         self.set_history_buttons()
         ax = self.canvas_instance.plot_axes['map']
         ax.set_extent([-180, 180, -90, 90])
