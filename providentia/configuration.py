@@ -1181,12 +1181,6 @@ class ProvConfiguration:
                 msg = "Experiment alias could not be set."
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
-        # before checking the experiment check that the remote download has the interpolated tag as False, if not exit
-        if self.read_instance.download and MACHINE in ["storage5", "nord3v2", "nord4"] and self.read_instance.interpolated is True:
-            error = F"Error: Nothing from the {self.read_instance.section} section was copied to gpfs, change the interpolated field to 'False'."
-            self.read_instance.logger.error(error)
-            sys.exit(1)
-
         # get correct check experiment function
         # TODO do it using heritage
         # if the current mode is interpolation or the experiment i want to download is not interpolated
