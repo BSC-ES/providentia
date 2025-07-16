@@ -30,7 +30,7 @@ from .plot_formatting import (format_plot_options, format_axis, set_axis_label, 
                               harmonise_xy_lims_paradigm)
 from .read import DataReader
 from .read_aux import (generate_file_trees, get_lower_resolutions, 
-                       get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
+                       get_periodic_nonrelevant_temporal_resolutions, get_periodic_relevant_temporal_resolutions, 
                        get_valid_experiments, get_valid_obs_files_in_date_range)
 from .statistics import (calculate_statistic, generate_colourbar, generate_colourbar_detail, 
                          get_fairmode_data, get_selected_station_data, get_z_statistic_info)
@@ -100,8 +100,8 @@ class Library:
             setattr(self, k, val)
 
         # set some key configuration variables
-        self.relevant_temporal_resolutions = get_relevant_temporal_resolutions(self.resolution)
-        self.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(self.resolution)
+        self.periodic_relevant_temporal_resolutions = get_periodic_relevant_temporal_resolutions(self.resolution)
+        self.periodic_nonrelevant_temporal_resolutions = get_periodic_nonrelevant_temporal_resolutions(self.resolution)
         self.data_labels = [self.observations_data_label] + list(self.experiments.values())
         self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
@@ -999,11 +999,11 @@ class Library:
                         except:
                             msg = "axis to plot legend on not defined for plot type in plot_characteristics.yaml, or passed via 'format' argument.\nTaking first available axis."
                             show_message(self, msg)
-                            ax_to_plot = self.relevant_temporal_resolutions[0]
-                        if ax_to_plot not in self.relevant_temporal_resolutions:
+                            ax_to_plot = self.periodic_relevant_temporal_resolutions[0]
+                        if ax_to_plot not in self.periodic_relevant_temporal_resolutions:
                             msg = "defined axis to plot legend on not available for data resolution of read data.\nInstead, taking first available axis."
                             show_message(self, msg)
-                            ax_to_plot = self.relevant_temporal_resolutions[0]
+                            ax_to_plot = self.periodic_relevant_temporal_resolutions[0]
                         relevant_ax[ax_to_plot].legend(**legend_handles)
                     else:
                         if base_plot_type == 'fairmode-target':
