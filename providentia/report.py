@@ -491,34 +491,36 @@ class Report:
             # save page figures
             valid_page = False
             real_page = 1
-            for page in self.plot_dictionary:
+            for i, page in enumerate(self.plot_dictionary):
                 # if page has no active data plotted, do not plot it
                 n_page_plotted_labels = 0
                 for ax_dict in self.plot_dictionary[page]['axs']:
                     n_page_plotted_labels += len(ax_dict['data_labels'])
                 if n_page_plotted_labels > 0:
-                    if not valid_page:
+                    # the following variables will be used to set the order of multispecies plot
+                    # in the report if there are
+                    # get pages in PDF that contain multispecies plots
+                    if 'multispecies' in self.plot_dictionary[page]['plot_type']:
+                        if self.plot_dictionary[page]['paradigm'] == 'summary':
+                            self.summary_multispecies_pages.append(real_page)
+                        elif self.plot_dictionary[page]['paradigm'] == 'station':
+                            self.station_multispecies_pages.append(real_page)
+
+                    # save page where station plots start to be created
+                    if ((self.plot_dictionary[page]['paradigm'] == 'station') and 
+                        (not hasattr(self, 'paradigm_break_page'))):
+                        self.paradigm_break_page = real_page
+
+                    # save pdf when reaching last page
+                    if i == len(self.plot_dictionary) - 1:
                         self.logger.info(f'\nWriting PDF in {reports_path}')
                         valid_page = True
-                    else:
-                        # the following variables will be used to set the order of multispecies plot
-                        # in the report if there are
-                        # get pages in PDF that contain multispecies plots
-                        if 'multispecies' in self.plot_dictionary[page]['plot_type']:
-                            if self.plot_dictionary[page]['paradigm'] == 'summary':
-                                self.summary_multispecies_pages.append(real_page)
-                            elif self.plot_dictionary[page]['paradigm'] == 'station':
-                                self.station_multispecies_pages.append(real_page)
-
-                        # save page where station plots start to be created
-                        if ((self.plot_dictionary[page]['paradigm'] == 'station') and 
-                            (not hasattr(self, 'paradigm_break_page'))):
-                            self.paradigm_break_page = real_page
-
                     fig = self.plot_dictionary[page]['fig']
                     self.pdf.savefig(fig, dpi=self.dpi)
                     plt.close(fig)
                     real_page += 1
+
+            # if last page was reached tha means there were plots to write (valid_page = True)
             if not valid_page:
                 self.logger.info('\n0 plots remain to write to PDF')
 
@@ -815,7 +817,7 @@ class Report:
 
         # iterate through subsections
         for subsection_ind, subsection in enumerate(self.subsections):
-
+            
             self.subsection_ind = subsection_ind
             self.subsection = subsection
 
@@ -827,6 +829,12 @@ class Report:
 
             # update the conf options for defined subsection
             if len(self.child_subsection_names) > 0:
+
+                # we save the species to make sure that the species that do not have data after read
+                # are not being set later in parse parameter
+                read_species = copy.deepcopy(self.species)
+                read_networkspecies = copy.deepcopy(self.networkspecies)
+
                 # get subsection variables
                 self.subsection_opts = self.sub_opts[self.subsection]
 
@@ -840,7 +848,13 @@ class Report:
 
                 # update subsection variables
                 for k, val in self.subsection_opts.items():
-                    setattr(self, k, provconf.parse_parameter(k, val, deactivate_warning=True))
+                    value = provconf.parse_parameter(k, val, deactivate_warning=True)
+                    # keep only the species that were available when we read the parent section data
+                    if k == 'species':
+                        value = [speci for speci in value if speci in read_species]
+                    elif k == 'networkspecies':
+                        value = [speci for speci in value if speci in read_networkspecies]
+                    setattr(self, k, value)
 
                 # now all variables have been parsed, check validity of those, throwing errors where necessary
                 provconf.check_validity(deactivate_warning=True)
@@ -942,12 +956,6 @@ class Report:
         # if have 0 relevant stations, continue to next networkspeci
         if self.n_stations == 0:
             self.logger.info('No valid stations for {}, {}. Not making summmary plots'.format(networkspeci, self.subsection))
-            # do not stop if there is any multispecies plot and we are in last subsection
-            # if last subsection has data for 0 stations, it would not create them
-            if (have_multispecies) and (self.subsection == self.subsections[-1]):
-                pass 
-            else:
-                return
         else:
             self.logger.info('Making {}, {} summary plots'.format(networkspeci, self.subsection)) 
 
@@ -972,7 +980,12 @@ class Report:
 
         multispecies_pass = False
 
+        # setup plotting geometry for summary plots per networkspeci (for all subsections)
+        if (not self.summary_plot_geometry_setup) & (self.do_plot_geometry_setup):
+            self.setup_plot_geometry('summary', networkspeci, self.made_networkspeci_summary_plots)
+
         # if have no valid data across data labels (no observations or experiments), then continue to next networkspeci
+        # unless it is the last subsection
         if not self.selected_station_data[networkspeci]: 
             # do not stop if there is any multispecies plot and we are in last subsection
             # if last subsection has data for 0 stations, it would not create them
@@ -980,11 +993,7 @@ class Report:
                 multispecies_pass = True
             else:
                 return
-        
-        # setup plotting geometry for summary plots per networkspeci (for all subsections)
-        if (not self.summary_plot_geometry_setup) & (self.do_plot_geometry_setup):
-            self.setup_plot_geometry('summary', networkspeci, self.made_networkspeci_summary_plots)
-
+  
         # iterate through plots to make
         for plot_type in summary_plots_to_make:
 
