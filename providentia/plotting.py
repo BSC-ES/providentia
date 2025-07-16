@@ -866,14 +866,20 @@ class Plotting:
             n_exps = len(cut_data_labels) 
 
         # hide non-relevant resolution axes
-        for nonrelevant_temporal_resolution in self.read_instance.nonrelevant_temporal_resolutions:
+        for nonrelevant_temporal_resolution in self.read_instance.periodic_nonrelevant_temporal_resolutions:
             # get subplot axis
             relevant_sub_ax = relevant_axis[nonrelevant_temporal_resolution]
             relevant_sub_ax.axis('off')
             relevant_sub_ax.set_visible(False)
 
+        # get active resolution
+        if str(self.read_instance.resampling_resolution) == 'None':
+            active_resolution = self.read_instance.resolution
+        else:
+            active_resolution = self.read_instance.resampling_resolution
+
         # iterate through all relevant temporal aggregation 
-        for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+        for relevant_temporal_resolution in self.read_instance.periodic_relevant_temporal_resolutions:
 
             # get subplot axis
             relevant_sub_ax = relevant_axis[relevant_temporal_resolution]
@@ -926,10 +932,19 @@ class Plotting:
                         # get x_grid for period
                         x_grid = period_x_grid[period_ii]
 
-                        if relevant_temporal_resolution == 'month':
+                        # set xaxis position of each violin
+                        if relevant_temporal_resolution == 'hour':
+                            if active_resolution == '3hourly':
+                                period_pos = period_ii * 3
+                            elif active_resolution == '6hourly':
+                                period_pos = period_ii * 6
+                            else:
+                                period_pos = period_ii
+                        elif relevant_temporal_resolution == 'month':
                             period_pos = period_ii + 1
                         else:
                             period_pos = period_ii
+
                         PDF_sampled = PDFs_sampled[data_label_ii, period_ii, :]
                         if not np.all(np.isnan(PDF_sampled)):
                             

@@ -29,6 +29,7 @@ from .dashboard_elements import ComboBox
 from .dashboard_elements import set_formatting
 from .dashboard_interactivity import HoverAnnotation
 from .dashboard_interactivity import legend_picker_func, picker_block_func, zoom_map_func
+from .fields_menus import update_period_fields, update_representativity_fields
 from .filter import DataFilter
 from .plotting import Plotting
 from .plot_aux import get_map_extent
@@ -250,7 +251,7 @@ class Canvas(FigureCanvas):
         axs_to_reset = []
         if isinstance(ax, dict):
             for relevant_temporal_resolution, sub_ax in ax.items():
-                if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                if relevant_temporal_resolution in self.read_instance.periodic_relevant_temporal_resolutions:
                     axs_to_reset.append(sub_ax)
         elif isinstance(ax, list):
             axs_to_reset = copy.deepcopy(ax)
@@ -332,6 +333,10 @@ class Canvas(FigureCanvas):
             if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
                 self.read_instance.cursor_function = 'handle_resampling_update'
                 QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+
+            # update represenativity and period fields
+            update_representativity_fields(self.read_instance)
+            update_period_fields(self.read_instance)
 
             # resample data
             do_resampling(self.read_instance)
@@ -727,7 +732,7 @@ class Canvas(FigureCanvas):
 
                 # if there are no temporal resolutions (only yearly), skip periodic plots
                 if ((plot_type in ['periodic', 'periodic-violin']) and 
-                    (not self.read_instance.relevant_temporal_resolutions)):
+                    (not self.read_instance.periodic_relevant_temporal_resolutions)):
                     msg = 'It is not possible to make periodic plots using annual resolution data.'
                     show_message(self.read_instance, msg)
                     self.read_instance.handle_layout_update('None', sender=plot_type_position)
@@ -745,6 +750,7 @@ class Canvas(FigureCanvas):
                         self.read_instance.handle_layout_update('None', sender=plot_type_position)
                         return
                 
+                # if do not have correct resolution or species, cannot make fairmode plots
                 if plot_type in ['fairmode-target', 'fairmode-statsummary']:
                     speci = self.read_instance.networkspeci.split('|')[1]
                     if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
@@ -1547,7 +1553,7 @@ class Canvas(FigureCanvas):
     
     def remove_axis_elements(self, ax, plot_type):
         """ Remove all plotted axis elements."""
-       
+
         # get appropriate axes for nested axes
         axs_to_remove = []
         if isinstance(ax, dict):
@@ -1601,9 +1607,13 @@ class Canvas(FigureCanvas):
 
             elif plot_type == 'statsummary':
                 self.remove_axis_objects(ax_to_remove.tables)
-
-            elif plot_type in ['taylor', 'boxplot', 'scatter']:
+            
+            elif plot_type in ['taylor', 'scatter']:
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
+                    self.remove_axis_objects(objects)
+
+            elif plot_type in ['boxplot']:
+                for objects in [ax_to_remove.artists, ax_to_remove.patches,ax_to_remove.lines]:
                     self.remove_axis_objects(objects)
 
             elif plot_type == 'fairmode-target':
@@ -2675,7 +2685,7 @@ class Canvas(FigureCanvas):
                         if not undo:
                             if isinstance(self.plot_axes[plot_type], dict):
                                 for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
-                                    if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                                    if relevant_temporal_resolution in self.read_instance.periodic_relevant_temporal_resolutions:
                                         annotation(self.read_instance, 
                                                    self, 
                                                    sub_ax,
@@ -2764,7 +2774,7 @@ class Canvas(FigureCanvas):
                         if not undo:
                             if isinstance(self.plot_axes[plot_type], dict):
                                 for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
-                                    if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                                    if relevant_temporal_resolution in self.read_instance.periodic_relevant_temporal_resolutions:
                                         threshold(self.read_instance, 
                                                   self,       
                                                   sub_ax, 
@@ -3019,7 +3029,7 @@ class Canvas(FigureCanvas):
             if plot_option == 'annotate':
                 if isinstance(self.plot_axes[plot_type], dict):
                     for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
-                        if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                        if relevant_temporal_resolution in self.read_instance.periodic_relevant_temporal_resolutions:
                             annotation(self.read_instance, self, sub_ax, self.read_instance.networkspeci, data_labels, 
                                        plot_type, self.plot_characteristics[plot_type], plot_options,
                                        plot_z_statistic_sign=z_statistic_sign)
@@ -3036,7 +3046,7 @@ class Canvas(FigureCanvas):
             elif plot_option == 'threshold':
                 if isinstance(self.plot_axes[plot_type], dict):
                     for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
-                        if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                        if relevant_temporal_resolution in self.read_instance.periodic_relevant_temporal_resolutions:
                             threshold(self.read_instance, self, sub_ax, self.read_instance.networkspeci, 
                                         plot_type, self.plot_characteristics[plot_type])
                 else:
