@@ -8,10 +8,9 @@ import yaml
 from functools import partial
 from PyQt5 import QtCore, QtGui, QtWidgets 
 
+from providentia.auxiliar import CURRENT_PATH, join
 from .dashboard_elements import CheckableComboBox, ComboBox
 from .dashboard_elements import set_formatting
-
-from providentia.auxiliar import CURRENT_PATH, join
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 settings_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/canvas_menus.yaml')))

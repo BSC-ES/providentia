@@ -24,14 +24,14 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from getpass import getpass
 
+from .actris import (get_files_path, temporally_average_data, get_data,
+                     get_files_per_var, is_wavelength_var, get_files_to_download,
+                     get_files_info, parameters_dict)
+from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import ProvConfiguration, load_conf
 from .read_aux import check_for_ghost
 from .warnings_prv import show_message
 
-from providentia.auxiliar import CURRENT_PATH, join
-from providentia.actris import (get_files_path, temporally_average_data, get_data,
-                                get_files_per_var, is_wavelength_var, get_files_to_download,
-                                get_files_info, parameters_dict)
 
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 REMOTE_MACHINE = "storage5"
@@ -1036,10 +1036,6 @@ class Download(object):
         # get experiment id and the domain
         exp_id, domain, ensemble_options = experiment.split("-")
 
-        # get stat if it is an ensemble statistic
-        if ensemble_options.startswith("stat_"): 
-            stat = ensemble_options.split("_",1)[-1]
-
         # initialise warning message and experiment exists boolean
         msg = ""
         experiment_exists = False
@@ -1131,11 +1127,11 @@ class Download(object):
                 # first try with the original species
                 try:
                     # if it is an ensemble member
-                    if not ensemble_options.startswith("stat_"):
+                    if ensemble_options.isdigit() or ensemble_options == 'allmembers':
                         res_spec = join(remote_dir,resolution,species)
                     # if it is an ensemble statistic
                     else:
-                        res_spec = join(remote_dir,resolution,"ensemble-stats",species+"_"+stat)
+                        res_spec = join(remote_dir,resolution,"ensemble-stats",species+"_"+ensemble_options)
   
                     self.sftp.stat(res_spec)
                     species_exists = True
@@ -1146,11 +1142,11 @@ class Download(object):
                         for mapping_speci in mapping_species[speci_to_process]:
                             try:
                                 # if it is an ensemble member
-                                if not ensemble_options.startswith("stat_"):
+                                if ensemble_options.isdigit() or ensemble_options == 'allmembers':
                                     res_spec = join(remote_dir,resolution, mapping_speci)
                                 # if it is an ensemble statistic
                                 else:
-                                    res_spec = join(remote_dir,resolution, "ensemble-stats", species + "_" + stat)
+                                    res_spec = join(remote_dir,resolution, "ensemble-stats", species + "_" + ensemble_options)
   
                                 self.sftp.stat(res_spec)  
                                 species_exists = True
@@ -1187,7 +1183,7 @@ class Download(object):
 
                 if nc_files:
                     # if it is an ensemble member
-                    if not ensemble_options.startswith("stat_"):
+                    if ensemble_options.isdigit() or ensemble_options == 'allmembers':
                         # get the domain, resolution and species from the path
                         domain, resolution, species = remote_dir.split('/')[-3:]
 
@@ -1226,7 +1222,7 @@ class Download(object):
                         species = species.split("_",1)[0]
 
                         # filter the nc files to only get the ones that have the correct species and stats
-                        nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == stat, nc_files))
+                        nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == ensemble_options, nc_files))
                 
                 # if there is no options with the ensemble option, tell the user
                 if nc_files == []:
@@ -1247,10 +1243,10 @@ class Download(object):
                 else:
                     # create local directory 
                     # if it is an ensemble member
-                    if not ensemble_options.startswith("stat_"):
+                    if ensemble_options.isdigit() or ensemble_options == 'allmembers':
                         local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,species)
                     else:
-                        local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+stat)
+                        local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+ensemble_options)
                     
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
@@ -1306,10 +1302,6 @@ class Download(object):
 
         # get experiment id and the domain
         exp_id, domain, ensemble_options = experiment.split("-")
-
-        # get stat if it is an ensemble statistic
-        if ensemble_options.startswith("stat_"): 
-            stat = ensemble_options.split("_",1)[-1]
 
         # get experiment type
         for experiment_type, experiment_dict in interp_experiments.items():
@@ -1373,12 +1365,11 @@ class Download(object):
                 species = speci_to_process
 
                 # if it is an ensemble member
-                if not ensemble_options.startswith("stat_"):
+                if ensemble_options.isdigit() or ensemble_options == 'allmembers':
                     res_spec = join(esarchive_dir,resolution,species)
                 # if it is an ensemble statistic
                 else:
-                    res_spec = join(esarchive_dir,resolution,"ensemble-stats",species+"_"+stat)
-  
+                    res_spec = join(esarchive_dir,resolution,"ensemble-stats",species+"_"+ensemble_options)
                 species_exists = os.path.exists(res_spec)
                 # if there are none, try with the mapped species
                 if species_exists is False:
@@ -1386,11 +1377,11 @@ class Download(object):
                     if speci_to_process in mapping_species:
                         for species in mapping_species[speci_to_process]:
                             # if it is an ensemble member
-                            if not ensemble_options.startswith("stat_"):
+                            if ensemble_options.isdigit() or ensemble_options == 'allmembers':
                                 res_spec = join(esarchive_dir,resolution,species)
                             # if it is an ensemble statistic
                             else:
-                                res_spec = join(esarchive_dir,resolution,"ensemble-stats",species+"_"+stat)
+                                res_spec = join(esarchive_dir,resolution,"ensemble-stats",species+"_"+ensemble_options)
   
                             species_exists = os.path.exists(res_spec)
                 
@@ -1422,7 +1413,7 @@ class Download(object):
 
                 if nc_files:
                     # if it is an ensemble member
-                    if not ensemble_options.startswith("stat_"):
+                    if ensemble_options.isdigit() or ensemble_options == 'allmembers':
                         # get the domain, resolution and species from the path
                         domain, resolution, species = esarchive_dir.split('/')[-3:]
 
@@ -1460,7 +1451,7 @@ class Download(object):
                         species = species.split("_",1)[0]
 
                         # filter the nc files to only get the ones that have the correct species and stats
-                        nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == stat, nc_files))
+                        nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == ensemble_options, nc_files))
                         
                 # if there is no options with the ensemble option, tell the user
                 if nc_files == []:
@@ -1480,10 +1471,10 @@ class Download(object):
                 # copy the valid resolution specie date combinations
                 else:
                     # if it is an ensemble member
-                    if not ensemble_options.startswith("stat_"):
+                    if ensemble_options.isdigit() or ensemble_options == 'allmembers':
                         gpfs_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,species)
                     else:
-                        gpfs_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+stat)
+                        gpfs_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+ensemble_options)
                     
                     # create directories if they don't exist
                     if not os.path.exists(gpfs_dir):

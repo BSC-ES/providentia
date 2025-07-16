@@ -11,9 +11,8 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from .configuration import write_conf
-
 from providentia.auxiliar import CURRENT_PATH, join
+from .configuration import write_conf
 
 # get current path and providentia root path
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
@@ -60,21 +59,6 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
     # create dict to save data
     save_data_dict = {}
 
-    # get transform resolution to code for .resample function
-    if prv.resampling_resolution in possible_resolutions:
-        if prv.resampling_resolution in ['hourly', 'hourly_instantaneous']:
-            temporal_resolution_to_output_code = 'h'
-        elif prv.resampling_resolution in ['3hourly', '3hourly_instantaneous']:
-            temporal_resolution_to_output_code = '3h'
-        elif prv.resampling_resolution in ['6hourly', '6hourly_instantaneous']:
-            temporal_resolution_to_output_code = '6h'
-        elif prv.resampling_resolution == 'daily':
-            temporal_resolution_to_output_code = 'D'
-        elif prv.resampling_resolution == 'monthly':
-            temporal_resolution_to_output_code = 'MS'
-        elif prv.resampling_resolution == 'annual':
-            temporal_resolution_to_output_code = 'YS'
-
     # save data / ghost data / metadata
     for networkspeci in prv.networkspecies:
 
@@ -94,56 +78,64 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
             # cut data array for valid station inds
             data_array = np.take(data_array, valid_station_inds, axis=1)
 
-            # temporally resample data array if required
-            if prv.resampling_resolution in possible_resolutions:
-                # flatten networkspecies dimension for creation of pandas dataframe
-                data_array_reduced = data_array.reshape(data_array.shape[0]*data_array.shape[1], data_array.shape[2])
-                
-                # create pandas dataframe of data array
-                data_array_df = pd.DataFrame(data_array_reduced.transpose(), index=prv.time_array, 
-                                             columns=np.arange(data_array_reduced.shape[0]), dtype=np.float32)
-                # resample data array
-                data_array_df_resampled = data_array_df.resample(temporal_resolution_to_output_code, axis=0).mean()
-                time_index = data_array_df_resampled.index
-
-                # save back out as numpy array (reshaping to get back networkspecies dimension)
-                data_array_resampled = data_array_df_resampled.to_numpy().transpose()
-                data_array = data_array_resampled.reshape(data_array.shape[0], data_array.shape[1], 
-                                                          data_array_resampled.shape[1])
-
         # otherwise, take unfiltered array
         else:
             valid_station_inds = np.arange(prv.data_in_memory[networkspeci].shape[1], dtype=np.int32)
             data_array = copy.deepcopy(prv.data_in_memory[networkspeci])
 
-        # save time / data / metadata
-        save_data_dict['time'] = prv.time_array
+        # save data / metadata
         save_data_dict['{}_data'.format(networkspeci)] = data_array
         save_data_dict['{}_metadata'.format(networkspeci)] = np.take(prv.metadata_in_memory[networkspeci], 
-            valid_station_inds, axis=0)
-
+                       valid_station_inds, axis=0)
         # save GHOST specific variables
         if prv.reading_ghost:
             save_data_dict['{}_ghost_data'.format(networkspeci)] = np.take(prv.ghost_data_in_memory[networkspeci], 
                            valid_station_inds, axis=1)
             save_data_dict['{}_qa'.format(networkspeci)] = np.unique(prv.qa_per_species[speci])
             save_data_dict['{}_flags'.format(networkspeci)] = np.unique(prv.flags)
-            save_data_dict['ghost_version'] = prv.ghost_version
-            save_data_dict['ghost_data_variables'] = prv.ghost_data_vars_to_read
 
-    # save out miscellaneous variables 
-    # set time_resampled variable, and resolution to be resampling resolution if are resampling and apply_filters is active
-    if (prv.resampling_resolution in possible_resolutions) & (apply_filters):
-        save_data_dict['time_resampled'] = time_index
-        save_data_dict['resolution'] = prv.resampling_resolution
-    else:
-        save_data_dict['resolution'] = prv.resolution
+    # save out key variables 
+    save_data_dict['time'] = prv.time_array
+    save_data_dict['resolution'] = prv.resolution
     save_data_dict['data_labels'] = prv.data_labels
     save_data_dict['start_date'] = prv.start_date
     save_data_dict['end_date'] = prv.end_date
     save_data_dict['temporal_colocation'] = prv.temporal_colocation
     save_data_dict['spatial_colocation'] = prv.spatial_colocation
     save_data_dict['filter_species'] = prv.filter_species
+    save_data_dict['forecast'] = prv.forecast
+    if prv.reading_ghost:
+        save_data_dict['ghost_version'] = prv.ghost_version
+        save_data_dict['ghost_data_variables'] = prv.ghost_data_vars_to_read
+
+    # save resampled time and resolution
+    if (prv.resampling_resolution in possible_resolutions) & (apply_filters):
+        save_data_dict['time_resampled'] = prv.time_index
+        save_data_dict['resampling_resolution'] = prv.resampling_resolution
+
+    # save out statistical information
+    save_data_dict['statistic_mode'] = prv.statistic_mode
+    save_data_dict['statistic_aggregation'] = prv.statistic_aggregation
+    save_data_dict['periodic_statistic_mode'] = prv.periodic_statistic_mode
+    save_data_dict['periodic_statistic_aggregation'] = prv.periodic_statistic_aggregation
+    save_data_dict['timeseries_statistic_aggregation'] = prv.timeseries_statistic_aggregation
+
+    # save out miscellaneous variables
+    calibration_factor = ''
+    for factor_ii, (exp, factor) in enumerate(prv.calibration_factor.items()):
+        if factor_ii == (len(prv.calibration_factor) - 1):
+            calibration_factor += '{} ({})'.format(exp, factor)
+        else:
+            calibration_factor += '{} ({}), '.format(exp, factor)
+    save_data_dict['calibration_factor'] = calibration_factor
+    save_data_dict['remove_extreme_stations'] = prv.remove_extreme_stations
+    save_data_dict['spatial_colocation_tolerance'] = prv.spatial_colocation_tolerance
+    save_data_dict['spatial_colocation_station_reference'] = prv.spatial_colocation_station_reference
+    save_data_dict['spatial_colocation_station_name'] = prv.spatial_colocation_station_name
+    save_data_dict['spatial_colocation_longitude_latitude'] = prv.spatial_colocation_longitude_latitude
+    save_data_dict['spatial_colocation_measurement_altitude'] = prv.spatial_colocation_measurement_altitude
+    save_data_dict['spatial_colocation_validation'] = prv.spatial_colocation_validation
+    save_data_dict['spatial_colocation_validation_tolerance'] = prv.spatial_colocation_validation_tolerance
 
     # save out dict to .npz file
     np.savez(fname, **save_data_dict)
@@ -198,21 +190,6 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
     parameter_dictionary = {}
     for _, param_dict in standard_parameters.items():
         parameter_dictionary[param_dict['bsc_parameter_name']] = param_dict
-    
-    # get transform resolution to code for .resample function
-    if prv.resampling_resolution in possible_resolutions:
-        if prv.resampling_resolution in ['hourly', 'hourly_instantaneous']:
-            temporal_resolution_to_output_code = 'h'
-        elif prv.resampling_resolution in ['3hourly', '3hourly_instantaneous']:
-            temporal_resolution_to_output_code = '3h'
-        elif prv.resampling_resolution in ['6hourly', '6hourly_instantaneous']:
-            temporal_resolution_to_output_code = '6h'
-        elif prv.resampling_resolution == 'daily':
-            temporal_resolution_to_output_code = 'D'
-        elif prv.resampling_resolution == 'monthly':
-            temporal_resolution_to_output_code = 'MS'
-        elif prv.resampling_resolution == 'annual':
-            temporal_resolution_to_output_code = 'YS'
 
     # dictionary to map python types to netcdf types
     type_map = {np.uint8: 'u1', np.uint32: 'u4', object: str,
@@ -232,12 +209,13 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
     fout.createDimension('data_label', len(prv.data_labels))
     fout.createDimension('time', len(prv.time_array))
     fout.createDimension('month', len(prv.yearmonths))
+    # create resampling resolution if needed
+    if (prv.resampling_resolution in possible_resolutions) & (apply_filters):
+        fout.createDimension('time_resampled', len(prv.time_index))
+    # create GHOST variables
     if prv.reading_ghost:
         fout.createDimension('qa', len(list(standard_QA_name_to_QA_code.keys())))
         fout.createDimension('flag', len(list(standard_data_flag_name_to_data_flag_code.keys())))
-
-    # create dimensions only for GHOST case
-    if prv.reading_ghost:
         fout.createDimension('ghost_data_variable', len(prv.ghost_data_vars_to_read))
 
     # iterate through networkspecies 
@@ -259,7 +237,6 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
        
         # get data array
         # if apply_filters is active get the filtered data array
-        # also temporally resample data if required
         if apply_filters:
             valid_station_inds = prv.valid_station_inds_temporal_colocation[networkspeci][prv.observations_data_label]
             data_array = copy.deepcopy(prv.data_in_memory_filtered[networkspeci])
@@ -269,27 +246,6 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
 
             # cut data array for valid station inds
             data_array = np.take(data_array, valid_station_inds, axis=1)
-
-            # temporally resample data array if required
-            if prv.resampling_resolution in possible_resolutions:
-                # flatten networkspecies dimension for creation of pandas dataframe
-                data_array_reduced = data_array.reshape(data_array.shape[0]*data_array.shape[1], data_array.shape[2])
-                
-                # create pandas dataframe of data array
-                data_array_df = pd.DataFrame(data_array_reduced.transpose(), index=prv.time_array, 
-                                             columns=np.arange(data_array_reduced.shape[0]), dtype=np.float32)
-                # resample data array
-                data_array_df_resampled = data_array_df.resample(temporal_resolution_to_output_code, axis=0).mean()
-                time_index = data_array_df_resampled.index
-
-                # add time_resampled dimension if on first pass
-                if speci_ii == 0:
-                    fout.createDimension('time_resampled', len(time_index))
-
-                # save back out as numpy array (reshaping to get back networkspecies dimension)
-                data_array_resampled = data_array_df_resampled.to_numpy().transpose()
-                data_array = data_array_resampled.reshape(data_array.shape[0], data_array.shape[1], 
-                                                          data_array_resampled.shape[1])
 
         # otherwise, take unfiltered array
         else:
@@ -364,7 +320,7 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
                 var.calendar = 'standard'
                 var.tz = 'UTC'
                 if prv.resampling_resolution in ['3hourly', '6hourly']:
-                    # get indices of time_array in an array with all hours from start date to end date
+                    # get indices of time_index in an array with all hours from start date to end date
                     all_hours_array = pd.to_datetime(np.arange(datetime(int(str(prv.start_date)[0:4]), 
                                                                         int(str(prv.start_date)[4:6]), 
                                                                         int(str(prv.start_date)[6:8])), 
@@ -372,9 +328,9 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
                                                                      int(str(prv.end_date)[4:6]), 
                                                                      int(str(prv.end_date)[6:8])), 
                                                             timedelta(hours=1)))
-                    time_var_resampled = np.where(np.in1d(all_hours_array, time_index))[0]
+                    time_var_resampled = np.where(np.in1d(all_hours_array, prv.time_index))[0]
                 else:
-                    time_var_resampled = np.arange(len(time_index))
+                    time_var_resampled = np.arange(len(prv.time_index))
                 var[:] = time_var_resampled
                 
             # miscellaneous variables 
@@ -383,7 +339,7 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
             var.long_name = 'data_labels'
             var.description = 'Labels associated with each data array, e.g. observations, experiment_1, etc.'
             var[:] = np.array(prv.data_labels)
-            
+            # GHOST variables
             if prv.reading_ghost:
                 var = fout.createVariable('ghost_data_variables', str, ('ghost_data_variable',))
                 var.standard_name = 'ghost_data_variables'
@@ -400,26 +356,38 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
         # set dimension to be time_resampled if are resampling and apply_filters is active
         if (prv.resampling_resolution in possible_resolutions) & (apply_filters):
             var = fout.createVariable('{}_data'.format(var_prefix), current_data_type, 
-                                    ('data_label', station_dimension_var, 'time_resampled',))
+                                     ('data_label', station_dimension_var, 'time_resampled',))
         else:
             var = fout.createVariable('{}_data'.format(var_prefix), current_data_type, 
-                                    ('data_label', station_dimension_var, 'time',))
+                                     ('data_label', station_dimension_var, 'time',))
 
         # set attributes
         var.standard_name = data_format_dict[speci]['standard_name']
         var.long_name = data_format_dict[speci]['long_name']
         var.units = data_format_dict[speci]['units']
         var.description = data_format_dict[speci]['description']
-        # set resolution to be resampling resolution if are resampling and apply_filters is active
-        if (prv.resampling_resolution in possible_resolutions) & (apply_filters):
-            var.resolution = str(prv.resampling_resolution)
-        else:
-            var.resolution = str(prv.resolution)
+        var.resolution = str(prv.resolution)
+        var.resampling_resolution = str(prv.resampling_resolution)
         var.start_date = str(prv.start_date)
         var.end_date = str(prv.end_date)
         var.temporal_colocation = str(prv.temporal_colocation)
         var.spatial_colocation = str(prv.spatial_colocation)
         var.filter_species = str(prv.filter_species)
+        var.forecast = str(prv.forecast)
+        var.calibration_factor = str(prv.calibration_factor)
+        var.remove_extreme_stations = str(prv.remove_extreme_stations)
+        var.statistic_mode = str(prv.statistic_mode)
+        var.statistic_aggregation = str(prv.statistic_aggregation)
+        var.periodic_statistic_mode = str(prv.periodic_statistic_mode)
+        var.periodic_statistic_aggregation = str(prv.periodic_statistic_aggregation)
+        var.timeseries_statistic_aggregation = str(prv.timeseries_statistic_aggregation)
+        var.spatial_colocation_tolerance = str(prv.spatial_colocation_tolerance)
+        var.spatial_colocation_station_reference = str(prv.spatial_colocation_station_reference)
+        var.spatial_colocation_station_name = str(prv.spatial_colocation_station_name)
+        var.spatial_colocation_longitude_latitude = str(prv.spatial_colocation_longitude_latitude)
+        var.spatial_colocation_measurement_altitude = str(prv.spatial_colocation_measurement_altitude)
+        var.spatial_colocation_validation = str(prv.spatial_colocation_validation)
+        var.spatial_colocation_validation_tolerance = str(prv.spatial_colocation_validation_tolerance)
         if prv.reading_ghost:
             var.ghost_version = str(prv.ghost_version)
         var[:] = data_array
@@ -429,7 +397,7 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
 
             # set GHOST data variable (e.g. representativity)
             var = fout.createVariable('{}_ghost_data'.format(networkspeci), 'f4', 
-                                      ('ghost_data_variable', station_dimension_var, 'time',))
+                                     ('ghost_data_variable', station_dimension_var, 'time',))
             # set attributes and data
             var.standard_name = '{}_ghost_data'.format(networkspeci) 
             var.long_name = '{}_ghost_data'.format(networkspeci)
@@ -569,6 +537,18 @@ def export_configuration(prv, cname, separator="||"):
         filter_species = filter_species.replace("))", ")")
         options['section'].update({'filter_species': filter_species})
 
+    # resampling_resolution
+    if prv.resampling_resolution in possible_resolutions:
+        options['section'].update({'resampling_resolution': prv.resampling_resolution})
+
+    # statistic_mode
+    if prv.statistic_mode != merged_defaults['statistic_mode']:
+        options['section'].update({'statistic_mode': prv.statistic_mode})
+
+    # statistic_aggregation 
+    if prv.statistic_aggregation != merged_defaults['statistic_aggregation'][prv.statistic_mode]:
+        options['section'].update({'statistic_aggregation': prv.statistic_aggregation})
+
     # calibration_factor
     if len(prv.calibration_factor) > 0:
         calibration_factor = ''
@@ -579,9 +559,9 @@ def export_configuration(prv, cname, separator="||"):
                 calibration_factor += '{} ({}), '.format(exp, factor)
         options['section'].update({'calibration_factor': calibration_factor})
 
-    # statistic_aggregation
-    if prv.statistic_aggregation != merged_defaults['statistic_aggregation'][prv.statistic_mode]:
-        options['section'].update({'statistic_aggregation': prv.statistic_aggregation})
+    # forecast
+    if len(prv.forecast) > 0:
+        options['section']['forecast'] = ",".join(str(i) for i in prv.forecast)
 
     # qa
     if set(prv.qa_menu['checkboxes']['remove_selected']) != set(prv.qa_menu['checkboxes']['remove_default']):
@@ -638,9 +618,17 @@ def export_configuration(prv, cname, separator="||"):
                 meta_remove = " remove: " + ",".join(str(i) for i in removes) + separator
                 options['section'][label] = meta_keep + meta_remove
 
+    # map extent
+    if prv.map_extent != [-180.0,180.0,-90.0,90.0]:
+        options['section']['map_extent'] = ",".join(str(i) for i in prv.map_extent)
+
+    # active dashboard plots 
+    if prv.active_dashboard_plots != merged_defaults['active_dashboard_plots']:
+        options['section']['active_dashboard_plots'] = ",".join(str(i) for i in prv.active_dashboard_plots)
+
     # miscellaneous fields that need string joining 
-    options['section'].update({'map_extent': ",".join(str(i) for i in prv.map_extent),
-                               'active_dashboard_plots': ",".join(str(i) for i in prv.active_dashboard_plots)})
+    #options['section'].update({'map_extent': ",".join(str(i) for i in prv.map_extent),
+    #                           'active_dashboard_plots': ",".join(str(i) for i in prv.active_dashboard_plots)})
 
     # plot_characteristics_filename
     if ((prv.plot_characteristics_filename != join(PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')) &

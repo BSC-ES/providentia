@@ -8,20 +8,22 @@ import traceback
 
 import matplotlib
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
+from matplotlib.transforms import Bbox
 from packaging.version import Version
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import ProvConfiguration
 from .configuration import load_conf
 from .dashboard_elements import InputDialog
 from .dashboard_interactivity import LassoSelector
 from .fields_menus import metadata_conf, multispecies_conf, period_conf, representativity_conf
+from .plot_aux import get_map_extent
 from .plot_formatting import harmonise_xy_lims_paradigm
 from .read_aux import generate_file_trees
 from .warnings_prv import show_message
 from .writing import export_configuration, export_data_npz, export_netcdf
 
-from providentia.auxiliar import CURRENT_PATH, join
 
 class _Mode(str, Enum):
 
@@ -50,7 +52,8 @@ class NavigationToolbar(NavigationToolbar2QT):
             ('Save data', 'Save current instance of data and metadata', '', 'save_data'),
             ('Load data', 'Load toolbar selections from configuration file', '', 'conf_dialogs'),
             (None, None, None, None),
-            ('Home', 'Reset original view', 'home', 'home'),
+            ('World', 'Set world view', 'world', 'world'),
+            ('Home', 'Set to original view', 'home', 'home'),
             ('Back', 'Back to previous view', 'back', 'back'),
             ('Forward', 'Forward to next view', 'forward', 'forward'),
             (None, None, None, None),
@@ -68,7 +71,8 @@ class NavigationToolbar(NavigationToolbar2QT):
         actions = self.findChildren(QtWidgets.QAction)
         self._actions['save_data'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/save_icon.png")))
         self._actions['conf_dialogs'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/conf_icon.png")))
-        self._actions['home'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/world_icon.png")))
+        self._actions['world'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/world_icon.png")))
+        self._actions['home'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/original_view_icon.png")))
         self._actions['zoom'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/zoom_icon.png")))
         self._actions['connect_lasso'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/lasso_icon.png")))
         self._actions['save_figure'].setIcon(QtGui.QIcon(join(CURRENT_PATH, "resources/save_fig_icon.png")))
@@ -112,17 +116,12 @@ class NavigationToolbar(NavigationToolbar2QT):
             if startpath != "":
                 matplotlib.rcParams['savefig.directory'] = (os.path.dirname(fname))
                 try:
-                    if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                        self.read_instance.cursor_function = 'save_data'
-                        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
                     if chose_npz:
                         export_data_npz(self.read_instance, fname, input_dialogue=True)
                     elif chose_conf:
                         export_configuration(self.read_instance, fname)
                     else:
                         export_netcdf(self.read_instance, fname, input_dialogue=True)
-                    if self.read_instance.cursor_function == 'save_data':
-                        QtWidgets.QApplication.restoreOverrideCursor()
                     msg = 'The data was successfully saved in {}.'.format(fname)
                     show_message(self.read_instance, msg)
                 except Exception as e:
@@ -144,7 +143,7 @@ class NavigationToolbar(NavigationToolbar2QT):
                 self.harmonise_changed_axis(axis)
     
     def harmonise_changed_axis(self, axis):
-        """ Method that checks which plot is being restored an applies
+        """ Method that checks which plot is being restored and applies
             the harmonise_xy_lims_paradigm function if needed. 
         """
 
@@ -162,9 +161,23 @@ class NavigationToolbar(NavigationToolbar2QT):
         # apply harmonise to the plots with time
         if plot_type in ["periodic", "periodic-violin", "timeseries"]:
             plot_options = copy.deepcopy(self.canvas_instance.current_plot_options[plot_type])
-            harmonise_xy_lims_paradigm(self.canvas_instance, self.read_instance, self.canvas_instance.plot_axes[plot_type], plot_type, 
-                                        self.canvas_instance.plot_characteristics[plot_type], plot_options, relim=True, autoscale=False)
+            harmonise_xy_lims_paradigm(self.read_instance, self.canvas_instance, self.canvas_instance.plot_axes[plot_type], plot_type, 
+                                       self.canvas_instance.plot_characteristics[plot_type], plot_options, relim=True, autoscale=False)
                 
+    def world(self):
+        """ Method that sets the world view in the map.
+        """
+
+        self._nav_stack.back()
+        self.set_history_buttons()
+        ax = self.canvas_instance.plot_axes['map']
+        ax.set_extent([-180, 180, -90, 90])
+        self.push_current()
+        self.canvas.draw_idle()
+
+        # update map extent
+        self.read_instance.map_extent = get_map_extent(self.canvas_instance)
+
     def home(self):
         """ Method inherited from matplotlib backend_bases home that 
             restores the original view.
@@ -181,6 +194,9 @@ class NavigationToolbar(NavigationToolbar2QT):
         # harmonise axis if needed
         self.check_for_axis_limit_changes(previous_state, current_state)
 
+        # update map extent
+        self.read_instance.map_extent = get_map_extent(self.canvas_instance)
+
     def back(self):
         """ Method inherited from matplotlib backend_bases back that 
             moves back up the view lim stack.
@@ -196,7 +212,10 @@ class NavigationToolbar(NavigationToolbar2QT):
 
         # harmonise axis if needed
         self.check_for_axis_limit_changes(previous_state, current_state)
-    
+
+        # update map extent
+        self.read_instance.map_extent = get_map_extent(self.canvas_instance)
+
     def forward(self):
         """ Method inherited from matplotlib backend_bases forward that 
             moves forward in the view lim stack.
@@ -213,6 +232,9 @@ class NavigationToolbar(NavigationToolbar2QT):
         # harmonise axis if needed
         self.check_for_axis_limit_changes(previous_state, current_state)
 
+        # update map extent
+        self.read_instance.map_extent = get_map_extent(self.canvas_instance)
+
     def drag_pan(self, event):
         """ Method inherited from matplotlib backend_bases drag_pan that controls
             the release in zoom.
@@ -222,7 +244,10 @@ class NavigationToolbar(NavigationToolbar2QT):
 
         # harmonise axis if needed
         self.harmonise_changed_axis(event.inaxes)
-        
+
+        # update map extent
+        self.read_instance.map_extent = get_map_extent(self.canvas_instance)
+
     def release_zoom(self, event):
         """ Method inherited from matplotlib backend_bases release_zoom that 
             drags in pan/zoom mode.
@@ -232,7 +257,10 @@ class NavigationToolbar(NavigationToolbar2QT):
 
         # harmonise axis if needed
         self.harmonise_changed_axis(event.inaxes)
-    
+
+        # update map extent
+        self.read_instance.map_extent = get_map_extent(self.canvas_instance)
+
     def save_figure(self):
         """ Method inherited from matplotlib backend_bases save_figure that controls
             the image creation.

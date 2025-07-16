@@ -1,6 +1,6 @@
 # Interpolation
 
-Starting from the release of version 2.4.0 in September 2024, our old tool Providentia Interpolation will be merged into Providentia and it will be now refered as the Interpolation mode.
+In version 2.4.0 in September 2024, our [old tool Providentia Interpolation](https://earth.bsc.es/gitlab/ac/providentia-interpolation) was merged into Providentia and since then it is refered as the Interpolation mode.
 
 This mode allows users to spatially interpolate experiment output against available observational stations to be viewable in **Providentia**. 
 
@@ -9,8 +9,6 @@ The Interpolation mode allows to interpolate experiments against **GHOST** and *
 Contained in: `/gpfs/projects/bsc32/AC_cache/recon/exp_interp/` exists an archive of previously interpolated experiment output, depending on the version. If the experiment you want to analyse is not there, or if you have re-run the experiment, add new variables etc. then this guide will aid you in interpolating the experiment output.
 
 ## Starting an Interpolation
-
-The interpolation has been designed to only run on the **MareNostrum5/Nord3v2** machines, so first the user must be logged onto either machine.
 
 To start an interpolation,  you need to add either --interp, --interpolate, or --interpolation as a launch option along with the **mandatory** configuration file in the command line. This will initiate the interpolation process.
 
@@ -31,7 +29,7 @@ In terms of performance, we recommend running Providentia Interpolation in MareN
 
 ## Checking output  
 
-The code that runs the interpolation is found under the `providentia/interpolation` folder. All the logs will be created there too.
+The code that runs the interpolation is found under the `logs/interpolation` folder. All the logs will be created there too.
 
 To check the status/output of an interpolation job, the following log files are created on submission in different directories:
 
@@ -39,19 +37,19 @@ To check the status/output of an interpolation job, the following log files are 
 
    These logs provide an overview of the interpolation process. Most errors will appear here.
    
-   Located in the `providentia/interpolation/management_logs` folder, look for an `$SLURMJOBID.out` file.
+   Located in the `logs/interpolation/management_logs` folder, look for an `$SLURMJOBID.out` file.
 
 * ### Submission logs
 
    These logs contain information about the Slurm and Greasy submissions to the HPC machines.
    
-   Found in the `providentia/interpolation/submission_logs` folder, search for an `$SLURMJOBID.out` file.
+   Found in the `logs/interpolation/submission_logs` folder, search for an `$SLURMJOBID.out` file.
 
 * ### Interpolation logs
 
    These logs give information about individual interpolations and how long it took to do them.
    
-    Found in the `providentia/interpolation/interpolation_logs` folder, for each individual interpolation, new directories are created with the structure `{experiment}/{species}/{network}/{resolution}`. Inside these directories, logs for each month are stored as `{YYYYMM}_{exit_code}.out`. If successful, the exit code will be 0.
+    Found in the `logs/interpolation/interpolation_logs` folder, for each individual interpolation, new directories are created with the structure `{experiment}/{species}/{network}/{resolution}`. Inside these directories, logs for each month are stored as `{YYYYMM}_{exit_code}.out`. If successful, the exit code will be 0.
 
  
 If the interpolation is succesful, the resulted interpolated files are stored under the directory : `/gpfs/projects/bsc32/AC_cache/recon/exp_interp/` followed by the latest version of GHOST used by the interpolation.
@@ -64,7 +62,7 @@ This file contains a dictionary of default relevant experiments grouped by type,
 
 If you have a new experiment to interpolate and it is located on one of the examples paths such as `/esarchive/exp/monarch/`, you only need to add it to its list of experiments.
 
-If the experiment is not located in one of the predefined paths, you will need to add the **experiment type**, the **experiment name**, and the **experiment storage directory** (excluding the experiment name). For example:
+If the experiment is not located in one of the predefined paths, you will need to add the **experiment type**, the **experiment name**, and the **experiment storage directory** from root (excluding the experiment name). For example:
 
 ```
 "example_experiment_type": {
@@ -74,15 +72,26 @@ If the experiment is not located in one of the predefined paths, you will need t
         ]
 ```
 
-You can find this exact template at the end of the interp_experiments.yaml file.
+You can find this exact template at the end of the `interp_experiments.yaml` file.
 
-When adding a new experiment, the subdirectories inside the experiment storage directory must follow this structure: `{experiment_name}/{domain}/{resolution}/{species}`. For example: `cams61_monarch_ph3/eu/hourly/sconco3`.
+When adding a new experiment to a directory, if you want it to be read from Providentia, the subdirectories inside the experiment storage directory must follow this structure: `{experiment_name}/{domain}/{resolution}/{species}`. For example: `cams61_monarch_ph3/eu/hourly/sconco3`.
 
 There can be multiple paths to the same experiments, and you can add them to the list of paths. The order is important: the first path that works on the machine will be used.
 
-There's normally two types the location of experiment data:
+There's normally two location types of experiment data:
 
-* **gpfs**: Accessible by the ***MareNostrum5/Nord3v2*** machines.
-* **esarchive**: Accessible by the ***Nord3v2*** machine.
+* **gpfs**: Accessible by the ***MareNostrum5/Nord4*** machines.
+* **esarchive**: Accessible by the ***Nord4*** machine.
 
 If you are using a machine that allows both types of paths, it is recommended to list your `gpfs` paths first. This is because when reading data from the `esarchive`, a major limitation on the read time is the transfer speed between the 2 machines, reading directly from the `gpfs`  directory circumvents this therefore.
+
+## Additional Considerations
+
+When checking if an experiment is stored in a location with the corresponding domain, resolution, and species, consider that the species might not always be listed under the same name.
+
+The file `internal/mapping_species.yaml` contains a dictionary mapping original species names to their alternative names. 
+
+Note that the mapping species file is only used when the species name from the configuration file is not found in the expected location, meaning Povidentia first looks for the species written in the configuration file. If it is not found, it then searches for the corresponding mapped species in `mapping_species.yaml`.
+
+
+

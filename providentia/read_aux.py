@@ -1,5 +1,6 @@
 """ Module storing static reading functions """
 
+import copy
 import datetime
 from glob import glob
 import json
@@ -855,7 +856,7 @@ def generate_file_trees(instance, force=False):
     elif instance.disable_file_tree:
         gft = False
     # by default generate filetree on MN5
-    elif instance.machine in ['mn5', 'nord4']:
+    elif instance.machine in ['mn5', 'nord4', 'dust']:
         gft = True
     # by default generate filetree locally
     elif instance.filetree_type == 'local':
@@ -906,3 +907,69 @@ def get_valid_metadata(read_instance, variable, valid_station_idxs, networkspeci
         valid_metadata.append(first_valid_station_metadata)
 
     return valid_metadata
+
+
+def do_resampling(read_instance):
+
+    """ Function which handles resampling of data """
+
+    possible_resolutions = ['hourly', 'hourly_instantaneous', '3hourly', '3hourly_instantaneous', 
+                            '6hourly', '6hourly_instantaneous', 'daily', 'monthly', 'annual']
+    
+    # temporally resample data array if required
+    if read_instance.resampling_resolution in possible_resolutions:
+
+        # update relevant/nonrelevant temporal resolutions 
+        read_instance.relevant_temporal_resolutions = get_relevant_temporal_resolutions(read_instance.resampling_resolution)
+        read_instance.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(read_instance.resampling_resolution)
+
+        # transform resolution to code for .resample function
+        if read_instance.resampling_resolution in ['hourly', 'hourly_instantaneous']:
+            temporal_resolution_to_output_code = 'h'
+        elif read_instance.resampling_resolution in ['3hourly', '3hourly_instantaneous']:
+            temporal_resolution_to_output_code = '3h'
+        elif read_instance.resampling_resolution in ['6hourly', '6hourly_instantaneous']:
+            temporal_resolution_to_output_code = '6h'
+        elif read_instance.resampling_resolution == 'daily':
+            temporal_resolution_to_output_code = 'D'
+        elif read_instance.resampling_resolution == 'monthly':
+            temporal_resolution_to_output_code = 'MS'
+        elif read_instance.resampling_resolution == 'annual':
+            temporal_resolution_to_output_code = 'YS'
+
+        # copy original resolution data array 
+        read_instance.data_in_memory_resampled = copy.deepcopy(read_instance.data_in_memory)
+
+        # iterate through networkspecies + filter_networkspecies
+        for networkspeci in (read_instance.networkspecies + read_instance.filter_networkspecies):
+
+            # get data array for networkspeci
+            data_array = read_instance.data_in_memory_resampled[networkspeci][:,:,:]
+
+            # flatten data label dimension for creation of pandas dataframe
+            data_array_reduced = data_array.reshape(data_array.shape[0]*data_array.shape[1], data_array.shape[2])
+            
+            # create pandas dataframe of data array
+            data_array_df = pd.DataFrame(data_array_reduced.transpose(), index=read_instance.time_array, 
+                                            columns=np.arange(data_array_reduced.shape[0]), dtype=np.float32)
+            
+            # resample data array
+            data_array_df_resampled = data_array_df.resample(temporal_resolution_to_output_code, axis=0).mean()
+            read_instance.time_index = data_array_df_resampled.index
+
+            # save back out as numpy array (reshaping to get back networkspecies dimension)
+            data_array_resampled = data_array_df_resampled.to_numpy().transpose()
+            read_instance.data_in_memory_resampled[networkspeci] = data_array_resampled.reshape(data_array.shape[0], 
+                                                                                                data_array.shape[1], 
+                                                                                                data_array_resampled.shape[1])
+
+    else:
+        # update relevant/nonrelevant temporal resolutions 
+        read_instance.relevant_temporal_resolutions = get_relevant_temporal_resolutions(read_instance.resolution)    
+        read_instance.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(read_instance.resolution) 
+
+        # update data_in_memory_resampled to point to data_in_memory
+        read_instance.data_in_memory_resampled = read_instance.data_in_memory
+
+        # set time index to point to time_array
+        read_instance.time_index = read_instance.time_array

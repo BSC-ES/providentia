@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Download &mdash; Providentia 2.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
@@ -22,8 +22,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Topics in depth" href="topics-in-depth.html" />
-    <link rel="prev" title="Interactive mode" href="Interactive-mode.html" /> 
+    <link rel="next" title="Library" href="Library.html" />
+    <link rel="prev" title="Report" href="Report.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -51,18 +51,23 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modes.html">Modes</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Interpolation.html">Interpolation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Offline-reports.html">Offline reports</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Interactive-mode.html">Interactive mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Report.html">Report</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Download</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#types-of-downloads">Types of downloads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#where-to-download-from">Where to download from</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download-requirements-summary">Download Requirements Summary</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#fields">Fields</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#env-file">.env file</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Notebook.html">Notebook</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a></li>
 <li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="evolution.html">Evolution</a></li>
 </ul>
 
         </div>
@@ -93,12 +98,116 @@
   <section id="download">
 <h1>Download<a class="headerlink" href="#download" title="Link to this heading"></a></h1>
 <p>Now it is possible to download data directly into your machine outside HPC via the download mode. With this, you won’t need to spend time waiting for a job to be allocated for you and the tool interactive features will run smoothly as there will be no x11 forwarding.</p>
-<p>To download data you just need to add <code class="docutils literal notranslate"><span class="pre">--download</span></code> to your command:</p>
+<p>To download data you just need to add <code class="docutils literal notranslate"><span class="pre">--download</span></code> or <code class="docutils literal notranslate"><span class="pre">--dl</span></code> to your command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">download</span>
 </pre></div>
 </div>
-<p>This will get the data that needs to be downloaded from your configuration file and save it into the directories specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths</span></code> for <code class="docutils literal notranslate"><span class="pre">local</span></code>.</p>
+<p>OR</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">dl</span>
+</pre></div>
+</div>
+<p>This will get the data that needs to be downloaded from your configuration file and save it into the directories specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code> for <code class="docutils literal notranslate"><span class="pre">local</span></code>.</p>
 <p>The download mode fetches all the content specified in your configuration file across all sections, similar to how it functions in the reports.</p>
+<section id="types-of-downloads">
+<h2>Types of downloads<a class="headerlink" href="#types-of-downloads" title="Link to this heading"></a></h2>
+<p>There are currently four types of downloads available:</p>
+<ol class="arabic simple">
+<li><p><strong>Download of Network from HPC Machines:</strong></p>
+<ul class="simple">
+<li><p>Downloads ghost and non-ghost networks from the storage5 machine (or mn5 if storage5 is down).</p></li>
+<li><p>Saves them within the <code class="docutils literal notranslate"><span class="pre">ghost_root</span></code> and <code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code> paths specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
+<li><p><strong>How to get this type of download:</strong> Answer <code class="docutils literal notranslate"><span class="pre">y</span></code> to the <em>Do you want to download from BSC remote machine?</em> question or change the <code class="docutils literal notranslate"><span class="pre">BSC_DL_CHOICE</span></code> value to <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p></li>
+</ul>
+</li>
+<li><p><strong>Download of Network from Zenodo:</strong></p>
+<ul class="simple">
+<li><p>Downloads networks from the <a class="reference external" href="https://zenodo.org/records/10637450">GHOST Zenodo webpage</a>.</p></li>
+<li><p>No need for a BSC HPC machine account, as the download is from the internet.</p></li>
+<li><p>To download a network, use the network name exactly as it appears in the zip file. For example, use <code class="docutils literal notranslate"><span class="pre">EBAS-COLOSSAL_tursk</span></code> instead of <code class="docutils literal notranslate"><span class="pre">EBAS</span></code>.</p></li>
+<li><p><strong>How to get this type of download:</strong> Answer <code class="docutils literal notranslate"><span class="pre">n</span></code> to the <em>Do you want to download from BSC remote machine?</em> question or change the <code class="docutils literal notranslate"><span class="pre">BSC_DL_CHOICE</span></code> value to <code class="docutils literal notranslate"><span class="pre">n</span></code>.</p></li>
+</ul>
+</li>
+<li><p><strong>Download of Interpolated Experiments:</strong></p>
+<ul class="simple">
+<li><p>Downloads interpolated experiments from the storage5 machine (or mn5 if storage5 is down).</p></li>
+<li><p>Saves them in the <code class="docutils literal notranslate"><span class="pre">exp_root</span></code> paths specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
+<li><p><strong>How to get this type of download:</strong> Set the <code class="docutils literal notranslate"><span class="pre">interpolated</span></code> field in the configuration file to <code class="docutils literal notranslate"><span class="pre">True</span></code> or don’t even set it since that is the default.</p></li>
+</ul>
+</li>
+<li><p><strong>Download of Non-interpolated Experiments:</strong></p>
+<ul class="simple">
+<li><p>For local downloads:</p>
+<ul>
+<li><p>Downloads non-interpolated experiments from the storage5 machine (or mn5 if storage5 is down).</p></li>
+<li><p>The preferred path is specified in <code class="docutils literal notranslate"><span class="pre">interp_experiments.yaml</span></code>. If the experiment is not listed or no path or experiment domain is found, the system will look in the <code class="docutils literal notranslate"><span class="pre">exp_to_interp_root</span></code> path specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
+</ul>
+</li>
+<li><p>For HPC downloads:</p>
+<ul>
+<li><p>In this case, the download (more accurately, the copy) will transfer non-interpolated experiments from esarchive to the gpfs folder found in <code class="docutils literal notranslate"><span class="pre">exp_to_interp_root</span></code> in the <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code> file.</p></li>
+<li><p>It only copies from the paths that are specified in <code class="docutils literal notranslate"><span class="pre">interp_experiments.yaml</span></code>.</p></li>
+</ul>
+</li>
+<li><p><strong>How to get this type of download:</strong> Set the <code class="docutils literal notranslate"><span class="pre">interpolated</span></code> field in the configuration file to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
+</li>
+</ol>
+<p>*To know how to define an experiment in <code class="docutils literal notranslate"><span class="pre">interp_experiments.yaml</span></code>, please visit <a class="reference external" href="https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Interpolation#define-experiments">this page</a>.</p>
+</section>
+<section id="where-to-download-from">
+<h2>Where to download from<a class="headerlink" href="#where-to-download-from" title="Link to this heading"></a></h2>
+<p>As for today download mode is available:</p>
+<ul class="simple">
+<li><p><strong>In local</strong> for all 4 modes:</p>
+<ol class="arabic simple">
+<li><p>Download of Network from HPC Machines.</p></li>
+<li><p>Download of Network from Zenodo.</p></li>
+<li><p>Download of Interpolated Experiments.</p></li>
+<li><p>Download of Non-interpolated Experiment (download from esarchive or gpfs to local).</p></li>
+</ol>
+</li>
+<li><p><strong>In storage5/nord4</strong> for:</p>
+<ol class="arabic simple">
+<li><p>Download of Non-interpolated Experiment (copy from esarchive to gpfs).</p></li>
+</ol>
+</li>
+</ul>
+</section>
+<section id="download-requirements-summary">
+<h2>Download Requirements Summary<a class="headerlink" href="#download-requirements-summary" title="Link to this heading"></a></h2>
+<p>The table below summarizes the basic requirements to download data from BSC:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Download Type</p></th>
+<th class="head"><p>Available from Local</p></th>
+<th class="head"><p>Available from HPC Machines</p></th>
+<th class="head"><p>Need to have a BSC account to an HPC machine</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Network from HPC Machines</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>Network from Zenodo</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✗</p></td>
+</tr>
+<tr class="row-even"><td><p>Interpolated Experiment</p></td>
+<td><p>✓</p></td>
+<td><p>✗</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>Non-interpolated Experiment</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 <section id="fields">
 <h2>Fields<a class="headerlink" href="#fields" title="Link to this heading"></a></h2>
 <p>Fields work a bit different in this mode, as only the parameters below will be used, some of them without being mandatory:</p>
@@ -163,8 +272,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Interactive-mode.html" class="btn btn-neutral float-left" title="Interactive mode" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="topics-in-depth.html" class="btn btn-neutral float-right" title="Topics in depth" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Report.html" class="btn btn-neutral float-left" title="Report" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Library.html" class="btn btn-neutral float-right" title="Library" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

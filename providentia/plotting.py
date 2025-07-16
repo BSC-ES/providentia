@@ -8,6 +8,7 @@ import yaml
 
 import cartopy
 import cartopy.crs as ccrs
+from datetime import datetime
 from KDEpy import FFTKDE
 from itertools import groupby
 import matplotlib
@@ -20,20 +21,21 @@ import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 from packaging.version import Version
+from PIL import Image
 import pandas as pd
 import pyproj
 import seaborn as sns
 
+from providentia.auxiliar import CURRENT_PATH, join
 from .calculate import ExpBias, Stats
-from .statistics import (boxplot_inner_fences, calculate_statistic,
+from .statistics import (boxplot_inner_fences, calculate_statistic, group_periodic,
                          get_fairmode_data, get_z_statistic_info, get_z_statistic_type)
 from .read_aux import drop_nans, get_valid_metadata
-from .plot_aux import (create_chunked_timeseries, get_multispecies_aliases, 
+from .plot_aux import (create_statistical_timeseries, get_multispecies_aliases, 
                        get_taylor_diagram_ghelper_info, kde_fft, merge_cells, periodic_labels, 
                        periodic_xticks, round_decimal_places, temp_axis_dict)
 from .plot_formatting import set_axis_title
 from .warnings_prv import show_message
-from providentia.auxiliar import CURRENT_PATH, join
 
 # speed up transformations in cartopy
 pyproj.set_use_global_context()
@@ -356,6 +358,64 @@ class Plotting:
             
         return grid_edge_polygons
 
+    def draw_line(self, fig, key, value, plot_characteristics, y, spacing, max_len):
+        """ Add key-value line to PDF
+
+            :param fig: Cover page
+            :type fig: plt.figure
+            :param key: Key of line
+            :type key: str
+            :param value: Value of line
+            :type value: str
+            :param plot_characteristics: 
+            :type plot_characteristics: dict
+            :param y: Y position of last line
+            :type y: float
+            :param spacing: Spacing between lines
+            :type spacing: float
+            :param max_len: Maximum characters in value
+            :type max_len: int
+        """
+
+        # calculate number of lines for value if it is more than max length characters
+        value = str(value)
+        lines = [value[i:i + max_len] for i in range(0, len(value), max_len)]
+        n_lines = len(lines)
+
+        # add key
+        fig.text(y=y + (n_lines - 1) * spacing, s=f"{key}:", **plot_characteristics['keys'])
+
+        # add value, wrapped when too long        
+        for j, line in enumerate(reversed(lines)):
+            fig.text(y=y + j * spacing, s=line, **plot_characteristics['values'])
+
+        return n_lines
+    
+    def format_value(self, value):
+        """ Convert list or array into string
+
+            :param value: Value
+            :type value: list, np.ndarray, str
+        """
+
+        if isinstance(value, (list, np.ndarray)):
+            return ', '.join(map(str, value))
+        return value
+
+    def get_key_by_bsc_name(self, standard_parameters, bsc_name):
+        """ Get GHOST standard parameter key name by BSC speci name
+
+            :param standard_parameters: GHOST standard parameters dictionary
+            :type standard_parameters: dict
+            :param bsc_name: BSC speci name
+            :type bsc_name: str
+        """
+
+        for key, value in standard_parameters.items():
+            if value.get('bsc_parameter_name') == bsc_name:
+                return key
+        return None
+
     def make_header(self, pdf, plot_characteristics):
         """ Make header.
         
@@ -363,23 +423,47 @@ class Plotting:
             :type plot_characteristics: dict
         """
 
-        # create header page
-        page = plt.figure(**plot_characteristics['figure'])
+        # load external image as background
+        if plot_characteristics['dark_mode']:
+            bg_image_path = 'assets/report_dark.png'
+            for key in ['keys', 'values']:
+                plot_characteristics[key]['color'] = plot_characteristics[key]['color']['dark_mode']
+            logo_image_path = plot_characteristics['logo']['path']['dark_mode']
+        else:
+            bg_image_path = 'assets/report.png'
+            for key in ['keys', 'values']:
+                plot_characteristics[key]['color'] = plot_characteristics[key]['color']['light_mode']
+            logo_image_path = plot_characteristics['logo']['path']['light_mode']
+        
+        # add background image
+        bg_img = Image.open(join(PROVIDENTIA_ROOT, bg_image_path))
+        dpi = self.canvas_instance.dpi
+        fig_width, fig_height = bg_img.size[0] / dpi, bg_img.size[1] / dpi
+        fig = plt.figure(figsize=(fig_width, fig_height), dpi=dpi)
+        ax = fig.add_axes([0, 0, 1, 1])
+        ax.axis('off')
+        ax.imshow(bg_img)
 
-        # get logo
-        logo_path = join(PROVIDENTIA_ROOT, 'assets/logoline.png')
-        logo = mpimg.imread(logo_path)
+        # add logo image if path is defined
+        if logo_image_path:
+            logo_img = Image.open(join(PROVIDENTIA_ROOT, logo_image_path))
 
-        # place logo on top center
-        page_width, page_height = page.get_size_inches()
-        xo = (page_width * page.dpi) / 2 + 500
-        yo = page_height * page.dpi * 2 + 700
-        page.figimage(logo, xo=int(xo), yo=int(yo))
-
-        # set header title
-        plot_characteristics['page_title']['s'] = self.read_instance.report_title 
-        plot_characteristics['page_title']['transform'] = page.transFigure
-        page.text(**plot_characteristics['page_title'])
+            # resize logo to scale of the background width (1/4 by default)
+            bg_width, bg_height = bg_img.size
+            scale = plot_characteristics['logo']['scale']
+            logo_new_width = int(bg_width * scale)
+            aspect_ratio = logo_img.height / logo_img.width
+            logo_new_height = int(logo_new_width * aspect_ratio)
+            logo_img_resized = logo_img.resize((logo_new_width, logo_new_height))
+            logo_array = np.asarray(logo_img_resized)
+            logo_ax = fig.add_axes([
+                plot_characteristics['logo']['x'],
+                plot_characteristics['logo']['y'],
+                scale,
+                logo_new_height / bg_height
+            ])
+            logo_ax.imshow(logo_array)
+            logo_ax.axis('off')
 
         # if len of network or species uniques is 1, set that instead of long list of duplicates
         _, idx = np.unique(self.read_instance.network, return_index=True)
@@ -387,42 +471,58 @@ class Plotting:
         _, idx = np.unique(self.read_instance.species, return_index=True)
         species_to_write = np.array(self.read_instance.species)[np.sort(idx)]
 
-        # set header main text
-        txt = 'Network : {}\n' \
-              'Species : {}\n' \
-              'Temporal Resolution : {}\n' \
-              'Date Range : {} - {}\n' \
-              'Experiments : {}\n' \
-              'Temporal Colocation : {}\n' \
-              'Spatial Colocation : {}\n' \
-              .format(network_to_write,
-                      species_to_write,
-                      self.read_instance.resolution,
-                      self.read_instance.start_date,
-                      self.read_instance.end_date,
-                      list(self.read_instance.experiments.values()),
-                      self.read_instance.temporal_colocation,
-                      self.read_instance.spatial_colocation 
-                      )
+        # get key from standard parameters as name for species
+        from GHOST_standards import standard_parameters
+        species = []
+        for speci in species_to_write:
+            species.append(self.get_key_by_bsc_name(standard_parameters, speci))
+        
+        # format date
+        start_date = datetime.strptime(self.read_instance.start_date, "%Y%m%d").strftime("%d/%m/%Y")
+        end_date = datetime.strptime(self.read_instance.end_date, "%Y%m%d").strftime("%d/%m/%Y")
+        dates = f"{start_date} - {end_date}"
 
-        # add filter species to header if have it set
-        if self.read_instance.filter_species: 
-            txt += 'Filter Species : {}\n'.format(self.read_instance.filter_species)
+        variable_values = {
+            'network': self.format_value(network_to_write),
+            'species': self.format_value(species),
+            'resolution': self.read_instance.resolution.capitalize().replace('_', ' '),
+            'dates': dates,
+            'experiments': self.format_value(list(self.read_instance.experiments.values())),
+            'temporal_colocation': self.read_instance.temporal_colocation,
+            'spatial_colocation': self.read_instance.spatial_colocation,
+            'filter_species': self.format_value(list(self.read_instance.filter_species.keys())),
+            'calibration': getattr(self.read_instance, 'calibration_factor', ''),
+            'subsections': self.format_value(self.read_instance.subsections)
+        }
 
-        # add calibration factor to header if have it set
-        if hasattr(self.read_instance, 'calibration_factor'):
-            if self.read_instance.calibration_factor: 
-                txt += 'Calibration : {}\n'.format(self.read_instance.calibration_factor)
+        visible_items = []
+        for key, value in variable_values.items():
+            if not value:
+                continue
+            if plot_characteristics['variables'][key]['active']:
+                if plot_characteristics['variables'][key]['value']:
+                    value = plot_characteristics['variables'][key]['value']
+                visible_items.append((key, value))
 
-        # add subsections to header
-        txt += 'Subsections : {}\n'.format(self.read_instance.subsections)
+        # add key: value as line
+        spacing = plot_characteristics['spacing']
+        max_len = plot_characteristics['max_len']
+        y = plot_characteristics['y_end']
+        for key, value in reversed(visible_items):
+            n_lines = self.draw_line(
+                fig,
+                plot_characteristics['variables'][key]['key'],
+                value,
+                plot_characteristics,
+                y,
+                spacing,
+                max_len
+            )
+            y += n_lines * spacing 
 
-        plot_characteristics['page_text']['s'] = txt   
-        plot_characteristics['page_text']['transform'] = page.transFigure
-        page.text(**plot_characteristics['page_text'])
-
-        pdf.savefig(page, dpi=self.canvas_instance.dpi)
-        plt.close(page)
+        # save and close
+        pdf.savefig(fig)
+        plt.close(fig)
 
     def make_metadata(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         """ Make metadata summary plot.
@@ -659,8 +759,8 @@ class Plotting:
         
         # chunk timeseries
         if (chunk_stat is not None) and (chunk_resolution is not None):
-            timeseries_data = create_chunked_timeseries(self.read_instance, self.canvas_instance, chunk_stat, 
-                                                        chunk_resolution, networkspeci, cut_data_labels, bias)
+            timeseries_data = create_statistical_timeseries(self.read_instance, self.canvas_instance, chunk_stat, 
+                                                            chunk_resolution, networkspeci, cut_data_labels, bias)
 
             # if it is a bias chunk statistic, add bias line
             z_statistic_type = get_z_statistic_type(chunk_stat)
@@ -772,7 +872,7 @@ class Plotting:
             relevant_sub_ax.axis('off')
             relevant_sub_ax.set_visible(False)
 
-        # iterate through all relevant temporal aggregation resolutions
+        # iterate through all relevant temporal aggregation 
         for relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
 
             # get subplot axis
@@ -781,9 +881,6 @@ class Plotting:
             # un-hide relevant resolution axis
             relevant_sub_ax.axis('on')
             relevant_sub_ax.set_visible(True)
-
-            # set xticks
-            xticks = self.canvas_instance.selected_station_data[networkspeci][relevant_temporal_resolution]['valid_xticks']
 
             # violin plot type?
             if zstat is None:
@@ -818,13 +915,13 @@ class Plotting:
                             violin_fill = plot_characteristics['violin_fill_2+models']
 
                     # make plot of median
-                    median_plots = relevant_sub_ax.plot(xticks, medians[:, data_label_ii], 
+                    median_plots = relevant_sub_ax.plot(self.canvas_instance.unique_periods, medians[:, data_label_ii], 
                                                         color=self.read_instance.plotting_params[data_label]['colour'], 
                                                         zorder=median_zorder, 
                                                         **plot_characteristics['plot']['median'])
 
                     # make violin plot
-                    for period_ii in range(len(xticks)):
+                    for period_ii in range(len(self.canvas_instance.unique_periods)):
 
                         # get x_grid for period
                         x_grid = period_x_grid[period_ii]
@@ -914,7 +1011,7 @@ class Plotting:
                         continue
 
                     # make plot
-                    self.periodic_plots = relevant_sub_ax.plot(xticks, stats_calc[:, data_label_ii], 
+                    self.periodic_plots = relevant_sub_ax.plot(self.canvas_instance.unique_periods, stats_calc[:, data_label_ii], 
                                                                color=self.read_instance.plotting_params[data_label]['colour'], 
                                                                zorder=self.read_instance.plotting_params[data_label]['zorder'], 
                                                                **plot_characteristics['plot'])
@@ -1080,8 +1177,14 @@ class Plotting:
                     period_data_range_min = []
                     period_data_range_max = []
                     period_x_grid = []
+
+                    # get grouped data per period
+                    grouped_data = group_periodic(self.read_instance, self.canvas_instance, networkspeci, 
+                                                  violin_resolution, False, 
+                                                  self.canvas_instance.selected_station_data[networkspeci]['active_mode'])
+
                     # iterate through periods
-                    for group in self.canvas_instance.selected_station_data[networkspeci][violin_resolution]['active_mode']:
+                    for group in grouped_data:
                         lower_inner_fence, upper_inner_fence = boxplot_inner_fences(group)
                         min_data = np.nanmin(group)
                         period_data_range_min.append(min_data)
@@ -1090,7 +1193,7 @@ class Plotting:
                 
                 # get data (flattened and drop NaNs)
                 if violin_resolution is not None:
-                    kde_data_grouped = [drop_nans(group[valid_data_labels.index(data_label)].flatten()) for group in self.canvas_instance.selected_station_data[networkspeci][violin_resolution]['active_mode']]
+                    kde_data_grouped = [drop_nans(group[valid_data_labels.index(data_label)].flatten()) for group in grouped_data]
                 else:    
                     kde_data_grouped = [drop_nans(self.canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(data_label),0,:])]
 
@@ -1361,7 +1464,7 @@ class Plotting:
         # set xticklabels 
         # labels for multispecies plot
         xtick_params = copy.deepcopy(plot_characteristics['xtick_params'])
-        xticklabel_params = copy.deepcopy(plot_characteristics['xticklabel_params'])
+        xticklabel_params = copy.deepcopy(plot_characteristics['xticklabels'])
         if ('multispecies' in plot_options) & (len(self.read_instance.networkspecies) > 1):
             xticks = np.arange(len(self.read_instance.networkspecies))
             #if all networks or species are same, drop them from xtick label
@@ -1373,6 +1476,7 @@ class Plotting:
                 xtick_labels = copy.deepcopy(self.read_instance.networkspecies)
             # get aliases for multispecies (if have any)
             xtick_labels, xlabel = get_multispecies_aliases(xtick_labels)
+
             # set xlabel if xlabels have changed due to alias, and have one to set
             if xlabel != '':
                 plot_characteristics['xlabel']['xlabel'] = xlabel
@@ -1382,7 +1486,7 @@ class Plotting:
             xticks = positions
             xtick_labels = copy.deepcopy(cut_data_labels)
 
-        #modify xticks to be horizontal as just have 1 label
+        # modify xticks to be horizontal as just have 1 label
         if len(xtick_labels) == 1:
             xtick_params['rotation'] = 0
             xticklabel_params = {}
@@ -1512,25 +1616,37 @@ class Plotting:
                 yticklabels = stats_df.index.get_level_values(1)
         relevant_axis.set_yticklabels(yticklabels, **plot_characteristics['yticklabels'])
 
-        # set xticklables
+        # set xticklabels
         relevant_axis.set_xticklabels(stats_df.columns, **plot_characteristics['xticklabels'])
 
-        # axis cuts off due to bug in matplotlib 3.1.1 - hack fix. Remove in Future!
-        if len(stats_df.index) > 1:
-            bottom, top = relevant_axis.get_ylim()
-            relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
+        # axis cuts off due to bug in matplotlib 3.1.1 - hack fix
+        if Version(matplotlib.__version__) <= Version("3.1.1"):
+            if len(stats_df.index) > 1:
+                bottom, top = relevant_axis.get_ylim()
+                relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
+
+        networkspecies = list(stats_df.index.get_level_values(0)[::(len(subsections))])
+        n_rows = len(subsections)*len(networkspecies)
+        n_cols = len(data_labels)
 
         # format for multispecies
         if 'multispecies' in plot_options:
+            
+            if plot_characteristics['multispecies']['xmin']:
+                xmin = plot_characteristics['multispecies']['xmin']
+            else:
+                if n_rows == n_cols:
+                    xmin = -0.35 * n_rows - 0.35 * n_cols
+                else:
+                    xmin = -0.35 * n_rows + 0.1 * n_cols
 
             # if we have more than one subsection and we are plotting summaries
             if (len(subsections) > 1) and (plotting_paradigm == 'summary'):
                 # add horizontal lines to separate networkspecies
-                networkspecies = list(stats_df.index.get_level_values(0)[::(len(subsections))])
                 y_separators = []
                 for networkspeci_ii in range(len(networkspecies)+1):
                     y_separators.append(len(subsections)*networkspeci_ii)
-                relevant_axis.hlines(y=y_separators, xmin=plot_characteristics['multispecies']['xmin'], 
+                relevant_axis.hlines(y=y_separators, xmin=xmin, 
                                      xmax=0, clip_on=False, **plot_characteristics['multispecies']['hlines'])
 
                 # annotate networkspecies names on the left
@@ -1544,11 +1660,11 @@ class Plotting:
                     
                     if Version(matplotlib.__version__) >= Version("3.3"):
                         relevant_axis.annotate(text=networkspeci_label, annotation_clip=False,
-                                               xy=(plot_characteristics['multispecies']['xmin'], y_position), 
+                                               xy=(xmin, y_position), 
                                                **plot_characteristics['multispecies']['yticklabels'])
                     else:
                         relevant_axis.annotate(s=networkspeci_label, annotation_clip=False,
-                                               xy=(plot_characteristics['multispecies']['xmin'], y_position), 
+                                               xy=(xmin, y_position), 
                                                **plot_characteristics['multispecies']['yticklabels'])        
         
         # format for non multispecies
@@ -1988,19 +2104,15 @@ class Plotting:
         # resample to daily for PM10 and PM2.5 if data is hourly
         # get MDA8 for ozone if data is hourly
         # finally filter by coverage
-        data, valid_station_idxs = get_fairmode_data(self.canvas_instance, self.read_instance, networkspeci,
-                                                     self.read_instance.resolution, data_labels)
+        data, valid_station_idxs = get_fairmode_data(self.read_instance, self.canvas_instance, networkspeci, data_labels)
         
         # skip making plot if there is no valid data
         # library and report modes are already handling this in advance
         if (not self.read_instance.report) and (not self.read_instance.library) and (not any(valid_station_idxs)):
             msg = 'No valid data to create FAIRMODE target plot after filtering by coverage.'
             show_message(self.read_instance, msg)
-            relevant_axis.set_visible(False)
+            self.read_instance.handle_layout_update('None', sender=self.canvas_instance.get_plot_type_position('fairmode-target'))
             return
-        else:
-            if not relevant_axis.get_visible():
-                relevant_axis.set_visible(True)
         
         observations_data = data[0, :, :]
 
@@ -2192,8 +2304,16 @@ class Plotting:
         # resample to daily for PM10 and PM2.5 if data is hourly
         # get MDA8 for ozone if data is hourly
         # finally filter by coverage
-        data, valid_station_idxs = get_fairmode_data(self.canvas_instance, self.read_instance, networkspeci,
-                                                     self.read_instance.resolution, data_labels)
+        data, valid_station_idxs = get_fairmode_data(self.read_instance, self.canvas_instance, networkspeci, data_labels)
+
+        # skip making plot if there is no valid data
+        # library and report modes are already handling this in advance
+        if (not self.read_instance.report) and (not self.read_instance.library) and (not any(valid_station_idxs)):
+            msg = 'No valid data to create FAIRMODE target plot after filtering by coverage.'
+            show_message(self.read_instance, msg)
+            self.read_instance.handle_layout_update('None', sender=self.canvas_instance.get_plot_type_position('fairmode-statsummary'))
+            return
+
         observations_data = data[0, :, :]
 
         # get settings
