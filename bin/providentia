@@ -63,7 +63,7 @@ IFS=$'\n\t'
 # An option followed by double colons '::' means that its argument is optional.
 # See `man getopt'.
 SHORT=uc:t:J:q:m:V
-LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,clean,section:,ghost_version:,conf:,config:,config_dir:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,exp_to_interp_root:,generate_file_tree,gft,disable_file_tree,dft,report,reports,offline,download,dl,interpolation,interp,interpolate,notebook,nb,jupyter,slurm_job_id:,network:,species:,resolution:,start_date:,end_date:,observations_data_label:,experiments:,domain:,ensemble_options:,dataset:,forecast_day:,forecast:,qa:,flags:,add_qa:,subtract_qa:,add_flags:,subtract_flags:,temporal_colocation:,spatial_colocation:,spatial_colocation_tolerance:,spatial_colocation_station_reference:,spatial_colocation_station_name:,spatial_colocation_longitude_latitude:,spatial_colocation_measurement_altitude:,spatial_colocation_validation:,spatial_colocation_validation_tolerance:,map_extent:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,harmonise_summary:,harmonise_stations:,active_dashboard_plots:,resampling_resolution:,statistic_mode:,statistic_aggregation:,periodic_statistic_mode:,periodic_statistic_aggregation:,timeseries_statistic_aggregation:,plot_characteristics_filename:,interp_multiprocessing:,interp_n_neighbours:,interp_reverse_vertical_orientation:,interp_chunk_size:,interp_job_array_limit:,logfile::
+LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,clean,section:,ghost_version:,conf:,config:,config_dir:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,exp_to_interp_root:,generate_file_tree,gft,disable_file_tree,dft,report,reports,offline,download,dl,interpolation,interp,interpolate,notebook,nb,jupyter,slurm_job_id:,network:,species:,resolution:,start_date:,end_date:,observations_data_label:,experiments:,domain:,ensemble_options:,forecast:,qa:,flags:,add_qa:,subtract_qa:,add_flags:,subtract_flags:,temporal_colocation:,spatial_colocation:,spatial_colocation_tolerance:,spatial_colocation_station_reference:,spatial_colocation_station_name:,spatial_colocation_longitude_latitude:,spatial_colocation_measurement_altitude:,spatial_colocation_validation:,spatial_colocation_validation_tolerance:,map_extent:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,harmonise_summary:,harmonise_stations:,active_dashboard_plots:,resampling_resolution:,statistic_mode:,statistic_aggregation:,periodic_statistic_mode:,periodic_statistic_aggregation:,timeseries_statistic_aggregation:,plot_characteristics_filename:,interp_multiprocessing:,interp_n_neighbours:,interp_reverse_vertical_orientation:,interp_chunk_size:,interp_job_array_limit:,interp_spinup_timesteps:,interp_experiment_downsampling:,interp_experiment_upsampling:,logfile::
 
 # parse arguments
 PARSED=$(getopt --options ${SHORT} \
@@ -75,11 +75,12 @@ if [[ $? -ne 0 ]]; then
     exit 2
 fi
 
+# define default number of cores
+cores="12"
+coresexplicit=false
+
 # set qos depending on the mode and machine
 if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" ]]; then
-    # define core as one when it is interpolation
-    cores="1"
-    
     # define qos in interpolation
     if [ "${BSC_MACHINE}" == "mn5" ]; then
         queue="gp_bsces"
@@ -88,10 +89,7 @@ if [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--int
     else
         queue="bsc_es"
     fi
-else
-    # define core as twelve if it is not an interpolation
-    cores="12"
-    
+else    
     # define qos in every mode but interpolation
     if [ "${BSC_MACHINE}" == "mn5" ]; then
         queue="gp_debug"
@@ -126,7 +124,9 @@ while [ $# -gt 0 ]; do
                     exit 0
                     ;;
         -c|--cores) shift
-                    cores=$OPTARG;;
+                    cores=$OPTARG
+                    coresexplicit=true
+                    ;;
         -t|--time) shift
                     time=$OPTARG;;
         -J|--jobname) shift
@@ -147,6 +147,8 @@ done
 account_option="--account=bsc32"
 queue_option="--qos=$queue"
 memory_option="--mem=$mem"
+cores_option="--cpus-per-task=$cores"
+cores_explicit_option="--cores-explicit=$coresexplicit"
 constraint_option="--constraint=$constraint"
 load_command="source bin/load_modules.sh"
 notebook_alloc_command="sbatch -t $time -c $cores -J $jobname"
@@ -157,7 +159,12 @@ if [[ "${OS}" != "Windows" ]] ; then
     python_ver="3"
 fi
 
-python_command="python$python_ver -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
+# if using Mac, then use Providentia executable (in order to rename application name)
+if [[ "${OS}" == "Mac" ]] ; then
+    python_command="./bin/Mac/Providentia -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
+else
+    python_command="python$python_ver -u -Wi -c 'from providentia import main;main.main()' $OTHEROPTS"
+fi
 
 # use clean mode and exit
 if [[ $PARSED =~ "--clean" ]]; then
@@ -165,9 +172,11 @@ if [[ $PARSED =~ "--clean" ]]; then
     exit 0
 fi
 
-# avoid x11 forwarding when creating reports or doing interpolations
-if [[ $PARSED =~ "--report" || $PARSED =~ "--reports" || $PARSED =~ "--offline" || $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" || $PARSED =~ "--download" || $PARSED =~ "--dl" ]]; then
+# Avoid x11 forwarding when creating reports or doing interpolations
+if [[ $PARSED =~ "--report" || $PARSED =~ "--reports" || $PARSED =~ "--offline" || $PARSED =~ "--download" || $PARSED =~ "--dl" ]]; then
     salloc_command="salloc -t $time -c $cores -J $jobname"
+elif [[ $PARSED =~ "--interp" || $PARSED =~ "--interpolation" || $PARSED =~ "--interpolate" ]]; then
+    salloc_command="salloc -t $time -c 1 -J $jobname"
 else
     salloc_command="salloc -t $time -c $cores -J $jobname --x11"
 fi
@@ -283,7 +292,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
             echo "Loading dependencies..."
             eval "${load_command}"
-            jobid=$(eval "sbatch ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
+            jobid=$(eval "sbatch ${cores_option} ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
             echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
 
         else
@@ -328,7 +337,7 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
             echo "Loading dependencies..."
             eval "${load_command}"
-            jobid=$(eval "sbatch ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
+            jobid=$(eval "sbatch ${cores_option} ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
             echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
 
     else
@@ -420,7 +429,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
             echo "Loading dependencies..."
             eval "${load_command}"
-            jobid=$(eval "sbatch ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
+            jobid=$(eval "sbatch ${cores_option} ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
             echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
 
         else
@@ -483,7 +492,7 @@ elif [ "${BSC_MACHINE}" == "grace" ]; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, mem: ${mem}"
             echo "Loading dependencies..."
             eval "${load_command}"
-            jobid=$(eval "sbatch ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
+            jobid=$(eval "sbatch ${cores_option} ${account_option} ${queue_option} bin/submit_interpolation_${BSC_MACHINE}.sh $OTHEROPTS | awk '{print \$4}'")
             echo "Check submission info in 'logs/interpolation/management_logs/$jobid.out'"
 
         else
@@ -530,13 +539,21 @@ else
         active_env=true
     fi
 
+    # if are using Mac then create a Providentia executable (if does not already exist)
+    if [[ "${OS}" == "Mac" ]] ; then
+        python_exe=$(eval "which python")
+        if [[ ! -f bin/Mac/Providentia ]]; then
+            cp "${python_exe}" bin/Mac/Providentia
+        fi
+    fi
+
     if $notebook; then
         echo "Starting jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}
         jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
     elif $interpolation; then
         unique_id=$(printf "%06d\n" $((RANDOM % 1000000)))
-        eval "${python_command} --slurm_job_id=$unique_id" 2>&1 | tee logs/interpolation/management_logs/$unique_id.out
+        eval "${python_command} ${cores_option} ${cores_explicit_option} --slurm_job_id=$unique_id" 2>&1 | tee logs/interpolation/management_logs/$unique_id.out
     else
         eval "${python_command}"
     fi

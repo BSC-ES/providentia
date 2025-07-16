@@ -6,6 +6,7 @@ from PIL import Image
 
 import cartopy
 import cartopy.feature as cfeature
+from datetime import datetime
 import matplotlib
 import matplotlib as mpl 
 import matplotlib.dates as mdates
@@ -17,11 +18,10 @@ import numpy as np
 from packaging.version import Version
 import pandas as pd
 
+from providentia.auxiliar import CURRENT_PATH, join
 from .plot_aux import get_land_polygon_resolution, set_map_extent
 from .plot_options import annotation, experiment_domain, linear_regression, log_axes, smooth, threshold
 from .statistics import get_z_statistic_info
-
-from providentia.auxiliar import CURRENT_PATH, join
 from .warnings_prv import show_message
 
 Image.MAX_IMAGE_PIXELS = None
@@ -89,15 +89,15 @@ def set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type):
     return None
 
 
-def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, base_plot_type, plot_characteristics, 
+def harmonise_xy_lims_paradigm(read_instance, canvas_instance, relevant_axs, base_plot_type, plot_characteristics, 
                                plot_options, xlim=None, ylim=None, relim=False, autoscale=False, autoscale_x=False, 
                                autoscale_y=False, bias_centre=False, harmonise=True):
     """ Harmonise xy limits across paradigm of plot type, unless axis limits have been defined.
     
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
         :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
+        :param canvas_instance: Instance of class Canvas or Report
+        :type canvas_instance: object
         :param relevant_axs: relevant axes
         :type relevant_axs: list
         :param base_plot_type: Plot type, without statistical information
@@ -357,6 +357,8 @@ def harmonise_xy_lims_paradigm(canvas_instance, read_instance, relevant_axs, bas
 
             # if there's more than 3 months, define time slices as the first day of the month
             if n_days >= 3 * 30:
+                # remove hours, minutes and seconds from the right and end dates
+                left, right = datetime(left.year, left.month, left.day), datetime(right.year, right.month, right.day)
 
                 # get the first and last days of each month
                 months_start = pd.date_range(left, right, freq='MS')
@@ -528,16 +530,16 @@ def set_axis_label(relevant_axis, label_ax, label, plot_characteristics,
             relevant_axis.set_ylabel(**axis_label_characteristics)
 
 
-def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_data_labels, networkspeci, 
+def format_plot_options(read_instance, canvas_instance, relevant_axs, relevant_data_labels, networkspeci, 
                         base_plot_type, plot_type, plot_options, map_extent=False, chunk_stat=None, 
                         chunk_resolution=None):
     """ Function that handles formatting of a plot axis,
         based on given plot options.
 
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
         :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
+        :param canvas_instance: Instance of class Canvas or Report
+        :type canvas_instance: object
         :param relevant_axs: relevant axes
         :type relevant_axs: list
         :param relevant_data_labels: names of plotted data arrays per axis
@@ -605,7 +607,7 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
         # annotation
         if 'annotate' in plot_options:
             if base_plot_type not in ['heatmap']:
-                annotation(canvas_instance, read_instance, relevant_ax, networkspeci, 
+                annotation(read_instance, canvas_instance, relevant_ax, networkspeci, 
                            relevant_data_labels[relevant_ax_ii], base_plot_type, 
                            canvas_instance.plot_characteristics[plot_type],
                            plot_options, plot_z_statistic_sign=z_statistic_sign)
@@ -615,31 +617,31 @@ def format_plot_options(canvas_instance, read_instance, relevant_axs, relevant_d
         
         # regression line
         if 'regression' in plot_options:
-            linear_regression(canvas_instance, read_instance, relevant_ax, networkspeci, 
+            linear_regression(read_instance, canvas_instance, relevant_ax, networkspeci, 
                               relevant_data_labels[relevant_ax_ii], base_plot_type, 
                               canvas_instance.plot_characteristics[plot_type], plot_options)
 
         # smooth line
         if 'smooth' in plot_options:
-            smooth(canvas_instance, read_instance, relevant_ax, networkspeci,
+            smooth(read_instance, canvas_instance, relevant_ax, networkspeci,
                    relevant_data_labels[relevant_ax_ii], base_plot_type, 
                    canvas_instance.plot_characteristics[plot_type], plot_options,
                    chunk_stat, chunk_resolution)
 
         # threshold line
         if 'threshold' in plot_options:
-            threshold(canvas_instance, read_instance, relevant_ax, networkspeci, base_plot_type,
+            threshold(read_instance, canvas_instance, relevant_ax, networkspeci, base_plot_type,
                       canvas_instance.plot_characteristics[plot_type])
             
             
-def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_characteristics, col_ii=0, last_valid_row=True, 
+def format_axis(read_instance, canvas_instance, ax, base_plot_type, plot_characteristics, col_ii=0, last_valid_row=True, 
                 last_row_on_page=True, map_extent=False, relevant_temporal_resolutions=None):
     """ Format a plotting axis.
     
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
         :param read_instance: Instance of class Dashboard or Report
         :type read_instance: object
+        :param canvas_instance: Instance of class Canvas or Report
+        :type canvas_instance: object
         :param ax: axis object
         :type ax: object
         :param base_plot_type: plot to make, without statistical information
@@ -805,9 +807,6 @@ def format_axis(canvas_instance, read_instance, ax, base_plot_type, plot_charact
             # add gridlines ?
             if 'gridlines' in plot_characteristics_vars:
                 gridlines_characteristics = plot_characteristics['gridlines']
-                if Version(cartopy.__version__) >= Version("0.23"):
-                    if 'auto_update' in plot_characteristics['gridlines'].keys():
-                        gridlines_characteristics.pop('auto_update', None)
                 ax_to_format.gridlines(crs=canvas_instance.datacrs, 
                                        **gridlines_characteristics)
 

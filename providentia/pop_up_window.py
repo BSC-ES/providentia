@@ -10,11 +10,11 @@ import yaml
 import numpy as np
 from PyQt5 import QtCore, QtWidgets
 
+from providentia.auxiliar import CURRENT_PATH, join
 from .read_aux import get_default_qa
 from .dashboard_elements import set_formatting, wrap_tooltip_text, ComboBox
 from .warnings_prv import show_message
 
-from providentia.auxiliar import CURRENT_PATH, join
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 # get operating system specific formatting
@@ -809,7 +809,6 @@ class PopUpWindow(QtWidgets.QWidget):
             elif event_source == self.page_memory['multispecies']['current_filter_species_fill_value'][label_ii]:
                 self.read_instance.selected_widget_filter_species_fill_value.update({label_ii: changed_param})
 
-
             # update multispecies filtering fields
             self.update_multispecies_fields(label_ii)
 
@@ -892,10 +891,7 @@ class PopUpWindow(QtWidgets.QWidget):
             :param add_filter_species: boolean to indicate if networkspeci has to be added or removed
             :type add_filter_species: boolean
         """
-
-        # update previous filter species
-        self.read_instance.previous_filter_species = copy.deepcopy(self.read_instance.filter_species)
-
+        
         # get selected network, species and bounds
         network = self.read_instance.selected_widget_network[label_ii]
         speci = self.read_instance.selected_widget_species[label_ii]
@@ -909,7 +905,7 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # if apply button is checked or filter_species in configuration file, add networkspecies in filter_species
         if add_filter_species:
-            
+
             # do not add to filter_species if lower and upper bounds are nan
             if current_lower == str(np.nan) or current_upper == str(np.nan):
                 msg = 'Data bounds cannot be empty.'
@@ -944,11 +940,11 @@ class PopUpWindow(QtWidgets.QWidget):
             # add or update networkspeci
             # check selected lower and upper bounds and fill value are numbers or nan
             try:
-                if networkspeci in self.read_instance.filter_species.keys():
-                    if current_filter_species not in self.read_instance.filter_species[networkspeci]:
-                        self.read_instance.filter_species[networkspeci].append(current_filter_species)
+                if networkspeci in self.read_instance.selected_filter_species.keys():
+                    if current_filter_species not in self.read_instance.selected_filter_species[networkspeci]:
+                        self.read_instance.selected_filter_species[networkspeci].append(current_filter_species)
                 else:
-                    self.read_instance.filter_species[networkspeci] = [current_filter_species]
+                    self.read_instance.selected_filter_species[networkspeci] = [current_filter_species]
 
             # if any of the fields are not numbers, return from function
             except ValueError:
@@ -962,7 +958,8 @@ class PopUpWindow(QtWidgets.QWidget):
                 # get species in memory 
                 species = copy.deepcopy(self.read_instance.species)
                 filter_species = [val.split('|')[1] 
-                                  for val in list(copy.deepcopy(self.read_instance.filter_species).keys())]
+                                  for val in list(copy.deepcopy(self.read_instance.selected_filter_species).keys())]
+
                 qa_species = species + filter_species
                 
                 # add qa per species
@@ -973,16 +970,15 @@ class PopUpWindow(QtWidgets.QWidget):
         # if apply button is unchecked, remove networkspecies from filter_species
         else:
             # remove from filter_species
-            filter_species_aux = copy.deepcopy(self.read_instance.filter_species)
+            filter_species_aux = copy.deepcopy(self.read_instance.selected_filter_species)
             if networkspeci in filter_species_aux.keys():
-                for networkspeci in filter_species_aux:
-                    if current_filter_species in filter_species_aux[networkspeci]:
-                        sub_networkspeci_ii = self.read_instance.filter_species[networkspeci].index(current_filter_species)
-                        del self.read_instance.filter_species[networkspeci][sub_networkspeci_ii]
-                        if len(self.read_instance.filter_species[networkspeci]) == 0:
-                            del self.read_instance.filter_species[networkspeci]
+                if current_filter_species in filter_species_aux[networkspeci]:
+                    sub_networkspeci_ii = self.read_instance.selected_filter_species[networkspeci].index(current_filter_species)
+                    del self.read_instance.selected_filter_species[networkspeci][sub_networkspeci_ii]
+                    if len(self.read_instance.selected_filter_species[networkspeci]) == 0:
+                        del self.read_instance.selected_filter_species[networkspeci]
 
             # remove from qa_per_species
             if ((speci in self.read_instance.qa_per_species) and 
-                (networkspeci not in self.read_instance.filter_species.keys())):
+                (networkspeci not in self.read_instance.selected_filter_species.keys())):
                 del self.read_instance.qa_per_species[speci]
