@@ -27,7 +27,7 @@ from .plot_aux import get_taylor_diagram_ghelper, set_map_extent, reorder_pdf_pa
 from .plot_formatting import format_plot_options, format_axis, harmonise_xy_lims_paradigm, set_axis_label, set_axis_title
 from .read import DataReader
 from .read_aux import (generate_file_trees, get_lower_resolutions, 
-                       get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
+                       get_periodic_nonrelevant_temporal_resolutions, get_periodic_relevant_temporal_resolutions, 
                        get_valid_experiments, get_valid_obs_files_in_date_range)
 from .statistics import (calculate_statistic, get_fairmode_data,
                          generate_colourbar, get_selected_station_data, get_z_statistic_info)
@@ -177,8 +177,8 @@ class Report:
             provconf.check_validity()
 
             # set some key configuration variables
-            self.relevant_temporal_resolutions = get_relevant_temporal_resolutions(self.resolution)
-            self.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(self.resolution)
+            self.periodic_relevant_temporal_resolutions = get_periodic_relevant_temporal_resolutions(self.resolution)
+            self.periodic_nonrelevant_temporal_resolutions = get_periodic_nonrelevant_temporal_resolutions(self.resolution)
             self.data_labels = [self.observations_data_label] + list(self.experiments.values())
             self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
             self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
@@ -726,10 +726,10 @@ class Report:
                             
                             # format axis
                             format_axis(self, self, grid_dict, base_plot_type, plot_characteristics,
-                                        relevant_temporal_resolutions=self.relevant_temporal_resolutions)
+                                        relevant_temporal_resolutions=self.periodic_relevant_temporal_resolutions)
 
                             # get references to periodic label annotations made, and then hide them
-                            for relevant_temporal_resolution in self.relevant_temporal_resolutions:
+                            for relevant_temporal_resolution in self.periodic_relevant_temporal_resolutions:
                                 annotations = [child for child in grid_dict[relevant_temporal_resolution].get_children() 
                                                if isinstance(child, matplotlib.text.Annotation)]
                                 # hide annotations
@@ -1718,7 +1718,7 @@ class Report:
 
                 # turn axis/axes on
                 if base_plot_type in ['periodic','periodic-violin']:
-                    for relevant_temporal_resolution in self.relevant_temporal_resolutions:
+                    for relevant_temporal_resolution in self.periodic_relevant_temporal_resolutions:
                         relevant_axis[relevant_temporal_resolution].axis('on')
                         relevant_axis[relevant_temporal_resolution].set_visible(True)
 
@@ -1930,7 +1930,7 @@ class Report:
         for relevant_page in relevant_pages:
             if base_plot_type in ['periodic', 'periodic-violin']:
                 for ax in self.plot_dictionary[relevant_page]['axs']:
-                    for relevant_temporal_resolution in self.relevant_temporal_resolutions:
+                    for relevant_temporal_resolution in self.periodic_relevant_temporal_resolutions:
                         relevant_axs.append(ax['handle'][relevant_temporal_resolution])
                         relevant_data_labels.append(ax['data_labels'])
             elif base_plot_type == 'fairmode-statsummary':
@@ -1952,7 +1952,7 @@ class Report:
         relevant_data_labels = []
         for relevant_page, page_ind in plot_indices:
             if base_plot_type in ['periodic', 'periodic-violin']:
-                for relevant_temporal_resolution in self.relevant_temporal_resolutions:
+                for relevant_temporal_resolution in self.periodic_relevant_temporal_resolutions:
                     relevant_axs.append(self.plot_dictionary[relevant_page]['axs'][page_ind]['handle'][relevant_temporal_resolution])
                     relevant_data_labels.append(self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'])
             else:
