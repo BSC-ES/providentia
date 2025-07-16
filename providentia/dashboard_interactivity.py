@@ -277,8 +277,8 @@ class HoverAnnotation(object):
 
             if not plot_type:
                 if test_plot_type in ['periodic','periodic-violin']:
-                    if hasattr(self.canvas_instance.read_instance, 'relevant_temporal_resolutions'):
-                        for resolution in self.canvas_instance.read_instance.relevant_temporal_resolutions:
+                    if hasattr(self.canvas_instance.read_instance, 'periodic_relevant_temporal_resolutions'):
+                        for resolution in self.canvas_instance.read_instance.periodic_relevant_temporal_resolutions:
                             if event.inaxes == self.canvas_instance.plot_axes[test_plot_type][resolution]:
                                 plot_type = copy.deepcopy(test_plot_type)
                                 break

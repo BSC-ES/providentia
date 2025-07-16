@@ -35,7 +35,7 @@ from .pop_up_window import PopUpWindow
 from .read import DataReader
 from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, generate_file_trees, 
                        get_valid_experiments, get_valid_obs_files_in_date_range,
-                       get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions,
+                       get_periodic_nonrelevant_temporal_resolutions, get_periodic_relevant_temporal_resolutions,
                        temporal_resolution_order_dict, get_lower_resolutions)
 from .toolbar import NavigationToolbar
 from .warnings_prv import show_message
@@ -847,17 +847,12 @@ class Dashboard(QtWidgets.QWidget):
             self.experiments_menu['checkboxes']['keep_selected'] = [experiment for experiment in self.experiments
                                                                     if experiment in 
                                                                     self.experiments_menu['checkboxes']['map_vars']]
-            self.experiments = {experiment:experiment_alias for experiment, experiment_alias in self.experiments.items()
-                                if experiment in self.experiments_menu['checkboxes']['map_vars']}
 
         self.experiments_menu['checkboxes']['keep_selected'] = [previous_selected_experiment for
                                                                 previous_selected_experiment in
                                                                 self.experiments_menu['checkboxes']['keep_selected']
                                                                 if previous_selected_experiment in
                                                                 self.experiments_menu['checkboxes']['map_vars']]
-        previous_experiments = self.experiments
-        self.experiments = {exp:previous_experiments[exp] if exp in previous_experiments else exp 
-                            for exp in self.experiments_menu['checkboxes']['keep_selected']}
 
         # update default qa
         default_qa = get_default_qa(self, self.selected_species)
