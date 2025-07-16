@@ -1479,7 +1479,7 @@ class Plotting:
         # set xticklabels 
         # labels for multispecies plot
         xtick_params = copy.deepcopy(plot_characteristics['xtick_params'])
-        xticklabel_params = copy.deepcopy(plot_characteristics['xticklabel_params'])
+        xticklabel_params = copy.deepcopy(plot_characteristics['xticklabels'])
         if ('multispecies' in plot_options) & (len(self.read_instance.networkspecies) > 1):
             xticks = np.arange(len(self.read_instance.networkspecies))
             #if all networks or species are same, drop them from xtick label
@@ -1491,6 +1491,7 @@ class Plotting:
                 xtick_labels = copy.deepcopy(self.read_instance.networkspecies)
             # get aliases for multispecies (if have any)
             xtick_labels, xlabel = get_multispecies_aliases(xtick_labels)
+
             # set xlabel if xlabels have changed due to alias, and have one to set
             if xlabel != '':
                 plot_characteristics['xlabel']['xlabel'] = xlabel
@@ -1500,7 +1501,7 @@ class Plotting:
             xticks = positions
             xtick_labels = copy.deepcopy(cut_data_labels)
 
-        #modify xticks to be horizontal as just have 1 label
+        # modify xticks to be horizontal as just have 1 label
         if len(xtick_labels) == 1:
             xtick_params['rotation'] = 0
             xticklabel_params = {}
@@ -1630,25 +1631,37 @@ class Plotting:
                 yticklabels = stats_df.index.get_level_values(1)
         relevant_axis.set_yticklabels(yticklabels, **plot_characteristics['yticklabels'])
 
-        # set xticklables
+        # set xticklabels
         relevant_axis.set_xticklabels(stats_df.columns, **plot_characteristics['xticklabels'])
 
-        # axis cuts off due to bug in matplotlib 3.1.1 - hack fix. Remove in Future!
-        if len(stats_df.index) > 1:
-            bottom, top = relevant_axis.get_ylim()
-            relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
+        # axis cuts off due to bug in matplotlib 3.1.1 - hack fix
+        if Version(matplotlib.__version__) <= Version("3.1.1"):
+            if len(stats_df.index) > 1:
+                bottom, top = relevant_axis.get_ylim()
+                relevant_axis.set_ylim(bottom + 0.5, top - 0.5)
+
+        networkspecies = list(stats_df.index.get_level_values(0)[::(len(subsections))])
+        n_rows = len(subsections)*len(networkspecies)
+        n_cols = len(data_labels)
 
         # format for multispecies
         if 'multispecies' in plot_options:
+            
+            if plot_characteristics['multispecies']['xmin']:
+                xmin = plot_characteristics['multispecies']['xmin']
+            else:
+                if n_rows == n_cols:
+                    xmin = -0.35 * n_rows - 0.35 * n_cols
+                else:
+                    xmin = -0.35 * n_rows + 0.1 * n_cols
 
             # if we have more than one subsection and we are plotting summaries
             if (len(subsections) > 1) and (plotting_paradigm == 'summary'):
                 # add horizontal lines to separate networkspecies
-                networkspecies = list(stats_df.index.get_level_values(0)[::(len(subsections))])
                 y_separators = []
                 for networkspeci_ii in range(len(networkspecies)+1):
                     y_separators.append(len(subsections)*networkspeci_ii)
-                relevant_axis.hlines(y=y_separators, xmin=plot_characteristics['multispecies']['xmin'], 
+                relevant_axis.hlines(y=y_separators, xmin=xmin, 
                                      xmax=0, clip_on=False, **plot_characteristics['multispecies']['hlines'])
 
                 # annotate networkspecies names on the left
@@ -1662,11 +1675,11 @@ class Plotting:
                     
                     if Version(matplotlib.__version__) >= Version("3.3"):
                         relevant_axis.annotate(text=networkspeci_label, annotation_clip=False,
-                                               xy=(plot_characteristics['multispecies']['xmin'], y_position), 
+                                               xy=(xmin, y_position), 
                                                **plot_characteristics['multispecies']['yticklabels'])
                     else:
                         relevant_axis.annotate(s=networkspeci_label, annotation_clip=False,
-                                               xy=(plot_characteristics['multispecies']['xmin'], y_position), 
+                                               xy=(xmin, y_position), 
                                                **plot_characteristics['multispecies']['yticklabels'])        
         
         # format for non multispecies

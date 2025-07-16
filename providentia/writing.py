@@ -49,6 +49,8 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
                    'Do not apply metadata filters, data filters, temporal colocation, calibration factor, and resampling to exported data']
         dialog = InputDialog(prv, title, msg, options)
         selected_option, okpressed = dialog.selected_option, dialog.okpressed
+        if okpressed is False:
+            return False
         if selected_option == options[0]:
             apply_filters = True
         elif selected_option == options[1]:
@@ -145,7 +147,9 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
         data = np.load(fname, allow_pickle=True)
         # delete temporary save file after load
         os.remove(fname)  
-        return data                  
+        return data        
+
+    return True          
 
 def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=False):
     """ Write data and metadata to netcdf file. 
@@ -177,6 +181,8 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
                    'Do not apply metadata filters, data filters, temporal colocation, calibration factor, and resampling to exported data']
         dialog = InputDialog(prv, title, msg, options)
         selected_option, okpressed = dialog.selected_option, dialog.okpressed
+        if okpressed is False:
+            return False
         if selected_option == options[0]:
             apply_filters = True
         elif selected_option == options[1]:
@@ -459,7 +465,9 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
         # delete temporary save file after load
         os.remove(fname)  
 
-        return data  
+        return data
+    
+    return True
 
 def export_configuration(prv, cname, separator="||"):
     """ Create all items to be written in configuration file
@@ -647,3 +655,5 @@ def export_configuration(prv, cname, separator="||"):
     
     # write .conf file
     write_conf(section, subsection, cname, options)
+
+    return True
