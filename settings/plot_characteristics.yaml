@@ -769,6 +769,7 @@
                   "columnspacing": 1,
                   "ncol": 4,
                   "fontsize": 10.0,
+                  "frameon": false
                 },
               "handles": { "markersize": 10, "marker": "o", "color": "white" },
             },
@@ -1376,7 +1377,7 @@
         { "linestyle": "--", "linewidth": 1.0, "color": "red", "zorder": 0 },
       "plot":
         { "patch_artist": true, "manage_ticks": false, "showfliers": false },
-      "xticklabel_params": { "ha": "right", "rotation_mode": "anchor" },
+      "xticklabels": { "ha": "right", "rotation_mode": "anchor" },
       "axis_title": { "label": "" },
       "xlabel": { "xlabel": "" },
       "ylabel": { "ylabel": "[measurement_units]" },
@@ -1404,7 +1405,7 @@
             ],
           #"plot_options": ["annotate", "individual", "logy", "multispecies", "normmedian", "normmean", "normmin", "normmax", "normsum", "obs", "threshold"],
           "orientation": "landscape",
-          "figure": { "ncols": 2, "nrows": 2 },
+          "figure": { "ncols": 2, "nrows": 1 },
           "page_title":
             {
               "t": "Boxplot",
@@ -1434,10 +1435,10 @@
             },
           "subplots_adjust":
             {
-              "left": 0.06,
-              "right": 0.98,
+              "left": 0.1,
+              "right": 0.9,
               "top": 0.86,
-              "bottom": 0.10,
+              "bottom": 0.25,
               "hspace": 0.34,
               "wspace": 0.14,
             },
@@ -1476,7 +1477,7 @@
       "parent_section_names": false,
       "multispecies":
         {
-          "xmin": -2,
+          "xmin": "",
           "network_names": false,
           "hlines": { "color": "grey", "linewidth": 0.5 },
         },
@@ -1493,6 +1494,7 @@
           "labeltop": false,
           "labelright": false,
           "labelleft": true,
+          "rotation": 45
         },
       "ytick_params":
         {
@@ -1512,7 +1514,7 @@
           "yticklabels": "auto",
           "square": true,
           "cbar": false,
-          "linewidths": 1,
+          "linewidths": 0.5,
           "linecolor": "black",
           "clip_on": false,
         },
@@ -1547,7 +1549,7 @@
         {
           "plot_options": ["annotate", "bias", "multispecies"],
           "orientation": "portrait",
-          "figure": { "ncols": 1, "nrows": 1 },
+          "figure": { "ncols": 1, "nrows": 1},
           "page_title":
             {
               "t": "Heatmap",
@@ -1561,17 +1563,17 @@
           "ytick_params": { "labelsize": 7, "labelrotation": 0 },
           "subplots_adjust":
             {
-              "left": 0.20,
+              "left": 0.40,
               "right": 0.9,
               "top": 0.90,
-              "bottom": 0.06,
+              "bottom": 0.1,
               "hspace": 0.2,
               "wspace": 0.1,
             },
           "cb": { "position": [0.45, 0.95, 0.52, 0.04] },
           "cb_tick_params": { "labelsize": 8 },
           "cb_label": { "fontsize": 8 },
-          "xticklabels": { "rotation": 0, "fontsize": 9 },
+          "xticklabels": { "ha": "right", "rotation_mode": "anchor", "fontsize": 9 },
           "yticklabels": { "rotation": 0, "fontsize": 9 },
           "plot":
             {
