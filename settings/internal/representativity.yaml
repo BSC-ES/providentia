@@ -8,13 +8,49 @@
               "hourly_native_representativity_percent",
               "daily_native_representativity_percent",
               "monthly_native_representativity_percent",
+              "annual_native_representativity_percent",
               "daily_representativity_percent",
               "monthly_representativity_percent",
+              "annual_representativity_percent",
               "all_representativity_percent",
             ],
-          "labels": ["Hourly", "Daily", "Monthly", "Daily", "Monthly", "All"],
+          "labels": ["Hourly", "Daily", "Monthly", "Annual", "Daily", "Monthly", "Annual", "All"],
           "subtitles": ["Native", "Averaged"],
-          "subtitle_inds": [0, 3],
+          "subtitle_inds": [0, 4],
+        },
+      "3hourly":
+        {
+          "map_vars":
+            [
+              "hourly_native_representativity_percent",
+              "daily_native_representativity_percent",
+              "monthly_native_representativity_percent",
+              "annual_native_representativity_percent",
+              "daily_representativity_percent",
+              "monthly_representativity_percent",
+              "annual_representativity_percent",
+              "all_representativity_percent",
+            ],
+          "labels": ["3 Hourly", "Daily", "Monthly", "Annual", "Daily", "Monthly", "Annual", "All"],
+          "subtitles": ["Native", "Averaged"],
+          "subtitle_inds": [0, 4],
+        },
+      "6hourly":
+        {
+          "map_vars":
+            [
+              "hourly_native_representativity_percent",
+              "daily_native_representativity_percent",
+              "monthly_native_representativity_percent",
+              "annual_native_representativity_percent",
+              "daily_representativity_percent",
+              "monthly_representativity_percent",
+              "annual_representativity_percent",
+              "all_representativity_percent",
+            ],
+          "labels": ["6 Hourly", "Daily", "Monthly", "Annual", "Daily", "Monthly", "Annual", "All"],
+          "subtitles": ["Native", "Averaged"],
+          "subtitle_inds": [0, 4],
         },
       "daily":
         {
@@ -22,24 +58,40 @@
             [
               "daily_native_representativity_percent",
               "monthly_native_representativity_percent",
+              "annual_native_representativity_percent",
               "monthly_representativity_percent",
+              "annual_representativity_percent",
               "all_representativity_percent",
             ],
-          "labels": ["Daily", "Monthly", "Monthly", "All"],
+          "labels": ["Daily", "Monthly", "Annual", "Monthly", "Annual", "All"],
           "subtitles": ["Native", "Averaged"],
-          "subtitle_inds": [0, 2],
+          "subtitle_inds": [0, 3],
         },
       "monthly":
         {
           "map_vars":
             [
               "monthly_native_representativity_percent",
+              "annual_native_representativity_percent",
+              "annual_representativity_percent",
               "all_representativity_percent",
             ],
-          "labels": ["Monthly", "All"],
+          "labels": ["Monthly", "Annual", "Annual", "All"],
+          "subtitles": ["Native", "Averaged"],
+          "subtitle_inds": [0, 2],
+        },
+      "annual":
+        {
+          "map_vars":
+            [
+              "annual_native_representativity_percent",
+              "all_representativity_percent",
+            ],
+          "labels": ["Annual", "Annual", "All"],
           "subtitles": ["Native", "Averaged"],
           "subtitle_inds": [0, 1],
         },
+
     },
   "nonghost":
     {
@@ -49,9 +101,36 @@
             [
               "daily_representativity_percent",
               "monthly_representativity_percent",
+              "annual_representativity_percent",
               "all_representativity_percent",
             ],
-          "labels": ["Daily", "Monthly", "All"],
+          "labels": ["Daily", "Monthly", "Annual", "All"],
+          "subtitles": ["Averaged"],
+          "subtitle_inds": [0],
+        },
+      "3hourly":
+        {
+          "map_vars":
+            [
+              "daily_representativity_percent",
+              "monthly_representativity_percent",
+              "annual_representativity_percent",
+              "all_representativity_percent",
+            ],
+          "labels": ["Daily", "Monthly", "Annual", "All"],
+          "subtitles": ["Averaged"],
+          "subtitle_inds": [0],
+        },
+      "6hourly":
+        {
+          "map_vars":
+            [
+              "daily_representativity_percent",
+              "monthly_representativity_percent",
+              "annual_representativity_percent",
+              "all_representativity_percent",
+            ],
+          "labels": ["Daily", "Monthly", "Annual", "All"],
           "subtitles": ["Averaged"],
           "subtitle_inds": [0],
         },
@@ -60,15 +139,28 @@
           "map_vars":
             [
               "monthly_representativity_percent",
+              "annual_representativity_percent",
               "all_representativity_percent",
             ],
-          "labels": ["Monthly", "All"],
+          "labels": ["Monthly", "Annual", "All"],
           "subtitles": ["Averaged"],
           "subtitle_inds": [0],
         },
       "monthly":
         {
-          "map_vars": ["all_representativity_percent"],
+          "map_vars": [
+                       "annual_representativity_percent", 
+                       "all_representativity_percent"
+                      ],
+          "labels": ["Annual", "All"],
+          "subtitles": ["Averaged"],
+          "subtitle_inds": [0],
+        },
+      "annual":
+        {
+          "map_vars": [
+                       "all_representativity_percent"
+                      ],
           "labels": ["All"],
           "subtitles": ["Averaged"],
           "subtitle_inds": [0],
