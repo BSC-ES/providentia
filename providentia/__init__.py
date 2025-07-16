@@ -1,4 +1,4 @@
-__date__ = "2024-09-20"
-__version__ = "2.4.0"
+__date__ = "2025-07-31"
+__version__ = "3.0.0"
 
 from .library import *
