@@ -147,6 +147,15 @@ class Download(object):
             for k, val in self.section_opts.items():
                 setattr(self, k, self.provconf.parse_parameter(k, val))
 
+            # if there's experiments, ask the user whether they want interpolated or non-interpolated
+            if self.experiments:
+                self.interpolated = input("Experiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
+                while self.interpolated.lower() not in ['','y','n']:
+                    self.interpolated = input("Experiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
+
+                # set the interpolated parameter  
+                self.interpolated = self.interpolated.lower() in ['','y']
+
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             self.provconf.check_validity(deactivate_warning=True)
 
