@@ -134,7 +134,7 @@ class ProvConfiguration:
         
         elif key == 'machine':
             # set filetree type
-            if MACHINE in ['nord3v2', 'mn5', 'dust', 'nord4']:
+            if MACHINE in ['nord3v2', 'mn5', 'nord4']:
                 self.read_instance.filetree_type = 'remote'
             else:
                 self.read_instance.filetree_type = 'local'
