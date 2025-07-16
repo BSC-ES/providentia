@@ -1458,7 +1458,11 @@ class Dashboard(QtWidgets.QWidget):
         if self.cursor_function == 'handle_data_selection_update':
             QtWidgets.QApplication.restoreOverrideCursor()
 
+        # update performing read variable to false 
         self.performing_read = False
+
+        # unset variable to allow updating of MPL canvas
+        self.block_MPL_canvas_updates = False
 
     def reset_options(self):
         """ Reset all filter fields to initial values. """
