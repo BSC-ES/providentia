@@ -6,6 +6,7 @@ from base64 import decodebytes
 import copy
 from dotenv import dotenv_values
 import json 
+from netCDF4 import Dataset
 import numpy as np
 import paramiko 
 import re 
@@ -1978,19 +1979,27 @@ class Download(object):
                 experiment_dir = f"{self.dataset.replace('-','_')}_{exp_id}"
                 dir_tail = join(experiment_dir, domain, resolution, species)
 
-                # create temporal dirs to store the middle tar file with its directories
-                os.makedirs(join(self.exp_to_interp_root,'.temp', dir_tail), exist_ok=True)
+                # get tempoarl and final dir
+                temp_dir = join(self.exp_to_interp_root,'.temp', dir_tail)
+                final_dir = join(self.exp_to_interp_root, dir_tail)
+
+                # create temporal and final dirs to store the middle zip file with its directories
+                os.makedirs(temp_dir, exist_ok=True)
+                os.makedirs(final_dir, exist_ok=True)
 
                 # iterate through the dates
                 current_cams_date = cams_start_date
                 while current_cams_date <= cams_end_date:
+                    
+                    # get the date in cams str format
+                    current_cams_date_str = current_cams_date.strftime('%Y-%m-%d')
 
                     # create the request
                     request = {
                     "variable": [cams_species],
                     "model": [exp_id],
                     "level": ["0"],
-                    "date": [f"{current_cams_date.strftime('%Y-%m-%d')}/{current_cams_date.strftime('%Y-%m-%d')}"],
+                    "date": [f"{current_cams_date_str}/{current_cams_date_str}"],
                     "type": ["forecast"],
                     "time": ["00:00"],
                     "leadtime_hour": list(range(0,24)),
@@ -2001,11 +2010,12 @@ class Download(object):
                     file_name = f"{species}_000_{current_cams_date.strftime('%Y%m%d')}.nc"
 
                     # get temporal and final path
-                    temp_path = join(self.exp_to_interp_root,'.temp', dir_tail, file_name)
-                    experiment_path = join(self.exp_to_interp_root, dir_tail, file_name)
+                    temp_path = join(temp_dir, file_name)
+                    final_path = join(final_dir, file_name)
 
                     # make the request
                     try:
+                        self.logger.info(f"Downloading {final_path}") # TODO change message
                         client.retrieve(self.dataset, request, target=temp_path)
                     except requests.exceptions.HTTPError as err:
                         # bad request
@@ -2024,13 +2034,92 @@ class Download(object):
 
                     # extract file 
                     with zipfile.ZipFile(temp_path, 'r') as zip_ref:
-                        zip_ref.extractall(join(self.exp_to_interp_root,'.temp', dir_tail))
+                        zip_ref.extractall(temp_dir)
 
-                    # move file to the corresponding folder
-                    shutil.move(join(self.exp_to_interp_root,'.temp', dir_tail,'ENS_FORECAST.nc'), experiment_path) 
+                    # format the cams files and move them to the corresponding folder
+                    self.logger.info(f"Formatting {final_path}\n") # TODO change message
+                    self.format_cams(join(temp_dir,'ENS_FORECAST.nc'), final_path, cams_species, species)
 
                     # add one day to the date
-                    current_cams_date += timedelta(days=1)                
+                    current_cams_date += timedelta(days=1)     
+
+    def format_cams(self, input_filepath, output_filepath, cams_species, species):  
+        # open original netcdf file      
+        og_grp = Dataset(input_filepath, 'r', format="NETCDF4") 
+
+        # extract date 
+        date_str = og_grp['time'].long_name.split()[-1]
+
+        # create new netcdf file
+        root_grp = Dataset(output_filepath, 'w', format="NETCDF4") 
+        root_grp.set_auto_mask(True)	
+        
+        # give permission to others 
+
+        # copy global attributes
+        root_grp.setncatts({k: og_grp.getncattr(k) for k in og_grp.ncattrs()})
+
+        # copy dimensions 
+        for name, dim in og_grp.dimensions.items():
+            # skip level
+            if name == 'level': 
+                continue
+            root_grp.createDimension(name, len(dim))
+
+        # copy variables
+        for name, og_var in og_grp.variables.items():
+            # skip level
+            if name == "level":
+                continue
+
+            # change species name
+            if name == "ectot_conc":# cams_species: TODO change this to the yaml file
+                name = species
+
+            # get dimensions without level
+            dims = tuple(dim for dim in og_var.dimensions if dim != "level")
+            
+            # create the variable
+            var = root_grp.createVariable(name, og_var.datatype, dims)
+
+            # add atribures
+            if name == "time":
+                # add specific atributes to time
+                var.units = f'hours since {date_str[:4]}-{date_str[4:6]}-{date_str[-2:]} 00:00:00'                
+                var.axis = 'T'
+                var.calendar = 'standard'
+                var.tz = 'UTC'
+            else:
+                # copy atributes from the original file
+                var.setncatts({k: og_var.getncattr(k) for k in og_var.ncattrs() if k != '_FillValue'})
+
+            # get the data from the orignal file
+            data = og_var[:]
+
+            # remove level dimension from species
+            if name == species:
+                data = np.squeeze(data, axis=1)
+            
+            # add the data to the variable
+            var[:] = data
+
+        # add grid_mapping
+        root_grp[species].setncattr('grid_mapping', 'crs')
+        
+        # add coordinates
+        root_grp[species].setncattr('coordinates', 'latitude longitude')
+
+        # add crs
+        crs_var = root_grp.createVariable('crs', 'u1')  
+        crs_var.setncatts({
+            'grid_mapping_name': 'latitude_longitude',
+            'semi_major_axis': 6371000.0,
+            'inverse_flattening': 0.0
+        })
+        
+        # close the original and new netcdf files
+        root_grp.close()
+        og_grp.close()           
 
     def check_time(self, size, file_size):
         if (time.time() - self.ncfile_dl_start_time) > self.timeoutLimit:
