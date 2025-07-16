@@ -8,17 +8,17 @@ REQUIREMENTS = {
         'jupyterlab',
         'cartopy',
         'ghostscript',
+        'KDEpy',
         'matplotlib==3.9.1',
-        'netCDF4==1.6.5',
+        'netCDF4==1.7.2',
         'numpy==1.26.4',
         'pandas==2.2.2',
         'pyproj==3.6.1',
         'PyQt5==5.15.11',
         'seaborn==0.13.2',
-        'scipy==1.12.0',
+        'scipy==1.15.2',
         'ConfigArgParse==1.7',
         'cftime==1.6.3',
-        'KDEpy==1.1.9',
         'xarray==2024.11.0',
         'Sphinx==7.2.6',
         'Sphinx-rtd-theme==2.0.0',
@@ -32,7 +32,7 @@ REQUIREMENTS = {
         'PyYAML==6.0.1',
         'python-dotenv==1.0.1',
         'paramiko==3.4.0',
-        'memory-profiler==0.61.0'
+        'memray==1.17.1'
     ],
     'setup': [
         'setuptools_scm',
@@ -45,7 +45,7 @@ with open("README.md", "r") as f:
 setup(
     name="providentia",
     license="GNU GPL v3",
-    version="2.4.0",
+    version="3.0.0",
     author="Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Amalia Vradi, Francesco Benincasa",
     author_email="dene.bowdalo@bsc.es, alba.vilanova@bsc.es, paula.serrano@bsc.es, amalia.vradi@bsc.es, francesco.benincasa@bsc.es",
     packages=find_packages(),
