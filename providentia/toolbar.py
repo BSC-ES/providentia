@@ -117,13 +117,14 @@ class NavigationToolbar(NavigationToolbar2QT):
                 matplotlib.rcParams['savefig.directory'] = (os.path.dirname(fname))
                 try:
                     if chose_npz:
-                        export_data_npz(self.read_instance, fname, input_dialogue=True)
+                        output = export_data_npz(self.read_instance, fname, input_dialogue=True)
                     elif chose_conf:
-                        export_configuration(self.read_instance, fname)
+                        output = export_configuration(self.read_instance, fname)
                     else:
-                        export_netcdf(self.read_instance, fname, input_dialogue=True)
-                    msg = 'The data was successfully saved in {}.'.format(fname)
-                    show_message(self.read_instance, msg)
+                        output = export_netcdf(self.read_instance, fname, input_dialogue=True)
+                    if output is True:
+                        msg = 'The data was successfully saved in {}.'.format(fname)
+                        show_message(self.read_instance, msg)
                 except Exception as e:
                     msg = 'There was an error saving the file.'
                     self.read_instance.logger.info(e)
@@ -168,7 +169,6 @@ class NavigationToolbar(NavigationToolbar2QT):
         """ Method that sets the world view in the map.
         """
 
-        self._nav_stack.back()
         self.set_history_buttons()
         ax = self.canvas_instance.plot_axes['map']
         ax.set_extent([-180, 180, -90, 90])
