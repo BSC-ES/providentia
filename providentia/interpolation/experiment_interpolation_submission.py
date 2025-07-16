@@ -90,10 +90,12 @@ class SubmitInterpolation(object):
 
         # TODO Hardcoded
         interp_print_variables = ['ghost_version', 'start_date', 'end_date', 'experiments', 
-                                  'species', 'network', 'resolution', 'forecast', 'forecast_day', 
-                                  'interp_n_neighbours', 'interp_reverse_vertical_orientation', 
-                                  'interp_chunk_size', 'interp_job_array_limit', 'exp_root', 
-                                  'ghost_root', 'nonghost_root', 'exp_to_interp_root', 'interp_multiprocessing']
+                                  'species', 'network', 'resolution', 'forecast',
+                                  'interp_spinup_timesteps', 'interp_experiment_downsampling',
+                                  'interp_experiment_upsampling', 'interp_n_neighbours', 
+                                  'interp_reverse_vertical_orientation', 'interp_chunk_size', 
+                                  'interp_job_array_limit', 'exp_root', 'ghost_root', 'nonghost_root', 
+                                  'exp_to_interp_root', 'interp_multiprocessing']
 
         # print variables used, if all species are used print "All Species"        
         print("\nVariables used for the interpolation:\n")
@@ -879,15 +881,21 @@ class SubmitInterpolation(object):
             print(f"Error in submission using the following args {result.args[3:-1]}: {error}")
 
     def submit_job_multiprocessing(self):
-        
+
         # if n_cpus hasn't been defined, use 1 or half of the available CPUS to 
         # avoid having to kill other processes locally
-        if (self.machine == 'local') and (self.n_cpus == self.available_cpus):  
-            n_cpus = max(1, int(self.n_cpus * 0.50))
-            msg = f'Using {n_cpus} out of {self.n_cpus} available CPUs to'
-            msg += ' ensure that other processes keep running. \nIf you encounter any problems'
-            msg += ' consider reducing the number of CPUS by defining n_cpus \nin your'
-            msg += ' configuration file (e.g. n_cpus = 2).'
+        if self.machine == 'local':
+            # use value passed through --cores in terminal
+            if self.cores_explicit:
+                n_cpus = self.n_cpus
+                msg = f'Using {n_cpus} CPUs.'
+            # use default value not passed through --cores (available cpus by 2)
+            else:
+                n_cpus = max(1, int(self.n_cpus * 0.50))
+                msg = f'Using {n_cpus} out of {self.n_cpus} available CPUs to'
+                msg += ' ensure that other processes keep running. \nIf you encounter any problems'
+                msg += ' consider reducing the number of CPUS by running Providentia using'
+                msg += ' --cores (./bin/providentia --cores=2).'
         else:
             n_cpus = self.n_cpus
             msg = f'Using {n_cpus} CPUs.'

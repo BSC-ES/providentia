@@ -15,6 +15,8 @@ Namely, these are:
 | mem | Memory. | 20Gb |
 | constraint | Memory constraint. | medmem (to use nodes with 64GB of memory) |
 | version | Print version of Providentia. | |
+| clean | Removes log files. | |
+| logfile | Redirects output to a file. More info in the [wiki page](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Redirecting-output-to-a-file). | |
 | debug | Start [debug mode](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Interactive-mode#starting-a-jupyter-notebook). | |
 | interactive | Open a Jupyter notebook to [use Providentia as a library](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Run-the-tool#running-the-tool-on-a-bsc-machine). | |
 | conf | Configuration file path. | |

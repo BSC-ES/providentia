@@ -1,8 +1,9 @@
 #!/bin/sh
 
-# Try to remove wiki and uploads
+# Try to remove wiki, uploads and previous docs
 rm -rf Providentia.wiki
 rm -rf source/uploads
+rm -rf source/*.md
 
 # Cloning wiki to get Markdown files
 echo "Cloning wiki..."
