@@ -16,15 +16,31 @@ sconcso2: sulphur_dioxide
 sconcnmvoc: non_methane_vocs
 sconcpan: peroxyacyl_nitrates 
 
-# "alder_pollen",
-# "birch_pollen",
-# "grass_pollen",
-# "mugwort_pollen",
-# "olive_pollen",
-# "ragweed_pollen",
+asy440aero: asymmetry_factor_440nm
+asy550: asymmetry_factor_550nm
 
-# "secondary_inorganic_aerosol",
-# "pm2.5_total_organic_matter",
-# "pm10_sea_salt_dry",
-# "pm10_wildfires",
-# "residential_elementary_carbon"
+        # there is lbsco532 but is it from ground?
+        # "attenuated_backscatter_due_to_aerosol_1064nm_from_ground",
+        # "attenuated_backscatter_due_to_aerosol_1064nm_from_top_of_atmosphere",
+        # "attenuated_backscatter_due_to_aerosol_355nm_from_ground",
+        # "attenuated_backscatter_due_to_aerosol_355nm_from_top_of_atmosphere",
+        # "attenuated_backscatter_due_to_aerosol_532nm_from_ground",
+        # "attenuated_backscatter_due_to_aerosol_532nm_from_top_of_atmosphere",
+
+        # "asymmetry_factor_1020nm",
+        # "asymmetry_factor_1064nm",
+        # "asymmetry_factor_1240nm",
+        # "asymmetry_factor_1640nm",
+        # "asymmetry_factor_2130nm",
+        # "asymmetry_factor_340nm",
+        # "asymmetry_factor_355nm",
+        # "asymmetry_factor_380nm",
+        # "asymmetry_factor_400nm",
+        # "asymmetry_factor_469nm",
+        # "asymmetry_factor_500nm",
+        # "asymmetry_factor_532nm",
+        # "asymmetry_factor_645nm",
+        # "asymmetry_factor_670nm",
+        # "asymmetry_factor_800nm",
+        # "asymmetry_factor_858nm",
+        # "asymmetry_factor_865nm",
