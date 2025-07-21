@@ -1,46 +1,61 @@
-pm10: particulate_matter_10um  
-pm10du: dust  
-pm2p5: particulate_matter_2.5um  
-pm2p5ec: total_elementary_carbon  
-pm2p5nh4: pm2.5_ammonium  
-pm2p5no3: pm2.5_nitrate  
-pm2p5so4: pm2.5_sulphate  
-sconchcho: formaldehyde  
-sconcglyox: glyoxal  
-sconcco: carbon_monoxide  
-sconcnh3: ammonia
-sconcno: nitrogen_monoxide  
-sconcno2: nitrogen_dioxide  
-sconco3: ozone  
-sconcso2: sulphur_dioxide  
-sconcnmvoc: non_methane_vocs
-sconcpan: peroxyacyl_nitrates 
-
+absod1020aero: total_absorption_aerosol_optical_depth_1020nm
+absod440aero: total_absorption_aerosol_optical_depth_440nm
+absod550aero: total_absorption_aerosol_optical_depth_550nm
+acprec: total_precipitation
+asy1020aero: asymmetry_factor_1020nm
 asy440aero: asymmetry_factor_440nm
-asy550: asymmetry_factor_550nm
-
-        # there is lbsco532 but is it from ground?
-        # "attenuated_backscatter_due_to_aerosol_1064nm_from_ground",
-        # "attenuated_backscatter_due_to_aerosol_1064nm_from_top_of_atmosphere",
-        # "attenuated_backscatter_due_to_aerosol_355nm_from_ground",
-        # "attenuated_backscatter_due_to_aerosol_355nm_from_top_of_atmosphere",
-        # "attenuated_backscatter_due_to_aerosol_532nm_from_ground",
-        # "attenuated_backscatter_due_to_aerosol_532nm_from_top_of_atmosphere",
-
-        # "asymmetry_factor_1020nm",
-        # "asymmetry_factor_1064nm",
-        # "asymmetry_factor_1240nm",
-        # "asymmetry_factor_1640nm",
-        # "asymmetry_factor_2130nm",
-        # "asymmetry_factor_340nm",
-        # "asymmetry_factor_355nm",
-        # "asymmetry_factor_380nm",
-        # "asymmetry_factor_400nm",
-        # "asymmetry_factor_469nm",
-        # "asymmetry_factor_500nm",
-        # "asymmetry_factor_532nm",
-        # "asymmetry_factor_645nm",
-        # "asymmetry_factor_670nm",
-        # "asymmetry_factor_800nm",
-        # "asymmetry_factor_858nm",
-        # "asymmetry_factor_865nm",
+cfracmax: fraction_of_cloud_cover
+cldbot: cloud_base_height
+lbsco532: attenuated_backscatter_due_to_aerosol_532nm_from_ground
+od1020aero: total_aerosol_optical_depth_1020nm
+od380aero: total_aerosol_optical_depth_380nm
+od440aero: total_aerosol_optical_depth_440nm
+od500aero: total_aerosol_optical_depth_500nm
+od500aerofine: total_fine_mode_aerosol_optical_depth_500nm
+od550aero: total_aerosol_optical_depth_550nm
+od550du: dust_aerosol_optical_depth_550nm # new GHOST variable
+pm1: particulate_matter_1um
+pm10: particulate_matter_10um
+pm10du: dust
+pm10so4ss: pm10_sea_salt_dry
+pm2p5: particulate_matter_2.5um
+pm2p5ec: total_elementary_carbon
+pm2p5nh4: pm2.5_ammonium
+pm2p5no3: pm2.5_nitrate
+pm2p5so4: pm2.5_sulphate
+pshltr: surface_pressure
+rh2: relative_humidity
+sca1020aero: single_scattering_albedo_1020nm
+sca440aero: single_scattering_albedo_440nm
+sca550aero: single_scattering_albedo_550nm
+sconcc2h4: ethene
+sconcc2h6: ethane
+sconcc3h6: propene
+sconcc3h8: propane
+sconcch4: methane
+sconcco: carbon_monoxide
+sconcetoh: ethanol
+sconcglyox: glyoxal
+sconchcho: formaldehyde
+sconchcl: hydrogen_chloride
+sconchf: hydrogen_fluoride
+sconchno3: nitric_acid
+sconcisop: isoprene
+sconcmsa: methane_sulfonic_acid
+sconcnh3: ammonia
+sconcnh4: ammonium
+sconcnmvoc: non_methane_vocs
+sconcno: nitrogen_monoxide
+sconcno2: nitrogen_dioxide
+sconcno3: nitrate
+sconco3: ozone
+sconcpan: peroxyacetyl_nitrate
+sconcpb: lead
+sconcso2: sulphur_dioxide
+sconcso4: sulphate_aerosol_mixing_ratio
+si: snow_depth
+slp: mean_sea_level_pressure
+sst: sea_surface_temperature
+t2: 2m_temperature
+td2: 2m_dewpoint_temperature
+vdist: visibility
