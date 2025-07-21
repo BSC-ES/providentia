@@ -29,7 +29,7 @@ from .plot_aux import get_taylor_diagram_ghelper
 from .plot_formatting import (format_plot_options, format_axis, set_axis_label, set_axis_title, 
                               harmonise_xy_lims_paradigm)
 from .read import DataReader
-from .read_aux import (generate_file_trees, get_lower_resolutions, 
+from .read_aux import (generate_file_trees, get_possible_resampling_resolutions, 
                        get_periodic_nonrelevant_temporal_resolutions, get_periodic_relevant_temporal_resolutions, 
                        get_valid_experiments, get_valid_obs_files_in_date_range)
 from .statistics import (calculate_statistic, generate_colourbar, generate_colourbar_detail, 
@@ -472,11 +472,8 @@ class Library:
                 # get zstat information 
                 zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=chunk_stat)
                 
-                # check if chunk resolution is available
-                if self.resampling_resolution is None:
-                    available_timeseries_chunk_resolutions = list(get_lower_resolutions(self.resolution))
-                else:
-                    available_timeseries_chunk_resolutions = list(get_lower_resolutions(self.resampling_resolution))
+                # get available chunk timeseries resolutions
+                available_timeseries_chunk_resolutions = get_possible_resampling_resolutions(self.active_resolution)
 
                 # show warning if it is not
                 if chunk_resolution not in available_timeseries_chunk_resolutions:
@@ -536,14 +533,9 @@ class Library:
                 msg = f'Fairmode target plot cannot be created for {speci}.'
                 show_message(self, msg)
                 return
-            # get active temporal resolution
-            if str(self.resampling_resolution) != 'None':
-                resolution = self.resampling_resolution
-            else:
-                resolution = self.resolution
             # warning for fairmode plots if resolution is not hourly or daily
-            if ((speci in ['sconco3', 'sconcno2'] and resolution != 'hourly') 
-                or (speci in ['pm10', 'pm2p5'] and (resolution not in ['hourly', 'daily']))):
+            if ((speci in ['sconco3', 'sconcno2'] and self.active_resolution != 'hourly') 
+                or (speci in ['pm10', 'pm2p5'] and (self.active_resolution not in ['hourly', 'daily']))):
                 msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
                 show_message(self, msg)
                 return
