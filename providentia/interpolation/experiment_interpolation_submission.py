@@ -509,15 +509,15 @@ class SubmitInterpolation(object):
                     msg += 'e.g. For November 2018, this is 201811 to 201812.'
                 else:
                     if len(exp_files) == 0:
-                        msg += f'Experiment data between {self.start_date} and {self.end_date} cannot be found.'
+                        msg += f'Experiment data between {self.start_date} and {self.end_date} cannot be found.\n'
                     else:
                         msg += f'Experiment files: {exp_files}\n'
                         msg += f'Experiment dates: {exp_files_dates}\n'
-                        if len(obs_files) == 0:
-                            msg += f'Observational data between {self.start_date} and {self.end_date} cannot be found.'
-                        else:
-                            msg += f'Observational files: {obs_files}\n'
-                            msg += f'Observational dates: {obs_files_dates}\n'
+                    if len(obs_files) == 0:
+                        msg += f'Observational data between {self.start_date} and {self.end_date} cannot be found.\n'
+                    else:
+                        msg += f'Observational files: {obs_files}\n'
+                        msg += f'Observational dates: {obs_files_dates}\n'
             else:
                 msg = '***INTERSECTING OBSERVATIONAL AND EXPERIMENTAL DATA IS AVAILABLE FOR INTERPOLATION.***' 
                 msg += f'\nExperiment Data Source Path: {exp_dir}'
