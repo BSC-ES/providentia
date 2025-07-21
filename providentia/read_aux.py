@@ -247,6 +247,16 @@ def read_netcdf_data(tuple_arguments):
                             meta_var_nc = 'station_code'
                         elif 'station_name' in ncdf_root.variables:
                             meta_var_nc = 'station_name'
+                    elif meta_var == 'area_classification':
+                        if 'area_classification' in ncdf_root.variables:
+                            meta_var_nc = 'area_classification'
+                        else:
+                            meta_var_nc = 'station_area'
+                    elif meta_var == 'station_classification':
+                        if 'station_classification' in ncdf_root.variables:
+                            meta_var_nc = 'station_classification'
+                        else:
+                            meta_var_nc = 'station_type'
                     else:
                         meta_var_nc = meta_var
         
