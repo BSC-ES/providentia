@@ -622,6 +622,8 @@ class ProvConfiguration:
 
             if isinstance(value, str):
                 return value.strip()
+            else:
+                return str(value)
 
         elif key == 'calibration_factor':
             # parse calibration factor
@@ -1024,6 +1026,20 @@ class ProvConfiguration:
                         sys.exit(1)
                     previous_is_ghost = is_ghost
 
+        # if are using dashboard then just take first network/species pair, as multivar not supported yet
+        if ((len(self.read_instance.network) > 1) and (len(self.read_instance.species) > 1) and 
+            (not self.read_instance.report) and (not self.read_instance.library) and (not self.read_instance.download) and (not self.read_instance.interpolation)):
+             
+            msg = 'Multiple networks/species are not supported in the dashboard. First ones will be taken.'
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+
+            self.read_instance.network = [self.read_instance.network[0]]
+            self.read_instance.species = [self.read_instance.species[0]]
+
+        # initialise networkspeci as first network and species pair
+        self.read_instance.networkspeci = '{}|{}'.format(self.read_instance.network[0],
+                                                         self.read_instance.species[0]) 
+
         # check have resolution information, TODO when refactoring init change this way of checking defaults
         # if report, throw message, stating are using default instead
         if (not self.read_instance.resolution and not self.read_instance.download):
@@ -1034,6 +1050,12 @@ class ProvConfiguration:
             msg = "Resolution (resolution) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.resolution = default
+
+        # set active resolution, resampling_resolution when set, otherwise resolution
+        if self.read_instance.resampling_resolution != 'None':
+            self.read_instance.active_resolution = self.read_instance.resampling_resolution
+        else:
+            self.read_instance.active_resolution = self.read_instance.resolution
 
         # check start_date format, TODO START DATE IS DIFFERENT IN INTERPOLATION (check in the refactoring)
         # if report, throw message, stating are using default instead
@@ -1501,16 +1523,6 @@ class ProvConfiguration:
                     self.read_instance.flags.remove(flag_to_remove)
 
             self.read_instance.flags = sorted(self.read_instance.flags) 
-
-        # if are using dashboard then just take first network/species pair, as multivar not supported yet
-        if ((len(self.read_instance.network) > 1) and (len(self.read_instance.species) > 1) and 
-            (not self.read_instance.report) and (not self.read_instance.library) and (not self.read_instance.download) and (not self.read_instance.interpolation)):
-             
-            msg = 'Multiple networks/species are not supported in the dashboard. First ones will be taken.'
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-
-            self.read_instance.network = [self.read_instance.network[0]]
-            self.read_instance.species = [self.read_instance.species[0]]
         
         # check bounds inside filter_species
         if self.read_instance.filter_species:

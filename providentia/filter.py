@@ -156,14 +156,12 @@ class DataFilter:
     def filter_by_period(self):
         """ Filter data for selected periods (keeping or removing data, as defined). """
 
-        # get active resolution and set appropriate data and variable name arrays
-        if str(self.read_instance.resampling_resolution) == 'None':
-            active_resolution = self.read_instance.resolution
+        # set appropriate data and variable name arrays
+        if self.read_instance.resampling_resolution == 'None':
             if self.read_instance.reading_ghost:
                 data_array = self.read_instance.ghost_data_in_memory
                 varname_array = self.read_instance.ghost_data_vars_to_read
         else:
-            active_resolution = self.read_instance.resampling_resolution
             if self.read_instance.reading_ghost:
                 data_array = self.read_instance.ghost_data_in_memory_period
                 varname_array = self.read_instance.active_period_vars
@@ -190,7 +188,7 @@ class DataFilter:
             if 'Nighttime' in keeps:
                 day_night_codes_to_keep.append(1)
             if len(day_night_codes_to_keep) == 1:
-                if 'hourly' in active_resolution:
+                if 'hourly' in self.read_instance.active_resolution:
                     day_night_index = varname_array.index('day_night_code')
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
@@ -203,7 +201,7 @@ class DataFilter:
             if 'Weekend' in keeps:
                 weekday_weekend_codes_to_keep.append(1)
             if len(weekday_weekend_codes_to_keep) == 1:
-                if active_resolution not in ['monthly','annual']:
+                if self.read_instance.active_resolution not in ['monthly','annual']:
                     weekday_weekend_index = varname_array.index('weekday_weekend_code')
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
@@ -220,7 +218,7 @@ class DataFilter:
             if 'Winter' in keeps:
                 season_codes_to_keep.append(3)
             if (len(season_codes_to_keep) > 0) & (len(season_codes_to_keep) < 4):
-                if active_resolution != 'annual':
+                if self.read_instance.active_resolution != 'annual':
                     season_index = varname_array.index('season_code')
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
@@ -234,7 +232,7 @@ class DataFilter:
             if 'Nighttime' in removes:
                 day_night_codes_to_remove.append(1)
             if len(day_night_codes_to_remove) > 0:
-                if 'hourly' in active_resolution:
+                if 'hourly' in self.read_instance.active_resolution:
                     day_night_index = varname_array.index('day_night_code')
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
@@ -247,7 +245,7 @@ class DataFilter:
             if 'Weekend' in removes:
                 weekday_weekend_codes_to_remove.append(1)
             if len(weekday_weekend_codes_to_remove) > 0:
-                if active_resolution not in ['monthly','annual']:
+                if self.read_instance.active_resolution not in ['monthly','annual']:
                     weekday_weekend_index = varname_array.index('weekday_weekend_code')
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
@@ -264,7 +262,7 @@ class DataFilter:
             if 'Winter' in removes:
                 season_codes_to_remove.append(3)
             if len(season_codes_to_remove) > 0:
-                if active_resolution != 'annual':
+                if self.read_instance.active_resolution != 'annual':
                     season_index = varname_array.index('season_code')
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
@@ -292,7 +290,7 @@ class DataFilter:
         if self.read_instance.reading_ghost:
 
             # get appropriate data and variable name arrays
-            if str(self.read_instance.resampling_resolution) == 'None':
+            if self.read_instance.resampling_resolution == 'None':
                 data_array = self.read_instance.ghost_data_in_memory
                 varname_array = self.read_instance.ghost_data_vars_to_read
             else:

@@ -276,25 +276,19 @@ def update_representativity_fields(instance):
     
     # build representativity menu
     network_type = 'ghost' if instance.reading_ghost else 'nonghost'
-    
-    # get active resolution
-    if str(instance.resampling_resolution) == 'None':
-        active_resolution = instance.resolution
-    else:
-        active_resolution = instance.resampling_resolution
 
     # set resolution to get representativity information based on active resolution
-    if active_resolution in ['hourly', 'hourly_instantaneous']:
+    if instance.active_resolution in ['hourly', 'hourly_instantaneous']:
         resolution = 'hourly'
-    elif active_resolution in ['3hourly', '3hourly_instantaneous']:
+    elif instance.active_resolution in ['3hourly', '3hourly_instantaneous']:
         resolution = '3hourly'
-    elif active_resolution in ['6hourly', '6hourly_instantaneous']:
+    elif instance.active_resolution in ['6hourly', '6hourly_instantaneous']:
         resolution = '6hourly'
-    elif active_resolution == 'daily':
+    elif instance.active_resolution == 'daily':
         resolution = 'daily'
-    elif active_resolution == 'monthly':
+    elif instance.active_resolution == 'monthly':
         resolution = 'monthly'
-    elif active_resolution == 'annual':
+    elif instance.active_resolution == 'annual':
         resolution = 'annual'
 
     instance.representativity_menu['rangeboxes']['map_vars'] = instance.representativity_info[network_type][resolution]['map_vars']
@@ -324,18 +318,12 @@ def update_period_fields(instance):
         :type instance: object
     """
 
-    # get active resolution
-    if str(instance.resampling_resolution) == 'None':
-        active_resolution = instance.resolution
-    else:
-        active_resolution = instance.resampling_resolution
-
     # hourly/3hourly/6hourly temporal resolution?
-    if 'hourly' in active_resolution:
+    if 'hourly' in instance.active_resolution:
         instance.period_menu['checkboxes']['labels'] = ['Daytime', 'Nighttime', 'Weekday', 'Weekend',
                                                         'Spring', 'Summer', 'Autumn', 'Winter']
     # daily temporal resolution?
-    elif active_resolution == 'daily':
+    elif instance.active_resolution == 'daily':
         instance.period_menu['checkboxes']['labels'] = ['Weekday', 'Weekend', 
                                                         'Spring', 'Summer', 'Autumn', 'Winter']
         # drop selected fields from higher temporal resolutions
@@ -347,7 +335,7 @@ def update_period_fields(instance):
                 instance.period_menu['checkboxes']['remove_selected'].remove(label)
 
     # monthly temporal resolution?
-    elif active_resolution == 'monthly':
+    elif instance.active_resolution == 'monthly':
         instance.period_menu['checkboxes']['labels'] = ['Spring', 'Summer', 'Autumn', 'Winter']
         # drop selected fields from higher temporal resolutions
         labels_to_remove = ['Daytime', 'Nighttime', 'Weekday', 'Weekend']
@@ -358,7 +346,7 @@ def update_period_fields(instance):
                 instance.period_menu['checkboxes']['remove_selected'].remove(label)
 
     # annual temporal resolution?
-    elif active_resolution == 'annual':
+    elif instance.active_resolution == 'annual':
         instance.period_menu['checkboxes']['labels'] = []
         # drop selected fields from higher temporal resolutions
         labels_to_remove = ['Daytime', 'Nighttime', 'Weekday', 'Weekend', 'Spring', 'Summer', 'Autumn', 'Winter']
