@@ -1220,12 +1220,6 @@ def exceedance_lim(networkspeci):
 
 def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels):
     
-    # get active temporal resolution
-    if str(read_instance.resampling_resolution) != 'None':
-        resolution = read_instance.resampling_resolution
-    else:
-        resolution = read_instance.resolution
-
     # get coverage
     speci = networkspeci.split('|')[1]
     coverage = fairmode_settings[speci]['coverage']
@@ -1241,7 +1235,7 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels)
     data_array = data_array[:,canvas_instance.station_inds[networkspeci],:]
 
     # if hourly data then make sure days with less than 75% coverage are nan
-    if resolution == 'hourly':
+    if read_instance.active_resolution == 'hourly':
 
         # get number of days
         num_days = data_array.shape[-1] // 24
@@ -1265,7 +1259,7 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels)
     valid_station_idxs = obs_representativity >= coverage
 
     # do some extra processing for hourly resolution data
-    if resolution == 'hourly':
+    if read_instance.active_resolution == 'hourly':
 
         # resample PM10/PM2.5 data to daily
         if speci in ['pm2p5', 'pm10']:

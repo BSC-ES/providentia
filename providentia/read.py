@@ -416,6 +416,9 @@ class DataReader:
                     self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]] = \
                         self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]][:, :, data_left_edge_ind:data_right_edge_ind]
 
+                # do resampling of data (if necessary)
+                do_resampling(self.read_instance)
+
             # need to read on left / read on right
             if ('read_left' in operations) or ('read_right' in operations):
 
