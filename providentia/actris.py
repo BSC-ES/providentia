@@ -687,7 +687,7 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
             print(f'{file} - Error: {error}')
 
     # show warnings
-    if len(warnings) > 0:
+    if len(warnings) > 0 and all(len(warning) > 0 for warning in warnings.values()):
         print(f'\n    Collected warnings ({len(warnings)}):')
         for file, warning in warnings.items():
             print(f'{file} - Warning: {warning}')
