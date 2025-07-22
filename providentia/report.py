@@ -26,7 +26,7 @@ from .plotting import Plotting
 from .plot_aux import get_taylor_diagram_ghelper, set_map_extent, reorder_pdf_pages
 from .plot_formatting import format_plot_options, format_axis, harmonise_xy_lims_paradigm, set_axis_label, set_axis_title
 from .read import DataReader
-from .read_aux import (generate_file_trees, get_lower_resolutions, 
+from .read_aux import (generate_file_trees, get_possible_resampling_resolutions, 
                        get_periodic_nonrelevant_temporal_resolutions, get_periodic_relevant_temporal_resolutions, 
                        get_valid_experiments, get_valid_obs_files_in_date_range)
 from .statistics import (calculate_statistic, get_fairmode_data,
@@ -1049,14 +1049,9 @@ class Report:
                     msg = f'Fairmode target summary plot cannot be created for {speci}.'
                     show_message(self, msg)
                     continue
-                # get active temporal resolution
-                if str(self.resampling_resolution) != 'None':
-                    resolution = self.resampling_resolution
-                else:
-                    resolution = self.resolution
                 # warning for fairmode plots if resolution is not hourly or daily
-                if ((speci in ['sconco3', 'sconcno2'] and resolution != 'hourly') 
-                    or (speci in ['pm10', 'pm2p5'] and (resolution not in ['hourly', 'daily']))):
+                if ((speci in ['sconco3', 'sconcno2'] and self.active_resolution != 'hourly') 
+                    or (speci in ['pm10', 'pm2p5'] and (self.active_resolution not in ['hourly', 'daily']))):
                     msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
                     show_message(self, msg)
                     continue
@@ -1239,8 +1234,9 @@ class Report:
                         msg = f'Fairmode target station plot cannot be created for {speci} in {self.current_station_name}.'
                         show_message(self, msg)
                         continue
-                    if ((speci in ['sconco3', 'sconcno2'] and self.resolution != 'hourly') 
-                        or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
+                    # warning for fairmode plots if resolution is not hourly or daily
+                    if ((speci in ['sconco3', 'sconcno2'] and self.active_resolution != 'hourly') 
+                        or (speci in ['pm10', 'pm2p5'] and (self.active_resolution not in ['hourly', 'daily']))):
                         msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
                         show_message(self, msg)
                         continue
@@ -1540,11 +1536,8 @@ class Report:
                     chunk_stat = copy.deepcopy(zstat)
                     chunk_resolution = plot_type.split('-')[2].split('_')[0]
                     
-                    # check if chunk resolution is available
-                    if self.resampling_resolution is None:
-                        available_timeseries_chunk_resolutions = list(get_lower_resolutions(self.resolution))
-                    else:
-                        available_timeseries_chunk_resolutions = list(get_lower_resolutions(self.resampling_resolution))
+                    # get available chunk timeseries resolutions
+                    available_timeseries_chunk_resolutions = get_possible_resampling_resolutions(self.active_resolution)
 
                     # show warning if it is not available
                     if chunk_resolution not in available_timeseries_chunk_resolutions:

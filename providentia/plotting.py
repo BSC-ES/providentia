@@ -108,7 +108,7 @@ class Plotting:
                     show_message(self.read_instance, msg)
                     valid_plot_type = False
 
-                # remove plots what calculating bias stat but temporal_colocation is not active
+                # remove plots when calculating bias stat but temporal_colocation is not active
                 elif (z_statistic_type == 'expbias') & (not self.read_instance.temporal_colocation):
                         msg = f'To calculate the experiment bias stat {zstat}, temporal_colocation must be set to True, so {plot_type} plot cannot be created.'
                         show_message(self.read_instance, msg)
@@ -171,6 +171,12 @@ class Plotting:
                     # warning for timeseries bias plot if the temporal colocation is not active
                     elif ('timeseries' == base_plot_type) & ('bias' in plot_options) & (not self.read_instance.temporal_colocation):
                         msg = f'{plot_type} cannot be created as temporal colocation is not active.'
+                        show_message(self.read_instance, msg)
+                        valid_plot_type = False
+
+                    # warning for periodic plot when active resolution is annual
+                    elif ('periodic' == base_plot_type) & (self.read_instance.active_resolution == 'annual'): 
+                        msg = f'{plot_type} cannot be created when active temporal resolution is annual'
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
@@ -241,6 +247,12 @@ class Plotting:
                     # warning for timeseries bias plot if the temporal colocation is not active
                     elif ('timeseries' == base_plot_type) & ('bias' in plot_options) & (not self.read_instance.temporal_colocation):
                         msg = f'{plot_type} cannot be created as temporal colocation is not active.'
+                        show_message(self.read_instance, msg)
+                        valid_plot_type = False
+
+                    # warning for periodic-violin plot when active resolution is annual
+                    elif ('periodic-violin' == base_plot_type) & (self.read_instance.active_resolution == 'annual'): 
+                        msg = f'{plot_type} cannot be created when active temporal resolution is annual'
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
@@ -872,12 +884,6 @@ class Plotting:
             relevant_sub_ax.axis('off')
             relevant_sub_ax.set_visible(False)
 
-        # get active resolution
-        if str(self.read_instance.resampling_resolution) == 'None':
-            active_resolution = self.read_instance.resolution
-        else:
-            active_resolution = self.read_instance.resampling_resolution
-
         # iterate through all relevant temporal aggregation 
         for relevant_temporal_resolution in self.read_instance.periodic_relevant_temporal_resolutions:
 
@@ -934,9 +940,9 @@ class Plotting:
 
                         # set xaxis position of each violin
                         if relevant_temporal_resolution == 'hour':
-                            if active_resolution == '3hourly':
+                            if self.read_instance.active_resolution == '3hourly':
                                 period_pos = period_ii * 3
-                            elif active_resolution == '6hourly':
+                            elif self.read_instance.active_resolution  == '6hourly':
                                 period_pos = period_ii * 6
                             else:
                                 period_pos = period_ii
