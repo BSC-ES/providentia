@@ -247,6 +247,16 @@ def read_netcdf_data(tuple_arguments):
                             meta_var_nc = 'station_code'
                         elif 'station_name' in ncdf_root.variables:
                             meta_var_nc = 'station_name'
+                    elif meta_var == 'area_classification':
+                        if 'area_classification' in ncdf_root.variables:
+                            meta_var_nc = 'area_classification'
+                        else:
+                            meta_var_nc = 'station_area'
+                    elif meta_var == 'station_classification':
+                        if 'station_classification' in ncdf_root.variables:
+                            meta_var_nc = 'station_classification'
+                        else:
+                            meta_var_nc = 'station_type'
                     else:
                         meta_var_nc = meta_var
         
@@ -763,7 +773,21 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
         instance.experiments_menu['checkboxes']['map_vars'] = experiments_to_add
 
 
-def temporal_resolution_order_dict():
+def get_possible_temporal_resolutions():
+    """ Return possible temporal resolutions as a list.
+
+        :return: available temporal resolutions
+        :rtype: list
+    """
+
+    # define possible temporal resolutions
+    possible_resolutions = ['hourly', 'hourly_instantaneous', '3hourly', '3hourly_instantaneous', 
+                            '6hourly', '6hourly_instantaneous', 'daily', 'monthly', 'annual']
+    
+    return possible_resolutions
+
+
+def get_temporal_resolution_order():
     """ Return temporal resolution order for menus as a dictionary.
 
         :return: temporal resolution order
@@ -775,6 +799,25 @@ def temporal_resolution_order_dict():
                              'daily': 7, 'monthly': 8}
 
     return resolution_order_dict
+
+
+def get_possible_resampling_resolutions(resolution):
+    """ Get available lower resolutions. """
+
+    if resolution in ['hourly', 'hourly_instantaneous']:
+        resolutions = ['3hourly', '6hourly', 'daily', 'monthly', 'annual']
+    elif resolution in ['3hourly', '3hourly_instantaneous']:
+        resolutions = ['6hourly', 'daily', 'monthly', 'annual']
+    elif resolution in ['6hourly', '6hourly_instantaneous']:
+        resolutions = ['daily', 'monthly', 'annual']
+    elif resolution == 'daily':
+        resolutions = ['monthly', 'annual']
+    elif resolution == 'monthly':
+        resolutions = ['annual']
+    elif resolution == 'annual':
+        resolutions = []
+
+    return resolutions
 
 
 def get_periodic_relevant_temporal_resolutions(resolution):        
@@ -796,6 +839,7 @@ def get_periodic_relevant_temporal_resolutions(resolution):
         relevant_temporal_resolutions = []
         
     return relevant_temporal_resolutions
+
 
 def get_periodic_nonrelevant_temporal_resolutions(resolution):        
     """ Get non-relevant temporal resolutions for periodic plots, by selected temporal resolution.
@@ -826,25 +870,6 @@ def valid_date(date_text):
         return True
     except Exception as e:
         return False
-
-
-def get_lower_resolutions(resolution):
-    """ Get available lower resolutions. """
-
-    if resolution in ['hourly', 'hourly_instantaneous']:
-        resolutions = ['3hourly', '6hourly', 'daily', 'monthly', 'annual']
-    elif resolution in ['3hourly', '3hourly_instantaneous']:
-        resolutions = ['6hourly', 'daily', 'monthly', 'annual']
-    elif resolution in ['6hourly', '6hourly_instantaneous']:
-        resolutions = ['daily', 'monthly', 'annual']
-    elif resolution == 'daily':
-        resolutions = ['monthly', 'annual']
-    elif resolution == 'monthly':
-        resolutions = ['annual']
-    elif resolution == 'annual':
-        resolutions = []
-
-    return resolutions
 
 
 def generate_file_trees(instance, force=False):
@@ -915,12 +940,9 @@ def get_valid_metadata(read_instance, variable, valid_station_idxs, networkspeci
 def do_resampling(read_instance):
 
     """ Function which handles resampling of data """
-
-    possible_resolutions = ['hourly', 'hourly_instantaneous', '3hourly', '3hourly_instantaneous', 
-                            '6hourly', '6hourly_instantaneous', 'daily', 'monthly', 'annual']
     
     # temporally resample data array if required
-    if read_instance.resampling_resolution in possible_resolutions:
+    if read_instance.resampling_resolution in get_possible_temporal_resolutions():
 
         # update relevant/nonrelevant periodic temporal resolutions 
         read_instance.periodic_relevant_temporal_resolutions = get_periodic_relevant_temporal_resolutions(read_instance.resampling_resolution)
@@ -970,7 +992,6 @@ def do_resampling(read_instance):
                 read_instance.active_period_vars = ['season_code']
             elif read_instance.resampling_resolution == 'annual':
                 read_instance.active_period_vars = []
-            # add to read instance
 
         # iterate through networkspecies + filter_networkspecies
         for networkspeci in (read_instance.networkspecies + read_instance.filter_networkspecies):
