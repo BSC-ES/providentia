@@ -416,6 +416,9 @@ class DataReader:
                     self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]] = \
                         self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]][:, :, data_left_edge_ind:data_right_edge_ind]
 
+                # do resampling of data (if necessary)
+                do_resampling(self.read_instance)
+
             # need to read on left / read on right
             if ('read_left' in operations) or ('read_right' in operations):
 
@@ -722,6 +725,16 @@ class DataReader:
                 for ghost_metadata_var in self.read_instance.ghost_metadata_vars_to_read:
                     if (ghost_metadata_var in ncdf_root.variables) & (ghost_metadata_var not in self.read_instance.nonghost_metadata_vars_to_read):
                         self.read_instance.nonghost_metadata_vars_to_read.append(ghost_metadata_var) 
+
+                # check if area classification is available in files (if not already added)
+                if 'area_classification' not in self.read_instance.nonghost_metadata_vars_to_read:
+                    if 'station_area' in ncdf_root.variables:
+                        self.read_instance.nonghost_metadata_vars_to_read.append('area_classification') 
+
+                # check if station classification is available in files (if not already added)
+                if 'station_classification' not in self.read_instance.nonghost_metadata_vars_to_read:
+                    if 'station_type' in ncdf_root.variables:
+                        self.read_instance.nonghost_metadata_vars_to_read.append('station_classification') 
 
                 # close first relevant file
                 ncdf_root.close()
