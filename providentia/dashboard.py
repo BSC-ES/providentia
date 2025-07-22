@@ -36,7 +36,7 @@ from .read import DataReader
 from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, generate_file_trees, 
                        get_valid_experiments, get_valid_obs_files_in_date_range,
                        get_periodic_nonrelevant_temporal_resolutions, get_periodic_relevant_temporal_resolutions,
-                       temporal_resolution_order_dict, get_lower_resolutions)
+                       get_temporal_resolution_order, get_possible_resampling_resolutions)
 from .toolbar import NavigationToolbar
 from .warnings_prv import show_message
 
@@ -659,7 +659,6 @@ class Dashboard(QtWidgets.QWidget):
             self.data_labels = []
             self.data_labels_raw = []
             self.performing_read = False
-            self.networkspeci = None
 
             # set initial station references to be empty dict
             self.station_references = {}
@@ -741,7 +740,7 @@ class Dashboard(QtWidgets.QWidget):
         # update resolution field
         available_resolutions = list(self.available_observation_data[self.selected_network].keys())
         # set order of available resolutions
-        available_resolutions = sorted(available_resolutions, key=temporal_resolution_order_dict().__getitem__)
+        available_resolutions = sorted(available_resolutions, key=get_temporal_resolution_order().__getitem__)
         self.cb_resolution.addItems(available_resolutions)
         if self.selected_resolution in available_resolutions:
             self.cb_resolution.setCurrentText(self.selected_resolution)
@@ -810,7 +809,7 @@ class Dashboard(QtWidgets.QWidget):
             self.selected_timeseries_statistic_aggregation = self.mpl_canvas.timeseries_stat.currentText()
 
         # get available resampling resolutions
-        available_resampling_resolutions = get_lower_resolutions(self.selected_resolution)
+        available_resampling_resolutions = get_possible_resampling_resolutions(self.selected_resolution)
 
         # remove resolutions if resampled data would be less than 2 timesteps
         resampling_resolutions = copy.deepcopy(available_resampling_resolutions)
@@ -880,26 +879,38 @@ class Dashboard(QtWidgets.QWidget):
     
         # remove plot types that need active temporal colocation and experiments data
         if Version(matplotlib.__version__) < Version("3.8"):
-            if 'taylor' in canvas_instance.layout_options:
-                canvas_instance.layout_options.remove('taylor')
+            available_plots = ['scatter', 'fairmode-target', 'fairmode-statsummary']
         else:
-            for plot_type in ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']:
-                if ((not self.temporal_colocation) 
-                    or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
+            available_plots = ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']        
+        for plot_type in available_plots:
+            if ((not self.temporal_colocation) 
+                or ((self.temporal_colocation) and (len(self.experiments) == 0))): 
+                if plot_type in canvas_instance.layout_options:
+                    canvas_instance.layout_options.remove(plot_type)
+            else:
+                if plot_type not in canvas_instance.layout_options:
+                    canvas_instance.layout_options.append(plot_type)       
+
+             # remove fairmode plot types if do not have correct species / resolution
+            speci = self.networkspeci.split('|')[1]
+            for plot_type in ['fairmode-target', 'fairmode-statsummary']:
+                if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
                     if plot_type in canvas_instance.layout_options:
                         canvas_instance.layout_options.remove(plot_type)
-                else:
-                    if plot_type not in canvas_instance.layout_options:
-                        canvas_instance.layout_options.append(plot_type)       
-
-            for plot_type in ['fairmode-target', 'fairmode-statsummary']:
-                if plot_type in canvas_instance.layout_options and hasattr(self, 'selected_species'):
-                    if self.selected_species not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
-                        canvas_instance.layout_options.remove(plot_type)   
-                    if ((self.selected_species in ['sconco3', 'sconcno2'] and self.selected_resolution != 'hourly') 
-                        or (self.selected_species in ['pm10', 'pm2p5'] and (self.selected_resolution not in ['hourly', 'daily']))):
+                if ((speci in ['sconco3', 'sconcno2'] and self.active_resolution != 'hourly') or
+                (speci in ['pm10', 'pm2p5'] and (self.active_resolution not in ['hourly', 'daily']))):
+                    if plot_type in canvas_instance.layout_options:
                         canvas_instance.layout_options.remove(plot_type)
 
+        # if there are no temporal resolutions (only yearly), skip periodic plots
+        for plot_type in ['periodic', 'periodic-violin']: 
+            if self.active_resolution == 'annual':            
+                if plot_type in canvas_instance.layout_options:
+                    canvas_instance.layout_options.remove(plot_type)
+            else:
+                if plot_type not in canvas_instance.layout_options:
+                    canvas_instance.layout_options.append(plot_type) 
+            
         # order alphabetically
         layout_options = sorted(canvas_instance.layout_options)
 
@@ -955,8 +966,7 @@ class Dashboard(QtWidgets.QWidget):
             event_source = self.sender()
 
             # if network, resolution, matrix, species, aggregation mode or resampling resolution have changed 
-            # then alter respective current selection for the 
-            # changed param
+            # then alter respective current selection for the changed param
             if event_source == self.cb_network:
                 self.selected_network = changed_param
                 # ensure that QA defaults have been updated if network has changed (i.e. to or from ACTRIS)
@@ -972,13 +982,6 @@ class Dashboard(QtWidgets.QWidget):
             
             elif event_source == self.cb_species:
                 self.selected_species = changed_param
-                if ((self.selected_species not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5'])
-                    or (self.selected_species in ['sconco3', 'sconcno2'] and self.selected_resolution != 'hourly')
-                    or (self.selected_species in ['pm10', 'pm2p5'] and self.selected_resolution not in ['hourly', 'daily'])):
-                    for plot_type in ['fairmode-target', 'fairmode-statsummary']:
-                        if plot_type in self.mpl_canvas.layout_options:
-                            self.mpl_canvas.layout_options.remove(plot_type)
-                            self.update_layout_fields(self.mpl_canvas)
 
             elif event_source == self.cb_statistic_mode:
                 self.selected_statistic_mode = changed_param
