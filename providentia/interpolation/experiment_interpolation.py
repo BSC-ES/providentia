@@ -27,13 +27,14 @@ from scipy.spatial import cKDTree
 from shapely.geometry import Polygon, Point
 import xarray as xr
 from aux_interp import (check_for_ghost, findMiddle, check_directory_existence, set_file_permissions_ownership,
-                 get_aeronet_bin_radius_from_bin_variable, get_aeronet_model_bin, 
-                 get_model_to_aeronet_bin_transform_factor)
+                        get_aeronet_bin_radius_from_bin_variable, get_aeronet_model_bin, 
+                        get_model_to_aeronet_bin_transform_factor)
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[2]))
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, get_machine
 
-MACHINE = os.environ.get('BSC_MACHINE', 'local')
+# set current MACHINE
+MACHINE = get_machine()
 
 # get current path and providentia root path
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
@@ -151,7 +152,7 @@ class ExperimentInterpolation(object):
                                                 .format(exp_dir, self.grid_type,
                                                         self.model_temporal_resolution,
                                                         self.speci_to_process, self.speci_to_process, self.yearmonth)))
-             
+
             # drop all analysis files ending with '_an.nc' which are not in ensemble-stats
             all_model_files = [f for f in all_model_files if '_an.nc' not in f] 
 

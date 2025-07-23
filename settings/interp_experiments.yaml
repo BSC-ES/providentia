@@ -26,7 +26,7 @@
     },
     "auto-wrf-hermes-cmaq": {
         "experiments": ["a767", "a1ay", "a1uo", "a148", "a1wz", "a1y6", "a1y7", "a1y8", "a1y9", "a1ya", "a1zk", "a1zm", "a26h", 
-                        "a26j", "a26o", "a272", "a29h", "a29i", "a2a1", "a2d1", "a2a6", "a2hl", "a2kp", "a2y4", "a50p"],
+                        "a26j", "a26o", "a272", "a29h", "a29i", "a2a1", "a2d1", "a2a6", "a2hl", "a2kp", "a2y4", "a50p", "a8g1"],
         "paths": [ 
             "/esarchive/exp/auto-wrf-hermes-cmaq/"
         ]
