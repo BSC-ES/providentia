@@ -17,10 +17,7 @@ import yaml
 import numpy as np
 import pandas as pd
 
-from providentia.auxiliar import CURRENT_PATH, join
-
-# get BSC machine name (if have one)
-MACHINE = os.environ.get('BSC_MACHINE', 'local')
+from providentia.auxiliar import CURRENT_PATH, join, get_machine
 
 # get current path and providentia root path
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
@@ -30,33 +27,8 @@ multispecies_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'inter
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 
 # set current MACHINE
-if MACHINE not in ['nord3v2', 'mn5', 'nord4']:
-    hostname = os.environ.get('HOSTNAME', '')
+MACHINE = get_machine()
     
-    #setup retrial system for getting ip address as occasionaly breaks
-    retry = 0
-    while True:
-        try:
-            ip = socket.gethostbyname(socket.gethostname())
-            break
-        except:
-            if retry == 3:
-                break
-            else:
-                retry+=1
-                time.sleep(1)
-
-    if "bscearth" in hostname:
-        MACHINE = "workstation"
-    elif "transfer" in hostname:
-        MACHINE = "storage5"
-    elif "bscesdust02.bsc.es" in hostname:
-        MACHINE = "dust"
-    elif ip == "84.88.185.48":
-        MACHINE = "hub"
-    else:
-        MACHINE = "local"
-
 def parse_path(dir, f):
     if os.path.isabs(f):
         return f
