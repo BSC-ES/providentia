@@ -1713,9 +1713,13 @@ class Download(object):
             if len(files) != 0:
 
                 # get data and metadata for each file within period
+                start = time.time()
                 combined_ds_list, metadata, wavelength = get_data(files, var, actris_parameter, resolution, 
                                                                   target_start_date, target_end_date)
-                
+                end = time.time()
+                elapsed_minutes = (end - start) / 60
+                print(f"Time to read data: {elapsed_minutes:.2f} minutes")
+
                 # check if there is data after reading available files
                 if len(combined_ds_list) == 0:
                     self.logger.info('No data were found')
@@ -1748,8 +1752,12 @@ class Download(object):
             
                 # combine and create new dataset
                 self.logger.info('Combining files...')
+                start = time.time()
                 combined_ds = temporally_average_data(combined_ds_list_corrected_flag, resolution, var, self.ghost_version, target_start_date, target_end_date)
-                
+                end = time.time()
+                elapsed_minutes = (end - start) / 60
+                print(f"Time to temporally average: {elapsed_minutes:.2f} minutes")
+
                 # add metadata
                 for key, value in metadata[resolution].items():
                     if key in ['latitude', 'longitude']:
