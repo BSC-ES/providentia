@@ -1877,32 +1877,29 @@ class Download(object):
         self.logger.info(f"\nDownloading {experiment} experiment data from the Atmosphere Data Store...")
 
         # get experiment id and the domain
-        dataset_expid, domain, ensemble_options = experiment.split("-")
+        prefix_expid, domain, ensemble_options = experiment.split("-")
         
         # get the CAMS dataset and the experiment name
-        prefix, exp_id = dataset_expid.rsplit('_', 1)
-
-        # get CAMS dataset
-        dataset = cams_options[prefix]["dataset"]
-
-        # make sure dataset is a possible option
-        if prefix not in cams_options:
-            msg = f"{prefix} prefix is not valid. The CAMS experiment must start with one of the following prefixes: ({', '.join(cams_options.keys())})."
-            show_message(self, msg)
-            return
-
-        # make sure the experiment is available in the dataset
-        if exp_id not in cams_options[prefix]["experiments"]:
-            msg = f"Cannot find the {exp_id} experiment in the {dataset} dataset."    
-            show_message(self, msg)
-            return
+        prefix, exp_id = prefix_expid.rsplit('_', 1)
 
         # check if the domain is the correct one for the dataset
-        if domain not in cams_options[prefix]["domain"]:
-            possible_domains = "', '".join(cams_options[prefix]['domain'])
+        if domain not in cams_options[prefix]:
+            possible_domains = "', '".join(cams_options[prefix])
             msg = (
-            f"The current domain '{domain}' is not valid for the CAMS '{dataset}' dataset."
+            f"The current domain '{domain}' is not valid for the CAMS dataset."
             f"It must be '{possible_domains}'.")            
+            show_message(self, msg)
+            return
+
+        # get prefix - domain dictionary
+        cams_dict = cams_options[prefix][domain]
+
+        # get CAMS dataset
+        dataset = cams_dict["dataset"]
+
+        # make sure the experiment is available in the dataset
+        if exp_id not in cams_dict["experiments"]:
+            msg = f"Cannot find the {exp_id} experiment in the {dataset} dataset."    
             show_message(self, msg)
             return
 
@@ -1915,7 +1912,7 @@ class Download(object):
             return
         
         # get minimum and maximum possible dates
-        min_start_date, max_end_date = self.fetch_cams_dates(cams_options[prefix]['url'])
+        min_start_date, max_end_date = self.fetch_cams_dates(cams_dict['url'])
 
         # convert the selected dates to datetetime
         cams_start_date = datetime.strptime(self.start_date, "%Y%m%d")
@@ -1942,33 +1939,41 @@ class Download(object):
         for resolution in self.resolution:
 
             # check if the resolution is the correct one for the dataset
-            if resolution != cams_options[prefix]["resolution"]:
+            if resolution != cams_dict["resolution"]:
                 msg = (
                 f"The current resolution '{resolution}' is not valid for the CAMS '{dataset}' dataset. "
-                f"It must be '{cams_options[prefix]['resolution']}'.")            
+                f"It must be '{cams_dict['resolution']}'.")            
                 show_message(self, msg)
                 continue
             
             # iterate through the species
             for species in self.species: 
+                # check if species is in the ghost_cams_variables file
                 if species not in parameters_dict:
-                    msg = f"The current species '{species}' is not valid for the CAMS '{dataset}' dataset. "           
+                    msg = f"The species '{species}' is not available in CAMS."
                     show_message(self, msg)
                     continue
             
                 # get the species in the cams vocabulary
                 cams_species = parameters_dict[species]
-                
-                # create cdsapirc file in case it was not created
-                cdsapirc_file = join(os.getenv("HOME"),'.cdsapirc')
-                if not os.path.isfile(cdsapirc_file):
 
-                    create_file = input(f"'.cdsapirc' file not found. Creating it at {cdsapirc_file}. Do you agree? ([y]/n)").lower()
+                # check if the mapped species are available in the dataset
+                if cams_species not in cams_dict['variable']:
+                    msg = f"Mapped species '{cams_species}' for input species '{species}' is not available in the CAMS '{dataset}' dataset."          
+                    show_message(self, msg)
+                    continue
+
+                # create cdsapirc file in case it was not created
+                cdsapirc_path = join(os.getenv("HOME"),'.cdsapirc')
+                if not os.path.isfile(cdsapirc_path):
+                    
+                    # ask the user whether they want to crete the file in the home directory
+                    create_file = input(f"'.cdsapirc' file not found. Creating it at {cdsapirc_path}. Do you agree? ([y]/n)").lower()
                     while create_file not in ['','y','n']:
-                        create_file = input(f"'.cdsapirc' file not found. Creating it at {cdsapirc_file}. Do you agree? ([y]/n)").lower()
+                        create_file = input(f"'.cdsapirc' file not found. Creating it at {cdsapirc_path}. Do you agree? ([y]/n)").lower()
 
                     if create_file in ['', 'y']: 
-                        with open(cdsapirc_file, "w") as f:
+                        with open(cdsapirc_path, "w") as f:
                             f.write("url: https://ads.atmosphere.copernicus.eu/api\n")
                             f.write("key: 6101c82f-6d0b-4278-ac89-82743a81502c\n") # TODO get the user key
                     else:
@@ -1980,7 +1985,7 @@ class Download(object):
                 client = cdsapi.Client(retry_max=1, quiet=True)
 
                 # get directory structure
-                dir_tail = join(dataset_expid, domain, resolution, species)
+                dir_tail = join(prefix_expid, domain, resolution, species)
 
                 # get temporal and final dir
                 temp_dir = join(self.exp_to_interp_root,'.temp', dir_tail)
@@ -2003,19 +2008,27 @@ class Download(object):
                     "model": [exp_id],
                     "level": ["0"],
                     "date": [f"{current_cams_date_str}/{current_cams_date_str}"],
-                    "type": ["forecast"],
                     "time": ["00:00"],
-                    "leadtime_hour": list(range(0,24)),
                     "data_format": "netcdf_zip"
                     }
 
-                    # get file name
-                    file_name = f"{species}-000_{current_cams_date.strftime('%Y%m%d')}.nc"
+                    # add leadtime hour to the request if the dataset has it
+                    if 'leadtime_hour' in cams_dict:
+                        request["leadtime_hour"] = list(range(0,cams_dict['leadtime_hour']))
 
-                    # get temporal and final path
-                    temp_path = join(temp_dir, file_name)
+                    # add type to the request if the dataset has it
+                    if 'type' in cams_dict:
+                        request["type"] = cams_dict['type']
+
+                    # if it's forecast one file per day, analysisi one file per month
+
+                    # get file name and final path
+                    file_name = f"{species}-000_{current_cams_date.strftime('%Y%m%d')}.nc"
                     final_path = join(final_dir, file_name)
 
+                    # get temporal path
+                    temp_path = join(temp_dir, 'zip_file')
+                    
                     # make the request
                     try:
                         self.logger.info(f"Downloading {final_path}") # TODO change message
@@ -2039,11 +2052,15 @@ class Download(object):
 
                     # extract file 
                     with zipfile.ZipFile(temp_path, 'r') as zip_ref:
+                        zip_file_name = zip_ref.namelist()[0]
                         zip_ref.extractall(temp_dir)
 
                     # format the cams files and move them to the corresponding folder
-                    self.logger.info(f"Formatting {final_path}\n") # TODO change message
-                    self.format_cams(join(temp_dir,'ENS_FORECAST.nc'), final_path, cams_species, species)
+                    self.logger.info(f"Formatting {final_path}\n") 
+                    self.format_cams(join(temp_dir,zip_file_name), final_path, cams_species, species)
+
+                    # remove the temp directory tail
+                    shutil.rmtree(join(self.exp_to_interp_root,'.temp'))
 
                     # add one day to the date
                     current_cams_date += timedelta(days=1)     
@@ -2091,9 +2108,7 @@ class Download(object):
             if name == "time":
                 # add specific atributes to time
                 var.units = f'hours since {date_str[:4]}-{date_str[4:6]}-{date_str[-2:]} 00:00:00'                
-                var.axis = 'T'
                 var.calendar = 'standard'
-                var.tz = 'UTC'
             else:
                 # copy atributes from the original file
                 var.setncatts({k: og_var.getncattr(k) for k in og_var.ncattrs() if k != '_FillValue'})
