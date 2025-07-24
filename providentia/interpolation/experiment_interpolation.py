@@ -651,18 +651,21 @@ class ExperimentInterpolation(object):
                 self.log_file_str += "Experiment units should be 'angular degrees', but are set as '{}'".format(
                     self.mod_speci_units)
                 create_output_logfile(1, self.log_file_str)
-        
+    
+        # determine chemical formula of species 
+        speci_chemical_formula = self.standard_parameter_speci['chemical_formula']
+
         # otherwise check if the unit quantities are equal
-        conv_obj = unit_converter.convert_units(obs_speci_units,obs_speci_units,1)
+        conv_obj = unit_converter.convert_units(obs_speci_units, obs_speci_units, 1, 
+                                                measured_species=speci_chemical_formula)
         obs_quantity = conv_obj.output_represented_quantity
-        conv_obj = unit_converter.convert_units(self.mod_speci_units,self.mod_speci_units,1)
+        conv_obj = unit_converter.convert_units(self.mod_speci_units, self.mod_speci_units, 1, 
+                                                measured_species=speci_chemical_formula)
         model_quantity = conv_obj.output_represented_quantity
 
         # observations and model quantities not equal (convert to observational units, standard_temperature=293.15, 
         # standard_pressure=1013.25)
         if obs_quantity != model_quantity:
-            # determine chemical formula of species 
-            speci_chemical_formula = self.standard_parameter_speci['chemical_formula']
             # if cannot determine chemical formula of species, then terminate process
             if speci_chemical_formula == '':
                 self.log_file_str += 'Cannot determine speci chemical formula needed for unit conversion. Terminating process.'
@@ -674,7 +677,8 @@ class ExperimentInterpolation(object):
                                                     conversion_input_quantity=model_quantity)
             self.conversion_factor = conv_obj.conversion_factor
         else:
-            conv_obj = unit_converter.convert_units(self.mod_speci_units, obs_speci_units, 1.0) 
+            conv_obj = unit_converter.convert_units(self.mod_speci_units, obs_speci_units, 1.0, 
+                                                    measured_species=speci_chemical_formula) 
             self.conversion_factor = conv_obj.conversion_factor
 
     def get_monthly_model_data(self):

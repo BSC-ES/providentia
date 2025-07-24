@@ -270,7 +270,8 @@ class DataReader:
                     input_units = self.read_instance.nonghost_units[speci]
                     if input_units != '-':
                         output_units = copy.deepcopy(input_units)
-                        conv_obj = unit_converter.convert_units(input_units, output_units, 1)
+                        formula = self.read_instance.parameter_dictionary[speci]['chemical_formula']
+                        conv_obj = unit_converter.convert_units(input_units, output_units, 1, measured_species=formula)
                         nonghost_standard_units[speci] = conv_obj.output_standard_units
                     else:
                         nonghost_standard_units[speci] = 'unitless'
