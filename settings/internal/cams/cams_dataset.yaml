@@ -34,6 +34,8 @@ cams_analysis:
     - dust
     - pm10_sea_salt_dry
     - sulphur_dioxide
+    leadtime_hour: 24
+    forecast: false
 cams_forecast:
   global:
     dataset: cams-global-atmospheric-composition-forecasts
@@ -107,6 +109,8 @@ cams_forecast:
     - total_fine_mode_aerosol_optical_depth_500nm
     - total_precipitation
     - visibility
+    leadtime_hour: 120
+    forecast: true
   regional:
     dataset: cams-europe-air-quality-forecasts
     experiments:
@@ -142,6 +146,8 @@ cams_forecast:
     - dust
     - pm10_sea_salt_dry
     - sulphur_dioxide
+    leadtime_hour: 96
+    forecast: true
 cams_reanalysis:
   global:
     dataset: cams-global-reanalysis-eac4
@@ -181,6 +187,7 @@ cams_reanalysis:
     - sulphur_dioxide
     - surface_pressure
     - total_aerosol_optical_depth_550nm
+    forecast: false
   regional:
     dataset: cams-europe-air-quality-reanalyses
     experiments:
@@ -213,3 +220,4 @@ cams_reanalysis:
     - dust
     - pm10_sea_salt_dry
     - sulphur_dioxide
+    forecast: false
