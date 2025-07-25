@@ -247,6 +247,16 @@ def read_netcdf_data(tuple_arguments):
                             meta_var_nc = 'station_code'
                         elif 'station_name' in ncdf_root.variables:
                             meta_var_nc = 'station_name'
+                    elif meta_var == 'area_classification':
+                        if 'area_classification' in ncdf_root.variables:
+                            meta_var_nc = 'area_classification'
+                        else:
+                            meta_var_nc = 'station_area'
+                    elif meta_var == 'station_classification':
+                        if 'station_classification' in ncdf_root.variables:
+                            meta_var_nc = 'station_classification'
+                        else:
+                            meta_var_nc = 'station_type'
                     else:
                         meta_var_nc = meta_var
         
@@ -763,7 +773,21 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
         instance.experiments_menu['checkboxes']['map_vars'] = experiments_to_add
 
 
-def temporal_resolution_order_dict():
+def get_possible_temporal_resolutions():
+    """ Return possible temporal resolutions as a list.
+
+        :return: available temporal resolutions
+        :rtype: list
+    """
+
+    # define possible temporal resolutions
+    possible_resolutions = ['hourly', 'hourly_instantaneous', '3hourly', '3hourly_instantaneous', 
+                            '6hourly', '6hourly_instantaneous', 'daily', 'monthly', 'annual']
+    
+    return possible_resolutions
+
+
+def get_temporal_resolution_order():
     """ Return temporal resolution order for menus as a dictionary.
 
         :return: temporal resolution order
@@ -777,8 +801,27 @@ def temporal_resolution_order_dict():
     return resolution_order_dict
 
 
-def get_relevant_temporal_resolutions(resolution):        
-    """ Get relevant temporal reolsutions for periodic plots, by selected temporal resolution.
+def get_possible_resampling_resolutions(resolution):
+    """ Get available lower resolutions. """
+
+    if resolution in ['hourly', 'hourly_instantaneous']:
+        resolutions = ['3hourly', '6hourly', 'daily', 'monthly', 'annual']
+    elif resolution in ['3hourly', '3hourly_instantaneous']:
+        resolutions = ['6hourly', 'daily', 'monthly', 'annual']
+    elif resolution in ['6hourly', '6hourly_instantaneous']:
+        resolutions = ['daily', 'monthly', 'annual']
+    elif resolution == 'daily':
+        resolutions = ['monthly', 'annual']
+    elif resolution == 'monthly':
+        resolutions = ['annual']
+    elif resolution == 'annual':
+        resolutions = []
+
+    return resolutions
+
+
+def get_periodic_relevant_temporal_resolutions(resolution):        
+    """ Get relevant temporal resolutions for periodic plots, by selected temporal resolution.
 
         :param resolution: name of selected temporal resolution
         :type resolution: str
@@ -797,8 +840,9 @@ def get_relevant_temporal_resolutions(resolution):
         
     return relevant_temporal_resolutions
 
-def get_nonrelevant_temporal_resolutions(resolution):        
-    """ Get non-relevant temporal reolsutions for periodic plots, by selected temporal resolution.
+
+def get_periodic_nonrelevant_temporal_resolutions(resolution):        
+    """ Get non-relevant temporal resolutions for periodic plots, by selected temporal resolution.
 
         :param resolution: name of selected temporal resolution
         :type resolution: str
@@ -826,22 +870,6 @@ def valid_date(date_text):
         return True
     except Exception as e:
         return False
-
-
-def get_lower_resolutions(resolution):
-    """ Get available lower resolutions. """
-
-    if resolution in ['hourly', 'hourly_instantaneous', '3hourly', '3hourly_instantaneous', 
-                      '6hourly', '6hourly_instantaneous']:
-        resolutions = ['daily', 'monthly', 'annual']
-    elif resolution == 'daily':
-        resolutions = ['monthly', 'annual']
-    elif resolution == 'monthly':
-        resolutions = ['annual']
-    elif resolution == 'annual':
-        resolutions = []
-
-    return resolutions
 
 
 def generate_file_trees(instance, force=False):
@@ -912,16 +940,13 @@ def get_valid_metadata(read_instance, variable, valid_station_idxs, networkspeci
 def do_resampling(read_instance):
 
     """ Function which handles resampling of data """
-
-    possible_resolutions = ['hourly', 'hourly_instantaneous', '3hourly', '3hourly_instantaneous', 
-                            '6hourly', '6hourly_instantaneous', 'daily', 'monthly', 'annual']
     
     # temporally resample data array if required
-    if read_instance.resampling_resolution in possible_resolutions:
+    if read_instance.resampling_resolution in get_possible_temporal_resolutions():
 
-        # update relevant/nonrelevant temporal resolutions 
-        read_instance.relevant_temporal_resolutions = get_relevant_temporal_resolutions(read_instance.resampling_resolution)
-        read_instance.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(read_instance.resampling_resolution)
+        # update relevant/nonrelevant periodic temporal resolutions 
+        read_instance.periodic_relevant_temporal_resolutions = get_periodic_relevant_temporal_resolutions(read_instance.resampling_resolution)
+        read_instance.periodic_nonrelevant_temporal_resolutions = get_periodic_nonrelevant_temporal_resolutions(read_instance.resampling_resolution)
 
         # transform resolution to code for .resample function
         if read_instance.resampling_resolution in ['hourly', 'hourly_instantaneous']:
@@ -939,6 +964,34 @@ def do_resampling(read_instance):
 
         # copy original resolution data array 
         read_instance.data_in_memory_resampled = copy.deepcopy(read_instance.data_in_memory)
+
+        # create new dictionaries to store resampled representativity and period variables
+        read_instance.ghost_data_in_memory_representativity = {}
+        read_instance.ghost_data_in_memory_period = {}
+
+        # resample GHOST representativity and period fields
+        if read_instance.reading_ghost:   
+
+            # resample GHOST representativity fields
+            active_data_availablity_vars = read_instance.representativity_menu['rangeboxes']['map_vars']
+                
+            # iterate through representativity fields and only get valid active GHOST ones
+            new_var_index = 0
+            read_instance.native_GHOST_representativity_vars = []
+            for var in active_data_availablity_vars:
+                # ensure representativity field is a native GHOST one
+                if 'native' in var:
+                    read_instance.native_GHOST_representativity_vars.append(var)
+
+            # get active period vars
+            if read_instance.resampling_resolution in ['hourly', 'hourly_instantaneous', '3hourly', '6hourly', '3hourly_instantaneous', '6hourly_instantaneous']:
+                read_instance.active_period_vars = ['day_night_code', 'weekday_weekend_code', 'season_code']
+            elif read_instance.resampling_resolution in ['daily']:
+                read_instance.active_period_vars = ['weekday_weekend_code', 'season_code']
+            elif read_instance.resampling_resolution == 'monthly':
+                read_instance.active_period_vars = ['season_code']
+            elif read_instance.resampling_resolution == 'annual':
+                read_instance.active_period_vars = []
 
         # iterate through networkspecies + filter_networkspecies
         for networkspeci in (read_instance.networkspecies + read_instance.filter_networkspecies):
@@ -963,10 +1016,64 @@ def do_resampling(read_instance):
                                                                                                 data_array.shape[1], 
                                                                                                 data_array_resampled.shape[1])
 
+            # if have GHOST data resample data representativity and period codes
+            if read_instance.reading_ghost:   
+
+                # resample GHOST representativity variables
+                for var_ii, var in enumerate(read_instance.native_GHOST_representativity_vars):
+
+                    # get index of data representativity variable
+                    var_index = read_instance.ghost_data_vars_to_read.index(var)
+
+                    # get data array for networkspeci and variable
+                    data_array = read_instance.ghost_data_in_memory[networkspeci][var_index,:,:]
+                    
+                    # create pandas dataframe of data array
+                    data_array_df = pd.DataFrame(data_array.transpose(), index=read_instance.time_array, 
+                                                 columns=np.arange(data_array.shape[0]))
+                    
+                    # resample data array
+                    data_array_resampled = data_array_df.resample(temporal_resolution_to_output_code, axis=0).mean().to_numpy().transpose()
+
+                    # if first variable then create array for networkspeci to store data
+                    if var_ii == 0:
+                        read_instance.ghost_data_in_memory_representativity[networkspeci] = np.full((len(read_instance.native_GHOST_representativity_vars), 
+                                                                                                     data_array_resampled.shape[0], data_array_resampled.shape[1]),  
+                                                                                                     np.NaN, dtype=np.float32)
+
+                    # place variable data in array
+                    read_instance.ghost_data_in_memory_representativity[networkspeci][var_ii,:,:] = data_array_resampled
+            
+                # resample GHOST period fields
+                for var_ii, var in enumerate(read_instance.active_period_vars):
+
+                    # get index of period code variable
+                    var_index = read_instance.ghost_data_vars_to_read.index(var)
+
+                    # get data array for networkspeci and variable
+                    data_array = read_instance.ghost_data_in_memory[networkspeci][var_index,:,:]
+                    
+                    # create pandas dataframe of data array
+                    data_array_df = pd.DataFrame(data_array.transpose(), index=read_instance.time_array, 
+                                                 columns=np.arange(data_array.shape[0]))
+                
+                    # resample data array
+                    data_array_resampled = np.round(data_array_df.resample(temporal_resolution_to_output_code, axis=0).mean().to_numpy().transpose(), 0)
+
+                    # if first variable then create array for networkspeci to store data
+                    if var_ii == 0:
+                        read_instance.ghost_data_in_memory_period[networkspeci] = np.full((len(read_instance.active_period_vars), 
+                                                                                               data_array_resampled.shape[0], data_array_resampled.shape[1]),  
+                                                                                               np.NaN, dtype=np.float32)
+
+                    # place variable data in array
+                    read_instance.ghost_data_in_memory_period[networkspeci][var_ii,:,:] = data_array_resampled
+
+    # resampling not neccessary?
     else:
-        # update relevant/nonrelevant temporal resolutions 
-        read_instance.relevant_temporal_resolutions = get_relevant_temporal_resolutions(read_instance.resolution)    
-        read_instance.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(read_instance.resolution) 
+        # update relevant/nonrelevant periodic temporal resolutions 
+        read_instance.periodic_relevant_temporal_resolutions = get_periodic_relevant_temporal_resolutions(read_instance.resolution)    
+        read_instance.periodic_nonrelevant_temporal_resolutions = get_periodic_nonrelevant_temporal_resolutions(read_instance.resolution) 
 
         # update data_in_memory_resampled to point to data_in_memory
         read_instance.data_in_memory_resampled = read_instance.data_in_memory
