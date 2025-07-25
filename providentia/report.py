@@ -26,8 +26,8 @@ from .plotting import Plotting
 from .plot_aux import get_taylor_diagram_ghelper, set_map_extent, reorder_pdf_pages
 from .plot_formatting import format_plot_options, format_axis, harmonise_xy_lims_paradigm, set_axis_label, set_axis_title
 from .read import DataReader
-from .read_aux import (generate_file_trees, get_lower_resolutions, 
-                       get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
+from .read_aux import (generate_file_trees, get_possible_resampling_resolutions, 
+                       get_periodic_nonrelevant_temporal_resolutions, get_periodic_relevant_temporal_resolutions, 
                        get_valid_experiments, get_valid_obs_files_in_date_range)
 from .statistics import (calculate_statistic, get_fairmode_data,
                          generate_colourbar, get_selected_station_data, get_z_statistic_info)
@@ -177,8 +177,8 @@ class Report:
             provconf.check_validity()
 
             # set some key configuration variables
-            self.relevant_temporal_resolutions = get_relevant_temporal_resolutions(self.resolution)
-            self.nonrelevant_temporal_resolutions = get_nonrelevant_temporal_resolutions(self.resolution)
+            self.periodic_relevant_temporal_resolutions = get_periodic_relevant_temporal_resolutions(self.resolution)
+            self.periodic_nonrelevant_temporal_resolutions = get_periodic_nonrelevant_temporal_resolutions(self.resolution)
             self.data_labels = [self.observations_data_label] + list(self.experiments.values())
             self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
             self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
@@ -491,34 +491,36 @@ class Report:
             # save page figures
             valid_page = False
             real_page = 1
-            for page in self.plot_dictionary:
+            for i, page in enumerate(self.plot_dictionary):
                 # if page has no active data plotted, do not plot it
                 n_page_plotted_labels = 0
                 for ax_dict in self.plot_dictionary[page]['axs']:
                     n_page_plotted_labels += len(ax_dict['data_labels'])
                 if n_page_plotted_labels > 0:
-                    if not valid_page:
+                    # the following variables will be used to set the order of multispecies plot
+                    # in the report if there are
+                    # get pages in PDF that contain multispecies plots
+                    if 'multispecies' in self.plot_dictionary[page]['plot_type']:
+                        if self.plot_dictionary[page]['paradigm'] == 'summary':
+                            self.summary_multispecies_pages.append(real_page)
+                        elif self.plot_dictionary[page]['paradigm'] == 'station':
+                            self.station_multispecies_pages.append(real_page)
+
+                    # save page where station plots start to be created
+                    if ((self.plot_dictionary[page]['paradigm'] == 'station') and 
+                        (not hasattr(self, 'paradigm_break_page'))):
+                        self.paradigm_break_page = real_page
+
+                    # save pdf when reaching last page
+                    if i == len(self.plot_dictionary) - 1:
                         self.logger.info(f'\nWriting PDF in {reports_path}')
                         valid_page = True
-                    else:
-                        # the following variables will be used to set the order of multispecies plot
-                        # in the report if there are
-                        # get pages in PDF that contain multispecies plots
-                        if 'multispecies' in self.plot_dictionary[page]['plot_type']:
-                            if self.plot_dictionary[page]['paradigm'] == 'summary':
-                                self.summary_multispecies_pages.append(real_page)
-                            elif self.plot_dictionary[page]['paradigm'] == 'station':
-                                self.station_multispecies_pages.append(real_page)
-
-                        # save page where station plots start to be created
-                        if ((self.plot_dictionary[page]['paradigm'] == 'station') and 
-                            (not hasattr(self, 'paradigm_break_page'))):
-                            self.paradigm_break_page = real_page
-
                     fig = self.plot_dictionary[page]['fig']
                     self.pdf.savefig(fig, dpi=self.dpi)
                     plt.close(fig)
                     real_page += 1
+
+            # if last page was reached tha means there were plots to write (valid_page = True)
             if not valid_page:
                 self.logger.info('\n0 plots remain to write to PDF')
 
@@ -726,10 +728,10 @@ class Report:
                             
                             # format axis
                             format_axis(self, self, grid_dict, base_plot_type, plot_characteristics,
-                                        relevant_temporal_resolutions=self.relevant_temporal_resolutions)
+                                        relevant_temporal_resolutions=self.periodic_relevant_temporal_resolutions)
 
                             # get references to periodic label annotations made, and then hide them
-                            for relevant_temporal_resolution in self.relevant_temporal_resolutions:
+                            for relevant_temporal_resolution in self.periodic_relevant_temporal_resolutions:
                                 annotations = [child for child in grid_dict[relevant_temporal_resolution].get_children() 
                                                if isinstance(child, matplotlib.text.Annotation)]
                                 # hide annotations
@@ -1047,14 +1049,9 @@ class Report:
                     msg = f'Fairmode target summary plot cannot be created for {speci}.'
                     show_message(self, msg)
                     continue
-                # get active temporal resolution
-                if str(self.resampling_resolution) != 'None':
-                    resolution = self.resampling_resolution
-                else:
-                    resolution = self.resolution
                 # warning for fairmode plots if resolution is not hourly or daily
-                if ((speci in ['sconco3', 'sconcno2'] and resolution != 'hourly') 
-                    or (speci in ['pm10', 'pm2p5'] and (resolution not in ['hourly', 'daily']))):
+                if ((speci in ['sconco3', 'sconcno2'] and self.active_resolution != 'hourly') 
+                    or (speci in ['pm10', 'pm2p5'] and (self.active_resolution not in ['hourly', 'daily']))):
                     msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
                     show_message(self, msg)
                     continue
@@ -1237,8 +1234,9 @@ class Report:
                         msg = f'Fairmode target station plot cannot be created for {speci} in {self.current_station_name}.'
                         show_message(self, msg)
                         continue
-                    if ((speci in ['sconco3', 'sconcno2'] and self.resolution != 'hourly') 
-                        or (speci in ['pm10', 'pm2p5'] and (self.resolution not in ['hourly', 'daily']))):
+                    # warning for fairmode plots if resolution is not hourly or daily
+                    if ((speci in ['sconco3', 'sconcno2'] and self.active_resolution != 'hourly') 
+                        or (speci in ['pm10', 'pm2p5'] and (self.active_resolution not in ['hourly', 'daily']))):
                         msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
                         show_message(self, msg)
                         continue
@@ -1538,11 +1536,8 @@ class Report:
                     chunk_stat = copy.deepcopy(zstat)
                     chunk_resolution = plot_type.split('-')[2].split('_')[0]
                     
-                    # check if chunk resolution is available
-                    if self.resampling_resolution is None:
-                        available_timeseries_chunk_resolutions = list(get_lower_resolutions(self.resolution))
-                    else:
-                        available_timeseries_chunk_resolutions = list(get_lower_resolutions(self.resampling_resolution))
+                    # get available chunk timeseries resolutions
+                    available_timeseries_chunk_resolutions = get_possible_resampling_resolutions(self.active_resolution)
 
                     # show warning if it is not available
                     if chunk_resolution not in available_timeseries_chunk_resolutions:
@@ -1725,7 +1720,7 @@ class Report:
 
                 # turn axis/axes on
                 if base_plot_type in ['periodic','periodic-violin']:
-                    for relevant_temporal_resolution in self.relevant_temporal_resolutions:
+                    for relevant_temporal_resolution in self.periodic_relevant_temporal_resolutions:
                         relevant_axis[relevant_temporal_resolution].axis('on')
                         relevant_axis[relevant_temporal_resolution].set_visible(True)
 
@@ -1937,7 +1932,7 @@ class Report:
         for relevant_page in relevant_pages:
             if base_plot_type in ['periodic', 'periodic-violin']:
                 for ax in self.plot_dictionary[relevant_page]['axs']:
-                    for relevant_temporal_resolution in self.relevant_temporal_resolutions:
+                    for relevant_temporal_resolution in self.periodic_relevant_temporal_resolutions:
                         relevant_axs.append(ax['handle'][relevant_temporal_resolution])
                         relevant_data_labels.append(ax['data_labels'])
             elif base_plot_type == 'fairmode-statsummary':
@@ -1959,7 +1954,7 @@ class Report:
         relevant_data_labels = []
         for relevant_page, page_ind in plot_indices:
             if base_plot_type in ['periodic', 'periodic-violin']:
-                for relevant_temporal_resolution in self.relevant_temporal_resolutions:
+                for relevant_temporal_resolution in self.periodic_relevant_temporal_resolutions:
                     relevant_axs.append(self.plot_dictionary[relevant_page]['axs'][page_ind]['handle'][relevant_temporal_resolution])
                     relevant_data_labels.append(self.plot_dictionary[relevant_page]['axs'][page_ind]['data_labels'])
             else:

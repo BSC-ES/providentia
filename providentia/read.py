@@ -113,6 +113,12 @@ class DataReader:
                     self.read_instance.time_array >= datetime.datetime.strptime(start_yyyymm+'01','%Y%m%d')) 
                     for month_ii, start_yyyymm in enumerate(self.read_instance.yearmonths)])
 
+                # get N indices per year
+                self.read_instance.N_inds_per_year = np.array([np.count_nonzero(np.all(
+                    [self.read_instance.time_array >= datetime.datetime.strptime(str(year)+'0101','%Y%m%d'),
+                    self.read_instance.time_array < datetime.datetime.strptime(str(year+1)+'0101','%Y%m%d')], axis=0)) 
+                    for year in np.unique([int(str(yyyymm)[:4]) for yyyymm in self.read_instance.yearmonths])])
+
                 # get unique basic metadata across networkspecies
                 # for this step include filter networkspecies
                 self.read_basic_metadata()
@@ -179,13 +185,15 @@ class DataReader:
                 self.read_instance.ghost_data_vars_to_read = [var for var 
                                                               in self.read_instance.representativity_info['ghost'][resolution]['map_vars'] 
                                                               if 'native' in var]
-                
-                # add annual reprentativity and daytime and seasonal variables
-                self.read_instance.ghost_data_vars_to_read += ['annual_native_representativity_percent', 'season_code']
+                # add annual native representativity percent    
+                self.read_instance.ghost_data_vars_to_read.append('annual_native_representativity_percent') 
+
+                # add periodic code variables
+                self.read_instance.ghost_data_vars_to_read.append('season_code')
                 if self.read_instance.resolution != 'monthly':
-                    self.read_instance.ghost_data_vars_to_read += ['weekday_weekend_code']
+                    self.read_instance.ghost_data_vars_to_read.append('weekday_weekend_code')
                 if self.read_instance.resolution not in ['monthly', 'daily']:
-                    self.read_instance.ghost_data_vars_to_read += ['day_night_code']
+                    self.read_instance.ghost_data_vars_to_read.append('day_night_code')
 
                 # initialise data in memory for GHOST with NaN for these variables
                 self.read_instance.ghost_data_in_memory = {networkspeci:
@@ -262,7 +270,8 @@ class DataReader:
                     input_units = self.read_instance.nonghost_units[speci]
                     if input_units != '-':
                         output_units = copy.deepcopy(input_units)
-                        conv_obj = unit_converter.convert_units(input_units, output_units, 1)
+                        formula = self.read_instance.parameter_dictionary[speci]['chemical_formula']
+                        conv_obj = unit_converter.convert_units(input_units, output_units, 1, measured_species=formula)
                         nonghost_standard_units[speci] = conv_obj.output_standard_units
                     else:
                         nonghost_standard_units[speci] = 'unitless'
@@ -407,6 +416,9 @@ class DataReader:
                 if self.read_instance.reading_ghost:
                     self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]] = \
                         self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]][:, :, data_left_edge_ind:data_right_edge_ind]
+
+                # do resampling of data (if necessary)
+                do_resampling(self.read_instance)
 
             # need to read on left / read on right
             if ('read_left' in operations) or ('read_right' in operations):
@@ -714,6 +726,16 @@ class DataReader:
                 for ghost_metadata_var in self.read_instance.ghost_metadata_vars_to_read:
                     if (ghost_metadata_var in ncdf_root.variables) & (ghost_metadata_var not in self.read_instance.nonghost_metadata_vars_to_read):
                         self.read_instance.nonghost_metadata_vars_to_read.append(ghost_metadata_var) 
+
+                # check if area classification is available in files (if not already added)
+                if 'area_classification' not in self.read_instance.nonghost_metadata_vars_to_read:
+                    if 'station_area' in ncdf_root.variables:
+                        self.read_instance.nonghost_metadata_vars_to_read.append('area_classification') 
+
+                # check if station classification is available in files (if not already added)
+                if 'station_classification' not in self.read_instance.nonghost_metadata_vars_to_read:
+                    if 'station_type' in ncdf_root.variables:
+                        self.read_instance.nonghost_metadata_vars_to_read.append('station_classification') 
 
                 # close first relevant file
                 ncdf_root.close()
