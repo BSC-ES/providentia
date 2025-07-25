@@ -40,6 +40,7 @@ cams_forecast:
   global:
     dataset: cams-global-atmospheric-composition-forecasts
     resolution: hourly
+    type: forecast
     url: https://ads.atmosphere.copernicus.eu/datasets/cams-global-atmospheric-composition-forecasts?tab=download
     variable:
     - 2m_dewpoint_temperature
