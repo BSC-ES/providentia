@@ -3,6 +3,7 @@ import os
 import shutil
 
 from base64 import decodebytes
+import cdsapi
 import copy
 from dotenv import dotenv_values
 import json 
@@ -41,6 +42,7 @@ data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/data_paths.yam
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 cams_options = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_dataset.yaml')))
+cams_variables_level = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_variables_level.yaml')))
 
 class Download(object):
     def __init__(self, **kwargs):
@@ -149,12 +151,12 @@ class Download(object):
 
             # if there's experiments, ask the user whether they want interpolated or non-interpolated
             if self.experiments:
-                self.interpolated = input("Experiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
-                while self.interpolated.lower() not in ['','y','n']:
-                    self.interpolated = input("Experiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
+                # self.interpolated = input("Experiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
+                # while self.interpolated.lower() not in ['','y','n']:
+                #     self.interpolated = input("Experiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
 
-                # set the interpolated parameter  
-                self.interpolated = self.interpolated.lower() in ['','y']
+                # # set the interpolated parameter  
+                self.interpolated = False
 
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             self.provconf.check_validity(deactivate_warning=True)
@@ -1870,8 +1872,6 @@ class Download(object):
                 self.logger.info('No files were found')
 
     def download_cams_experiment(self, experiment): 
-        import cdsapi
-
         # print current_experiment
         self.logger.info('\n'+'-'*40)
         self.logger.info(f"\nDownloading {experiment} experiment data from the Atmosphere Data Store...")
@@ -1898,7 +1898,7 @@ class Download(object):
         dataset = cams_dict["dataset"]
 
         # make sure the experiment is available in the dataset
-        if exp_id not in cams_dict["experiments"]:
+        if 'experiments' in cams_dict and exp_id not in cams_dict["experiments"]:
             msg = f"Cannot find the {exp_id} experiment in the {dataset} dataset."    
             show_message(self, msg)
             return
@@ -1935,6 +1935,23 @@ class Download(object):
         # get the ghost to cams vocabulary mapping
         parameters_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'ghost_cams_variables.yaml')))
         
+        # create cdsapirc file in case it was not created
+        cdsapirc_path = join(os.getenv("HOME"),'.cdsapirc')
+        if not os.path.isfile(cdsapirc_path):
+            
+            # ask the user whether they want to crete the file in the home directory
+            create_file = input(f"'.cdsapirc' file not found. Creating it at {cdsapirc_path}. Do you agree? ([y]/n)").lower()
+            while create_file not in ['','y','n']:
+                create_file = input(f"'.cdsapirc' file not found. Creating it at {cdsapirc_path}. Do you agree? ([y]/n)").lower()
+
+            if create_file in ['', 'y']: 
+                with open(cdsapirc_path, "w") as f:
+                    f.write("url: https://ads.atmosphere.copernicus.eu/api\n")
+                    f.write("key: 6101c82f-6d0b-4278-ac89-82743a81502c\n") # TODO get the user key
+            else:
+                self.logger.error("Error: Cannot proceed without '.cdsapirc'. CAMS experiment data download requires this file.")
+                sys.exit(1)
+
         # iterate throught the resolutions
         for resolution in self.resolution:
 
@@ -1963,23 +1980,6 @@ class Download(object):
                     show_message(self, msg)
                     continue
 
-                # create cdsapirc file in case it was not created
-                cdsapirc_path = join(os.getenv("HOME"),'.cdsapirc')
-                if not os.path.isfile(cdsapirc_path):
-                    
-                    # ask the user whether they want to crete the file in the home directory
-                    create_file = input(f"'.cdsapirc' file not found. Creating it at {cdsapirc_path}. Do you agree? ([y]/n)").lower()
-                    while create_file not in ['','y','n']:
-                        create_file = input(f"'.cdsapirc' file not found. Creating it at {cdsapirc_path}. Do you agree? ([y]/n)").lower()
-
-                    if create_file in ['', 'y']: 
-                        with open(cdsapirc_path, "w") as f:
-                            f.write("url: https://ads.atmosphere.copernicus.eu/api\n")
-                            f.write("key: 6101c82f-6d0b-4278-ac89-82743a81502c\n") # TODO get the user key
-                    else:
-                        self.logger.error("Error: Cannot proceed without '.cdsapirc'. CAMS experiment data download requires this file.")
-                        sys.exit(1)
-
                 # create client
                 self.logger.info('')
                 client = cdsapi.Client(retry_max=1, quiet=True)
@@ -1998,29 +1998,44 @@ class Download(object):
                 # iterate through the dates
                 current_cams_date = cams_start_date
                 while current_cams_date <= cams_end_date:
-                    
+
+                    # add one day or one month depending if it is forecast or analysis
+                    if cams_dict['forecast'] is True:
+                        next_cams_date = current_cams_date.replace(day=1) + relativedelta(months=1)
+                    else:
+                        next_cams_date =  current_cams_date + timedelta(days=1) 
+
                     # get the date in cams str format
                     current_cams_date_str = current_cams_date.strftime('%Y-%m-%d')
 
                     # create the request
                     request = {
                     "variable": [cams_species],
-                    "model": [exp_id],
-                    "level": ["0"],
-                    "date": [f"{current_cams_date_str}/{current_cams_date_str}"],
                     "time": ["00:00"],
                     "data_format": "netcdf_zip"
                     }
 
                     # add leadtime hour to the request if the dataset has it
                     if 'leadtime_hour' in cams_dict:
-                        request["leadtime_hour"] = list(range(0,cams_dict['leadtime_hour']))
+                        request["leadtime_hour"] = list(range(0,cams_dict['leadtime_hour']+1))
 
                     # add type to the request if the dataset has it
                     if 'type' in cams_dict:
                         request["type"] = cams_dict['type']
 
-                    # if it's forecast one file per day, analysisi one file per month
+                    # if it's forecast one file per day, analysis one file per month
+                    if cams_dict['forecast'] is True:  # monthly
+                        request["date"] = [f"{current_cams_date_str}/{(next_cams_date - timedelta(days=1)).strftime('%Y-%m-%d')}"]
+                    else: # daily
+                        request["date"] = [f"{current_cams_date_str}/{current_cams_date_str}"]
+
+                    # add the experiment if models are available in the dataset
+                    if 'experiments' in cams_dict:
+                        request["model"] = [exp_id]
+
+                    # if species is multi level, get the 0
+                    if cams_species in cams_variables_level['multi']:
+                        request["level"] = ["0"]
 
                     # get file name and final path
                     file_name = f"{species}-000_{current_cams_date.strftime('%Y%m%d')}.nc"
@@ -2028,7 +2043,13 @@ class Download(object):
 
                     # get temporal path
                     temp_path = join(temp_dir, 'zip_file')
-                    
+
+                    # print the request
+                    self.logger.info('Request -> {')
+                    for k,v in request.items():
+                        self.logger.info(f"{k} : {v}")
+                    self.logger.info('}\n')
+
                     # make the request
                     try:
                         self.logger.info(f"Downloading {final_path}") # TODO change message
@@ -2063,7 +2084,7 @@ class Download(object):
                     shutil.rmtree(join(self.exp_to_interp_root,'.temp'))
 
                     # add one day to the date
-                    current_cams_date += timedelta(days=1)     
+                    current_cams_date = next_cams_date    
 
     def format_cams(self, input_filepath, output_filepath, cams_species, species):  
         # open original netcdf file      
