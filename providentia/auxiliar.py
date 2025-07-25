@@ -134,7 +134,7 @@ def get_machine():
             machine = "storage5"
         elif "bscesdust02.bsc.es" in hostname:
             machine = "dust"
-        elif "bscesoper01.bsc.es" in hostname:
+        elif ip == "84.88.185.205":
             machine = "oper"
         elif ip == "84.88.185.48":
             machine = "hub"
