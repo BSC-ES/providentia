@@ -29,12 +29,13 @@ from .dashboard_elements import ComboBox
 from .dashboard_elements import set_formatting
 from .dashboard_interactivity import HoverAnnotation
 from .dashboard_interactivity import legend_picker_func, picker_block_func, zoom_map_func
+from .fields_menus import update_period_fields, update_representativity_fields
 from .filter import DataFilter
 from .plotting import Plotting
 from .plot_aux import get_map_extent
 from .plot_formatting import format_axis, harmonise_xy_lims_paradigm, log_validity, set_axis_label, set_axis_title
 from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
-from .read_aux import get_lower_resolutions, do_resampling
+from .read_aux import get_possible_resampling_resolutions, do_resampling
 from .statistics import *
 from .warnings_prv import show_message
 
@@ -250,7 +251,7 @@ class Canvas(FigureCanvas):
         axs_to_reset = []
         if isinstance(ax, dict):
             for relevant_temporal_resolution, sub_ax in ax.items():
-                if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                if relevant_temporal_resolution in self.read_instance.periodic_relevant_temporal_resolutions:
                     axs_to_reset.append(sub_ax)
         elif isinstance(ax, list):
             axs_to_reset = copy.deepcopy(ax)
@@ -263,8 +264,9 @@ class Canvas(FigureCanvas):
             if len(self.read_instance.navi_toolbar._nav_stack) == 0:
                 # if don't have an axes dictionary in stack list, create one with current
                 # axis in dictionary with current view limits
-                self.read_instance.navi_toolbar._nav_stack.push(
-                    WeakKeyDictionary({ax_to_reset: (ax_to_reset._get_view(), (ax_to_reset.get_position(True).frozen(), ax_to_reset.get_position().frozen()))}))
+                if ax_to_reset.get_figure():
+                    self.read_instance.navi_toolbar._nav_stack.push(
+                        WeakKeyDictionary({ax_to_reset: (ax_to_reset._get_view(), (ax_to_reset.get_position(True).frozen(), ax_to_reset.get_position().frozen()))}))
 
             # if have existing axes dictionaries in stack list, iterate through stack list
             # removing given axis from all stack list dictionaries
@@ -274,8 +276,9 @@ class Canvas(FigureCanvas):
                         axes_dict.pop(ax_to_reset)
 
                 # now add axis to first dictionary in stack, with the current view limits
-                self.read_instance.navi_toolbar._nav_stack[0][ax_to_reset] = \
-                    (ax_to_reset._get_view(), (ax_to_reset.get_position(True).frozen(), ax_to_reset.get_position().frozen()))
+                if ax_to_reset.get_figure():
+                    self.read_instance.navi_toolbar._nav_stack[0][ax_to_reset] = \
+                        (ax_to_reset._get_view(), (ax_to_reset.get_position(True).frozen(), ax_to_reset.get_position().frozen()))
 
         return None
 
@@ -315,14 +318,20 @@ class Canvas(FigureCanvas):
 
         if not self.read_instance.block_MPL_canvas_updates:
 
+            # set active resolution, resampling_resolution when set, otherwise resolution
+            if self.read_instance.resampling_resolution != 'None':
+                self.read_instance.active_resolution = self.read_instance.resampling_resolution
+            else:
+                self.read_instance.active_resolution = self.read_instance.resolution
+
             # remove timeseries chunk resolution if resampling resolution is lower or equal to chunk resolution
             chunk_resolution = self.timeseries_chunk_resolution.currentText()
             chunk_stat = self.timeseries_chunk_stat.currentText()
             if (chunk_stat != 'None') and (chunk_resolution != 'None'):
-                available_chunk_resolutions = get_lower_resolutions(self.read_instance.resampling_resolution)
+                available_chunk_resolutions = get_possible_resampling_resolutions(self.read_instance.active_resolution)
                 if chunk_resolution not in available_chunk_resolutions:
                     msg = "Timeseries chunk resolution and statistic will be set to 'None' "
-                    msg += f"because resampling resolution ({self.read_instance.resampling_resolution}) "
+                    msg += f"because resampling resolution ({self.read_instance.active_resolution}) "
                     msg += f"is coarser or equal to the set chunk resolution ({chunk_resolution})."
                     show_message(self.read_instance, msg)
                     self.timeseries_chunk_stat.setCurrentText("None")
@@ -333,11 +342,18 @@ class Canvas(FigureCanvas):
                 self.read_instance.cursor_function = 'handle_resampling_update'
                 QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
+            # update represenativity and period fields
+            update_representativity_fields(self.read_instance)
+            update_period_fields(self.read_instance)
+
             # resample data
             do_resampling(self.read_instance)
 
             # update data filters
             self.handle_data_filter_update()
+
+            # update layout fields
+            self.read_instance.update_layout_fields(self)
 
             # if have selected stations on map, then now remake plots
             if hasattr(self, 'relative_selected_station_inds'):
@@ -727,13 +743,13 @@ class Canvas(FigureCanvas):
 
                 # if there are no temporal resolutions (only yearly), skip periodic plots
                 if ((plot_type in ['periodic', 'periodic-violin']) and 
-                    (not self.read_instance.relevant_temporal_resolutions)):
+                    (self.read_instance.active_resolution == 'annual')):
                     msg = 'It is not possible to make periodic plots using annual resolution data.'
                     show_message(self.read_instance, msg)
                     self.read_instance.handle_layout_update('None', sender=plot_type_position)
                     return
                 
-                # if temporal colocation is turned off or there are no experiments, skip scatter plot
+                # if temporal colocation is turned off or there are no experiments, skip some plots
                 if plot_type in ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']:
                     if ((not self.read_instance.temporal_colocation) 
                         or ((self.read_instance.temporal_colocation) and (len(self.read_instance.data_labels) == 1))):
@@ -745,6 +761,7 @@ class Canvas(FigureCanvas):
                         self.read_instance.handle_layout_update('None', sender=plot_type_position)
                         return
                 
+                # if do not have correct resolution or species, cannot make fairmode plots
                 if plot_type in ['fairmode-target', 'fairmode-statsummary']:
                     speci = self.read_instance.networkspeci.split('|')[1]
                     if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
@@ -752,12 +769,8 @@ class Canvas(FigureCanvas):
                         show_message(self.read_instance, msg)
                         self.read_instance.handle_layout_update('None', sender=plot_type_position)
                         return
-                    if str(self.read_instance.resampling_resolution) != 'None':
-                        resolution = self.read_instance.resampling_resolution
-                    else:
-                        resolution = self.read_instance.resolution
-                    if ((speci in ['sconco3', 'sconcno2'] and resolution != 'hourly') 
-                        or (speci in ['pm10', 'pm2p5'] and (resolution not in ['hourly', 'daily']))):
+                    if ((speci in ['sconco3', 'sconcno2'] and self.read_instance.active_resolution != 'hourly') 
+                        or (speci in ['pm10', 'pm2p5'] and (self.read_instance.active_resolution not in ['hourly', 'daily']))):
                         msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
                         show_message(self.read_instance, msg)
                         self.read_instance.handle_layout_update('None', sender=plot_type_position)
@@ -1547,7 +1560,7 @@ class Canvas(FigureCanvas):
     
     def remove_axis_elements(self, ax, plot_type):
         """ Remove all plotted axis elements."""
-       
+
         # get appropriate axes for nested axes
         axs_to_remove = []
         if isinstance(ax, dict):
@@ -1601,9 +1614,13 @@ class Canvas(FigureCanvas):
 
             elif plot_type == 'statsummary':
                 self.remove_axis_objects(ax_to_remove.tables)
-
-            elif plot_type in ['taylor', 'boxplot', 'scatter']:
+            
+            elif plot_type in ['taylor', 'scatter']:
                 for objects in [ax_to_remove.lines, ax_to_remove.artists]:
+                    self.remove_axis_objects(objects)
+
+            elif plot_type in ['boxplot']:
+                for objects in [ax_to_remove.artists, ax_to_remove.patches,ax_to_remove.lines]:
                     self.remove_axis_objects(objects)
 
             elif plot_type == 'fairmode-target':
@@ -2675,7 +2692,7 @@ class Canvas(FigureCanvas):
                         if not undo:
                             if isinstance(self.plot_axes[plot_type], dict):
                                 for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
-                                    if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                                    if relevant_temporal_resolution in self.read_instance.periodic_relevant_temporal_resolutions:
                                         annotation(self.read_instance, 
                                                    self, 
                                                    sub_ax,
@@ -2764,7 +2781,7 @@ class Canvas(FigureCanvas):
                         if not undo:
                             if isinstance(self.plot_axes[plot_type], dict):
                                 for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
-                                    if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                                    if relevant_temporal_resolution in self.read_instance.periodic_relevant_temporal_resolutions:
                                         threshold(self.read_instance, 
                                                   self,       
                                                   sub_ax, 
@@ -3019,7 +3036,7 @@ class Canvas(FigureCanvas):
             if plot_option == 'annotate':
                 if isinstance(self.plot_axes[plot_type], dict):
                     for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
-                        if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                        if relevant_temporal_resolution in self.read_instance.periodic_relevant_temporal_resolutions:
                             annotation(self.read_instance, self, sub_ax, self.read_instance.networkspeci, data_labels, 
                                        plot_type, self.plot_characteristics[plot_type], plot_options,
                                        plot_z_statistic_sign=z_statistic_sign)
@@ -3036,7 +3053,7 @@ class Canvas(FigureCanvas):
             elif plot_option == 'threshold':
                 if isinstance(self.plot_axes[plot_type], dict):
                     for relevant_temporal_resolution, sub_ax in self.plot_axes[plot_type].items():
-                        if relevant_temporal_resolution in self.read_instance.relevant_temporal_resolutions:
+                        if relevant_temporal_resolution in self.read_instance.periodic_relevant_temporal_resolutions:
                             threshold(self.read_instance, self, sub_ax, self.read_instance.networkspeci, 
                                         plot_type, self.plot_characteristics[plot_type])
                 else:
@@ -3428,13 +3445,9 @@ class Canvas(FigureCanvas):
         else:
             available_timeseries_chunk_stats = ["None",] + list(copy.deepcopy(self.read_instance.basic_and_bias_z_stats))
 
-        # update timeseries chunk resolution, to all higher resolutions
-        if self.read_instance.selected_resampling_resolution == "None":
-            available_timeseries_chunk_resolutions = ["None",] + \
-                list(get_lower_resolutions(self.read_instance.selected_resolution))
-        else:
-            available_timeseries_chunk_resolutions = ["None",] + \
-                list(get_lower_resolutions(self.read_instance.selected_resampling_resolution))
+        # update available timeseries chunk resolutions
+        available_timeseries_chunk_resolutions = ["None",] + \
+            get_possible_resampling_resolutions(self.read_instance.active_resolution)
                 
         # the statistic number of stations only make sense when Temporal|Spatial mode is active
         if self.read_instance.statistic_mode != 'Temporal|Spatial':

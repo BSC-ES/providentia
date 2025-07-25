@@ -24,14 +24,8 @@ class DataFilter:
     def __init__(self, read_instance):
         self.read_instance = read_instance
 
-        # get indices of some data variables
+        # get index of observational data array
         self.obs_index = self.read_instance.data_labels.index(self.read_instance.observations_data_label)
-        if self.read_instance.reading_ghost:
-            if self.read_instance.resolution != 'daily' and self.read_instance.resolution != 'monthly':
-                self.day_night_index = self.read_instance.ghost_data_vars_to_read.index('day_night_code')
-            if self.read_instance.resolution != 'monthly':
-                self.weekday_weekend_index = self.read_instance.ghost_data_vars_to_read.index('weekday_weekend_code')
-            self.season_index = self.read_instance.ghost_data_vars_to_read.index('season_code')
 
         # apply filtering
         self.filter_all()
@@ -162,6 +156,16 @@ class DataFilter:
     def filter_by_period(self):
         """ Filter data for selected periods (keeping or removing data, as defined). """
 
+        # set appropriate data and variable name arrays
+        if self.read_instance.resampling_resolution == 'None':
+            if self.read_instance.reading_ghost:
+                data_array = self.read_instance.ghost_data_in_memory
+                varname_array = self.read_instance.ghost_data_vars_to_read
+        else:
+            if self.read_instance.reading_ghost:
+                data_array = self.read_instance.ghost_data_in_memory_period
+                varname_array = self.read_instance.active_period_vars
+
         keeps, removes = [], []
         if (self.read_instance.report) or (self.read_instance.library):
             if hasattr(self.read_instance, 'period'):
@@ -184,10 +188,11 @@ class DataFilter:
             if 'Nighttime' in keeps:
                 day_night_codes_to_keep.append(1)
             if len(day_night_codes_to_keep) == 1:
-                if (self.read_instance.resolution != 'daily') & (self.read_instance.resolution != 'monthly'):
+                if 'hourly' in self.read_instance.active_resolution:
+                    day_night_index = varname_array.index('day_night_code')
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
-                        inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.day_night_index,:,:], day_night_codes_to_keep, invert=True)
+                        inds_to_screen = np.isin(data_array[networkspeci][day_night_index,:,:], day_night_codes_to_keep, invert=True)
                         self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
             weekday_weekend_codes_to_keep = []
@@ -196,10 +201,11 @@ class DataFilter:
             if 'Weekend' in keeps:
                 weekday_weekend_codes_to_keep.append(1)
             if len(weekday_weekend_codes_to_keep) == 1:
-                if self.read_instance.resolution != 'monthly':
+                if self.read_instance.active_resolution not in ['monthly','annual']:
+                    weekday_weekend_index = varname_array.index('weekday_weekend_code')
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
-                        inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.weekday_weekend_index,:,:], weekday_weekend_codes_to_keep, invert=True)
+                        inds_to_screen = np.isin(data_array[networkspeci][weekday_weekend_index,:,:], weekday_weekend_codes_to_keep, invert=True)
                         self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
             season_codes_to_keep = []
@@ -212,10 +218,12 @@ class DataFilter:
             if 'Winter' in keeps:
                 season_codes_to_keep.append(3)
             if (len(season_codes_to_keep) > 0) & (len(season_codes_to_keep) < 4):
-                # iterate through network / species  
-                for networkspeci in self.read_instance.networkspecies:
-                    inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.season_index,:,:], season_codes_to_keep, invert=True)
-                    self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
+                if self.read_instance.active_resolution != 'annual':
+                    season_index = varname_array.index('season_code')
+                    # iterate through network / species  
+                    for networkspeci in self.read_instance.networkspecies:
+                        inds_to_screen = np.isin(data_array[networkspeci][season_index,:,:], season_codes_to_keep, invert=True)
+                        self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
         if len(removes) > 0:
             day_night_codes_to_remove = []
@@ -224,10 +232,11 @@ class DataFilter:
             if 'Nighttime' in removes:
                 day_night_codes_to_remove.append(1)
             if len(day_night_codes_to_remove) > 0:
-                if (self.read_instance.resolution != 'daily') & (self.read_instance.resolution != 'monthly'):
+                if 'hourly' in self.read_instance.active_resolution:
+                    day_night_index = varname_array.index('day_night_code')
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
-                        inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.day_night_index,:,:], day_night_codes_to_remove)
+                        inds_to_screen = np.isin(data_array[networkspeci][day_night_index,:,:], day_night_codes_to_remove)
                         self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
             weekday_weekend_codes_to_remove = []
@@ -236,10 +245,11 @@ class DataFilter:
             if 'Weekend' in removes:
                 weekday_weekend_codes_to_remove.append(1)
             if len(weekday_weekend_codes_to_remove) > 0:
-                if self.read_instance.resolution != 'monthly':
+                if self.read_instance.active_resolution not in ['monthly','annual']:
+                    weekday_weekend_index = varname_array.index('weekday_weekend_code')
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
-                        inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.weekday_weekend_index,:,:], weekday_weekend_codes_to_remove)
+                        inds_to_screen = np.isin(data_array[networkspeci][weekday_weekend_index,:,:], weekday_weekend_codes_to_remove)
                         self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
             season_codes_to_remove = []
@@ -252,10 +262,12 @@ class DataFilter:
             if 'Winter' in removes:
                 season_codes_to_remove.append(3)
             if len(season_codes_to_remove) > 0:
-                # iterate through network / species  
-                for networkspeci in self.read_instance.networkspecies:
-                    inds_to_screen = np.isin(self.read_instance.ghost_data_in_memory[networkspeci][self.season_index,:,:], season_codes_to_remove)
-                    self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
+                if self.read_instance.active_resolution != 'annual':
+                    season_index = varname_array.index('season_code')
+                    # iterate through network / species  
+                    for networkspeci in self.read_instance.networkspecies:
+                        inds_to_screen = np.isin(data_array[networkspeci][season_index,:,:], season_codes_to_remove)
+                        self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
 
     def filter_by_data_availability(self):
         """ Function which filters data by selected data availability variables. """
@@ -276,9 +288,21 @@ class DataFilter:
 
         # filter observations by native percentage data availability variables (only GHOST data)
         if self.read_instance.reading_ghost:
+
+            # get appropriate data and variable name arrays
+            if self.read_instance.resampling_resolution == 'None':
+                data_array = self.read_instance.ghost_data_in_memory
+                varname_array = self.read_instance.ghost_data_vars_to_read
+            else:
+                data_array = self.read_instance.ghost_data_in_memory_representativity
+                varname_array = self.read_instance.native_GHOST_representativity_vars
+
+            # iterate through data availability variables
             for var_ii, var in enumerate(active_data_availablity_vars):
+                
+                # variable is GHOST native?
                 if 'native' in var:
-                    var_index = self.read_instance.ghost_data_vars_to_read.index(var)
+                    var_index = varname_array.index(var)
                     
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
@@ -287,13 +311,13 @@ class DataFilter:
                         if 'max_gap' in var:
                             # bound is < 100?:
                             if data_availability_lower_bounds[var_ii] < 100:
-                                inds_to_screen = self.read_instance.ghost_data_in_memory[networkspeci][var_index,:,:] > data_availability_lower_bounds[var_ii]
+                                inds_to_screen = data_array[networkspeci][var_index,:,:] > data_availability_lower_bounds[var_ii]
                                 self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_screen] = np.NaN
                         # data representativity variable?
                         else:
                             # bound is > 0?
                             if data_availability_lower_bounds[var_ii] > 0:
-                                inds_to_screen = self.read_instance.ghost_data_in_memory[networkspeci][var_index,:,:] < data_availability_lower_bounds[var_ii]
+                                inds_to_screen = data_array[networkspeci][var_index,:,:] < data_availability_lower_bounds[var_ii]
                                 self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_screen] = np.NaN
 
         # filter observations and experiment data by non-native percentage data availability variables 
@@ -313,7 +337,8 @@ class DataFilter:
 
                 # get period associate with variable
                 period = var.split('_')[0]
-                period_inds = np.arange(len(self.read_instance.time_array))
+                period_inds = np.arange(len(self.read_instance.time_index))
+
                 # daily variable?
                 if period == 'daily':
                     period_inds_split = np.array_split(period_inds,
@@ -321,6 +346,10 @@ class DataFilter:
                 # monthly variable?
                 elif period == 'monthly':
                     period_inds_split = np.array_split(period_inds, np.cumsum(self.read_instance.N_inds_per_yearmonth))
+                # annual variable?
+                elif period == 'annual':
+                    # if annual variable, then split indices into whole record variable 
+                    period_inds_split = np.array_split(period_inds, np.cumsum(self.read_instance.N_inds_per_year))
                 # whole record variable?
                 else:
                     period_inds_split = [period_inds]

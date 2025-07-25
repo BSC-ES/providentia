@@ -130,6 +130,7 @@ class Stats(object):
     def calculate_data_avail_fraction(data):
         """ Calculate data availability fraction
             (i.e. fraction of total data array not equal to NaN).
+            Round it to the nearest integer.
 
             :param data: array of data
             :type data: numpy.ndarray
@@ -139,8 +140,8 @@ class Stats(object):
         if data.size == 0:
             return np.NaN
         else:
-            return (100. / data.shape[-1]) * \
-                   (np.count_nonzero(~np.isnan(data), axis=-1))
+            return np.round((100. / data.shape[-1]) * \
+                   (np.count_nonzero(~np.isnan(data), axis=-1)), 0)
 
     @staticmethod
     def calculate_data_avail_number(data):

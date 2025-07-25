@@ -259,9 +259,9 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
     if ! { conda config --show-sources | grep '/gpfs/projects/bsc32/repository/apps/conda_envs/'; } >/dev/null 2>&1; then
         conda config --append envs_dirs /gpfs/projects/bsc32/repository/apps/conda_envs/
     fi
-    if { conda env list | grep 'providentia-env_v2.4.0'; } >/dev/null 2>&1; then 
-        echo "Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v2.4.0..."
-        conda activate providentia-env_v2.4.0
+    if { conda env list | grep 'providentia-env_v3.0.0'; } >/dev/null 2>&1; then 
+        echo "Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0..."
+        conda activate providentia-env_v3.0.0
         active_env=true
     else 
         echo "Environment not found in /gpfs/projects/bsc32/repository/apps/conda_envs/"
@@ -360,9 +360,9 @@ elif [[ "${BSC_MACHINE}" == "stg" ]]; then
     # load modules from conda environment
     active_env=false
     eval "$(conda shell.bash hook)"
-    if { conda env list | grep 'providentia-env_v2.4.0'; } >/dev/null 2>&1; then 
+    if { conda env list | grep 'providentia-env_v3.0.0'; } >/dev/null 2>&1; then 
         echo "Activating environment..."
-        conda activate providentia-env_v2.4.0
+        conda activate providentia-env_v3.0.0
         active_env=true
     fi
     if $download; then
@@ -396,9 +396,9 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
     if ! { conda config --show-sources | grep '/gpfs/projects/bsc32/repository/apps/conda_envs/'; } >/dev/null 2>&1; then
         conda config --append envs_dirs /gpfs/projects/bsc32/repository/apps/conda_envs/
     fi
-    if { conda env list | grep 'providentia-env_v2.4.0'; } >/dev/null 2>&1; then 
-        echo "Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v2.4.0..."
-        conda activate providentia-env_v2.4.0
+    if { conda env list | grep 'providentia-env_v3.0.0'; } >/dev/null 2>&1; then 
+        echo "Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0..."
+        conda activate providentia-env_v3.0.0
         active_env=true
     else 
         echo "Environment not found in /gpfs/projects/bsc32/repository/apps/conda_envs/"
@@ -510,6 +510,48 @@ elif [ "${BSC_MACHINE}" == "grace" ]; then
         fi
     fi
 
+# Oper machine
+elif [ "${ip}" == "84.88.185.205" ]; then
+    echo "INFO: Running on operational machine..."
+    
+    # load modules from conda environment
+    active_env=false
+    module load Miniconda3/24.7.1-0
+    module load NCO/5.3.2-foss-2023b
+    eval "$(conda shell.bash hook)"
+    if { conda env list | grep 'providentia-env_v3.0.0'; } >/dev/null 2>&1; then 
+        echo "Activating environment..."
+        conda activate providentia-env_v3.0.0
+        active_env=true
+    else
+        # create environment if it does not exist
+        echo "Environment providentia-env_v3.0.0 does not exist."; 
+        echo "Creating environment..."
+        if ! conda config --show channels 2>/dev/null | grep -q 'conda-forge'; then
+            conda config --append channels conda-forge
+        fi
+        conda create -c conda-forge -n providentia-env_v3.0.0 -y python=3.11.5 --override-channels
+        conda activate providentia-env_v3.0.0
+        conda install -c conda-forge cartopy -y --override-channels
+        conda install -c conda-forge jupyterlab -y --override-channels
+        conda install -c conda-forge ghostscript -y --override-channels
+        conda install -c conda-forge KDEpy -y --override-channels
+
+        pip install -r requirements.txt
+        active_env=true
+    fi  
+
+    if $notebook; then
+        echo "Starting jupyter session."
+        export PYTHONPATH=$(pwd):${PYTHONPATH}
+        jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
+    elif $interpolation; then
+        unique_id=$(printf "%06d\n" $((RANDOM % 1000000)))
+        eval "${python_command} ${cores_option} ${cores_explicit_option} --slurm_job_id=$unique_id" 2>&1 | tee logs/interpolation/management_logs/$unique_id.out
+    else
+        eval "${python_command}"
+    fi
+
 # Local machines (Workstations, dust02 machine and personal laptops)
 else
     echo "INFO: Running on a local machine..."
@@ -517,19 +559,19 @@ else
     # load modules from conda environment
     active_env=false
     eval "$(conda shell.bash hook)"
-    if { conda env list | grep -w '^providentia-env_v2.4.0'; } >/dev/null 2>&1; then 
+    if { conda env list | grep 'providentia-env_v3.0.0'; } >/dev/null 2>&1; then 
         echo "Activating environment..."
-        conda activate providentia-env_v2.4.0
+        conda activate providentia-env_v3.0.0
         active_env=true
     else
         # create environment if it does not exist
-        echo "Environment providentia-env_v2.4.0 does not exist."; 
+        echo "Environment providentia-env_v3.0.0 does not exist."; 
         echo "Creating environment..."
         if ! conda config --show channels 2>/dev/null | grep -q 'conda-forge'; then
             conda config --append channels conda-forge
         fi
-        conda create -c conda-forge -n providentia-env_v2.4.0 -y python=3.11.5 --override-channels
-        conda activate providentia-env_v2.4.0
+        conda create -c conda-forge -n providentia-env_v3.0.0 -y python=3.11.5 --override-channels
+        conda activate providentia-env_v3.0.0
         conda install -c conda-forge cartopy -y --override-channels
         conda install -c conda-forge jupyterlab -y --override-channels
         conda install -c conda-forge ghostscript -y --override-channels

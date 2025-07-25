@@ -5,7 +5,7 @@
         "exp_root": "~/data/providentia/exp",
         "exp_to_interp_root": "~/data/providentia/exp_to_interp"
     },
-    
+
     "mn5": {
         "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
         "nonghost_root": "/gpfs/projects/bsc32/AC_cache/obs/nonghost",
@@ -60,5 +60,12 @@
         "nonghost_root": "/esarchive/obs",
         "exp_root": "/esarchive/recon/prov_interp",
         "exp_to_interp_root": ""
-    }
+    },
+    
+    "oper": {
+        "ghost_root": "/esarchive/obs/ghost", 
+        "nonghost_root": "/esarchive/obs", 
+        "exp_root": "/esarchive/recon/prov_interp",
+        "exp_to_interp_root": ""
+    },
 }

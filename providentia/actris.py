@@ -496,6 +496,30 @@ def get_files_info(files, var, path):
     return files_info
 
 
+def get_var_in_file(ds, var, actris_parameter, ebas_component):
+
+    unformatted_units = variable_mapping[actris_parameter]['units']
+    units = unformatted_units.replace('/', '_per_').replace(' ', '_')
+    units_var = f'{ebas_component}_{units}'
+    possible_vars = [ebas_component,
+                        f'{ebas_component}_amean',
+                        units_var,
+                        f'{units_var}_amean']
+    if var in ['sconcso4', 'precso4']:
+        possible_vars.append(f'sulphate_corrected_{units}')
+    da_var_exists = False
+    for possible_var in possible_vars:
+        if possible_var in ds:
+            da_var_exists = True
+            break
+
+    # continue to next file if variable cannot be read
+    if not da_var_exists:
+        return None
+
+    return possible_vars, possible_var
+
+
 def get_data(files, var, actris_parameter, resolution, target_start_date, target_end_date):
     """Read variable and metadata data standarising dimensions
 
@@ -545,11 +569,32 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
         try:
             if len(urls) == 1:
                 ds = xr.open_dataset(urls[0])
+                possible_vars, possible_var = get_var_in_file(ds, var, actris_parameter, ebas_component)
+                if possible_var is None:
+                    errors[
+                        station] = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}.'
+                    continue
             else:
+                url_vars = []
+                for url in urls:
+                    ds = xr.open_dataset(url)
+                    possible_vars, possible_var = get_var_in_file(ds, var, actris_parameter, ebas_component)
+                    if possible_var is None:
+                        errors[
+                            station] = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}.'
+                        continue
+                    url_vars.append(possible_var)
+
+                # throw error if the variable names across datasets are different for main species
+                if len(list(set(url_vars))) > 1:
+                    msg = 'There is more than one dataset for the same station in the Thredds and the variable names are not the same. '
+                    msg += f'Unique variable names for all files: {list(set(url_vars))}'
+                    errors[station] = msg
+                    continue
                 ds = xr.open_mfdataset(urls, combine='nested', concat_dim='time')
                 ds = ds.sortby('time')
-        except:
-            errors[station] = 'Error opening file.'
+        except Exception as error:
+            errors[station] = f'{i} - Error opening file: {error}.'
             continue
         
         warnings[station] = ""
@@ -562,28 +607,6 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
 
         # assign station code as dimension
         ds = ds.expand_dims(dim={'station': [i]})
-
-        # select data for that variable only
-        unformatted_units = variable_mapping[actris_parameter]['units']
-        units = unformatted_units.replace('/', '_per_').replace(' ', '_')
-        units_var = f'{ebas_component}_{units}'
-        possible_vars = [ebas_component,
-                         f'{ebas_component}_amean',
-                         units_var,
-                         f'{units_var}_amean']
-        if var in ['sconcso4', 'precso4']:
-            possible_vars.append(f'sulphate_corrected_{units}')
-        da_var_exists = False
-        for possible_var in possible_vars:
-            if possible_var in ds:
-                da_var_exists = True
-                break
-
-        # continue to next file if variable cannot be read
-        if not da_var_exists:
-            errors[
-                station] = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}.'
-            continue
 
         # rename qc dimension
         ds = ds.rename_dims({f'{possible_var}_qc_flags': 'N_flag_codes'})
@@ -682,15 +705,16 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
 
     # show errors
     if len(errors) > 0:
-        print(f'\n    Collected errors ({len(errors)}):')
+        print(f'Collected errors ({len(errors)}):')
         for file, error in errors.items():
             print(f'{file} - Error: {error}')
 
     # show warnings
-    if len(warnings) > 0:
-        print(f'\n    Collected warnings ({len(warnings)}):')
+    if len(warnings) > 0 and all(len(warning) > 0 for warning in warnings.values()):
+        print(f'Collected warnings ({len(warnings)}):')
         for file, warning in warnings.items():
-            print(f'{file} - Warning: {warning}')
+            if len(warning) > 0:
+                print(f'{file} - Warning: {warning}')
 
     return combined_ds_list, metadata, wavelength
 

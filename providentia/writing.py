@@ -17,9 +17,6 @@ from .configuration import write_conf
 # get current path and providentia root path
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
-# define possible temporal resolutions
-possible_resolutions = ['hourly', 'hourly_instantaneous', '3hourly', '3hourly_instantaneous', 
-                        '6hourly', '6hourly_instantaneous', 'daily', 'monthly', 'annual']
 
 def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
     """ Function that writes out current data / ghost data / metadata 
@@ -49,6 +46,8 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
                    'Do not apply metadata filters, data filters, temporal colocation, calibration factor, and resampling to exported data']
         dialog = InputDialog(prv, title, msg, options)
         selected_option, okpressed = dialog.selected_option, dialog.okpressed
+        if okpressed is False:
+            return False
         if selected_option == options[0]:
             apply_filters = True
         elif selected_option == options[1]:
@@ -109,7 +108,7 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
         save_data_dict['ghost_data_variables'] = prv.ghost_data_vars_to_read
 
     # save resampled time and resolution
-    if (prv.resampling_resolution in possible_resolutions) & (apply_filters):
+    if (prv.resampling_resolution != 'None') & (apply_filters):
         save_data_dict['time_resampled'] = prv.time_index
         save_data_dict['resampling_resolution'] = prv.resampling_resolution
 
@@ -145,7 +144,9 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
         data = np.load(fname, allow_pickle=True)
         # delete temporary save file after load
         os.remove(fname)  
-        return data                  
+        return data        
+
+    return True          
 
 def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=False):
     """ Write data and metadata to netcdf file. 
@@ -177,6 +178,8 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
                    'Do not apply metadata filters, data filters, temporal colocation, calibration factor, and resampling to exported data']
         dialog = InputDialog(prv, title, msg, options)
         selected_option, okpressed = dialog.selected_option, dialog.okpressed
+        if okpressed is False:
+            return False
         if selected_option == options[0]:
             apply_filters = True
         elif selected_option == options[1]:
@@ -210,7 +213,7 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
     fout.createDimension('time', len(prv.time_array))
     fout.createDimension('month', len(prv.yearmonths))
     # create resampling resolution if needed
-    if (prv.resampling_resolution in possible_resolutions) & (apply_filters):
+    if (prv.resampling_resolution != 'None') & (apply_filters):
         fout.createDimension('time_resampled', len(prv.time_index))
     # create GHOST variables
     if prv.reading_ghost:
@@ -294,7 +297,7 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
             var[:] = time_var
 
             # time resampled - create variable if have resampled data, and apply_filters is active
-            if (prv.resampling_resolution in possible_resolutions) & (apply_filters):
+            if (prv.resampling_resolution != 'None') & (apply_filters):
 
                 current_data_type = type_map[data_format_dict['time']['data_type']]
                 var = fout.createVariable('time_resampled', current_data_type, ('time_resampled',))
@@ -305,6 +308,9 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
                     res_str = 'days'
                 elif 'monthly' in prv.resampling_resolution:
                     res_str = 'months'
+                elif 'annual' in prv.resampling_resolution:
+                    res_str = 'years'
+
                 var.standard_name = data_format_dict['time']['standard_name']
                 var.long_name = data_format_dict['time']['long_name']
                 var.units = '{} since {}-{}-01 00:00:00'.format(res_str, 
@@ -354,7 +360,7 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
         # set data variable
         current_data_type = type_map[data_format_dict[speci]['data_type']]
         # set dimension to be time_resampled if are resampling and apply_filters is active
-        if (prv.resampling_resolution in possible_resolutions) & (apply_filters):
+        if (prv.resampling_resolution != 'None') & (apply_filters):
             var = fout.createVariable('{}_data'.format(var_prefix), current_data_type, 
                                      ('data_label', station_dimension_var, 'time_resampled',))
         else:
@@ -459,7 +465,9 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
         # delete temporary save file after load
         os.remove(fname)  
 
-        return data  
+        return data
+    
+    return True
 
 def export_configuration(prv, cname, separator="||"):
     """ Create all items to be written in configuration file
@@ -538,7 +546,7 @@ def export_configuration(prv, cname, separator="||"):
         options['section'].update({'filter_species': filter_species})
 
     # resampling_resolution
-    if prv.resampling_resolution in possible_resolutions:
+    if prv.resampling_resolution != 'None':
         options['section'].update({'resampling_resolution': prv.resampling_resolution})
 
     # statistic_mode
@@ -647,3 +655,5 @@ def export_configuration(prv, cname, separator="||"):
     
     # write .conf file
     write_conf(section, subsection, cname, options)
+
+    return True
