@@ -1,3 +1,4 @@
+import bisect
 import copy
 import csv
 import datetime
@@ -7,7 +8,7 @@ import requests
 import sys
 import yaml
 import re
-
+import time
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
@@ -171,7 +172,7 @@ def get_standard_flags_and_qa(flags, ghost_version):
     GHOST_decreed_validities = []
     for flag in flags:
         # get standard flag name from GHOST standards
-        flag_info = flags_dict[str(int(flag))]
+        flag_info = flags_dict[str(int(flag))] if flag != 0 else flags_dict['000']
         standard_flag_name = flag_info["standard_data_flag_name"][0]
         standard_flag = standard_data_flag_name_to_data_flag_code[standard_flag_name]
         standard_flags.append(standard_flag)
@@ -207,19 +208,32 @@ def check_overlap(station_ds, var, standard_start_date, standard_end_date, measu
     overlap_flag_data = []
 
     for i, (measurement_start_date, measurement_end_date) in enumerate(measurement_time_pairs):
+        print('Measurement dates: ', measurement_start_date, measurement_end_date)
+        start = time.time()
         overlap_start = max(measurement_start_date, standard_start_date)
         overlap_end = min(measurement_end_date, standard_end_date)
+        end = time.time()
+        elapsed_minutes = (end - start) / 60
+        print(f"Time calc max: {elapsed_minutes:.2f} minutes")
 
         # Detect and save overlap
         if overlap_start < overlap_end:
             overlap_duration = np.array(pd.Timedelta(
                 overlap_end - overlap_start).total_seconds() / 60)
+            start = time.time()
             data = station_ds.sel(time=slice(
                 measurement_start_date, measurement_end_date))
-
+            end = time.time()
+            elapsed_minutes = (end - start) / 60
+            print(f"Time calc sel: {elapsed_minutes:.2f} minutes")
+            
             # get values at 0 to remove time dimension (always 1)
+            start = time.time()
             var_data = data[var].values[0]
             flag_data = data['flag'].values[0]
+            end = time.time()
+            elapsed_minutes = (end - start) / 60
+            print(f"Time get vals: {elapsed_minutes:.2f} minutes")
 
             overlap_durations.append(overlap_duration)
             overlap_var_data.append(var_data)
@@ -229,12 +243,21 @@ def check_overlap(station_ds, var, standard_start_date, standard_end_date, measu
         elif len(overlap_durations) > 0:
             break
 
+        stop
+
     overlap_durations = np.array(overlap_durations)
     overlap_var_data = np.array(overlap_var_data)
     overlap_flag_data = np.array(overlap_flag_data)
 
     return overlap_durations, overlap_var_data, overlap_flag_data
 
+
+def datetime_to_fractional_minutes_from_reference(dateFuture):
+    '''get reference start datetime'''
+    datePast = datetime.datetime(1,1,1,0,0)
+    difference = dateFuture - datePast
+    return difference.total_seconds() / datetime.timedelta(minutes=1).total_seconds()
+                    
 
 def temporally_average_data(combined_ds_list, resolution, var, ghost_version, target_start_date, target_end_date):
     """Temporally average data and get unique flags in the valid times (temporally averaged)
@@ -272,7 +295,7 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
         timedelta = np.timedelta64(15, 'D')
 
     standard_time = pd.date_range(start=target_start_date, end=target_end_date,
-                                  freq=frequency).to_numpy(dtype='datetime64[ns]')
+                                  freq=frequency).to_pydatetime()
 
     # initialise averaged data
     averaged_data = np.empty(
@@ -284,8 +307,9 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
 
     # define vectorize function to get GHOST_decreed_validity by overlap flags later
     vfunc = np.vectorize(
-        lambda flag: np.nan if np.isnan(flag) else flags_dict[str(
-            int(flag))]["GHOST_decreed_validity"][0],
+        lambda flag: np.nan if np.isnan(flag) 
+                    else flags_dict['000']["GHOST_decreed_validity"][0] if flag == 0 
+                    else flags_dict[str(int(flag))]["GHOST_decreed_validity"][0],
         otypes=['O']
     )
 
@@ -303,61 +327,154 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
 
         # remove station selection
         station_ds = station_ds.isel(station=0)
+        station_var = station_ds[var].values
+        station_flag = station_ds['flag'].values
+        
+        mid_times = station_ds.time.values
+        # TODO: Get time from time_bnds
+        start_times = [t - (timedelta) for t in mid_times]
+        end_times = [t + (timedelta) for t in mid_times]
+        valid_timedeltas =  np.array([(end_time - start_time).astype('timedelta64[m]').astype(np.float32) 
+                                      for (end_time, start_time) in zip(end_times, start_times)])
+        valid_start_times = np.array([datetime_to_fractional_minutes_from_reference(t) for t in pd.to_datetime(start_times).to_pydatetime()])
+        valid_end_times = np.array([datetime_to_fractional_minutes_from_reference(t) for t in pd.to_datetime(end_times).to_pydatetime()])
 
-        measurement_time_pairs = [(t - timedelta, t + timedelta)
-                                  for t in station_ds.time.values]
+        # initialise variable for finding relevant measurement indices
+        last_relevant_index = 0
+
         for i, (standard_start_date, standard_end_date) in enumerate(standard_time_pairs):
-            overlap_durations, overlap_var_data, overlap_flag_data = check_overlap(station_ds, var,
-                                                                                   standard_start_date,
-                                                                                   standard_end_date,
-                                                                                   measurement_time_pairs)
 
-            if len(overlap_var_data) > 0:
-                if len(overlap_var_data) > 1:
-                    GHOST_decreed_validities = vfunc(overlap_flag_data)
-                    GHOST_invalid = np.any(
-                        GHOST_decreed_validities == 'I', axis=1)
-                    # if there are invalid values in period but some of them are valid, convert invalid ones to nan
-                    if np.any(GHOST_invalid) and not np.all(GHOST_invalid):
-                        for i in range(len(overlap_var_data)):
-                            if GHOST_invalid[i]:
-                                overlap_var_data[i] = np.array(np.nan)
-                                overlap_flag_data[i, :] = np.array(
-                                    [np.nan]*overlap_flag_data.shape[1])
+            window_start_minute = datetime_to_fractional_minutes_from_reference(standard_start_date)
+            window_end_minute = datetime_to_fractional_minutes_from_reference(standard_end_date)
 
-                # remove nan
-                valid_mask = ~np.isnan(overlap_var_data)
-                valid_durations = overlap_durations[valid_mask]
-                valid_values = overlap_var_data[valid_mask]
+            # get index where valid start times >= window start minute
+            valid_start_times_begin = bisect.bisect_left(valid_start_times, window_start_minute, 
+                                                         lo=last_relevant_index, hi=len(valid_start_times))
+            
+            # get index where valid start times < window end minute
+            valid_start_times_end = bisect.bisect_left(valid_start_times, window_end_minute, 
+                                                       lo=last_relevant_index, hi=len(valid_start_times))
 
-                # get weighted average if there is more than one value
-                if len(valid_values) > 1:
-                    mean = np.average(valid_values, weights=valid_durations)
-                # get value if there is only one value
-                elif len(valid_values) == 1:
-                    mean = valid_values[0]
-                # otherwise nan
-                else:
-                    mean = np.nan
-                station_averaged_data.append(mean)
+            # get index of first start time < window start minute
+            start_time_index_before_window = valid_start_times_begin - 1
+
+            # get index where valid end times > window start minute
+            valid_end_times_begin = bisect.bisect_right(valid_end_times, window_start_minute, 
+                                                        lo=last_relevant_index, hi=len(valid_end_times))
+            
+            # get index where valid end times <= window end minute
+            valid_end_times_end = bisect.bisect_right(valid_end_times, window_end_minute, 
+                                                      lo=last_relevant_index, hi=len(valid_end_times))
+
+            # get index of first end time > window end minute
+            end_time_index_after_window = copy.deepcopy(valid_end_times_end)
+
+            # get indices of all measurement periods which entirely contain window
+            if start_time_index_before_window == end_time_index_after_window:
+                window_in_measurement_indices = np.array([start_time_index_before_window])
+            else:
+                window_in_measurement_indices = np.array([], dtype=np.uint32)
+
+            # get indices of measurements entirely contained within window
+            start_time_indices_in_window = np.arange(valid_start_times_begin, valid_start_times_end, dtype=np.uint32)
+            end_time_indices_in_window = np.arange(valid_end_times_begin, valid_end_times_end, dtype=np.uint32)
+            measurement_in_window_indices = np.intersect1d(start_time_indices_in_window,end_time_indices_in_window, assume_unique=True)
+            
+            # get indices of measurements which overlap on left/right edges of window
+            left_overlap_indices = np.setdiff1d(end_time_indices_in_window, measurement_in_window_indices, assume_unique=True)
+            left_overlap_indices = np.setdiff1d(left_overlap_indices, window_in_measurement_indices, assume_unique=True)
+            right_overlap_indices = np.setdiff1d(start_time_indices_in_window, measurement_in_window_indices, assume_unique=True)
+            right_overlap_indices = np.setdiff1d(right_overlap_indices, window_in_measurement_indices, assume_unique=True)
+
+            # deal with cases where left/right borders align but measurement period entirely contains window
+            # add indices of these cases to window_in_measurement_indices
+            # remove these indices also from the overlap indices
+            left_window_in_measurement_indices = right_overlap_indices[np.where(valid_start_times[right_overlap_indices] == window_start_minute)]
+            right_window_in_measurement_indices = left_overlap_indices[np.where(valid_end_times[left_overlap_indices] == window_end_minute)]
+            if len(left_window_in_measurement_indices) > 0:
+                window_in_measurement_indices = np.concatenate((window_in_measurement_indices, left_window_in_measurement_indices))
+                right_overlap_indices = np.setdiff1d(right_overlap_indices, left_window_in_measurement_indices, assume_unique=True)
+            if len(right_window_in_measurement_indices) > 0:
+                window_in_measurement_indices = np.concatenate((window_in_measurement_indices, right_window_in_measurement_indices))
+                left_overlap_indices = np.setdiff1d(left_overlap_indices, right_window_in_measurement_indices, assume_unique=True)
+            
+            # if there is a left border overlap, get the number of minutes the measurement period overlaps the measurement window
+            if len(left_overlap_indices) > 0:
+                left_overlap = valid_end_times[left_overlap_indices[0]] - window_start_minute
+            # otherwise left overlap == 0
+            else:
+                left_overlap = 0
+            # if there is a right border overlap, get the number of minutes the measurement period overlaps the measurement window
+            if len(right_overlap_indices) > 0:
+                right_overlap = window_end_minute - valid_start_times[right_overlap_indices[0]]
+            # otherwise right overlap == 0
+            else:
+                right_overlap = 0
+            # concatenate all relevant measurements indices in current window
+            window_indices = np.sort(np.concatenate((measurement_in_window_indices,window_in_measurement_indices,left_overlap_indices,right_overlap_indices)))
+            
+            # only one overlap value
+            if len(window_indices) == 1:
+                window_var_data = station_var[window_indices][0]
+                flag_data = station_flag[window_indices][0]
 
                 # get unique flag values and convert to standard flag names (instead of EBAS) and qa
-                flags = np.unique(overlap_flag_data)
+                flags = np.unique(flag_data)
                 valid_flags = flags[~np.isnan(flags)]
-                standard_flag_codes, qa = get_standard_flags_and_qa(
+                window_flag_data, window_qa_data = get_standard_flags_and_qa(
                     valid_flags, ghost_version)
+                
+                # record last index of current window indices for next iteration
+                last_relevant_index = window_indices[-1]
 
-                # save flags and qa
-                station_flag_data.append(
-                    pad_array(standard_flag_codes, length=186))
-                station_qa_data.append(pad_array(qa, length=2))
+            # multiple overlap values
+            elif len(window_indices) > 1:
+                flag_data = station_flag[window_indices]
+                var_data = station_var[window_indices]
 
-            # if file has no data for dates, set it to be nan
+                GHOST_decreed_validities = vfunc(flag_data)
+                GHOST_invalid = np.any(
+                    GHOST_decreed_validities == 'I', axis=1)
+
+                # if there are invalid values in period but some of them are valid, convert invalid ones to nan
+                if np.any(GHOST_invalid) and not np.all(GHOST_invalid):
+                    var_data[GHOST_invalid] = np.nan
+                    flag_data[GHOST_invalid, :] = np.nan
+                
+                # weight data by timedeltas for averaging different temporal resolution data
+                window_weights = valid_timedeltas[window_indices]
+
+                # modify weights on left and right edges to adjust for actual time sampled within window, 
+                # if measurement overlaps edge
+                if left_overlap > 0.0:
+                    window_weights[0] = left_overlap
+                if right_overlap > 0.0:
+                    window_weights[-1] = right_overlap
+
+                window_var_data = np.average(var_data, weights=window_weights)
+
+                # get unique flag values and convert to standard flag names (instead of EBAS) and qa
+                flags = np.unique(flag_data)
+                valid_flags = flags[~np.isnan(flags)]
+                window_flag_data, window_qa_data = get_standard_flags_and_qa(
+                    valid_flags, ghost_version)
+                
+                # record last index of current window indices for next iteration
+                last_relevant_index = window_indices[-1]
+
+            # no overlap values
             else:
-                station_averaged_data.append(np.nan)
-                station_flag_data.append([np.nan]*186)
-                station_qa_data.append([np.nan]*2)
+                window_var_data = np.nan
+                window_flag_data = [np.nan]
+                window_qa_data = [np.nan]
 
+            # save flags, qa and var
+            # TODO: Check why flag data is not sorted
+            station_flag_data.append(
+                pad_array(window_flag_data, length=186))
+            station_qa_data.append(pad_array(window_qa_data, length=2))
+            station_averaged_data.append(window_var_data)
+        
         averaged_data[station_i, :] = station_averaged_data
         averaged_flag_data[station_i, :, :] = station_flag_data
         averaged_qa_data[station_i, :, :] = station_qa_data
