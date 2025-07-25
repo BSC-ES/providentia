@@ -39,19 +39,6 @@ cams_analysis:
 cams_forecast:
   global:
     dataset: cams-global-atmospheric-composition-forecasts
-    experiments:
-    - ensemble
-    - chimere
-    - dehm
-    - emep
-    - euradim
-    - gemaq
-    - lotos
-    - match
-    - minni
-    - mocage
-    - monarch
-    - silam
     resolution: hourly
     url: https://ads.atmosphere.copernicus.eu/datasets/cams-global-atmospheric-composition-forecasts?tab=download
     variable:
