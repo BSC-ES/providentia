@@ -27,13 +27,14 @@ from scipy.spatial import cKDTree
 from shapely.geometry import Polygon, Point
 import xarray as xr
 from aux_interp import (check_for_ghost, findMiddle, check_directory_existence, set_file_permissions_ownership,
-                 get_aeronet_bin_radius_from_bin_variable, get_aeronet_model_bin, 
-                 get_model_to_aeronet_bin_transform_factor)
+                        get_aeronet_bin_radius_from_bin_variable, get_aeronet_model_bin, 
+                        get_model_to_aeronet_bin_transform_factor)
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[2]))
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, get_machine
 
-MACHINE = os.environ.get('BSC_MACHINE', 'local')
+# set current MACHINE
+MACHINE = get_machine()
 
 # get current path and providentia root path
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
@@ -151,7 +152,7 @@ class ExperimentInterpolation(object):
                                                 .format(exp_dir, self.grid_type,
                                                         self.model_temporal_resolution,
                                                         self.speci_to_process, self.speci_to_process, self.yearmonth)))
-             
+
             # drop all analysis files ending with '_an.nc' which are not in ensemble-stats
             all_model_files = [f for f in all_model_files if '_an.nc' not in f] 
 
@@ -650,18 +651,21 @@ class ExperimentInterpolation(object):
                 self.log_file_str += "Experiment units should be 'angular degrees', but are set as '{}'".format(
                     self.mod_speci_units)
                 create_output_logfile(1, self.log_file_str)
-        
+    
+        # determine chemical formula of species 
+        speci_chemical_formula = self.standard_parameter_speci['chemical_formula']
+
         # otherwise check if the unit quantities are equal
-        conv_obj = unit_converter.convert_units(obs_speci_units,obs_speci_units,1)
+        conv_obj = unit_converter.convert_units(obs_speci_units, obs_speci_units, 1, 
+                                                measured_species=speci_chemical_formula)
         obs_quantity = conv_obj.output_represented_quantity
-        conv_obj = unit_converter.convert_units(self.mod_speci_units,self.mod_speci_units,1)
+        conv_obj = unit_converter.convert_units(self.mod_speci_units, self.mod_speci_units, 1, 
+                                                measured_species=speci_chemical_formula)
         model_quantity = conv_obj.output_represented_quantity
 
         # observations and model quantities not equal (convert to observational units, standard_temperature=293.15, 
         # standard_pressure=1013.25)
         if obs_quantity != model_quantity:
-            # determine chemical formula of species 
-            speci_chemical_formula = self.standard_parameter_speci['chemical_formula']
             # if cannot determine chemical formula of species, then terminate process
             if speci_chemical_formula == '':
                 self.log_file_str += 'Cannot determine speci chemical formula needed for unit conversion. Terminating process.'
@@ -673,7 +677,8 @@ class ExperimentInterpolation(object):
                                                     conversion_input_quantity=model_quantity)
             self.conversion_factor = conv_obj.conversion_factor
         else:
-            conv_obj = unit_converter.convert_units(self.mod_speci_units, obs_speci_units, 1.0) 
+            conv_obj = unit_converter.convert_units(self.mod_speci_units, obs_speci_units, 1.0, 
+                                                    measured_species=speci_chemical_formula) 
             self.conversion_factor = conv_obj.conversion_factor
 
     def get_monthly_model_data(self):

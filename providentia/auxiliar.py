@@ -1,5 +1,7 @@
 import os
 import numpy as np
+import socket
+import time
 
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
@@ -103,3 +105,40 @@ def pad_array(arr, length, pad_value=np.nan):
     pad_size = max(0, length - len(arr))
 
     return np.pad(arr, (0, pad_size), constant_values=pad_value)
+
+
+def get_machine():
+
+    # get BSC machine name (if have one)
+    machine = os.environ.get('BSC_MACHINE', None)
+
+    # set current machine
+    if machine is None:
+        hostname = os.environ.get('HOSTNAME', '')
+        
+        #setup retrial system for getting ip address as occasionaly breaks
+        retry = 0
+        while True:
+            try:
+                ip = socket.gethostbyname(socket.gethostname())
+                break
+            except:
+                if retry == 3:
+                    break
+                else:
+                    retry+=1
+                    time.sleep(1)
+        if "bscearth" in hostname:
+            machine = "workstation"
+        elif "transfer" in hostname:
+            machine = "storage5"
+        elif "bscesdust02.bsc.es" in hostname:
+            machine = "dust"
+        elif ip == "84.88.185.205":
+            machine = "oper"
+        elif ip == "84.88.185.48":
+            machine = "hub"
+        else:
+            machine = "local"
+
+    return machine

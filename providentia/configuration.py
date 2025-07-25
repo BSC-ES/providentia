@@ -17,10 +17,7 @@ import yaml
 import numpy as np
 import pandas as pd
 
-from providentia.auxiliar import CURRENT_PATH, join
-
-# get BSC machine name (if have one)
-MACHINE = os.environ.get('BSC_MACHINE', 'local')
+from providentia.auxiliar import CURRENT_PATH, join, get_machine
 
 # get current path and providentia root path
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
@@ -30,33 +27,8 @@ multispecies_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'inter
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 
 # set current MACHINE
-if MACHINE not in ['nord3v2', 'mn5', 'nord4']:
-    hostname = os.environ.get('HOSTNAME', '')
+MACHINE = get_machine()
     
-    #setup retrial system for getting ip address as occasionaly breaks
-    retry = 0
-    while True:
-        try:
-            ip = socket.gethostbyname(socket.gethostname())
-            break
-        except:
-            if retry == 3:
-                break
-            else:
-                retry+=1
-                time.sleep(1)
-
-    if "bscearth" in hostname:
-        MACHINE = "workstation"
-    elif "transfer" in hostname:
-        MACHINE = "storage5"
-    elif "bscesdust02.bsc.es" in hostname:
-        MACHINE = "dust"
-    elif ip == "84.88.185.48":
-        MACHINE = "hub"
-    else:
-        MACHINE = "local"
-
 def parse_path(dir, f):
     if os.path.isabs(f):
         return f
@@ -622,6 +594,8 @@ class ProvConfiguration:
 
             if isinstance(value, str):
                 return value.strip()
+            else:
+                return str(value)
 
         elif key == 'calibration_factor':
             # parse calibration factor
@@ -1029,6 +1003,20 @@ class ProvConfiguration:
                         sys.exit(1)
                     previous_is_ghost = is_ghost
 
+        # if are using dashboard then just take first network/species pair, as multivar not supported yet
+        if ((len(self.read_instance.network) > 1) and (len(self.read_instance.species) > 1) and 
+            (not self.read_instance.report) and (not self.read_instance.library) and (not self.read_instance.download) and (not self.read_instance.interpolation)):
+             
+            msg = 'Multiple networks/species are not supported in the dashboard. First ones will be taken.'
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+
+            self.read_instance.network = [self.read_instance.network[0]]
+            self.read_instance.species = [self.read_instance.species[0]]
+
+        # initialise networkspeci as first network and species pair
+        self.read_instance.networkspeci = '{}|{}'.format(self.read_instance.network[0],
+                                                         self.read_instance.species[0]) 
+
         # check have resolution information, TODO when refactoring init change this way of checking defaults
         # if report, throw message, stating are using default instead
         if (not self.read_instance.resolution and not self.read_instance.download):
@@ -1039,6 +1027,12 @@ class ProvConfiguration:
             msg = "Resolution (resolution) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.resolution = default
+
+        # set active resolution, resampling_resolution when set, otherwise resolution
+        if self.read_instance.resampling_resolution != 'None':
+            self.read_instance.active_resolution = self.read_instance.resampling_resolution
+        else:
+            self.read_instance.active_resolution = self.read_instance.resolution
 
         # check start_date format, TODO START DATE IS DIFFERENT IN INTERPOLATION (check in the refactoring)
         # if report, throw message, stating are using default instead
@@ -1500,16 +1494,6 @@ class ProvConfiguration:
                     self.read_instance.flags.remove(flag_to_remove)
 
             self.read_instance.flags = sorted(self.read_instance.flags) 
-
-        # if are using dashboard then just take first network/species pair, as multivar not supported yet
-        if ((len(self.read_instance.network) > 1) and (len(self.read_instance.species) > 1) and 
-            (not self.read_instance.report) and (not self.read_instance.library) and (not self.read_instance.download) and (not self.read_instance.interpolation)):
-             
-            msg = 'Multiple networks/species are not supported in the dashboard. First ones will be taken.'
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-
-            self.read_instance.network = [self.read_instance.network[0]]
-            self.read_instance.species = [self.read_instance.species[0]]
         
         # check bounds inside filter_species
         if self.read_instance.filter_species:

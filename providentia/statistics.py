@@ -17,8 +17,7 @@ import scipy.stats as st
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .calculate import Stats, ExpBias
-from .read_aux import (drop_nans, get_nonrelevant_temporal_resolutions, get_relevant_temporal_resolutions, 
-                       get_frequency_code, get_lower_resolutions)
+from .read_aux import get_frequency_code
 
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
@@ -296,9 +295,29 @@ def group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolutio
 
     # get timeseries data for each chunk
     for index in canvas_instance.grouped_ts_index:
-        
+
+        # is 3hourly chunk resolution?
+        if new_freq == "3h":
+            start_date = datetime.datetime(year=index.year, 
+                                            month=index.month, 
+                                            day=index.day, 
+                                            hour=index.hour)  
+            end_date = datetime.datetime(year=index.year, 
+                                         month=index.month, 
+                                         day=index.day, 
+                                         hour=index.hour+2)
+        # is 6hourly chunk resolution?
+        elif new_freq == "6h":
+            start_date = datetime.datetime(year=index.year, 
+                                            month=index.month, 
+                                            day=index.day, 
+                                            hour=index.hour)     
+            end_date = datetime.datetime(year=index.year, 
+                                         month=index.month, 
+                                         day=index.day, 
+                                         hour=index.hour+5)
         # is daily chunk resolution?
-        if new_freq == "D":
+        elif new_freq == "D":
             start_date = datetime.datetime(year=index.year, 
                                            month=index.month, 
                                            day=index.day, 
@@ -1201,12 +1220,6 @@ def exceedance_lim(networkspeci):
 
 def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels):
     
-    # get active temporal resolution
-    if str(read_instance.resampling_resolution) != 'None':
-        resolution = read_instance.resampling_resolution
-    else:
-        resolution = read_instance.resolution
-
     # get coverage
     speci = networkspeci.split('|')[1]
     coverage = fairmode_settings[speci]['coverage']
@@ -1222,7 +1235,7 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels)
     data_array = data_array[:,canvas_instance.station_inds[networkspeci],:]
 
     # if hourly data then make sure days with less than 75% coverage are nan
-    if resolution == 'hourly':
+    if read_instance.active_resolution == 'hourly':
 
         # get number of days
         num_days = data_array.shape[-1] // 24
@@ -1246,7 +1259,7 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels)
     valid_station_idxs = obs_representativity >= coverage
 
     # do some extra processing for hourly resolution data
-    if resolution == 'hourly':
+    if read_instance.active_resolution == 'hourly':
 
         # resample PM10/PM2.5 data to daily
         if speci in ['pm2p5', 'pm10']:

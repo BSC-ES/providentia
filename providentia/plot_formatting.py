@@ -144,12 +144,12 @@ def harmonise_xy_lims_paradigm(read_instance, canvas_instance, relevant_axs, bas
         # transform dictionaries into lists
         else:
             relevant_axs = [relevant_axs[relevant_temporal_resolution] for 
-                            relevant_temporal_resolution in read_instance.relevant_temporal_resolutions]
+                            relevant_temporal_resolution in read_instance.periodic_relevant_temporal_resolutions]
 
     # get mapped resolution per axis for periodic plots
     if base_plot_type in ['periodic', 'periodic-violin']:
-        mapped_resolutions = read_instance.relevant_temporal_resolutions*(int(len(relevant_axs)/len(
-            read_instance.relevant_temporal_resolutions)))
+        mapped_resolutions = read_instance.periodic_relevant_temporal_resolutions*(int(len(relevant_axs)/len(
+            read_instance.periodic_relevant_temporal_resolutions)))
 
     # remove any axes from relevant_axs which are not active (only for report and library)
     if (read_instance.report) or (read_instance.library):
@@ -466,7 +466,7 @@ def set_axis_title(read_instance, relevant_axis, title, plot_characteristics):
         # reorder dict to show axis title in monthly plot and not in DoW for daily plots
         relevant_dict = {key : relevant_axis[key] for key in ['hour', 'month', 'dayofweek']}
         for relevant_temporal_resolution, sub_ax in relevant_dict.items():
-            if relevant_temporal_resolution in read_instance.relevant_temporal_resolutions:
+            if relevant_temporal_resolution in read_instance.periodic_relevant_temporal_resolutions:
                 axs_to_set_title.append(sub_ax)
                 break
     elif isinstance(relevant_axis, list):
@@ -568,8 +568,8 @@ def format_plot_options(read_instance, canvas_instance, relevant_axs, relevant_d
         # transform dictionaries into lists
         else:
             relevant_axs = [relevant_axs[relevant_temporal_resolution] for 
-                            relevant_temporal_resolution in read_instance.relevant_temporal_resolutions]
-            relevant_data_labels = copy.deepcopy(relevant_data_labels) * len(read_instance.relevant_temporal_resolutions)
+                            relevant_temporal_resolution in read_instance.periodic_relevant_temporal_resolutions]
+            relevant_data_labels = copy.deepcopy(relevant_data_labels) * len(read_instance.periodic_relevant_temporal_resolutions)
 
     # get zstat info (if any)
     zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type) 
