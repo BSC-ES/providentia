@@ -201,63 +201,86 @@ def create_time_pairs(time):
     return time_pairs
 
 
-def check_overlap(station_ds, var, standard_start_date, standard_end_date, measurement_time_pairs):
-
-    overlap_durations = []
-    overlap_var_data = []
-    overlap_flag_data = []
-
-    for i, (measurement_start_date, measurement_end_date) in enumerate(measurement_time_pairs):
-        print('Measurement dates: ', measurement_start_date, measurement_end_date)
-        start = time.time()
-        overlap_start = max(measurement_start_date, standard_start_date)
-        overlap_end = min(measurement_end_date, standard_end_date)
-        end = time.time()
-        elapsed_minutes = (end - start) / 60
-        print(f"Time calc max: {elapsed_minutes:.2f} minutes")
-
-        # Detect and save overlap
-        if overlap_start < overlap_end:
-            overlap_duration = np.array(pd.Timedelta(
-                overlap_end - overlap_start).total_seconds() / 60)
-            start = time.time()
-            data = station_ds.sel(time=slice(
-                measurement_start_date, measurement_end_date))
-            end = time.time()
-            elapsed_minutes = (end - start) / 60
-            print(f"Time calc sel: {elapsed_minutes:.2f} minutes")
-            
-            # get values at 0 to remove time dimension (always 1)
-            start = time.time()
-            var_data = data[var].values[0]
-            flag_data = data['flag'].values[0]
-            end = time.time()
-            elapsed_minutes = (end - start) / 60
-            print(f"Time get vals: {elapsed_minutes:.2f} minutes")
-
-            overlap_durations.append(overlap_duration)
-            overlap_var_data.append(var_data)
-            overlap_flag_data.append(flag_data)
-
-        # If there is no overlap and there have already been overlaps, go to next period
-        elif len(overlap_durations) > 0:
-            break
-
-        stop
-
-    overlap_durations = np.array(overlap_durations)
-    overlap_var_data = np.array(overlap_var_data)
-    overlap_flag_data = np.array(overlap_flag_data)
-
-    return overlap_durations, overlap_var_data, overlap_flag_data
-
-
 def datetime_to_fractional_minutes_from_reference(dateFuture):
     '''get reference start datetime'''
     datePast = datetime.datetime(1,1,1,0,0)
     difference = dateFuture - datePast
     return difference.total_seconds() / datetime.timedelta(minutes=1).total_seconds()
                     
+
+def get_window_indices(standard_start_date, standard_end_date, valid_start_times, valid_end_times, last_relevant_index):
+
+    window_start_minute = datetime_to_fractional_minutes_from_reference(standard_start_date)
+    window_end_minute = datetime_to_fractional_minutes_from_reference(standard_end_date)
+
+    # get index where valid start times >= window start minute
+    valid_start_times_begin = bisect.bisect_left(valid_start_times, window_start_minute, 
+                                                    lo=last_relevant_index, hi=len(valid_start_times))
+    
+    # get index where valid start times < window end minute
+    valid_start_times_end = bisect.bisect_left(valid_start_times, window_end_minute, 
+                                                lo=last_relevant_index, hi=len(valid_start_times))
+
+    # get index of first start time < window start minute
+    start_time_index_before_window = valid_start_times_begin - 1
+
+    # get index where valid end times > window start minute
+    valid_end_times_begin = bisect.bisect_right(valid_end_times, window_start_minute, 
+                                                lo=last_relevant_index, hi=len(valid_end_times))
+    
+    # get index where valid end times <= window end minute
+    valid_end_times_end = bisect.bisect_right(valid_end_times, window_end_minute, 
+                                                lo=last_relevant_index, hi=len(valid_end_times))
+
+    # get index of first end time > window end minute
+    end_time_index_after_window = copy.deepcopy(valid_end_times_end)
+
+    # get indices of all measurement periods which entirely contain window
+    if start_time_index_before_window == end_time_index_after_window:
+        window_in_measurement_indices = np.array([start_time_index_before_window])
+    else:
+        window_in_measurement_indices = np.array([], dtype=np.uint32)
+
+    # get indices of measurements entirely contained within window
+    start_time_indices_in_window = np.arange(valid_start_times_begin, valid_start_times_end, dtype=np.uint32)
+    end_time_indices_in_window = np.arange(valid_end_times_begin, valid_end_times_end, dtype=np.uint32)
+    measurement_in_window_indices = np.intersect1d(start_time_indices_in_window,end_time_indices_in_window, assume_unique=True)
+    
+    # get indices of measurements which overlap on left/right edges of window
+    left_overlap_indices = np.setdiff1d(end_time_indices_in_window, measurement_in_window_indices, assume_unique=True)
+    left_overlap_indices = np.setdiff1d(left_overlap_indices, window_in_measurement_indices, assume_unique=True)
+    right_overlap_indices = np.setdiff1d(start_time_indices_in_window, measurement_in_window_indices, assume_unique=True)
+    right_overlap_indices = np.setdiff1d(right_overlap_indices, window_in_measurement_indices, assume_unique=True)
+
+    # deal with cases where left/right borders align but measurement period entirely contains window
+    # add indices of these cases to window_in_measurement_indices
+    # remove these indices also from the overlap indices
+    left_window_in_measurement_indices = right_overlap_indices[np.where(valid_start_times[right_overlap_indices] == window_start_minute)]
+    right_window_in_measurement_indices = left_overlap_indices[np.where(valid_end_times[left_overlap_indices] == window_end_minute)]
+    if len(left_window_in_measurement_indices) > 0:
+        window_in_measurement_indices = np.concatenate((window_in_measurement_indices, left_window_in_measurement_indices))
+        right_overlap_indices = np.setdiff1d(right_overlap_indices, left_window_in_measurement_indices, assume_unique=True)
+    if len(right_window_in_measurement_indices) > 0:
+        window_in_measurement_indices = np.concatenate((window_in_measurement_indices, right_window_in_measurement_indices))
+        left_overlap_indices = np.setdiff1d(left_overlap_indices, right_window_in_measurement_indices, assume_unique=True)
+    
+    # if there is a left border overlap, get the number of minutes the measurement period overlaps the measurement window
+    if len(left_overlap_indices) > 0:
+        left_overlap = valid_end_times[left_overlap_indices[0]] - window_start_minute
+    # otherwise left overlap == 0
+    else:
+        left_overlap = 0
+    # if there is a right border overlap, get the number of minutes the measurement period overlaps the measurement window
+    if len(right_overlap_indices) > 0:
+        right_overlap = window_end_minute - valid_start_times[right_overlap_indices[0]]
+    # otherwise right overlap == 0
+    else:
+        right_overlap = 0
+    # concatenate all relevant measurements indices in current window
+    window_indices = np.sort(np.concatenate((measurement_in_window_indices,window_in_measurement_indices,left_overlap_indices,right_overlap_indices)))
+            
+    return window_indices, right_overlap, left_overlap
+
 
 def temporally_average_data(combined_ds_list, resolution, var, ghost_version, target_start_date, target_end_date):
     """Temporally average data and get unique flags in the valid times (temporally averaged)
@@ -343,76 +366,10 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
         last_relevant_index = 0
 
         for i, (standard_start_date, standard_end_date) in enumerate(standard_time_pairs):
-
-            window_start_minute = datetime_to_fractional_minutes_from_reference(standard_start_date)
-            window_end_minute = datetime_to_fractional_minutes_from_reference(standard_end_date)
-
-            # get index where valid start times >= window start minute
-            valid_start_times_begin = bisect.bisect_left(valid_start_times, window_start_minute, 
-                                                         lo=last_relevant_index, hi=len(valid_start_times))
             
-            # get index where valid start times < window end minute
-            valid_start_times_end = bisect.bisect_left(valid_start_times, window_end_minute, 
-                                                       lo=last_relevant_index, hi=len(valid_start_times))
+            # get window indices
+            window_indices, right_overlap, left_overlap = get_window_indices(standard_start_date, standard_end_date, valid_start_times, valid_end_times, last_relevant_index)
 
-            # get index of first start time < window start minute
-            start_time_index_before_window = valid_start_times_begin - 1
-
-            # get index where valid end times > window start minute
-            valid_end_times_begin = bisect.bisect_right(valid_end_times, window_start_minute, 
-                                                        lo=last_relevant_index, hi=len(valid_end_times))
-            
-            # get index where valid end times <= window end minute
-            valid_end_times_end = bisect.bisect_right(valid_end_times, window_end_minute, 
-                                                      lo=last_relevant_index, hi=len(valid_end_times))
-
-            # get index of first end time > window end minute
-            end_time_index_after_window = copy.deepcopy(valid_end_times_end)
-
-            # get indices of all measurement periods which entirely contain window
-            if start_time_index_before_window == end_time_index_after_window:
-                window_in_measurement_indices = np.array([start_time_index_before_window])
-            else:
-                window_in_measurement_indices = np.array([], dtype=np.uint32)
-
-            # get indices of measurements entirely contained within window
-            start_time_indices_in_window = np.arange(valid_start_times_begin, valid_start_times_end, dtype=np.uint32)
-            end_time_indices_in_window = np.arange(valid_end_times_begin, valid_end_times_end, dtype=np.uint32)
-            measurement_in_window_indices = np.intersect1d(start_time_indices_in_window,end_time_indices_in_window, assume_unique=True)
-            
-            # get indices of measurements which overlap on left/right edges of window
-            left_overlap_indices = np.setdiff1d(end_time_indices_in_window, measurement_in_window_indices, assume_unique=True)
-            left_overlap_indices = np.setdiff1d(left_overlap_indices, window_in_measurement_indices, assume_unique=True)
-            right_overlap_indices = np.setdiff1d(start_time_indices_in_window, measurement_in_window_indices, assume_unique=True)
-            right_overlap_indices = np.setdiff1d(right_overlap_indices, window_in_measurement_indices, assume_unique=True)
-
-            # deal with cases where left/right borders align but measurement period entirely contains window
-            # add indices of these cases to window_in_measurement_indices
-            # remove these indices also from the overlap indices
-            left_window_in_measurement_indices = right_overlap_indices[np.where(valid_start_times[right_overlap_indices] == window_start_minute)]
-            right_window_in_measurement_indices = left_overlap_indices[np.where(valid_end_times[left_overlap_indices] == window_end_minute)]
-            if len(left_window_in_measurement_indices) > 0:
-                window_in_measurement_indices = np.concatenate((window_in_measurement_indices, left_window_in_measurement_indices))
-                right_overlap_indices = np.setdiff1d(right_overlap_indices, left_window_in_measurement_indices, assume_unique=True)
-            if len(right_window_in_measurement_indices) > 0:
-                window_in_measurement_indices = np.concatenate((window_in_measurement_indices, right_window_in_measurement_indices))
-                left_overlap_indices = np.setdiff1d(left_overlap_indices, right_window_in_measurement_indices, assume_unique=True)
-            
-            # if there is a left border overlap, get the number of minutes the measurement period overlaps the measurement window
-            if len(left_overlap_indices) > 0:
-                left_overlap = valid_end_times[left_overlap_indices[0]] - window_start_minute
-            # otherwise left overlap == 0
-            else:
-                left_overlap = 0
-            # if there is a right border overlap, get the number of minutes the measurement period overlaps the measurement window
-            if len(right_overlap_indices) > 0:
-                right_overlap = window_end_minute - valid_start_times[right_overlap_indices[0]]
-            # otherwise right overlap == 0
-            else:
-                right_overlap = 0
-            # concatenate all relevant measurements indices in current window
-            window_indices = np.sort(np.concatenate((measurement_in_window_indices,window_in_measurement_indices,left_overlap_indices,right_overlap_indices)))
-            
             # only one overlap value
             if len(window_indices) == 1:
                 window_var_data = station_var[window_indices][0]
