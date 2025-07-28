@@ -1885,10 +1885,14 @@ class Download(object):
         self.logger.info(f"\nDownloading {experiment} experiment data from the Atmosphere Data Store...")
 
         # get experiment id and the domain
-        prefix_expid, domain, ensemble_options = experiment.split("-")
+        config_expid, domain, ensemble_options = experiment.split("-")
         
-        # get the CAMS dataset and the experiment name
-        prefix, exp_id = prefix_expid.rsplit('_', 1)
+        # get the CAMS dataset and the experiment name (if there's one)
+        exp_id = None
+        if len(config_expid.split('_')) == 2:
+            prefix = config_expid
+        else:
+            prefix, exp_id = config_expid.rsplit('_', 1)
 
         # check if the domain is the correct one for the dataset
         if domain not in cams_options[prefix]:
@@ -1908,6 +1912,12 @@ class Download(object):
         # make sure the experiment is available in the dataset
         if 'experiments' in cams_dict and exp_id not in cams_dict["experiments"]:
             msg = f"Cannot find the {exp_id} experiment in the {dataset} dataset."    
+            show_message(self, msg)
+            return
+
+        # download an experiment
+        if 'experiments' not in cams_dict and exp_id is not None:
+            msg = f"The {dataset} does not admit experiments, change the experiment in the configuration file to '{prefix}'."    
             show_message(self, msg)
             return
 
@@ -1993,7 +2003,7 @@ class Download(object):
                 client = cdsapi.Client(retry_max=1, quiet=True)
 
                 # get directory structure
-                dir_tail = join(prefix_expid, domain, resolution, species)
+                dir_tail = join(config_expid, domain, resolution, species)
 
                 # get temporal and final dir
                 temp_dir = join(self.exp_to_interp_root,'.temp', dir_tail)
@@ -2053,6 +2063,7 @@ class Download(object):
                     temp_path = join(temp_dir, 'zip_file')
 
                     # print the request
+                    self.logger.info(f"Dataset -> {cams_dict['dataset']}")
                     self.logger.info('Request -> {')
                     for k,v in request.items():
                         self.logger.info(f"{k} : {v}")
@@ -2088,11 +2099,11 @@ class Download(object):
                     self.logger.info(f"Formatting {final_path}\n") 
                     self.format_cams(join(temp_dir,zip_file_name), final_path, cams_species, species)
 
-                    # remove the temp directory tail
-                    shutil.rmtree(join(self.exp_to_interp_root,'.temp'))
-
                     # add one day to the date
                     current_cams_date = next_cams_date    
+
+                # remove the temp directory tail
+                shutil.rmtree(join(self.exp_to_interp_root,'.temp'))
 
     def format_cams(self, input_filepath, output_filepath, cams_species, species):  
         # open original netcdf file      
@@ -2142,7 +2153,7 @@ class Download(object):
                 # copy atributes from the original file
                 var.setncatts({k: og_var.getncattr(k) for k in og_var.ncattrs() if k != '_FillValue'})
 
-            # get the data from the orignal file
+            # get the data from the original file
             data = og_var[:]
 
             # remove level dimension from species
