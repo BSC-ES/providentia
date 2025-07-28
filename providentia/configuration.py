@@ -24,6 +24,7 @@ PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'data_paths.yaml')))
 default_values = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_defaults.yaml')))
 multispecies_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
+mapping_species = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 
 # set current MACHINE
@@ -918,7 +919,7 @@ class ProvConfiguration:
         # check if species is valid
         if self.read_instance.species:
             for speci in self.read_instance.species:
-                if '*' not in speci and speci not in self.read_instance.parameter_dictionary:
+                if ('*' not in speci) and (speci not in self.read_instance.parameter_dictionary) and (speci not in mapping_species):
                     error = f'Error: species "{speci}" not valid.'
                     self.read_instance.logger.error(error)
                     sys.exit(1)
