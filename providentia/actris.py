@@ -305,17 +305,13 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
     # get valid dates frequency
     if resolution == 'hourly':
         frequency = 'h'
-        timedelta = np.timedelta64(30, 'm')
     elif resolution == '3hourly':
         frequency = '3h'
-        timedelta = np.timedelta64(90, 'm')
     elif resolution == 'daily':
         frequency = 'D'
-        timedelta = np.timedelta64(12, 'h')
     # TODO: Review this
     elif resolution == 'monthly':
         frequency = 'MS'
-        timedelta = np.timedelta64(15, 'D')
 
     standard_time = pd.date_range(start=target_start_date, end=target_end_date,
                                   freq=frequency).to_pydatetime()
@@ -352,13 +348,17 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
         station_ds = station_ds.isel(station=0)
         station_var = station_ds[var].values
         station_flag = station_ds['flag'].values
-        
-        mid_times = station_ds.time.values
-        # TODO: Get time from time_bnds
-        start_times = [t - (timedelta) for t in mid_times]
-        end_times = [t + (timedelta) for t in mid_times]
+        station_time_bnds = station_ds['time_bnds'].values
+
+        # get measurement start and end times
+        start_times = station_time_bnds[:, 0]
+        end_times = station_time_bnds[:, 1]
+
+        # get timedelta between start and end times
         valid_timedeltas =  np.array([(end_time - start_time).astype('timedelta64[m]').astype(np.float32) 
                                       for (end_time, start_time) in zip(end_times, start_times)])
+        
+        # get measurement start and end times as integers
         valid_start_times = np.array([datetime_to_fractional_minutes_from_reference(t) for t in pd.to_datetime(start_times).to_pydatetime()])
         valid_end_times = np.array([datetime_to_fractional_minutes_from_reference(t) for t in pd.to_datetime(end_times).to_pydatetime()])
 
@@ -770,6 +770,9 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
 
         # rename variable to BSC standards
         ds_station = da_var.to_dataset(name=var)
+
+        # add time bounds
+        ds_station['time_bnds'] = ds['time_bnds']
 
         # add quality control data
         ds_station['flag'] = flag_data
