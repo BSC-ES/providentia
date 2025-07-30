@@ -1696,26 +1696,27 @@ class Download(object):
             files = {}
             for file, attributes in files_info.items():
                 if attributes["resolution"] == resolution:
-                    start_date = datetime.strptime(attributes["start_date"], "%Y-%m-%dT%H:%M:%S UTC")
-                    end_date = datetime.strptime(attributes["end_date"], "%Y-%m-%dT%H:%M:%S UTC")
+                    start_date = datetime.strptime(attributes["time_coverage_start"], "%Y-%m-%dT%H:%M:%S UTC")
+                    end_date = datetime.strptime(attributes["time_coverage_end"], "%Y-%m-%dT%H:%M:%S UTC")
                     for file_to_download in files_to_download:
                         file_to_download_yearmonth = file_to_download.split(f'{var}_')[1].split('.nc')[0]
                         file_to_download_start_date = datetime.strptime(file_to_download_yearmonth, "%Y%m")
                         file_to_download_end_date = datetime(file_to_download_start_date.year, file_to_download_start_date.month, 1) + relativedelta(months=1, seconds=-1)
                         if file_to_download_start_date <= end_date and file_to_download_end_date >= start_date:
                             # from filtered files, save those that are provided multiple times
-                            station = attributes["station_reference"]
+                            station = attributes["ebas_station_code"]
                             if station not in files:
                                 files[station] = []
                             if file not in files[station]:
                                 files[station].append(file)
 
+            # files = dict(list(files.items())[0:1])
             if len(files) != 0:
 
                 # get data and metadata for each file within period
                 start = time.time()
                 combined_ds_list, metadata, wavelength = get_data(files, var, actris_parameter, resolution, 
-                                                                  target_start_date, target_end_date)
+                                                                  target_start_date, target_end_date, files_info)
                 end = time.time()
                 elapsed_minutes = (end - start) / 60
                 print(f"Time to read data: {elapsed_minutes:.2f} minutes")
