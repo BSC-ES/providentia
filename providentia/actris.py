@@ -283,13 +283,13 @@ def get_window_indices(standard_start_date, standard_end_date, valid_start_times
     return window_indices, right_overlap, left_overlap
 
 
-def temporally_average_data(combined_ds_list, resolution, var, ghost_version, target_start_date, target_end_date):
+def temporally_average_data(station_ds, var, ghost_version, standard_time_pairs, vfunc):
     """Temporally average data and get unique flags in the valid times (temporally averaged)
 
     Parameters
     ----------
-    combined_ds_list : xarray.Dataset
-        Concatenated data for all stations with original times per month
+    ds : xarray.Dataset
+        Data per station
     resolution : str
         Temporal resolution
     var : str
@@ -299,180 +299,104 @@ def temporally_average_data(combined_ds_list, resolution, var, ghost_version, ta
 
     Returns
     -------
-    combined_ds : xarray.Dataset
-        Concatenated data for all stations with valid times per month
+    ds : xarray.Dataset
+        Data per station with valid times per month
     """
 
-    # get valid dates frequency
-    if resolution == 'hourly':
-        frequency = 'h'
-    elif resolution == '3hourly':
-        frequency = '3h'
-    elif resolution == 'daily':
-        frequency = 'D'
-    # TODO: Review this
-    elif resolution == 'monthly':
-        frequency = 'MS'
-
-    standard_time = pd.date_range(start=target_start_date, end=target_end_date,
-                                  freq=frequency).to_pydatetime()
-
     # initialise averaged data
-    averaged_data = np.empty(
-        (len(combined_ds_list), len(standard_time)), dtype=np.float32)
-    averaged_flag_data = np.empty(
-        (len(combined_ds_list), len(standard_time), 186), dtype=np.float32)
-    averaged_qa_data = np.empty(
-        (len(combined_ds_list), len(standard_time), 2), dtype=np.float32)
+    station_averaged_data = []
+    station_flag_data = []
+    station_qa_data = []
 
-    # define vectorize function to get GHOST_decreed_validity by overlap flags later
-    vfunc = np.vectorize(
-        lambda flag: np.nan if np.isnan(flag) 
-                    else flags_dict['000']["GHOST_decreed_validity"][0] if flag == 0 
-                    else flags_dict[str(int(flag))]["GHOST_decreed_validity"][0],
-        otypes=['O']
-    )
+    # remove station selection
+    station_ds = station_ds.isel(station=0)
+    station_var = station_ds[var].values
+    station_flag = station_ds['flag'].values
+    station_time_bnds = station_ds['time_bnds'].values
 
-    # create pairs of valid dates
-    standard_time_pairs = create_time_pairs(standard_time)
+    # get measurement start and end times
+    start_times = station_time_bnds[:, 0]
+    end_times = station_time_bnds[:, 1]
 
-    tqdm_iter = tqdm(combined_ds_list, bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}',
-                     desc=f"Temporally averaging data")
-    for station_i, station_ds in enumerate(tqdm_iter):
+    # get timedelta between start and end times
+    valid_timedeltas =  np.array([(end_time - start_time).astype('timedelta64[m]').astype(np.float32) 
+                                    for (end_time, start_time) in zip(end_times, start_times)])
+    
+    # get measurement start and end times as integers
+    valid_start_times = np.array([datetime_to_fractional_minutes_from_reference(t) for t in pd.to_datetime(start_times).to_pydatetime()])
+    valid_end_times = np.array([datetime_to_fractional_minutes_from_reference(t) for t in pd.to_datetime(end_times).to_pydatetime()])
 
-        # initialise averaged data
-        station_averaged_data = []
-        station_flag_data = []
-        station_qa_data = []
+    # initialise variable for finding relevant measurement indices
+    last_relevant_index = 0
 
-        # remove station selection
-        station_ds = station_ds.isel(station=0)
-        station_var = station_ds[var].values
-        station_flag = station_ds['flag'].values
-        station_time_bnds = station_ds['time_bnds'].values
-
-        # get measurement start and end times
-        start_times = station_time_bnds[:, 0]
-        end_times = station_time_bnds[:, 1]
-
-        # get timedelta between start and end times
-        valid_timedeltas =  np.array([(end_time - start_time).astype('timedelta64[m]').astype(np.float32) 
-                                      for (end_time, start_time) in zip(end_times, start_times)])
+    for i, (standard_start_date, standard_end_date) in enumerate(standard_time_pairs):
         
-        # get measurement start and end times as integers
-        valid_start_times = np.array([datetime_to_fractional_minutes_from_reference(t) for t in pd.to_datetime(start_times).to_pydatetime()])
-        valid_end_times = np.array([datetime_to_fractional_minutes_from_reference(t) for t in pd.to_datetime(end_times).to_pydatetime()])
+        # get window indices
+        window_indices, right_overlap, left_overlap = get_window_indices(standard_start_date, standard_end_date, valid_start_times, valid_end_times, last_relevant_index)
 
-        # initialise variable for finding relevant measurement indices
-        last_relevant_index = 0
+        # only one overlap value
+        if len(window_indices) == 1:
+            window_var_data = station_var[window_indices][0]
+            flag_data = station_flag[window_indices][0]
 
-        for i, (standard_start_date, standard_end_date) in enumerate(standard_time_pairs):
+            # get unique flag values and convert to standard flag names (instead of EBAS) and qa
+            flags = np.unique(flag_data)
+            valid_flags = flags[~np.isnan(flags)]
+            window_flag_data, window_qa_data = get_standard_flags_and_qa(
+                valid_flags, ghost_version)
             
-            # get window indices
-            window_indices, right_overlap, left_overlap = get_window_indices(standard_start_date, standard_end_date, valid_start_times, valid_end_times, last_relevant_index)
+            # record last index of current window indices for next iteration
+            last_relevant_index = window_indices[-1]
 
-            # only one overlap value
-            if len(window_indices) == 1:
-                window_var_data = station_var[window_indices][0]
-                flag_data = station_flag[window_indices][0]
+        # multiple overlap values
+        elif len(window_indices) > 1:
+            flag_data = station_flag[window_indices]
+            var_data = station_var[window_indices]
 
-                # get unique flag values and convert to standard flag names (instead of EBAS) and qa
-                flags = np.unique(flag_data)
-                valid_flags = flags[~np.isnan(flags)]
-                window_flag_data, window_qa_data = get_standard_flags_and_qa(
-                    valid_flags, ghost_version)
-                
-                # record last index of current window indices for next iteration
-                last_relevant_index = window_indices[-1]
+            GHOST_decreed_validities = vfunc(flag_data)
+            GHOST_invalid = np.any(
+                GHOST_decreed_validities == 'I', axis=1)
 
-            # multiple overlap values
-            elif len(window_indices) > 1:
-                flag_data = station_flag[window_indices]
-                var_data = station_var[window_indices]
+            # if there are invalid values in period but some of them are valid, convert invalid ones to nan
+            if np.any(GHOST_invalid) and not np.all(GHOST_invalid):
+                var_data[GHOST_invalid] = np.nan
+                flag_data[GHOST_invalid, :] = np.nan
+            
+            # weight data by timedeltas for averaging different temporal resolution data
+            window_weights = valid_timedeltas[window_indices]
 
-                GHOST_decreed_validities = vfunc(flag_data)
-                GHOST_invalid = np.any(
-                    GHOST_decreed_validities == 'I', axis=1)
+            # modify weights on left and right edges to adjust for actual time sampled within window, 
+            # if measurement overlaps edge
+            if left_overlap > 0.0:
+                window_weights[0] = left_overlap
+            if right_overlap > 0.0:
+                window_weights[-1] = right_overlap
 
-                # if there are invalid values in period but some of them are valid, convert invalid ones to nan
-                if np.any(GHOST_invalid) and not np.all(GHOST_invalid):
-                    var_data[GHOST_invalid] = np.nan
-                    flag_data[GHOST_invalid, :] = np.nan
-                
-                # weight data by timedeltas for averaging different temporal resolution data
-                window_weights = valid_timedeltas[window_indices]
+            window_var_data = np.average(var_data, weights=window_weights)
 
-                # modify weights on left and right edges to adjust for actual time sampled within window, 
-                # if measurement overlaps edge
-                if left_overlap > 0.0:
-                    window_weights[0] = left_overlap
-                if right_overlap > 0.0:
-                    window_weights[-1] = right_overlap
+            # get unique flag values and convert to standard flag names (instead of EBAS) and qa
+            flags = np.unique(flag_data)
+            valid_flags = flags[~np.isnan(flags)]
+            window_flag_data, window_qa_data = get_standard_flags_and_qa(
+                valid_flags, ghost_version)
+            
+            # record last index of current window indices for next iteration
+            last_relevant_index = window_indices[-1]
 
-                window_var_data = np.average(var_data, weights=window_weights)
+        # no overlap values
+        else:
+            window_var_data = np.nan
+            window_flag_data = [np.nan]
+            window_qa_data = [np.nan]
 
-                # get unique flag values and convert to standard flag names (instead of EBAS) and qa
-                flags = np.unique(flag_data)
-                valid_flags = flags[~np.isnan(flags)]
-                window_flag_data, window_qa_data = get_standard_flags_and_qa(
-                    valid_flags, ghost_version)
-                
-                # record last index of current window indices for next iteration
-                last_relevant_index = window_indices[-1]
-
-            # no overlap values
-            else:
-                window_var_data = np.nan
-                window_flag_data = [np.nan]
-                window_qa_data = [np.nan]
-
-            # save flags, qa and var
-            # TODO: Check why flag data is not sorted
-            station_flag_data.append(
-                pad_array(window_flag_data, length=186))
-            station_qa_data.append(pad_array(window_qa_data, length=2))
-            station_averaged_data.append(window_var_data)
-        
-        averaged_data[station_i, :] = station_averaged_data
-        averaged_flag_data[station_i, :, :] = station_flag_data
-        averaged_qa_data[station_i, :, :] = station_qa_data
-
-    # create dataset with averaged data
-    units = combined_ds_list[0][var].attrs['ebas_unit']
-    combined_ds = xr.Dataset(
-        data_vars={
-            var: (['station', 'time'], averaged_data,
-                  {'units': units})
-        },
-        coords={
-            'station': np.arange(len(combined_ds_list)),
-            'time': standard_time
-        }
-    )
-
-    # add flags variable
-    da_flag = xr.DataArray(
-        averaged_flag_data,
-        dims=["station", "time", "N_flag_codes"],
-        coords={
-            "time": standard_time,
-        },
-        name="flag"
-    )
-    combined_ds['flag'] = da_flag
-
-    # add qa variable
-    da_qa = xr.DataArray(
-        averaged_qa_data,
-        dims=["station", "time", "N_qa_codes"],
-        coords={
-            "time": standard_time,
-        },
-        name="qa"
-    )
-    combined_ds['qa'] = da_qa
-
-    return combined_ds
+        # save flags, qa and var
+        # TODO: Check why flag data is not sorted
+        station_flag_data.append(
+            pad_array(window_flag_data, length=186))
+        station_qa_data.append(pad_array(window_qa_data, length=2))
+        station_averaged_data.append(window_var_data)
+    
+    return station_averaged_data, station_flag_data, station_qa_data
 
 
 def is_wavelength_var(actris_parameter):
@@ -651,7 +575,8 @@ def select_station_file(urls, files_info):
     return url
 
 
-def get_data(files, var, actris_parameter, resolution, target_start_date, target_end_date, files_info):
+def get_data(files, var, actris_parameter, resolution, target_start_date, target_end_date, files_info, 
+             ghost_version):
     """Read variable and metadata data standarising dimensions
 
     Parameters
@@ -680,7 +605,6 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
     """
 
     # combine datasets that have the same variable and resolution
-    combined_ds_list = []
     metadata = {}
     metadata[resolution] = {}
 
@@ -690,6 +614,39 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
     # initialise wavelength
     wavelength = None
     
+    # get valid dates frequency
+    if resolution == 'hourly':
+        frequency = 'h'
+    elif resolution == '3hourly':
+        frequency = '3h'
+    elif resolution == 'daily':
+        frequency = 'D'
+    # TODO: Review this
+    elif resolution == 'monthly':
+        frequency = 'MS'
+
+    standard_time = pd.date_range(start=target_start_date, end=target_end_date,
+                                  freq=frequency).to_pydatetime()
+
+    # initialise averaged data
+    averaged_data = np.full(
+        (len(files.items()), len(standard_time)), fill_value=np.nan, dtype=np.float32)
+    averaged_flag_data = np.full(
+        (len(files.items()), len(standard_time), 186), fill_value=np.nan, dtype=np.float32)
+    averaged_qa_data = np.full(
+        (len(files.items()), len(standard_time), 2), fill_value=np.nan, dtype=np.float32)
+
+    # define vectorize function to get GHOST_decreed_validity by overlap flags later
+    vfunc = np.vectorize(
+        lambda flag: np.nan if np.isnan(flag) 
+                    else flags_dict['000']["GHOST_decreed_validity"][0] if flag == 0 
+                    else flags_dict[str(int(flag))]["GHOST_decreed_validity"][0],
+        otypes=['O']
+    )
+
+    # create pairs of valid dates
+    standard_time_pairs = create_time_pairs(standard_time)
+
     errors = {}
     warnings = {}
     tqdm_iter = tqdm(
@@ -816,16 +773,56 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
             "station", "time", "N_flag_codes")
 
         # rename variable to BSC standards
-        ds_station = da_var.to_dataset(name=var)
+        station_ds = da_var.to_dataset(name=var)
 
         # add time bounds
-        ds_station['time_bnds'] = ds['time_bnds']
+        station_ds['time_bnds'] = ds['time_bnds']
 
         # add quality control data
-        ds_station['flag'] = flag_data
+        station_ds['flag'] = flag_data
 
-        # append modified dataset to list
-        combined_ds_list.append(ds_station)
+        # temporally average data from original times to standard times
+        station_averaged_data, station_flag_data, station_qa_data = temporally_average_data(station_ds, var, ghost_version, standard_time_pairs, vfunc)
+
+        # save
+        averaged_data[i, :] = station_averaged_data
+        averaged_flag_data[i, :, :] = station_flag_data
+        averaged_qa_data[i, :, :] = station_qa_data
+
+    # create dataset with averaged data
+    units = variable_mapping[actris_parameter]['units']
+    combined_ds = xr.Dataset(
+        data_vars={
+            var: (['station', 'time'], averaged_data,
+                  {'units': units})
+        },
+        coords={
+            'station': np.arange(averaged_data.shape[0]),
+            'time': standard_time
+        }
+    )
+
+    # add flags variable
+    da_flag = xr.DataArray(
+        averaged_flag_data,
+        dims=["station", "time", "N_flag_codes"],
+        coords={
+            "time": standard_time,
+        },
+        name="flag"
+    )
+    combined_ds['flag'] = da_flag
+
+    # add qa variable
+    da_qa = xr.DataArray(
+        averaged_qa_data,
+        dims=["station", "time", "N_qa_codes"],
+        coords={
+            "time": standard_time,
+        },
+        name="qa"
+    )
+    combined_ds['qa'] = da_qa
 
     # show errors
     if len(errors) > 0:
@@ -840,7 +837,7 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
             if len(warning) > 0:
                 print(f'{file} - Warning: {warning}')
 
-    return combined_ds_list, metadata, wavelength
+    return combined_ds, metadata, wavelength
 
 
 def get_files_to_download(nonghost_root, target_start_date, target_end_date, resolution, var):
