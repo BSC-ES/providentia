@@ -13,6 +13,7 @@ from tqdm import tqdm
 import numpy as np
 import pandas as pd
 import xarray as xr
+from netCDF4 import Dataset
 
 from providentia.auxiliar import CURRENT_PATH, join, pad_array
 
@@ -522,15 +523,9 @@ def get_files_info(files, var, path):
     for file in tqdm_iter:
         # open file
         try:
-            ds = xr.open_dataset(file)
+            ds = Dataset(file)
         except:
             continue
-
-        # get statistics
-        if 'ebas_statistics' in ds.attrs:
-            file_statistics = ds.attrs['ebas_statistics']
-        else:
-            file_statistics = 'Unknown'
 
         # get resolution
         coverage = ds.time_coverage_resolution
@@ -539,19 +534,17 @@ def get_files_info(files, var, path):
         except:
             file_resolution = f'Unrecognised ({coverage})'
 
-        file_start_date = ds.time_coverage_start
-        file_end_date = ds.time_coverage_end
-        file_variables = list(ds.data_vars.keys())
-        file_reference = ds.attrs['ebas_station_code']
-
         # save in dict
         files_info[file] = {}
         files_info[file]['resolution'] = file_resolution
-        files_info[file]['start_date'] = file_start_date
-        files_info[file]['end_date'] = file_end_date
-        files_info[file]['variables'] = file_variables
-        files_info[file]['statistics'] = file_statistics
-        files_info[file]['station_reference'] = file_reference
+        files_info[file]['variables'] = list(ds.variables.keys())
+        for var in ['time_coverage_start', 'time_coverage_end', 'ebas_statistics', 
+                    'ebas_station_code', 'ebas_station_latitude', 'ebas_station_longitude',
+                    'ebas_data_level', 'ebas_station_altitude', 'ebas_measurement_height',
+                    'ebas_instrument_name', 'ebas_method_ref', 'ebas_revision_date',
+                    'ebas_station_code']:
+            if var in ds.ncattrs():
+                files_info[file][var] = ds.getncattr(var)
 
     # create file
     datasets = {
@@ -576,9 +569,9 @@ def get_var_in_file(ds, var, actris_parameter, ebas_component):
     units = unformatted_units.replace('/', '_per_').replace(' ', '_')
     units_var = f'{ebas_component}_{units}'
     possible_vars = [ebas_component,
-                        f'{ebas_component}_amean',
-                        units_var,
-                        f'{units_var}_amean']
+                     f'{ebas_component}_amean',
+                     units_var,
+                     f'{units_var}_amean']
     if var in ['sconcso4', 'precso4']:
         possible_vars.append(f'sulphate_corrected_{units}')
     da_var_exists = False
@@ -593,8 +586,72 @@ def get_var_in_file(ds, var, actris_parameter, ebas_component):
 
     return possible_vars, possible_var
 
+def select_station_file(urls, files_info):
 
-def get_data(files, var, actris_parameter, resolution, target_start_date, target_end_date):
+    attrs_dict = {}
+    urls = np.array(urls)
+    # create dictionary with information about statistics, data level and revision date of available files
+    for url in urls:
+        attrs = files_info[url]
+        for attr in ['ebas_statistics', 'ebas_data_level', 'ebas_revision_date']:
+            if attr not in attrs_dict:
+                attrs_dict[attr] = np.array([])
+            if attr in attrs:
+                attrs_dict[attr] = np.append(attrs_dict[attr], attrs[attr])
+            else:
+                attrs_dict[attr] = np.append(attrs_dict[attr], '')
+
+    urls_statistics = np.unique(attrs_dict['ebas_statistics'])
+    if len(urls_statistics) > 1:
+        for attr_val in ['arithmetic mean', '']:
+            if attr_val in attrs_dict['ebas_statistics']:
+                is_attr_val = attrs_dict['ebas_statistics'] == attr_val
+
+                # remove urls if the statistics are not attr_val (arithmetic mean or undefined)
+                for attr in ['ebas_statistics', 'ebas_data_level', 'ebas_revision_date']:
+                    attrs_dict[attr] = attrs_dict[attr][is_attr_val]
+                urls = urls[is_attr_val]
+                break
+    
+    # if all the urls contain statistics that are not arithmetic mean or undefined, 
+    # then continue to next station
+    elif len(urls_statistics) == 1:
+        if urls_statistics[0] not in ['', 'arithmetic mean']:
+            return
+
+    # check if we still have files
+    if len(urls) > 1:
+        urls_data_levels = np.unique(attrs_dict['ebas_data_level'])
+        # if we have different data levels
+        if len(urls_data_levels) > 1:
+            is_max = attrs_dict['ebas_data_level'] == attrs_dict['ebas_data_level'][np.argmax(np.float32(attrs_dict['ebas_data_level']))]
+            
+            # remove urls if the data level is not the maximum of all files
+            for attr in ['ebas_statistics', 'ebas_data_level', 'ebas_revision_date']:
+                attrs_dict[attr] = attrs_dict[attr][is_max]
+            urls = urls[is_max]
+
+    # check if we still have files
+    if len(urls) > 1:
+        urls_revision_dates = np.unique(attrs_dict['ebas_revision_date'])
+        # if we have different revision dates
+        if len(urls_revision_dates) > 1:
+            is_most_recent = attrs_dict['ebas_revision_date'] == attrs_dict['ebas_revision_date'][np.argmax(np.float32(attrs_dict['ebas_revision_date']))]
+            
+            # remove urls if they aren't the most recent
+            for attr in ['ebas_statistics', 'ebas_data_level', 'ebas_revision_date']:
+                attrs_dict[attr] = attrs_dict[attr][is_most_recent]
+            urls = urls[is_most_recent]               
+
+    # get first file after checks
+    # in case we have multiple files, that would mean all our remaining files have the same revision date, 
+    # data level and statistics
+    url = urls[0]
+
+    return url
+
+
+def get_data(files, var, actris_parameter, resolution, target_start_date, target_end_date, files_info):
     """Read variable and metadata data standarising dimensions
 
     Parameters
@@ -639,38 +696,28 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
         files.items(), bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}', desc=f"Reading data")
     for i, (station, urls) in enumerate(tqdm_iter):
 
-        # open file
+        # open files
         try:
-            if len(urls) == 1:
-                ds = xr.open_dataset(urls[0])
-                possible_vars, possible_var = get_var_in_file(ds, var, actris_parameter, ebas_component)
-                if possible_var is None:
-                    errors[
-                        station] = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}.'
+            if len(urls) > 1:
+                url = select_station_file(urls, files_info)
+                if url is None:
                     continue
             else:
-                url_vars = []
-                for url in urls:
-                    ds = xr.open_dataset(url)
-                    possible_vars, possible_var = get_var_in_file(ds, var, actris_parameter, ebas_component)
-                    if possible_var is None:
-                        errors[
-                            station] = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}.'
-                        continue
-                    url_vars.append(possible_var)
+                url = urls[0]
 
-                # throw error if the variable names across datasets are different for main species
-                if len(list(set(url_vars))) > 1:
-                    msg = 'There is more than one dataset for the same station in the Thredds and the variable names are not the same. '
-                    msg += f'Unique variable names for all files: {list(set(url_vars))}'
-                    errors[station] = msg
-                    continue
-                ds = xr.open_mfdataset(urls, combine='nested', concat_dim='time')
-                ds = ds.sortby('time')
+            nc = Dataset(url, mode='r')
+            ds = xr.open_dataset(xr.backends.NetCDF4DataStore(nc))
+
+            possible_vars, possible_var = get_var_in_file(ds, var, actris_parameter, ebas_component)
+            if possible_var is None:
+                errors[
+                    station] = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}.'
+                continue
+
         except Exception as error:
             errors[station] = f'{i} - Error opening file: {error}.'
             continue
-        
+
         warnings[station] = ""
 
         # remove time duplicates if any (keep first)
