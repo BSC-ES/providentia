@@ -1713,51 +1713,14 @@ class Download(object):
             # files = dict(list(files.items())[0:1])
             if len(files) != 0:
 
-                # get data and metadata for each file within period
+                # get data and metadata for each file within period and temporally average to standard times
                 start = time.time()
-                combined_ds_list, metadata, wavelength = get_data(files, var, actris_parameter, resolution, 
-                                                                  target_start_date, target_end_date, files_info)
+                combined_ds, metadata, wavelength = get_data(files, var, actris_parameter, resolution, 
+                                                             target_start_date, target_end_date, files_info,
+                                                             self.ghost_version)
                 end = time.time()
                 elapsed_minutes = (end - start) / 60
                 print(f"Time to read data: {elapsed_minutes:.2f} minutes")
-
-                # check if there is data after reading available files
-                if len(combined_ds_list) == 0:
-                    self.logger.info('No data were found')
-                    continue
-
-                # get flag dimension per station
-                N_flag_codes_dims = []
-                for ds in combined_ds_list:
-                    N_flag_codes_dims.append(ds.dims['N_flag_codes'])
-                
-                # get maximum number of flags across all stations
-                N_flag_codes_max = max(N_flag_codes_dims)
-                
-                # recreate flag variable so that all stations have the same dimension and can be concatenated, leave nan for unknown values
-                combined_ds_list_corrected_flag = []
-                for ds in combined_ds_list:
-                    flag_data = ds['flag']
-                    da_flag = xr.DataArray(
-                            np.full((flag_data.sizes['station'], flag_data.sizes['time'], N_flag_codes_max), np.nan),
-                            dims=["station", "time", "N_flag_codes"],
-                            coords={
-                                "time": flag_data.coords["time"],
-                            },
-                            name="flag"
-                        )
-                    da_flag[:, :, :flag_data.values.shape[-1]] = flag_data.values
-                    ds = ds.drop_vars('flag')
-                    ds['flag'] = da_flag
-                    combined_ds_list_corrected_flag.append(ds)
-            
-                # combine and create new dataset
-                self.logger.info('Combining files...')
-                start = time.time()
-                combined_ds = temporally_average_data(combined_ds_list_corrected_flag, resolution, var, self.ghost_version, target_start_date, target_end_date)
-                end = time.time()
-                elapsed_minutes = (end - start) / 60
-                print(f"Time to temporally average: {elapsed_minutes:.2f} minutes")
 
                 # add metadata
                 for key, value in metadata[resolution].items():
