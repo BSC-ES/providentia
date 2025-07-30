@@ -919,7 +919,7 @@ class ProvConfiguration:
         # check if species is valid
         if self.read_instance.species:
             for speci in self.read_instance.species:
-                if ('*' not in speci) and (speci not in self.read_instance.parameter_dictionary) and (speci not in mapping_species):
+                if ('*' not in speci) and (speci not in self.read_instance.parameter_dictionary):
                     error = f'Error: species "{speci}" not valid.'
                     self.read_instance.logger.error(error)
                     sys.exit(1)
