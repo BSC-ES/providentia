@@ -2139,25 +2139,18 @@ class Download(object):
         # copy dimensions 
         for name, dim in og_grp.dimensions.items():
             # skip level
-            if name == 'level': 
-                continue
             root_grp.createDimension(name, len(dim))
 
         # copy variables
         for name, og_var in og_grp.variables.items():
             # skip level
-            if name == "level":
-                continue
 
             # change species name
-            if name not in ["longitude","latitude","time"]:
+            if name not in ["longitude","latitude","time",'level']:
                 name = species
-
-            # get dimensions without level
-            dims = tuple(dim for dim in og_var.dimensions if dim != "level")
             
             # create the variable
-            var = root_grp.createVariable(name, og_var.datatype, dims)
+            var = root_grp.createVariable(name, og_var.datatype, og_var.dimensions)
 
             # add atribures
             if name == "time":
@@ -2168,12 +2161,12 @@ class Download(object):
                 # copy atributes from the original file
                 var.setncatts({k: og_var.getncattr(k) for k in og_var.ncattrs() if k != '_FillValue'})
 
+            # add to level the priority of the level
+            if name == "level":
+                var.positive = 'up'
+
             # get the data from the original file
             data = og_var[:]
-
-            # remove level dimension from species
-            if name == species:
-                data = np.squeeze(data, axis=1)
             
             # add the data to the variable
             var[:] = data
