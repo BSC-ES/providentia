@@ -1584,26 +1584,30 @@ class Download(object):
                 zip_network = line.split("/")[-1][:-5]
                 self.zenodo_ghost_available_networks[zip_network] = zip_file_url
 
-    def fetch_cams_dates(self, url):
+    def fetch_cams_dates(self, url, cams_dict):
         
-        # send HTTP GET request and get
+        # send HTTP GET request and get the text
         response = requests.get(url)
+        r = response.text
 
-        # get the info for all the fields
-        fields_info = re.findall(r'(\{"name":".*?".*?)(?=\,{"name":)', response.text, re.DOTALL)
+        # do the webscrapping depending if there is whole dates or only month
+        if cams_dict['month_names'] is False:
+            # get the minstart and maxend dictionary
+            minstart_dict = re.findall(r'"minStart":".*?"', r, re.DOTALL)
+            maxend_dict = re.findall(r'"maxEnd":".*?"', r, re.DOTALL)
+            
+            # get the value from the dictionary
+            minstart = datetime.strptime(minstart_dict[0].split('"')[-2], '%Y-%m-%d')
+            maxend = datetime.strptime(maxend_dict[0].split('"')[-2], '%Y-%m-%d')
+        else:
+            # get the interval dictionary
+            match = re.search(r'"interval":\[\["(.*?)","(.*?)"\]\]', r)
 
-        # get the date field minimum and maximum
-        for field in fields_info:
-            if '"name":"date"' in field:
-                # transform the str to a dict
-                field_dict = json.loads(field)
-
-                # convert to datetime format
-                minstart = datetime.strptime(field_dict["details"]["minStart"], '%Y-%m-%d')
-                maxend = datetime.strptime(field_dict["details"]["maxEnd"], '%Y-%m-%d')
-
-                # get the mininimum start date and maximum end date
-                return minstart, maxend
+            # get the date value
+            minstart = datetime.strptime(match.group(1), "%Y-%m-%dT%H:%M:%SZ")
+            maxend = datetime.strptime(match.group(2), "%Y-%m-%dT%H:%M:%SZ")
+   
+        return minstart, maxend
 
     def get_all_networks(self):
         # get user input to know which kind of network wants
@@ -1929,8 +1933,14 @@ class Download(object):
             show_message(self, msg)
             return
         
+        # get url
+        url = cams_dict['url']
+
         # get minimum and maximum possible dates
-        min_start_date, max_end_date = self.fetch_cams_dates(cams_dict['url'])
+        if cams_dict['fetch_dates'] is True:
+            min_start_date, max_end_date = self.fetch_cams_dates(url, cams_dict)
+        else: # TODO: change this
+            min_start_date, max_end_date = datetime.strptime('2013-01-01', '%Y-%m-%d'), datetime.strptime('2024-12-31', '%Y-%m-%d')
 
         # convert the selected dates to datetetime
         cams_start_date = datetime.strptime(self.start_date, "%Y%m%d")
@@ -2018,8 +2028,9 @@ class Download(object):
                 while current_cams_date <= cams_end_date:
 
                     # add one day or one month depending if it is forecast or analysis
-                    if cams_dict['forecast'] is True:
+                    if cams_dict['forecast'] is False:
                         next_cams_date = current_cams_date.replace(day=1) + relativedelta(months=1)
+                        next_cams_date = cams_end_date if next_cams_date > cams_end_date else next_cams_date
                     else:
                         next_cams_date =  current_cams_date + timedelta(days=1) 
 
@@ -2036,13 +2047,16 @@ class Download(object):
                     # add leadtime hour to the request if the dataset has it
                     if 'leadtime_hour' in cams_dict:
                         request["leadtime_hour"] = list(range(0,cams_dict['leadtime_hour']+1))
+                        
+                        if cams_species in cams_variables_level[url]['multi']: # TODO: clean this
+                            request["leadtime_hour"] = list(range(0, cams_dict['leadtime_hour']+1, 3))
 
                     # add type to the request if the dataset has it
                     if 'type' in cams_dict:
-                        request["type"] = cams_dict['type']
+                        request["type"] = [cams_dict['type']]
 
                     # if it's forecast one file per day, analysis one file per month
-                    if cams_dict['forecast'] is True:  # monthly
+                    if cams_dict['forecast'] is False:  # monthly
                         request["date"] = [f"{current_cams_date_str}/{(next_cams_date - timedelta(days=1)).strftime('%Y-%m-%d')}"]
                     else: # daily
                         request["date"] = [f"{current_cams_date_str}/{current_cams_date_str}"]
@@ -2051,9 +2065,10 @@ class Download(object):
                     if 'experiments' in cams_dict:
                         request["model"] = [exp_id]
 
-                    # if species is multi level, get the 0
-                    if cams_species in cams_variables_level['multi']:
-                        request["level"] = ["0"]
+                    # get the level and apply it if the species is multi level
+                    level_variable = 'level' if 'level' in cams_dict else 'model_level'
+                    if cams_species in cams_variables_level[url]['multi']:
+                        request[level_variable] = [cams_dict[level_variable]]
 
                     # get file name and final path
                     file_name = f"{species}-000_{current_cams_date.strftime('%Y%m%d')}.nc"
