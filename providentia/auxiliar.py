@@ -116,8 +116,9 @@ def get_machine():
     if machine is None:
         hostname = os.environ.get('HOSTNAME', '')
         
-        #setup retrial system for getting ip address as occasionaly breaks
+        # setup retrial system for getting ip address as occasionaly breaks
         retry = 0
+        ip = None
         while True:
             try:
                 ip = socket.gethostbyname(socket.gethostname())
