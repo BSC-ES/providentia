@@ -36,7 +36,7 @@ cams_analysis:
       - sulphur_dioxide
     leadtime_hour: 24
     forecast: false
-    fetch_dates: true # change because we have to find a way
+    fetch_dates: true
     level: 0
     month_names: false
 cams_forecast:

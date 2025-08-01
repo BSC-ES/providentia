@@ -12,6 +12,11 @@ import numpy as np
 import paramiko 
 import re 
 import requests
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions
 import signal
 import subprocess
 import tarfile
@@ -1590,8 +1595,54 @@ class Download(object):
         response = requests.get(url)
         r = response.text
 
+        if cams_dict['dataset'] == 'cams-europe-air-quality-forecasts' and cams_dict['type'] == 'analysis':
+            def get_button(selector,var1):
+                wait.until(expected_conditions.presence_of_element_located((var1, selector)))
+                return driver.find_elements(var1, selector)
+
+            # run firefox headless so window does not pop up
+            options = Options()
+            options.add_argument("--headless")
+
+            # create webdriver object
+            driver = webdriver.Firefox(options=options)
+
+            # get webpage
+            driver.get(cams_dict['url'])
+
+            # create wait object
+            wait = WebDriverWait(driver, 10)
+
+            # click on 'Save' for cookies
+            buttons = get_button('.sc-76df4671-1', By.CSS_SELECTOR)
+            button = [b for b in buttons if b.text == 'Save'][0]
+            button.click()
+
+            # click on 'Analysis' for type
+            buttons = get_button('type_analysis', By.ID)
+            driver.execute_script("arguments[0].click();", buttons[0])
+
+            # click on start date calendar after scrolling into view
+            buttons = get_button('.sc-fd7d6ae1-6', By.CSS_SELECTOR)
+            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", buttons[0])
+            time.sleep(0.5)
+            buttons[0].click()
+
+            # click on the first day of the month
+            buttons = get_button('.sc-fd7d6ae1-15', By.CSS_SELECTOR)
+            button = [b for b in buttons if b.text == '1'][0]
+            button.click()
+
+            # get warning text to get the minimum and maximum date
+            buttons = get_button('.sc-dd07f942-10', By.CSS_SELECTOR)
+            text = [b.text for b in buttons if b.text.startswith('Date not available, must be between')][0]
+            
+            # get the date
+            minstart = datetime.strptime(text.split()[-3], '%Y-%m-%d')
+            maxend = datetime.strptime(text.split()[-1], '%Y-%m-%d')
+        
         # do the webscrapping depending if there is whole dates or only month
-        if cams_dict['month_names'] is False:
+        elif cams_dict['month_names'] is False:
             # get the minstart and maxend dictionary
             minstart_dict = re.findall(r'"minStart":".*?"', r, re.DOTALL)
             maxend_dict = re.findall(r'"maxEnd":".*?"', r, re.DOTALL)
