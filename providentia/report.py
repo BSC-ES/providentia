@@ -1059,7 +1059,7 @@ class Report:
                 # skip making plot if there is no valid data
                 data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.data_labels)
                 if not any(valid_station_idxs):
-                    self.logger.info(f'No data after filtering by coverage for {speci}.')
+                    self.logger.info(f'No data to generate FAIRMODE plot after filtering by coverage for {speci}.')
                     continue
 
             # make plot
@@ -1244,7 +1244,7 @@ class Report:
                     # skip making plot if there is no valid data
                     data, valid_station_idxs = get_fairmode_data(self, self, networkspeci, self.data_labels)
                     if not any(valid_station_idxs):
-                        self.logger.info(f'No data after filtering by coverage for {speci} in {self.current_station_name}.')
+                        self.logger.info(f'No data to generate FAIRMODE plot after filtering by coverage for {speci} in {self.current_station_name}.')
                         continue
 
                 # make plot
