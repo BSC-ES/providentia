@@ -18,9 +18,7 @@ from pypdf import PdfReader
 from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 from .configuration import load_conf
 from .configuration import ProvConfiguration
-from .fields_menus import (init_metadata, init_period, init_representativity, metadata_conf,
-                           update_metadata_fields, update_period_fields, update_representativity_fields,
-                           period_conf, representativity_conf)
+from .fields_menus import update_metadata_fields
 from .filter import DataFilter
 from .plotting import Plotting
 from .plot_aux import get_taylor_diagram_ghelper, set_map_extent, reorder_pdf_pages
@@ -511,17 +509,17 @@ class Report:
                         (not hasattr(self, 'paradigm_break_page'))):
                         self.paradigm_break_page = real_page
 
-                    # save pdf when reaching last page
-                    if i == len(self.plot_dictionary) - 1:
-                        self.logger.info(f'\nWriting PDF in {reports_path}')
-                        valid_page = True
+                    # save page figure                        
                     fig = self.plot_dictionary[page]['fig']
                     self.pdf.savefig(fig, dpi=self.dpi)
                     plt.close(fig)
                     real_page += 1
+                    valid_page = True
 
-            # if last page was reached tha means there were plots to write (valid_page = True)
-            if not valid_page:
+            # if last page was reached that means there were plots to write (valid_page = True)
+            if valid_page:
+                self.logger.info(f'\nWriting PDF in {reports_path}')
+            else:    
                 self.logger.info('\n0 plots remain to write to PDF')
 
         # compress PDF using ghostscript if desired (at 300 DPI)
@@ -867,25 +865,6 @@ class Report:
                 # re-read data
                 self.datareader.read_setup(['reset'])
 
-            # update fields available for filtering
-            init_representativity(self)
-            update_representativity_fields(self)
-            representativity_conf(self)
-            init_period(self)
-            update_period_fields(self)
-            period_conf(self)
-            init_metadata(self)
-
-            # for non-GHOST delete valid station indices variables because we do not want to 
-            # remove the stations with 0 valid measurements before the filter has been updated, 
-            # this will happen later
-            if hasattr(self, 'valid_station_inds') and (not self.reading_ghost):
-                delattr(self, 'valid_station_inds')
-                delattr(self, 'valid_station_inds_temporal_colocation')
-
-            update_metadata_fields(self)
-            metadata_conf(self)
-
             # set previous QA, flags, filter species and calibration factor as subsection
             self.previous_qa = copy.deepcopy(self.qa)
             self.previous_flags = copy.deepcopy(self.flags)
@@ -895,7 +874,13 @@ class Report:
             # filter dataset for current subsection
             self.logger.info('\nFiltering data for {} subsection'.format(self.subsection))
             DataFilter(self)
-            
+
+            # for non-GHOST, we call update_metadata_fields after filtering to remove the stations that have
+            # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained 
+            # after filtering
+            if not self.reading_ghost:
+                update_metadata_fields(self)
+
             # iterate through networks and species, creating plots
             self.n_total_pages = len(self.plot_dictionary)
 
@@ -1042,17 +1027,19 @@ class Report:
                                           or (networkspeci != self.networkspecies[-1])):
                     continue
 
+            self.logger.info('Making summary {0}'.format(plot_type))
+
             if base_plot_type in ['fairmode-target', 'fairmode-statsummary']:
                 # warning for fairmode plots if species aren't PM2.5, PM10, NO2 or O3
                 speci = networkspeci.split('|')[1]
                 if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
-                    msg = f'Fairmode target summary plot cannot be created for {speci}.'
+                    msg = f'Fairmode plot cannot be created for {speci}.'
                     show_message(self, msg)
                     continue
                 # warning for fairmode plots if resolution is not hourly or daily
                 if ((speci in ['sconco3', 'sconcno2'] and self.active_resolution != 'hourly') 
                     or (speci in ['pm10', 'pm2p5'] and (self.active_resolution not in ['hourly', 'daily']))):
-                    msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
+                    msg = 'Fairmode plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
                     show_message(self, msg)
                     continue
 
@@ -1063,7 +1050,6 @@ class Report:
                     continue
 
             # make plot
-            self.logger.info('Making summary {0}'.format(plot_type))
             plot_indices = self.make_plot('summary', plot_type, plot_options, networkspeci)
 
             # do formatting for plot options
@@ -1227,17 +1213,22 @@ class Report:
                     else:
                         continue
 
+                self.logger.info('Making station {2} for {3} ({0}/{1})'.format(i+1, 
+                                                                    len(self.relevant_station_inds),
+                                                                    plot_type, 
+                                                                    self.current_station_name))   
+
                 if base_plot_type in ['fairmode-target', 'fairmode-statsummary']:
                     # warning for fairmode plots if species aren't PM2.5, PM10, NO2 or O3
                     speci = networkspeci.split('|')[1]
                     if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
-                        msg = f'Fairmode target station plot cannot be created for {speci} in {self.current_station_name}.'
+                        msg = f'Fairmode plot cannot be created for {speci} in {self.current_station_name}.'
                         show_message(self, msg)
                         continue
                     # warning for fairmode plots if resolution is not hourly or daily
                     if ((speci in ['sconco3', 'sconcno2'] and self.active_resolution != 'hourly') 
                         or (speci in ['pm10', 'pm2p5'] and (self.active_resolution not in ['hourly', 'daily']))):
-                        msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
+                        msg = 'Fairmode plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
                         show_message(self, msg)
                         continue
 
@@ -1247,12 +1238,7 @@ class Report:
                         self.logger.info(f'No data after filtering by coverage for {speci} in {self.current_station_name}.')
                         continue
 
-                # make plot
-                self.logger.info('Making station {2} for {3} ({0}/{1})'.format(i+1, 
-                                                                    len(self.relevant_station_inds),
-                                                                    plot_type, 
-                                                                    self.current_station_name))   
-                
+                # make plot                
                 plot_indices = self.make_plot('station', plot_type, plot_options, networkspeci)
 
                 # do not format Taylor diagrams until last station
@@ -1547,13 +1533,21 @@ class Report:
                             msg += f'The available resolutions are: {available_timeseries_chunk_resolutions}'
                         show_message(self, msg)
                         return plot_indices
-                    
-                    # show warning if chunk stat is NStations and mode is not Temporal|Spatial
-                    if (chunk_stat == 'NStations') and (self.statistic_mode != 'Temporal|Spatial'):
+
+                    # show warning if chunk stat is MDA8 and active resolution is not hourly
+                    if (chunk_stat == 'MDA8') and (self.active_resolution != 'hourly'):
                         msg = f'{plot_type} cannot be created because {chunk_stat} '
-                        msg += 'it is only available when Temporal|Spatial mode is active.'
+                        msg += 'is only available when resolution is hourly.'
                         show_message(self, msg)
                         return plot_indices
+                    
+                    # show warning if chunk stat is MDA8 and chunk resolution is not daily
+                    if (chunk_stat == 'MDA8') and (chunk_resolution != 'daily'):
+                        msg = f'{plot_type} cannot be created because {chunk_stat} '
+                        msg += 'is only available when chunk resolution is daily.'
+                        show_message(self, msg)
+                        return plot_indices
+
                 else:
                     chunk_stat = None
                     chunk_resolution = None

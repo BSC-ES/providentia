@@ -269,7 +269,7 @@ def update_representativity_fields(instance):
         :param instance: Instance of class Report or Dashboard
         :type instance: object
     """
- 
+
     # get previously set rangebox labels / values
     previous_mapped_labels = copy.deepcopy(instance.representativity_menu['rangeboxes']['map_vars'])
     previous_lower = copy.deepcopy(instance.representativity_menu['rangeboxes']['current_lower'])
