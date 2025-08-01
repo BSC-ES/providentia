@@ -117,9 +117,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--domain",
                                      dest="domain",
                                      help="domain of the experiment")
-            self.parser.add_argument("--ensemble_options",
-                                     dest="ensemble_options",
-                                     help="ensemble options of the experiment")
+            self.parser.add_argument("--ensemble",
+                                     dest="ensemble",
+                                     help="ensemble member number or ensemble statistic of the experiment")
             self.parser.add_argument("--forecast",
                                      dest="forecast",
                                      help="set part of forecast data desired")
