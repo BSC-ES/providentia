@@ -14,9 +14,13 @@ import numpy as np
 import pandas as pd
 
 from providentia.auxiliar import CURRENT_PATH, join
+from .fields_menus import (init_representativity, init_period, init_metadata,
+                           update_representativity_fields, update_period_fields, update_metadata_fields,
+                           representativity_conf, period_conf, metadata_conf)
 from .plot_aux import update_plotting_parameters
 from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_yearmonths_to_read, 
-                       init_shared_vars_read_netcdf_data, read_netcdf_data, read_netcdf_metadata, do_resampling)
+                       init_shared_vars_read_netcdf_data, read_netcdf_data, read_netcdf_metadata, 
+                       do_resampling)
 from .spatial_colocation import SpatialColocation
 from .warnings_prv import show_message
 
@@ -46,6 +50,16 @@ class DataReader:
 
             # determine if reading GHOST or non-GHOST
             self.read_instance.reading_ghost = check_for_ghost(self.read_instance.network[0])
+
+            # re-initialise and update representativity fields and period fields for active resolution
+            init_representativity(self.read_instance)
+            init_period(self.read_instance)
+            update_representativity_fields(self.read_instance)
+            update_period_fields(self.read_instance)
+            # if loading from a conf file then load representativity and period fields
+            if self.read_instance.from_conf:
+                representativity_conf(self.read_instance)
+                period_conf(self.read_instance)
 
             # get active frequency code
             self.read_instance.active_frequency_code = get_frequency_code(self.read_instance.resolution)
@@ -416,9 +430,6 @@ class DataReader:
                     self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]] = \
                         self.read_instance.ghost_data_in_memory[self.read_instance.networkspecies[0]][:, :, data_left_edge_ind:data_right_edge_ind]
 
-                # do resampling of data (if necessary)
-                do_resampling(self.read_instance)
-
             # need to read on left / read on right
             if ('read_left' in operations) or ('read_right' in operations):
 
@@ -584,6 +595,23 @@ class DataReader:
             
             # update plotting parameters colours and zorder
             update_plotting_parameters(self.read_instance) 
+
+        # for non-GHOST delete valid station indices variables because we do not want to 
+        # remove the stations with 0 valid measurements before the filter has been updated, 
+        # this will happen later
+        if hasattr(self.read_instance, 'valid_station_inds') and (not self.read_instance.reading_ghost):
+            delattr(self.read_instance, 'valid_station_inds')
+            delattr(self.read_instance, 'valid_station_inds_temporal_colocation')
+
+        # re-initialise and update metadata fields for read metadata
+        init_metadata(self.read_instance)
+        update_metadata_fields(self.read_instance)
+        # if loading from a conf file then load metadata fields
+        if self.read_instance.from_conf:
+            metadata_conf(self.read_instance)
+
+        # do resampling of data (if necessary)
+        do_resampling(self.read_instance)
 
         # print basic information species
         self.read_instance.logger.info('\nOBSERVATIONS')
@@ -1006,6 +1034,3 @@ class DataReader:
 
                 self.read_instance.logger.error(error)
                 sys.exit(1) 
-
-        # do resampling of data (if necessary)
-        do_resampling(self.read_instance)

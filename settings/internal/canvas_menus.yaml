@@ -272,7 +272,7 @@
           "formatting_dict": "menu_combobox",
           "fixed_width": 105,
           "relative_position": [-220, 75],
-          "function": "handle_timeseries_statistic_update",
+          "function": "handle_timeseries_aggregation_statistic_update",
         },
 
       "chunk_stat_label":
