@@ -13,6 +13,7 @@ import paramiko
 import re 
 import requests
 from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
@@ -1625,13 +1626,24 @@ class Download(object):
             # click on start date calendar after scrolling into view
             buttons = get_button('.sc-fd7d6ae1-6', By.CSS_SELECTOR)
             driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", buttons[0])
-            time.sleep(0.5)
-            buttons[0].click()
 
-            # click on the first day of the month
-            buttons = get_button('.sc-fd7d6ae1-15', By.CSS_SELECTOR)
-            button = [b for b in buttons if b.text == '1'][0]
-            button.click()
+            # change month field text to years outside the range
+            buttons = get_button('.sc-fd7d6ae1-8', By.CSS_SELECTOR)
+            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", buttons[0])
+            script = """
+            const el = arguments[0];
+            const value = arguments[1];
+            el.focus();
+            el.innerText = value;
+            el.dispatchEvent(new InputEvent('input', { bubbles: true }));
+            """
+            time.sleep(1)
+            driver.execute_script(script, buttons[0], "1986\n")
+            driver.execute_script(script, buttons[-5], "2102\n")
+
+            # do a double click on the date so the warning appears
+            actions = ActionChains(driver)
+            actions.double_click(buttons[-5]).perform()
 
             # get warning text to get the minimum and maximum date
             buttons = get_button('.sc-dd07f942-10', By.CSS_SELECTOR)
