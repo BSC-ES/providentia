@@ -477,18 +477,18 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
         # for other cases, get cut of selected station data for data_labels_a
         else:
-            indices_a = np.array([canvas_instance.selected_station_data_labels[networkspeci].index(label) for label in data_labels_a])
+            data_label_a_indices = np.array([canvas_instance.selected_station_data_labels[networkspeci].index(label) for label in data_labels_a], dtype=np.int32)
                         
             # for grouping data take per_station array
             if (chunk_resolution is not None) or (period is not None) or (z_statistic_period is not None) or (base_zstat in ['NStations','MDA8']):
-                data_array_a = canvas_instance.selected_station_data[networkspeci]['per_station'][indices_a]
+                data_array_a = canvas_instance.selected_station_data[networkspeci]['per_station'][data_label_a_indices]
             # otherwise take active mode
             else:
-                data_array_a = canvas_instance.selected_station_data[networkspeci]['active_mode'][indices_a]
+                data_array_a = canvas_instance.selected_station_data[networkspeci]['active_mode'][data_label_a_indices]
 
         # if need to mask data, then do so
         if mask is not None:
-            data_array_a[mask] = np.NaN
+            data_array_a[mask[data_label_a_indices]] = np.NaN
 
         # if need to temporally chunk data, then do so
         if chunk_resolution is not None:
@@ -585,18 +585,18 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
             # for other cases, get cut of selected station data for data_labels_b
             else:
-                indices_b = np.array([canvas_instance.selected_station_data_labels[networkspeci].index(label) for label in data_labels_b])
+                data_label_b_indices = np.array([canvas_instance.selected_station_data_labels[networkspeci].index(label) for label in data_labels_b], dtype=np.int32)
 
                 # for grouping data take per_station array
                 if (chunk_resolution is not None) or (period is not None) or (z_statistic_period is not None) or (base_zstat in ['NStations','MDA8']):
-                    data_array_b = canvas_instance.selected_station_data[networkspeci]['per_station'][indices_b]
+                    data_array_b = canvas_instance.selected_station_data[networkspeci]['per_station'][data_label_b_indices]
                 # otherwise take active mode
                 else:
-                    data_array_b = canvas_instance.selected_station_data[networkspeci]['active_mode'][indices_b]
+                    data_array_b = canvas_instance.selected_station_data[networkspeci]['active_mode'][data_label_b_indices]
             
             # if need to mask data, then do so
             if mask is not None:
-                data_array_b[mask] = np.NaN
+                data_array_b[mask[data_label_b_indices]] = np.NaN
 
             # if need to temporally chunk data, then do so
             if chunk_resolution is not None:
