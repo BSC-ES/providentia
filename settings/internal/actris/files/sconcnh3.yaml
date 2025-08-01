@@ -1,23 +1,41 @@
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/25/YD/5K/25YD-5KNP.nc:
-  end_date: 2018-06-29T10:30:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: ALPHA_Gracia
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: ES14L_ALPHA_Gracia
+  ebas_revision_date: '20241210112644'
+  ebas_station_altitude: 58.0 m
+  ebas_station_code: ES0028U
+  ebas_station_latitude: '41.385335'
+  ebas_station_longitude: '2.154101'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2013-11-20T12:15:00 UTC
-  station_reference: ES0028U
-  statistics: arithmetic mean
+  time_coverage_end: 2018-06-29T10:30:00 UTC
+  time_coverage_start: 2013-11-20T12:15:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2C/U5/6K/2CU5-6K6Z.nc:
-  end_date: 2000-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f2p_01
+  ebas_revision_date: '20140501000000'
+  ebas_station_altitude: 735.0 m
+  ebas_station_code: CZ0001R
+  ebas_station_latitude: '49.735084444'
+  ebas_station_longitude: '16.034196944'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1999-01-01T00:00:00 UTC
-  station_reference: CZ0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2000-01-01T00:00:00 UTC
+  time_coverage_start: 1999-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
@@ -32,13 +50,23 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2C/U5/6K/2CU5-6K6Z.nc:
   - sulphur_dioxide_qc
   - sulphur_dioxide_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2D/RM/ZB/2DRM-ZBNZ.nc:
-  end_date: 2023-01-03T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Ng_Den_0002
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '20240410095705'
+  ebas_station_altitude: 62.0 m
+  ebas_station_code: DE0007R
+  ebas_station_latitude: '53.141303'
+  ebas_station_longitude: '13.031662'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2015-12-29T07:00:00 UTC
-  station_reference: DE0007R
-  statistics: arithmetic mean
+  time_coverage_end: 2023-01-03T07:00:00 UTC
+  time_coverage_start: 2015-12-29T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -47,13 +75,23 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2D/RM/ZB/2DRM-ZBNZ.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2N/77/C5/2N77-C57A.nc:
-  end_date: 2023-08-29T13:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Poses
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR26L_NH3_Poses
+  ebas_revision_date: '20231108000000'
+  ebas_station_altitude: 10.0 m
+  ebas_station_code: FR0056U
+  ebas_station_latitude: '49.30423'
+  ebas_station_longitude: '1.2449'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2023-06-23T18:00:00 UTC
-  station_reference: FR0056U
-  statistics: arithmetic mean
+  time_coverage_end: 2023-08-29T13:00:00 UTC
+  time_coverage_start: 2023-06-23T18:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -62,49 +100,85 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2N/77/C5/2N77-C57A.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3K/6Y/KF/3K6Y-KFCS.nc:
-  end_date: 2009-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f30_02
+  ebas_method_ref: DE03L_IC_air
+  ebas_revision_date: '20140501000000'
+  ebas_station_altitude: 74.0 m
+  ebas_station_code: DE0002R
+  ebas_station_latitude: '52.802222'
+  ebas_station_longitude: '10.759444'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2005-01-01T00:00:00 UTC
-  station_reference: DE0002R
-  statistics: arithmetic mean
+  time_coverage_end: 2009-01-01T00:00:00 UTC
+  time_coverage_start: 2005-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3U/SC/HZ/3USC-HZYH.nc:
-  end_date: 2003-01-06T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_w_0047
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '20110512000000'
+  ebas_station_altitude: 30.0 m
+  ebas_station_code: NO0047R
+  ebas_station_latitude: '69.45'
+  ebas_station_longitude: '30.033333'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2001-01-01T07:00:00 UTC
-  station_reference: NO0047R
-  statistics: arithmetic mean
+  time_coverage_end: 2003-01-06T07:00:00 UTC
+  time_coverage_start: 2001-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3V/A6/YC/3VA6-YCVY.nc:
-  end_date: 2013-12-31T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: RADIELLO
+  ebas_method_ref: ES01L_uv_vis
+  ebas_revision_date: '20150203093542'
+  ebas_station_altitude: 1360.0 m
+  ebas_station_code: ES0009R
+  ebas_station_latitude: '41.27417'
+  ebas_station_longitude: '-3.1425'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2008-01-28T07:00:00 UTC
-  station_reference: ES0009R
-  statistics: arithmetic mean
+  time_coverage_end: 2013-12-31T07:00:00 UTC
+  time_coverage_start: 2008-01-28T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/48/PZ/PX/48PZ-PXZJ.nc:
-  end_date: 2023-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: MA01
+  ebas_method_ref: GB03L_MA_1
+  ebas_revision_date: '20230731000000'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: GB0048R
+  ebas_station_latitude: '55.79216'
+  ebas_station_longitude: '-3.2429'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2022-01-01T00:00:00 UTC
-  station_reference: GB0048R
-  statistics: arithmetic mean
+  time_coverage_end: 2023-01-01T00:00:00 UTC
+  time_coverage_start: 2022-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
@@ -122,13 +196,21 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/48/PZ/PX/48PZ-PXZJ.nc:
   - sulphur_dioxide_qc
   - sulphur_dioxide_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/49/7G/73/497G-73Q8.nc:
-  end_date: 1996-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f2p_01
+  ebas_revision_date: '20140501000000'
+  ebas_station_altitude: 735.0 m
+  ebas_station_code: CZ0001R
+  ebas_station_latitude: '49.735084444'
+  ebas_station_longitude: '16.034196944'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1995-01-01T07:00:00 UTC
-  station_reference: CZ0001R
-  statistics: arithmetic mean
+  time_coverage_end: 1996-01-01T00:00:00 UTC
+  time_coverage_start: 1995-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
@@ -137,49 +219,86 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/49/7G/73/497G-73Q8.nc:
   - sulphur_dioxide_qc
   - sulphur_dioxide_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4C/RT/XB/4CRT-XB3W.nc:
-  end_date: 2020-12-30T11:40:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: CEH_denuder_32
+  ebas_method_ref: GB03L_CEH
+  ebas_revision_date: '20241121082926'
+  ebas_station_altitude: 267.0 m
+  ebas_station_code: GB0014R
+  ebas_station_latitude: '54.334444'
+  ebas_station_longitude: '-0.8075'
+  ebas_statistics: arithmetic mean
   resolution: monthly
-  start_date: 2013-01-02T10:30:00 UTC
-  station_reference: GB0014R
-  statistics: arithmetic mean
+  time_coverage_end: 2020-12-30T11:40:00 UTC
+  time_coverage_start: 2013-01-02T10:30:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4P/CK/8C/4PCK-8CCG.nc:
-  end_date: 2000-01-01T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: tubd_02
+  ebas_method_ref: HU01L_indo
+  ebas_revision_date: '20240405085837'
+  ebas_station_altitude: 125.0 m
+  ebas_station_code: HU0002R
+  ebas_station_latitude: '46.965333'
+  ebas_station_longitude: '19.544889'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1986-01-01T07:00:00 UTC
-  station_reference: HU0002R
-  statistics: arithmetic mean
+  time_coverage_end: 2000-01-01T07:00:00 UTC
+  time_coverage_start: 1986-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4X/FX/SZ/4XFX-SZUD.nc:
-  end_date: 2013-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: ECN_Amor
+  ebas_method_ref: NL01L_LVM_LU
+  ebas_revision_date: '20240405085923'
+  ebas_station_altitude: 20.0 m
+  ebas_station_code: NL0007R
+  ebas_station_latitude: '52.083333'
+  ebas_station_longitude: '6.566667'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2009-01-01T00:00:00 UTC
-  station_reference: NL0007R
-  statistics: arithmetic mean
+  time_coverage_end: 2013-01-01T00:00:00 UTC
+  time_coverage_start: 2009-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4Z/YY/CH/4ZYY-CHTA.nc:
-  end_date: 2023-01-03T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Wa_Den_0002
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '20240410095704'
+  ebas_station_altitude: 74.0 m
+  ebas_station_code: DE0002R
+  ebas_station_latitude: '52.802222'
+  ebas_station_longitude: '10.759444'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2015-12-29T07:00:00 UTC
-  station_reference: DE0002R
-  statistics: arithmetic mean
+  time_coverage_end: 2023-01-03T07:00:00 UTC
+  time_coverage_start: 2015-12-29T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -188,25 +307,44 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4Z/YY/CH/4ZYY-CHTA.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/56/AK/69/56AK-69X5.nc:
-  end_date: 2011-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_09
+  ebas_method_ref: DE03L_IC_c
+  ebas_revision_date: '20110929000000'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: '54.4368'
+  ebas_station_longitude: '12.7249'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2010-01-01T00:00:00 UTC
-  station_reference: DE0009R
-  statistics: arithmetic mean
+  time_coverage_end: 2011-01-01T00:00:00 UTC
+  time_coverage_start: 2010-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5C/9T/V6/5C9T-V6HC.nc:
-  end_date: 2023-01-03T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_We_Den_0002
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '20240410095638'
+  ebas_station_altitude: 12.0 m
+  ebas_station_code: DE0001R
+  ebas_station_latitude: '54.925556'
+  ebas_station_longitude: '8.309722'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2015-12-29T07:00:00 UTC
-  station_reference: DE0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2023-01-03T07:00:00 UTC
+  time_coverage_start: 2015-12-29T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -215,13 +353,23 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5C/9T/V6/5C9T-V6HC.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5S/7C/VJ/5S7C-VJ6Z.nc:
-  end_date: 2023-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: doas
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: NL01L_MIL-W-5500_NL01L_ILG-W-2900
+  ebas_revision_date: '20231113143151'
+  ebas_station_altitude: 4.0 m
+  ebas_station_code: NL0091R
+  ebas_station_latitude: '52.3'
+  ebas_station_longitude: '4.5'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2016-01-01T00:00:00 UTC
-  station_reference: NL0091R
-  statistics: arithmetic mean
+  time_coverage_end: 2023-01-01T00:00:00 UTC
+  time_coverage_start: 2016-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -230,109 +378,189 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5S/7C/VJ/5S7C-VJ6Z.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5X/NF/HB/5XNF-HBGH.nc:
-  end_date: 2021-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_22
+  ebas_method_ref: SE01L_AD
+  ebas_revision_date: '20210702112901'
+  ebas_station_altitude: 45.0 m
+  ebas_station_code: SE0022R
+  ebas_station_latitude: '60.0858'
+  ebas_station_longitude: '17.50528'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2018-01-01T00:00:00 UTC
-  station_reference: SE0022R
-  statistics: arithmetic mean
+  time_coverage_end: 2021-01-01T00:00:00 UTC
+  time_coverage_start: 2018-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/67/XT/BM/67XT-BMRM.nc:
-  end_date: 2016-01-26T08:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: 39KK0101
+  ebas_method_ref: BE01L_PS
+  ebas_revision_date: '20160930000000'
+  ebas_station_altitude: 4.0 m
+  ebas_station_code: BE0014R
+  ebas_station_latitude: '51.12092'
+  ebas_station_longitude: '2.65854'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-28T00:00:00)
-  start_date: 2011-12-20T08:00:00 UTC
-  station_reference: BE0014R
-  statistics: arithmetic mean
+  time_coverage_end: 2016-01-26T08:00:00 UTC
+  time_coverage_start: 2011-12-20T08:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6F/EX/DA/6FEX-DAJ6.nc:
-  end_date: 1996-01-01T09:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: tubd_15
+  ebas_method_ref: LT01L_indo
+  ebas_revision_date: '20240405085846'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: LT0015R
+  ebas_station_latitude: '55.37611111111111'
+  ebas_station_longitude: '21.030555555555555'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1991-01-01T07:00:00 UTC
-  station_reference: LT0015R
-  statistics: arithmetic mean
+  time_coverage_end: 1996-01-01T09:00:00 UTC
+  time_coverage_start: 1991-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6F/N6/HN/6FN6-HNB2.nc:
-  end_date: 2015-12-29T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Ng_Den_0001
+  ebas_measurement_height: 2.9 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '20161205132617'
+  ebas_station_altitude: 62.0 m
+  ebas_station_code: DE0007R
+  ebas_station_latitude: '53.166667'
+  ebas_station_longitude: '13.033333'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2013-12-08T07:00:00 UTC
-  station_reference: DE0007R
-  statistics: arithmetic mean
+  time_coverage_end: 2015-12-29T07:00:00 UTC
+  time_coverage_start: 2013-12-08T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6Q/PE/25/6QPE-25QY.nc:
-  end_date: 2012-12-31T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: RADIELLO_14
+  ebas_method_ref: ES01L_uv_vis
+  ebas_revision_date: '20130703000000'
+  ebas_station_altitude: 470.0 m
+  ebas_station_code: ES0014R
+  ebas_station_latitude: '41.39389'
+  ebas_station_longitude: '0.73472'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2012-08-20T07:00:00 UTC
-  station_reference: ES0014R
-  statistics: arithmetic mean
+  time_coverage_end: 2012-12-31T07:00:00 UTC
+  time_coverage_start: 2012-08-20T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/75/TA/UP/75TA-UPUK.nc:
-  end_date: 2012-01-02T00:00:00 UTC
+  ebas_instrument_name: denuder_09
+  ebas_method_ref: DE03L_FIA
+  ebas_revision_date: '20120917000000'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: '54.4368'
+  ebas_station_longitude: '12.7249'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2011-01-04T00:00:00 UTC
-  station_reference: DE0009R
-  statistics: arithmetic mean
+  time_coverage_end: 2012-01-02T00:00:00 UTC
+  time_coverage_start: 2011-01-04T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/78/E2/R8/78E2-R87M.nc:
-  end_date: 2011-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_01
+  ebas_method_ref: DE03L_IC_air
+  ebas_revision_date: '20110929000000'
+  ebas_station_altitude: 12.0 m
+  ebas_station_code: DE0001R
+  ebas_station_latitude: '54.925556'
+  ebas_station_longitude: '8.309722'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2010-01-01T00:00:00 UTC
-  station_reference: DE0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2011-01-01T00:00:00 UTC
+  time_coverage_start: 2010-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7A/RR/B7/7ARR-B7K5.nc:
-  end_date: 2021-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: MA01
+  ebas_method_ref: GB03L_MA_1
+  ebas_revision_date: '20210723000000'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: GB0048R
+  ebas_station_latitude: '55.79216'
+  ebas_station_longitude: '-3.2429'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2013-01-01T00:00:00 UTC
-  station_reference: GB0048R
-  statistics: arithmetic mean
+  time_coverage_end: 2021-01-01T00:00:00 UTC
+  time_coverage_start: 2013-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7D/FD/SJ/7DFD-SJJJ.nc:
-  end_date: 2007-01-01T00:00:00 UTC
+  ebas_instrument_name: den_1
+  ebas_method_ref: IT01L_IC_a
+  ebas_revision_date: '20070101000000'
+  ebas_station_altitude: 48.0 m
+  ebas_station_code: IT0001R
+  ebas_station_latitude: '42.1'
+  ebas_station_longitude: '12.633333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2005-01-01T00:00:00 UTC
-  station_reference: IT0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2007-01-01T00:00:00 UTC
+  time_coverage_start: 2005-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
@@ -344,73 +572,128 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7D/FD/SJ/7DFD-SJJJ.nc:
   - sulphur_dioxide_qc
   - sulphur_dioxide_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7P/CV/V3/7PCV-V3KF.nc:
-  end_date: 2021-01-01T08:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: filter_holder_06
+  ebas_method_ref: SK01L_IC_Dionex
+  ebas_revision_date: '20210720000000'
+  ebas_station_altitude: 345.0 m
+  ebas_station_code: SK0006R
+  ebas_station_latitude: '49.05'
+  ebas_station_longitude: '22.266667'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2011-01-01T08:00:00 UTC
-  station_reference: SK0006R
-  statistics: arithmetic mean
+  time_coverage_end: 2021-01-01T08:00:00 UTC
+  time_coverage_start: 2011-01-01T08:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7W/J6/3K/7WJ6-3K7J.nc:
-  end_date: 2015-12-29T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Wa_Den_0001
+  ebas_measurement_height: 1.4 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '20161205132615'
+  ebas_station_altitude: 74.0 m
+  ebas_station_code: DE0002R
+  ebas_station_latitude: '52.802222'
+  ebas_station_longitude: '10.759444'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2013-12-08T07:00:00 UTC
-  station_reference: DE0002R
-  statistics: arithmetic mean
+  time_coverage_end: 2015-12-29T07:00:00 UTC
+  time_coverage_start: 2013-12-08T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7Z/G5/G3/7ZG5-G38K.nc:
-  end_date: 2020-12-28T10:50:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: vav_denuder
+  ebas_method_ref: SE01L_AM
+  ebas_revision_date: '20210705130858'
+  ebas_station_altitude: 190.0 m
+  ebas_station_code: SE0020R
+  ebas_station_latitude: '56.0429'
+  ebas_station_longitude: '13.148'
+  ebas_statistics: arithmetic mean
   resolution: monthly
-  start_date: 2015-12-30T10:00:00 UTC
-  station_reference: SE0020R
-  statistics: arithmetic mean
+  time_coverage_end: 2020-12-28T10:50:00 UTC
+  time_coverage_start: 2015-12-30T10:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/88/PY/QD/88PY-QDTS.nc:
-  end_date: 2021-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_14
+  ebas_method_ref: SE01L_AD
+  ebas_revision_date: '20210702112900'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: SE0014R
+  ebas_station_latitude: '57.394'
+  ebas_station_longitude: '11.914'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2002-01-01T06:00:00 UTC
-  station_reference: SE0014R
-  statistics: arithmetic mean
+  time_coverage_end: 2021-01-01T00:00:00 UTC
+  time_coverage_start: 2002-01-01T06:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8A/UT/74/8AUT-748P.nc:
-  end_date: 2009-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_01
+  ebas_method_ref: DE03L_IC_air
+  ebas_revision_date: '20140501000000'
+  ebas_station_altitude: 12.0 m
+  ebas_station_code: DE0001R
+  ebas_station_latitude: '54.925556'
+  ebas_station_longitude: '8.309722'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2005-01-01T00:00:00 UTC
-  station_reference: DE0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2009-01-01T00:00:00 UTC
+  time_coverage_start: 2005-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8G/AB/S2/8GAB-S2KZ.nc:
-  end_date: 2005-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: abst_1
+  ebas_method_ref: IT01L_IC_air
+  ebas_revision_date: '20070101000000'
+  ebas_station_altitude: 48.0 m
+  ebas_station_code: IT0001R
+  ebas_station_latitude: '42.1'
+  ebas_station_longitude: '12.633333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1996-01-01T00:00:00 UTC
-  station_reference: IT0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2005-01-01T00:00:00 UTC
+  time_coverage_start: 1996-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
@@ -422,145 +705,254 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8G/AB/S2/8GAB-S2KZ.nc:
   - sulphur_dioxide_qc
   - sulphur_dioxide_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8H/D4/WS/8HD4-WSS3.nc:
-  end_date: 2023-01-01T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0039
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '20230313140503'
+  ebas_station_altitude: 210.0 m
+  ebas_station_code: NO0039R
+  ebas_station_latitude: '62.783333'
+  ebas_station_longitude: '8.883333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2014-01-01T07:00:00 UTC
-  station_reference: NO0039R
-  statistics: arithmetic mean
+  time_coverage_end: 2023-01-01T07:00:00 UTC
+  time_coverage_start: 2014-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Q/JH/KZ/8QJH-KZYM.nc:
-  end_date: 2017-12-26T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: 39KK01019
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: BE08L_BDB_spec
+  ebas_revision_date: '20180920140308'
+  ebas_station_altitude: 4.0 m
+  ebas_station_code: BE0014R
+  ebas_station_latitude: '51.12092'
+  ebas_station_longitude: '2.65854'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-28T00:00:00)
-  start_date: 2016-10-04T00:00:00 UTC
-  station_reference: BE0014R
-  statistics: arithmetic mean
+  time_coverage_end: 2017-12-26T00:00:00 UTC
+  time_coverage_start: 2016-10-04T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8U/7D/SR/8U7D-SRH8.nc:
-  end_date: 2013-01-01T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_2_dup
+  ebas_method_ref: HU01L_indo
+  ebas_revision_date: '20130523000000'
+  ebas_station_altitude: 125.0 m
+  ebas_station_code: HU0002R
+  ebas_station_latitude: '46.966667'
+  ebas_station_longitude: '19.583333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2012-01-01T07:00:00 UTC
-  station_reference: HU0002R
-  statistics: arithmetic mean
+  time_coverage_end: 2013-01-01T07:00:00 UTC
+  time_coverage_start: 2012-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9X/VX/W7/9XVX-W7A5.nc:
-  end_date: 2007-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_03
+  ebas_method_ref: DE03L_IC_air
+  ebas_revision_date: '20070715000000'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: '47.914722'
+  ebas_station_longitude: '7.908611'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2005-01-01T00:00:00 UTC
-  station_reference: DE0003R
-  statistics: arithmetic mean
+  time_coverage_end: 2007-01-01T00:00:00 UTC
+  time_coverage_start: 2005-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Z/RW/NZ/9ZRW-NZHG.nc:
-  end_date: 2023-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0001R_Radiello_RAD168
+  ebas_measurement_height: 1.7 m
+  ebas_method_ref: ES01L_spectrophotometric
+  ebas_revision_date: '20230724000000'
+  ebas_station_altitude: 917.0 m
+  ebas_station_code: ES0001R
+  ebas_station_latitude: '39.54694'
+  ebas_station_longitude: '-4.35056'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2022-01-03T00:00:00 UTC
-  station_reference: ES0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2023-01-01T00:00:00 UTC
+  time_coverage_start: 2022-01-03T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/A4/7C/YZ/A47C-YZ9P.nc:
-  end_date: 2022-01-03T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0008R_RADIELLO
+  ebas_method_ref: ES01L_uv_vis
+  ebas_revision_date: '20220718000000'
+  ebas_station_altitude: 134.0 m
+  ebas_station_code: ES0008R
+  ebas_station_latitude: '43.43917'
+  ebas_station_longitude: '-4.85'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2013-12-31T07:00:00 UTC
-  station_reference: ES0008R
-  statistics: arithmetic mean
+  time_coverage_end: 2022-01-03T07:00:00 UTC
+  time_coverage_start: 2013-12-31T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AB/J7/ZS/ABJ7-ZSBN.nc:
-  end_date: 2019-01-01T09:00:00 UTC
+  ebas_instrument_name: f3p_01
+  ebas_method_ref: MD02L_IC_air
+  ebas_revision_date: '20200907000000'
+  ebas_station_altitude: 166.0 m
+  ebas_station_code: MD0013R
+  ebas_station_latitude: '46.4884'
+  ebas_station_longitude: '28.2835'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2013-01-01T09:00:00 UTC
-  station_reference: MD0013R
-  statistics: arithmetic mean
+  time_coverage_end: 2019-01-01T09:00:00 UTC
+  time_coverage_start: 2013-01-01T09:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AG/3A/NH/AG3A-NH9R.nc:
-  end_date: 2004-01-01T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0041
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '20110512000000'
+  ebas_station_altitude: 440.0 m
+  ebas_station_code: NO0041R
+  ebas_station_latitude: '61.25'
+  ebas_station_longitude: '11.783333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1993-01-01T07:00:00 UTC
-  station_reference: NO0041R
-  statistics: arithmetic mean
+  time_coverage_end: 2004-01-01T07:00:00 UTC
+  time_coverage_start: 1993-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AU/9N/7B/AU9N-7BWP.nc:
-  end_date: 2009-03-24T06:00:00 UTC
+  ebas_instrument_name: online_IC_11
+  ebas_method_ref: NL01L_MARGA
+  ebas_revision_date: '20150129124418'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: NL0011R
+  ebas_station_latitude: '51.970278'
+  ebas_station_longitude: '4.926389'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2006-06-01T16:00:00 UTC
-  station_reference: NL0011R
-  statistics: arithmetic mean
+  time_coverage_end: 2009-03-24T06:00:00 UTC
+  time_coverage_start: 2006-06-01T16:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AV/5J/K9/AV5J-K94R.nc:
-  end_date: 2020-12-31T03:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: A_Whatmanfilter_02
+  ebas_method_ref: AM01L_spectrometric_Nessler
+  ebas_revision_date: '20241210135315'
+  ebas_station_altitude: 2080.0 m
+  ebas_station_code: AM0001R
+  ebas_station_latitude: '40.38444444'
+  ebas_station_longitude: '44.260583333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2011-01-01T03:00:00 UTC
-  station_reference: AM0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2020-12-31T03:00:00 UTC
+  time_coverage_start: 2011-01-01T03:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/B5/DM/5G/B5DM-5GCG.nc:
-  end_date: 2015-12-29T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Sm_Den_0001
+  ebas_measurement_height: 2.3 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '20161205132618'
+  ebas_station_altitude: 937.0 m
+  ebas_station_code: DE0008R
+  ebas_station_latitude: '50.65'
+  ebas_station_longitude: '10.766667'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2013-12-03T07:00:00 UTC
-  station_reference: DE0008R
-  statistics: arithmetic mean
+  time_coverage_end: 2015-12-29T07:00:00 UTC
+  time_coverage_start: 2013-12-03T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BG/2J/FT/BG2J-FTRP.nc:
-  end_date: 1997-01-01T10:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: abst_4
+  ebas_method_ref: IT03L_IC_air
+  ebas_revision_date: '20030318000000'
+  ebas_station_altitude: 209.0 m
+  ebas_station_code: IT0004R
+  ebas_station_latitude: '45.8'
+  ebas_station_longitude: '8.633333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1994-01-01T10:00:00 UTC
-  station_reference: IT0004R
-  statistics: arithmetic mean
+  time_coverage_end: 1997-01-01T10:00:00 UTC
+  time_coverage_start: 1994-01-01T10:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
@@ -572,145 +964,255 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BG/2J/FT/BG2J-FTRP.nc:
   - sulphur_dioxide_qc
   - sulphur_dioxide_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BJ/T5/AW/BJT5-AW8Z.nc:
-  end_date: 2014-01-01T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_2
+  ebas_method_ref: HU01L_indo
+  ebas_revision_date: '20150305114001'
+  ebas_station_altitude: 125.0 m
+  ebas_station_code: HU0002R
+  ebas_station_latitude: '46.966667'
+  ebas_station_longitude: '19.583333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2013-01-01T07:00:00 UTC
-  station_reference: HU0002R
-  statistics: arithmetic mean
+  time_coverage_end: 2014-01-01T07:00:00 UTC
+  time_coverage_start: 2013-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BK/34/CS/BK34-CSB2.nc:
-  end_date: 2012-12-31T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: RADIELLO_01
+  ebas_method_ref: ES01L_uv_vis
+  ebas_revision_date: '20130703000000'
+  ebas_station_altitude: 917.0 m
+  ebas_station_code: ES0001R
+  ebas_station_latitude: '39.54694'
+  ebas_station_longitude: '-4.35056'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2012-06-04T07:00:00 UTC
-  station_reference: ES0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2012-12-31T07:00:00 UTC
+  time_coverage_start: 2012-06-04T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BM/42/RV/BM42-RVS4.nc:
-  end_date: 2021-01-01T11:55:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: CEH_denuder_06
+  ebas_method_ref: GB03L_CEH
+  ebas_revision_date: '20241118100640'
+  ebas_station_altitude: 126.0 m
+  ebas_station_code: GB0006R
+  ebas_station_latitude: '54.443056'
+  ebas_station_longitude: '-7.87'
+  ebas_statistics: arithmetic mean
   resolution: monthly
-  start_date: 2013-02-02T13:40:00 UTC
-  station_reference: GB0006R
-  statistics: arithmetic mean
+  time_coverage_end: 2021-01-01T11:55:00 UTC
+  time_coverage_start: 2013-02-02T13:40:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BN/XN/X6/BNXN-X6TY.nc:
-  end_date: 2022-12-27T01:11:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Poitiers
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR25L_NH3_Poitiers
+  ebas_revision_date: '20241210112644'
+  ebas_station_altitude: 71.0 m
+  ebas_station_code: FR0049U
+  ebas_station_latitude: '46.59111'
+  ebas_station_longitude: '0.340278'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-14T00:00:00)
-  start_date: 2022-02-08T00:00:00 UTC
-  station_reference: FR0049U
-  statistics: arithmetic mean
+  time_coverage_end: 2022-12-27T01:11:00 UTC
+  time_coverage_start: 2022-02-08T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/C6/N7/8F/C6N7-8FT3.nc:
-  end_date: 2011-01-01T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_2
+  ebas_method_ref: HU02L_indo
+  ebas_revision_date: '20140507070616'
+  ebas_station_altitude: 125.0 m
+  ebas_station_code: HU0002R
+  ebas_station_latitude: '46.966667'
+  ebas_station_longitude: '19.583333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2009-01-01T07:00:00 UTC
-  station_reference: HU0002R
-  statistics: arithmetic mean
+  time_coverage_end: 2011-01-01T07:00:00 UTC
+  time_coverage_start: 2009-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CD/6S/PX/CD6S-PXBE.nc:
-  end_date: 2022-01-03T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0009R_RADIELLO
+  ebas_method_ref: ES01L_uv_vis
+  ebas_revision_date: '20220718000000'
+  ebas_station_altitude: 1360.0 m
+  ebas_station_code: ES0009R
+  ebas_station_latitude: '41.27417'
+  ebas_station_longitude: '-3.1425'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2013-12-31T07:00:00 UTC
-  station_reference: ES0009R
-  statistics: arithmetic mean
+  time_coverage_end: 2022-01-03T07:00:00 UTC
+  time_coverage_start: 2013-12-31T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CJ/TF/UR/CJTF-URXS.nc:
-  end_date: 2021-01-01T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0015
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '20210421103102'
+  ebas_station_altitude: 439.0 m
+  ebas_station_code: NO0015R
+  ebas_station_latitude: '65.833333'
+  ebas_station_longitude: '13.916667'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2014-01-01T07:00:00 UTC
-  station_reference: NO0015R
-  statistics: arithmetic mean
+  time_coverage_end: 2021-01-01T07:00:00 UTC
+  time_coverage_start: 2014-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CJ/US/Q9/CJUS-Q9QY.nc:
-  end_date: 2020-01-01T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: 3F2
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: HU01L_OMSZ_SPM2
+  ebas_revision_date: '20210215123159'
+  ebas_station_altitude: 125.0 m
+  ebas_station_code: HU0002R
+  ebas_station_latitude: '46.966667'
+  ebas_station_longitude: '19.583333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2019-01-01T07:00:00 UTC
-  station_reference: HU0002R
-  statistics: arithmetic mean
+  time_coverage_end: 2020-01-01T07:00:00 UTC
+  time_coverage_start: 2019-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CP/HG/E6/CPHG-E6ZV.nc:
-  end_date: 2021-01-01T08:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: filter_holder_06
+  ebas_method_ref: SK01L_IC_Dionex
+  ebas_revision_date: '20210720000000'
+  ebas_station_altitude: 345.0 m
+  ebas_station_code: SK0006R
+  ebas_station_latitude: '49.05'
+  ebas_station_longitude: '22.266667'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2011-01-01T08:00:00 UTC
-  station_reference: SK0006R
-  statistics: arithmetic mean
+  time_coverage_end: 2021-01-01T08:00:00 UTC
+  time_coverage_start: 2011-01-01T08:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CY/S7/TA/CYS7-TAB8.nc:
-  end_date: 2021-06-21T10:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: passive_SIRTA
+  ebas_measurement_height: 6.0 m
+  ebas_method_ref: FR24L_passive_SIRTA
+  ebas_revision_date: '20241210112644'
+  ebas_station_altitude: 162.0 m
+  ebas_station_code: FR0020R
+  ebas_station_latitude: '48.7089'
+  ebas_station_longitude: '2.1487'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2017-05-22T14:30:00 UTC
-  station_reference: FR0020R
-  statistics: arithmetic mean
+  time_coverage_end: 2021-06-21T10:00:00 UTC
+  time_coverage_start: 2017-05-22T14:30:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/D2/8D/DJ/D28D-DJ4M.nc:
-  end_date: 2016-01-01T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0056
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '20160421000000'
+  ebas_station_altitude: 300.0 m
+  ebas_station_code: NO0056R
+  ebas_station_latitude: '60.372386'
+  ebas_station_longitude: '11.078142'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2014-01-01T07:00:00 UTC
-  station_reference: NO0056R
-  statistics: arithmetic mean
+  time_coverage_end: 2016-01-01T07:00:00 UTC
+  time_coverage_start: 2014-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/D8/SF/95/D8SF-955K.nc:
-  end_date: 1995-04-11T06:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f1p_2
+  ebas_revision_date: '19960718000000'
+  ebas_station_altitude: 180.0 m
+  ebas_station_code: PL0002R
+  ebas_station_latitude: '51.814408'
+  ebas_station_longitude: '21.972419'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1995-01-01T06:00:00 UTC
-  station_reference: PL0002R
-  statistics: arithmetic mean
+  time_coverage_end: 1995-04-11T06:00:00 UTC
+  time_coverage_start: 1995-01-01T06:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
@@ -719,37 +1221,64 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/D8/SF/95/D8SF-955K.nc:
   - nitric_acid_qc
   - nitric_acid_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DA/FZ/7N/DAFZ-7N2G.nc:
-  end_date: 2023-05-31T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Bujaraloz
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: ES04L_NH3_Bujaraloz
+  ebas_revision_date: '20241210112644'
+  ebas_station_altitude: 327.0 m
+  ebas_station_code: ES0045R
+  ebas_station_latitude: '41.5056'
+  ebas_station_longitude: '-0.1519'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-42T00:00:00)
-  start_date: 2020-07-09T00:00:00 UTC
-  station_reference: ES0045R
-  statistics: arithmetic mean
+  time_coverage_end: 2023-05-31T00:00:00 UTC
+  time_coverage_start: 2020-07-09T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DU/FV/85/DUFV-85Y6.nc:
-  end_date: 2018-01-01T06:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_12
+  ebas_method_ref: SE01L_AD
+  ebas_revision_date: '20180720080048'
+  ebas_station_altitude: 20.0 m
+  ebas_station_code: SE0012R
+  ebas_station_latitude: '58.8'
+  ebas_station_longitude: '17.383333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1993-01-01T06:00:00 UTC
-  station_reference: SE0012R
-  statistics: arithmetic mean
+  time_coverage_end: 2018-01-01T06:00:00 UTC
+  time_coverage_start: 1993-01-01T06:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/E5/VE/WA/E5VE-WA5F.nc:
-  end_date: 1997-07-01T09:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f2p_16
+  ebas_revision_date: '19971125000000'
+  ebas_station_altitude: 188.0 m
+  ebas_station_code: LV0016R
+  ebas_station_latitude: '57.135278'
+  ebas_station_longitude: '25.905556'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1997-01-01T09:00:00 UTC
-  station_reference: LV0016R
-  statistics: arithmetic mean
+  time_coverage_end: 1997-07-01T09:00:00 UTC
+  time_coverage_start: 1997-01-01T09:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
@@ -758,25 +1287,44 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/E5/VE/WA/E5VE-WA5F.nc:
   - nitric_acid_qc
   - nitric_acid_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/E5/YH/WE/E5YH-WEBE.nc:
-  end_date: 2003-01-06T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_w_0056
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '20110512000000'
+  ebas_station_altitude: 300.0 m
+  ebas_station_code: NO0056R
+  ebas_station_latitude: '60.372386'
+  ebas_station_longitude: '11.078142'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 1997-01-01T07:00:00 UTC
-  station_reference: NO0056R
-  statistics: arithmetic mean
+  time_coverage_end: 2003-01-06T07:00:00 UTC
+  time_coverage_start: 1997-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EU/PQ/BE/EUPQ-BE64.nc:
-  end_date: 2023-08-21T04:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Gonfreville
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR26L_NH3_Gonfreville
+  ebas_revision_date: '20231108000000'
+  ebas_station_altitude: 72.0 m
+  ebas_station_code: FR0050U
+  ebas_station_latitude: '49.502635'
+  ebas_station_longitude: '0.23269'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2020-07-09T00:00:00 UTC
-  station_reference: FR0050U
-  statistics: arithmetic mean
+  time_coverage_end: 2023-08-21T04:00:00 UTC
+  time_coverage_start: 2020-07-09T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -785,25 +1333,42 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EU/PQ/BE/EUPQ-BE64.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EY/YA/5G/EYYA-5GJW.nc:
-  end_date: 2014-01-01T06:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_5
+  ebas_method_ref: PL02L_ASNHC
+  ebas_revision_date: '20141204123628'
+  ebas_station_altitude: 157.0 m
+  ebas_station_code: PL0005R
+  ebas_station_latitude: '54.15'
+  ebas_station_longitude: '22.066667'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2008-01-01T06:00:00 UTC
-  station_reference: PL0005R
-  statistics: arithmetic mean
+  time_coverage_end: 2014-01-01T06:00:00 UTC
+  time_coverage_start: 2008-01-01T06:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/F6/3D/MT/F63D-MTME.nc:
-  end_date: 1995-04-11T06:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f1p_4
+  ebas_revision_date: '19960718000000'
+  ebas_station_altitude: 2.0 m
+  ebas_station_code: PL0004R
+  ebas_station_latitude: '54.753894'
+  ebas_station_longitude: '17.534264'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1995-01-01T06:00:00 UTC
-  station_reference: PL0004R
-  statistics: arithmetic mean
+  time_coverage_end: 1995-04-11T06:00:00 UTC
+  time_coverage_start: 1995-01-01T06:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
@@ -812,97 +1377,171 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/F6/3D/MT/F63D-MTME.nc:
   - nitric_acid_qc
   - nitric_acid_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/F6/ME/7T/F6ME-7TCD.nc:
-  end_date: 2015-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: ECN_Amor
+  ebas_method_ref: NL01L_LM-W-500_501_IL-W-900
+  ebas_revision_date: '20150721000000'
+  ebas_station_altitude: 20.0 m
+  ebas_station_code: NL0007R
+  ebas_station_latitude: '52.083333'
+  ebas_station_longitude: '6.566667'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2013-01-01T00:00:00 UTC
-  station_reference: NL0007R
-  statistics: arithmetic mean
+  time_coverage_end: 2015-01-01T00:00:00 UTC
+  time_coverage_start: 2013-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FK/GS/AW/FKGS-AW7T.nc:
-  end_date: 2016-01-01T00:00:00 UTC
+  ebas_instrument_name: MA02
+  ebas_method_ref: GB02L_MA_1
+  ebas_revision_date: '20161207000000'
+  ebas_station_altitude: 137.0 m
+  ebas_station_code: GB0036R
+  ebas_station_latitude: '51.573056'
+  ebas_station_longitude: '-1.316667'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2013-01-01T00:00:00 UTC
-  station_reference: GB0036R
-  statistics: arithmetic mean
+  time_coverage_end: 2016-01-01T00:00:00 UTC
+  time_coverage_start: 2013-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FN/7B/AC/FN7B-AC8R.nc:
-  end_date: 2023-01-17T10:35:02 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: 39KK01019_39KK01020
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: BE06L_SGS_IC
+  ebas_revision_date: '20231016115938'
+  ebas_station_altitude: 4.0 m
+  ebas_station_code: BE0014R
+  ebas_station_latitude: '51.12092'
+  ebas_station_longitude: '2.65854'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-28T00:00:00)
-  start_date: 2017-12-26T00:00:00 UTC
-  station_reference: BE0014R
-  statistics: arithmetic mean
+  time_coverage_end: 2023-01-17T10:35:02 UTC
+  time_coverage_start: 2017-12-26T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FY/5S/43/FY5S-43B2.nc:
-  end_date: 2013-12-23T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: Malaga_NH3
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: ES18L_Malaga_NH3
+  ebas_revision_date: '20241210112644'
+  ebas_station_altitude: 86.0 m
+  ebas_station_code: ES0033U
+  ebas_station_latitude: '36.72956'
+  ebas_station_longitude: '-4.46553'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-21T00:00:00)
-  start_date: 2011-05-16T00:00:00 UTC
-  station_reference: ES0033U
-  statistics: arithmetic mean
+  time_coverage_end: 2013-12-23T00:00:00 UTC
+  time_coverage_start: 2011-05-16T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FY/6U/2S/FY6U-2SQQ.nc:
-  end_date: 1992-12-02T08:00:00 UTC
+  ebas_instrument_name: den_12
+  ebas_method_ref: SE01L_NA
+  ebas_revision_date: '19940101000000'
+  ebas_station_altitude: 20.0 m
+  ebas_station_code: SE0012R
+  ebas_station_latitude: '58.8'
+  ebas_station_longitude: '17.383333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1992-12-01T08:00:00 UTC
-  station_reference: SE0012R
-  statistics: arithmetic mean
+  time_coverage_end: 1992-12-02T08:00:00 UTC
+  time_coverage_start: 1992-12-01T08:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FZ/8Y/KF/FZ8Y-KFAE.nc:
-  end_date: 2022-03-14T23:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Montseny
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: ES05L_NH3_Montseny
+  ebas_revision_date: '20241210112644'
+  ebas_station_altitude: 700.0 m
+  ebas_station_code: ES1778R
+  ebas_station_latitude: '41.766667'
+  ebas_station_longitude: '2.35'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-21T00:00:00)
-  start_date: 2011-02-18T00:00:00 UTC
-  station_reference: ES1778R
-  statistics: arithmetic mean
+  time_coverage_end: 2022-03-14T23:00:00 UTC
+  time_coverage_start: 2011-02-18T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/G9/8C/9Q/G98C-9Q9T.nc:
-  end_date: 2022-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Lo
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: IT23L_NH3_Lo
+  ebas_revision_date: '20241210112644'
+  ebas_station_altitude: 64.0 m
+  ebas_station_code: IT0039R
+  ebas_station_latitude: '45.2335'
+  ebas_station_longitude: '9.666258'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2009-03-03T00:00:00 UTC
-  station_reference: IT0039R
-  statistics: arithmetic mean
+  time_coverage_end: 2022-01-01T00:00:00 UTC
+  time_coverage_start: 2009-03-03T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GC/R2/9N/GCR2-9NBH.nc:
-  end_date: 2014-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_02
+  ebas_method_ref: DE03L_IC_air
+  ebas_revision_date: '20150422000000'
+  ebas_station_altitude: 74.0 m
+  ebas_station_code: DE0002R
+  ebas_station_latitude: '52.802222'
+  ebas_station_longitude: '10.759444'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2013-01-01T00:00:00 UTC
-  station_reference: DE0002R
-  statistics: arithmetic mean
+  time_coverage_end: 2014-01-01T00:00:00 UTC
+  time_coverage_start: 2013-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
@@ -914,25 +1553,44 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GC/R2/9N/GCR2-9NBH.nc:
   - sulphur_dioxide_qc
   - sulphur_dioxide_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GH/MQ/NU/GHMQ-NUSB.nc:
-  end_date: 1996-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: airsamp_UK
+  ebas_method_ref: DK01L_ICan
+  ebas_revision_date: '20150129095618'
+  ebas_station_altitude: 40.0 m
+  ebas_station_code: DK0008R
+  ebas_station_latitude: '56.716667'
+  ebas_station_longitude: '11.516667'
+  ebas_statistics: arithmetic mean
   resolution: monthly
-  start_date: 1993-01-01T00:00:00 UTC
-  station_reference: DK0008R
-  statistics: arithmetic mean
+  time_coverage_end: 1996-01-01T00:00:00 UTC
+  time_coverage_start: 1993-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GK/XB/JN/GKXB-JN8F.nc:
-  end_date: 2022-01-01T01:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: Picarro_BPEst
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR21L_Picarro_BPEst
+  ebas_revision_date: '20230901000000'
+  ebas_station_altitude: 48.0 m
+  ebas_station_code: FR0042U
+  ebas_station_latitude: '48.838574'
+  ebas_station_longitude: '2.412713'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2020-11-03T12:00:00 UTC
-  station_reference: FR0042U
-  statistics: arithmetic mean
+  time_coverage_end: 2022-01-01T01:00:00 UTC
+  time_coverage_start: 2020-11-03T12:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -941,85 +1599,147 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GK/XB/JN/GKXB-JN8F.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GP/CZ/FM/GPCZ-FMHA.nc:
-  end_date: 2007-12-31T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f1p_9
+  ebas_method_ref: ES01L_indo
+  ebas_revision_date: '20140501000000'
+  ebas_station_altitude: 1360.0 m
+  ebas_station_code: ES0009R
+  ebas_station_latitude: '41.27417'
+  ebas_station_longitude: '-3.1425'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2004-08-02T00:00:00 UTC
-  station_reference: ES0009R
-  statistics: arithmetic mean
+  time_coverage_end: 2007-12-31T07:00:00 UTC
+  time_coverage_start: 2004-08-02T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/H2/UM/GV/H2UM-GVRR.nc:
-  end_date: 2004-07-12T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: abs_08
+  ebas_method_ref: ES01L_indo
+  ebas_revision_date: '20050101000000'
+  ebas_station_altitude: 134.0 m
+  ebas_station_code: ES0008R
+  ebas_station_latitude: '43.43917'
+  ebas_station_longitude: '-4.85'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2004-07-05T00:00:00 UTC
-  station_reference: ES0008R
-  statistics: arithmetic mean
+  time_coverage_end: 2004-07-12T00:00:00 UTC
+  time_coverage_start: 2004-07-05T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/H5/YE/7E/H5YE-7E9F.nc:
-  end_date: 2022-12-27T00:33:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Niort
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR25L_NH3_Niort
+  ebas_revision_date: '20241210112644'
+  ebas_station_altitude: 17.0 m
+  ebas_station_code: FR0051U
+  ebas_station_latitude: '46.32019'
+  ebas_station_longitude: '-0.483032'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-14T00:00:00)
-  start_date: 2022-01-25T00:00:00 UTC
-  station_reference: FR0051U
-  statistics: arithmetic mean
+  time_coverage_end: 2022-12-27T00:33:00 UTC
+  time_coverage_start: 2022-01-25T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HD/KA/6G/HDKA-6GAN.nc:
-  end_date: 2008-01-01T00:00:00 UTC
+  ebas_instrument_name: den_1
+  ebas_method_ref: IT01L_IC_a
+  ebas_revision_date: '20081208000000'
+  ebas_station_altitude: 48.0 m
+  ebas_station_code: IT0001R
+  ebas_station_latitude: '42.1'
+  ebas_station_longitude: '12.633333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2007-01-01T00:00:00 UTC
-  station_reference: IT0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2008-01-01T00:00:00 UTC
+  time_coverage_start: 2007-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HH/6S/3K/HH6S-3K2Z.nc:
-  end_date: 2016-01-01T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0042
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '20160421000000'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: '78.90715'
+  ebas_station_longitude: '11.88668'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2014-01-01T07:00:00 UTC
-  station_reference: NO0042G
-  statistics: arithmetic mean
+  time_coverage_end: 2016-01-01T07:00:00 UTC
+  time_coverage_start: 2014-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HV/GQ/Q2/HVGQ-Q2KR.nc:
-  end_date: 2013-12-22T05:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0001
+  ebas_method_ref: GE01L_IC
+  ebas_revision_date: '20150323130156'
+  ebas_station_altitude: 1650.0 m
+  ebas_station_code: GE0001R
+  ebas_station_latitude: '41.755053'
+  ebas_station_longitude: '42.825333'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-03T00:00:00)
-  start_date: 2012-01-01T05:00:00 UTC
-  station_reference: GE0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2013-12-22T05:00:00 UTC
+  time_coverage_start: 2012-01-01T05:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/J5/58/NH/J558-NH6Q.nc:
-  end_date: 2007-02-02T15:27:00 UTC
+  ebas_instrument_name: online_IC_04
+  ebas_method_ref: IT03L_WAD_SJAC_IC
+  ebas_revision_date: '20080101000000'
+  ebas_station_altitude: 209.0 m
+  ebas_station_code: IT0004R
+  ebas_station_latitude: '45.8'
+  ebas_station_longitude: '8.633333'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2006-06-08T08:10:00 UTC
-  station_reference: IT0004R
-  statistics: arithmetic mean
+  time_coverage_end: 2007-02-02T15:27:00 UTC
+  time_coverage_start: 2006-06-08T08:10:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
@@ -1031,37 +1751,66 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/J5/58/NH/J558-NH6Q.nc:
   - sulphur_dioxide_qc
   - sulphur_dioxide_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/J9/EX/QX/J9EX-QXVJ.nc:
-  end_date: 2023-07-17T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Murcia
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: ES04L_NH3_Murcia
+  ebas_revision_date: '20241210112644'
+  ebas_station_altitude: 41.0 m
+  ebas_station_code: ES0040U
+  ebas_station_latitude: '37.993611'
+  ebas_station_longitude: '-1.144722'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2023-04-14T00:00:00 UTC
-  station_reference: ES0040U
-  statistics: arithmetic mean
+  time_coverage_end: 2023-07-17T00:00:00 UTC
+  time_coverage_start: 2023-04-14T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JB/RU/RR/JBRU-RRV8.nc:
-  end_date: 2013-12-31T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: RADIELLO
+  ebas_method_ref: ES01L_uv_vis
+  ebas_revision_date: '20150203093541'
+  ebas_station_altitude: 134.0 m
+  ebas_station_code: ES0008R
+  ebas_station_latitude: '43.43917'
+  ebas_station_longitude: '-4.85'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2007-01-01T07:00:00 UTC
-  station_reference: ES0008R
-  statistics: arithmetic mean
+  time_coverage_end: 2013-12-31T07:00:00 UTC
+  time_coverage_start: 2007-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JS/84/HB/JS84-HBHZ.nc:
-  end_date: 2020-07-08T10:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Rouen2
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR26L_NH3_Rouen2
+  ebas_revision_date: '20231108000000'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: FR0053U
+  ebas_station_latitude: '49.43674'
+  ebas_station_longitude: '1.09856'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2020-03-13T00:00:00 UTC
-  station_reference: FR0053U
-  statistics: arithmetic mean
+  time_coverage_end: 2020-07-08T10:00:00 UTC
+  time_coverage_start: 2020-03-13T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -1070,13 +1819,21 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JS/84/HB/JS84-HBHZ.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/K2/UM/NQ/K2UM-NQ2S.nc:
-  end_date: 1996-01-01T06:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f1p_3
+  ebas_revision_date: '19960718000000'
+  ebas_station_altitude: 1603.0 m
+  ebas_station_code: PL0003R
+  ebas_station_latitude: '50.736444'
+  ebas_station_longitude: '15.7395'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1995-01-01T06:00:00 UTC
-  station_reference: PL0003R
-  statistics: arithmetic mean
+  time_coverage_end: 1996-01-01T06:00:00 UTC
+  time_coverage_start: 1995-01-01T06:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
@@ -1085,13 +1842,23 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/K2/UM/NQ/K2UM-NQ2S.nc:
   - nitric_acid_qc
   - nitric_acid_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/K2/XG/B3/K2XG-B3HQ.nc:
-  end_date: 2023-01-03T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Sc_Den_0002
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '20240410095704'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: '47.914722'
+  ebas_station_longitude: '7.908611'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2015-12-29T07:00:00 UTC
-  station_reference: DE0003R
-  statistics: arithmetic mean
+  time_coverage_end: 2023-01-03T07:00:00 UTC
+  time_coverage_start: 2015-12-29T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -1100,37 +1867,66 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/K2/XG/B3/K2XG-B3HQ.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KJ/93/VA/KJ93-VAQR.nc:
-  end_date: 2021-05-28T23:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Montsec
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: ES04L_NH3_Montsec
+  ebas_revision_date: '20241210112644'
+  ebas_station_altitude: 1571.0 m
+  ebas_station_code: ES0022R
+  ebas_station_latitude: '42.05134'
+  ebas_station_longitude: '0.72956'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-28T00:00:00)
-  start_date: 2011-02-15T00:00:00 UTC
-  station_reference: ES0022R
-  statistics: arithmetic mean
+  time_coverage_end: 2021-05-28T23:00:00 UTC
+  time_coverage_start: 2011-02-15T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KP/NU/MQ/KPNU-MQ6A.nc:
-  end_date: 2022-01-03T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0014R_RADIELLO
+  ebas_method_ref: ES01L_uv_vis
+  ebas_revision_date: '20220718000000'
+  ebas_station_altitude: 470.0 m
+  ebas_station_code: ES0014R
+  ebas_station_latitude: '41.39389'
+  ebas_station_longitude: '0.73472'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2014-01-01T07:00:00 UTC
-  station_reference: ES0014R
-  statistics: arithmetic mean
+  time_coverage_end: 2022-01-03T07:00:00 UTC
+  time_coverage_start: 2014-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KS/KS/E2/KSKS-E242.nc:
-  end_date: 2023-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Reims
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR22L_NH3_Reims
+  ebas_revision_date: '20231108000000'
+  ebas_station_altitude: 97.0 m
+  ebas_station_code: FR0054U
+  ebas_station_latitude: '49.22439'
+  ebas_station_longitude: '4.0205278'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2016-01-01T00:00:00 UTC
-  station_reference: FR0054U
-  statistics: arithmetic mean
+  time_coverage_end: 2023-01-01T00:00:00 UTC
+  time_coverage_start: 2016-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -1139,13 +1935,23 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KS/KS/E2/KSKS-E242.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KU/2T/U5/KU2T-U5JX.nc:
-  end_date: 2020-12-31T23:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_MAQS
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: GB06L_NH3_MAQS
+  ebas_revision_date: '20231108000000'
+  ebas_station_altitude: 43.0 m
+  ebas_station_code: GB0062U
+  ebas_station_latitude: '53.44417'
+  ebas_station_longitude: '-2.214444'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2018-12-20T11:00:00 UTC
-  station_reference: GB0062U
-  statistics: arithmetic mean
+  time_coverage_end: 2020-12-31T23:00:00 UTC
+  time_coverage_start: 2018-12-20T11:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -1154,13 +1960,23 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KU/2T/U5/KU2T-U5JX.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MD/GY/FG/MDGY-FGE4.nc:
-  end_date: 2023-01-01T01:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Strasbourg
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR22L_NH3_Strasbourg
+  ebas_revision_date: '20231108000000'
+  ebas_station_altitude: 140.0 m
+  ebas_station_code: FR0055U
+  ebas_station_latitude: '48.57279'
+  ebas_station_longitude: '7.7529972'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2019-12-04T12:00:00 UTC
-  station_reference: FR0055U
-  statistics: arithmetic mean
+  time_coverage_end: 2023-01-01T01:00:00 UTC
+  time_coverage_start: 2019-12-04T12:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -1169,97 +1985,171 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MD/GY/FG/MDGY-FGE4.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MG/AB/75/MGAB-75XF.nc:
-  end_date: 2011-01-01T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_31
+  ebas_method_ref: DK01L_ICan
+  ebas_revision_date: '20150129114440'
+  ebas_station_altitude: 10.0 m
+  ebas_station_code: DK0031R
+  ebas_station_latitude: '56.290424'
+  ebas_station_longitude: '8.427486'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1996-01-01T07:00:00 UTC
-  station_reference: DK0031R
-  statistics: arithmetic mean
+  time_coverage_end: 2011-01-01T07:00:00 UTC
+  time_coverage_start: 1996-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MK/8A/5F/MK8A-5FG2.nc:
-  end_date: 2013-12-30T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Barcarrota
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: ES01L_NH3_Barcarrota
+  ebas_revision_date: '20241210112644'
+  ebas_station_altitude: 393.0 m
+  ebas_station_code: ES0011R
+  ebas_station_latitude: '38.47278'
+  ebas_station_longitude: '-6.92361'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2012-09-12T00:00:00 UTC
-  station_reference: ES0011R
-  statistics: arithmetic mean
+  time_coverage_end: 2013-12-30T00:00:00 UTC
+  time_coverage_start: 2012-09-12T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MR/44/NB/MR44-NBK2.nc:
-  end_date: 2011-01-01T03:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: A_Whatmanfilter_02
+  ebas_method_ref: AM01L_uv_abs_Nessler
+  ebas_revision_date: '20241210135315'
+  ebas_station_altitude: 2080.0 m
+  ebas_station_code: AM0001R
+  ebas_station_latitude: '40.38444444'
+  ebas_station_longitude: '44.260583333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2009-01-01T03:00:00 UTC
-  station_reference: AM0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2011-01-01T03:00:00 UTC
+  time_coverage_start: 2009-01-01T03:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/N4/F4/PV/N4F4-PVBW.nc:
-  end_date: 2023-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0008R_Radiello_RAD168
+  ebas_measurement_height: 1.7 m
+  ebas_method_ref: ES01L_spectrophotometric
+  ebas_revision_date: '20230724000000'
+  ebas_station_altitude: 134.0 m
+  ebas_station_code: ES0008R
+  ebas_station_latitude: '43.43917'
+  ebas_station_longitude: '-4.85'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2022-01-03T00:00:00 UTC
-  station_reference: ES0008R
-  statistics: arithmetic mean
+  time_coverage_end: 2023-01-01T00:00:00 UTC
+  time_coverage_start: 2022-01-03T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/N9/KA/27/N9KA-27DG.nc:
-  end_date: 2021-12-30T10:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: mini_53
+  ebas_method_ref: CH01L_den
+  ebas_revision_date: '20220823094814'
+  ebas_station_altitude: 797.0 m
+  ebas_station_code: CH0053R
+  ebas_station_latitude: '47.18961391'
+  ebas_station_longitude: '8.175433684'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-14T00:00:00)
-  start_date: 2017-03-14T10:00:00 UTC
-  station_reference: CH0053R
-  statistics: arithmetic mean
+  time_coverage_end: 2021-12-30T10:00:00 UTC
+  time_coverage_start: 2017-03-14T10:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NE/NA/3E/NENA-3EBP.nc:
-  end_date: 2007-03-01T01:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f1p_02
+  ebas_method_ref: CH01L_IC_air
+  ebas_revision_date: '20071001000000'
+  ebas_station_altitude: 489.0 m
+  ebas_station_code: CH0002R
+  ebas_station_latitude: '46.813056'
+  ebas_station_longitude: '6.944722'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2006-06-01T01:00:00 UTC
-  station_reference: CH0002R
-  statistics: arithmetic mean
+  time_coverage_end: 2007-03-01T01:00:00 UTC
+  time_coverage_start: 2006-06-01T01:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NF/BD/ZN/NFBD-ZNBC.nc:
-  end_date: 2022-01-26T10:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: mini_2
+  ebas_method_ref: CH01L_den
+  ebas_revision_date: '20220823083425'
+  ebas_station_altitude: 489.0 m
+  ebas_station_code: CH0002R
+  ebas_station_latitude: '46.813056'
+  ebas_station_longitude: '6.944722'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-14T00:00:00)
-  start_date: 2013-01-09T10:00:00 UTC
-  station_reference: CH0002R
-  statistics: arithmetic mean
+  time_coverage_end: 2022-01-26T10:00:00 UTC
+  time_coverage_start: 2013-01-09T10:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NU/GT/28/NUGT-28AP.nc:
-  end_date: 2010-05-25T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: Marga_Finland
+  ebas_method_ref: FI01L_Marga_Finland
+  ebas_revision_date: '20230825160000'
+  ebas_station_altitude: 25.0 m
+  ebas_station_code: FI0038U
+  ebas_station_latitude: '60.20288'
+  ebas_station_longitude: '24.961207'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2009-11-01T01:00:00 UTC
-  station_reference: FI0038U
-  statistics: arithmetic mean
+  time_coverage_end: 2010-05-25T07:00:00 UTC
+  time_coverage_start: 2009-11-01T01:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -1268,13 +2158,23 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NU/GT/28/NUGT-28AP.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NU/NJ/CK/NUNJ-CKNT.nc:
-  end_date: 2020-11-22T05:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_HOP
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: GB17L_NH3_HOP
+  ebas_revision_date: '20231108000000'
+  ebas_station_altitude: 31.0 m
+  ebas_station_code: GB0023U
+  ebas_station_latitude: '51.449699'
+  ebas_station_longitude: '-0.037387'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2019-01-01T11:00:00 UTC
-  station_reference: GB0023U
-  statistics: arithmetic mean
+  time_coverage_end: 2020-11-22T05:00:00 UTC
+  time_coverage_start: 2019-01-01T11:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -1283,85 +2183,150 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NU/NJ/CK/NUNJ-CKNT.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NX/CT/E7/NXCT-E7GB.nc:
-  end_date: 2020-08-03T05:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_01
+  ebas_method_ref: GE01L_air
+  ebas_revision_date: '20220404000000'
+  ebas_station_altitude: 1650.0 m
+  ebas_station_code: GE0001R
+  ebas_station_latitude: '41.755053'
+  ebas_station_longitude: '42.825333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2014-02-24T05:00:00 UTC
-  station_reference: GE0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2020-08-03T05:00:00 UTC
+  time_coverage_start: 2014-02-24T05:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NX/XG/ND/NXXG-NDAJ.nc:
-  end_date: 2015-12-29T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Zg_Den_0001
+  ebas_measurement_height: 1.6 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '20161205132620'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: '54.4368'
+  ebas_station_longitude: '12.7249'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2013-12-03T07:00:00 UTC
-  station_reference: DE0009R
-  statistics: arithmetic mean
+  time_coverage_end: 2015-12-29T07:00:00 UTC
+  time_coverage_start: 2013-12-03T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/P7/9U/2C/P79U-2CUK.nc:
-  end_date: 2012-01-02T00:00:00 UTC
+  ebas_instrument_name: den_01
+  ebas_method_ref: DE03L_IC_air
+  ebas_revision_date: '20120917000000'
+  ebas_station_altitude: 12.0 m
+  ebas_station_code: DE0001R
+  ebas_station_latitude: '54.925556'
+  ebas_station_longitude: '8.309722'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2011-01-04T00:00:00 UTC
-  station_reference: DE0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2012-01-02T00:00:00 UTC
+  time_coverage_start: 2011-01-04T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/P9/PG/RP/P9PG-RPGF.nc:
-  end_date: 2022-01-11T10:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: mini_5
+  ebas_method_ref: CH01L_den
+  ebas_revision_date: '20220823093128'
+  ebas_station_altitude: 1031.0 m
+  ebas_station_code: CH0005R
+  ebas_station_latitude: '47.0675'
+  ebas_station_longitude: '8.463889'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-14T00:00:00)
-  start_date: 2013-01-08T10:00:00 UTC
-  station_reference: CH0005R
-  statistics: arithmetic mean
+  time_coverage_end: 2022-01-11T10:00:00 UTC
+  time_coverage_start: 2013-01-08T10:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/P9/Y8/8C/P9Y8-8C77.nc:
-  end_date: 1999-12-31T14:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f2p_03
+  ebas_method_ref: CZ01L_indophenol
+  ebas_revision_date: '20140501000000'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: '49.573394'
+  ebas_station_longitude: '15.080278'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1995-01-01T07:00:00 UTC
-  station_reference: CZ0003R
-  statistics: arithmetic mean
+  time_coverage_end: 1999-12-31T14:00:00 UTC
+  time_coverage_start: 1995-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PE/3P/3P/PE3P-3PD5.nc:
-  end_date: 2016-10-04T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: 39KK01019
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: BE05L_VMM_spec
+  ebas_revision_date: '20170928050000'
+  ebas_station_altitude: 4.0 m
+  ebas_station_code: BE0014R
+  ebas_station_latitude: '51.12092'
+  ebas_station_longitude: '2.65854'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-28T00:00:00)
-  start_date: 2015-12-29T00:00:00 UTC
-  station_reference: BE0014R
-  statistics: arithmetic mean
+  time_coverage_end: 2016-10-04T00:00:00 UTC
+  time_coverage_start: 2015-12-29T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q3/DQ/69/Q3DQ-69KJ.nc:
-  end_date: 2022-01-01T01:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: Picarro_Chatelet
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR21L_Picarro_Chatelet
+  ebas_revision_date: '20230901000000'
+  ebas_station_altitude: 35.0 m
+  ebas_station_code: FR0041U
+  ebas_station_latitude: '48.86214'
+  ebas_station_longitude: '2.34462'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2020-03-10T15:00:00 UTC
-  station_reference: FR0041U
-  statistics: arithmetic mean
+  time_coverage_end: 2022-01-01T01:00:00 UTC
+  time_coverage_start: 2020-03-10T15:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -1370,85 +2335,152 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q3/DQ/69/Q3DQ-69KJ.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QA/AM/ES/QAAM-ESKN.nc:
-  end_date: 2022-12-19T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: Malaga_JuanXXIII_NH3
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: ES18L_Malaga_JuanXXIII_NH3
+  ebas_revision_date: '20241210112644'
+  ebas_station_altitude: 380.0 m
+  ebas_station_code: ES0034U
+  ebas_station_latitude: '36.709033'
+  ebas_station_longitude: '-4.444645'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-21T00:00:00)
-  start_date: 2014-01-13T00:00:00 UTC
-  station_reference: ES0034U
-  statistics: arithmetic mean
+  time_coverage_end: 2022-12-19T00:00:00 UTC
+  time_coverage_start: 2014-01-13T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QU/B5/CV/QUB5-CVXF.nc:
-  end_date: 2023-07-03T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Manlleu
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: ES04L_NH3_Manlleu
+  ebas_revision_date: '20241210112644'
+  ebas_station_altitude: 451.0 m
+  ebas_station_code: ES0043U
+  ebas_station_latitude: '42.00333'
+  ebas_station_longitude: '2.286944'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-18T00:00:00)
-  start_date: 2021-05-20T00:00:00 UTC
-  station_reference: ES0043U
-  statistics: arithmetic mean
+  time_coverage_end: 2023-07-03T00:00:00 UTC
+  time_coverage_start: 2021-05-20T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QU/WT/88/QUWT-88UW.nc:
-  end_date: 2021-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_05
+  ebas_method_ref: SE01L_AD
+  ebas_revision_date: '20210702112901'
+  ebas_station_altitude: 404.0 m
+  ebas_station_code: SE0005R
+  ebas_station_latitude: '63.85'
+  ebas_station_longitude: '15.333333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1993-01-01T06:00:00 UTC
-  station_reference: SE0005R
-  statistics: arithmetic mean
+  time_coverage_end: 2021-01-01T00:00:00 UTC
+  time_coverage_start: 1993-01-01T06:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QV/BR/4N/QVBR-4N3K.nc:
-  end_date: 2016-01-01T06:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_11
+  ebas_method_ref: SE01L_AD
+  ebas_revision_date: '20171113081720'
+  ebas_station_altitude: 175.0 m
+  ebas_station_code: SE0011R
+  ebas_station_latitude: '56.016667'
+  ebas_station_longitude: '13.15'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1993-01-01T06:00:00 UTC
-  station_reference: SE0011R
-  statistics: arithmetic mean
+  time_coverage_end: 2016-01-01T06:00:00 UTC
+  time_coverage_start: 1993-01-01T06:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/R9/DZ/U5/R9DZ-U5YQ.nc:
-  end_date: 2015-12-29T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_We_Den_0001
+  ebas_measurement_height: 3.5 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '20161205132615'
+  ebas_station_altitude: 12.0 m
+  ebas_station_code: DE0001R
+  ebas_station_latitude: '54.925556'
+  ebas_station_longitude: '8.309722'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2013-12-03T07:00:00 UTC
-  station_reference: DE0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2015-12-29T07:00:00 UTC
+  time_coverage_start: 2013-12-03T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RB/TX/6A/RBTX-6AZY.nc:
-  end_date: 2012-01-01T05:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_01
+  ebas_method_ref: GE01L_air
+  ebas_revision_date: '20141124122447'
+  ebas_station_altitude: 1650.0 m
+  ebas_station_code: GE0001R
+  ebas_station_latitude: '41.755053'
+  ebas_station_longitude: '42.825333'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-03T00:00:00)
-  start_date: 2009-01-01T05:00:00 UTC
-  station_reference: GE0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2012-01-01T05:00:00 UTC
+  time_coverage_start: 2009-01-01T05:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RP/CW/BB/RPCW-BBA2.nc:
-  end_date: 2023-01-03T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Sm_Den_0002
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '20240410095706'
+  ebas_station_altitude: 937.0 m
+  ebas_station_code: DE0008R
+  ebas_station_latitude: '50.65'
+  ebas_station_longitude: '10.766667'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2015-12-29T07:00:00 UTC
-  station_reference: DE0008R
-  statistics: arithmetic mean
+  time_coverage_end: 2023-01-03T07:00:00 UTC
+  time_coverage_start: 2015-12-29T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -1457,49 +2489,86 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RP/CW/BB/RPCW-BBA2.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RV/WM/PQ/RVWM-PQBU.nc:
-  end_date: 2015-12-29T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Sc_Den_0001
+  ebas_measurement_height: 1.9 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '20160728074059'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: '47.914722'
+  ebas_station_longitude: '7.908611'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2013-12-03T07:00:00 UTC
-  station_reference: DE0003R
-  statistics: arithmetic mean
+  time_coverage_end: 2015-12-29T07:00:00 UTC
+  time_coverage_start: 2013-12-03T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SS/CD/E6/SSCD-E6W2.nc:
-  end_date: 2007-01-01T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: hvs_08
+  ebas_method_ref: ES01L_GF_AAS
+  ebas_revision_date: '20140501000000'
+  ebas_station_altitude: 134.0 m
+  ebas_station_code: ES0008R
+  ebas_station_latitude: '43.43917'
+  ebas_station_longitude: '-4.85'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2004-08-02T00:00:00 UTC
-  station_reference: ES0008R
-  statistics: arithmetic mean
+  time_coverage_end: 2007-01-01T07:00:00 UTC
+  time_coverage_start: 2004-08-02T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SZ/JZ/33/SZJZ-33NU.nc:
-  end_date: 2016-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: ECN_Amor_0091
+  ebas_method_ref: NL01L_MIL-W-5500_NL01L_ILG-W-2900
+  ebas_revision_date: '20161215121055'
+  ebas_station_altitude: 4.0 m
+  ebas_station_code: NL0091R
+  ebas_station_latitude: '52.3'
+  ebas_station_longitude: '4.5'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 1996-01-01T00:00:00 UTC
-  station_reference: NL0091R
-  statistics: arithmetic mean
+  time_coverage_end: 2016-01-01T00:00:00 UTC
+  time_coverage_start: 1996-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/T2/4H/B2/T24H-B26R.nc:
-  end_date: 2023-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: MA02
+  ebas_method_ref: GB02L_MA_1
+  ebas_revision_date: '20230731000000'
+  ebas_station_altitude: 78.0 m
+  ebas_station_code: GB1055R
+  ebas_station_latitude: '51.149617'
+  ebas_station_longitude: '-1.438228'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2022-01-01T00:00:00 UTC
-  station_reference: GB1055R
-  statistics: arithmetic mean
+  time_coverage_end: 2023-01-01T00:00:00 UTC
+  time_coverage_start: 2022-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
@@ -1517,193 +2586,344 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/T2/4H/B2/T24H-B26R.nc:
   - sulphur_dioxide_qc
   - sulphur_dioxide_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/T4/VZ/T3/T4VZ-T3XH.nc:
-  end_date: 2003-12-12T12:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: ES1778R_HVS_DIG_AIR_01
+  ebas_method_ref: ES05L_EE
+  ebas_revision_date: '20100325000000'
+  ebas_station_altitude: 700.0 m
+  ebas_station_code: ES1778R
+  ebas_station_latitude: '41.766667'
+  ebas_station_longitude: '2.35'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2002-03-22T12:00:00 UTC
-  station_reference: ES1778R
-  statistics: arithmetic mean
+  time_coverage_end: 2003-12-12T12:00:00 UTC
+  time_coverage_start: 2002-03-22T12:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TA/N7/AZ/TAN7-AZ93.nc:
-  end_date: 2022-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Borghi
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: IT23L_NH3_Borghi
+  ebas_revision_date: '20241210112644'
+  ebas_station_altitude: 35.0 m
+  ebas_station_code: IT0037R
+  ebas_station_latitude: '45.10954'
+  ebas_station_longitude: '10.069242'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2011-10-11T00:00:00 UTC
-  station_reference: IT0037R
-  statistics: arithmetic mean
+  time_coverage_end: 2022-01-01T00:00:00 UTC
+  time_coverage_start: 2011-10-11T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TM/PP/WK/TMPP-WKZM.nc:
-  end_date: 2021-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_20
+  ebas_method_ref: SE01L_AD
+  ebas_revision_date: '20210702112901'
+  ebas_station_altitude: 190.0 m
+  ebas_station_code: SE0020R
+  ebas_station_latitude: '56.0429'
+  ebas_station_longitude: '13.148'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2016-01-01T06:00:00 UTC
-  station_reference: SE0020R
-  statistics: arithmetic mean
+  time_coverage_end: 2021-01-01T00:00:00 UTC
+  time_coverage_start: 2016-01-01T06:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TN/XH/JU/TNXH-JU52.nc:
-  end_date: 2022-12-28T22:59:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Bordeaux
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR25L_NH3_Bordeaux
+  ebas_revision_date: '20241210112644'
+  ebas_station_altitude: 7.0 m
+  ebas_station_code: FR0048U
+  ebas_station_latitude: '44.833611'
+  ebas_station_longitude: '-0.598333'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-14T00:00:00)
-  start_date: 2022-01-27T00:00:00 UTC
-  station_reference: FR0048U
-  statistics: arithmetic mean
+  time_coverage_end: 2022-12-28T22:59:00 UTC
+  time_coverage_start: 2022-01-27T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UG/CS/QH/UGCS-QHVQ.nc:
-  end_date: 1994-01-01T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: abs_2
+  ebas_method_ref: NL01L_indo
+  ebas_revision_date: '19950330000000'
+  ebas_station_altitude: 18.0 m
+  ebas_station_code: NL0002R
+  ebas_station_latitude: '52.816667'
+  ebas_station_longitude: '6.666667'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1993-01-01T07:00:00 UTC
-  station_reference: NL0002R
-  statistics: arithmetic mean
+  time_coverage_end: 1994-01-01T07:00:00 UTC
+  time_coverage_start: 1993-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UH/ME/FG/UHME-FGA3.nc:
-  end_date: 2018-01-23T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: 39KK01019
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: BE06L_SGS_IC
+  ebas_revision_date: '20180816050000'
+  ebas_station_altitude: 4.0 m
+  ebas_station_code: BE0014R
+  ebas_station_latitude: '51.12092'
+  ebas_station_longitude: '2.65854'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-28T00:00:00)
-  start_date: 2017-12-26T00:00:00 UTC
-  station_reference: BE0014R
-  statistics: arithmetic mean
+  time_coverage_end: 2018-01-23T00:00:00 UTC
+  time_coverage_start: 2017-12-26T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UQ/XC/E5/UQXC-E5N2.nc:
-  end_date: 2020-12-30T10:05:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: CEH_denuder_34
+  ebas_method_ref: GB03L_CEH
+  ebas_revision_date: '20241120150341'
+  ebas_station_altitude: 119.0 m
+  ebas_station_code: GB0013R
+  ebas_station_latitude: '50.596389'
+  ebas_station_longitude: '-3.713056'
+  ebas_statistics: arithmetic mean
   resolution: monthly
-  start_date: 2013-01-01T09:40:00 UTC
-  station_reference: GB0013R
-  statistics: arithmetic mean
+  time_coverage_end: 2020-12-30T10:05:00 UTC
+  time_coverage_start: 2013-01-01T09:40:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/US/4S/54/US4S-54YK.nc:
-  end_date: 2022-12-19T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: Sevilla_NH3
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: ES18L_Sevilla_NH3
+  ebas_revision_date: '20241210112644'
+  ebas_station_altitude: 29.0 m
+  ebas_station_code: ES0035U
+  ebas_station_latitude: '37.38425'
+  ebas_station_longitude: '-5.95962'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-21T00:00:00)
-  start_date: 2011-05-16T00:00:00 UTC
-  station_reference: ES0035U
-  statistics: arithmetic mean
+  time_coverage_end: 2022-12-19T00:00:00 UTC
+  time_coverage_start: 2011-05-16T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UX/QE/NR/UXQE-NRY3.nc:
-  end_date: 2021-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: MA02
+  ebas_method_ref: GB02L_MA_1
+  ebas_revision_date: '20210723000000'
+  ebas_station_altitude: 78.0 m
+  ebas_station_code: GB1055R
+  ebas_station_latitude: '51.149617'
+  ebas_station_longitude: '-1.438228'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2016-01-01T00:00:00 UTC
-  station_reference: GB1055R
-  statistics: arithmetic mean
+  time_coverage_end: 2021-01-01T00:00:00 UTC
+  time_coverage_start: 2016-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VG/76/XY/VG76-XY6M.nc:
-  end_date: 2009-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: ECN_Amor
+  ebas_method_ref: NL01L_LVM_LU_P195_196
+  ebas_revision_date: '20240405085901'
+  ebas_station_altitude: 20.0 m
+  ebas_station_code: NL0007R
+  ebas_station_latitude: '52.083333'
+  ebas_station_longitude: '6.566667'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2006-01-01T00:00:00 UTC
-  station_reference: NL0007R
-  statistics: arithmetic mean
+  time_coverage_end: 2009-01-01T00:00:00 UTC
+  time_coverage_start: 2006-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VT/2H/5U/VT2H-5U26.nc:
-  end_date: 2023-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0014R_Radiello_RAD168
+  ebas_measurement_height: 1.7 m
+  ebas_method_ref: ES01L_spectrophotometric
+  ebas_revision_date: '20230724000000'
+  ebas_station_altitude: 470.0 m
+  ebas_station_code: ES0014R
+  ebas_station_latitude: '41.39389'
+  ebas_station_longitude: '0.73472'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2022-01-03T00:00:00 UTC
-  station_reference: ES0014R
-  statistics: arithmetic mean
+  time_coverage_end: 2023-01-01T00:00:00 UTC
+  time_coverage_start: 2022-01-03T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VX/YW/DW/VXYW-DW79.nc:
-  end_date: 2016-01-04T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_1665
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '20170123000000'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: NO1665R
+  ebas_station_latitude: '78.92472'
+  ebas_station_longitude: '11.92643'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2014-06-09T07:00:00 UTC
-  station_reference: NO1665R
-  statistics: arithmetic mean
+  time_coverage_end: 2016-01-04T07:00:00 UTC
+  time_coverage_start: 2014-06-09T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/W3/M5/49/W3M5-49F2.nc:
-  end_date: 2012-01-03T08:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: ps_14
+  ebas_method_ref: BE01L_PS
+  ebas_revision_date: '20140501000000'
+  ebas_station_altitude: 4.0 m
+  ebas_station_code: BE0014R
+  ebas_station_latitude: '51.12092'
+  ebas_station_longitude: '2.65854'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-14T00:00:00)
-  start_date: 2010-12-21T08:00:00 UTC
-  station_reference: BE0014R
-  statistics: arithmetic mean
+  time_coverage_end: 2012-01-03T08:00:00 UTC
+  time_coverage_start: 2010-12-21T08:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/W7/YQ/E9/W7YQ-E9MZ.nc:
-  end_date: 2023-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0009R_Radiello_RAD168
+  ebas_measurement_height: 1.7 m
+  ebas_method_ref: ES01L_spectrophotometric
+  ebas_revision_date: '20230724000000'
+  ebas_station_altitude: 1360.0 m
+  ebas_station_code: ES0009R
+  ebas_station_latitude: '41.27417'
+  ebas_station_longitude: '-3.1425'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2022-01-03T00:00:00 UTC
-  station_reference: ES0009R
-  statistics: arithmetic mean
+  time_coverage_end: 2023-01-01T00:00:00 UTC
+  time_coverage_start: 2022-01-03T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WH/GW/GM/WHGW-GMWG.nc:
-  end_date: 2022-01-03T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: ES0001R_RADIELLO
+  ebas_method_ref: ES01L_uv_vis
+  ebas_revision_date: '20220718000000'
+  ebas_station_altitude: 917.0 m
+  ebas_station_code: ES0001R
+  ebas_station_latitude: '39.54694'
+  ebas_station_longitude: '-4.35056'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2013-12-31T07:00:00 UTC
-  station_reference: ES0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2022-01-03T07:00:00 UTC
+  time_coverage_start: 2013-12-31T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/X6/Z9/5X/X6Z9-5X6W.nc:
-  end_date: 2023-01-03T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: UBA_Zg_Den_0002
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: DE27L_UBA_Ng_FIA_0001
+  ebas_revision_date: '20231017111112'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: '54.4368'
+  ebas_station_longitude: '12.7249'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2015-12-29T07:00:00 UTC
-  station_reference: DE0009R
-  statistics: arithmetic mean
+  time_coverage_end: 2023-01-03T07:00:00 UTC
+  time_coverage_start: 2015-12-29T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -1712,109 +2932,192 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/X6/Z9/5X/X6Z9-5X6W.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XM/GH/9Q/XMGH-9QKD.nc:
-  end_date: 2021-01-06T11:30:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: CEH_denuder_45
+  ebas_method_ref: GB03L_CEH
+  ebas_revision_date: '20241107131704'
+  ebas_station_altitude: 85.0 m
+  ebas_station_code: GB0054R
+  ebas_station_latitude: '56.907222'
+  ebas_station_longitude: '-2.559167'
+  ebas_statistics: arithmetic mean
   resolution: monthly
-  start_date: 2013-01-09T10:10:00 UTC
-  station_reference: GB0054R
-  statistics: arithmetic mean
+  time_coverage_end: 2021-01-06T11:30:00 UTC
+  time_coverage_start: 2013-01-09T10:10:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XX/3T/WB/XX3T-WBC3.nc:
-  end_date: 2002-01-01T06:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_02
+  ebas_method_ref: SE01L_AD
+  ebas_revision_date: '20171113083103'
+  ebas_station_altitude: 10.0 m
+  ebas_station_code: SE0002R
+  ebas_station_latitude: '57.416667'
+  ebas_station_longitude: '11.933333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1993-01-01T06:00:00 UTC
-  station_reference: SE0002R
-  statistics: arithmetic mean
+  time_coverage_end: 2002-01-01T06:00:00 UTC
+  time_coverage_start: 1993-01-01T06:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y5/BV/DY/Y5BV-DYKS.nc:
-  end_date: 2014-01-01T06:00:28 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: fp3s36
+  ebas_method_ref: FI01L_IC_c
+  ebas_revision_date: '20200515103501'
+  ebas_station_altitude: 340.0 m
+  ebas_station_code: FI0036R
+  ebas_station_latitude: '68.0'
+  ebas_station_longitude: '24.237222222'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2013-12-31T06:00:28 UTC
-  station_reference: FI0036R
-  statistics: arithmetic mean
+  time_coverage_end: 2014-01-01T06:00:28 UTC
+  time_coverage_start: 2013-12-31T06:00:28 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y5/E4/9F/Y5E4-9FEQ.nc:
-  end_date: 2013-12-31T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: RADIELLO
+  ebas_method_ref: ES01L_uv_vis
+  ebas_revision_date: '20150203093538'
+  ebas_station_altitude: 917.0 m
+  ebas_station_code: ES0001R
+  ebas_station_latitude: '39.54694'
+  ebas_station_longitude: '-4.35056'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-07T00:00:00)
-  start_date: 2013-01-01T07:00:00 UTC
-  station_reference: ES0001R
-  statistics: arithmetic mean
+  time_coverage_end: 2013-12-31T07:00:00 UTC
+  time_coverage_start: 2013-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YM/RM/44/YMRM-44YC.nc:
-  end_date: 2016-01-01T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_d_0002
+  ebas_method_ref: NO01L_IC
+  ebas_revision_date: '20160421000000'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: '58.38853'
+  ebas_station_longitude: '8.252'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2014-01-01T07:00:00 UTC
-  station_reference: NO0002R
-  statistics: arithmetic mean
+  time_coverage_end: 2016-01-01T07:00:00 UTC
+  time_coverage_start: 2014-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YP/C6/KS/YPC6-KSKX.nc:
-  end_date: 2022-02-07T09:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: ALPHA_Palau_Reial
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: ES14L_ALPHA_Palau_Reial
+  ebas_revision_date: '20241210112644'
+  ebas_station_altitude: 80.0 m
+  ebas_station_code: ES0019U
+  ebas_station_latitude: '41.387463'
+  ebas_station_longitude: '2.11532'
+  ebas_statistics: arithmetic mean
   resolution: Unrecognised (P0000-00-11T00:00:00)
-  start_date: 2011-02-14T11:00:00 UTC
-  station_reference: ES0019U
-  statistics: arithmetic mean
+  time_coverage_end: 2022-02-07T09:00:00 UTC
+  time_coverage_start: 2011-02-14T11:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZD/4E/TP/ZD4E-TP54.nc:
-  end_date: 2001-01-01T07:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_08
+  ebas_method_ref: DK01L_ICan
+  ebas_revision_date: '20140501000000'
+  ebas_station_altitude: 40.0 m
+  ebas_station_code: DK0008R
+  ebas_station_latitude: '56.716667'
+  ebas_station_longitude: '11.516667'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 1997-01-01T07:00:00 UTC
-  station_reference: DK0008R
-  statistics: arithmetic mean
+  time_coverage_end: 2001-01-01T07:00:00 UTC
+  time_coverage_start: 1997-01-01T07:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZF/XX/DV/ZFXX-DVE5.nc:
-  end_date: 2009-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: f3p_07
+  ebas_method_ref: DE03L_IC_c
+  ebas_revision_date: '20140501000000'
+  ebas_station_altitude: 62.0 m
+  ebas_station_code: DE0007R
+  ebas_station_latitude: '53.166667'
+  ebas_station_longitude: '13.033333'
+  ebas_statistics: arithmetic mean
   resolution: daily
-  start_date: 2005-01-01T00:00:00 UTC
-  station_reference: DE0007R
-  statistics: arithmetic mean
+  time_coverage_end: 2009-01-01T00:00:00 UTC
+  time_coverage_start: 2005-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia
   - ammonia_qc
   - ammonia_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZQ/96/X5/ZQ96-X5NF.nc:
-  end_date: 2019-03-01T10:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: NH3_Rouen1
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: FR26L_NH3_Rouen1
+  ebas_revision_date: '20231108000000'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: FR0052U
+  ebas_station_latitude: '49.43417'
+  ebas_station_longitude: '1.066944'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2016-09-01T00:00:00 UTC
-  station_reference: FR0052U
-  statistics: arithmetic mean
+  time_coverage_end: 2019-03-01T10:00:00 UTC
+  time_coverage_start: 2016-09-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
@@ -1823,13 +3126,23 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZQ/96/X5/ZQ96-X5NF.nc:
   - ammonia_ug_N_per_m3_qc
   - ammonia_ug_N_per_m3_ebasmetadata
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZS/MG/HB/ZSMG-HBUB.nc:
-  end_date: 2024-01-01T00:00:00 UTC
+  ebas_data_level: '2'
+  ebas_instrument_name: doas
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: NL01L_MIL-W-5500_NL01L_ILG-W-2900
+  ebas_revision_date: '20240925124623'
+  ebas_station_altitude: 4.0 m
+  ebas_station_code: NL0091R
+  ebas_station_latitude: '52.3'
+  ebas_station_longitude: '4.5'
+  ebas_statistics: arithmetic mean
   resolution: hourly
-  start_date: 2016-01-01T00:00:00 UTC
-  station_reference: NL0091R
-  statistics: arithmetic mean
+  time_coverage_end: 2024-01-01T00:00:00 UTC
+  time_coverage_start: 2016-01-01T00:00:00 UTC
   variables:
+  - time
   - time_bnds
+  - metadata_time
   - metadata_time_bnds
   - ammonia_nmol_per_mol
   - ammonia_nmol_per_mol_qc
