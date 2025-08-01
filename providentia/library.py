@@ -484,7 +484,7 @@ class Library:
                 # show warning if it is not
                 if chunk_resolution not in available_timeseries_chunk_resolutions:
                     msg = f'{plot_type} cannot be created because {chunk_resolution} '
-                    msg += 'is not an available chunking resolution.'
+                    msg += 'is not an available chunking resolution. '
                     if len(available_timeseries_chunk_resolutions) > 0:
                         msg += f'The available resolutions are: {available_timeseries_chunk_resolutions}'
                     show_message(self, msg)
@@ -493,7 +493,7 @@ class Library:
                 # show warning if chunk stat is MDA8 and active resolution is not hourly
                 if (chunk_stat == 'MDA8') and (self.active_resolution != 'hourly'):
                     msg = f'{plot_type} cannot be created because {chunk_stat} '
-                    msg += 'is only available when resolution is hourly.'
+                    msg += 'is only available when active resolution is hourly.'
                     show_message(self, msg)
                     return
                 
