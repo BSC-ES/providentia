@@ -214,7 +214,7 @@ def get_station_inds(read_instance, canvas_instance, networkspeci, station_index
 
     return station_inds
 
-def group_periodic(read_instance, canvas_instance, networkspeci, period_resolution, per_station, data_array):
+def group_periodic(read_instance, canvas_instance, networkspeci, period_resolution, per_station, statistic_mode, base_zstat, data_array):
     """ Function that groups data into periodic chunks
 
         :param read_instance: Instance of class Dashboard or Report
@@ -226,7 +226,11 @@ def group_periodic(read_instance, canvas_instance, networkspeci, period_resoluti
         :param period_resolution: period resolution to group data into 
         :type period_resolution: str
         :param per_station: indication if are calculating integrated statistic across selected stations, or per station
-        :type per_station: boolean
+        :type per_station: boolean  
+        :param statistic_mode: active statistic mode
+        :type statistic_mode: str
+        :param base_zstat: Statistic
+        :type base_zstat: str 
         :param data_array: data array to temporally group
         :type data_array: list
         :return: nested list of temporally grouped data
@@ -255,7 +259,7 @@ def group_periodic(read_instance, canvas_instance, networkspeci, period_resoluti
         # otherwise, append empty list
         if period_data.size > 0:
              # flatten group when flattened stat mode is active and per_station option is not active 
-            if (read_instance.statistic_mode == 'Flattened') & (not per_station):
+            if (statistic_mode == 'Flattened') & (not per_station) & (base_zstat not in ['NStations','MDA8']):
                 period_data = period_data.reshape(period_data.shape[0],1,period_data.shape[1]*period_data.shape[2])
         else:
             period_data = []
@@ -265,7 +269,7 @@ def group_periodic(read_instance, canvas_instance, networkspeci, period_resoluti
     
     return periodic_data
 
-def group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolution, per_station, data_array):
+def group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolution, per_station, statistic_mode, base_zstat, data_array):
     """ Function that groups data into temporal chunks
 
         :param read_instance: Instance of class Dashboard or Report
@@ -278,6 +282,10 @@ def group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolutio
         :type chunk_resolution: str
         :param per_station: indication if are calculating integrated statistic across selected stations, or per station
         :type per_station: boolean
+        :param statistic_mode: active statistic mode
+        :type statistic_mode: str
+        :param base_zstat: Statistic
+        :type base_zstat: str 
         :param data_array: data array to temporally group
         :type data_array: list
         :return: nested list of temporally grouped data
@@ -297,7 +305,18 @@ def group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolutio
     for index in canvas_instance.grouped_ts_index:
 
         # is 3hourly chunk resolution?
-        if new_freq == "3h":
+        if new_freq == "h":
+            start_date = datetime.datetime(year=index.year, 
+                                            month=index.month, 
+                                            day=index.day, 
+                                            hour=index.hour)  
+            end_date = datetime.datetime(year=index.year, 
+                                         month=index.month, 
+                                         day=index.day, 
+                                         hour=index.hour)
+
+        # is 3hourly chunk resolution?
+        elif new_freq == "3h":
             start_date = datetime.datetime(year=index.year, 
                                             month=index.month, 
                                             day=index.day, 
@@ -354,8 +373,8 @@ def group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolutio
         # if have valid data for period, append it
         # otherwise, append empty list
         if cut_data.size > 0:
-            # flatten group when flattened stat mode is active and per_station option is not active 
-            if (read_instance.statistic_mode == 'Flattened') & (not per_station):
+            # flatten group when flattened stat mode is active, and per_station option is not active, and not calculating NStations
+            if (statistic_mode == 'Flattened') & (not per_station) & (base_zstat not in ['NStations','MDA8']):
                 cut_data = cut_data.reshape(cut_data.shape[0], 1, cut_data.shape[1] * cut_data.shape[2])
         else:
             cut_data = []
@@ -367,10 +386,27 @@ def group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolutio
 
 def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, data_labels_a, 
                         data_labels_b, map=False, per_station=False, period=None, chunk_resolution=None, 
-                        reduction=True, mask=None):
+                        reduction=True, mask=None, statistic_mode=None, statistic_aggregation=None, 
+                        periodic_statistic_mode=None, periodic_statistic_aggregation=None):
     """Function that calculates a statistic for data labels, either absolute or bias, 
        for different aggregation modes.
     """
+
+    # if statistic mode is None, then take the global one
+    if not statistic_mode:
+        statistic_mode = read_instance.statistic_mode 
+
+    # if statistic aggregation is None, then take the global one
+    if not statistic_aggregation:
+        statistic_aggregation = read_instance.statistic_aggregation 
+
+    # if periodic statistic mode is None, then take the global one
+    if not periodic_statistic_mode:
+        periodic_statistic_mode = read_instance.periodic_statistic_mode
+
+    # if periodic statistic aggregation is None, then take the global one
+    if not periodic_statistic_aggregation:
+        periodic_statistic_aggregation = read_instance.periodic_statistic_aggregation 
 
     # if data_labels_a, data_labels_b are strings then convert to lists
     if type(data_labels_a) != list:
@@ -444,7 +480,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
             indices_a = np.array([canvas_instance.selected_station_data_labels[networkspeci].index(label) for label in data_labels_a])
                         
             # for grouping data take per_station array
-            if (chunk_resolution is not None) or (period is not None) or (z_statistic_period is not None):
+            if (chunk_resolution is not None) or (period is not None) or (z_statistic_period is not None) or (base_zstat in ['NStations','MDA8']):
                 data_array_a = canvas_instance.selected_station_data[networkspeci]['per_station'][indices_a]
             # otherwise take active mode
             else:
@@ -456,21 +492,26 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
         # if need to temporally chunk data, then do so
         if chunk_resolution is not None:
-            data_array_a = group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolution, per_station, data_array_a)
+            if ((chunk_resolution == read_instance.active_resolution) & (statistic_mode in ['Temporal|Spatial', 'Spatial|Temporal'])) or ((chunk_resolution == read_instance.active_resolution) & (statistic_mode == 'Flattened') & (base_zstat in ['NStations','MDA8'])):
+                data_array_a = np.expand_dims(np.transpose(data_array_a, (2,0,1)), -1)
+                if len(data_labels_b) == 0:
+                    chunk_resolution = None
+            else:
+                data_array_a = group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolution, per_station, statistic_mode, base_zstat, data_array_a)            
 
         # if need to group data for a period, then do so
         # this can be for calculating statistics per period, or an integated periodic statistic
         if period is not None:
-            data_array_a = group_periodic(read_instance, canvas_instance, networkspeci, period, per_station, data_array_a)
+            data_array_a = group_periodic(read_instance, canvas_instance, networkspeci, period, per_station, statistic_mode, base_zstat, data_array_a)
 
         if z_statistic_period is not None:
-            data_array_a = group_periodic(read_instance, canvas_instance, networkspeci, z_statistic_period, per_station, data_array_a)
+            data_array_a = group_periodic(read_instance, canvas_instance, networkspeci, z_statistic_period, per_station, statistic_mode, base_zstat, data_array_a)
 
         # get dictionary containing necessary information for calculation of selected statistic
         if z_statistic_type == 'basic':
-            stats_dict = basic_stats[base_zstat]
+            stats_dict = copy.deepcopy(basic_stats[base_zstat])
         else:
-            stats_dict = expbias_stats[base_zstat]
+            stats_dict = copy.deepcopy(expbias_stats[base_zstat])
 
         # if have no data_labels_b, calculate 'absolute' basic statistic
         if len(data_labels_b) == 0:
@@ -482,11 +523,15 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
             if base_zstat == 'Exceedances':
                 function_arguments['threshold'] = exceedance_lim(networkspeci)
 
-            # need to do the aggregation inside the calculation of NStations, because if not we
-            # get arrays with different time dimensions (e.g. different months have different number of hours)
-            # and therefore np.array explodes
-            if base_zstat == 'NStations':
-                function_arguments['statistic_aggregation'] = read_instance.statistic_aggregation
+            # need to do the aggregation inside function for the calculation of NStations and MDA8
+            # this is due to handling excepetions in how these are calculated across modes
+            if base_zstat in ['NStations','MDA8']:
+                function_arguments['statistic_mode'] = statistic_mode
+                function_arguments['statistic_aggregation'] = statistic_aggregation
+                function_arguments['per_station'] = per_station
+                if z_statistic_period is not None:
+                    function_arguments['periodic_statistic_mode'] = periodic_statistic_mode
+                    function_arguments['periodic_statistic_aggregation'] = periodic_statistic_aggregation
 
             # calculate statistics
             
@@ -498,21 +543,24 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
             # calculate periodic statistic per station
             elif z_statistic_period is not None:
                 # if periodic statistic mode is cycle, then aggregate per periodic grouping, and then calculate stat
-                if read_instance.periodic_statistic_mode == 'Cycle':
+                if periodic_statistic_mode == 'Cycle':
                     # aggregation in each group, per station, by periodic statistic
-                    z_statistic = np.array([aggregation(group, read_instance.periodic_statistic_aggregation, axis=-1)
+                    z_statistic = np.array([aggregation(group, periodic_statistic_aggregation, axis=-1)
                                             for group in data_array_a]).transpose()
+
                     # calculate statistic per station (removing period dimension)
                     z_statistic = np.array(getattr(Stats, stats_dict['function'])(z_statistic, **function_arguments)).transpose()
 
                 # if periodic statistic mode is independent, then calculate stats independently per periodic grouping,
                 # and then aggregate 
-                elif read_instance.periodic_statistic_mode == 'Independent':
+                elif periodic_statistic_mode == 'Independent':
                     # calculate statistic per periodic grouping per station
                     z_statistic = np.array([getattr(Stats, stats_dict['function'])(group, **function_arguments)
                                             for group in data_array_a]).transpose()
+                    
                     # aggregate data per station (removing period dimension)
-                    z_statistic = aggregation(z_statistic, read_instance.periodic_statistic_aggregation, axis=-1).transpose()
+                    if base_zstat != 'NStations':
+                        z_statistic = aggregation(z_statistic, periodic_statistic_aggregation, axis=-1).transpose()
 
             # calculate statistics per station 
             else:
@@ -540,7 +588,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 indices_b = np.array([canvas_instance.selected_station_data_labels[networkspeci].index(label) for label in data_labels_b])
 
                 # for grouping data take per_station array
-                if (chunk_resolution is not None) or (period is not None) or (z_statistic_period is not None):
+                if (chunk_resolution is not None) or (period is not None) or (z_statistic_period is not None) or (base_zstat in ['NStations','MDA8']):
                     data_array_b = canvas_instance.selected_station_data[networkspeci]['per_station'][indices_b]
                 # otherwise take active mode
                 else:
@@ -552,15 +600,19 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
             # if need to temporally chunk data, then do so
             if chunk_resolution is not None:
-                data_array_b = group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolution, per_station, data_array_b)
+                if ((chunk_resolution == read_instance.active_resolution) & (statistic_mode in ['Temporal|Spatial', 'Spatial|Temporal'])) or ((chunk_resolution == read_instance.active_resolution) & (statistic_mode == 'Flattened') & (base_zstat in ['NStations','MDA8'])):
+                    data_array_b = np.expand_dims(np.transpose(data_array_b, (2,0,1)), -1)
+                    chunk_resolution = None
+                else:
+                    data_array_b = group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolution, per_station, statistic_mode, base_zstat, data_array_b)
 
             # if need to group data for a period, then do so
             # this can be for calculating statistics per period, or an integated periodic statistic
             if period is not None:
-                data_array_b = group_periodic(read_instance, canvas_instance, networkspeci, period, per_station, data_array_b)
+                data_array_b = group_periodic(read_instance, canvas_instance, networkspeci, period, per_station, statistic_mode, base_zstat, data_array_b)
 
             if z_statistic_period is not None:
-                data_array_b = group_periodic(read_instance, canvas_instance, networkspeci, z_statistic_period, per_station, data_array_b)
+                data_array_b = group_periodic(read_instance, canvas_instance, networkspeci, z_statistic_period, per_station, statistic_mode, base_zstat, data_array_b)
 
             # is the difference statistic basic (i.e. mean)?
             if z_statistic_type == 'basic':
@@ -568,9 +620,21 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 # load default selected statistic arguments and make separate arguments
                 # dictionaries for data_labels_a/data_labels_b calculations (as doing 2 separate calculations for data_labels_a/data_labels_b and subtracting)
                 function_arguments_a = stats_dict['arguments']
+
                 # if stat is exceedances then add threshold value (if available)  
                 if base_zstat == 'Exceedances':
                     function_arguments_a['threshold'] = exceedance_lim(networkspeci)
+
+                # need to do the aggregation inside function for the calculation of NStations and MDA8
+                # this is due to handling excepetions in how these are calculated across modes
+                if base_zstat in ['NStations','MDA8']:
+                    function_arguments_a['statistic_mode'] = statistic_mode
+                    function_arguments_a['statistic_aggregation'] = statistic_aggregation
+                    function_arguments_a['per_station'] = per_station
+                    if z_statistic_period is not None:
+                        function_arguments_a['periodic_statistic_mode'] = periodic_statistic_mode
+                        function_arguments_a['periodic_statistic_aggregation'] = periodic_statistic_aggregation
+
                 function_arguments_b = copy.deepcopy(function_arguments_a)
 
                 # calculate statistics for data_labels_a and data_labels_b, then subtract data_labels_b - data_labels_a
@@ -585,11 +649,11 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 # calculate periodic statistic per station
                 elif z_statistic_period is not None:
                     # if periodic statistic mode is cycle, then aggregate per periodic grouping, and then calculate stat
-                    if read_instance.periodic_statistic_mode == 'Cycle':
+                    if periodic_statistic_mode == 'Cycle':
                         # aggregation in each group, per station, by periodic statistic
-                        statistic_a = np.array([aggregation(group, read_instance.periodic_statistic_aggregation, axis=-1)
+                        statistic_a = np.array([aggregation(group, periodic_statistic_aggregation, axis=-1)
                                             for group in data_array_a]).transpose()
-                        statistic_b = np.array([aggregation(group, read_instance.periodic_statistic_aggregation, axis=-1)
+                        statistic_b = np.array([aggregation(group, periodic_statistic_aggregation, axis=-1)
                                             for group in data_array_b]).transpose()
                         
                         # calculate statistic per station (removing period dimension)
@@ -598,7 +662,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
                     # if periodic statistic mode is independent, then calculate stats independently per periodic grouping,
                     # and then aggregate 
-                    elif read_instance.periodic_statistic_mode == 'Independent':
+                    elif periodic_statistic_mode == 'Independent':
                         # calculate statistic per periodic grouping per station
                         statistic_a = np.array([getattr(Stats, stats_dict['function'])(group, **function_arguments_a)
                                                 for group in data_array_a]).transpose()
@@ -606,8 +670,9 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                                                 for group in data_array_b]).transpose()
 
                         # aggregate data per station (removing period dimension)
-                        statistic_a = aggregation(statistic_a, read_instance.periodic_statistic_aggregation, axis=-1).transpose()
-                        statistic_b = aggregation(statistic_b, read_instance.periodic_statistic_aggregation, axis=-1).transpose()
+                        if base_zstat != 'NStations':
+                            statistic_a = aggregation(statistic_a, periodic_statistic_aggregation, axis=-1).transpose()
+                            statistic_b = aggregation(statistic_b, periodic_statistic_aggregation, axis=-1).transpose()
 
                 # calculate statistics per station 
                 else:
@@ -649,11 +714,11 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 # calculate periodic statistic per station
                 elif z_statistic_period is not None:
                     # if periodic statistic mode is cycle, then aggregate per periodic grouping, and then calculate stat
-                    if read_instance.periodic_statistic_mode == 'Cycle':
+                    if periodic_statistic_mode == 'Cycle':
                         # aggregation in each group, per station, by periodic statistic
-                        statistic_a = np.array([aggregation(group, read_instance.periodic_statistic_aggregation, axis=-1)
+                        statistic_a = np.array([aggregation(group, periodic_statistic_aggregation, axis=-1)
                                             for group in data_array_a]).transpose()
-                        statistic_b = np.array([aggregation(group, read_instance.periodic_statistic_aggregation, axis=-1)
+                        statistic_b = np.array([aggregation(group, periodic_statistic_aggregation, axis=-1)
                                             for group in data_array_b]).transpose()
                         
                         # calculate statistic per station (removing period dimension)
@@ -661,13 +726,13 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
                     # if periodic statistic mode is independent, then calculate stats independently per periodic grouping,
                     # and then aggregate 
-                    elif read_instance.periodic_statistic_mode == 'Independent':
+                    elif periodic_statistic_mode == 'Independent':
                         # calculate statistic per periodic grouping per station
                         z_statistic = np.array([getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':group_a,'exp':group_b}})
                                                 for group_a, group_b in zip(data_array_a, data_array_b)]).transpose()
 
                         # aggregate data per station (removing period dimension)
-                        z_statistic = aggregation(z_statistic, read_instance.periodic_statistic_aggregation, axis=-1).transpose()
+                        z_statistic = aggregation(z_statistic, periodic_statistic_aggregation, axis=-1).transpose()
 
                 # calculate statistics per station 
                 else:
@@ -692,10 +757,13 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
         # otherwise, save desired statistic for specific statistical calculation mode 
         else:
             if reduction:
-                if (read_instance.statistic_mode == 'Temporal|Spatial') and (base_zstat != 'NStations'):
-                    z_statistic = aggregation(z_statistic, read_instance.statistic_aggregation,axis=-1)
-                elif read_instance.statistic_mode in ['Flattened', 'Spatial|Temporal']:
-                    z_statistic = np.squeeze(z_statistic, axis=-1)
+                if (statistic_mode == 'Temporal|Spatial') & ((base_zstat not in ['NStations','MDA8']) or (z_statistic_period is not None)):
+                    z_statistic = aggregation(z_statistic, statistic_aggregation, axis=-1)
+                elif (statistic_mode in ['Flattened', 'Spatial|Temporal']) & ((base_zstat not in ['NStations','MDA8']) or (z_statistic_period is not None)):
+                    if base_zstat in ['NStations','MDA8']:
+                        z_statistic = aggregation(z_statistic, statistic_aggregation, axis=-1)
+                    else:
+                        z_statistic = np.squeeze(z_statistic, axis=-1)
             stats_calc[zstat] = z_statistic
 
     # return statistics calculated (if just one statistic then remove dict)
@@ -1287,7 +1355,7 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels)
             stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, 'MDA8', 
                                              valid_data_labels, [], per_station=True, chunk_resolution='daily',
                                              mask=days_to_nan_expanded)
-            
+
             # reshape data array
             data_array = np.transpose(stats_calc, (1, 2, 0))
 

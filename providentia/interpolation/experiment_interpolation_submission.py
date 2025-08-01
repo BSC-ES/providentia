@@ -361,7 +361,7 @@ class SubmitInterpolation(object):
 
                             # ensemble stat?
                             if ensemble_stat:
-                                available_ensemble_options = [ensemble_option]    
+                                available_ensemble = [ensemble_option]    
 
                             # not ensemble stat?
                             else:                                
@@ -378,10 +378,10 @@ class SubmitInterpolation(object):
                                     # available in directory
                                     # if no members defined explicitly to process, process them all 
                                     if ensemble_option == 'allmembers':
-                                        available_ensemble_options = unique_ensemble_members
+                                        available_ensemble = unique_ensemble_members
                                     else:
                                         if ensemble_option in unique_ensemble_members:
-                                            available_ensemble_options = [ensemble_option]
+                                            available_ensemble = [ensemble_option]
                                         else:
                                             continue
                                 # if there's no ensemble number in the file name
@@ -393,10 +393,10 @@ class SubmitInterpolation(object):
                                         continue
                                     # otherwise, proceed (tag files as ensemble member '000' for sake of operation)
                                     else:
-                                        available_ensemble_options = ['000']
+                                        available_ensemble = ['000']
                             
                             # iterate through available ensemble options to process                    
-                            for available_ensemble_option in available_ensemble_options:
+                            for available_ensemble_option in available_ensemble:
                         
                                 # limit experiment files to be just those for specific ensemble member 
                                 # (where neccessary) 

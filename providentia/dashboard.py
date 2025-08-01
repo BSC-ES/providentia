@@ -28,7 +28,7 @@ from .dashboard_elements import ComboBox, QVLine, InputDialog
 from .dashboard_elements import set_formatting
 from .fields_menus import (init_experiments, init_flags, init_qa, update_qa, init_metadata, init_multispecies, init_period, 
                            init_representativity, metadata_conf, multispecies_conf, representativity_conf, period_conf, 
-                           update_metadata_fields, update_period_fields, update_representativity_fields)
+                           update_representativity_fields, update_period_fields, update_metadata_fields)
 from .plot_aux import get_taylor_diagram_ghelper
 from .plot_formatting import format_axis
 from .pop_up_window import PopUpWindow
@@ -555,6 +555,12 @@ class Dashboard(QtWidgets.QWidget):
             metadata_conf(self)
             self.mpl_canvas.handle_data_filter_update()
 
+            # for non-GHOST, we call update_metadata_fields after filtering to remove the stations that have
+            # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained 
+            # after filtering
+            if not self.reading_ghost:
+                update_metadata_fields(self)
+
         # enable pop up configuration windows
         self.bu_flags.clicked.connect(partial(self.generate_pop_up_window, self.flag_menu))
         self.bu_QA.clicked.connect(partial(self.generate_pop_up_window, self.qa_menu))
@@ -801,15 +807,21 @@ class Dashboard(QtWidgets.QWidget):
             self.selected_periodic_statistic_mode = self.mpl_canvas.statsummary_periodic_mode.currentText()
 
         # update timeseries statistic field
-        available_timeseries_statistics = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
+        if self.selected_statistic_mode == 'Flattened':
+            available_timeseries_statistics = []
+        else:    
+            available_timeseries_statistics = ['Mean', 'Median', 'p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']
+            if self.selected_timeseries_statistic_aggregation == '':
+                self.selected_timeseries_statistic_aggregation = available_timeseries_statistics[1]
         self.mpl_canvas.timeseries_stat.addItems(available_timeseries_statistics)
         if self.selected_timeseries_statistic_aggregation in available_timeseries_statistics:
             self.mpl_canvas.timeseries_stat.setCurrentText(self.selected_timeseries_statistic_aggregation)
         else:
             self.selected_timeseries_statistic_aggregation = self.mpl_canvas.timeseries_stat.currentText()
 
-        # get available resampling resolutions
+        # get available resampling resolutions, removing base resolution
         available_resampling_resolutions = get_possible_resampling_resolutions(self.selected_resolution)
+        available_resampling_resolutions.remove(self.resolution)
 
         # remove resolutions if resampled data would be less than 2 timesteps
         resampling_resolutions = copy.deepcopy(available_resampling_resolutions)
@@ -1401,20 +1413,6 @@ class Dashboard(QtWidgets.QWidget):
                     QtWidgets.QApplication.restoreOverrideCursor()
                 return
 
-            # update fields available for filtering
-            update_representativity_fields(self)
-            update_period_fields(self)
-
-            # for non-GHOST delete valid station indices variables because we do not want to 
-            # remove the stations with 0 valid measurements before the filter has been updated, 
-            # this will happen later
-            if hasattr(self, 'valid_station_inds') and (not self.reading_ghost):
-                delattr(self, 'valid_station_inds')
-                delattr(self, 'valid_station_inds_temporal_colocation')
-
-            # update metadata fields
-            update_metadata_fields(self)
-
             # if species has changed, or first read, update species specific lower/upper limits
             if (self.first_read) or (self.species[0] != self.previous_species[0]):
                 # get default GHOST limits
@@ -1426,7 +1424,7 @@ class Dashboard(QtWidgets.QWidget):
             # run function to update filter
             self.mpl_canvas.handle_data_filter_update()
 
-            # for non-GHOST, we call update_metadata_fields again to remove the stations that have
+            # for non-GHOST, we call update_metadata_fields after filtering to remove the stations that have
             # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained 
             # after filtering
             if not self.reading_ghost:
@@ -1489,6 +1487,14 @@ class Dashboard(QtWidgets.QWidget):
 
         # reset metadata
         init_metadata(self)
+
+        # for non-GHOST delete valid station indices variables because we do not want to 
+        # remove the stations with 0 valid measurements before the filter has been updated, 
+        # this will happen later
+        if hasattr(self, 'valid_station_inds') and (not self.reading_ghost):
+            delattr(self, 'valid_station_inds')
+            delattr(self, 'valid_station_inds_temporal_colocation')
+
         update_metadata_fields(self)
 
         # reset bounds
@@ -1502,7 +1508,7 @@ class Dashboard(QtWidgets.QWidget):
         # unfilter data
         self.mpl_canvas.handle_data_filter_update()
         
-        # for non-GHOST, we call update_metadata_fields again to remove the stations that have
+        # for non-GHOST, we call update_metadata_fields after filtering to remove the stations that have
         # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained 
         # after filtering
         if not self.reading_ghost:
