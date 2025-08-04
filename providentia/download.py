@@ -1661,7 +1661,7 @@ class Download(object):
                 self.logger.info(f'\nFile containing information of the files available in Thredds for {var} ({path}) does not exist, creating.')
                 combined_data = get_files_per_var(var)
                 all_files = combined_data[var]['files']
-                files_info = get_files_info(all_files, var, path)
+                files_info = get_files_info(self, all_files, var, path)
                     
             # if file exists
             else:
@@ -1685,7 +1685,7 @@ class Download(object):
                     # get files information
                     combined_data = get_files_per_var(var)
                     all_files = combined_data[var]['files']
-                    files_info = get_files_info(all_files, var, path)
+                    files_info = get_files_info(self, all_files, var, path)
             
             # go to next variable if no data is found
             if len(files_info) == 0:
@@ -1710,12 +1710,12 @@ class Download(object):
                             if file not in files[station]:
                                 files[station].append(file)
 
-            # files = dict(list(files.items())[0:1])
+            # files = dict(list(files.items())[0:80])
             if len(files) != 0:
 
                 # get data and metadata for each file within period and temporally average to standard times
                 start = time.time()
-                combined_ds, metadata, wavelength = get_data(files, var, actris_parameter, resolution, 
+                combined_ds, metadata, wavelength = get_data(self, files, var, actris_parameter, resolution, 
                                                              target_start_date, target_end_date, files_info,
                                                              self.ghost_version)
                 end = time.time()
@@ -1723,7 +1723,7 @@ class Download(object):
                 print(f"Time to read data: {elapsed_minutes:.2f} minutes")
 
                 # add metadata
-                for key, value in metadata[resolution].items():
+                for key, value in metadata.items():
                     if key in ['latitude', 'longitude']:
                         value = [float(val) for val in value]
                     elif key in ['altitude', 'sampling_height']:
