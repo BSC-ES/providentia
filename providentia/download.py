@@ -1963,6 +1963,13 @@ class Download(object):
         # get url
         url = cams_dict['url']
 
+        # check end date is > start date, if not, return with no valid obs. files
+        # TODO code from read_aux.py
+        if int(self.start_date) >= int(self.end_date):
+            msg = f'Start date ({self.start_date}) exceeds end date ({self.end_date}).'
+            show_message(self, msg, print=True)
+            return
+
         # get minimum and maximum possible dates
         if cams_dict['fetch_dates'] is True:
             min_start_date, max_end_date = self.fetch_cams_dates(url, cams_dict)
@@ -2056,13 +2063,14 @@ class Download(object):
 
                     # add one day or one month depending if it is forecast or analysis
                     if cams_dict['forecast'] is False:
-                        next_cams_date = current_cams_date.replace(day=1) + relativedelta(months=1)
+                        next_cams_date = current_cams_date.replace(day=1) + relativedelta(months=1) - timedelta(days=1)
                         next_cams_date = cams_end_date if next_cams_date > cams_end_date else next_cams_date
                     else:
-                        next_cams_date =  current_cams_date + timedelta(days=1) 
+                        next_cams_date =  current_cams_date
 
                     # get the date in cams str format
                     current_cams_date_str = current_cams_date.strftime('%Y-%m-%d')
+                    next_cams_date_str = next_cams_date.strftime('%Y-%m-%d')
 
                     # create the request
                     request = {
@@ -2073,20 +2081,15 @@ class Download(object):
 
                     # add leadtime hour to the request if the dataset has it
                     if 'leadtime_hour' in cams_dict:
-                        request["leadtime_hour"] = list(range(0,cams_dict['leadtime_hour']+1))
-                        
-                        if cams_species in cams_variables_level[url]['multi']: # TODO: clean this
-                            request["leadtime_hour"] = list(range(0, cams_dict['leadtime_hour']+1, 3))
+                        level = 'multi' if cams_species in cams_variables_level[url]['multi'] else 'single'
+                        request["leadtime_hour"] = cams_dict['leadtime_hour'][level]
 
                     # add type to the request if the dataset has it
                     if 'type' in cams_dict:
                         request["type"] = [cams_dict['type']]
 
                     # if it's forecast one file per day, analysis one file per month
-                    if cams_dict['forecast'] is False:  # monthly
-                        request["date"] = [f"{current_cams_date_str}/{(next_cams_date - timedelta(days=1)).strftime('%Y-%m-%d')}"]
-                    else: # daily
-                        request["date"] = [f"{current_cams_date_str}/{current_cams_date_str}"]
+                    request["date"] = [f"{current_cams_date_str}/{next_cams_date_str}"]
 
                     # add the experiment if models are available in the dataset
                     if 'experiments' in cams_dict:
@@ -2108,7 +2111,9 @@ class Download(object):
                     self.logger.info(f"Dataset -> {cams_dict['dataset']}")
                     self.logger.info('Request -> {')
                     for k,v in request.items():
-                        self.logger.info(f"{k} : {v}")
+                        if type(v) == str:
+                            v = f"'{v}'"
+                        self.logger.info(f"'{k}' : {v},")
                     self.logger.info('}\n')
 
                     # make the request
@@ -2142,7 +2147,7 @@ class Download(object):
                     self.format_cams(join(temp_dir,zip_file_name), final_path, cams_species, species)
 
                     # add one day to the date
-                    current_cams_date = next_cams_date    
+                    current_cams_date = next_cams_date + timedelta(days=1)    
 
                 # remove the temp directory tail
                 shutil.rmtree(join(self.exp_to_interp_root,'.temp'))
