@@ -67,6 +67,6 @@
 
     "het_chem": ["periodic-Mean"],
 
-    "debug": ["fairmode-target", "fairmode-statsummary"]
+    "debug": ["timeseries-NStations-hourly","timeseries-NStations-daily","timeseries-MDA8-daily","timeseries-MDA8-monthly","fairmode-target","fairmode-statsummary"]
 
 }
