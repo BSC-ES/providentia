@@ -154,18 +154,34 @@ class Stats(object):
             return np.count_nonzero(~np.isnan(data), axis=-1).astype('float32')
 
     @staticmethod
-    def calculate_stations_number(data, statistic_aggregation):
+    def calculate_stations_number(data, statistic_mode, statistic_aggregation, per_station,
+                                  periodic_statistic_mode=None, periodic_statistic_aggregation=None):
         """ Calculate number of stations."""
         if data.size == 0:
             return np.NaN
         else:
 
-            # get number of stations that do not have missing values per original timestep
-            original_stations_number = np.count_nonzero(~np.isnan(data), axis=-2).astype('float32')
+            # get number of stations that do not have missing values
+            # if calculating periodic statistic for cycle mode, then aggregate across first dimension
+            # this due to inconsistent way Nstations is calculated with respect to other statistics
+            if periodic_statistic_mode == 'Cycle':
+                stations_number = np.count_nonzero(~np.isnan(data), axis=0).astype('float32').transpose()
+            else:
+                stations_number = np.count_nonzero(~np.isnan(data), axis=-2).astype('float32')
 
-            # aggregate the number of valid stations per new time step
-            from .statistics import aggregation
-            stations_number = aggregation(original_stations_number, statistic_aggregation, axis=-1)
+            # if calculating periodic statistic for independent mode, then aggregate across last dimension
+            # this due to inconsistent way Nstations is calculated with respect to other statistics
+            if periodic_statistic_mode == 'Independent':
+                from .statistics import aggregation
+                stations_number = aggregation(stations_number, periodic_statistic_aggregation, axis=-1)
+
+            # do aggregation (if not calculating periodic statistic, or per station)
+            if (not periodic_statistic_mode) & (not per_station):
+                from .statistics import aggregation
+                if statistic_mode in ['Temporal|Spatial','Spatial|Temporal']:
+                    stations_number = aggregation(stations_number, statistic_aggregation, axis=-1)
+                elif statistic_mode == 'Flattened':
+                    stations_number = aggregation(stations_number, 'Median', axis=-1)
 
             return stations_number
     
@@ -198,18 +214,30 @@ class Stats(object):
             return n_exceed
 
     @staticmethod
-    def calculate_mda8(data):
+    def calculate_mda8(data, statistic_mode, statistic_aggregation, per_station,
+                       periodic_statistic_mode=None, periodic_statistic_aggregation=None):
         """ Calculate MDA8 (daily maximum 8 hour average) 
         """
         if data.size == 0:
             return np.NaN
         else:
+
+            #calculate MDA8
             start_inds = np.arange(0,17)
             end_inds = np.arange(8,25)
             mda8_arr = np.full((data.shape[0], data.shape[1], 17), np.NaN, dtype=np.float32)
             for window_ind, (start_ind, end_ind) in enumerate(zip(start_inds, end_inds)):
                 mda8_arr[:,:,window_ind] = np.nanmean(data[:,:,start_ind:end_ind], axis=-1)
             mda8 = np.nanmax(mda8_arr, axis=-1)
+
+            # do aggregation (if not calculating periodic statistic, or per station)
+            if (not periodic_statistic_mode) & (not per_station):
+                from .statistics import aggregation
+                if statistic_mode in ['Temporal|Spatial','Spatial|Temporal']:
+                    mda8 = aggregation(mda8, statistic_aggregation, axis=-1)
+                elif statistic_mode == 'Flattened':
+                    mda8 = aggregation(mda8, 'Median', axis=-1)
+
             return mda8
 
     @staticmethod
