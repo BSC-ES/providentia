@@ -805,17 +805,17 @@ def get_possible_resampling_resolutions(resolution):
     """ Get available lower resolutions. """
 
     if resolution in ['hourly', 'hourly_instantaneous']:
-        resolutions = ['3hourly', '6hourly', 'daily', 'monthly', 'annual']
+        resolutions = ['hourly', '3hourly', '6hourly', 'daily', 'monthly', 'annual']
     elif resolution in ['3hourly', '3hourly_instantaneous']:
-        resolutions = ['6hourly', 'daily', 'monthly', 'annual']
+        resolutions = ['3hourly', '6hourly', 'daily', 'monthly', 'annual']
     elif resolution in ['6hourly', '6hourly_instantaneous']:
-        resolutions = ['daily', 'monthly', 'annual']
+        resolutions = ['6hourly', 'daily', 'monthly', 'annual']
     elif resolution == 'daily':
-        resolutions = ['monthly', 'annual']
+        resolutions = ['daily', 'monthly', 'annual']
     elif resolution == 'monthly':
-        resolutions = ['annual']
+        resolutions = ['monthly', 'annual']
     elif resolution == 'annual':
-        resolutions = []
+        resolutions = ['annual']
 
     return resolutions
 

@@ -261,7 +261,7 @@ class Download(object):
 
             # reset domain and ensemble options for new section
             self.domain = []
-            self.ensemble_options = []
+            self.ensemble = []
 
         # show message in case experiments or observations were ignored
         if self.overwritten_files_flag == True:
@@ -1051,7 +1051,7 @@ class Download(object):
         res_spec_dir = []
 
         # get experiment id and the domain
-        exp_id, domain, ensemble_options = experiment.split("-")
+        exp_id, domain, ensemble = experiment.split("-")
 
         # initialise warning message and experiment exists boolean
         msg = ""
@@ -1144,11 +1144,11 @@ class Download(object):
                 # first try with the original species
                 try:
                     # if it is an ensemble member
-                    if ensemble_options.isdigit() or ensemble_options == 'allmembers':
+                    if ensemble.isdigit() or ensemble == 'allmembers':
                         res_spec = join(remote_dir,resolution,species)
                     # if it is an ensemble statistic
                     else:
-                        res_spec = join(remote_dir,resolution,"ensemble-stats",species+"_"+ensemble_options)
+                        res_spec = join(remote_dir,resolution,"ensemble-stats",species+"_"+ensemble)
   
                     self.sftp.stat(res_spec)
                     species_exists = True
@@ -1159,11 +1159,11 @@ class Download(object):
                         for mapping_speci in mapping_species[speci_to_process]:
                             try:
                                 # if it is an ensemble member
-                                if ensemble_options.isdigit() or ensemble_options == 'allmembers':
+                                if ensemble.isdigit() or ensemble == 'allmembers':
                                     res_spec = join(remote_dir,resolution, mapping_speci)
                                 # if it is an ensemble statistic
                                 else:
-                                    res_spec = join(remote_dir,resolution, "ensemble-stats", species + "_" + ensemble_options)
+                                    res_spec = join(remote_dir,resolution, "ensemble-stats", species + "_" + ensemble)
   
                                 self.sftp.stat(res_spec)  
                                 species_exists = True
@@ -1200,7 +1200,7 @@ class Download(object):
 
                 if nc_files:
                     # if it is an ensemble member
-                    if ensemble_options.isdigit() or ensemble_options == 'allmembers':
+                    if ensemble.isdigit() or ensemble == 'allmembers':
                         # get the domain, resolution and species from the path
                         domain, resolution, species = remote_dir.split('/')[-3:]
 
@@ -1217,14 +1217,14 @@ class Download(object):
                         # example: od550du_2019040212.nc (0,1)
                         if format == (0,1):
                             # when there is no ensemble option in the name only allmembers and 000 are valid
-                            if ensemble_options == '000' or ensemble_options == 'allmembers':
+                            if ensemble == '000' or ensemble == 'allmembers':
                                 nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
 
                         # example: od550du-000_2021020812.nc (1,1)
                         elif format == (1,1):
                             # filter by ensemble option in case that ensemble option is not allmembers
-                            if ensemble_options != 'allmembers':
-                                nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble_options,nc_files))
+                            if ensemble != 'allmembers':
+                                nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble,nc_files))
                            
                         else:
                             # TODO delete this in the future
@@ -1239,11 +1239,11 @@ class Download(object):
                         species = species.split("_",1)[0]
 
                         # filter the nc files to only get the ones that have the correct species and stats
-                        nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == ensemble_options, nc_files))
+                        nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == ensemble, nc_files))
                 
                 # if there is no options with the ensemble option, tell the user
                 if nc_files == []:
-                    msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble_options} ensemble option."
+                    msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble} ensemble option."
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -1260,10 +1260,10 @@ class Download(object):
                 else:
                     # create local directory 
                     # if it is an ensemble member
-                    if ensemble_options.isdigit() or ensemble_options == 'allmembers':
+                    if ensemble.isdigit() or ensemble == 'allmembers':
                         local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,species)
                     else:
-                        local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+ensemble_options)
+                        local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+ensemble)
                     
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
@@ -1318,7 +1318,7 @@ class Download(object):
         res_spec_dir = []
 
         # get experiment id and the domain
-        exp_id, domain, ensemble_options = experiment.split("-")
+        exp_id, domain, ensemble = experiment.split("-")
 
         # get experiment type
         for experiment_type, experiment_dict in interp_experiments.items():
@@ -1382,11 +1382,11 @@ class Download(object):
                 species = speci_to_process
 
                 # if it is an ensemble member
-                if ensemble_options.isdigit() or ensemble_options == 'allmembers':
+                if ensemble.isdigit() or ensemble == 'allmembers':
                     res_spec = join(esarchive_dir,resolution,species)
                 # if it is an ensemble statistic
                 else:
-                    res_spec = join(esarchive_dir,resolution,"ensemble-stats",species+"_"+ensemble_options)
+                    res_spec = join(esarchive_dir,resolution,"ensemble-stats",species+"_"+ensemble)
                 species_exists = os.path.exists(res_spec)
                 # if there are none, try with the mapped species
                 if species_exists is False:
@@ -1394,11 +1394,11 @@ class Download(object):
                     if speci_to_process in mapping_species:
                         for species in mapping_species[speci_to_process]:
                             # if it is an ensemble member
-                            if ensemble_options.isdigit() or ensemble_options == 'allmembers':
+                            if ensemble.isdigit() or ensemble == 'allmembers':
                                 res_spec = join(esarchive_dir,resolution,species)
                             # if it is an ensemble statistic
                             else:
-                                res_spec = join(esarchive_dir,resolution,"ensemble-stats",species+"_"+ensemble_options)
+                                res_spec = join(esarchive_dir,resolution,"ensemble-stats",species+"_"+ensemble)
   
                             species_exists = os.path.exists(res_spec)
                 
@@ -1430,7 +1430,7 @@ class Download(object):
 
                 if nc_files:
                     # if it is an ensemble member
-                    if ensemble_options.isdigit() or ensemble_options == 'allmembers':
+                    if ensemble.isdigit() or ensemble == 'allmembers':
                         # get the domain, resolution and species from the path
                         domain, resolution, species = esarchive_dir.split('/')[-3:]
 
@@ -1447,14 +1447,14 @@ class Download(object):
                         # example: od550du_2019040212.nc (0,1)
                         if format == (0,1):
                             # when there is no ensemble option in the name only allmembers and 000 are valid
-                            if ensemble_options == '000' or ensemble_options == 'allmembers':
+                            if ensemble == '000' or ensemble == 'allmembers':
                                 nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
                         
                         # example: od550du-000_2021020812.nc (1,1)
                         elif format == (1,1):
                             # filter by ensemble option in case that ensemble option is not allmembers
-                            if ensemble_options != 'allmembers':
-                                nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble_options,nc_files))
+                            if ensemble != 'allmembers':
+                                nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble,nc_files))
                            
                         else:
                             error = "It is not possible to copy this nc file type yet. Please, contact the developers.", nc_files
@@ -1468,11 +1468,11 @@ class Download(object):
                         species = species.split("_",1)[0]
 
                         # filter the nc files to only get the ones that have the correct species and stats
-                        nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == ensemble_options, nc_files))
+                        nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == ensemble, nc_files))
                         
                 # if there is no options with the ensemble option, tell the user
                 if nc_files == []:
-                    msg = f"There is no data available in esarchive for the {exp_id} experiment with the {domain} domain with the {ensemble_options} ensemble option."
+                    msg = f"There is no data available in esarchive for the {exp_id} experiment with the {domain} domain with the {ensemble} ensemble option."
                     show_message(self, msg, deactivate=initial_check)
                     continue
                 
@@ -1488,10 +1488,10 @@ class Download(object):
                 # copy the valid resolution specie date combinations
                 else:
                     # if it is an ensemble member
-                    if ensemble_options.isdigit() or ensemble_options == 'allmembers':
+                    if ensemble.isdigit() or ensemble == 'allmembers':
                         gpfs_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,species)
                     else:
-                        gpfs_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+ensemble_options)
+                        gpfs_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+ensemble)
                     
                     # create directories if they don't exist
                     if not os.path.exists(gpfs_dir):
@@ -1803,67 +1803,31 @@ class Download(object):
             files = {}
             for file, attributes in files_info.items():
                 if attributes["resolution"] == resolution:
-                    start_date = datetime.strptime(attributes["start_date"], "%Y-%m-%dT%H:%M:%S UTC")
-                    end_date = datetime.strptime(attributes["end_date"], "%Y-%m-%dT%H:%M:%S UTC")
+                    start_date = datetime.strptime(attributes["time_coverage_start"], "%Y-%m-%dT%H:%M:%S UTC")
+                    end_date = datetime.strptime(attributes["time_coverage_end"], "%Y-%m-%dT%H:%M:%S UTC")
                     for file_to_download in files_to_download:
                         file_to_download_yearmonth = file_to_download.split(f'{var}_')[1].split('.nc')[0]
                         file_to_download_start_date = datetime.strptime(file_to_download_yearmonth, "%Y%m")
                         file_to_download_end_date = datetime(file_to_download_start_date.year, file_to_download_start_date.month, 1) + relativedelta(months=1, seconds=-1)
                         if file_to_download_start_date <= end_date and file_to_download_end_date >= start_date:
                             # from filtered files, save those that are provided multiple times
-                            station = attributes["station_reference"]
+                            station = attributes["ebas_station_code"]
                             if station not in files:
                                 files[station] = []
                             if file not in files[station]:
                                 files[station].append(file)
 
+            # files = dict(list(files.items())[0:1])
             if len(files) != 0:
 
-                # get data and metadata for each file within period
+                # get data and metadata for each file within period and temporally average to standard times
                 start = time.time()
-                combined_ds_list, metadata, wavelength = get_data(files, var, actris_parameter, resolution, 
-                                                                  target_start_date, target_end_date)
+                combined_ds, metadata, wavelength = get_data(files, var, actris_parameter, resolution, 
+                                                             target_start_date, target_end_date, files_info,
+                                                             self.ghost_version)
                 end = time.time()
                 elapsed_minutes = (end - start) / 60
                 print(f"Time to read data: {elapsed_minutes:.2f} minutes")
-
-                # check if there is data after reading available files
-                if len(combined_ds_list) == 0:
-                    self.logger.info('No data were found')
-                    continue
-
-                # get flag dimension per station
-                N_flag_codes_dims = []
-                for ds in combined_ds_list:
-                    N_flag_codes_dims.append(ds.dims['N_flag_codes'])
-                
-                # get maximum number of flags across all stations
-                N_flag_codes_max = max(N_flag_codes_dims)
-                
-                # recreate flag variable so that all stations have the same dimension and can be concatenated, leave nan for unknown values
-                combined_ds_list_corrected_flag = []
-                for ds in combined_ds_list:
-                    flag_data = ds['flag']
-                    da_flag = xr.DataArray(
-                            np.full((flag_data.sizes['station'], flag_data.sizes['time'], N_flag_codes_max), np.nan),
-                            dims=["station", "time", "N_flag_codes"],
-                            coords={
-                                "time": flag_data.coords["time"],
-                            },
-                            name="flag"
-                        )
-                    da_flag[:, :, :flag_data.values.shape[-1]] = flag_data.values
-                    ds = ds.drop_vars('flag')
-                    ds['flag'] = da_flag
-                    combined_ds_list_corrected_flag.append(ds)
-            
-                # combine and create new dataset
-                self.logger.info('Combining files...')
-                start = time.time()
-                combined_ds = temporally_average_data(combined_ds_list_corrected_flag, resolution, var, self.ghost_version, target_start_date, target_end_date)
-                end = time.time()
-                elapsed_minutes = (end - start) / 60
-                print(f"Time to temporally average: {elapsed_minutes:.2f} minutes")
 
                 # add metadata
                 for key, value in metadata[resolution].items():

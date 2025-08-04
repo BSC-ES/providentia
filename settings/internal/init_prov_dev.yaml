@@ -34,7 +34,7 @@
   "alias": [],
   "exp_ids": [], # TODO remove if changed
   "domain": null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
-  "ensemble_options": null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
+  "ensemble": null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
   "dataset": null,
   "forecast": [],
   "experiment_types": [], # TODO remove if changed # interpolation
@@ -118,7 +118,7 @@
       "alias_flag",
       "experiments",
       "domain",
-      "ensemble_options",
+      "ensemble",
       "forecast",
       "experiment_types",
       "temporal_colocation",

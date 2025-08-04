@@ -315,6 +315,12 @@ class Library:
         # re-filter 
         self.apply_filter()
 
+        # for non-GHOST, we call update_metadata_fields after filtering to remove the stations that have
+        # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained 
+        # after filtering
+        if not self.reading_ghost:
+            update_metadata_fields(self)
+
         # set variable to know if data is in intial state or not
         if initialise:
             self.initialised = True
@@ -478,19 +484,26 @@ class Library:
                 # show warning if it is not
                 if chunk_resolution not in available_timeseries_chunk_resolutions:
                     msg = f'{plot_type} cannot be created because {chunk_resolution} '
-                    msg += 'is not an available chunking resolution.'
+                    msg += 'is not an available chunking resolution. '
                     if len(available_timeseries_chunk_resolutions) > 0:
                         msg += f'The available resolutions are: {available_timeseries_chunk_resolutions}'
                     show_message(self, msg)
                     return
 
-                # show warning if chunk stat is NStations and mode is not Temporal|Spatial
-                if chunk_stat == 'NStations' and self.statistic_mode != 'Temporal|Spatial':
+                # show warning if chunk stat is MDA8 and active resolution is not hourly
+                if (chunk_stat == 'MDA8') and (self.active_resolution != 'hourly'):
                     msg = f'{plot_type} cannot be created because {chunk_stat} '
-                    msg += 'it is only available when Temporal|Spatial mode is active.'
+                    msg += 'is only available when active resolution is hourly.'
                     show_message(self, msg)
                     return
-                    
+                
+                # show warning if chunk stat is MDA8 and chunk resolution is not daily
+                if (chunk_stat == 'MDA8') and (chunk_resolution != 'daily'):
+                    msg = f'{plot_type} cannot be created because {chunk_stat} '
+                    msg += 'is only available when chunk resolution is daily.'
+                    show_message(self, msg)
+                    return
+
         # get zstat information 
         zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type=plot_type) 
 
@@ -530,13 +543,13 @@ class Library:
         if base_plot_type in ['fairmode-target','fairmode-statsummary']:
             # warning for fairmode plots if species aren't PM2.5, PM10, NO2 or O3
             if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
-                msg = f'Fairmode target plot cannot be created for {speci}.'
+                msg = f'Fairmode plot cannot be created for {speci}.'
                 show_message(self, msg)
                 return
             # warning for fairmode plots if resolution is not hourly or daily
             if ((speci in ['sconco3', 'sconcno2'] and self.active_resolution != 'hourly') 
                 or (speci in ['pm10', 'pm2p5'] and (self.active_resolution not in ['hourly', 'daily']))):
-                msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
+                msg = 'Fairmode plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
                 show_message(self, msg)
                 return
             
