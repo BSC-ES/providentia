@@ -68,7 +68,7 @@ def create_ghost_variables_file(ghost_version):
                              ', '.join(standard_parameters[key]['ebas_parameter_name'])])
 
 
-def get_files_per_var(var):
+def get_files_per_var(download_instance, var):
     """Get all files available in ACTRIS server per variable
 
     Parameters
@@ -97,7 +97,7 @@ def get_files_per_var(var):
 
         # check if the response is valid and contains data
         if response.status_code != 200:
-            print(
+            download_instance.logger.error(
                 f"Error fetching page {page}. Status code: {response.status_code}")
             break
 
@@ -202,10 +202,23 @@ def create_time_pairs(time):
     return time_pairs
 
 
-def datetime_to_fractional_minutes_from_reference(dateFuture):
-    '''get reference start datetime'''
-    datePast = datetime.datetime(1,1,1,0,0)
-    difference = dateFuture - datePast
+def datetime_to_fractional_minutes_from_reference(date):
+    """Get datetime in fractional minutes
+
+    Parameters
+    ----------
+    date : datetime.datetime
+        Datetime
+
+    Returns
+    -------
+    int
+        Datetime in fractional minutes
+    """
+
+    past_date = datetime.datetime(1,1,1,0,0)
+    difference = date - past_date
+    
     return difference.total_seconds() / datetime.timedelta(minutes=1).total_seconds()
                     
 
@@ -309,7 +322,6 @@ def temporally_average_data(station_ds, var, ghost_version, standard_time_pairs,
     station_qa_data = []
 
     # remove station selection
-    station_ds = station_ds.isel(station=0)
     station_var = station_ds[var].values
     station_flag = station_ds['flag'].values
     station_time_bnds = station_ds['time_bnds'].values
@@ -320,11 +332,13 @@ def temporally_average_data(station_ds, var, ghost_version, standard_time_pairs,
 
     # get timedelta between start and end times
     valid_timedeltas =  np.array([(end_time - start_time).astype('timedelta64[m]').astype(np.float32) 
-                                    for (end_time, start_time) in zip(end_times, start_times)])
+                                  for (end_time, start_time) in zip(end_times, start_times)])
     
     # get measurement start and end times as integers
-    valid_start_times = np.array([datetime_to_fractional_minutes_from_reference(t) for t in pd.to_datetime(start_times).to_pydatetime()])
-    valid_end_times = np.array([datetime_to_fractional_minutes_from_reference(t) for t in pd.to_datetime(end_times).to_pydatetime()])
+    valid_start_times = np.array([datetime_to_fractional_minutes_from_reference(t) 
+                                  for t in pd.to_datetime(start_times).to_pydatetime()])
+    valid_end_times = np.array([datetime_to_fractional_minutes_from_reference(t) 
+                                for t in pd.to_datetime(end_times).to_pydatetime()])
 
     # initialise variable for finding relevant measurement indices
     last_relevant_index = 0
@@ -332,7 +346,11 @@ def temporally_average_data(station_ds, var, ghost_version, standard_time_pairs,
     for i, (standard_start_date, standard_end_date) in enumerate(standard_time_pairs):
         
         # get window indices
-        window_indices, right_overlap, left_overlap = get_window_indices(standard_start_date, standard_end_date, valid_start_times, valid_end_times, last_relevant_index)
+        window_indices, right_overlap, left_overlap = get_window_indices(standard_start_date, 
+                                                                         standard_end_date, 
+                                                                         valid_start_times, 
+                                                                         valid_end_times, 
+                                                                         last_relevant_index)
 
         # only one overlap value
         if len(window_indices) == 1:
@@ -423,7 +441,7 @@ def is_wavelength_var(actris_parameter):
     return wavelength_var
 
 
-def get_files_info(files, var, path):
+def get_files_info(download_instance, files, var, path):
     """Read variables, resolution, start date and end date from all files in ACTRIS server per variable.
 
     Parameters
@@ -482,7 +500,8 @@ def get_files_info(files, var, path):
         with open(path, 'w') as file:
             yaml.dump(datasets, file, default_flow_style=False)
     else:
-        print(f'Error: No data could be found for {var}')
+        download_instance.logger.error(f'Error: No data could be found for {var}')
+        sys.exit(1)
 
     return files_info
 
@@ -575,8 +594,8 @@ def select_station_file(urls, files_info):
     return url
 
 
-def get_data(files, var, actris_parameter, resolution, target_start_date, target_end_date, files_info, 
-             ghost_version):
+def get_data(download_instance, files, var, actris_parameter, resolution, target_start_date, target_end_date, 
+             files_info, ghost_version):
     """Read variable and metadata data standarising dimensions
 
     Parameters
@@ -604,9 +623,8 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
         Wavelength
     """
 
-    # combine datasets that have the same variable and resolution
+    # initialise metadata
     metadata = {}
-    metadata[resolution] = {}
 
     # get EBAS component
     ebas_component = variable_mapping[actris_parameter]['var']
@@ -672,19 +690,19 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
                 continue
 
         except Exception as error:
-            errors[station] = f'{i} - Error opening file: {error}.'
+            errors[station] = f'Error opening file: {error}.'
             continue
 
         warnings[station] = ""
 
         # remove time duplicates if any (keep first)
         ds = ds.sel(time=~ds['time'].to_index().duplicated())
-
+        
         # select data in period range
         ds = ds.sel(time=slice(target_start_date, target_end_date))
-
-        # assign station code as dimension
-        ds = ds.expand_dims(dim={'station': [i]})
+        if ds.time.size == 0:
+            errors[station] = f'No data available after filtering by time.'
+            continue
 
         # rename qc dimension
         ds = ds.rename_dims({f'{possible_var}_qc_flags': 'N_flag_codes'})
@@ -748,29 +766,14 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
             errors[station] += f"dictionary ({variable_mapping[actris_parameter]['units']})."
             continue
 
-        # save metadata
-        for ghost_key, ebas_key in metadata_dict.items():
-            # create key if it does not exist
-            if ghost_key not in metadata[resolution].keys():
-                metadata[resolution][ghost_key] = []
-
-            # search value in var attrs
-            if ebas_key in da_var.attrs.keys():
-                metadata[resolution][ghost_key].append(da_var.attrs[ebas_key])
-            # search value in ds attrs
-            elif ebas_key in ds.attrs.keys():
-                metadata[resolution][ghost_key].append(ds.attrs[ebas_key])
-            # not found -> nan
-            else:
-                metadata[resolution][ghost_key].append(np.nan)
-
         # remove all attributes except units
+        da_var_attrs = copy.deepcopy(da_var.attrs)
         da_var.attrs = {key: value for key,
                         value in da_var.attrs.items() if key in ['ebas_unit', 'ebas_station_code']}
 
         # read quality control data
         flag_data = ds[f'{possible_var}_qc'].transpose(
-            "station", "time", "N_flag_codes")
+            "time", "N_flag_codes")
 
         # rename variable to BSC standards
         station_ds = da_var.to_dataset(name=var)
@@ -783,11 +786,36 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
 
         # temporally average data from original times to standard times
         station_averaged_data, station_flag_data, station_qa_data = temporally_average_data(station_ds, var, ghost_version, standard_time_pairs, vfunc)
+        if np.isnan(station_averaged_data).all():
+            warnings[station] += 'No data after temporal averaging. '
+            continue
+
+        # save metadata
+        for ghost_key, ebas_key in metadata_dict.items():
+            # create key if it does not exist
+            if ghost_key not in metadata.keys():
+                metadata[ghost_key] = []
+
+            # search value in var attrs
+            if ebas_key in da_var_attrs.keys():
+                metadata[ghost_key].append(da_var_attrs[ebas_key])
+            # search value in ds attrs
+            elif ebas_key in ds.attrs.keys():
+                metadata[ghost_key].append(ds.attrs[ebas_key])
+            # not found -> nan
+            else:
+                metadata[ghost_key].append(np.nan)
 
         # save
         averaged_data[i, :] = station_averaged_data
         averaged_flag_data[i, :, :] = station_flag_data
         averaged_qa_data[i, :, :] = station_qa_data
+
+    # drop stations that have nan for all times
+    mask = ~np.isnan(averaged_data).all(axis=1)
+    averaged_data = averaged_data[mask]
+    averaged_flag_data = averaged_flag_data[mask, :]
+    averaged_qa_data = averaged_qa_data[mask, :]
 
     # create dataset with averaged data
     units = variable_mapping[actris_parameter]['units']
@@ -826,16 +854,16 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
 
     # show errors
     if len(errors) > 0:
-        print(f'Collected errors ({len(errors)}):')
+        download_instance.logger.info(f'Collected errors ({len(errors)}):')
         for file, error in errors.items():
-            print(f'{file} - Error: {error}')
+            download_instance.logger.info(f'{file} - Error: {error}')
 
     # show warnings
     if len(warnings) > 0 and all(len(warning) > 0 for warning in warnings.values()):
-        print(f'Collected warnings ({len(warnings)}):')
+        download_instance.logger.info(f'Collected warnings ({len(warnings)}):')
         for file, warning in warnings.items():
             if len(warning) > 0:
-                print(f'{file} - Warning: {warning}')
+                download_instance.logger.info(f'{file} - Warning: {warning}')
 
     return combined_ds, metadata, wavelength
 
