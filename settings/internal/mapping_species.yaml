@@ -101,3 +101,6 @@ vconcaerobin21:
   - loaddu
 vconcaerobin22:
   - loaddu
+sconcdu:
+  - concdu
+  - sconcducoarse
