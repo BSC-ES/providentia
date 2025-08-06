@@ -20,8 +20,7 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from getpass import getpass
 
-from .actris import (get_files_path, temporally_average_data, get_data,
-                     get_files_per_var, is_wavelength_var, get_files_to_download,
+from .actris import (get_files_path, get_data, get_files_per_var, is_wavelength_var, get_files_to_download,
                      get_files_info, parameters_dict)
 from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import ProvConfiguration, load_conf
@@ -1659,7 +1658,7 @@ class Download(object):
             if not os.path.isfile(path):
                 # get files information
                 self.logger.info(f'\nFile containing information of the files available in Thredds for {var} ({path}) does not exist, creating.')
-                combined_data = get_files_per_var(var)
+                combined_data = get_files_per_var(self, var)
                 all_files = combined_data[var]['files']
                 files_info = get_files_info(self, all_files, var, path)
                     
@@ -1683,7 +1682,7 @@ class Download(object):
                     files_info = {k: v for k, v in files_info.items() if k.strip() and v}
                 else:
                     # get files information
-                    combined_data = get_files_per_var(var)
+                    combined_data = get_files_per_var(self, var)
                     all_files = combined_data[var]['files']
                     files_info = get_files_info(self, all_files, var, path)
             
@@ -1717,38 +1716,10 @@ class Download(object):
                 start = time.time()
                 combined_ds, metadata, wavelength = get_data(self, files, var, actris_parameter, resolution, 
                                                              target_start_date, target_end_date, files_info,
-                                                             self.ghost_version)
+                                                             self.ghost_version, self.n_cpus)
                 end = time.time()
                 elapsed_minutes = (end - start) / 60
                 print(f"Time to read data: {elapsed_minutes:.2f} minutes")
-
-                # add metadata
-                for key, value in metadata.items():
-                    if key in ['latitude', 'longitude']:
-                        value = [float(val) for val in value]
-                    elif key in ['altitude', 'sampling_height']:
-                        value = [float(val.replace('m', '').strip()) if isinstance(val, str) else val for val in value]
-                    combined_ds[key] = xr.Variable(data=value, dims=('station'))
-
-                # calculate measurement_altitude if altitude and sampling_height exist
-                if ('altitude' in combined_ds.keys()) and ('sampling_height' in combined_ds.keys()):
-                    value = combined_ds['altitude'].values + combined_ds['sampling_height'].values
-                    combined_ds['measurement_altitude'] = xr.Variable(data=value, dims=('station'))
-
-                # add units for lat and lon
-                # TODO: Check attrs geospatial_lat_units and geospatial_lon_units
-                combined_ds.latitude.attrs['units'] = 'degrees_north'
-                combined_ds.longitude.attrs['units'] = 'degrees_east'
-
-                # add general attrs
-                combined_ds.attrs['data_license'] = 'BSD-3-Clause. Copyright 2025 Alba Vilanova Cortezón'
-                combined_ds.attrs['source'] = 'Observations'
-                combined_ds.attrs['institution'] = 'Barcelona Supercomputing Center'
-                combined_ds.attrs['creator_name'] = 'Alba Vilanova Cortezón'
-                combined_ds.attrs['creator_email'] = 'alba.vilanova@bsc.es'
-                combined_ds.attrs['application_area'] = 'Monitoring atmospheric composition'
-                combined_ds.attrs['domain'] = 'Atmosphere'
-                combined_ds.attrs['observed_layer'] = 'Land surface'
 
                 # save data per year and month
                 path = join(self.nonghost_root, f'actris/actris/{resolution}/{var}')
