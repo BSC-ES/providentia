@@ -429,15 +429,15 @@ class ProvConfiguration:
             else:
                 return []
 
-        elif key == 'ensemble_options': # TODO maybe there's no need of ensemble num because it is included on experiments
-            # parse ensemble_options
+        elif key == 'ensemble': # TODO maybe there's no need of ensemble num because it is included on experiments
+            # parse ensemble
 
             if value is not None:
                 # treat leaving the field blank as default
                 if value == '':
                     return self.var_defaults[key]
 
-                # split list, if only one ensemble_options, then creates list of one element
+                # split list, if only one ensemble, then creates list of one element
                 ensemble_opts = []
                 for opt in str(value).split(","):
                     # if it is a number, then make it 3 digits, if not it stays as it is
@@ -629,7 +629,7 @@ class ProvConfiguration:
         return value
 
     def decompose_experiments(self):
-        """ Get experiment components (experiment-domain-ensemble_options) and fill the class variables with their value."""
+        """ Get experiment components (experiment-domain-ensemble) and fill the class variables with their value."""
 
         # get possible domains
         possible_domains = default_values["domain"]
@@ -645,14 +645,14 @@ class ProvConfiguration:
 
         # get original domain and ensemble options as passed in the configuration file
         config_domain = copy.deepcopy(self.read_instance.domain) 
-        config_ensemble_options = copy.deepcopy(self.read_instance.ensemble_options)
+        config_ensemble = copy.deepcopy(self.read_instance.ensemble)
 
         # initialize experiment id, domain and ensemble options for each of the experiments
         exp_id, exp_dom, exp_ens = None, None, None
 
         # initialize lists to hold domains/ensemble options inside the experiments
         exp_domains_list = []
-        exp_ensemble_options_list = []
+        exp_ensemble_list = []
         exp_ids_list = []
 
         # iterate through all the experiments
@@ -694,7 +694,7 @@ class ProvConfiguration:
                             "   · 'av_an' for ensemble analysis average"
                             self.read_instance.logger.error(error)
                             sys.exit(1)
-                    exp_ensemble_options_list.append(exp_ens)
+                    exp_ensemble_list.append(exp_ens)
 
             # [expID]-[domain]-[ensembleNum]
             elif len(split_experiment) == 3:               
@@ -711,7 +711,7 @@ class ProvConfiguration:
                         "   · 'av_an' for ensemble analysis average"
                         self.read_instance.logger.error(error)
                         sys.exit(1)
-                exp_ensemble_options_list.append(exp_ens)
+                exp_ensemble_list.append(exp_ens)
                         
             # if experiment is composed by more than 3 parts, exit
             elif len(split_experiment) > 3:
@@ -730,14 +730,14 @@ class ProvConfiguration:
                 self.read_instance.domain = exp_domains_list
             
             # throw error if ensemble options has been defined in configuration file and in experiment name
-            if exp_ens and config_ensemble_options:
-                error = f"Error: Unable to set ensemble option(s) as {', '.join(config_ensemble_options)} because the "
+            if exp_ens and config_ensemble:
+                error = f"Error: Unable to set ensemble option(s) as {', '.join(config_ensemble)} because the "
                 error +=  f"experiment {self.read_instance.experiments[exp_i]} already contains the ensemble option."                  
                 self.read_instance.logger.error(error)
                 sys.exit(1)
             # if there is no ensemble option, fill it with the list from the experiments names
-            elif not config_ensemble_options:
-                self.read_instance.ensemble_options = exp_ensemble_options_list
+            elif not config_ensemble:
+                self.read_instance.ensemble = exp_ensemble_list
             
             # add experiment id to the experiment ids list
             self.read_instance.exp_ids = exp_ids_list
@@ -745,11 +745,11 @@ class ProvConfiguration:
         # when there's no domain/ensemble opt passed in the config file or got from the experiment, then set the default option to true
         if not self.read_instance.domain:
             self.default_domain = True
-        if not self.read_instance.ensemble_options:
-            self.default_ensemble_options = True
+        if not self.read_instance.ensemble:
+            self.default_ensemble = True
 
-        # set the bool which tells you if domain/ensemble_options have to be combined as it was done in interpolation mode or not
-        self.combined_domain, self.combined_ensemble_options = bool(config_domain or self.default_domain), bool(config_ensemble_options or self.default_ensemble_options)
+        # set the bool which tells you if domain/ensemble have to be combined as it was done in interpolation mode or not
+        self.combined_domain, self.combined_ensemble = bool(config_domain or self.default_domain), bool(config_ensemble or self.default_ensemble)
 
     def check_experiment(self, full_experiment, deactivate_warning):
         # TODO Check if i can only import one time
@@ -1123,7 +1123,7 @@ class ProvConfiguration:
         # TODO and should it be provconf or no????
         # initialise possible domains
         self.default_domain = False
-        self.default_ensemble_options = False
+        self.default_ensemble = False
 
         # make sure there are experiments in interpolation
         if self.read_instance.interpolation and (len(self.read_instance.experiments) == 0):
@@ -1143,18 +1143,18 @@ class ProvConfiguration:
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             self.read_instance.domain = default
 
-        # check have ensemble_options information, TODO ONLY FOR INTERPOLATION
+        # check have ensemble information, TODO ONLY FOR INTERPOLATION
         # TODO think if we need one separated variable for this one because it is already included on experiments
         # if report, throw message, stating are using default instead
         # TODO maybe think this a bit better, if i dont pass it it should check better if i already passed it in experiments and so
-        if self.read_instance.experiments and self.default_ensemble_options:
+        if self.read_instance.experiments and self.default_ensemble:
             if self.read_instance.interpolation:
                 default = ["000"]
             else:
-                default = default_values['ensemble_options']
-            msg = "Ensemble options (ensemble_options) was not defined in the configuration file. Using '{}' as default.".format(default)
+                default = default_values['ensemble']
+            msg = "Ensemble options (ensemble) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
-            self.read_instance.ensemble_options = default
+            self.read_instance.ensemble = default
 
         # check if alias can be set (in case there is an alias)
         if self.read_instance.alias:
@@ -1163,7 +1163,7 @@ class ProvConfiguration:
                 # if all experiments are full length ([expID]-[domain]-[ensembleNum]) or there's only one experiment with only one possible combination,
                 # then they can be set as alias     
                 if all([len(exp.split("-"))==3 for exp in self.read_instance.experiments]) or \
-                    (len(self.read_instance.experiments) == 1 and len(self.read_instance.domain) == 1 and len(self.read_instance.ensemble_options) == 1):
+                    (len(self.read_instance.experiments) == 1 and len(self.read_instance.domain) == 1 and len(self.read_instance.ensemble) == 1):
                     self.read_instance.alias_flag = True
             
             # show warning if alias not possible to be set
@@ -1193,20 +1193,20 @@ class ProvConfiguration:
 
         # join experiments
         for exp_i, experiment in enumerate(self.read_instance.exp_ids):
-            # experiment, domain, ensemble_options
-            if self.combined_domain and self.combined_ensemble_options:
-                final_experiments += [f'{experiment}-{domain}-{ens_opt}' for domain in self.read_instance.domain for ens_opt in self.read_instance.ensemble_options]
+            # experiment, domain, ensemble
+            if self.combined_domain and self.combined_ensemble:
+                final_experiments += [f'{experiment}-{domain}-{ens_opt}' for domain in self.read_instance.domain for ens_opt in self.read_instance.ensemble]
             else:
-                if self.combined_domain or self.combined_ensemble_options:
-                    # experiment-ensemble_options, domain
+                if self.combined_domain or self.combined_ensemble:
+                    # experiment-ensemble, domain
                     if self.combined_domain:
-                        final_experiments += [f'{experiment}-{domain}-{self.read_instance.ensemble_options[exp_i]}' for domain in self.read_instance.domain]
-                    # experiment-domain, ensemble_options 
+                        final_experiments += [f'{experiment}-{domain}-{self.read_instance.ensemble[exp_i]}' for domain in self.read_instance.domain]
+                    # experiment-domain, ensemble 
                     else:
-                        final_experiments += [f'{experiment}-{self.read_instance.domain[exp_i]}-{ens_opt}' for ens_opt in self.read_instance.ensemble_options]
-                # experiment-domain-ensemble_options
+                        final_experiments += [f'{experiment}-{self.read_instance.domain[exp_i]}-{ens_opt}' for ens_opt in self.read_instance.ensemble]
+                # experiment-domain-ensemble
                 else:
-                    final_experiments.append(f'{experiment}-{self.read_instance.domain[exp_i]}-{self.read_instance.ensemble_options[exp_i]}')
+                    final_experiments.append(f'{experiment}-{self.read_instance.domain[exp_i]}-{self.read_instance.ensemble[exp_i]}')
 
         for exp_i, experiment in enumerate(final_experiments):
             exp_is_valid, valid_exp_list = check_experiment_fun(experiment, deactivate_warning)

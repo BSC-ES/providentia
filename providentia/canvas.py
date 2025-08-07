@@ -330,12 +330,25 @@ class Canvas(FigureCanvas):
             if (chunk_stat != 'None') and (chunk_resolution != 'None'):
                 available_chunk_resolutions = get_possible_resampling_resolutions(self.read_instance.active_resolution)
                 if chunk_resolution not in available_chunk_resolutions:
-                    msg = "Timeseries chunk resolution and statistic will be set to 'None' "
-                    msg += f"because resampling resolution ({self.read_instance.active_resolution}) "
-                    msg += f"is coarser or equal to the set chunk resolution ({chunk_resolution})."
-                    show_message(self.read_instance, msg)
+                    #msg = "Timeseries chunk resolution and statistic will be set to 'None' "
+                    #msg += f"because resampling resolution ({self.read_instance.active_resolution}) "
+                    #msg += f"is coarser or equal to the set chunk resolution ({chunk_resolution})."
+                    #show_message(self.read_instance, msg)
                     self.timeseries_chunk_stat.setCurrentText("None")
                     self.timeseries_chunk_resolution.setCurrentText("None")
+
+            # disable MDA8 stat from periodic, statsummary and timeseries chunk statistic plots if active resolution is not hourly
+            self.read_instance.block_MPL_canvas_updates = True
+            self.handle_statsummary_statistics_update()
+            for stat in self.active_statsummary_stats['basic']:
+                if 'MDA8' in stat:
+                    self.active_statsummary_stats['basic'].remove(stat)
+            for stat in self.active_statsummary_stats['expbias']:
+                if 'MDA8' in stat:
+                    self.active_statsummary_stats['expbias'].remove(stat)
+            self.handle_periodic_statistic_update()
+            self.update_timeseries_chunk_statistics()
+            self.read_instance.block_MPL_canvas_updates = False
 
             # update mouse cursor to a waiting cursor
             if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
@@ -362,9 +375,6 @@ class Canvas(FigureCanvas):
                     # update associated plots with selected stations
                     self.update_associated_active_dashboard_plots()
 
-                    # update timeseries chunk resolution
-                    self.handle_timeseries_chunk_statistic_update()
-
             # draw changes
             self.figure.canvas.draw_idle()
 
@@ -378,6 +388,9 @@ class Canvas(FigureCanvas):
         """ Function that updates plotted map z statistic and updates associated plots. """
 
         if not self.read_instance.block_MPL_canvas_updates:
+
+            # make copy of current full array relative selected stations indices
+            self.previous_relative_selected_station_inds = copy.deepcopy(self.relative_selected_station_inds)
 
             # update plotted map z statistic
             self.update_map_z_statistic()
@@ -415,25 +428,12 @@ class Canvas(FigureCanvas):
             # update aggregation statistic
             self.update_aggregation_statistic()
 
+            # update timeseries aggregation statistic
+            self.update_timeseries_aggregation_statistic()
+            
             # handle special cases for some chunk statistics
             chunk_stat = self.timeseries_chunk_stat.currentText()
             chunk_resolution = self.timeseries_chunk_resolution.currentText()
-
-            if (self.read_instance.statistic_mode in ['Spatial|Temporal', 'Flattened']):
-                if (chunk_stat == 'NStations') and (chunk_resolution != 'None'):
-                    msg = 'It is not possible to get the number of stations when the '
-                    msg += f'statistic mode {self.read_instance.statistic_mode} is active. '
-                    msg += 'Chunking will be deactivated.'
-                    show_message(self.read_instance, msg)
-                    self.timeseries_chunk_stat.setCurrentText("None")
-                    self.timeseries_chunk_resolution.setCurrentText("None")
-
-            elif (chunk_stat == 'MDA8') & (chunk_resolution != 'daily'):
-                    msg = 'MDA8 can only be calculated when a daily chunking resolution is set. '
-                    msg += 'Chunking will be deactivated.'
-                    show_message(self.read_instance, msg)
-                    self.timeseries_chunk_stat.setCurrentText("None")
-                    self.timeseries_chunk_resolution.setCurrentText("None")
                 
             # update chunk statistic
             self.update_timeseries_chunk_statistics()
@@ -534,7 +534,6 @@ class Canvas(FigureCanvas):
             self.read_instance.block_MPL_canvas_updates = True
             # update plot statistics
             self.handle_map_z_statistic_update()
-            self.handle_timeseries_statistic_update()
             self.handle_resampling_update()
             self.handle_timeseries_chunk_statistic_update()
             self.handle_periodic_statistic_update()
@@ -765,13 +764,13 @@ class Canvas(FigureCanvas):
                 if plot_type in ['fairmode-target', 'fairmode-statsummary']:
                     speci = self.read_instance.networkspeci.split('|')[1]
                     if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:
-                        msg = f'Fairmode target plot cannot be created for {speci}.'
+                        msg = f'Fairmode plot cannot be created for {speci}.'
                         show_message(self.read_instance, msg)
                         self.read_instance.handle_layout_update('None', sender=plot_type_position)
                         return
                     if ((speci in ['sconco3', 'sconcno2'] and self.read_instance.active_resolution != 'hourly') 
                         or (speci in ['pm10', 'pm2p5'] and (self.read_instance.active_resolution not in ['hourly', 'daily']))):
-                        msg = 'Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
+                        msg = 'Fairmode plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).'
                         show_message(self.read_instance, msg)
                         self.read_instance.handle_layout_update('None', sender=plot_type_position)
                         return
@@ -1069,21 +1068,20 @@ class Canvas(FigureCanvas):
 
         return None
 
-    def handle_timeseries_statistic_update(self):
-        """ Function that handles update of plotted timeseries statistic
-            upon interaction with timeseries statistic combobox.
+    def handle_timeseries_aggregation_statistic_update(self):
+        """ Function that handles update of timeseries aggregation statistic
+            upon interaction with timeseries aggregation statistic combobox.
         """
 
         if not self.read_instance.block_config_bar_handling_updates:  
         
             # update mouse cursor to a waiting cursor
             if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
-                self.read_instance.cursor_function = 'handle_timeseries_statistic_update'
+                self.read_instance.cursor_function = 'handle_timeseries_aggregation_statistic_update'
                 QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-            # update statistic
-            self.read_instance.selected_timeseries_statistic_aggregation = self.timeseries_stat.currentText()
-            self.read_instance.timeseries_statistic_aggregation = self.read_instance.selected_timeseries_statistic_aggregation
+            # update timeseries aggregation statistic
+            self.update_timeseries_aggregation_statistic()
 
             # update plotted timeseries statistic
             if not self.read_instance.block_MPL_canvas_updates:
@@ -1100,7 +1098,7 @@ class Canvas(FigureCanvas):
             self.figure.canvas.draw_idle()
 
             # restore mouse cursor to normal
-            if self.read_instance.cursor_function == 'handle_timeseries_statistic_update':
+            if self.read_instance.cursor_function == 'handle_timeseries_aggregation_statistic_update':
                 QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
@@ -1171,6 +1169,10 @@ class Canvas(FigureCanvas):
                 available_periodic_stats = copy.deepcopy(self.read_instance.basic_z_stats)
             else:
                 available_periodic_stats = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
+
+            # remove MDA8 from available stats if active resolution is not hourly
+            if ('MDA8' in available_periodic_stats) & (self.read_instance.active_resolution != 'hourly'):
+                available_periodic_stats = np.delete(available_periodic_stats, np.where(available_periodic_stats == 'MDA8')[0]) 
 
             # if base_zstat is empty string, it is because fields are being initialised for the first time
             if zstat == '':
@@ -1261,7 +1263,7 @@ class Canvas(FigureCanvas):
         active_statsummary_stats = [stat for sublist in 
                                     list(active_statsummary_stats.values()) 
                                     for stat in sublist]
-
+    
         return active_statsummary_stats
     
     def check_statsummary_stats(self):
@@ -1277,6 +1279,9 @@ class Canvas(FigureCanvas):
             items = list(copy.deepcopy(self.read_instance.basic_and_bias_z_stats))
         else:
             items = list(copy.deepcopy(self.read_instance.basic_z_stats))
+        # remove MDA8 as option if active resolution is not hourly
+        if ('MDA8' in items) & (self.read_instance.active_resolution != 'hourly'):
+            items.remove('MDA8')
         if periodic_cycle != 'None':
             items = [stat + '-' + periodic_cycle.lower() for stat in items]
         self.statsummary_stat.clear()
@@ -1301,7 +1306,7 @@ class Canvas(FigureCanvas):
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
-            
+
             # update mouse cursor to a waiting cursor
             if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
                 self.read_instance.cursor_function = 'handle_statsummary_statistics_update'
@@ -1325,7 +1330,7 @@ class Canvas(FigureCanvas):
                 self.active_statsummary_stats = {'basic': self.get_active_statsummary_stats('basic'),
                                                  'expbias': self.get_active_statsummary_stats('expbias')}
 
-                # check stats for the selected periodic cycle
+                # check stats for the selected stats
                 self.check_statsummary_stats()
 
             # get stats from selection
@@ -3446,15 +3451,10 @@ class Canvas(FigureCanvas):
             available_timeseries_chunk_stats = ["None",] + list(copy.deepcopy(self.read_instance.basic_and_bias_z_stats))
 
         # update available timeseries chunk resolutions
-        available_timeseries_chunk_resolutions = ["None",] + \
-            get_possible_resampling_resolutions(self.read_instance.active_resolution)
-                
-        # the statistic number of stations only make sense when Temporal|Spatial mode is active
-        if self.read_instance.statistic_mode != 'Temporal|Spatial':
-            available_timeseries_chunk_stats.remove('NStations')
+        available_timeseries_chunk_resolutions = ["None",] + get_possible_resampling_resolutions(self.read_instance.active_resolution)
 
-        # if chunk resolution has no daily resolution, then MDA8 cannot be available as stat
-        if 'daily' not in available_timeseries_chunk_resolutions:
+        # if active resolution is not hourly, then MDA8 cannot be available as stat
+        if self.read_instance.active_resolution != 'hourly':
             available_timeseries_chunk_stats.remove('MDA8')
             if chunk_stat == 'MDA8':
                 chunk_stat = 'None'
@@ -3492,13 +3492,6 @@ class Canvas(FigureCanvas):
         if chunk_resolution in available_timeseries_chunk_resolutions:
             self.timeseries_chunk_resolution.setCurrentText(chunk_resolution)
 
-        # disable spatial aggregation statistic
-        chunk_resolution = self.timeseries_chunk_resolution.currentText()
-        if chunk_stat != 'None' and chunk_resolution != 'None':
-            self.timeseries_stat.setEnabled(False)
-        else:
-            self.timeseries_stat.setEnabled(True)
-
     def update_aggregation_statistic(self):
         """ Update general aggregation statistic
         """
@@ -3508,6 +3501,17 @@ class Canvas(FigureCanvas):
     
         # update statistic in memory
         self.read_instance.statistic_aggregation = self.read_instance.selected_statistic_aggregation 
+
+    def update_timeseries_aggregation_statistic(self):
+        """ Update timeseries aggregation statistic
+        """
+        
+        # get statistic
+        self.read_instance.selected_timeseries_statistic_aggregation = self.timeseries_stat.currentText()
+    
+        # update statistic in memory
+        self.read_instance.timeseries_statistic_aggregation = self.read_instance.selected_timeseries_statistic_aggregation
+
 
     def update_option_on_combobox(self, event_source, index, uncheck=True):
         """ Check or uncheck option in combobox dropdown
