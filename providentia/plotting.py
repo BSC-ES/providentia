@@ -1201,7 +1201,7 @@ class Plotting:
 
                     # get grouped data per period
                     grouped_data = group_periodic(self.read_instance, self.canvas_instance, networkspeci, 
-                                                  violin_resolution, False, 
+                                                  violin_resolution, False, self.read_instance.statistic_mode, '',
                                                   self.canvas_instance.selected_station_data[networkspeci]['active_mode'])
 
                     # iterate through periods
