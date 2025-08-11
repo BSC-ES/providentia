@@ -1,0 +1,22 @@
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FN/M2/MM/FNM2-MM7C.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: 305-2000
+  ebas_measurement_height: 10.0 m
+  ebas_method_ref: CA09L_IC_aerosol
+  ebas_revision_date: '20191220175129'
+  ebas_station_altitude: 210.0 m
+  ebas_station_code: CA0420G
+  ebas_station_latitude: '82.4991455078'
+  ebas_station_longitude: '-62.3415260315'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: 2003-01-07T02:43:00 UTC
+  time_coverage_start: 1981-01-05T09:45:56 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methanesulfonic_acid
+  - methanesulfonic_acid_qc
+  - methanesulfonic_acid_ebasmetadata
