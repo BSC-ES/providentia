@@ -571,7 +571,8 @@ def select_station_file(urls, files_info):
         urls_data_levels = np.unique(attrs_dict['ebas_data_level'])
         # if we have different data levels
         if len(urls_data_levels) > 1:
-            is_max = attrs_dict['ebas_data_level'] == attrs_dict['ebas_data_level'][np.argmax(np.float32(attrs_dict['ebas_data_level']))]
+            max_level_ind = np.nanargmax(np.float32([np.nan if x == '' else x for x in attrs_dict['ebas_data_level']]))
+            is_max = attrs_dict['ebas_data_level'] == attrs_dict['ebas_data_level'][max_level_ind]
             
             # remove urls if the data level is not the maximum of all files
             for attr in ['ebas_statistics', 'ebas_data_level', 'ebas_revision_date']:
@@ -627,7 +628,7 @@ def read_data(args):
             return station, local_errors, local_warnings
 
     except Exception as error:
-        local_errors = f'Error opening file: {error}.'
+        local_errors = f'Opening file: {error}.'
         return station, local_errors, local_warnings
   
     # remove time duplicates if any (keep first)
