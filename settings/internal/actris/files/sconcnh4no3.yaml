@@ -1,0 +1,42 @@
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4T/GZ/5H/4TGZ-5HDP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: teflon_and_nylon_filter_pm1
+  ebas_method_ref: CH02L_ic_aero
+  ebas_revision_date: '20150612063126'
+  ebas_station_altitude: 3578.0 m
+  ebas_station_code: CH0001G
+  ebas_station_latitude: '46.5475'
+  ebas_station_longitude: '7.985'
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: 2013-12-31T00:00:00 UTC
+  time_coverage_start: 1999-06-17T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - ammonium_nitrate
+  - ammonium_nitrate_qc
+  - ammonium_nitrate_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N6/7N/8W/N67N-8WPG.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: teflon_and_nylon_filter_tsp
+  ebas_method_ref: CH02L_ic_aero
+  ebas_revision_date: '20150612063124'
+  ebas_station_altitude: 3578.0 m
+  ebas_station_code: CH0001G
+  ebas_station_latitude: '46.5475'
+  ebas_station_longitude: '7.985'
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: 2013-12-31T00:00:00 UTC
+  time_coverage_start: 1999-06-17T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - ammonium_nitrate
+  - ammonium_nitrate_qc
+  - ammonium_nitrate_ebasmetadata

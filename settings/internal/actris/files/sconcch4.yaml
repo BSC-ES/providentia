@@ -1,0 +1,1377 @@
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/25/FU/X7/25FU-X7CV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SilcoCan_fr18
+  ebas_measurement_height: 0.5 m
+  ebas_method_ref: DE20L_FZJ_CFKADS2270_IMP_2022
+  ebas_revision_date: '20221101000000'
+  ebas_station_altitude: 309.0 m
+  ebas_station_code: FR0018R
+  ebas_station_latitude: '48.633333'
+  ebas_station_longitude: '-0.45'
+  resolution: daily
+  time_coverage_end: 2022-07-19T13:02:00 UTC
+  time_coverage_start: 2022-07-12T12:10:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3D/84/FS/3D84-FSAE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: CFKADS2262
+  ebas_method_ref: NO01L_picarro_tower
+  ebas_revision_date: '20240804132827'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: '58.38853'
+  ebas_station_longitude: '8.252'
+  resolution: hourly
+  time_coverage_end: 2021-01-01T00:00:00 UTC
+  time_coverage_start: 2020-09-14T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_dioxide_amean_0
+  - carbon_dioxide_amean_0_qc
+  - carbon_dioxide_amean_0_ebasmetadata
+  - carbon_dioxide_amean_1
+  - carbon_dioxide_amean_1_qc
+  - carbon_dioxide_amean_1_ebasmetadata
+  - carbon_dioxide_amean_2
+  - carbon_dioxide_amean_2_qc
+  - carbon_dioxide_amean_2_ebasmetadata
+  - carbon_dioxide_stddev_0
+  - carbon_dioxide_stddev_0_qc
+  - carbon_dioxide_stddev_0_ebasmetadata
+  - carbon_dioxide_stddev_1
+  - carbon_dioxide_stddev_1_qc
+  - carbon_dioxide_stddev_1_ebasmetadata
+  - carbon_dioxide_stddev_2
+  - carbon_dioxide_stddev_2_qc
+  - carbon_dioxide_stddev_2_ebasmetadata
+  - Tower_inlet_height
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_stddev
+  - methane_amean
+  - methane_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3F/KA/4E/3FKA-4EB6.nc:
+  ebas_instrument_name: Piccarro-01
+  ebas_method_ref: DE01L_tracegas_monitor
+  ebas_revision_date: '20141022083928'
+  ebas_station_altitude: 12.0 m
+  ebas_station_code: DE0001R
+  ebas_station_latitude: '54.925556'
+  ebas_station_longitude: '8.309722'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2013-12-31T23:00:00 UTC
+  time_coverage_start: 2012-12-31T23:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3G/FP/6F/3GFP-6FNS.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: CFADS19
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: NO01L_picarro
+  ebas_revision_date: '20230321000000'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: '58.38853'
+  ebas_station_longitude: '8.252'
+  resolution: hourly
+  time_coverage_end: 2011-01-01T00:00:00 UTC
+  time_coverage_start: 2010-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3T/4G/EX/3T4G-EXYU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SilcoCan_no02
+  ebas_measurement_height: 0.5 m
+  ebas_method_ref: DE20L_FZJ_CFKADS2270_IMP_2022
+  ebas_revision_date: '20221101000000'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: '58.38853'
+  ebas_station_longitude: '8.252'
+  resolution: daily
+  time_coverage_end: 2022-07-19T12:05:00 UTC
+  time_coverage_start: 2022-07-12T11:38:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3U/4E/J9/3U4E-J94Y.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: custom_built_HP5890_no42_1
+  ebas_method_ref: NO01L_HP5890_ch4_InGOS_harm
+  ebas_revision_date: '20141022000000'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: '78.90715'
+  ebas_station_longitude: '11.88668'
+  resolution: hourly
+  time_coverage_end: 2011-01-01T00:00:00 UTC
+  time_coverage_start: 2001-08-10T23:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/42/B3/ZK/42B3-ZKAC.nc:
+  ebas_instrument_name: Picarro-07
+  ebas_method_ref: DE07L_tracegas_monitor
+  ebas_revision_date: '20141022084214'
+  ebas_station_altitude: 62.0 m
+  ebas_station_code: DE0007R
+  ebas_station_latitude: '53.166667'
+  ebas_station_longitude: '13.033333'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2013-12-31T23:00:00 UTC
+  time_coverage_start: 2012-12-31T23:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/46/DN/N5/46DN-N5WF.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: picarro2_G2401
+  ebas_measurement_height: 15.0 m
+  ebas_method_ref: NO01L_picarro
+  ebas_revision_date: '20240725102602'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: '78.90715'
+  ebas_station_longitude: '11.88668'
+  resolution: hourly
+  time_coverage_end: 2024-01-01T00:00:00 UTC
+  time_coverage_start: 2022-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4J/AX/24/4JAX-24NE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: custom_built_HP5890_no42_1
+  ebas_method_ref: NO01L_HP5890_ch4_InGOS_harm
+  ebas_revision_date: '20151115000000'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: '78.90715'
+  ebas_station_longitude: '11.88668'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2012-04-12T07:00:00 UTC
+  time_coverage_start: 2011-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4R/CT/ZV/4RCT-ZV2C.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: picarro2_G2401
+  ebas_measurement_height: 15.0 m
+  ebas_method_ref: NO01L_picarro
+  ebas_revision_date: '20180420115103'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: '78.90715'
+  ebas_station_longitude: '11.88668'
+  resolution: hourly
+  time_coverage_end: 2017-08-01T00:00:00 UTC
+  time_coverage_start: 2017-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4R/KV/TC/4RKV-TCBB.nc:
+  ebas_instrument_name: GC_Sichromat_DE01L
+  ebas_method_ref: DE01L_GC
+  ebas_revision_date: '20010215000000'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: '47.914722'
+  ebas_station_longitude: '7.908611'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2000-12-31T23:00:00 UTC
+  time_coverage_start: 1991-06-30T23:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4V/S5/XX/4VS5-XXCK.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SilcoCan_es21
+  ebas_measurement_height: 0.5 m
+  ebas_method_ref: DE20L_FZJ_CFKADS2270_IMP_2022
+  ebas_revision_date: '20221101000000'
+  ebas_station_altitude: 669.0 m
+  ebas_station_code: ES0021U
+  ebas_station_latitude: '40.456436'
+  ebas_station_longitude: '-3.725631'
+  resolution: daily
+  time_coverage_end: 2022-07-19T13:00:00 UTC
+  time_coverage_start: 2022-07-12T12:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5E/MN/3E/5EMN-3E4Y.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: CFKADS2417
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: NO01L_picarro
+  ebas_revision_date: '20240622214309'
+  ebas_station_altitude: 1553.0 m
+  ebas_station_code: NO0059G
+  ebas_station_latitude: '-72.0117'
+  ebas_station_longitude: '2.5351'
+  resolution: hourly
+  time_coverage_end: 2024-01-01T00:00:00 UTC
+  time_coverage_start: 2021-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Tower_inlet_height
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_mg_per_m3_amean_qc
+  - methane_mg_per_m3_amean_ebasmetadata
+  - methane_nmol_per_mol_amean_qc
+  - methane_nmol_per_mol_amean_ebasmetadata
+  - methane_mg_per_m3_stddev_qc
+  - methane_mg_per_m3_stddev_ebasmetadata
+  - methane_nmol_per_mol_stddev_qc
+  - methane_nmol_per_mol_stddev_ebasmetadata
+  - carbon_dioxide_amean
+  - carbon_dioxide_stddev
+  - carbon_monoxide_amean
+  - carbon_monoxide_stddev
+  - methane_mg_per_m3_amean
+  - methane_nmol_per_mol_amean
+  - methane_mg_per_m3_stddev
+  - methane_nmol_per_mol_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/77/S6/36/77S6-364A.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: CFKADS2262
+  ebas_method_ref: NO01L_picarro_tower
+  ebas_revision_date: '20240726120000'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: '58.38853'
+  ebas_station_longitude: '8.252'
+  resolution: hourly
+  time_coverage_end: 2021-01-01T00:00:00 UTC
+  time_coverage_start: 2020-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Tower_inlet_height
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+  - carbon_dioxide_amean
+  - carbon_dioxide_stddev
+  - carbon_monoxide_amean
+  - carbon_monoxide_stddev
+  - methane_amean
+  - methane_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8R/X2/UF/8RX2-UFJU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: electro_polished_steel_canister_00
+  ebas_method_ref: NO01L_GC_Cryotrap
+  ebas_revision_date: '20100110000000'
+  ebas_station_altitude: 190.0 m
+  ebas_station_code: NO0001R
+  ebas_station_latitude: '58.383333'
+  ebas_station_longitude: '8.25'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 1991-12-31T07:20:00 UTC
+  time_coverage_start: 1990-01-01T07:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/C4/AZ/U2/C4AZ-U2YF.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SilcoCan_fr31
+  ebas_measurement_height: 0.5 m
+  ebas_method_ref: DE20L_FZJ_CFKADS2270_IMP_2022
+  ebas_revision_date: '20221101000000'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: IE0031R
+  ebas_station_latitude: '53.32583'
+  ebas_station_longitude: '-9.89944'
+  resolution: daily
+  time_coverage_end: 2022-07-19T14:32:00 UTC
+  time_coverage_start: 2022-07-12T13:15:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CM/B7/XD/CMB7-XDWQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: picarro1_G2401
+  ebas_method_ref: NO01L_picarro
+  ebas_revision_date: '20160616000000'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: '78.90715'
+  ebas_station_longitude: '11.88668'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2016-01-01T00:00:00 UTC
+  time_coverage_start: 2012-04-23T10:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CM/HW/BA/CMHW-BAFP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: picarro2_G2401
+  ebas_measurement_height: 15.0 m
+  ebas_method_ref: NO01L_picarro
+  ebas_revision_date: '20180420115103'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: '78.90715'
+  ebas_station_longitude: '11.88668'
+  resolution: hourly
+  time_coverage_end: 2017-08-01T00:00:00 UTC
+  time_coverage_start: 2017-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H7/ZK/ZT/H7ZK-ZT84.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: CFKADS2262
+  ebas_method_ref: NO01L_picarro_tower
+  ebas_revision_date: '20240804165642'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: '58.38853'
+  ebas_station_longitude: '8.252'
+  resolution: hourly
+  time_coverage_end: 2024-01-01T00:00:00 UTC
+  time_coverage_start: 2021-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Tower_inlet_height
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+  - carbon_dioxide_amean
+  - carbon_dioxide_stddev
+  - carbon_monoxide_amean
+  - carbon_monoxide_stddev
+  - methane_amean
+  - methane_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HC/WV/78/HCWV-78DY.nc:
+  ebas_instrument_name: Chrompack_CP9000
+  ebas_method_ref: NL01L_TNO
+  ebas_revision_date: '20140507070128'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: NL0009R
+  ebas_station_latitude: '53.333889'
+  ebas_station_longitude: '6.277222'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2011-01-01T00:00:00 UTC
+  time_coverage_start: 2008-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/J6/MD/UK/J6MD-UK88.nc:
+  ebas_instrument_name: chromopack_CP9000
+  ebas_method_ref: NL01L_LVM_LU_P171_172
+  ebas_revision_date: '20080923000000'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: NL0009R
+  ebas_station_latitude: '53.333889'
+  ebas_station_longitude: '6.277222'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2008-01-01T00:00:00 UTC
+  time_coverage_start: 2006-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JR/UZ/HN/JRUZ-HNTG.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Picarro_CRDS_analyzer
+  ebas_measurement_height: 7.0 m
+  ebas_method_ref: MT01L_GS-OP-100-01
+  ebas_revision_date: '20190426083834'
+  ebas_station_altitude: 167.0 m
+  ebas_station_code: MT0001R
+  ebas_station_latitude: '36.0722'
+  ebas_station_longitude: '14.2184'
+  resolution: hourly
+  time_coverage_end: 2018-01-01T00:00:00 UTC
+  time_coverage_start: 2015-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_stddev
+  - water_vapor_stddev_qc
+  - water_vapor_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JZ/WW/QS/JZWW-QSZT.nc:
+  ebas_instrument_name: GC_Sichromat_DE01L
+  ebas_method_ref: DE01L_GC
+  ebas_revision_date: '20040215000000'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: '54.4368'
+  ebas_station_longitude: '12.7249'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2003-12-31T23:00:00 UTC
+  time_coverage_start: 1994-01-31T23:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N4/97/Z9/N497-Z9BG.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: sc_03
+  ebas_method_ref: CZ01L_PJ_VOC
+  ebas_revision_date: '20181210133000'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: '49.573394'
+  ebas_station_longitude: '15.080278'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-04T00:00:00)
+  time_coverage_end: 2015-12-31T12:20:00 UTC
+  time_coverage_start: 2013-01-03T12:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N8/C9/N2/N8C9-N2YS.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: CFKADS2262
+  ebas_method_ref: NO01L_picarro
+  ebas_revision_date: '20240804132827'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: '58.38853'
+  ebas_station_longitude: '8.252'
+  resolution: hourly
+  time_coverage_end: 2020-09-14T00:00:00 UTC
+  time_coverage_start: 2018-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NN/66/XD/NN66-XD97.nc:
+  ebas_instrument_name: GC_Sichromat_DE01L
+  ebas_method_ref: DE01L_GC
+  ebas_revision_date: '20100215000000'
+  ebas_station_altitude: 62.0 m
+  ebas_station_code: DE0007R
+  ebas_station_latitude: '53.166667'
+  ebas_station_longitude: '13.033333'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2009-12-31T23:00:00 UTC
+  time_coverage_start: 1994-07-31T23:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NP/4M/JH/NP4M-JHDQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: picarro1_G2401
+  ebas_revision_date: '20140814080017'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: '78.90715'
+  ebas_station_longitude: '11.88668'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2014-01-01T00:00:00 UTC
+  time_coverage_start: 2013-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_monoxide
+  - carbon_monoxide_qc
+  - carbon_monoxide_ebasmetadata
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NV/6C/53/NV6C-53DT.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SilcoCan_at02
+  ebas_measurement_height: 0.5 m
+  ebas_method_ref: DE20L_FZJ_CFKADS2270_IMP_2022
+  ebas_revision_date: '20221101000000'
+  ebas_station_altitude: 117.0 m
+  ebas_station_code: AT0002R
+  ebas_station_latitude: '47.7666664124'
+  ebas_station_longitude: '16.7666664124'
+  resolution: daily
+  time_coverage_end: 2022-07-18T14:00:00 UTC
+  time_coverage_start: 2022-07-12T13:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/P3/QG/TS/P3QG-TSRH.nc:
+  ebas_instrument_name: GC_Sichromat_07
+  ebas_method_ref: DE07L_GC
+  ebas_revision_date: '20130515000000'
+  ebas_station_altitude: 62.0 m
+  ebas_station_code: DE0007R
+  ebas_station_latitude: '53.166667'
+  ebas_station_longitude: '13.033333'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2012-12-31T23:00:00 UTC
+  time_coverage_start: 2010-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PM/XY/DJ/PMXY-DJBB.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: CFKADS2262
+  ebas_method_ref: NO01L_picarro
+  ebas_revision_date: '20240804132827'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: '58.38853'
+  ebas_station_longitude: '8.252'
+  resolution: hourly
+  time_coverage_end: 2020-01-01T00:00:00 UTC
+  time_coverage_start: 2018-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q7/S6/9Z/Q7S6-9Z5J.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SilcoCan_fr08
+  ebas_measurement_height: 0.5 m
+  ebas_method_ref: DE20L_FZJ_CFKADS2270_IMP_2022
+  ebas_revision_date: '20221101000000'
+  ebas_station_altitude: 775.0 m
+  ebas_station_code: FR0008R
+  ebas_station_latitude: '48.5'
+  ebas_station_longitude: '7.133333'
+  resolution: daily
+  time_coverage_end: 2022-07-19T13:00:00 UTC
+  time_coverage_start: 2022-07-12T12:07:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q9/NV/AC/Q9NV-AC8X.nc:
+  ebas_instrument_name: GC_Sichromat_03
+  ebas_method_ref: DE03L_GC
+  ebas_revision_date: '20140510032159'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: '47.914722'
+  ebas_station_longitude: '7.908611'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2012-12-31T23:00:00 UTC
+  time_coverage_start: 2010-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QQ/2S/ZM/QQ2S-ZM9W.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: picarro2_G2401_ICOS
+  ebas_measurement_height: 15.0 m
+  ebas_method_ref: NO01L_picarro
+  ebas_revision_date: '20240725114610'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: '78.90715'
+  ebas_station_longitude: '11.88668'
+  resolution: hourly
+  time_coverage_end: 2024-01-02T00:00:00 UTC
+  time_coverage_start: 2017-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_mg_per_m3_amean
+  - methane_mg_per_m3_amean_qc
+  - methane_mg_per_m3_amean_ebasmetadata
+  - methane_nmol_per_mol_amean
+  - methane_nmol_per_mol_amean_qc
+  - methane_nmol_per_mol_amean_ebasmetadata
+  - methane_mg_per_m3_stddev
+  - methane_mg_per_m3_stddev_qc
+  - methane_mg_per_m3_stddev_ebasmetadata
+  - methane_nmol_per_mol_stddev
+  - methane_nmol_per_mol_stddev_qc
+  - methane_nmol_per_mol_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QS/93/TF/QS93-TF3B.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: picarro2_G2401_ICOS
+  ebas_measurement_height: 15.0 m
+  ebas_method_ref: NO01L_picarro
+  ebas_revision_date: '20240725101631'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: '78.90715'
+  ebas_station_longitude: '11.88668'
+  resolution: hourly
+  time_coverage_end: 2022-01-01T00:00:00 UTC
+  time_coverage_start: 2017-08-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RQ/KY/DV/RQKY-DVWV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SilcoCan_fr27
+  ebas_measurement_height: 0.5 m
+  ebas_method_ref: DE20L_FZJ_CFKADS2270_IMP_2022
+  ebas_revision_date: '20221101000000'
+  ebas_station_altitude: 70.0 m
+  ebas_station_code: FR0027U
+  ebas_station_latitude: '50.611017'
+  ebas_station_longitude: '3.14035'
+  resolution: daily
+  time_coverage_end: 2022-07-19T13:07:00 UTC
+  time_coverage_start: 2022-07-12T12:14:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RT/EG/ZZ/RTEG-ZZH6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Picarro_CRDS_analyzer
+  ebas_measurement_height: 7.0 m
+  ebas_method_ref: MT01L_GS-OP-100-01
+  ebas_revision_date: '20240129093713'
+  ebas_station_altitude: 167.0 m
+  ebas_station_code: MT0001R
+  ebas_station_latitude: '36.0722'
+  ebas_station_longitude: '14.2184'
+  resolution: hourly
+  time_coverage_end: 2024-01-01T00:00:00 UTC
+  time_coverage_start: 2018-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_max
+  - methane_max_qc
+  - methane_max_ebasmetadata
+  - methane_min
+  - methane_min_qc
+  - methane_min_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SE/X7/ZD/SEX7-ZDBN.nc:
+  ebas_instrument_name: HP_6890_CHEM_STATION-DE01L
+  ebas_method_ref: DE01L_GC-FID
+  ebas_revision_date: '20100215000000'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: '47.914722'
+  ebas_station_longitude: '7.908611'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2009-12-31T23:00:00 UTC
+  time_coverage_start: 2001-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SY/C5/JJ/SYC5-JJU3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SilcoCan_be07
+  ebas_measurement_height: 0.5 m
+  ebas_method_ref: DE20L_FZJ_CFKADS2270_IMP_2022
+  ebas_revision_date: '20221101000000'
+  ebas_station_altitude: 496.0 m
+  ebas_station_code: BE0007R
+  ebas_station_latitude: '50.304003'
+  ebas_station_longitude: '6.001271'
+  resolution: daily
+  time_coverage_end: 2022-07-19T13:06:00 UTC
+  time_coverage_start: 2022-07-12T12:05:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/T3/WZ/KV/T3WZ-KVNC.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: picarro2_G2401
+  ebas_measurement_height: 15.0 m
+  ebas_method_ref: NO01L_picarro
+  ebas_revision_date: '20180420115103'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: '78.90715'
+  ebas_station_longitude: '11.88668'
+  resolution: hourly
+  time_coverage_end: 2017-01-01T00:00:00 UTC
+  time_coverage_start: 2016-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TY/V8/CV/TYV8-CVMF.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: CFADS19
+  ebas_measurement_height: 3.0 m
+  ebas_method_ref: NO01L_picarro
+  ebas_revision_date: '20230321100914'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: '58.38853'
+  ebas_station_longitude: '8.252'
+  resolution: hourly
+  time_coverage_end: 2018-09-24T00:00:00 UTC
+  time_coverage_start: 2009-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_stddev
+  - methane_stddev_qc
+  - methane_stddev_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UQ/HD/ZU/UQHD-ZUJB.nc:
+  ebas_instrument_name: GC_Sichromat_01
+  ebas_method_ref: DE01L_GC
+  ebas_revision_date: '20120415000000'
+  ebas_station_altitude: 12.0 m
+  ebas_station_code: DE0001R
+  ebas_station_latitude: '54.925556'
+  ebas_station_longitude: '8.309722'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2011-12-31T23:00:00 UTC
+  time_coverage_start: 2011-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UV/ES/VF/UVES-VF34.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: custom_built_HP5890_no42_1
+  ebas_method_ref: NO01L_HP5890_ch4_InGOS_harm
+  ebas_revision_date: '20141022000000'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: '78.90715'
+  ebas_station_longitude: '11.88668'
+  ebas_statistics: stddev
+  resolution: hourly
+  time_coverage_end: 2012-01-01T00:00:00 UTC
+  time_coverage_start: 2011-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VY/ZK/US/VYZK-USKV.nc:
+  ebas_instrument_name: Picarro-03
+  ebas_method_ref: DE03L_tracegas_monitor
+  ebas_revision_date: '20141022084128'
+  ebas_station_altitude: 1205.0 m
+  ebas_station_code: DE0003R
+  ebas_station_latitude: '47.914722'
+  ebas_station_longitude: '7.908611'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2013-12-31T23:00:00 UTC
+  time_coverage_start: 2012-12-31T23:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/X6/5T/84/X65T-84RU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SilcoCan_de44
+  ebas_measurement_height: 0.5 m
+  ebas_method_ref: DE20L_FZJ_CFKADS2270_IMP_2022
+  ebas_revision_date: '20221101000000'
+  ebas_station_altitude: 86.0 m
+  ebas_station_code: DE0044R
+  ebas_station_latitude: '51.5255'
+  ebas_station_longitude: '12.9277'
+  resolution: daily
+  time_coverage_end: 2022-07-19T13:00:00 UTC
+  time_coverage_start: 2022-07-12T12:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - carbon_dioxide_amean
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_precision
+  - carbon_dioxide_precision_qc
+  - carbon_dioxide_precision_ebasmetadata
+  - carbon_monoxide_amean
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_precision
+  - carbon_monoxide_precision_qc
+  - carbon_monoxide_precision_ebasmetadata
+  - methane_amean
+  - methane_amean_qc
+  - methane_amean_ebasmetadata
+  - methane_precision
+  - methane_precision_qc
+  - methane_precision_ebasmetadata
+  - water_vapor_amean
+  - water_vapor_amean_qc
+  - water_vapor_amean_ebasmetadata
+  - water_vapor_precision
+  - water_vapor_precision_qc
+  - water_vapor_precision_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XS/Q2/ZM/XSQ2-ZMH2.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: CFKADS2262
+  ebas_method_ref: NO01L_picarro_tower
+  ebas_revision_date: '20240804165909'
+  ebas_station_altitude: 219.0 m
+  ebas_station_code: NO0002R
+  ebas_station_latitude: '58.38853'
+  ebas_station_longitude: '8.252'
+  resolution: hourly
+  time_coverage_end: 2024-01-01T00:00:00 UTC
+  time_coverage_start: 2021-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Tower_inlet_height
+  - carbon_dioxide_amean_qc
+  - carbon_dioxide_amean_ebasmetadata
+  - carbon_dioxide_stddev_qc
+  - carbon_dioxide_stddev_ebasmetadata
+  - carbon_monoxide_amean_qc
+  - carbon_monoxide_amean_ebasmetadata
+  - carbon_monoxide_stddev_qc
+  - carbon_monoxide_stddev_ebasmetadata
+  - methane_mg_per_m3_amean_qc
+  - methane_mg_per_m3_amean_ebasmetadata
+  - methane_nmol_per_mol_amean_qc
+  - methane_nmol_per_mol_amean_ebasmetadata
+  - methane_mg_per_m3_stddev_qc
+  - methane_mg_per_m3_stddev_ebasmetadata
+  - methane_nmol_per_mol_stddev_qc
+  - methane_nmol_per_mol_stddev_ebasmetadata
+  - carbon_dioxide_amean
+  - carbon_dioxide_stddev
+  - carbon_monoxide_amean
+  - carbon_monoxide_stddev
+  - methane_mg_per_m3_amean
+  - methane_nmol_per_mol_amean
+  - methane_mg_per_m3_stddev
+  - methane_nmol_per_mol_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZG/3C/BZ/ZG3C-BZ5N.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: sc_03
+  ebas_method_ref: CZ01L_PJ_VOC
+  ebas_revision_date: '20170713000000'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: '49.573394'
+  ebas_station_longitude: '15.080278'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-03T00:00:00)
+  time_coverage_end: 2016-12-29T12:20:00 UTC
+  time_coverage_start: 2016-01-04T12:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - methane
+  - methane_qc
+  - methane_ebasmetadata

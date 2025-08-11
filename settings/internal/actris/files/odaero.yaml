@@ -1,0 +1,4423 @@
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2K/T5/Y5/2KT5-Y553.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_MHD
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20160316161506'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: IE0031R
+  ebas_station_latitude: '53.32583'
+  ebas_station_longitude: '-9.89944'
+  resolution: hourly
+  time_coverage_end: 2014-10-28T16:29:00 UTC
+  time_coverage_start: 2014-05-01T14:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2U/34/E2/2U34-E223.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: YES_MFR-7_GCR
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: US06L_MFR_JA_1
+  ebas_revision_date: '20240221231159'
+  ebas_station_altitude: 98.0 m
+  ebas_station_code: US0900R
+  ebas_station_latitude: '34.2547'
+  ebas_station_longitude: '-89.8729'
+  resolution: hourly
+  time_coverage_end: 2024-01-01T00:00:00 UTC
+  time_coverage_start: 2020-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/39/YT/SJ/39YT-SJ8G.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_IZO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20180429233616'
+  ebas_station_altitude: 2373.0 m
+  ebas_station_code: ES0018G
+  ebas_station_latitude: '28.309'
+  ebas_station_longitude: '-16.4994'
+  resolution: hourly
+  time_coverage_end: 2015-09-05T20:29:00 UTC
+  time_coverage_start: 2015-01-15T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4E/E2/8E/4EE2-8ERQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_MLO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20210322122237'
+  ebas_station_altitude: 3397.0 m
+  ebas_station_code: US1200R
+  ebas_station_latitude: '19.5362300873'
+  ebas_station_longitude: '-155.5761566162'
+  resolution: hourly
+  time_coverage_end: 2020-01-01T00:29:00 UTC
+  time_coverage_start: 2015-08-29T00:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4J/PM/85/4JPM-85TA.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PFR_57
+  ebas_method_ref: CH04L_Optical_Transmission
+  ebas_revision_date: '20100125000000'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: NO0057R
+  ebas_station_latitude: '78.925'
+  ebas_station_longitude: '11.9222222'
+  resolution: hourly
+  time_coverage_end: 2007-09-16T10:59:31 UTC
+  time_coverage_start: 2002-05-02T16:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/5H/7P/XW/5H7P-XWDJ.nc:
+  ebas_instrument_name: PMOD-WRC_PFR-N_HPB
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20120514000000'
+  ebas_station_altitude: 975.0 m
+  ebas_station_code: DE0043G
+  ebas_station_latitude: '47.8014984131'
+  ebas_station_longitude: '11.009619'
+  resolution: hourly
+  time_coverage_end: 2009-12-28T11:29:00 UTC
+  time_coverage_start: 2009-01-04T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - Wavelengthx
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/64/CE/FY/64CE-FYRS.nc:
+  ebas_instrument_name: sun_tracking_filter_radiometer_57
+  ebas_method_ref: DE13L_optical_transmission
+  ebas_revision_date: '20140501000000'
+  ebas_station_altitude: 2962.0 m
+  ebas_station_code: DE0057G
+  ebas_station_latitude: '47.421075'
+  ebas_station_longitude: '10.985896'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2005-06-25T05:01:00 UTC
+  time_coverage_start: 2003-01-08T14:15:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - aerosol_optical_depth_qc
+  - aerosol_optical_depth_ebasmetadata
+  - aerosol_optical_depth
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/65/2F/Z8/652F-Z8X6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_CPT
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20191004082505'
+  ebas_station_altitude: 230.0 m
+  ebas_station_code: ZA0001G
+  ebas_station_latitude: '-34.35348'
+  ebas_station_longitude: '18.48968'
+  resolution: hourly
+  time_coverage_end: 2016-03-14T17:29:00 UTC
+  time_coverage_start: 2014-03-27T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6A/GQ/3Z/6AGQ-3ZV7.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_NYA
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20171124101824'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: NO0057R
+  ebas_station_latitude: '78.925'
+  ebas_station_longitude: '11.9222222'
+  resolution: hourly
+  time_coverage_end: 2015-09-18T13:29:00 UTC
+  time_coverage_start: 2014-04-06T07:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6C/97/RM/6C97-RMAJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_TRO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20231109101457'
+  ebas_station_altitude: 1309.0 m
+  ebas_station_code: NO0058G
+  ebas_station_latitude: '-72.016667'
+  ebas_station_longitude: '2.533333'
+  resolution: hourly
+  time_coverage_end: 2022-12-30T21:29:00 UTC
+  time_coverage_start: 2020-01-12T02:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - sample_count_0
+  - sample_count_0_qc
+  - sample_count_0_ebasmetadata
+  - sample_count_1
+  - sample_count_1_qc
+  - sample_count_1_ebasmetadata
+  - sample_count_2
+  - sample_count_2_qc
+  - sample_count_2_ebasmetadata
+  - sample_count_3
+  - sample_count_3_qc
+  - sample_count_3_ebasmetadata
+  - aerosol_optical_depth_amean_0
+  - aerosol_optical_depth_amean_0_qc
+  - aerosol_optical_depth_amean_0_ebasmetadata
+  - aerosol_optical_depth_amean_1
+  - aerosol_optical_depth_amean_1_qc
+  - aerosol_optical_depth_amean_1_ebasmetadata
+  - aerosol_optical_depth_amean_2
+  - aerosol_optical_depth_amean_2_qc
+  - aerosol_optical_depth_amean_2_ebasmetadata
+  - aerosol_optical_depth_amean_3
+  - aerosol_optical_depth_amean_3_qc
+  - aerosol_optical_depth_amean_3_ebasmetadata
+  - aerosol_optical_depth_median_0
+  - aerosol_optical_depth_median_0_qc
+  - aerosol_optical_depth_median_0_ebasmetadata
+  - aerosol_optical_depth_median_1
+  - aerosol_optical_depth_median_1_qc
+  - aerosol_optical_depth_median_1_ebasmetadata
+  - aerosol_optical_depth_median_2
+  - aerosol_optical_depth_median_2_qc
+  - aerosol_optical_depth_median_2_ebasmetadata
+  - aerosol_optical_depth_median_3
+  - aerosol_optical_depth_median_3_qc
+  - aerosol_optical_depth_median_3_ebasmetadata
+  - aerosol_optical_depth_stddev_0
+  - aerosol_optical_depth_stddev_0_qc
+  - aerosol_optical_depth_stddev_0_ebasmetadata
+  - aerosol_optical_depth_stddev_1
+  - aerosol_optical_depth_stddev_1_qc
+  - aerosol_optical_depth_stddev_1_ebasmetadata
+  - aerosol_optical_depth_stddev_2
+  - aerosol_optical_depth_stddev_2_qc
+  - aerosol_optical_depth_stddev_2_ebasmetadata
+  - aerosol_optical_depth_stddev_3
+  - aerosol_optical_depth_stddev_3_qc
+  - aerosol_optical_depth_stddev_3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/72/UT/NF/72UT-NFHP.nc:
+  ebas_instrument_name: sun_tracking_filter_radiometer_31
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20140501000000'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: IE0031R
+  ebas_station_latitude: '53.32583'
+  ebas_station_longitude: '-9.89944'
+  resolution: hourly
+  time_coverage_end: 2007-12-24T16:00:00 UTC
+  time_coverage_start: 2001-01-10T09:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/78/QE/XZ/78QE-XZCR.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: POM02_PS2509103
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20191225000000'
+  ebas_station_altitude: 5.71 m
+  ebas_station_code: JP0006R
+  ebas_station_latitude: '24.3367'
+  ebas_station_longitude: '124.1644'
+  resolution: hourly
+  time_coverage_end: 2017-03-05T06:00:00 UTC
+  time_coverage_start: 2016-04-06T01:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/79/3J/AU/793J-AUUX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_LIN
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20160509151319'
+  ebas_station_altitude: 112.0 m
+  ebas_station_code: DE0058R
+  ebas_station_latitude: '52.2087'
+  ebas_station_longitude: '14.1216'
+  resolution: hourly
+  time_coverage_end: 2014-07-03T07:29:00 UTC
+  time_coverage_start: 2014-01-03T09:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7G/2J/PZ/7G2J-PZUF.nc:
+  ebas_instrument_name: PMOD-WRC_PFR-N_JFJ
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20140404000000'
+  ebas_station_altitude: 3578.0 m
+  ebas_station_code: CH0001G
+  ebas_station_latitude: '46.5475'
+  ebas_station_longitude: '7.985'
+  resolution: hourly
+  time_coverage_end: 2013-12-31T12:29:00 UTC
+  time_coverage_start: 2012-01-01T14:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7P/4G/C9/7P4G-C9N6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SP02
+  ebas_method_ref: AU01L_optical_depth
+  ebas_revision_date: '20230731111820'
+  ebas_station_altitude: 212.0 m
+  ebas_station_code: AU0004R
+  ebas_station_latitude: '-35.15983'
+  ebas_station_longitude: '147.45617'
+  resolution: hourly
+  time_coverage_end: 2014-12-31T08:59:00 UTC
+  time_coverage_start: 2012-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/7W/PY/7R/7WPY-7RGZ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_CES
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20160509145939'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: NL0011R
+  ebas_station_latitude: '51.970278'
+  ebas_station_longitude: '4.926389'
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2014-02-16T11:29:00 UTC
+  time_coverage_start: 2014-02-02T10:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8D/5J/DH/8D5J-DHSG.nc:
+  ebas_instrument_name: PFR_42
+  ebas_method_ref: CH04L_Optical_Transmission
+  ebas_revision_date: '20100125000000'
+  ebas_station_altitude: 106.0 m
+  ebas_station_code: FI0065R
+  ebas_station_latitude: '60.82'
+  ebas_station_longitude: '23.5'
+  resolution: hourly
+  time_coverage_end: 2007-09-29T13:00:00 UTC
+  time_coverage_start: 2004-06-14T13:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8E/J2/N5/8EJ2-N5C5.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SP02
+  ebas_method_ref: AU01L_optical_depth
+  ebas_revision_date: '20230731112519'
+  ebas_station_altitude: 212.0 m
+  ebas_station_code: AU0004R
+  ebas_station_latitude: '-35.15983'
+  ebas_station_longitude: '147.45617'
+  resolution: hourly
+  time_coverage_end: 2011-12-31T23:59:00 UTC
+  time_coverage_start: 2011-06-09T02:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8G/MD/5W/8GMD-5WFC.nc:
+  ebas_instrument_name: PMOD-WRC_PFR-N_AMY
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20120501000000'
+  ebas_station_altitude: 46.0 m
+  ebas_station_code: KR0100R
+  ebas_station_latitude: '36.5383338928'
+  ebas_station_longitude: '126.3300018311'
+  resolution: hourly
+  time_coverage_end: 2011-12-30T08:29:00 UTC
+  time_coverage_start: 2010-10-18T22:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8S/KX/QS/8SKX-QSG3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_JOK
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20161222102410'
+  ebas_station_altitude: 106.0 m
+  ebas_station_code: FI0065R
+  ebas_station_latitude: '60.82'
+  ebas_station_longitude: '23.5'
+  resolution: hourly
+  time_coverage_end: 2015-11-05T12:29:00 UTC
+  time_coverage_start: 2010-02-18T11:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Z/9Q/MX/8Z9Q-MX3Q.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_CES
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20160509145956'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: NL0011R
+  ebas_station_latitude: '51.970278'
+  ebas_station_longitude: '4.926389'
+  resolution: hourly
+  time_coverage_end: 2014-12-06T13:29:00 UTC
+  time_coverage_start: 2014-06-01T17:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/97/DA/73/97DA-73EH.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: POM02_PS2815705
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20230207000000'
+  ebas_station_altitude: 37.58 m
+  ebas_station_code: JP0007U
+  ebas_station_latitude: '44.0178'
+  ebas_station_longitude: '144.2797'
+  resolution: hourly
+  time_coverage_end: 2021-07-14T03:00:00 UTC
+  time_coverage_start: 2021-03-03T07:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/98/DC/SC/98DC-SCE9.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N46_YON
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20210115000000'
+  ebas_station_altitude: 30.0 m
+  ebas_station_code: JP1029R
+  ebas_station_latitude: '24.466941'
+  ebas_station_longitude: '123.010872'
+  resolution: hourly
+  time_coverage_end: 2009-05-16T08:00:00 UTC
+  time_coverage_start: 2007-04-01T01:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9P/2Y/2C/9P2Y-2CA8.nc:
+  ebas_instrument_name: sun_tracking_filter_radiometer_43
+  ebas_method_ref: DE13L_optical_transmission
+  ebas_revision_date: '20140501000000'
+  ebas_station_altitude: 975.0 m
+  ebas_station_code: DE0043G
+  ebas_station_latitude: '47.8014984131'
+  ebas_station_longitude: '11.009619'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2005-12-31T14:26:00 UTC
+  time_coverage_start: 1993-11-04T07:52:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - aerosol_optical_depth_qc
+  - aerosol_optical_depth_ebasmetadata
+  - aerosol_optical_depth
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9P/GM/VJ/9PGM-VJZR.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_DAV
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20210322154457'
+  ebas_station_altitude: 1590.0 m
+  ebas_station_code: CH0006C
+  ebas_station_latitude: '46.816667'
+  ebas_station_longitude: '9.85'
+  resolution: hourly
+  time_coverage_end: 2019-12-31T15:29:00 UTC
+  time_coverage_start: 2016-01-01T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AP/JJ/JG/APJJ-JG8C.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_NYA
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20131003000000'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: NO0057R
+  ebas_station_latitude: '78.925'
+  ebas_station_longitude: '11.9222222'
+  resolution: hourly
+  time_coverage_end: 2012-10-01T10:29:00 UTC
+  time_coverage_start: 2008-03-13T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AU/86/FN/AU86-FNN6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N56_MNM
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20210115000000'
+  ebas_station_altitude: 7.1 m
+  ebas_station_code: JP1028G
+  ebas_station_latitude: '24.2883'
+  ebas_station_longitude: '153.9833'
+  resolution: hourly
+  time_coverage_end: 2017-05-16T21:00:00 UTC
+  time_coverage_start: 2016-10-19T22:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AX/V8/WG/AXV8-WGJ6.nc:
+  ebas_instrument_name: PMOD-WRC_PFR-N_NL0011R_CES
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20140404000000'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: NL0011R
+  ebas_station_latitude: '51.970278'
+  ebas_station_longitude: '4.926389'
+  resolution: hourly
+  time_coverage_end: 2013-12-28T15:29:00 UTC
+  time_coverage_start: 2008-06-16T19:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AY/8T/3Z/AY8T-3ZZH.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N51_YON
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20210115000000'
+  ebas_station_altitude: 30.0 m
+  ebas_station_code: JP1029R
+  ebas_station_latitude: '24.466941'
+  ebas_station_longitude: '123.010872'
+  resolution: hourly
+  time_coverage_end: 2012-04-12T09:00:00 UTC
+  time_coverage_start: 2010-08-12T02:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BD/NQ/KS/BDNQ-KS8Z.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N41_RYO
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20210115000000'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: JP1020R
+  ebas_station_latitude: '39.0319'
+  ebas_station_longitude: '141.8222'
+  resolution: hourly
+  time_coverage_end: 2008-06-17T10:00:00 UTC
+  time_coverage_start: 2007-04-03T20:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BD/US/ZX/BDUS-ZXDF.nc:
+  ebas_instrument_name: sun_tracking_filter_radiometer_102
+  ebas_method_ref: JP02L_optical_transmission
+  ebas_revision_date: '20060331000000'
+  ebas_station_altitude: 7.1 m
+  ebas_station_code: JP1028G
+  ebas_station_latitude: '24.2883'
+  ebas_station_longitude: '153.9833'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2004-12-31T05:01:00 UTC
+  time_coverage_start: 2003-01-09T02:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - aerosol_optical_depth
+  - aerosol_optical_depth_qc
+  - aerosol_optical_depth_ebasmetadata
+  - Wavelength
+  - aerosol_optical_depth_Wavelength_qc
+  - aerosol_optical_depth_Wavelength_ebasmetadata
+  - aerosol_optical_depth_Wavelength
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BD/WV/RR/BDWV-RRG3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-L_NYA
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20231109094801'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: NO0057R
+  ebas_station_latitude: '78.925'
+  ebas_station_longitude: '11.9222222'
+  resolution: hourly
+  time_coverage_end: 2023-03-08T00:29:00 UTC
+  time_coverage_start: 2018-10-01T00:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BG/XC/QU/BGXC-QUH5.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_MBI
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20171207125922'
+  ebas_station_altitude: 198.0 m
+  ebas_station_code: AR0001R
+  ebas_station_latitude: '-64.24006'
+  ebas_station_longitude: '-56.62478'
+  resolution: hourly
+  time_coverage_end: 2015-04-30T16:29:00 UTC
+  time_coverage_start: 2011-08-03T14:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BM/23/HY/BM23-HYKZ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_HPB
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20231127154716'
+  ebas_station_altitude: 975.0 m
+  ebas_station_code: DE0043G
+  ebas_station_latitude: '47.8014984131'
+  ebas_station_longitude: '11.009619'
+  resolution: hourly
+  time_coverage_end: 2022-12-30T16:29:00 UTC
+  time_coverage_start: 2021-08-11T04:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BM/RE/8X/BMRE-8X5X.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: POM02_PS2815704
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20211207000000'
+  ebas_station_altitude: 17.45 m
+  ebas_station_code: JP0005U
+  ebas_station_latitude: '43.06'
+  ebas_station_longitude: '141.3286'
+  resolution: hourly
+  time_coverage_end: 2020-11-12T06:00:00 UTC
+  time_coverage_start: 2018-04-01T23:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/BV/FM/Z5/BVFM-Z55C.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_IZO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission_1
+  ebas_revision_date: '20220304105811'
+  ebas_station_altitude: 2373.0 m
+  ebas_station_code: ES0018G
+  ebas_station_latitude: '28.309'
+  ebas_station_longitude: '-16.4994'
+  resolution: hourly
+  time_coverage_end: 2021-12-30T18:29:00 UTC
+  time_coverage_start: 2021-01-05T09:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CG/X4/V2/CGX4-V2AW.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_DAV
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20140818193015'
+  ebas_station_altitude: 1590.0 m
+  ebas_station_code: CH0006C
+  ebas_station_latitude: '46.816667'
+  ebas_station_longitude: '9.85'
+  resolution: hourly
+  time_coverage_end: 2013-12-31T15:29:00 UTC
+  time_coverage_start: 2005-01-01T10:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CP/52/46/CP52-46TM.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: YES_MFR-7_PSU
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: US06L_MFR_JA
+  ebas_revision_date: '20240224131931'
+  ebas_station_altitude: 376.0 m
+  ebas_station_code: US0903R
+  ebas_station_latitude: '40.72012'
+  ebas_station_longitude: '-77.93085'
+  resolution: hourly
+  time_coverage_end: 2024-01-01T00:00:00 UTC
+  time_coverage_start: 2019-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CS/DC/84/CSDC-84EP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SP02
+  ebas_method_ref: AU01L_optical_depth
+  ebas_revision_date: '20230703045742'
+  ebas_station_altitude: 212.0 m
+  ebas_station_code: AU0004R
+  ebas_station_latitude: '-35.15983'
+  ebas_station_longitude: '147.45617'
+  resolution: hourly
+  time_coverage_end: 2001-02-18T08:59:00 UTC
+  time_coverage_start: 1999-06-21T22:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CW/48/2J/CW48-2JAE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N48_MNM
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20210115000000'
+  ebas_station_altitude: 7.1 m
+  ebas_station_code: JP1028G
+  ebas_station_latitude: '24.2883'
+  ebas_station_longitude: '153.9833'
+  resolution: hourly
+  time_coverage_end: 2018-03-28T01:00:00 UTC
+  time_coverage_start: 2007-04-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/CZ/25/K9/CZ25-K9D5.nc:
+  ebas_instrument_name: PMOD-WRC_PFR-N_MLO
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20110812000000'
+  ebas_station_altitude: 3397.0 m
+  ebas_station_code: US1200R
+  ebas_station_latitude: '19.5362300873'
+  ebas_station_longitude: '-155.5761566162'
+  resolution: hourly
+  time_coverage_end: 2010-06-16T05:29:00 UTC
+  time_coverage_start: 2008-01-03T03:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/D3/3M/P6/D33M-P63B.nc:
+  ebas_instrument_name: PMOD-WRC_PFR-N_RYO
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20110816000000'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: JP1020R
+  ebas_station_latitude: '39.0319'
+  ebas_station_longitude: '141.8222'
+  resolution: hourly
+  time_coverage_end: 2009-01-01T00:29:00 UTC
+  time_coverage_start: 2008-12-31T23:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/D6/M7/A9/D6M7-A9ND.nc:
+  ebas_instrument_name: PFR_01
+  ebas_method_ref: CH04L_Optical_Transmission
+  ebas_revision_date: '20100125000000'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: JP1020R
+  ebas_station_latitude: '39.0319'
+  ebas_station_longitude: '141.8222'
+  resolution: hourly
+  time_coverage_end: 2006-12-31T07:00:00 UTC
+  time_coverage_start: 2002-04-01T04:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DG/SU/82/DGSU-82QS.nc:
+  ebas_instrument_name: PMOD-WRC_PFR-N_MLO
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20131002000000'
+  ebas_station_altitude: 3397.0 m
+  ebas_station_code: US1200R
+  ebas_station_latitude: '19.5362300873'
+  ebas_station_longitude: '-155.5761566162'
+  resolution: hourly
+  time_coverage_end: 2010-12-31T22:29:00 UTC
+  time_coverage_start: 2010-06-18T21:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - Wavelengthx
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - Wavelengthxx
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DK/6R/6Y/DK6R-6YPV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_MHD
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20160316161504'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: IE0031R
+  ebas_station_latitude: '53.32583'
+  ebas_station_longitude: '-9.89944'
+  resolution: Unrecognised (P0000-00-00T02:00:00)
+  time_coverage_end: 2014-07-26T14:29:00 UTC
+  time_coverage_start: 2014-07-01T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DX/9U/87/DX9U-877K.nc:
+  ebas_instrument_name: PFR_01
+  ebas_method_ref: CH04L_Optical_Transmission
+  ebas_revision_date: '20100125000000'
+  ebas_station_altitude: 547.0 m
+  ebas_station_code: AU0001C
+  ebas_station_latitude: '-23.795085'
+  ebas_station_longitude: '133.88901'
+  resolution: hourly
+  time_coverage_end: 2007-12-31T03:00:00 UTC
+  time_coverage_start: 2002-04-11T05:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DY/GT/8S/DYGT-8SGU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: POM02_PS2815705
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20211207000000'
+  ebas_station_altitude: 17.45 m
+  ebas_station_code: JP0005U
+  ebas_station_latitude: '43.06'
+  ebas_station_longitude: '141.3286'
+  resolution: hourly
+  time_coverage_end: 2020-06-21T05:00:00 UTC
+  time_coverage_start: 2019-03-17T21:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/E5/WB/NX/E5WB-NXRG.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_DAV
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20140821192616'
+  ebas_station_altitude: 1590.0 m
+  ebas_station_code: CH0006C
+  ebas_station_latitude: '46.816667'
+  ebas_station_longitude: '9.85'
+  resolution: hourly
+  time_coverage_end: 2004-12-13T15:29:00 UTC
+  time_coverage_start: 2004-01-03T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ES/ZE/KB/ESZE-KBW3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SP02_WOL
+  ebas_method_ref: AU01L_optical_depth
+  ebas_revision_date: '20230825043203'
+  ebas_station_altitude: 50.0 m
+  ebas_station_code: AU0005U
+  ebas_station_latitude: '-34.4057'
+  ebas_station_longitude: '150.88047'
+  resolution: hourly
+  time_coverage_end: 2019-02-07T04:59:00 UTC
+  time_coverage_start: 2017-05-20T22:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EU/UC/A8/EUUC-A8XC.nc:
+  ebas_instrument_name: PMOD-WRC_PFR-N_JFJ
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20120424000000'
+  ebas_station_altitude: 3578.0 m
+  ebas_station_code: CH0001G
+  ebas_station_latitude: '46.5475'
+  ebas_station_longitude: '7.985'
+  resolution: hourly
+  time_coverage_end: 2011-12-28T15:29:00 UTC
+  time_coverage_start: 2008-01-08T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/EZ/MV/PC/EZMV-PC88.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_CPT
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20171205140016'
+  ebas_station_altitude: 230.0 m
+  ebas_station_code: ZA0001G
+  ebas_station_latitude: '-34.35348'
+  ebas_station_longitude: '18.48968'
+  resolution: hourly
+  time_coverage_end: 2014-03-03T17:29:00 UTC
+  time_coverage_start: 2012-10-01T09:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FQ/RQ/8Y/FQRQ-8YEM.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: YES_MFR-7_SXF
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: US06L_MFR_JA
+  ebas_revision_date: '20240226213238'
+  ebas_station_altitude: 473.0 m
+  ebas_station_code: US0904R
+  ebas_station_latitude: '43.73403'
+  ebas_station_longitude: '-96.62328'
+  resolution: hourly
+  time_coverage_end: 2024-01-01T00:00:00 UTC
+  time_coverage_start: 2019-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FS/WD/VK/FSWD-VKFH.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_NYA
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20231108232719'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: NO0057R
+  ebas_station_latitude: '78.925'
+  ebas_station_longitude: '11.9222222'
+  resolution: hourly
+  time_coverage_end: 2022-09-27T17:29:00 UTC
+  time_coverage_start: 2022-03-23T04:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FT/WY/TX/FTWY-TXFC.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_CPT
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20191004154049'
+  ebas_station_altitude: 230.0 m
+  ebas_station_code: ZA0001G
+  ebas_station_latitude: '-34.35348'
+  ebas_station_longitude: '18.48968'
+  resolution: hourly
+  time_coverage_end: 2018-12-27T17:29:00 UTC
+  time_coverage_start: 2011-01-01T12:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FY/FR/MD/FYFR-MDAQ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_IZO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20180429233600'
+  ebas_station_altitude: 2373.0 m
+  ebas_station_code: ES0018G
+  ebas_station_latitude: '28.309'
+  ebas_station_longitude: '-16.4994'
+  resolution: hourly
+  time_coverage_end: 2015-05-29T21:29:00 UTC
+  time_coverage_start: 2015-05-19T07:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - Wavelengthx
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FZ/7W/33/FZ7W-33SZ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: POM02_PS2815703
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20230202000000'
+  ebas_station_altitude: 7.1 m
+  ebas_station_code: JP1028G
+  ebas_station_latitude: '24.2883'
+  ebas_station_longitude: '153.9833'
+  resolution: hourly
+  time_coverage_end: 2021-02-23T04:00:00 UTC
+  time_coverage_start: 2019-05-23T20:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GA/ME/K3/GAME-K34Q.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_HPB
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20191005144927'
+  ebas_station_altitude: 975.0 m
+  ebas_station_code: DE0043G
+  ebas_station_latitude: '47.8014984131'
+  ebas_station_longitude: '11.009619'
+  resolution: hourly
+  time_coverage_end: 2017-11-25T14:29:00 UTC
+  time_coverage_start: 2014-01-01T09:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GD/XW/UW/GDXW-UWQ6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_JFJ
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20200115204554'
+  ebas_station_altitude: 3578.0 m
+  ebas_station_code: CH0001G
+  ebas_station_latitude: '46.5475'
+  ebas_station_longitude: '7.985'
+  resolution: hourly
+  time_coverage_end: 2016-12-31T15:29:00 UTC
+  time_coverage_start: 2014-01-01T12:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GK/8X/7S/GK8X-7SP3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_NYA
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20140807193357'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: NO0057R
+  ebas_station_latitude: '78.925'
+  ebas_station_longitude: '11.9222222'
+  resolution: hourly
+  time_coverage_end: 2013-09-26T15:29:00 UTC
+  time_coverage_start: 2013-03-12T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GU/6Y/N5/GU6Y-N5E5.nc:
+  ebas_instrument_name: PFR_42
+  ebas_method_ref: CH04L_Optical_Transmission
+  ebas_revision_date: '20100125000000'
+  ebas_station_altitude: 975.0 m
+  ebas_station_code: DE0043G
+  ebas_station_latitude: '47.8014984131'
+  ebas_station_longitude: '11.009619'
+  resolution: hourly
+  time_coverage_end: 2007-12-29T15:00:00 UTC
+  time_coverage_start: 1999-03-15T06:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GX/W4/GY/GXW4-GYXE.nc:
+  ebas_instrument_name: sun_tracking_filter_radiometer_102
+  ebas_method_ref: JP02L_optical_transmission
+  ebas_revision_date: '20060331000000'
+  ebas_station_altitude: 7.1 m
+  ebas_station_code: JP1028G
+  ebas_station_latitude: '24.2883'
+  ebas_station_longitude: '153.9833'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2003-12-31T23:01:00 UTC
+  time_coverage_start: 2003-12-31T23:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - aerosol_optical_depth_qc
+  - aerosol_optical_depth_ebasmetadata
+  - aerosol_optical_depth
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H5/CP/M7/H5CP-M7BE.nc:
+  ebas_instrument_name: PFR_01
+  ebas_method_ref: CH04L_Optical_Transmission
+  ebas_revision_date: '20100125000000'
+  ebas_station_altitude: 3397.0 m
+  ebas_station_code: US1200R
+  ebas_station_latitude: '19.5362300873'
+  ebas_station_longitude: '-155.5761566162'
+  resolution: hourly
+  time_coverage_end: 2007-12-26T20:00:00 UTC
+  time_coverage_start: 2000-01-01T17:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H7/59/55/H759-55X3.nc:
+  ebas_instrument_name: PFR_01
+  ebas_method_ref: CH04L_Optical_Transmission
+  ebas_revision_date: '20100125000000'
+  ebas_station_altitude: 3397.0 m
+  ebas_station_code: US1200R
+  ebas_station_latitude: '19.5362300873'
+  ebas_station_longitude: '-155.5761566162'
+  resolution: hourly
+  time_coverage_end: 2005-12-31T04:00:00 UTC
+  time_coverage_start: 2005-01-03T22:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - Wavelengthx
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H8/AX/KG/H8AX-KGGE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_NYA
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20220505173623'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: NO0057R
+  ebas_station_latitude: '78.925'
+  ebas_station_longitude: '11.9222222'
+  resolution: hourly
+  time_coverage_end: 2021-09-24T16:29:00 UTC
+  time_coverage_start: 2021-04-30T00:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/H8/NA/AH/H8NA-AHMS.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_IZO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20191203234108'
+  ebas_station_altitude: 2373.0 m
+  ebas_station_code: ES0018G
+  ebas_station_latitude: '28.309'
+  ebas_station_longitude: '-16.4994'
+  resolution: hourly
+  time_coverage_end: 2018-12-28T18:29:00 UTC
+  time_coverage_start: 2017-01-25T09:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HK/2Z/R9/HK2Z-R95J.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N56_RYO
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20210115000000'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: JP1020R
+  ebas_station_latitude: '39.0319'
+  ebas_station_longitude: '141.8222'
+  resolution: hourly
+  time_coverage_end: 2016-07-11T01:00:00 UTC
+  time_coverage_start: 2009-08-23T03:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HP/GJ/7J/HPGJ-7J9D.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_VTO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20171212100317'
+  ebas_station_altitude: 11.0 m
+  ebas_station_code: IE0001R
+  ebas_station_latitude: '51.939722'
+  ebas_station_longitude: '-10.244444'
+  resolution: hourly
+  time_coverage_end: 2016-12-02T11:29:00 UTC
+  time_coverage_start: 2014-07-13T09:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HQ/NX/3F/HQNX-3FNS.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N50_MNM
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20210115000000'
+  ebas_station_altitude: 7.1 m
+  ebas_station_code: JP1028G
+  ebas_station_latitude: '24.2883'
+  ebas_station_longitude: '153.9833'
+  resolution: hourly
+  time_coverage_end: 2016-06-15T03:00:00 UTC
+  time_coverage_start: 2010-04-14T22:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HR/DU/DN/HRDU-DN3N.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: POM02_PS2815704
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20230207000000'
+  ebas_station_altitude: 37.58 m
+  ebas_station_code: JP0007U
+  ebas_station_latitude: '44.0178'
+  ebas_station_longitude: '144.2797'
+  resolution: hourly
+  time_coverage_end: 2021-12-29T04:00:00 UTC
+  time_coverage_start: 2021-08-06T01:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/HU/BV/5V/HUBV-5VHU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_CES
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20160509145955'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: NL0011R
+  ebas_station_latitude: '51.970278'
+  ebas_station_longitude: '4.926389'
+  resolution: Unrecognised (P0000-00-00T02:00:00)
+  time_coverage_end: 2014-11-24T12:29:00 UTC
+  time_coverage_start: 2014-05-01T17:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/J5/JD/HE/J5JD-HEHJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N47_MNM
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20210115000000'
+  ebas_station_altitude: 7.1 m
+  ebas_station_code: JP1028G
+  ebas_station_latitude: '24.2883'
+  ebas_station_longitude: '153.9833'
+  resolution: hourly
+  time_coverage_end: 2015-06-14T09:00:00 UTC
+  time_coverage_start: 2008-01-04T21:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JU/2F/5B/JU2F-5BSX.nc:
+  ebas_instrument_name: sun_tracking_filter_radiometer_102
+  ebas_method_ref: JP02L_optical_transmission
+  ebas_revision_date: '20060331000000'
+  ebas_station_altitude: 30.0 m
+  ebas_station_code: JP1029R
+  ebas_station_latitude: '24.466941'
+  ebas_station_longitude: '123.010872'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2004-12-30T04:21:00 UTC
+  time_coverage_start: 2003-01-17T04:05:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - aerosol_optical_depth
+  - aerosol_optical_depth_qc
+  - aerosol_optical_depth_ebasmetadata
+  - Wavelength
+  - aerosol_optical_depth_Wavelength_qc
+  - aerosol_optical_depth_Wavelength_ebasmetadata
+  - aerosol_optical_depth_Wavelength
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/K6/59/KP/K659-KPGP.nc:
+  ebas_instrument_name: PMOD-WRC_PFR-N_IE0001R_VTO
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20111202000000'
+  ebas_station_altitude: 11.0 m
+  ebas_station_code: IE0001R
+  ebas_station_latitude: '51.939722'
+  ebas_station_longitude: '-10.244444'
+  resolution: hourly
+  time_coverage_end: 2008-12-28T16:29:00 UTC
+  time_coverage_start: 2007-10-03T13:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/K8/PF/28/K8PF-28SD.nc:
+  ebas_instrument_name: PMOD-WRC_PFR-N_BRA
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20131021000000'
+  ebas_station_altitude: 600.0 m
+  ebas_station_code: CA0023R
+  ebas_station_latitude: '50.202778'
+  ebas_station_longitude: '-104.204167'
+  resolution: hourly
+  time_coverage_end: 2012-07-01T03:29:00 UTC
+  time_coverage_start: 2008-01-04T16:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KA/3G/XR/KA3G-XRTJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N50_RYO
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20210115000000'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: JP1020R
+  ebas_station_latitude: '39.0319'
+  ebas_station_longitude: '141.8222'
+  resolution: hourly
+  time_coverage_end: 2009-08-16T05:00:00 UTC
+  time_coverage_start: 2008-06-17T20:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KC/Q7/2D/KCQ7-2D2S.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: YES_MFR-7_BND
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: US06L_MFR_JA
+  ebas_revision_date: '20240221232958'
+  ebas_station_altitude: 213.0 m
+  ebas_station_code: US0035R
+  ebas_station_latitude: '40.05'
+  ebas_station_longitude: '-88.36667'
+  resolution: hourly
+  time_coverage_end: 2024-01-01T00:00:00 UTC
+  time_coverage_start: 2019-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KM/HZ/ZW/KMHZ-ZWKU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_CES
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20160509145940'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: NL0011R
+  ebas_station_latitude: '51.970278'
+  ebas_station_longitude: '4.926389'
+  resolution: Unrecognised (P0000-00-00T12:00:00)
+  time_coverage_end: 2014-04-26T08:29:00 UTC
+  time_coverage_start: 2014-04-19T15:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KT/QM/6Q/KTQM-6QXD.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_ASP
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20140915200321'
+  ebas_station_altitude: 547.0 m
+  ebas_station_code: AU0001C
+  ebas_station_latitude: '-23.795085'
+  ebas_station_longitude: '133.88901'
+  resolution: hourly
+  time_coverage_end: 2013-12-31T10:29:00 UTC
+  time_coverage_start: 2010-08-19T22:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KW/2S/4N/KW2S-4NQZ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_JFJ
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20161221154213'
+  ebas_station_altitude: 3578.0 m
+  ebas_station_code: CH0001G
+  ebas_station_latitude: '46.5475'
+  ebas_station_longitude: '7.985'
+  resolution: Unrecognised (P0000-00-00T02:00:00)
+  time_coverage_end: 2015-05-31T07:29:00 UTC
+  time_coverage_start: 2015-03-07T07:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MC/49/9H/MC49-9H76.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SP02
+  ebas_method_ref: AU01L_optical_depth
+  ebas_revision_date: '20230731050431'
+  ebas_station_altitude: 212.0 m
+  ebas_station_code: AU0004R
+  ebas_station_latitude: '-35.15983'
+  ebas_station_longitude: '147.45617'
+  resolution: hourly
+  time_coverage_end: 2008-12-31T23:59:00 UTC
+  time_coverage_start: 2008-04-07T21:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MQ/ZY/8P/MQZY-8PAT.nc:
+  ebas_instrument_name: PFR_01
+  ebas_method_ref: CH04L_Optical_Transmission
+  ebas_revision_date: '20100125000000'
+  ebas_station_altitude: 3578.0 m
+  ebas_station_code: CH0001G
+  ebas_station_latitude: '46.5475'
+  ebas_station_longitude: '7.985'
+  resolution: hourly
+  time_coverage_end: 2006-12-30T13:00:00 UTC
+  time_coverage_start: 1999-01-06T07:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MT/QD/9F/MTQD-9FSW.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SP02_WOL
+  ebas_method_ref: AU01L_optical_depth
+  ebas_revision_date: '20230824034222'
+  ebas_station_altitude: 50.0 m
+  ebas_station_code: AU0005U
+  ebas_station_latitude: '-34.4057'
+  ebas_station_longitude: '150.88047'
+  resolution: hourly
+  time_coverage_end: 2014-07-31T05:59:00 UTC
+  time_coverage_start: 2009-03-04T20:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MZ/24/XJ/MZ24-XJ8C.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N71_MNM
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20210115000000'
+  ebas_station_altitude: 7.1 m
+  ebas_station_code: JP1028G
+  ebas_station_latitude: '24.2883'
+  ebas_station_longitude: '153.9833'
+  resolution: hourly
+  time_coverage_end: 2013-10-13T05:00:00 UTC
+  time_coverage_start: 2013-05-16T21:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N4/KZ/QE/N4KZ-QERU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_VTO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20171212100312'
+  ebas_station_altitude: 11.0 m
+  ebas_station_code: IE0001R
+  ebas_station_latitude: '51.939722'
+  ebas_station_longitude: '-10.244444'
+  resolution: 3hourly
+  time_coverage_end: 2016-08-28T10:29:00 UTC
+  time_coverage_start: 2016-08-18T07:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N8/K7/2Q/N8K7-2QJT.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_CES
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20160509145951'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: NL0011R
+  ebas_station_latitude: '51.970278'
+  ebas_station_longitude: '4.926389'
+  resolution: 3hourly
+  time_coverage_end: 2014-08-29T08:29:00 UTC
+  time_coverage_start: 2014-01-10T11:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N9/WY/97/N9WY-97XM.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_TRO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20200323184448'
+  ebas_station_altitude: 1309.0 m
+  ebas_station_code: NO0058G
+  ebas_station_latitude: '-72.016667'
+  ebas_station_longitude: '2.533333'
+  resolution: hourly
+  time_coverage_end: 2019-12-31T00:29:00 UTC
+  time_coverage_start: 2019-08-24T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - sample_count_0
+  - sample_count_0_qc
+  - sample_count_0_ebasmetadata
+  - sample_count_1
+  - sample_count_1_qc
+  - sample_count_1_ebasmetadata
+  - sample_count_2
+  - sample_count_2_qc
+  - sample_count_2_ebasmetadata
+  - sample_count_3
+  - sample_count_3_qc
+  - sample_count_3_ebasmetadata
+  - aerosol_optical_depth_amean_0
+  - aerosol_optical_depth_amean_0_qc
+  - aerosol_optical_depth_amean_0_ebasmetadata
+  - aerosol_optical_depth_amean_1
+  - aerosol_optical_depth_amean_1_qc
+  - aerosol_optical_depth_amean_1_ebasmetadata
+  - aerosol_optical_depth_amean_2
+  - aerosol_optical_depth_amean_2_qc
+  - aerosol_optical_depth_amean_2_ebasmetadata
+  - aerosol_optical_depth_amean_3
+  - aerosol_optical_depth_amean_3_qc
+  - aerosol_optical_depth_amean_3_ebasmetadata
+  - aerosol_optical_depth_median_0
+  - aerosol_optical_depth_median_0_qc
+  - aerosol_optical_depth_median_0_ebasmetadata
+  - aerosol_optical_depth_median_1
+  - aerosol_optical_depth_median_1_qc
+  - aerosol_optical_depth_median_1_ebasmetadata
+  - aerosol_optical_depth_median_2
+  - aerosol_optical_depth_median_2_qc
+  - aerosol_optical_depth_median_2_ebasmetadata
+  - aerosol_optical_depth_median_3
+  - aerosol_optical_depth_median_3_qc
+  - aerosol_optical_depth_median_3_ebasmetadata
+  - aerosol_optical_depth_stddev_0
+  - aerosol_optical_depth_stddev_0_qc
+  - aerosol_optical_depth_stddev_0_ebasmetadata
+  - aerosol_optical_depth_stddev_1
+  - aerosol_optical_depth_stddev_1_qc
+  - aerosol_optical_depth_stddev_1_ebasmetadata
+  - aerosol_optical_depth_stddev_2
+  - aerosol_optical_depth_stddev_2_qc
+  - aerosol_optical_depth_stddev_2_ebasmetadata
+  - aerosol_optical_depth_stddev_3
+  - aerosol_optical_depth_stddev_3_qc
+  - aerosol_optical_depth_stddev_3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NJ/WE/C6/NJWE-C6ZW.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N47_YON
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20210115000000'
+  ebas_station_altitude: 30.0 m
+  ebas_station_code: JP1029R
+  ebas_station_latitude: '24.466941'
+  ebas_station_longitude: '123.010872'
+  resolution: hourly
+  time_coverage_end: 2014-01-19T09:00:00 UTC
+  time_coverage_start: 2012-09-03T02:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NT/B5/S5/NTB5-S5G2.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: POM02_PS2509104
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20230202000000'
+  ebas_station_altitude: 5.71 m
+  ebas_station_code: JP0006R
+  ebas_station_latitude: '24.3367'
+  ebas_station_longitude: '124.1644'
+  resolution: hourly
+  time_coverage_end: 2021-11-07T06:00:00 UTC
+  time_coverage_start: 2017-03-13T03:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/NU/PS/2P/NUPS-2PYT.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: YES_MFR-7_DRA
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: US06L_MFR_JA
+  ebas_revision_date: '20240221235436'
+  ebas_station_altitude: 1007.0 m
+  ebas_station_code: US0902R
+  ebas_station_latitude: '36.62373'
+  ebas_station_longitude: '-116.01947'
+  resolution: hourly
+  time_coverage_end: 2024-01-01T00:00:00 UTC
+  time_coverage_start: 2019-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PN/8B/US/PN8B-US6R.nc:
+  ebas_instrument_name: sun_tracking_filter_radiometer_59
+  ebas_method_ref: DE13L_optical_transmission
+  ebas_revision_date: '20030312000000'
+  ebas_station_altitude: 89.0 m
+  ebas_station_code: DE0059C
+  ebas_station_latitude: '52.35'
+  ebas_station_longitude: '13.066667'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2002-12-31T13:10:00 UTC
+  time_coverage_start: 1994-11-02T07:31:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - aerosol_optical_depth_qc
+  - aerosol_optical_depth_ebasmetadata
+  - aerosol_optical_depth
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PN/FS/KT/PNFS-KT66.nc:
+  ebas_instrument_name: PMOD-WRC_PFR-N_JFJ
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20140404000000'
+  ebas_station_altitude: 3578.0 m
+  ebas_station_code: CH0001G
+  ebas_station_latitude: '46.5475'
+  ebas_station_longitude: '7.985'
+  resolution: hourly
+  time_coverage_end: 2010-11-25T09:29:00 UTC
+  time_coverage_start: 2010-01-18T07:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - Wavelengthx
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PP/W8/F2/PPW8-F2YE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_TRO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20190610192658'
+  ebas_station_altitude: 1309.0 m
+  ebas_station_code: NO0058G
+  ebas_station_latitude: '-72.016667'
+  ebas_station_longitude: '2.533333'
+  resolution: hourly
+  time_coverage_end: 2018-04-10T13:29:00 UTC
+  time_coverage_start: 2014-09-19T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - sample_count_0
+  - sample_count_0_qc
+  - sample_count_0_ebasmetadata
+  - sample_count_1
+  - sample_count_1_qc
+  - sample_count_1_ebasmetadata
+  - sample_count_2
+  - sample_count_2_qc
+  - sample_count_2_ebasmetadata
+  - sample_count_3
+  - sample_count_3_qc
+  - sample_count_3_ebasmetadata
+  - aerosol_optical_depth_amean_0
+  - aerosol_optical_depth_amean_0_qc
+  - aerosol_optical_depth_amean_0_ebasmetadata
+  - aerosol_optical_depth_amean_1
+  - aerosol_optical_depth_amean_1_qc
+  - aerosol_optical_depth_amean_1_ebasmetadata
+  - aerosol_optical_depth_amean_2
+  - aerosol_optical_depth_amean_2_qc
+  - aerosol_optical_depth_amean_2_ebasmetadata
+  - aerosol_optical_depth_amean_3
+  - aerosol_optical_depth_amean_3_qc
+  - aerosol_optical_depth_amean_3_ebasmetadata
+  - aerosol_optical_depth_median_0
+  - aerosol_optical_depth_median_0_qc
+  - aerosol_optical_depth_median_0_ebasmetadata
+  - aerosol_optical_depth_median_1
+  - aerosol_optical_depth_median_1_qc
+  - aerosol_optical_depth_median_1_ebasmetadata
+  - aerosol_optical_depth_median_2
+  - aerosol_optical_depth_median_2_qc
+  - aerosol_optical_depth_median_2_ebasmetadata
+  - aerosol_optical_depth_median_3
+  - aerosol_optical_depth_median_3_qc
+  - aerosol_optical_depth_median_3_ebasmetadata
+  - aerosol_optical_depth_stddev_0
+  - aerosol_optical_depth_stddev_0_qc
+  - aerosol_optical_depth_stddev_0_ebasmetadata
+  - aerosol_optical_depth_stddev_1
+  - aerosol_optical_depth_stddev_1_qc
+  - aerosol_optical_depth_stddev_1_ebasmetadata
+  - aerosol_optical_depth_stddev_2
+  - aerosol_optical_depth_stddev_2_qc
+  - aerosol_optical_depth_stddev_2_ebasmetadata
+  - aerosol_optical_depth_stddev_3
+  - aerosol_optical_depth_stddev_3_qc
+  - aerosol_optical_depth_stddev_3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PU/QQ/3E/PUQQ-3E43.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_CMN
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20190316142547'
+  ebas_station_altitude: 2165.0 m
+  ebas_station_code: IT0009R
+  ebas_station_latitude: '44.19320533600754'
+  ebas_station_longitude: '10.701429456423515'
+  resolution: hourly
+  time_coverage_end: 2018-10-25T16:29:00 UTC
+  time_coverage_start: 2018-07-04T04:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/PZ/NX/VY/PZNX-VYXF.nc:
+  ebas_instrument_name: sun_tracking_filter_radiometer_58
+  ebas_method_ref: DE13L_optical_transmission
+  ebas_revision_date: '20060425000000'
+  ebas_station_altitude: 112.0 m
+  ebas_station_code: DE0058R
+  ebas_station_latitude: '52.2087'
+  ebas_station_longitude: '14.1216'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2005-12-30T13:31:00 UTC
+  time_coverage_start: 1986-03-16T13:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - aerosol_optical_depth_qc
+  - aerosol_optical_depth_ebasmetadata
+  - aerosol_optical_depth
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q3/CS/UE/Q3CS-UEZA.nc:
+  ebas_instrument_name: PMOD-WRC_PFR-N_MLO
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20140403000000'
+  ebas_station_altitude: 3397.0 m
+  ebas_station_code: US1200R
+  ebas_station_latitude: '19.5362300873'
+  ebas_station_longitude: '-155.5761566162'
+  resolution: hourly
+  time_coverage_end: 2013-12-30T22:29:00 UTC
+  time_coverage_start: 2011-01-01T17:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q4/XQ/5K/Q4XQ-5KVE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_MHD
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20160316161505'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: IE0031R
+  ebas_station_latitude: '53.32583'
+  ebas_station_longitude: '-9.89944'
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2014-08-12T09:29:00 UTC
+  time_coverage_start: 2014-08-02T07:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q6/VF/Z7/Q6VF-Z7PA.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N18_RYO
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20210115000000'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: JP1020R
+  ebas_station_latitude: '39.0319'
+  ebas_station_longitude: '141.8222'
+  resolution: hourly
+  time_coverage_end: 2018-03-31T09:00:00 UTC
+  time_coverage_start: 2016-07-12T04:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QM/ZW/XX/QMZW-XX3P.nc:
+  ebas_instrument_name: PMOD-WRC_PFR-N_HPB
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20120514000000'
+  ebas_station_altitude: 975.0 m
+  ebas_station_code: DE0043G
+  ebas_station_latitude: '47.8014984131'
+  ebas_station_longitude: '11.009619'
+  resolution: hourly
+  time_coverage_end: 2011-12-28T15:29:00 UTC
+  time_coverage_start: 2008-01-02T10:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QU/UV/6V/QUUV-6V24.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SP02
+  ebas_method_ref: AU01L_optical_depth
+  ebas_revision_date: '20230731053425'
+  ebas_station_altitude: 212.0 m
+  ebas_station_code: AU0004R
+  ebas_station_latitude: '-35.15983'
+  ebas_station_longitude: '147.45617'
+  resolution: hourly
+  time_coverage_end: 2008-04-07T06:59:00 UTC
+  time_coverage_start: 2001-02-19T03:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R3/UY/AT/R3UY-ATAA.nc:
+  ebas_instrument_name: sun_tracking_filter_radiometer_102
+  ebas_method_ref: JP02L_optical_transmission
+  ebas_revision_date: '20060331000000'
+  ebas_station_altitude: 7.1 m
+  ebas_station_code: JP1028G
+  ebas_station_latitude: '24.2883'
+  ebas_station_longitude: '153.9833'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2003-12-31T23:01:00 UTC
+  time_coverage_start: 2003-12-31T23:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - aerosol_optical_depth_qc
+  - aerosol_optical_depth_ebasmetadata
+  - aerosol_optical_depth
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R4/2G/2Y/R42G-2YZ3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_IZO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20180512110114'
+  ebas_station_altitude: 2373.0 m
+  ebas_station_code: ES0018G
+  ebas_station_latitude: '28.309'
+  ebas_station_longitude: '-16.4994'
+  resolution: hourly
+  time_coverage_end: 2016-12-31T19:29:00 UTC
+  time_coverage_start: 2016-10-01T07:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R4/AQ/FM/R4AQ-FMW9.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_JFJ
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20161221154209'
+  ebas_station_altitude: 3578.0 m
+  ebas_station_code: CH0001G
+  ebas_station_latitude: '46.5475'
+  ebas_station_longitude: '7.985'
+  resolution: Unrecognised (P0000-00-00T12:00:00)
+  time_coverage_end: 2015-02-26T09:29:00 UTC
+  time_coverage_start: 2015-02-25T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/R8/ST/X9/R8ST-X93Z.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_IZO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20231108231122'
+  ebas_station_altitude: 2373.0 m
+  ebas_station_code: ES0018G
+  ebas_station_latitude: '28.309'
+  ebas_station_longitude: '-16.4994'
+  resolution: hourly
+  time_coverage_end: 2022-12-31T19:29:00 UTC
+  time_coverage_start: 2013-01-01T09:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RE/DU/8K/REDU-8K2H.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_HPB
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20231127154644'
+  ebas_station_altitude: 975.0 m
+  ebas_station_code: DE0043G
+  ebas_station_latitude: '47.8014984131'
+  ebas_station_longitude: '11.009619'
+  resolution: hourly
+  time_coverage_end: 2021-04-21T18:29:00 UTC
+  time_coverage_start: 2018-05-07T05:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/S6/WW/MV/S6WW-MVJ9.nc:
+  ebas_instrument_name: sun_tracking_filter_radiometer_102
+  ebas_method_ref: JP02L_optical_transmission
+  ebas_revision_date: '20140501000000'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: JP1020R
+  ebas_station_latitude: '39.0319'
+  ebas_station_longitude: '141.8222'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2004-12-27T05:41:00 UTC
+  time_coverage_start: 2003-01-06T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - aerosol_optical_depth
+  - aerosol_optical_depth_qc
+  - aerosol_optical_depth_ebasmetadata
+  - Wavelength
+  - aerosol_optical_depth_Wavelength_qc
+  - aerosol_optical_depth_Wavelength_ebasmetadata
+  - aerosol_optical_depth_Wavelength
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SB/JP/RX/SBJP-RX5M.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N48_YON
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20210115000000'
+  ebas_station_altitude: 30.0 m
+  ebas_station_code: JP1029R
+  ebas_station_latitude: '24.466941'
+  ebas_station_longitude: '123.010872'
+  resolution: hourly
+  time_coverage_end: 2015-09-25T07:00:00 UTC
+  time_coverage_start: 2009-05-23T03:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SP/HZ/Z3/SPHZ-Z37B.nc:
+  ebas_instrument_name: sun_tracking_filter_radiometer_102
+  ebas_method_ref: JP02L_optical_transmission
+  ebas_revision_date: '20060331000000'
+  ebas_station_altitude: 7.1 m
+  ebas_station_code: JP1028G
+  ebas_station_latitude: '24.2883'
+  ebas_station_longitude: '153.9833'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2003-12-31T23:01:00 UTC
+  time_coverage_start: 2003-12-31T23:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - aerosol_optical_depth
+  - aerosol_optical_depth_qc
+  - aerosol_optical_depth_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SQ/X4/RD/SQX4-RDNA.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_VTO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20191007142546'
+  ebas_station_altitude: 11.0 m
+  ebas_station_code: IE0001R
+  ebas_station_latitude: '51.939722'
+  ebas_station_longitude: '-10.244444'
+  resolution: hourly
+  time_coverage_end: 2018-10-06T17:29:00 UTC
+  time_coverage_start: 2018-01-06T10:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SU/UK/JF/SUUK-JF8M.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_IZO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20231108232043'
+  ebas_station_altitude: 2373.0 m
+  ebas_station_code: ES0018G
+  ebas_station_latitude: '28.309'
+  ebas_station_longitude: '-16.4994'
+  resolution: hourly
+  time_coverage_end: 2022-08-30T20:29:00 UTC
+  time_coverage_start: 2022-01-01T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/SX/CN/DH/SXCN-DHVA.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_DAV
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20231128134841'
+  ebas_station_altitude: 1590.0 m
+  ebas_station_code: CH0006C
+  ebas_station_latitude: '46.816667'
+  ebas_station_longitude: '9.85'
+  resolution: hourly
+  time_coverage_end: 2021-12-22T14:29:00 UTC
+  time_coverage_start: 2021-01-01T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/T5/NV/35/T5NV-35CV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: POM02_PS2815701
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20230202000000'
+  ebas_station_altitude: 5.71 m
+  ebas_station_code: JP0006R
+  ebas_station_latitude: '24.3367'
+  ebas_station_longitude: '124.1644'
+  resolution: hourly
+  time_coverage_end: 2021-12-31T03:00:00 UTC
+  time_coverage_start: 2018-03-20T01:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TA/TF/JS/TATF-JSJV.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_HPB
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20140702112526'
+  ebas_station_altitude: 975.0 m
+  ebas_station_code: DE0043G
+  ebas_station_latitude: '47.8014984131'
+  ebas_station_longitude: '11.009619'
+  resolution: hourly
+  time_coverage_end: 2013-12-30T15:29:00 UTC
+  time_coverage_start: 2012-01-11T07:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TD/KV/PG/TDKV-PG96.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_HPB
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20160504134127'
+  ebas_station_altitude: 975.0 m
+  ebas_station_code: DE0043G
+  ebas_station_latitude: '47.8014984131'
+  ebas_station_longitude: '11.009619'
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2014-04-24T16:29:00 UTC
+  time_coverage_start: 2014-04-01T13:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TZ/7J/G8/TZ7J-G8BR.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SP02
+  ebas_method_ref: AU01L_optical_depth
+  ebas_revision_date: '20230731052758'
+  ebas_station_altitude: 212.0 m
+  ebas_station_code: AU0004R
+  ebas_station_latitude: '-35.15983'
+  ebas_station_longitude: '147.45617'
+  resolution: hourly
+  time_coverage_end: 2011-06-06T03:59:00 UTC
+  time_coverage_start: 2009-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/U3/EY/K3/U3EY-K3SH.nc:
+  ebas_instrument_name: PMOD-WRC_PFR-N_VTO
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20140403000000'
+  ebas_station_altitude: 11.0 m
+  ebas_station_code: IE0001R
+  ebas_station_latitude: '51.939722'
+  ebas_station_longitude: '-10.244444'
+  resolution: hourly
+  time_coverage_end: 2013-12-25T15:29:00 UTC
+  time_coverage_start: 2009-01-07T14:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/U3/MD/VU/U3MD-VUVP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_DAV_27
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20180521205837'
+  ebas_station_altitude: 1590.0 m
+  ebas_station_code: CH0006C
+  ebas_station_latitude: '46.816667'
+  ebas_station_longitude: '9.85'
+  resolution: hourly
+  time_coverage_end: 2015-12-30T15:29:00 UTC
+  time_coverage_start: 2015-01-01T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/U3/XD/QW/U3XD-QW38.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_NYA
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20200907131835'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: NO0057R
+  ebas_station_latitude: '78.925'
+  ebas_station_longitude: '11.9222222'
+  resolution: hourly
+  time_coverage_end: 2019-09-19T13:29:00 UTC
+  time_coverage_start: 2016-03-16T10:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/U5/X3/TJ/U5X3-TJKZ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: YES_MFR-7_GCR
+  ebas_measurement_height: 2.0 m
+  ebas_method_ref: US06L_MFR_JA
+  ebas_revision_date: '20230222145229'
+  ebas_station_altitude: 98.0 m
+  ebas_station_code: US0900R
+  ebas_station_latitude: '34.2547'
+  ebas_station_longitude: '-89.8729'
+  resolution: hourly
+  time_coverage_end: 2020-01-01T00:00:00 UTC
+  time_coverage_start: 2019-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/U8/4H/QJ/U84H-QJJP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_MHD
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20160316161458'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: IE0031R
+  ebas_station_latitude: '53.32583'
+  ebas_station_longitude: '-9.89944'
+  resolution: 3hourly
+  time_coverage_end: 2014-04-28T16:29:00 UTC
+  time_coverage_start: 2014-04-20T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UJ/MW/U5/UJMW-U5E3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_RYO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20171122133015'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: JP1020R
+  ebas_station_latitude: '39.0319'
+  ebas_station_longitude: '141.8222'
+  resolution: hourly
+  time_coverage_end: 2015-12-31T06:29:00 UTC
+  time_coverage_start: 2014-01-02T05:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UP/6K/YE/UP6K-YEBX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SP02_WOL
+  ebas_method_ref: AU01L_optical_depth
+  ebas_revision_date: '20230824012449'
+  ebas_station_altitude: 50.0 m
+  ebas_station_code: AU0005U
+  ebas_station_latitude: '-34.4057'
+  ebas_station_longitude: '150.88047'
+  resolution: hourly
+  time_coverage_end: 2011-04-12T23:59:00 UTC
+  time_coverage_start: 2008-09-20T20:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UZ/7W/MK/UZ7W-MK6V.nc:
+  ebas_instrument_name: sun_tracking_filter_radiometer_09
+  ebas_method_ref: DE13L_optical_transmission
+  ebas_revision_date: '20060426000000'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: '54.4368'
+  ebas_station_longitude: '12.7249'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2005-12-25T12:21:00 UTC
+  time_coverage_start: 1987-04-25T11:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - aerosol_optical_depth_qc
+  - aerosol_optical_depth_ebasmetadata
+  - aerosol_optical_depth
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/V6/VG/J7/V6VG-J73G.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_RYO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20160408100227'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: JP1020R
+  ebas_station_latitude: '39.0319'
+  ebas_station_longitude: '141.8222'
+  resolution: Unrecognised (P0000-00-00T02:00:00)
+  time_coverage_end: 2014-12-28T06:29:00 UTC
+  time_coverage_start: 2014-12-05T01:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VB/XT/7N/VBXT-7NJG.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_HPB
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20231127154745'
+  ebas_station_altitude: 975.0 m
+  ebas_station_code: DE0043G
+  ebas_station_latitude: '47.8014984131'
+  ebas_station_longitude: '11.009619'
+  resolution: hourly
+  time_coverage_end: 2021-08-10T19:29:00 UTC
+  time_coverage_start: 2021-04-23T04:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VP/ZC/JJ/VPZC-JJQG.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_IZO
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20131003000000'
+  ebas_station_altitude: 2373.0 m
+  ebas_station_code: ES0018G
+  ebas_station_latitude: '28.309'
+  ebas_station_longitude: '-16.4994'
+  resolution: hourly
+  time_coverage_end: 2012-12-31T18:29:00 UTC
+  time_coverage_start: 2009-05-14T13:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VQ/44/T6/VQ44-T6GS.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_MLO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20180515234516'
+  ebas_station_altitude: 3397.0 m
+  ebas_station_code: US1200R
+  ebas_station_latitude: '19.5362300873'
+  ebas_station_longitude: '-155.5761566162'
+  resolution: hourly
+  time_coverage_end: 2015-08-01T01:29:00 UTC
+  time_coverage_start: 2014-01-01T18:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/VY/6T/W9/VY6T-W92P.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_NYA
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20210811084423'
+  ebas_station_altitude: 8.0 m
+  ebas_station_code: NO0057R
+  ebas_station_latitude: '78.925'
+  ebas_station_longitude: '11.9222222'
+  resolution: hourly
+  time_coverage_end: 2020-05-12T21:29:00 UTC
+  time_coverage_start: 2020-04-22T04:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/W6/YG/QH/W6YG-QHZP.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_IZO
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20110817000000'
+  ebas_station_altitude: 2373.0 m
+  ebas_station_code: ES0018G
+  ebas_station_latitude: '28.309'
+  ebas_station_longitude: '-16.4994'
+  resolution: hourly
+  time_coverage_end: 2009-02-11T19:29:00 UTC
+  time_coverage_start: 2008-01-01T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/W7/MZ/R4/W7MZ-R4B3.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_ASP
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20191121092155'
+  ebas_station_altitude: 547.0 m
+  ebas_station_code: AU0001C
+  ebas_station_latitude: '-23.795085'
+  ebas_station_longitude: '133.88901'
+  resolution: hourly
+  time_coverage_end: 2018-12-31T00:29:00 UTC
+  time_coverage_start: 2016-03-14T00:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WJ/UZ/BF/WJUZ-BFNB.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_TRO
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20231109101925'
+  ebas_station_altitude: 1309.0 m
+  ebas_station_code: NO0058G
+  ebas_station_latitude: '-72.016667'
+  ebas_station_longitude: '2.533333'
+  resolution: hourly
+  time_coverage_end: 2022-01-31T20:29:00 UTC
+  time_coverage_start: 2014-01-01T20:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - sample_count_0
+  - sample_count_0_qc
+  - sample_count_0_ebasmetadata
+  - sample_count_1
+  - sample_count_1_qc
+  - sample_count_1_ebasmetadata
+  - sample_count_2
+  - sample_count_2_qc
+  - sample_count_2_ebasmetadata
+  - sample_count_3
+  - sample_count_3_qc
+  - sample_count_3_ebasmetadata
+  - aerosol_optical_depth_amean_0
+  - aerosol_optical_depth_amean_0_qc
+  - aerosol_optical_depth_amean_0_ebasmetadata
+  - aerosol_optical_depth_amean_1
+  - aerosol_optical_depth_amean_1_qc
+  - aerosol_optical_depth_amean_1_ebasmetadata
+  - aerosol_optical_depth_amean_2
+  - aerosol_optical_depth_amean_2_qc
+  - aerosol_optical_depth_amean_2_ebasmetadata
+  - aerosol_optical_depth_amean_3
+  - aerosol_optical_depth_amean_3_qc
+  - aerosol_optical_depth_amean_3_ebasmetadata
+  - aerosol_optical_depth_median_0
+  - aerosol_optical_depth_median_0_qc
+  - aerosol_optical_depth_median_0_ebasmetadata
+  - aerosol_optical_depth_median_1
+  - aerosol_optical_depth_median_1_qc
+  - aerosol_optical_depth_median_1_ebasmetadata
+  - aerosol_optical_depth_median_2
+  - aerosol_optical_depth_median_2_qc
+  - aerosol_optical_depth_median_2_ebasmetadata
+  - aerosol_optical_depth_median_3
+  - aerosol_optical_depth_median_3_qc
+  - aerosol_optical_depth_median_3_ebasmetadata
+  - aerosol_optical_depth_stddev_0
+  - aerosol_optical_depth_stddev_0_qc
+  - aerosol_optical_depth_stddev_0_ebasmetadata
+  - aerosol_optical_depth_stddev_1
+  - aerosol_optical_depth_stddev_1_qc
+  - aerosol_optical_depth_stddev_1_ebasmetadata
+  - aerosol_optical_depth_stddev_2
+  - aerosol_optical_depth_stddev_2_qc
+  - aerosol_optical_depth_stddev_2_ebasmetadata
+  - aerosol_optical_depth_stddev_3
+  - aerosol_optical_depth_stddev_3_qc
+  - aerosol_optical_depth_stddev_3_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WX/ZZ/PV/WXZZ-PVCY.nc:
+  ebas_instrument_name: PFR_42
+  ebas_method_ref: CH04L_Optical_Transmission
+  ebas_revision_date: '20100125000000'
+  ebas_station_altitude: 2373.0 m
+  ebas_station_code: ES0018G
+  ebas_station_latitude: '28.309'
+  ebas_station_longitude: '-16.4994'
+  resolution: hourly
+  time_coverage_end: 2007-12-31T18:00:00 UTC
+  time_coverage_start: 2001-07-05T06:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/X6/T9/Z7/X6T9-Z7BH.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_ASP
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20191113182034'
+  ebas_station_altitude: 547.0 m
+  ebas_station_code: AU0001C
+  ebas_station_latitude: '-23.795085'
+  ebas_station_longitude: '133.88901'
+  resolution: hourly
+  time_coverage_end: 2016-03-11T00:29:00 UTC
+  time_coverage_start: 2014-01-01T23:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/X9/62/H2/X962-H2CJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_DAV
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20161223112029'
+  ebas_station_altitude: 1590.0 m
+  ebas_station_code: CH0006C
+  ebas_station_latitude: '46.816667'
+  ebas_station_longitude: '9.85'
+  resolution: hourly
+  time_coverage_end: 2015-12-30T14:29:00 UTC
+  time_coverage_start: 2014-01-01T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XG/T6/2J/XGT6-2JUT.nc:
+  ebas_instrument_name: Kipp-Zonen_Brewer_MkIII_178
+  ebas_method_ref: BE03L_Brewer_spectrophotometer_DeBock2010
+  ebas_revision_date: '20120601000000'
+  ebas_station_altitude: 100.0 m
+  ebas_station_code: BE0006R
+  ebas_station_latitude: '50.7979'
+  ebas_station_longitude: '4.35876'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2011-11-16T12:18:16 UTC
+  time_coverage_start: 2007-02-15T09:45:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - aerosol_optical_depth_qc
+  - aerosol_optical_depth_ebasmetadata
+  - aerosol_optical_depth
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XW/HW/WB/XWHW-WBGU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: POM02_PS2815702
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20230202000000'
+  ebas_station_altitude: 7.1 m
+  ebas_station_code: JP1028G
+  ebas_station_latitude: '24.2883'
+  ebas_station_longitude: '153.9833'
+  resolution: hourly
+  time_coverage_end: 2021-11-27T05:00:00 UTC
+  time_coverage_start: 2018-04-04T21:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/XX/6T/4Y/XX6T-4YEC.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SP02_WOL
+  ebas_method_ref: AU01L_optical_depth
+  ebas_revision_date: '20230830053939'
+  ebas_station_altitude: 50.0 m
+  ebas_station_code: AU0005U
+  ebas_station_latitude: '-34.4057'
+  ebas_station_longitude: '150.88047'
+  resolution: hourly
+  time_coverage_end: 2023-03-23T21:59:00 UTC
+  time_coverage_start: 2014-08-01T23:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YM/YX/ZG/YMYX-ZG4R.nc:
+  ebas_instrument_name: sun_tracking_filter_radiometer_102
+  ebas_method_ref: JP02L_optical_transmission
+  ebas_revision_date: '20060331000000'
+  ebas_station_altitude: 7.1 m
+  ebas_station_code: JP1028G
+  ebas_station_latitude: '24.2883'
+  ebas_station_longitude: '153.9833'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2003-12-31T23:01:00 UTC
+  time_coverage_start: 2003-12-31T23:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - aerosol_optical_depth_qc
+  - aerosol_optical_depth_ebasmetadata
+  - aerosol_optical_depth
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YQ/S9/QW/YQS9-QWWK.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N51_MNM
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20210115000000'
+  ebas_station_altitude: 7.1 m
+  ebas_station_code: JP1028G
+  ebas_station_latitude: '24.2883'
+  ebas_station_longitude: '153.9833'
+  resolution: hourly
+  time_coverage_end: 2017-10-18T22:00:00 UTC
+  time_coverage_start: 2009-02-01T23:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YT/9T/EB/YT9T-EBRT.nc:
+  ebas_instrument_name: PMOD-WRC_PFR-N_ASP
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20110822000000'
+  ebas_station_altitude: 547.0 m
+  ebas_station_code: AU0001C
+  ebas_station_latitude: '-23.795085'
+  ebas_station_longitude: '133.88901'
+  resolution: hourly
+  time_coverage_end: 2010-08-15T09:29:00 UTC
+  time_coverage_start: 2008-01-01T20:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YZ/NZ/Z9/YZNZ-Z9FF.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N_SDK
+  ebas_measurement_height: 1.0 m
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20160509154429'
+  ebas_station_altitude: 179.0 m
+  ebas_station_code: FI0005R
+  ebas_station_latitude: '67.367917'
+  ebas_station_longitude: '26.632778'
+  resolution: hourly
+  time_coverage_end: 2014-10-23T12:29:00 UTC
+  time_coverage_start: 2010-03-04T08:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z3/52/6V/Z352-6VKD.nc:
+  ebas_instrument_name: sun_tracking_filter_radiometer_09
+  ebas_method_ref: DE13L_optical_transmission
+  ebas_revision_date: '20050426000000'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: '54.4368'
+  ebas_station_longitude: '12.7249'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2004-12-28T12:50:00 UTC
+  time_coverage_start: 1991-07-11T04:15:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - aerosol_optical_depth_qc
+  - aerosol_optical_depth_ebasmetadata
+  - aerosol_optical_depth
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z5/9W/57/Z59W-57TG.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N37_MNM
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20210115000000'
+  ebas_station_altitude: 7.1 m
+  ebas_station_code: JP1028G
+  ebas_station_latitude: '24.2883'
+  ebas_station_longitude: '153.9833'
+  resolution: hourly
+  time_coverage_end: 2016-10-19T00:00:00 UTC
+  time_coverage_start: 2016-06-17T20:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZD/NA/PA/ZDNA-PAVQ.nc:
+  ebas_instrument_name: PFR_42
+  ebas_method_ref: CH04L_Optical_Transmission
+  ebas_revision_date: '20100125000000'
+  ebas_station_altitude: 600.0 m
+  ebas_station_code: CA0023R
+  ebas_station_latitude: '50.202778'
+  ebas_station_longitude: '-104.204167'
+  resolution: hourly
+  time_coverage_end: 2007-12-31T22:00:00 UTC
+  time_coverage_start: 2001-05-01T13:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZE/G2/9S/ZEG2-9STU.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PMOD-WRC_PFR-N50_YON
+  ebas_method_ref: JP02L_Optical_Transmission
+  ebas_revision_date: '20210115000000'
+  ebas_station_altitude: 30.0 m
+  ebas_station_code: JP1029R
+  ebas_station_latitude: '24.466941'
+  ebas_station_longitude: '123.010872'
+  resolution: hourly
+  time_coverage_end: 2014-08-05T00:00:00 UTC
+  time_coverage_start: 2012-05-14T07:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZF/RR/49/ZFRR-49YS.nc:
+  ebas_instrument_name: PMOD-WRC_PFR-N_MLO
+  ebas_method_ref: CH04L_optical_transmission
+  ebas_revision_date: '20131002000000'
+  ebas_station_altitude: 3397.0 m
+  ebas_station_code: US1200R
+  ebas_station_latitude: '19.5362300873'
+  ebas_station_longitude: '-155.5761566162'
+  resolution: hourly
+  time_coverage_end: 2011-01-01T00:29:00 UTC
+  time_coverage_start: 2010-06-18T21:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - Wavelengthx
+  - aerosol_optical_depth_qc
+  - aerosol_optical_depth_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZZ/MJ/UK/ZZMJ-UKAR.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: SP02_WOL
+  ebas_method_ref: AU01L_optical_depth
+  ebas_revision_date: '20230824031903'
+  ebas_station_altitude: 50.0 m
+  ebas_station_code: AU0005U
+  ebas_station_latitude: '-34.4057'
+  ebas_station_longitude: '150.88047'
+  resolution: hourly
+  time_coverage_end: 2012-02-11T22:59:00 UTC
+  time_coverage_start: 2011-10-27T21:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - sample_count_qc
+  - sample_count_ebasmetadata
+  - aerosol_optical_depth_amean_qc
+  - aerosol_optical_depth_amean_ebasmetadata
+  - aerosol_optical_depth_median_qc
+  - aerosol_optical_depth_median_ebasmetadata
+  - aerosol_optical_depth_stddev_qc
+  - aerosol_optical_depth_stddev_ebasmetadata
+  - sample_count
+  - aerosol_optical_depth_amean
+  - aerosol_optical_depth_median
+  - aerosol_optical_depth_stddev

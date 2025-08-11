@@ -949,7 +949,7 @@ def get_data(download_instance, files, var, actris_parameter, resolution, target
     combined_ds.attrs['domain'] = 'Atmosphere'
     combined_ds.attrs['observed_layer'] = 'Land surface'
 
-    return combined_ds, metadata, wavelength
+    return combined_ds, wavelength
 
 
 def get_files_to_download(nonghost_root, target_start_date, target_end_date, resolution, var):
