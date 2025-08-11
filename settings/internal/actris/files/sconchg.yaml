@@ -1,0 +1,617 @@
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/2K/MB/PQ/2KMB-PQ6X.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Hg01
+  ebas_method_ref: GB03L_Hg_online_1
+  ebas_revision_date: '20240916094334'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: GB0048R
+  ebas_station_latitude: '55.79216'
+  ebas_station_longitude: '-3.2429'
+  ebas_statistics: arithmetic mean
+  resolution: 3hourly
+  time_coverage_end: 2023-12-31T21:00:00 UTC
+  time_coverage_start: 2012-01-01T00:10:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Y/TT/XE/3YTT-XEBB.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ivl_trap_DE09
+  ebas_method_ref: SE01L_Thermal_desorb_CVAFS
+  ebas_revision_date: '20020212000000'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: '54.4368'
+  ebas_station_longitude: '12.7249'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 1999-01-01T00:00:00 UTC
+  time_coverage_start: 1998-11-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/45/EK/DZ/45EK-DZZN.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: PM10_91
+  ebas_method_ref: GB03L_ICP_MS
+  ebas_revision_date: '20230131151923'
+  ebas_station_altitude: 120.0 m
+  ebas_station_code: GB0091R
+  ebas_station_latitude: '57.076667'
+  ebas_station_longitude: '-2.534444'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  time_coverage_end: 2014-01-06T11:15:00 UTC
+  time_coverage_start: 2008-12-23T08:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/47/HR/5R/47HR-5RET.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: hvs_12
+  ebas_method_ref: ES01L_aas
+  ebas_revision_date: '20181210133000'
+  ebas_station_altitude: 885.0 m
+  ebas_station_code: ES0012R
+  ebas_station_latitude: '39.08278'
+  ebas_station_longitude: '-1.10111'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-08T00:00:00)
+  time_coverage_end: 2008-03-01T07:00:00 UTC
+  time_coverage_start: 2008-02-10T07:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/4B/8H/CC/4B8H-CC95.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: f1p_3_hg
+  ebas_method_ref: CZ01L_SOP_PM10
+  ebas_revision_date: '20230123132000'
+  ebas_station_altitude: 535.0 m
+  ebas_station_code: CZ0003R
+  ebas_station_latitude: '49.573394'
+  ebas_station_longitude: '15.080278'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: 2014-01-07T06:00:00 UTC
+  time_coverage_start: 2007-01-02T06:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/63/9T/WS/639T-WS62.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: hvs_13
+  ebas_method_ref: ES01L_aas
+  ebas_revision_date: '20181210133000'
+  ebas_station_altitude: 985.0 m
+  ebas_station_code: ES0013R
+  ebas_station_latitude: '41.23889'
+  ebas_station_longitude: '-5.8975'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-08T00:00:00)
+  time_coverage_end: 2008-07-13T07:00:00 UTC
+  time_coverage_start: 2007-08-05T07:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6K/X6/JQ/6KX6-JQTE.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: tpm_42_2
+  ebas_method_ref: NO01L_mini_trap
+  ebas_revision_date: '20141121112113'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: '78.90715'
+  ebas_station_longitude: '11.88668'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T06:00:00)
+  time_coverage_end: 2005-05-06T17:24:00 UTC
+  time_coverage_start: 2003-04-12T13:23:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/6T/NA/4D/6TNA-4D32.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TPMPA
+  ebas_method_ref: SE01L_HPLC
+  ebas_revision_date: '20240322131818'
+  ebas_station_altitude: 340.0 m
+  ebas_station_code: FI0036R
+  ebas_station_latitude: '68.0'
+  ebas_station_longitude: '24.237222222'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: 2022-12-25T22:00:00 UTC
+  time_coverage_start: 1998-01-05T15:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Q/J7/RZ/9QJ7-RZ84.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: flos1
+  ebas_method_ref: IS02L_cvafs_nilu
+  ebas_revision_date: '20230202133733'
+  ebas_station_altitude: 118.0 m
+  ebas_station_code: IS0091R
+  ebas_station_latitude: '63.3998'
+  ebas_station_longitude: '-20.2884'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  time_coverage_end: 2022-01-04T16:33:36 UTC
+  time_coverage_start: 2003-01-01T16:04:48 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/B6/JU/RZ/B6JU-RZQX.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: hvs91
+  ebas_method_ref: IS02L_cvafs
+  ebas_revision_date: '20230202133715'
+  ebas_station_altitude: 118.0 m
+  ebas_station_code: IS0091R
+  ebas_station_latitude: '63.3998'
+  ebas_station_longitude: '-20.2884'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  time_coverage_end: 2003-01-01T16:04:48 UTC
+  time_coverage_start: 1998-01-02T11:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DC/AP/V3/DCAP-V3S8.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: hvs_14
+  ebas_method_ref: ES01L_aas
+  ebas_revision_date: '20181210133000'
+  ebas_station_altitude: 470.0 m
+  ebas_station_code: ES0014R
+  ebas_station_latitude: '41.39389'
+  ebas_station_longitude: '0.73472'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-08T00:00:00)
+  time_coverage_end: 2010-09-26T07:00:00 UTC
+  time_coverage_start: 2007-11-11T07:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ET/SZ/Y8/ETSZ-Y8PJ.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TK_02
+  ebas_method_ref: DE03L_CVAFS
+  ebas_revision_date: '20150423111804'
+  ebas_station_altitude: 74.0 m
+  ebas_station_code: DE0002R
+  ebas_station_latitude: '52.802222'
+  ebas_station_longitude: '10.759444'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T05:00:00)
+  time_coverage_end: 2014-01-01T20:50:00 UTC
+  time_coverage_start: 2009-01-01T01:15:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FU/J3/CW/FUJ3-CWET.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: P5461_01
+  ebas_method_ref: ES01L_aas
+  ebas_revision_date: '20181210133000'
+  ebas_station_altitude: 917.0 m
+  ebas_station_code: ES0001R
+  ebas_station_latitude: '39.54694'
+  ebas_station_longitude: '-4.35056'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-08T00:00:00)
+  time_coverage_end: 2010-05-09T07:00:00 UTC
+  time_coverage_start: 2009-06-28T07:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/G6/BX/AB/G6BX-ABJH.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: hvs_08
+  ebas_method_ref: ES01L_aas
+  ebas_revision_date: '20181210133000'
+  ebas_station_altitude: 134.0 m
+  ebas_station_code: ES0008R
+  ebas_station_latitude: '43.43917'
+  ebas_station_longitude: '-4.85'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-04T00:00:00)
+  time_coverage_end: 2010-03-07T07:00:00 UTC
+  time_coverage_start: 2010-02-10T07:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/GW/78/EA/GW78-EAMK.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: ivl_trap_DE09
+  ebas_method_ref: SE01L_Thermal_desorb_CVAFS
+  ebas_revision_date: '20020213000000'
+  ebas_station_altitude: 1.0 m
+  ebas_station_code: DE0009R
+  ebas_station_latitude: '54.4368'
+  ebas_station_longitude: '12.7249'
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: 1999-11-15T09:07:12 UTC
+  time_coverage_start: 1998-11-23T12:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JZ/Q6/37/JZQ6-3799.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: hvs_09
+  ebas_method_ref: ES01L_aas
+  ebas_revision_date: '20181210133000'
+  ebas_station_altitude: 1360.0 m
+  ebas_station_code: ES0009R
+  ebas_station_latitude: '41.27417'
+  ebas_station_longitude: '-3.1425'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-08T00:00:00)
+  time_coverage_end: 2008-09-15T07:00:00 UTC
+  time_coverage_start: 2008-08-21T07:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MH/BD/46/MHBD-46RK.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: Hg01
+  ebas_method_ref: GB03L_Hg_online_1
+  ebas_revision_date: '20230731000000'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: GB0048R
+  ebas_station_latitude: '55.79216'
+  ebas_station_longitude: '-3.2429'
+  ebas_statistics: arithmetic mean
+  resolution: 3hourly
+  time_coverage_end: 2023-01-01T00:00:00 UTC
+  time_coverage_start: 2012-01-01T00:10:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MK/KH/YG/MKKH-YGN6.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: hvs_42
+  ebas_method_ref: NO01L_cvafs
+  ebas_revision_date: '20230203115350'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: '78.90715'
+  ebas_station_longitude: '11.88668'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: 2004-01-07T00:00:00 UTC
+  time_coverage_start: 2001-01-01T08:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/N8/PB/UQ/N8PB-UQP8.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: hvs_08
+  ebas_method_ref: ES01L_aas
+  ebas_revision_date: '20181210133000'
+  ebas_station_altitude: 134.0 m
+  ebas_station_code: ES0008R
+  ebas_station_latitude: '43.43917'
+  ebas_station_longitude: '-4.85'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-08T00:00:00)
+  time_coverage_end: 2009-06-14T07:00:00 UTC
+  time_coverage_start: 2007-10-06T07:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ND/HH/R5/NDHH-R59V.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: hvs_08
+  ebas_method_ref: ES01L_aas
+  ebas_revision_date: '20181210133000'
+  ebas_station_altitude: 134.0 m
+  ebas_station_code: ES0008R
+  ebas_station_latitude: '43.43917'
+  ebas_station_longitude: '-4.85'
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: 2004-05-18T08:00:00 UTC
+  time_coverage_start: 2004-05-05T08:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QA/WC/29/QAWC-2976.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: flos1
+  ebas_revision_date: '20231013000000'
+  ebas_station_altitude: 118.0 m
+  ebas_station_code: IS0091R
+  ebas_station_latitude: '63.3998'
+  ebas_station_longitude: '-20.2884'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-14T00:00:00)
+  time_coverage_end: 2023-01-10T00:00:00 UTC
+  time_coverage_start: 2022-01-04T16:33:36 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - aluminium
+  - aluminium_qc
+  - aluminium_ebasmetadata
+  - arsenic
+  - arsenic_qc
+  - arsenic_ebasmetadata
+  - cadmium
+  - cadmium_qc
+  - cadmium_ebasmetadata
+  - chloride
+  - chloride_qc
+  - chloride_ebasmetadata
+  - chromium
+  - chromium_qc
+  - chromium_ebasmetadata
+  - cobalt
+  - cobalt_qc
+  - cobalt_ebasmetadata
+  - copper
+  - copper_qc
+  - copper_ebasmetadata
+  - iron
+  - iron_qc
+  - iron_ebasmetadata
+  - lead
+  - lead_qc
+  - lead_ebasmetadata
+  - manganese
+  - manganese_qc
+  - manganese_ebasmetadata
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+  - nickel
+  - nickel_qc
+  - nickel_ebasmetadata
+  - nitrate_ug_N_per_m3
+  - nitrate_ug_N_per_m3_qc
+  - nitrate_ug_N_per_m3_ebasmetadata
+  - nitrate_ug_per_m3
+  - nitrate_ug_per_m3_qc
+  - nitrate_ug_per_m3_ebasmetadata
+  - sulphate_total_ug_S_per_m3
+  - sulphate_total_ug_S_per_m3_qc
+  - sulphate_total_ug_S_per_m3_ebasmetadata
+  - sulphate_total_ug_per_m3
+  - sulphate_total_ug_per_m3_qc
+  - sulphate_total_ug_per_m3_ebasmetadata
+  - vanadium
+  - vanadium_qc
+  - vanadium_ebasmetadata
+  - zinc
+  - zinc_qc
+  - zinc_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/QD/NQ/XD/QDNQ-XD7J.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: hvs_10
+  ebas_method_ref: ES01L_aas
+  ebas_revision_date: '20181210133000'
+  ebas_station_altitude: 76.0 m
+  ebas_station_code: ES0010R
+  ebas_station_latitude: '42.31917'
+  ebas_station_longitude: '3.31583'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-08T00:00:00)
+  time_coverage_end: 2008-01-05T07:00:00 UTC
+  time_coverage_start: 2008-01-04T07:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RC/3S/ZS/RC3S-ZSUY.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: hvs_11
+  ebas_method_ref: ES01L_aas
+  ebas_revision_date: '20181210133000'
+  ebas_station_altitude: 393.0 m
+  ebas_station_code: ES0011R
+  ebas_station_latitude: '38.47278'
+  ebas_station_longitude: '-6.92361'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-08T00:00:00)
+  time_coverage_end: 2008-04-06T07:00:00 UTC
+  time_coverage_start: 2008-03-12T07:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/RW/KE/SK/RWKE-SKS7.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: TPMRO
+  ebas_method_ref: SE01L_AD
+  ebas_revision_date: '20230203140008'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: SE0014R
+  ebas_station_latitude: '57.394'
+  ebas_station_longitude: '11.914'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-04T00:00:00)
+  time_coverage_end: 2020-04-26T06:00:00 UTC
+  time_coverage_start: 2002-01-01T06:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/S2/9W/TJ/S29W-TJMH.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: hvs_pm10_02
+  ebas_method_ref: GR03L_ICP_MS
+  ebas_revision_date: '20230123130851'
+  ebas_station_altitude: 520.0 m
+  ebas_station_code: CY0002R
+  ebas_station_latitude: '35.0381'
+  ebas_station_longitude: '33.0578'
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: 2014-01-01T00:00:00 UTC
+  time_coverage_start: 2007-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WE/NB/PM/WENB-PMDA.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: tpm_99
+  ebas_method_ref: NO01L_cvafs
+  ebas_revision_date: '20181210133000'
+  ebas_station_altitude: 13.0 m
+  ebas_station_code: NO0099R
+  ebas_station_latitude: '58.1'
+  ebas_station_longitude: '6.566667'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-07T00:00:00)
+  time_coverage_end: 2003-07-10T00:00:00 UTC
+  time_coverage_start: 2002-02-22T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZC/PU/95/ZCPU-95VD.nc:
+  ebas_data_level: '2'
+  ebas_instrument_name: tekran_42_modified
+  ebas_method_ref: NO01L_afs
+  ebas_revision_date: '20220324000000'
+  ebas_station_altitude: 474.0 m
+  ebas_station_code: NO0042G
+  ebas_station_latitude: '78.90715'
+  ebas_station_longitude: '11.88668'
+  ebas_statistics: arithmetic mean
+  resolution: 3hourly
+  time_coverage_end: 2022-01-01T01:30:00 UTC
+  time_coverage_start: 2021-07-01T01:30:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - mercury_PBM
+  - mercury_PBM_qc
+  - mercury_PBM_ebasmetadata
