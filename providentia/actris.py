@@ -637,7 +637,7 @@ def read_data(args):
     # select data in period range
     ds = ds.sel(time=slice(target_start_date, target_end_date))
     if ds.time.size == 0:
-        local_errors = f'No data available after filtering by time.'
+        local_warnings += f'No data available after filtering by time.'
         return station, local_errors, local_warnings
 
     # rename qc dimension
@@ -705,7 +705,7 @@ def read_data(args):
     da_var_attrs = copy.deepcopy(da_var.attrs)
     da_var.attrs = {key: value for key,
                     value in da_var.attrs.items() if key in ['ebas_unit', 'ebas_station_code']}
-
+    
     # read quality control data
     flag_data = ds[f'{possible_var}_qc'].transpose(
         "time", "N_flag_codes")
@@ -722,7 +722,7 @@ def read_data(args):
     # temporally average data from original times to standard times
     station_averaged_data, station_flag_data, station_qa_data = temporally_average_data(station_ds, var, ghost_version, standard_time_pairs, vfunc)
     if np.isnan(station_averaged_data).all():
-        local_errors = 'No data after temporal averaging.'
+        local_warnings += 'No data after temporal averaging.'
         return station, local_errors, local_warnings
 
     data_np = np.frombuffer(shared_memory_vars['data'], dtype=np.float32).reshape(data_shape)
@@ -886,6 +886,11 @@ def get_data(download_instance, files, var, actris_parameter, resolution, target
 
     # create dataset with averaged data
     units = variable_mapping[actris_parameter]['units']
+    
+    # remove spacing for temperature (t2) because unit converter assumes multiple units when there is a space in the units
+    if units == 'deg C':
+        units = 'degC'
+
     combined_ds = xr.Dataset(
         data_vars={
             var: (['station', 'time'], averaged_data,
@@ -941,7 +946,7 @@ def get_data(download_instance, files, var, actris_parameter, resolution, target
     combined_ds.longitude.attrs['units'] = 'degrees_east'
 
     # add general attrs
-    combined_ds.attrs['data_license'] = 'BSD-3-Clause. Copyright 2025 Alba Vilanova Cortezón'
+    combined_ds.attrs['data_license'] = f'BSD-3-Clause. Copyright {datetime.datetime.now().year} Alba Vilanova Cortezón'
     combined_ds.attrs['source'] = 'Observations'
     combined_ds.attrs['institution'] = 'Barcelona Supercomputing Center'
     combined_ds.attrs['creator_name'] = 'Alba Vilanova Cortezón'
