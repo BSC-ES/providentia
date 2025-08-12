@@ -650,7 +650,7 @@ def read_data(args):
             ds.Tower_inlet_height.values), drop=True)
 
     # get data at desired wavelength if wavelength is in coordinates
-    if 'Wavelength' in list(ds.coords) or 'Wavelengthx' in list(ds.coords):
+    if 'Wavelength' in list(ds[possible_var].coords) or 'Wavelengthx' in list(ds[possible_var].coords):
         # Select most common wavelength for black carbon (name does not provide it)
         if var == 'sconcbc':
             wavelength = 880
@@ -661,13 +661,13 @@ def read_data(args):
 
         # Select data for wavelength
         found_wavelength = False
-        if 'Wavelengthx' in list(ds.coords):
+        if 'Wavelengthx' in list(ds[possible_var].coords):
             if wavelength in ds.Wavelengthx.values:
                 ds = ds.sel(Wavelengthx=wavelength, drop=True)
                 found_wavelength = True
             else:
                 existing_wavelengths = ds.Wavelengthx.values
-        elif 'Wavelength' in list(ds.coords):
+        elif 'Wavelength' in list(ds[possible_var].coords):
             if wavelength in ds.Wavelength.values:
                 ds = ds.sel(Wavelength=wavelength, drop=True)
                 found_wavelength = True
@@ -707,8 +707,12 @@ def read_data(args):
                     value in da_var.attrs.items() if key in ['ebas_unit', 'ebas_station_code']}
     
     # read quality control data
-    flag_data = ds[f'{possible_var}_qc'].transpose(
-        "time", "N_flag_codes")
+    try:
+        flag_data = ds[f'{possible_var}_qc'].transpose(
+            "time", "N_flag_codes")
+    except:
+        local_errors = "Flag data could not be transposed."
+        return station, local_errors, local_warnings
 
     # rename variable to BSC standards
     station_ds = da_var.to_dataset(name=var)
