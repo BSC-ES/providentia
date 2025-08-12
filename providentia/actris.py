@@ -847,6 +847,8 @@ def get_data(download_instance, files, var, actris_parameter, resolution, target
         shared_metadata[ghost_key] = multiprocessing.RawArray(ctypes.c_char, int(np.prod(metadata_shape)*75))
 
     # read data and metadata in parallel
+    errors = []
+    warnings = []
     args_list = [
         (
             i, station, urls, data_shape, flag_shape, qa_shape, metadata_shape,
@@ -862,8 +864,6 @@ def get_data(download_instance, files, var, actris_parameter, resolution, target
         initializer=init_shared_vars_read_data,
         initargs=(shared_data, shared_flag_data, shared_qa_data, shared_metadata)
     )
-
-    # print errors and warnings if any
     for station, error, warning in tqdm(
             pool.imap(read_data, args_list),
             total=len(args_list),
@@ -871,10 +871,21 @@ def get_data(download_instance, files, var, actris_parameter, resolution, target
             bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt}'
         ):
         if error:
-            download_instance.logger.info(f'{station} - Error: {error}')
+            errors.append(f'{station} - Error: {error}')
         if warning:
-            download_instance.logger.info(f'{station} - Warning: {warning}')
+            warnings.append(f'{station} - Warning: {warning}')
 
+    # print errors and warnings if any
+    if errors:
+        download_instance.logger.info("=== ERRORS ===")
+        for e in errors:
+            download_instance.logger.info(e)
+
+    if warnings:
+        download_instance.logger.info("=== WARNINGS ===")
+        for w in warnings:
+            download_instance.logger.info(w)
+            
     pool.close()
     
     # wait for worker processes to terminate before continuing
