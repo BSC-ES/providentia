@@ -1709,14 +1709,14 @@ class Download(object):
                             if file not in files[station]:
                                 files[station].append(file)
 
-            # files = dict(list(files.items())[0:80])
+            # files = dict(list(files.items())[62:65])
             if len(files) != 0:
 
-                # get data and metadata for each file within period and temporally average to standard times
+                # get data for each file within period and temporally average to standard times
                 start = time.time()
-                combined_ds, metadata, wavelength = get_data(self, files, var, actris_parameter, resolution, 
-                                                             target_start_date, target_end_date, files_info,
-                                                             self.ghost_version, self.n_cpus)
+                combined_ds, wavelength = get_data(self, files, var, actris_parameter, resolution, 
+                                                   target_start_date, target_end_date, files_info,
+                                                   self.ghost_version, self.n_cpus)
                 end = time.time()
                 elapsed_minutes = (end - start) / 60
                 print(f"Time to read data: {elapsed_minutes:.2f} minutes")
