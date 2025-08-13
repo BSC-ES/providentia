@@ -505,8 +505,8 @@ def get_files_info(download_instance, files, var, path):
             yaml.dump(datasets, file, default_flow_style=False)
     else:
         download_instance.logger.error(f'Error: No data could be found for {var}')
-        sys.exit(1)
-
+        return
+    
     return files_info
 
 
@@ -891,6 +891,10 @@ def get_data(download_instance, files, var, actris_parameter, resolution, target
     # wait for worker processes to terminate before continuing
     pool.join()
 
+    if (len(errors) + len(warnings)) == len(args_list):
+        download_instance.logger.info('All datasets have thrown an error or warning, aborting.')
+        return None, None
+
     # get combined data and metadata after read
     averaged_data = np.frombuffer(shared_data, dtype=np.float32).reshape(data_shape)
     averaged_flag_data = np.frombuffer(shared_flag_data, dtype=np.float32).reshape(flag_shape)
@@ -902,9 +906,15 @@ def get_data(download_instance, files, var, actris_parameter, resolution, target
     # create dataset with averaged data
     units = variable_mapping[actris_parameter]['units']
     
-    # remove spacing for temperature (t2) because unit converter assumes multiple units when there is a space in the units
+    # case for temperature (t2), unit converter assumes multiple units when there is a space
     if units == 'deg C':
         units = 'degC'
+    # case for lsco, lbsco and absco
+    elif units == '1/Mm':
+        units = 'Mm-1'
+    # case for od
+    elif units == 'no unit':
+        units = 'unitless'
 
     combined_ds = xr.Dataset(
         data_vars={
