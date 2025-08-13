@@ -192,8 +192,9 @@ class Download(object):
                             if not initial_check_nc_files or files_to_download:
                                 download_ghost(network, initial_check=False, files_to_download=files_to_download)
                         # ACTRIS
-                        elif network == 'actris/actris':
-                            self.download_actris_network()
+                        elif network == 'actris/actris':   
+                            for resolution in self.resolution:
+                                self.download_actris_network(resolution)
                         # non-GHOST
                         else:
                             initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
@@ -1627,9 +1628,8 @@ class Download(object):
                     
         return valid_nc_files        
     
-    def download_actris_network(self):
-        
-        resolution = self.resolution[0]
+    def download_actris_network(self, resolution):
+
         target_start_date = datetime(int(self.start_date[:4]), int(self.start_date[4:6]), int(self.start_date[6:8]), 0)
         target_end_date = datetime(int(self.end_date[:4]), int(self.end_date[4:6]), int(self.end_date[6:8]), 23, 59, 59) - timedelta(days=1)
 
@@ -1687,7 +1687,10 @@ class Download(object):
                     files_info = get_files_info(self, all_files, var, path)
             
             # go to next variable if no data is found
-            if len(files_info) == 0:
+            if files_info is not None:
+                if len(files_info) == 0:
+                    continue
+            else:
                 continue
 
             # filter files by resolution and dates
@@ -1717,9 +1720,11 @@ class Download(object):
                 combined_ds, wavelength = get_data(self, files, var, actris_parameter, resolution, 
                                                    target_start_date, target_end_date, files_info,
                                                    self.ghost_version, self.n_cpus)
+                if combined_ds is None:
+                    continue
                 end = time.time()
                 elapsed_minutes = (end - start) / 60
-                print(f"Time to read data: {elapsed_minutes:.2f} minutes")
+                self.logger.info(f"Time to read data: {elapsed_minutes:.2f} minutes")
 
                 # save data per year and month
                 path = join(self.nonghost_root, f'actris/actris/{resolution}/{var}')
@@ -1772,7 +1777,7 @@ class Download(object):
                 self.logger.info(f'Total number of saved files: {saved_files}')
 
             else:
-                self.logger.info('No files were found')
+                self.logger.info(f'No files were found at {resolution} resolution for {var}')
 
 
     def check_time(self, size, file_size):
