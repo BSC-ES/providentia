@@ -1761,14 +1761,14 @@ class Download(object):
                             # n_stations_diff = previous_n_stations - current_n_stations
                             # if n_stations_diff > 0:
                             #     self.logger.info(f'Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
-                            
-                            # do not save if empty
-                            if len(combined_ds_yearmonth[var].values) == 0:
-                                continue
 
                             # remove file if it exists
                             if os.path.isfile(filename):
                                 os.system("rm {}".format(filename))
+
+                            # do not save if empty
+                            if len(combined_ds_yearmonth[var].values) == 0:
+                                continue
                                 
                             # save file
                             combined_ds_yearmonth.to_netcdf(filename)
