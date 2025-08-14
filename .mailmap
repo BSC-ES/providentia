@@ -2,15 +2,20 @@
 # Omit commit-name or commit-email if same as replace-with.
 # git log --pretty="%aN <%aE>%n%cN <%cE>" | sort | uniq
 
-Alba Vilanova               <alba.vilanova@bsc.es>               Alba Vilanova             <alba.vilanova@outlook.com>
-Alba Vilanova               <alba.vilanova@bsc.es>               Alba Vilanova             <gitlab-runner@bscesdust02.bsc.es>
-Alba Vilanova               <alba.vilanova@bsc.es>               Alba Vilanova             <avilanov@bscearth329.int.bsc.es>
-Alba Vilanova               <alba.vilanova@bsc.es>               Alba Vilanova             <avilanov@bscesoper01.bsc.es>
+Alba Vilanova               <alba.vilanova@bsc.es>               Alba Vilanova Cortezon    <alba.vilanova@outlook.com>
+Alba Vilanova               <alba.vilanova@bsc.es>               GitLab Runner             <gitlab-runner@bscesdust02.bsc.es>
+Alba Vilanova               <alba.vilanova@bsc.es>               ALBA VILANOVA CORTEZON    <avilanov@bscearth329.int.bsc.es>
+Alba Vilanova               <alba.vilanova@bsc.es>               ALBA VILANOVA CORTEZON    <avilanov@bscesoper01.bsc.es>
 Alba Vilanova               <alba.vilanova@bsc.es>               Alba Vilanova             <albavilanova@users.noreply.github.com>
-Dene Bowdalo                <dene.bowdalo@bsc.es>                Dene Bowdalo              <denebowdalo@googlemail.com>
+Alba Vilanova               <alba.vilanova@bsc.es>               Alba Vilanova Cortezon    <alba.vilanova@bsc.es>
+Dene Bowdalo                <dene.bowdalo@bsc.es>                DeneBowdalo               <denebowdalo@googlemail.com>
 Dene Bowdalo                <dene.bowdalo@bsc.es>                Dene Bowdalo              <denebowdalo@192.168.1.135>
+Dene Bowdalo                <dene.bowdalo@bsc.es>                dbowdalo                  <dene.bowdalo@bsc.es>
 Dene Bowdalo                <dene.bowdalo@bsc.es>                Dene Bowdalo              <denebowdalo@192.168.1.139>
 Dene Bowdalo                <dene.bowdalo@bsc.es>                Dene Bowdalo              <denebowdalo@denes-macbook-pro-2.local>
 Dene Bowdalo                <dene.bowdalo@bsc.es>                Dene Bowdalo              <denebowdalo@denes-macbook-pro.local>
 Dene Bowdalo                <dene.bowdalo@bsc.es>                Dene Bowdalo              <denebowdalo@users.noreply.github.com>
 Paula Serrano Sierra        <paula.serrano@bsc.es>               Paula Serrano Sierra      <PaulaSerranoSierra@users.noreply.github.com>
+Paula Serrano Sierra        <paula.serrano@bsc.es>               pserrano                  <paula.serrano@bsc.es>
+Paula Serrano Sierra        <paula.serrano@bsc.es>               Paula Serrano             <paula.serrano@bsc.es>
+Amalia Vradi                <amalia.vradi@bsc.es>                Amalia                    <amalia.vradi@bsc.es>
