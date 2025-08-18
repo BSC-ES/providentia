@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Configuration files &mdash; Providentia 2.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
@@ -176,7 +176,15 @@
 </tr>
 <tr class="row-odd"><td><p>experiments</p></td>
 <td><p>✗</p></td>
-<td><p>ID of interpolated experiment using providentia-interpolation. The experiment IDs can be mapped to different names by adding a list of alternative names after the experiment IDs (e.g. <code class="docutils literal notranslate"><span class="pre">exp1,</span> <span class="pre">exp2</span> <span class="pre">(altexp1,</span> <span class="pre">altexp2)</span></code>).</p></td>
+<td><p>ID of experiment. The experiment IDs can be mapped to different names by adding a list of alternative names after the experiment IDs (e.g. <code class="docutils literal notranslate"><span class="pre">exp1,</span> <span class="pre">exp2</span> <span class="pre">(altexp1,</span> <span class="pre">altexp2)</span></code>). After interpolation experiment IDs will consist of 3 separate strings [ID-domain-ensemble]. The domain and ensemble</p></td>
+</tr>
+<tr class="row-even"><td><p>domain</p></td>
+<td><p>✗</p></td>
+<td><p>Domain of the experiment. Can be multiple.</p></td>
+</tr>
+<tr class="row-odd"><td><p>ensemble</p></td>
+<td><p>✗</p></td>
+<td><p>Ensemble member number or ensemble statistic of the experiment. defaults to all members available. Can be multiple.</p></td>
 </tr>
 <tr class="row-even"><td><p>temporal_colocation</p></td>
 <td><p>✗</p></td>
@@ -268,23 +276,31 @@
 </tr>
 <tr class="row-even"><td><p>resampling_resolution</p></td>
 <td><p>✗</p></td>
-<td><p>Resolution you want to resample your data to. Options: <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">monthly</span></code>, <code class="docutils literal notranslate"><span class="pre">annual</span></code>.</p></td>
+<td><p>Resolution you want to resample your data to. Options: <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">3hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">6hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">monthly</span></code>, <code class="docutils literal notranslate"><span class="pre">annual</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p>forecast</p></td>
 <td><p>✗</p></td>
-<td><p>Indicates if data comes from forecast, this affects how the timesteps are taken in the interpolation.</p></td>
+<td><p>Controls how forecast data is handled. Valid options are <code class="docutils literal notranslate"><span class="pre">dayN</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">day1</span></code>) or <code class="docutils literal notranslate"><span class="pre">daily</span></code>. If this field is not empty in the interpolation, all forecast data will be processed.</p></td>
 </tr>
-<tr class="row-even"><td><p>forecast_day</p></td>
+<tr class="row-even"><td><p>interp_n_neighbours</p></td>
 <td><p>✗</p></td>
-<td><p>Day of the model forecast to analyse.</p></td>
+<td><p>The number of nearest neighbours to use in the interpolation of experiment output to observational stations. If not set, this defaults to <code class="docutils literal notranslate"><span class="pre">4</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p>interp_multiprocessing</p></td>
+<tr class="row-odd"><td><p>interp_spinup_timesteps</p></td>
+<td><p>✗</p></td>
+<td><p>Needs to be a number</p></td>
+</tr>
+<tr class="row-even"><td><p>interp_experiment_downsampling</p></td>
+<td><p>✗</p></td>
+<td><p>mean or median</p></td>
+</tr>
+<tr class="row-odd"><td><p>interp_experiment_upsampling</p></td>
+<td><p>✗</p></td>
+<td><p>None, fill or gaps</p></td>
+</tr>
+<tr class="row-even"><td><p>interp_multiprocessing</p></td>
 <td><p>✗</p></td>
 <td><p>Use multiprocessing instead of greasy to interpolate in HPC machines.</p></td>
-</tr>
-<tr class="row-even"><td><p>interpolated</p></td>
-<td><p>✗</p></td>
-<td><p>Indicates if the experiments are interpolated or to interpolate. If the variable is False, this can be used to download non-interpolated experiments into local machines.</p></td>
 </tr>
 </tbody>
 </table>

@@ -25,37 +25,25 @@ The default representativity filters set in Providentia (when using GHOST data),
 
 ```
 hourly_native_representativity_percent = 0
-hourly_native_max_gap_percent = 100 
 daily_native_representativity_percent = 0
 daily_representativity_percent = 0
-daily_native_max_gap_percent = 100
-daily_max_gap_percent = 100
 monthly_native_representativity_percent = 0
 monthly_representativity_percent = 0
-monthly_native_max_gap_percent = 100
-monthly_max_gap_percent = 100
 all_representativity_percent = 0
-all_max_gap_percent = 100
 ```
 
 ### 3hourly, 6hourly, 3hourly_instantaneous, 6hourly_instantaneous, daily
 
 ```
 daily_native_representativity_percent = 0
-daily_native_max_gap_percent = 100
 monthly_native_representativity_percent = 0
 monthly_representativity_percent = 0
-monthly_native_max_gap_percent = 100 
-monthly_max_gap_percent = 100
 all_representativity_percent = 0
-all_max_gap_percent = 100
 ```
 
 ### monthly
 
 ```
 monthly_native_representativity_percent = 0
-monthly_native_max_gap_percent = 100
 all_representativity_percent = 0
-all_max_gap_percent = 100
 ```

@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Report &mdash; Providentia 2.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
@@ -54,6 +54,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Report</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#plot-types-and-options">Plot types and options</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#plot-selection">Plot selection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cover-page">Cover page</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Download.html">Download</a></li>
@@ -111,6 +112,16 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">report_type</span> <span class="o">=</span> <span class="n">new_plots</span>
 </pre></div>
 </div>
+</section>
+<section id="cover-page">
+<h2>Cover page<a class="headerlink" href="#cover-page" title="Link to this heading"></a></h2>
+<p><img alt="cover_page" src="_images/cover_page.jpg" /></p>
+<p>The cover page can be customised by editing the parameters under header in <code class="docutils literal notranslate"><span class="pre">settings/plot_characteristics.yaml</span></code> file. The most interesting ones are these:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">dark_mode</span></code> to set the background to be dark (blue tone) or light (white).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">variables</span></code> to specify which variables you want to show. The options are <code class="docutils literal notranslate"><span class="pre">network</span></code>, <code class="docutils literal notranslate"><span class="pre">species</span></code>, <code class="docutils literal notranslate"><span class="pre">resolution</span></code>, <code class="docutils literal notranslate"><span class="pre">dates</span></code>, <code class="docutils literal notranslate"><span class="pre">experiments</span></code>, <code class="docutils literal notranslate"><span class="pre">temporal_colocation</span></code>, <code class="docutils literal notranslate"><span class="pre">spatial_colocation</span></code>, <code class="docutils literal notranslate"><span class="pre">filter_species</span></code>, <code class="docutils literal notranslate"><span class="pre">calibration</span></code> and <code class="docutils literal notranslate"><span class="pre">subsections</span></code>. By specifying the <code class="docutils literal notranslate"><span class="pre">value</span></code> under those keys, you can overwrite the default variable values and write anything you want.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">logo</span></code> to display any logo on your report cover. To use it, you must specify the path to your PNG file for the corresponding background (dark or light mode).</p></li>
+</ul>
 </section>
 </section>
 

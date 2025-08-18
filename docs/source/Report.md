@@ -20,3 +20,13 @@ The plots will appear in the report in the given order. The key name `new_plots`
 ```
 report_type = new_plots
 ```
+
+## Cover page
+
+![cover_page](uploads/20bc03eed5f13d480848fbc3980c3c43/cover_page.jpg)
+
+The cover page can be customised by editing the parameters under header in `settings/plot_characteristics.yaml` file. The most interesting ones are these:
+
+- `dark_mode` to set the background to be dark (blue tone) or light (white).
+- `variables` to specify which variables you want to show. The options are `network`, `species`, `resolution`, `dates`, `experiments`, `temporal_colocation`, `spatial_colocation`, `filter_species`, `calibration` and `subsections`. By specifying the `value` under those keys, you can overwrite the default variable values and write anything you want.
+- `logo` to display any logo on your report cover. To use it, you must specify the path to your PNG file for the corresponding background (dark or light mode).
