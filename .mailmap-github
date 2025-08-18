@@ -1,0 +1,9 @@
+# FORMAT: <replace-with--name>  <replace-with-email>  <commit-name>  <commit-email>
+# Omit commit-name or commit-email if same as replace-with.
+# git log --pretty="%aN <%aE>%n%cN <%cE>" | sort | uniq
+
+Alba Vilanova               <alba.vilanova@outlook.com>          Alba Vilanova             <alba.vilanova@bsc.es>
+Dene Bowdalo                <denebowdalo@googlemail.com>         Dene Bowdalo              <dene.bowdalo@bsc.es>
+Paula Serrano Sierra        <paulaserranosierra@gmail.com>       Paula Serrano Sierra      <paula.serrano@bsc.es>
+Amalia Vradi                <amalia.vradi@bsc.es>                Amalia Vradi              <amalia.vradi@bsc.es>
+Francesco Benincasa         <fbeninca@gmail.com>                 Francesco Benincasa       <francesco.benincasa@bsc.es>
