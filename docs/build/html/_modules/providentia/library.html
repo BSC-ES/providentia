@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>providentia.library &mdash; Providentia 2.3.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=7ae09063" />
 
@@ -79,49 +79,49 @@
   <h1>Source code for providentia.library</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot; Class to create library session&quot;&quot;&quot;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.gridspec</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gridspec</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.projections</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolarAxes</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">mpl_toolkits.axisartist.floating_axes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fa</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">gridspec</span>
+<span class="kn">from</span> <span class="nn">matplotlib.projections</span> <span class="kn">import</span> <span class="n">PolarAxes</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">mpl_toolkits.axisartist.floating_axes</span> <span class="k">as</span> <span class="nn">fa</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.configuration</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_conf</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.configuration</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProvConfiguration</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.fields_menus</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">init_metadata</span><span class="p">,</span> <span class="n">init_period</span><span class="p">,</span> <span class="n">init_representativity</span><span class="p">,</span> <span class="n">metadata_conf</span><span class="p">,</span>
+<span class="kn">from</span> <span class="nn">providentia.auxiliar</span> <span class="kn">import</span> <span class="n">CURRENT_PATH</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">expand_plot_characteristics</span>
+<span class="kn">from</span> <span class="nn">.configuration</span> <span class="kn">import</span> <span class="n">load_conf</span>
+<span class="kn">from</span> <span class="nn">.configuration</span> <span class="kn">import</span> <span class="n">ProvConfiguration</span>
+<span class="kn">from</span> <span class="nn">.fields_menus</span> <span class="kn">import</span> <span class="p">(</span><span class="n">init_metadata</span><span class="p">,</span> <span class="n">init_period</span><span class="p">,</span> <span class="n">init_representativity</span><span class="p">,</span> <span class="n">metadata_conf</span><span class="p">,</span>
                            <span class="n">update_metadata_fields</span><span class="p">,</span> <span class="n">update_period_fields</span><span class="p">,</span> <span class="n">update_representativity_fields</span><span class="p">,</span>
                            <span class="n">period_conf</span><span class="p">,</span> <span class="n">representativity_conf</span><span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.filter</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFilter</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">Plotting</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.plot_aux</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_taylor_diagram_ghelper</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.plot_formatting</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">format_plot_options</span><span class="p">,</span> <span class="n">format_axis</span><span class="p">,</span> <span class="n">set_axis_label</span><span class="p">,</span> <span class="n">set_axis_title</span><span class="p">,</span> 
+<span class="kn">from</span> <span class="nn">.filter</span> <span class="kn">import</span> <span class="n">DataFilter</span>
+<span class="kn">from</span> <span class="nn">.plotting</span> <span class="kn">import</span> <span class="n">Plotting</span>
+<span class="kn">from</span> <span class="nn">.plot_aux</span> <span class="kn">import</span> <span class="n">get_taylor_diagram_ghelper</span>
+<span class="kn">from</span> <span class="nn">.plot_formatting</span> <span class="kn">import</span> <span class="p">(</span><span class="n">format_plot_options</span><span class="p">,</span> <span class="n">format_axis</span><span class="p">,</span> <span class="n">set_axis_label</span><span class="p">,</span> <span class="n">set_axis_title</span><span class="p">,</span> 
                               <span class="n">harmonise_xy_lims_paradigm</span><span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.read</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataReader</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.read_aux</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">generate_file_trees</span><span class="p">,</span> <span class="n">get_lower_resolutions</span><span class="p">,</span> 
-                       <span class="n">get_nonrelevant_temporal_resolutions</span><span class="p">,</span> <span class="n">get_relevant_temporal_resolutions</span><span class="p">,</span> 
+<span class="kn">from</span> <span class="nn">.read</span> <span class="kn">import</span> <span class="n">DataReader</span>
+<span class="kn">from</span> <span class="nn">.read_aux</span> <span class="kn">import</span> <span class="p">(</span><span class="n">generate_file_trees</span><span class="p">,</span> <span class="n">get_possible_resampling_resolutions</span><span class="p">,</span> 
+                       <span class="n">get_periodic_nonrelevant_temporal_resolutions</span><span class="p">,</span> <span class="n">get_periodic_relevant_temporal_resolutions</span><span class="p">,</span> 
                        <span class="n">get_valid_experiments</span><span class="p">,</span> <span class="n">get_valid_obs_files_in_date_range</span><span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.statistics</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">calculate_statistic</span><span class="p">,</span> <span class="n">generate_colourbar</span><span class="p">,</span> <span class="n">generate_colourbar_detail</span><span class="p">,</span> 
+<span class="kn">from</span> <span class="nn">.statistics</span> <span class="kn">import</span> <span class="p">(</span><span class="n">calculate_statistic</span><span class="p">,</span> <span class="n">generate_colourbar</span><span class="p">,</span> <span class="n">generate_colourbar_detail</span><span class="p">,</span> 
                          <span class="n">get_fairmode_data</span><span class="p">,</span> <span class="n">get_selected_station_data</span><span class="p">,</span> <span class="n">get_z_statistic_info</span><span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.warnings_prv</span><span class="w"> </span><span class="kn">import</span> <span class="n">show_message</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.writing</span><span class="w"> </span><span class="kn">import</span> <span class="n">export_configuration</span><span class="p">,</span> <span class="n">export_data_npz</span><span class="p">,</span> <span class="n">export_netcdf</span>
+<span class="kn">from</span> <span class="nn">.warnings_prv</span> <span class="kn">import</span> <span class="n">show_message</span>
+<span class="kn">from</span> <span class="nn">.writing</span> <span class="kn">import</span> <span class="n">export_configuration</span><span class="p">,</span> <span class="n">export_data_npz</span><span class="p">,</span> <span class="n">export_netcdf</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">providentia.auxiliar</span><span class="w"> </span><span class="kn">import</span> <span class="n">CURRENT_PATH</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">expand_plot_characteristics</span>
 
 <span class="n">PROVIDENTIA_ROOT</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">CURRENT_PATH</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 <span class="n">fairmode_settings</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/fairmode.yaml&#39;</span><span class="p">)))</span>
 
 <span class="c1"># do not print deprecated warnings</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
 
 <span class="c1"># determine if using jupyter notebook or not</span>
@@ -133,10 +133,10 @@
 
 <div class="viewcode-block" id="Library">
 <a class="viewcode-back" href="../../reference.html#providentia.library.Library">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Library</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">Library</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Class for Providentia Library mode&quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="c1"># set config to self</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
@@ -181,8 +181,8 @@
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
 
         <span class="c1"># set some key configuration variables</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">relevant_temporal_resolutions</span> <span class="o">=</span> <span class="n">get_relevant_temporal_resolutions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nonrelevant_temporal_resolutions</span> <span class="o">=</span> <span class="n">get_nonrelevant_temporal_resolutions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">periodic_relevant_temporal_resolutions</span> <span class="o">=</span> <span class="n">get_periodic_relevant_temporal_resolutions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">periodic_nonrelevant_temporal_resolutions</span> <span class="o">=</span> <span class="n">get_periodic_nonrelevant_temporal_resolutions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">observations_data_label</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data_labels_raw</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">observations_data_label</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">|</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">network</span><span class="p">,</span><span class="n">speci</span><span class="p">)</span> <span class="k">for</span> <span class="n">network</span><span class="p">,</span> <span class="n">speci</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)]</span>
@@ -206,7 +206,7 @@
         <span class="c1"># set variable to know if data is in intial state or not</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initialised</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to read data. &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Reading data&#39;</span><span class="p">)</span>
@@ -216,7 +216,7 @@
 
 <div class="viewcode-block" id="Library.apply_filter">
 <a class="viewcode-back" href="../../reference.html#providentia.library.Library.apply_filter">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; method to apply filters to data. &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Filtering data&#39;</span><span class="p">)</span>
@@ -228,7 +228,7 @@
         <span class="n">get_selected_station_data</span><span class="p">(</span><span class="n">read_instance</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">canvas_instance</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">networkspecies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to filter data.</span>
 
 <span class="sd">        :param field: field to filter by</span>
@@ -346,7 +346,7 @@
         
 <div class="viewcode-block" id="Library.filter_station">
 <a class="viewcode-back" href="../../reference.html#providentia.library.Library.filter_station">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">filter_station</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">station</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">filter_station</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">station</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to filter specific station/s.</span>
 
 <span class="sd">        :param station: Station reference</span>
@@ -365,7 +365,7 @@
 
 <div class="viewcode-block" id="Library.reset">
 <a class="viewcode-back" href="../../reference.html#providentia.library.Library.reset">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initialise</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initialise</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to reset filter data.</span>
 
 <span class="sd">        :param initialise: Indicates whether to reset data to initial state when class was initialised </span>
@@ -404,6 +404,12 @@
         <span class="c1"># re-filter </span>
         <span class="bp">self</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">()</span>
 
+        <span class="c1"># for non-GHOST, we call update_metadata_fields after filtering to remove the stations that have</span>
+        <span class="c1"># 0 valid measurements, to do this we need to have valid_station_inds, which is obtained </span>
+        <span class="c1"># after filtering</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">reading_ghost</span><span class="p">:</span>
+            <span class="n">update_metadata_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
         <span class="c1"># set variable to know if data is in intial state or not</span>
         <span class="k">if</span> <span class="n">initialise</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">initialised</span> <span class="o">=</span> <span class="kc">True</span>
@@ -413,7 +419,7 @@
 
 <div class="viewcode-block" id="Library.plot">
 <a class="viewcode-back" href="../../reference.html#providentia.library.Library.plot">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">labelb</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">labelb</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
              <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">set_obs_legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">map_extent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
              <span class="n">hidedata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">multispecies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">regression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
              <span class="n">threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -564,28 +570,32 @@
                 <span class="c1"># get zstat information </span>
                 <span class="n">zstat</span><span class="p">,</span> <span class="n">base_zstat</span><span class="p">,</span> <span class="n">z_statistic_type</span><span class="p">,</span> <span class="n">z_statistic_sign</span><span class="p">,</span> <span class="n">z_statistic_period</span> <span class="o">=</span> <span class="n">get_z_statistic_info</span><span class="p">(</span><span class="n">zstat</span><span class="o">=</span><span class="n">chunk_stat</span><span class="p">)</span>
                 
-                <span class="c1"># check if chunk resolution is available</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">resampling_resolution</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">available_timeseries_chunk_resolutions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">get_lower_resolutions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">))</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">available_timeseries_chunk_resolutions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">get_lower_resolutions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resampling_resolution</span><span class="p">))</span>
+                <span class="c1"># get available chunk timeseries resolutions</span>
+                <span class="n">available_timeseries_chunk_resolutions</span> <span class="o">=</span> <span class="n">get_possible_resampling_resolutions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active_resolution</span><span class="p">)</span>
 
                 <span class="c1"># show warning if it is not</span>
                 <span class="k">if</span> <span class="n">chunk_resolution</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_timeseries_chunk_resolutions</span><span class="p">:</span>
                     <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s1"> cannot be created because </span><span class="si">{</span><span class="n">chunk_resolution</span><span class="si">}</span><span class="s1"> &#39;</span>
-                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;is not an available chunking resolution.&#39;</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;is not an available chunking resolution. &#39;</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">available_timeseries_chunk_resolutions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;The available resolutions are: </span><span class="si">{</span><span class="n">available_timeseries_chunk_resolutions</span><span class="si">}</span><span class="s1">&#39;</span>
                     <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
                     <span class="k">return</span>
 
-                <span class="c1"># show warning if chunk stat is NStations and mode is not Temporal|Spatial</span>
-                <span class="k">if</span> <span class="n">chunk_stat</span> <span class="o">==</span> <span class="s1">&#39;NStations&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">statistic_mode</span> <span class="o">!=</span> <span class="s1">&#39;Temporal|Spatial&#39;</span><span class="p">:</span>
+                <span class="c1"># show warning if chunk stat is MDA8 and active resolution is not hourly</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">chunk_stat</span> <span class="o">==</span> <span class="s1">&#39;MDA8&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active_resolution</span> <span class="o">!=</span> <span class="s1">&#39;hourly&#39;</span><span class="p">):</span>
                     <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s1"> cannot be created because </span><span class="si">{</span><span class="n">chunk_stat</span><span class="si">}</span><span class="s1"> &#39;</span>
-                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;it is only available when Temporal|Spatial mode is active.&#39;</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;is only available when active resolution is hourly.&#39;</span>
                     <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
                     <span class="k">return</span>
-                    
+                
+                <span class="c1"># show warning if chunk stat is MDA8 and chunk resolution is not daily</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">chunk_stat</span> <span class="o">==</span> <span class="s1">&#39;MDA8&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">chunk_resolution</span> <span class="o">!=</span> <span class="s1">&#39;daily&#39;</span><span class="p">):</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s1"> cannot be created because </span><span class="si">{</span><span class="n">chunk_stat</span><span class="si">}</span><span class="s1"> &#39;</span>
+                    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;is only available when chunk resolution is daily.&#39;</span>
+                    <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+                    <span class="k">return</span>
+
         <span class="c1"># get zstat information </span>
         <span class="n">zstat</span><span class="p">,</span> <span class="n">base_zstat</span><span class="p">,</span> <span class="n">z_statistic_type</span><span class="p">,</span> <span class="n">z_statistic_sign</span><span class="p">,</span> <span class="n">z_statistic_period</span> <span class="o">=</span> <span class="n">get_z_statistic_info</span><span class="p">(</span><span class="n">plot_type</span><span class="o">=</span><span class="n">plot_type</span><span class="p">)</span> 
 
@@ -622,20 +632,21 @@
             <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
             <span class="k">return</span>
         
-        <span class="c1"># do not make FAIRMODE target plot if species not in list or resolution not hourly</span>
         <span class="k">if</span> <span class="n">base_plot_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;fairmode-target&#39;</span><span class="p">,</span><span class="s1">&#39;fairmode-statsummary&#39;</span><span class="p">]:</span>
+            <span class="c1"># warning for fairmode plots if species aren&#39;t PM2.5, PM10, NO2 or O3</span>
             <span class="k">if</span> <span class="n">speci</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;sconco3&#39;</span><span class="p">,</span> <span class="s1">&#39;sconcno2&#39;</span><span class="p">,</span> <span class="s1">&#39;pm10&#39;</span><span class="p">,</span> <span class="s1">&#39;pm2p5&#39;</span><span class="p">]:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Fairmode target plot cannot be created for </span><span class="si">{</span><span class="n">speci</span><span class="si">}</span><span class="s1">.&#39;</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Fairmode plot cannot be created for </span><span class="si">{</span><span class="n">speci</span><span class="si">}</span><span class="s1">.&#39;</span>
                 <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
                 <span class="k">return</span>
-            <span class="k">if</span> <span class="p">((</span><span class="n">speci</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;sconco3&#39;</span><span class="p">,</span> <span class="s1">&#39;sconcno2&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">!=</span> <span class="s1">&#39;hourly&#39;</span><span class="p">)</span> 
-                <span class="ow">or</span> <span class="p">(</span><span class="n">speci</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;pm10&#39;</span><span class="p">,</span> <span class="s1">&#39;pm2p5&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hourly&#39;</span><span class="p">,</span> <span class="s1">&#39;daily&#39;</span><span class="p">]))):</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Fairmode target plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).&#39;</span>
+            <span class="c1"># warning for fairmode plots if resolution is not hourly or daily</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">speci</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;sconco3&#39;</span><span class="p">,</span> <span class="s1">&#39;sconcno2&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_resolution</span> <span class="o">!=</span> <span class="s1">&#39;hourly&#39;</span><span class="p">)</span> 
+                <span class="ow">or</span> <span class="p">(</span><span class="n">speci</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;pm10&#39;</span><span class="p">,</span> <span class="s1">&#39;pm2p5&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active_resolution</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hourly&#39;</span><span class="p">,</span> <span class="s1">&#39;daily&#39;</span><span class="p">]))):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Fairmode plot can only be created if the resolution is hourly (O3, NO2, PM2.5 and PM10) or daily (PM2.5 and PM10).&#39;</span>
                 <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
                 <span class="k">return</span>
             
             <span class="c1"># skip making plot if there is no valid data</span>
-            <span class="n">data</span><span class="p">,</span> <span class="n">valid_station_idxs</span> <span class="o">=</span> <span class="n">get_fairmode_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">,</span> <span class="n">valid_station_idxs</span> <span class="o">=</span> <span class="n">get_fairmode_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">valid_station_idxs</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;No data after filtering by coverage for </span><span class="si">{</span><span class="n">speci</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
                 <span class="k">return</span>
@@ -1085,11 +1096,11 @@
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;axis to plot legend on not defined for plot type in plot_characteristics.yaml, or passed via &#39;format&#39; argument.</span><span class="se">\n</span><span class="s2">Taking first available axis.&quot;</span>
                             <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-                            <span class="n">ax_to_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relevant_temporal_resolutions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                        <span class="k">if</span> <span class="n">ax_to_plot</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">relevant_temporal_resolutions</span><span class="p">:</span>
+                            <span class="n">ax_to_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">periodic_relevant_temporal_resolutions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">ax_to_plot</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">periodic_relevant_temporal_resolutions</span><span class="p">:</span>
                             <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;defined axis to plot legend on not available for data resolution of read data.</span><span class="se">\n</span><span class="s2">Instead, taking first available axis.&quot;</span>
                             <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-                            <span class="n">ax_to_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relevant_temporal_resolutions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="n">ax_to_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">periodic_relevant_temporal_resolutions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                         <span class="n">relevant_ax</span><span class="p">[</span><span class="n">ax_to_plot</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="o">**</span><span class="n">legend_handles</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;fairmode-target&#39;</span><span class="p">:</span>
@@ -1128,7 +1139,7 @@
 
 <div class="viewcode-block" id="Library.colourbar">
 <a class="viewcode-back" href="../../reference.html#providentia.library.Library.colourbar">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">colourbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">plot_ax</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">speci</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">colourbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">plot_ax</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">speci</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to make colourbar.</span>
 
 <span class="sd">        :param fig: Figure</span>
@@ -1155,7 +1166,7 @@
     
 <div class="viewcode-block" id="Library.legend">
 <a class="viewcode-back" href="../../reference.html#providentia.library.Library.legend">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">legend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">set_obs</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">legend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">set_obs</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to make legend.</span>
 
 <span class="sd">        :param plot_type: Plot type</span>
@@ -1184,7 +1195,7 @@
 
 <div class="viewcode-block" id="Library.statistic">
 <a class="viewcode-back" href="../../reference.html#providentia.library.Library.statistic">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">statistic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">labelb</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">per_station</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">statistic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">labelb</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">per_station</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chunk</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to calculate statistic/s.</span>
 
 <span class="sd">        :param stat: Statistic</span>
@@ -1193,9 +1204,13 @@
 <span class="sd">        :type labela: str, optional</span>
 <span class="sd">        :param labelb: Label of second dataset (if defined then a bias plot is made), defaults to &#39;&#39;</span>
 <span class="sd">        :type labelb: str, optional</span>
-<span class="sd">        :param per_station: Indicates if the station data is per station or for all stations, defaults to False</span>
+<span class="sd">        :param per_station: Indicates if to calculate integrated statistic for all stations, or per station, defaults to False</span>
 <span class="sd">        :type per_station: bool, optional</span>
-<span class="sd">        :return: Statistic value</span>
+<span class="sd">        :param period: Period to group data into for calculation of statistics. Current options: &#39;hour&#39;, &#39;dayofweek&#39;, &#39;month&#39; </span>
+<span class="sd">        :type period: str, optional</span>
+<span class="sd">        :param chunk: Chunked temporal window to calculate statistics for. Current options: &#39;daily&#39;, &#39;monthly&#39;, &#39;annual&#39;</span>
+<span class="sd">        :type chunk: str, optional</span>
+<span class="sd">        :return: Statistic value/s</span>
 <span class="sd">        :rtype: np.ndarray</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -1233,21 +1248,26 @@
             <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
             <span class="k">return</span>
 
+        <span class="c1"># throw error if both period and chunk are given</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">chunk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Cannot calculate statistic when both &#39;period&#39; and &#39;chunk&#39; are given.&quot;</span>
+            <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="k">return</span>
+
         <span class="c1"># get networkspeci to calculate for</span>
         <span class="n">networkspeci</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;More than 1 network or species defined, can only calculate for 1. Taking </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">networkspeci</span><span class="p">)</span>
             <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">per_station</span><span class="p">:</span>
-            <span class="n">stat</span> <span class="o">=</span> <span class="n">calculate_statistic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="p">[</span><span class="n">labela</span><span class="p">],</span> <span class="p">[</span><span class="n">labelb</span><span class="p">],</span> <span class="n">per_station</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">stat</span> <span class="o">=</span> <span class="n">calculate_statistic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="p">[</span><span class="n">labela</span><span class="p">],</span> <span class="p">[</span><span class="n">labelb</span><span class="p">])</span>
+        <span class="c1"># calculate statistic</span>
+        <span class="n">stat</span> <span class="o">=</span> <span class="n">calculate_statistic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="p">[</span><span class="n">labela</span><span class="p">],</span> <span class="p">[</span><span class="n">labelb</span><span class="p">],</span> <span class="n">per_station</span><span class="o">=</span><span class="n">per_station</span><span class="p">,</span> 
+                                   <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span> <span class="n">chunk_resolution</span><span class="o">=</span><span class="n">chunk</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="n">stat</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">set_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to set configuration variables. &quot;&quot;&quot;</span>
 
         <span class="c1"># initialise default configuration variables</span>
@@ -1364,7 +1384,7 @@
 
 <div class="viewcode-block" id="Library.print_config">
 <a class="viewcode-back" href="../../reference.html#providentia.library.Library.print_config">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">print_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">print_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Print selected config file to console.</span>
 
 <span class="sd">        :param conf: Configuration file name, defaults to None</span>
@@ -1392,7 +1412,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; set active config as __str__.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">print_config</span><span class="p">(</span><span class="n">conf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
@@ -1400,7 +1420,7 @@
 
 <div class="viewcode-block" id="Library.save">
 <a class="viewcode-back" href="../../reference.html#providentia.library.Library.save">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;nc&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;nc&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to save current data/ metadata in memory.</span>
 
 <span class="sd">        :param fname: File name, defaults to &#39;&#39;</span>
@@ -1431,7 +1451,7 @@
 
 <div class="viewcode-block" id="Library.data">
 <a class="viewcode-back" href="../../reference.html#providentia.library.Library.data">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;nc&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;nc&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method return data / metadata in specific format.</span>
 
 <span class="sd">        :param format: File format, defaults to &#39;nc&#39;</span>
@@ -1476,7 +1496,7 @@
 
 <div class="viewcode-block" id="Library.variable">
 <a class="viewcode-back" href="../../reference.html#providentia.library.Library.variable">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to return specific data / metadata variable.</span>
 
 <span class="sd">        :param var: Variable name, defaults to &#39;&#39;</span>
@@ -1509,17 +1529,17 @@
 
 <div class="viewcode-block" id="dashboard">
 <a class="viewcode-back" href="../../reference.html#providentia.library.dashboard">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">dashboard</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">dashboard</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Wrapper function for initialising Dashboard class&quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">.dashboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">main</span>
+    <span class="kn">from</span> <span class="nn">.dashboard</span> <span class="kn">import</span> <span class="n">main</span>
     <span class="n">main</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="download">
 <a class="viewcode-back" href="../../reference.html#providentia.library.download">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">download</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Wrapper function for initialising Download class&quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">.download</span><span class="w"> </span><span class="kn">import</span> <span class="n">Download</span>
+    <span class="kn">from</span> <span class="nn">.download</span> <span class="kn">import</span> <span class="n">Download</span>
     <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span>
     <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;download&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">provi</span> <span class="o">=</span> <span class="n">Download</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -1529,9 +1549,9 @@
 
 <div class="viewcode-block" id="interpolation">
 <a class="viewcode-back" href="../../reference.html#providentia.library.interpolation">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">interpolation</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">interpolation</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Wrapper function for initialising Interpolation class&quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">.interpolation</span><span class="w"> </span><span class="kn">import</span> <span class="n">experiment_interpolation_submission</span> <span class="k">as</span> <span class="n">interpolation</span>
+    <span class="kn">from</span> <span class="nn">.interpolation</span> <span class="kn">import</span> <span class="n">experiment_interpolation_submission</span> <span class="k">as</span> <span class="n">interpolation</span>
     <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span>
     <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;interpolation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;library&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>   
@@ -1549,7 +1569,7 @@
 
 <div class="viewcode-block" id="load">
 <a class="viewcode-back" href="../../reference.html#providentia.library.load">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Wrapper function for initialising Library class&quot;&quot;&quot;</span>
     <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;library&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">provi</span> <span class="o">=</span> <span class="n">Library</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -1558,16 +1578,16 @@
 
 <div class="viewcode-block" id="notebook">
 <a class="viewcode-back" href="../../reference.html#providentia.library.notebook">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">notebook</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">notebook</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Wrapper function for opening Jupyter Notebook&quot;&quot;&quot;</span>
     <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;./bin/providentia&#39;</span><span class="p">,</span> <span class="s1">&#39;--notebook&#39;</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="report">
 <a class="viewcode-back" href="../../reference.html#providentia.library.report">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">report</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">report</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Wrapper function for initialising Report class&quot;&quot;&quot;</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">.report</span><span class="w"> </span><span class="kn">import</span> <span class="n">Report</span>
+    <span class="kn">from</span> <span class="nn">.report</span> <span class="kn">import</span> <span class="n">Report</span>
     <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span>
     <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;report&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">provi</span> <span class="o">=</span> <span class="n">Report</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
