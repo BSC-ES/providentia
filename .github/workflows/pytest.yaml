@@ -1,0 +1,31 @@
+name: Python Package using Conda
+
+on: [push]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.11'
+    - name: Add conda to system path
+      run: |
+        # $CONDA is an environment variable pointing to the root of the miniconda directory
+        echo $CONDA/bin >> $GITHUB_PATH
+    - name: Install dependencies
+      run: |
+        conda env update --file environment.yaml
+    - name: Test with pytest
+      run: |
+        coverage run -m pytest tests
+        coverage report -i -m
+    - name: Upload coverage to GitHub summary
+      run: |
+        echo "### Coverage Report" >> $GITHUB_STEP_SUMMARY
+        coverage report -i -m >> $GITHUB_STEP_SUMMARY
