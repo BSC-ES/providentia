@@ -70,9 +70,9 @@
     },
 
     "github": {
-        "ghost_root": "/home/runner/providentia/tests/data/obs/ghost", 
-        "nonghost_root": "/home/runner/providentia/tests/data/obs", 
-        "exp_root": "/home/runner/providentia/tests/data/exp",
+        "ghost_root": "/home/runner/work/providentia/tests/data/obs/ghost", 
+        "nonghost_root": "/home/runner/work/providentia/tests/data/obs", 
+        "exp_root": "/home/runner/work/providentia/tests/data/exp",
         "exp_to_interp_root": ""
     },
 }
