@@ -23,9 +23,9 @@ jobs:
         conda env update --file environment.yaml
     - name: Test with pytest
       run: |
-        coverage run -m pytest tests
-        coverage report -i -m
+        conda run -n providentia-env coverage run -m pytest tests
+        conda run -n providentia-env coverage report -i -m
     - name: Upload coverage to GitHub summary
       run: |
         echo "### Coverage Report" >> $GITHUB_STEP_SUMMARY
-        coverage report -i -m >> $GITHUB_STEP_SUMMARY
+        conda run -n providentia-env coverage report -i -m >> $GITHUB_STEP_SUMMARY
