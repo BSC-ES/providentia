@@ -5,6 +5,7 @@
 # conda install -c conda-forge ghostscript
 # conda install -c conda-forge KDEpy
 
+coverage==7.10.4
 matplotlib==3.9.1
 netCDF4==1.7.2
 numpy==1.26.4
