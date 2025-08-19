@@ -68,4 +68,11 @@
         "exp_root": "/esarchive/recon/prov_interp",
         "exp_to_interp_root": ""
     },
+
+    "github": {
+        "ghost_root": "/home/runner/providentia/tests/data/obs/ghost", 
+        "nonghost_root": "/home/runner/providentia/tests/data/obs", 
+        "exp_root": "/home/runner/providentia/tests/data/recon/prov_interp",
+        "exp_to_interp_root": ""
+    },
 }
