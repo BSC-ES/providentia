@@ -463,7 +463,12 @@ class Library:
             zstat = None
 
         # get networkspeci to plot (for non-multispecies plots), taking first one preferentially
-        networkspeci = self.networkspecies[0]
+        if len(self.networkspecies) > 0:
+            networkspeci = self.networkspecies[0]
+        else:
+            msg = 'There are no available species.'
+            show_message(self, msg)
+            return
         speci = networkspeci.split('|')[-1]
 
         # for timeseries chunking

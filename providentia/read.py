@@ -690,7 +690,8 @@ class DataReader:
                     show_message(self.read_instance, msg)
                 elif networkspeci in self.read_instance.filter_networkspecies:
                     self.read_instance.filter_networkspecies.remove(networkspeci)
-                    del self.read_instance.filter_species[networkspeci.split('|')[1]]
+                    if networkspeci.split('|')[1] in self.read_instance.filter_species:
+                        del self.read_instance.filter_species[networkspeci.split('|')[1]]
                     msg = 'There is no available observational data for the filter network|species: {}. Dropping.'.format(networkspeci)
                     show_message(self.read_instance, msg)
                 continue
