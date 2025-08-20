@@ -1958,7 +1958,7 @@ class Plotting:
 
         if (self.read_instance.report) or (self.read_instance.library):
             self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(
-                PolarAxes.PolarTransform())
+                PolarAxes.PolarTransform(apply_theta_transforms=False))
 
         # add observations to labels to get all standard deviation when plotting per label
         if 'individual' in plot_options:
