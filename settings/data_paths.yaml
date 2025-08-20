@@ -71,7 +71,7 @@
 
     "github": {
         "ghost_root": "tests/data/obs/ghost", 
-        "nonghost_root": "tests/data/obs", 
+        "nonghost_root": "tests/data/obs/nonghost", 
         "exp_root": "tests/data/exp",
         "exp_to_interp_root": ""
     },
