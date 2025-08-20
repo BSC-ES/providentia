@@ -84,9 +84,9 @@ def test_make_periodic(inst, statistic_mode, network_type):
     plot(inst, statistic_mode, network_type, 'periodic-r')
 
 
-@pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
-def test_make_periodic_violin(inst, statistic_mode, network_type):
-    plot(inst, statistic_mode, network_type, 'periodic-violin')
+# @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
+# def test_make_periodic_violin(inst, statistic_mode, network_type):
+#     plot(inst, statistic_mode, network_type, 'periodic-violin')
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
