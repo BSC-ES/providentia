@@ -30,6 +30,8 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add coverage.svg
-        git commit -m "Update coverage badge"
-        git push
+        git add coverage.svg || echo "No coverage.svg to add"
+        git diff --cached --quiet || (
+          git commit -m "Update coverage badge"
+          git push
+        )
