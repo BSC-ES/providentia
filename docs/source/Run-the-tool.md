@@ -71,34 +71,11 @@ Using a [configuration file](Configuration-files), you can start interpolating y
 More details can be found in the [interpolation section](Interpolation).
 
 ## Running the tool on a personal machine
+If it is the first time that you launch Providentia, an environment called `providentia-env` will be created with all the necessary dependencies. 
 
-If you do not have access to the BSC machines, you can define the directories where your data is stored. You can do this by editing the file `settings/data_paths.yaml` and defining `ghost_root`, `nonghost_root` and `exp_root` under `local`. For instance:
+To be able to download the environment, make sure you have Conda installed. If not, you can follow the steps on [this page](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html).
 
-```
-    "local": {
-        "ghost_root": "/data/providentia/obs/ghost/",
-        "nonghost_root": "/data/providentia/obs/nonghost/",
-        "exp_root": "/data/providentia/exp/",
-        "exp_to_interp_root": "/data/providentia/exp_to_interp"
-    }
-```
-
-By default these paths are set as:
-
-```
-    "local": {
-        "ghost_root": "~/data/providentia/obs/ghost", 
-        "nonghost_root": "~/data/providentia/obs/nonghost", 
-        "exp_root": "~/data/providentia/exp",
-        "exp_to_interp_root": "~/data/providentia/exp_to_interp"
-    }
-```
-
-where `~` corresponds to `/home/{username}`.
-
-You should download the data that you need from the BSC systems to the local machine. To do this, you can use the [download mode](Download).
-
-If it is the first time that you launch Providentia, an environment called `providentia-env` will be created with all the necessary dependencies. If for some reason you want to create the environment from scratch, you can use:
+If for some reason you want to create the environment from scratch, you can use:
 
 ```
 conda env create -f environment.yaml

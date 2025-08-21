@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Run the tool &mdash; Providentia 2.3.0 documentation</title>
+  <title>Run the tool &mdash; Providentia 2.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=c3c8ae58"></script>
+        <script src="_static/documentation_options.js?v=4d935f96"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -156,27 +156,9 @@
 </section>
 <section id="running-the-tool-on-a-personal-machine">
 <h2>Running the tool on a personal machine<a class="headerlink" href="#running-the-tool-on-a-personal-machine" title="Link to this heading"></a></h2>
-<p>If you do not have access to the BSC machines, you can define the directories where your data is stored. You can do this by editing the file <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code> and defining <code class="docutils literal notranslate"><span class="pre">ghost_root</span></code>, <code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code> and <code class="docutils literal notranslate"><span class="pre">exp_root</span></code> under <code class="docutils literal notranslate"><span class="pre">local</span></code>. For instance:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="s2">&quot;local&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;ghost_root&quot;</span><span class="p">:</span> <span class="s2">&quot;/data/providentia/obs/ghost/&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;nonghost_root&quot;</span><span class="p">:</span> <span class="s2">&quot;/data/providentia/obs/nonghost/&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;exp_root&quot;</span><span class="p">:</span> <span class="s2">&quot;/data/providentia/exp/&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;exp_to_interp_root&quot;</span><span class="p">:</span> <span class="s2">&quot;/data/providentia/exp_to_interp&quot;</span>
-    <span class="p">}</span>
-</pre></div>
-</div>
-<p>By default these paths are set as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="s2">&quot;local&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;ghost_root&quot;</span><span class="p">:</span> <span class="s2">&quot;~/data/providentia/obs/ghost&quot;</span><span class="p">,</span> 
-        <span class="s2">&quot;nonghost_root&quot;</span><span class="p">:</span> <span class="s2">&quot;~/data/providentia/obs/nonghost&quot;</span><span class="p">,</span> 
-        <span class="s2">&quot;exp_root&quot;</span><span class="p">:</span> <span class="s2">&quot;~/data/providentia/exp&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;exp_to_interp_root&quot;</span><span class="p">:</span> <span class="s2">&quot;~/data/providentia/exp_to_interp&quot;</span>
-    <span class="p">}</span>
-</pre></div>
-</div>
-<p>where <code class="docutils literal notranslate"><span class="pre">~</span></code> corresponds to <code class="docutils literal notranslate"><span class="pre">/home/{username}</span></code>.</p>
-<p>You should download the data that you need from the BSC systems to the local machine. To do this, you can use the <a class="reference internal" href="Download.html"><span class="doc std std-doc">download mode</span></a>.</p>
-<p>If it is the first time that you launch Providentia, an environment called <code class="docutils literal notranslate"><span class="pre">providentia-env</span></code> will be created with all the necessary dependencies. If for some reason you want to create the environment from scratch, you can use:</p>
+<p>If it is the first time that you launch Providentia, an environment called <code class="docutils literal notranslate"><span class="pre">providentia-env</span></code> will be created with all the necessary dependencies.</p>
+<p>To be able to download the environment, make sure you have Conda installed. If not, you can follow the steps on <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html">this page</a>.</p>
+<p>If for some reason you want to create the environment from scratch, you can use:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">environment</span><span class="o">.</span><span class="n">yaml</span>
 </pre></div>
 </div>
@@ -213,7 +195,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2024, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa.</p>
+    <p>&#169; Copyright 2019-2025, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
