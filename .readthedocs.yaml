@@ -15,4 +15,4 @@ sphinx:
    configuration: docs/source/conf.py
 
 conda:
-  environment: docs/environment.yaml
+  environment: environment.yaml
