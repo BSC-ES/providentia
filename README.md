@@ -10,24 +10,9 @@ Providentia is designed to allow on-the-fly and offline analysis of experiment o
 Use the following command to get a copy of the repository:
 
 ```
-git clone https://earth.bsc.es/gitlab/ac/Providentia.git
-```
-
-You can use the latest stable version of Providentia
-by accessing the production branch:
-
-```
-git checkout production
-```
-
-You can also access the master branch to test new features,
-that are to be implemented in the upcoming release:
-
-```
-git checkout master
+git clone https://github.com/bsc-es/providentia.git
 ```
 
 # Run
 
-For running Providentia, please follow the instruction in 
-the [wiki](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/home).
+For running Providentia, please follow the instruction in [Read the docs](https://providentia.readthedocs.io/en/latest/).

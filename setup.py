@@ -69,5 +69,5 @@ setup(
     ]},
     setup_requires=REQUIREMENTS["setup"],
     install_requires=REQUIREMENTS["install"],
-    python_requires=">=3.7",
+    python_requires=">=3.11",
 )
