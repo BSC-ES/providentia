@@ -1,9 +1,0 @@
-myst-parser==4.0.1
-Sphinx==7.2.6
-Sphinx-rtd-theme==2.0.0
-matplotlib==3.9.1
-numpy==1.26.4
-pandas==2.2.2
-netCDF4==1.7.2
-scipy==1.15.2
-seaborn==0.13.2
