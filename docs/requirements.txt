@@ -4,3 +4,4 @@ Sphinx-rtd-theme==2.0.0
 matplotlib==3.9.1
 numpy==1.26.4
 pandas==2.2.2
+netCDF4==1.7.2
