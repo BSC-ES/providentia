@@ -1,0 +1,12 @@
+name: readthedocs-env
+channels:
+  - conda-forge
+dependencies:
+  - python==3.11.5
+  - cartopy
+  - jupyterlab
+  - ghostscript
+  - KDEpy
+  - pip
+  - pip:
+    - -r requirements.txt
