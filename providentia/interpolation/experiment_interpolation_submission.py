@@ -521,6 +521,12 @@ class SubmitInterpolation(object):
             else:
                 msg = '***INTERSECTING OBSERVATIONAL AND EXPERIMENTAL DATA IS AVAILABLE FOR INTERPOLATION.***' 
                 msg += f'\nExperiment Data Source Path: {exp_dir}'
+
+                # add a warning if nco is not installed
+                _, output = subprocess.getstatusoutput("ncks")
+                if "not found" in output:
+                    msg += '\n\nNCO could not be found, please install it in your system with sudo apt install nco (Debian/Ubuntu) or brew install nco (macOS).'
+            
             print(msg)
 
             # get the arguments from the last iteration
