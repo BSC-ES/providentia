@@ -2089,7 +2089,22 @@ class Download(object):
                         request["type"] = [cams_dict['type']]
 
                     # if it's forecast one file per day, analysis one file per month
-                    request["date"] = [f"{current_cams_date_str}/{next_cams_date_str}"]
+                    if cams_dict['month_names'] is False:
+                        request["date"] = [f"{current_cams_date_str}/{next_cams_date_str}"]
+                    else:
+                        request["year"] = [f"{current_cams_date.year}"]
+                        request["month"] = [f"{current_cams_date.strftime('%m')}"] 
+
+                    # add type to the request if the dataset has it
+                    if 'type' in cams_dict:
+                        request["type"] = []
+                        # if interim or validated reanalysis in the dataset, add it ro the request
+                        if 'validated_reanalysis' in cams_dict['type']:
+                            for reanalysis in ['validated_reanalysis','interim_reanalysis']:
+                                if request['year'][0] in cams_dict['type'][reanalysis]:
+                                    request["type"].append(reanalysis)
+                        else:
+                            request["type"].append(cams_dict['type'])
 
                     # add the experiment if models are available in the dataset
                     if 'experiments' in cams_dict:
@@ -2099,6 +2114,14 @@ class Download(object):
                     level_variable = 'level' if 'level' in cams_dict else 'model_level'
                     if cams_species in cams_variables_level[url]['multi']:
                         request[level_variable] = [cams_dict[level_variable]]
+                    
+                    # add time to the request
+                    if 'time' in cams_dict:
+                        request['time'] = cams_dict['time']
+
+                    # add data_format to the request
+                    if 'data_format' in cams_dict:
+                        request['data_format'] = cams_dict['data_format']
 
                     # get file name and final path
                     file_name = f"{species}-000_{current_cams_date.strftime('%Y%m%d')}.nc"
@@ -2144,7 +2167,7 @@ class Download(object):
 
                     # format the cams files and move them to the corresponding folder
                     self.logger.info(f"Formatting {final_path}\n") 
-                    self.format_cams(join(temp_dir,zip_file_name), final_path, cams_species, species)
+                    self.format_cams(join(temp_dir,zip_file_name), final_path, cams_species, species, prefix, domain)
 
                     # add one day to the date
                     current_cams_date = next_cams_date + timedelta(days=1)    
