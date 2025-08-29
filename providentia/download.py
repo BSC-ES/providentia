@@ -2175,12 +2175,29 @@ class Download(object):
                 # remove the temp directory tail
                 shutil.rmtree(join(self.exp_to_interp_root,'.temp'))
 
+    def extract_cams_date(input_file, prefix, domain):
+       
+        if prefix in ['cams_analysis','cams_forecast'] and domain == 'regional':
+            time = input_file['time'].long_name.split()[-1]
+            time = datetime.strptime(time, '%Y%m%d')
+        elif prefix == 'cams_reanalysis' and domain == 'regional':
+            time = input_file['time'].units.split()[2]
+            time = datetime.strptime(time, '%Y-%m-%d')
+        elif prefix == 'cams_forecast' and domain == 'global':
+            time = input_file['forecast_reference_time'][0]
+            time = datetime.fromtimestamp(int(time))
+        elif prefix == 'cams_reanalysis' and domain == 'global':
+            time = input_file['valid_time'][0]
+            time = datetime.fromtimestamp(int(time))
+
+        return time
+    
     def format_cams(self, input_filepath, output_filepath, cams_species, species):  
         # open original netcdf file      
         og_grp = Dataset(input_filepath, 'r', format="NETCDF4") 
 
         # extract date 
-        date_str = og_grp['time'].long_name.split()[-1]
+        date_str = self.extract_date(input_file, prefix, domain)
 
         # create new netcdf file
         root_grp = Dataset(output_filepath, 'w', format="NETCDF4") 
