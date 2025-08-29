@@ -552,7 +552,7 @@
           "marker": "o",
           "markeredgecolor": "None",
           "mew": 0,
-          "linestyle": "None",
+          "linestyle": "-",
         },
       "legend": { "handles": { "marker": "o", "color": "white" } },
       "dashboard":
@@ -1810,9 +1810,11 @@
       "report":
         {
           "plot_options": ["bias", "multispecies"],
-          "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
+            #"basic": ["Mean", "StdDev", "p5", "Median", "p95"],
+          "basic": ["Mean", "NData","p5", "Median", "p95"],
           "experiment_bias":
-            ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
+            #["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
+            ["Mean_bias", "MFB", "MFE", "RMSE", "r"],
           "orientation": "portrait",
           "figure": { "ncols": 1, "nrows": 1 },
           "page_title":

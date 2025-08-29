@@ -5,8 +5,10 @@
              "arguments": {},    
              "units": "[measurement_units]", 
              "minimum_bias": [0.0], 
-             "vmin_bias": {}, 
-             "vmax_bias": {},
+             "vmin_bias": {"sconco3": -50.0, "sconcno2": -30.0, "sconcco": -2.5, "sconcso2": -25.0,"pm10": -40.0,"pm2p5": -30.0},
+               #"vmin_bias": {}, 
+             "vmax_bias": {"sconco3": 50.0, "sconcno2": 30.0, "sconcco": 2.5, "sconcso2": 25.0,"pm10": 40.0,"pm2p5": 30.0},
+               #"vmax_bias": {},
              "cmap_bias": "RdYlBu_r"},
     
     "NMB":  {"function": "calculate_mb", 
@@ -86,7 +88,7 @@
              "units": "[measurement_units]", 
              "minimum_bias": [0.0], 
              "vmin_bias": 0.0,
-             "vmax_bias": {}, 
+             "vmax_bias": {"sconco3": 50.0, "sconcno2": 30.0, "sconcco": 1.5, "sconcso2": 30.0,"pm10": 40.0, "pm2p5": 30.0}, 
              "cmap_bias": "viridis"},
     
     "NRMSE": {"function": "calculate_rmse", 

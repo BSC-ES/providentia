@@ -22,6 +22,10 @@
 
     "cams2_40": ["metadata", "timeseries_annotate", "timeseries_bias", "periodic-violin", "periodic-r", "periodic-r2", 
                  "periodic-RMSE", "distribution", "scatter_annotate", "statsummary", "statsummary_bias"],
+    
+    "operational_test_weekly": ["statsummary_multispecies", "statsummary_multispecies_bias","timeseries-NData-daily","map-NData", "map-Mean", "map-MB", "map-RMSE","timeseries_annotate", "timeseries_bias_annotate", "distribution", "scatter_annotate", "periodic-Mean"],
+
+    "operational_test_3monthly": ["statsummary_multispecies", "statsummary_multispecies_bias", "timeseries-NData-daily","map-MB", "map-RMSE","timeseries_annotate", "timeseries_bias_annotate", "distribution", "scatter_annotate", "periodic-Mean","fairmode-target", "fairmode-target_annotate"],
 
     "paradigm": {"summary": ["map-p50", "map-p95_bias", "map-RMSE", "timeseries", "scatter"],
                  "station": ["timeseries", "scatter"]},
