@@ -40,6 +40,8 @@ cams_analysis:
     fetch_dates: true
     level: 0
     month_names: false
+    time: 00:00
+    data_format: netcdf_zip
 cams_forecast:
   regional:
     dataset: cams-europe-air-quality-forecasts
@@ -86,6 +88,8 @@ cams_forecast:
     fetch_dates: true
     level: 0
     month_names: false
+    time: 00:00
+    data_format: netcdf_zip
   global:
     dataset: cams-global-atmospheric-composition-forecasts
     resolution: hourly
@@ -159,8 +163,10 @@ cams_forecast:
             '117', '118', '119', '120' ]
     forecast: true
     fetch_dates: true
-    model_level: 120
+    model_level: 137
     month_names: false
+    time: 00:00
+    data_format: netcdf_zip
 cams_reanalysis:
   regional:
     dataset: cams-europe-air-quality-reanalyses
@@ -240,3 +246,5 @@ cams_reanalysis:
     fetch_dates: true
     model_level: 60
     month_names: false
+    time: 00:00
+    data_format: netcdf_zip
