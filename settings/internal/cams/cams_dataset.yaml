@@ -42,6 +42,7 @@ cams_analysis:
     month_names: false
     time: 00:00
     data_format: netcdf_zip
+    calendar: standard
 cams_forecast:
   regional:
     dataset: cams-europe-air-quality-forecasts
@@ -90,9 +91,12 @@ cams_forecast:
     month_names: false
     time: 00:00
     data_format: netcdf_zip
+    calendar: standard
   global:
     dataset: cams-global-atmospheric-composition-forecasts
-    resolution: hourly
+    resolution: 
+      multi: 3hourly
+      single: hourly
     type: forecast
     url: https://ads.atmosphere.copernicus.eu/datasets/cams-global-atmospheric-composition-forecasts?tab=download
     variable:
@@ -167,6 +171,7 @@ cams_forecast:
     month_names: false
     time: 00:00
     data_format: netcdf_zip
+    calendar: prolectic_gregorian
 cams_reanalysis:
   regional:
     dataset: cams-europe-air-quality-reanalyses
@@ -204,9 +209,10 @@ cams_reanalysis:
     fetch_dates: false
     level: 0
     month_names: true
+    calendar: standard
   global:
     dataset: cams-global-reanalysis-eac4
-    resolution: hourly
+    resolution: 3hourly
     url: https://ads.atmosphere.copernicus.eu/datasets/cams-global-reanalysis-eac4?tab=download
     variable:
       - 2m_dewpoint_temperature
@@ -248,3 +254,4 @@ cams_reanalysis:
     month_names: false
     time: 00:00
     data_format: netcdf_zip
+    calendar: prolectic_gregorian
