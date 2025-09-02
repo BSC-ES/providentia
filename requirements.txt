@@ -30,3 +30,4 @@ python-dotenv==1.0.1
 paramiko==3.4.0
 memray==1.17.1
 cdsapi==0.7.6
+selenium==4.35.0
