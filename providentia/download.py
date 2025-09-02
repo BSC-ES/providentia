@@ -2075,13 +2075,10 @@ class Download(object):
                     # create the request
                     request = {
                     "variable": [cams_species],
-                    "time": ["00:00"],
-                    "data_format": "netcdf_zip"
                     }
 
                     # add leadtime hour to the request if the dataset has it
                     if 'leadtime_hour' in cams_dict:
-                        level = 'multi' if cams_species in cams_variables_level[url]['multi'] else 'single'
                         request["leadtime_hour"] = cams_dict['leadtime_hour'][level]
 
                     # add type to the request if the dataset has it
@@ -2167,7 +2164,7 @@ class Download(object):
 
                     # format the cams files and move them to the corresponding folder
                     self.logger.info(f"Formatting {final_path}\n") 
-                    self.format_cams(join(temp_dir,zip_file_name), final_path, cams_species, species, prefix, domain)
+                    self.format_cams(join(temp_dir,zip_file_name), final_path, species, prefix, domain)
 
                     # add one day to the date
                     current_cams_date = next_cams_date + timedelta(days=1)    
@@ -2175,7 +2172,7 @@ class Download(object):
                 # remove the temp directory tail
                 shutil.rmtree(join(self.exp_to_interp_root,'.temp'))
 
-    def extract_cams_date(input_file, prefix, domain):
+    def extract_cams_date(self, input_file, prefix, domain):
        
         if prefix in ['cams_analysis','cams_forecast'] and domain == 'regional':
             time = input_file['time'].long_name.split()[-1]
@@ -2190,67 +2187,77 @@ class Download(object):
             time = input_file['valid_time'][0]
             time = datetime.fromtimestamp(int(time))
 
-        return time
+        return time.strftime('%Y-%m-%d')
     
-    def format_cams(self, input_filepath, output_filepath, cams_species, species):  
+    def format_cams(self, input_filepath, output_filepath, species, prefix, domain): 
+        # get file formatting 
+        cams_providentia_map = cams_formatting[prefix][domain]
+
         # open original netcdf file      
-        og_grp = Dataset(input_filepath, 'r', format="NETCDF4") 
+        input_file = Dataset(input_filepath, 'r', format="NETCDF4") 
 
         # extract date 
-        date_str = self.extract_date(input_file, prefix, domain)
+        date_str = self.extract_cams_date(input_file, prefix, domain)
 
         # create new netcdf file
-        root_grp = Dataset(output_filepath, 'w', format="NETCDF4") 
-        root_grp.set_auto_mask(True)	
-        
-        # give permission to others 
+        output_file = Dataset(output_filepath, 'w', format="NETCDF4") 
+        output_file.set_auto_mask(True)	
 
-        # copy global attributes
-        root_grp.setncatts({k: og_grp.getncattr(k) for k in og_grp.ncattrs()})
+        for input_dim_name, output_dim_name in cams_providentia_map.items():
+            # get dimension
+            dim = input_file.dimensions[input_dim_name]
+            # create the dimension with the new name 
+            output_file.createDimension(output_dim_name, len(dim))
 
-        # copy dimensions 
-        for name, dim in og_grp.dimensions.items():
-            # skip level
-            root_grp.createDimension(name, len(dim))
+        # get species name in the input file
+        input_species = list(set(input_file.variables) - set(input_file.dimensions))[0] # TODO take into account that cams_forecast_global has two elements
 
         # copy variables
-        for name, og_var in og_grp.variables.items():
-            # skip level
-
-            # change species name
-            if name not in ["longitude","latitude","time",'level']:
-                name = species
+        for input_var_name in input_file.variables:
+            # get the output var name
+            if input_var_name in cams_providentia_map:
+                output_var_name = cams_providentia_map[input_var_name]
+            elif input_var_name == input_species:
+                output_var_name = species
+            else:
+                continue
+            
+            # get the variable
+            input_var = input_file[input_var_name]
+            
+            # change the name of the dimensions into the providentia name
+            output_var_dims = [cams_providentia_map.get(name, name) for name in input_var.dimensions if name in cams_providentia_map]
             
             # create the variable
-            var = root_grp.createVariable(name, og_var.datatype, og_var.dimensions)
+            output_var = output_file.createVariable(output_var_name, input_var.datatype, output_var_dims)
 
-            # add atribures
-            if name == "time":
-                # add specific atributes to time
-                var.units = f'hours since {date_str[:4]}-{date_str[4:6]}-{date_str[-2:]} 00:00:00'                
-                var.calendar = 'standard'
-            else:
-                # copy atributes from the original file
-                var.setncatts({k: og_var.getncattr(k) for k in og_var.ncattrs() if k != '_FillValue'})
+            # add calendar and units attributes to the time variable
+            if output_var_name == "time":
+                output_var.setncattr('calendar', cams_options[prefix][domain]['calendar'])
+                time_units = f"hours since {date_str}"
+                output_var.setncattr('units', time_units)
 
             # add to level the priority of the level
-            if name == "level":
-                var.positive = 'up'
+            elif output_var_name == "level":
+                output_var.positive = 'up'
 
-            # get the data from the original file
-            data = og_var[:]
-            
+            # add coordinates, grid_mapping and units to the species variable
+            elif input_var_name == input_species:               
+                output_var.setncattr('coordinates', 'latitude longitude')
+                output_var.setncattr('grid_mapping', 'crs')
+                output_var.setncattr('units', input_var.units)
+
             # add the data to the variable
-            var[:] = data
-
+            output_var[:] = input_var[:]
+        
         # add grid_mapping
-        root_grp[species].setncattr('grid_mapping', 'crs')
+        output_file[species].setncattr('grid_mapping', 'crs')
         
         # add coordinates
-        root_grp[species].setncattr('coordinates', 'latitude longitude')
+        output_file[species].setncattr('coordinates', 'latitude longitude')
 
         # add crs
-        crs_var = root_grp.createVariable('crs', 'u1')  
+        crs_var = output_file.createVariable('crs', 'u1')  
         crs_var.setncatts({
             'grid_mapping_name': 'latitude_longitude',
             'semi_major_axis': 6371000.0,
@@ -2258,8 +2265,8 @@ class Download(object):
         })
         
         # close the original and new netcdf files
-        root_grp.close()
-        og_grp.close()           
+        output_file.close()
+        input_file.close()           
 
     def check_time(self, size, file_size):
         if (time.time() - self.ncfile_dl_start_time) > self.timeoutLimit:
