@@ -1919,11 +1919,7 @@ class Download(object):
         config_expid, domain, ensemble_options = experiment.split("-")
         
         # get the CAMS dataset and the experiment name (if there's one)
-        exp_id = None
-        if len(config_expid.split('_')) == 2:
-            prefix = config_expid
-        else:
-            prefix, exp_id = config_expid.rsplit('_', 1)
+        prefix, exp_id = config_expid.rsplit('_', 1)
 
         # check if the domain is the correct one for the dataset
         if domain not in cams_options[prefix]:
@@ -1941,7 +1937,7 @@ class Download(object):
         dataset = cams_dict["dataset"]
 
         # make sure the experiment is available in the dataset
-        if 'experiments' in cams_dict and exp_id not in cams_dict["experiments"]:
+        if exp_id not in cams_dict["experiments"]:
             msg = f"Cannot find the {exp_id} experiment in the {dataset} dataset."    
             show_message(self, msg)
             return
@@ -2014,31 +2010,35 @@ class Download(object):
                 self.logger.error("Error: Cannot proceed without '.cdsapirc'. CAMS experiment data download requires this file.")
                 sys.exit(1)
 
-        # iterate throught the resolutions
-        for resolution in self.resolution:
+        # iterate through the species
+        for species in self.species: 
+            # check if species is in the ghost_cams_variables file
+            if species not in parameters_dict:
+                msg = f"The species '{species}' is not available in CAMS."
+                show_message(self, msg)
+                continue
+        
+            # get the species in the cams vocabulary
+            cams_species = parameters_dict[species]
 
-            # check if the resolution is the correct one for the dataset
-            if resolution != cams_dict["resolution"]:
-                msg = (
-                f"The current resolution '{resolution}' is not valid for the CAMS '{dataset}' dataset. "
-                f"It must be '{cams_dict['resolution']}'.")            
+            # check if the mapped species are available in the dataset
+            if cams_species not in cams_dict['variable']:
+                msg = f"Mapped species '{cams_species}' for input species '{species}' is not available in the CAMS '{dataset}' dataset."          
                 show_message(self, msg)
                 continue
             
-            # iterate through the species
-            for species in self.species: 
-                # check if species is in the ghost_cams_variables file
-                if species not in parameters_dict:
-                    msg = f"The species '{species}' is not available in CAMS."
-                    show_message(self, msg)
-                    continue
-            
-                # get the species in the cams vocabulary
-                cams_species = parameters_dict[species]
+            # get the species' level
+            level = 'multi' if cams_species in cams_variables_level[url]['multi'] else 'single'
 
-                # check if the mapped species are available in the dataset
-                if cams_species not in cams_dict['variable']:
-                    msg = f"Mapped species '{cams_species}' for input species '{species}' is not available in the CAMS '{dataset}' dataset."          
+            # iterate throught the resolutions
+            for resolution in self.resolution:
+                # get the resolution for the cams dataset
+                correct_resolution = cams_dict["resolution"] if type(cams_dict["resolution"]) == str else cams_dict["resolution"][level]
+                
+                # check if the resolution is the correct one for the dataset
+                if resolution != correct_resolution:
+                    msg = (
+                    f"The current resolution '{resolution}' is not valid. It must be '{correct_resolution}'.")            
                     show_message(self, msg)
                     continue
 
@@ -2104,7 +2104,7 @@ class Download(object):
                             request["type"].append(cams_dict['type'])
 
                     # add the experiment if models are available in the dataset
-                    if 'experiments' in cams_dict:
+                    if cams_dict['model'] == True:
                         request["model"] = [exp_id]
 
                     # get the level and apply it if the species is multi level
@@ -2128,8 +2128,8 @@ class Download(object):
                     temp_path = join(temp_dir, 'zip_file')
 
                     # print the request
-                    self.logger.info(f"Dataset -> {cams_dict['dataset']}")
-                    self.logger.info('Request -> {')
+                    self.logger.info(f"'dataset = {cams_dict['dataset']}'")
+                    self.logger.info('request = {')
                     for k,v in request.items():
                         if type(v) == str:
                             v = f"'{v}'"
