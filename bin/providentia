@@ -581,6 +581,12 @@ else
         active_env=true
     fi
 
+    # if there is no NCO, install
+    if ! command -v ncks &> /dev/null; then
+        echo "NCO needs to be installed to compress datasets effectively. Installing..."
+        sudo apt-get update && sudo apt-get install -y nco
+    fi
+
     # if are using Mac then create a Providentia executable (if does not already exist)
     if [[ "${OS}" == "Mac" ]] ; then
         python_exe=$(eval "which python")
