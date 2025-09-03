@@ -5,9 +5,9 @@
              "arguments": {},    
              "units": "[measurement_units]", 
              "minimum_bias": [0.0], 
-             "vmin_bias": {"sconco3": -50.0, "sconcno2": -30.0, "sconcco": -2.5, "sconcso2": -25.0,"pm10": -40.0,"pm2p5": -30.0},
+             "vmin_bias": {"sconco3": -50.0, "sconcno2": -20.0, "sconcco": -0.5, "sconcso2": -10.0,"pm10": -30.0,"pm2p5": -20.0},
                #"vmin_bias": {}, 
-             "vmax_bias": {"sconco3": 50.0, "sconcno2": 30.0, "sconcco": 2.5, "sconcso2": 25.0,"pm10": 40.0,"pm2p5": 30.0},
+             "vmax_bias": {"sconco3": 50.0, "sconcno2": 20.0, "sconcco": 0.5, "sconcso2": 10.0,"pm10": 30.0,"pm2p5": 20.0},
                #"vmax_bias": {},
              "cmap_bias": "RdYlBu_r"},
     
@@ -88,7 +88,7 @@
              "units": "[measurement_units]", 
              "minimum_bias": [0.0], 
              "vmin_bias": 0.0,
-             "vmax_bias": {"sconco3": 50.0, "sconcno2": 30.0, "sconcco": 1.5, "sconcso2": 30.0,"pm10": 40.0, "pm2p5": 30.0}, 
+             "vmax_bias": {"sconco3": 40.0, "sconcno2": 30.0, "sconcco": 1.0, "sconcso2": 10.0,"pm10": 30.0, "pm2p5": 15.0}, 
              "cmap_bias": "viridis"},
     
     "NRMSE": {"function": "calculate_rmse", 
