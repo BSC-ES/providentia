@@ -1,7 +1,7 @@
 cams_analysis:
   regional:
     dataset: cams-europe-air-quality-forecasts
-    experiments:
+    models:
       - ensemble
       - chimere
       - dehm
@@ -42,11 +42,11 @@ cams_analysis:
     time: 00:00
     data_format: netcdf_zip
     calendar: standard
-    model: true
+    stream: false
 cams_forecast:
   regional:
     dataset: cams-europe-air-quality-forecasts
-    experiments:
+    models:
       - ensemble
       - chimere
       - dehm
@@ -91,11 +91,9 @@ cams_forecast:
     time: 00:00
     data_format: netcdf_zip
     calendar: standard
-    model: true
+    stream: false
   global:
     dataset: cams-global-atmospheric-composition-forecasts
-    experiments: 
-      - ensemble
     resolution: 
       multi: 3hourly
       single: hourly
@@ -173,11 +171,11 @@ cams_forecast:
     time: 00:00
     data_format: netcdf_zip
     calendar: prolectic_gregorian
-    model: false
+    stream: false
 cams_reanalysis:
   regional:
     dataset: cams-europe-air-quality-reanalyses
-    experiments:
+    models:
       - ensemble
       - chimere
       - emep
@@ -211,11 +209,9 @@ cams_reanalysis:
     level: '0'
     month_names: true
     calendar: standard
-    model: true
+    stream: true
   global:
     dataset: cams-global-reanalysis-eac4
-    experiments:
-      - ensemble
     resolution: 3hourly
     url: https://ads.atmosphere.copernicus.eu/datasets/cams-global-reanalysis-eac4?tab=download
     variable:
@@ -262,4 +258,4 @@ cams_reanalysis:
     ]
     data_format: netcdf_zip
     calendar: prolectic_gregorian
-    model: false
+    stream: false

@@ -44,6 +44,8 @@ mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'inter
 cams_options = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_dataset.yaml')))
 cams_variables_level = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_variables_level.yaml')))
 cams_formatting = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_formatting.yaml')))
+parameters_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'ghost_cams_variables.yaml')))
+cams_stream = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_stream.yaml')))
 
 class Download(object):
     def __init__(self, **kwargs):
@@ -1856,8 +1858,11 @@ class Download(object):
         # get experiment id and the domain
         config_expid, domain, ensemble_options = experiment.split("-")
         
-        # get the CAMS dataset and the experiment name (if there's one)
-        prefix, exp_id = config_expid.rsplit('_', 1)
+        # count underscores to determine format
+        u_count = config_expid.count('_')
+
+        # get the prefix
+        prefix = config_expid.rsplit('_', u_count-1)[0]
 
         # check if the domain is the correct one for the dataset
         if domain not in cams_options[prefix]:
@@ -1868,21 +1873,82 @@ class Download(object):
             show_message(self, msg)
             return
 
-        # get prefix - domain dictionary
+        # get the dictionary with the dataset characteristics
         cams_dict = cams_options[prefix][domain]
 
         # get CAMS dataset
         dataset = cams_dict["dataset"]
+        
+        # determine experiment ID or stream
+        exp_id, stream = None, None
+        
+        if u_count == 1: # e.g. cams_forecast
+            if 'experiments' in cams_dict:
+                msg = f"The experiment '{config_expid}' is missing the model. Please add one (e.g., '{config_expid}_ensemble')."
+                show_message(self, msg)
+                return
 
-        # make sure the experiment is available in the dataset
-        if exp_id not in cams_dict["experiments"]:
-            msg = f"Cannot find the {exp_id} experiment in the {dataset} dataset."    
-            show_message(self, msg)
-            return
+        elif u_count == 2:
+            # extract last element
+            last_element = config_expid.rsplit('_', 1)[1]
 
-        # download an experiment
-        if 'experiments' not in cams_dict and exp_id is not None:
-            msg = f"The {dataset} does not admit experiments, change the experiment in the configuration file to '{prefix}'."    
+            if cams_dict['stream'] is True and 'experiment' in cams_dict: 
+                
+                if last_element in ['validated','interim']: # e.g. cams_reanalysis_interim
+                    stream = last_element
+                    stream += "_reanalysis"
+                elif last_element in cams_dict["experiments"]: # e.g. cams_reanalysis_ensemble
+                    exp_id = last_element
+                else:
+                    msg = f"'{last_element}' is not valid for the '{dataset}' dataset."    
+                    show_message(self, msg)
+                    return
+                
+            elif 'experiments' in cams_dict: # e.g. cams_analysis_ensemble
+                exp_id = last_element
+
+                # make sure the experiment is available in the dataset
+                if exp_id not in cams_dict["experiments"]:
+                    msg = f"Cannot find the {exp_id} experiment in the '{dataset}' dataset."    
+                    show_message(self, msg)
+                    return
+                
+                # make sure the experiment is available in the dataset
+                if exp_id not in cams_dict["experiments"]:
+                    msg = f"Cannot find the {exp_id} experiment in the '{dataset}' dataset."    
+                    show_message(self, msg)
+                    return
+                
+            else:
+                # if there are three elements and they
+                msg = f"The '{dataset}' dataset does not admit models or streams, change the experiment in the configuration file to '{prefix}'."    
+                show_message(self, msg)
+                return
+                
+        elif u_count == 3:
+            prefix, exp_id, stream = config_expid.rsplit('_', 2)
+
+            if not (cams_dict['stream'] is True and 'experiment' in cams_dict): 
+                # if there are three elements and they
+                msg = f"The '{dataset}' dataset does not admit models or streams, change the experiment in the configuration file to '{prefix}'."    
+                show_message(self, msg)
+                return
+
+            # make sure the experiment is available in the dataset
+            if exp_id not in cams_dict["experiments"]:
+                msg = f"Cannot find the {exp_id} experiment in the '{dataset}' dataset."    
+                show_message(self, msg)
+                return
+            
+             # make sure the stream is valid
+            if stream not in ['validated','interim']:
+                msg = f"'{stream}' is not a valid stream. Availabe streams: validated, interim."    
+                show_message(self, msg)
+                return
+
+        # get error if it does not get any of the conditions
+        else:
+            msg = f"The '{config_expid}' format is not valid."    
             show_message(self, msg)
             return
 
@@ -1897,8 +1963,7 @@ class Download(object):
         # get url
         url = cams_dict['url']
 
-        # check end date is > start date, if not, return with no valid obs. files
-        # TODO code from read_aux.py
+        # check whether end date is bigger than start date, if not, return
         if int(self.start_date) >= int(self.end_date):
             msg = f'Start date ({self.start_date}) exceeds end date ({self.end_date}).'
             show_message(self, msg, print=True)
@@ -1925,9 +1990,6 @@ class Download(object):
         if max_end_date < cams_end_date:
             cams_end_date = max_end_date
 
-        # get the ghost to cams vocabulary mapping
-        parameters_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'ghost_cams_variables.yaml')))
-        
         # create cdsapirc file in case it was not created
         cdsapirc_path = join(os.getenv("HOME"),'.cdsapirc')
         if not os.path.isfile(cdsapirc_path):
@@ -2008,9 +2070,7 @@ class Download(object):
                     next_cams_date_str = next_cams_date.strftime('%Y-%m-%d')
 
                     # create the request
-                    request = {
-                    "variable": cams_species,
-                    }
+                    request = {"variable" : cams_species}
 
                     # add leadtime hour to the request if the dataset has it
                     if 'leadtime_hour' in cams_dict:
@@ -2024,15 +2084,30 @@ class Download(object):
                     if cams_dict['month_names'] is False:
                         request["date"] = f"{current_cams_date_str}/{next_cams_date_str}"
                     else:
-                        request["year"] = current_cams_date.year
-                        request["month"] = f"{current_cams_date.strftime('%m')}"
+                        request["year"] = str(current_cams_date.year)
+                        request["month"] = str(current_cams_date.strftime('%m'))
+
+                    # add interim and or validated stream to the request
+                    if cams_dict['stream'] is True:
+                        # if the stream was not passed by the user, get the available ones
+                        if stream == None:
+                            request["type"] = cams_stream[request["year"]]
+                        else:
+                            # check whether the stream is available for the year
+                            if stream not in cams_stream[request["year"]]:
+                                msg = (
+                                f"The current stream '{stream}' is not available for the current date: {request['month']}-{request['year']}. Continuing....")            
+                                show_message(self, msg)
+                                continue
+                            
+                            request["type"] = stream
 
                     # add type to the request if the dataset has it
                     if 'type' in cams_dict:
                         request["type"] = cams_dict['type']
 
                     # add the experiment if models are available in the dataset
-                    if cams_dict['model'] == True:
+                    if 'experiments' in cams_dict:
                         request["model"] = exp_id
 
                     # get the level and apply it if the species is multi level
@@ -2085,7 +2160,7 @@ class Download(object):
                         else:
                             self.logger.info(f"\nUnexpected error ({err.response.status_code}):")
                             self.logger.info(f"Details: {err}")
-                        # do the next download
+                        # make the next download
                         continue
 
                     # extract file 
