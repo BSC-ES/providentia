@@ -35,10 +35,9 @@ cams_analysis:
       - pm10_sea_salt_dry
       - sulphur_dioxide
     leadtime_hour: 
-      multi: ['0']
+      multi: '0'
     forecast: false
-    fetch_dates: true
-    level: 0
+    level: '0'
     month_names: false
     time: 00:00
     data_format: netcdf_zip
@@ -87,8 +86,7 @@ cams_forecast:
             '60', '61', '62', '63', '64', '65', '66', '67', '68', '69', '70', '71', '72', '73', '74', '75', '76', '77', '78', '79',
             '80', '81', '82', '83', '84', '85', '86', '87', '88', '89', '90', '91', '92', '93', '94', '95', '96' ]
     forecast: true
-    fetch_dates: true
-    level: 0
+    level: '0'
     month_names: false
     time: 00:00
     data_format: netcdf_zip
@@ -101,6 +99,7 @@ cams_forecast:
     resolution: 
       multi: 3hourly
       single: hourly
+    type: forecast
     url: https://ads.atmosphere.copernicus.eu/datasets/cams-global-atmospheric-composition-forecasts?tab=download
     variable:
       - 2m_dewpoint_temperature
@@ -169,8 +168,7 @@ cams_forecast:
             '100', '101', '102', '103', '104', '105', '106', '107', '108', '109', '110', '111', '112', '113', '114', '115', '116',
             '117', '118', '119', '120' ]
     forecast: true
-    fetch_dates: true
-    model_level: 137
+    model_level: '137'
     month_names: false
     time: 00:00
     data_format: netcdf_zip
@@ -210,8 +208,7 @@ cams_reanalysis:
       - pm10_sea_salt_dry
       - sulphur_dioxide
     forecast: false
-    fetch_dates: false
-    level: 0
+    level: '0'
     month_names: true
     calendar: standard
     model: true
@@ -256,8 +253,7 @@ cams_reanalysis:
       - surface_pressure
       - total_aerosol_optical_depth_550nm
     forecast: false
-    fetch_dates: true
-    model_level: 60
+    model_level: '60'
     month_names: false
     time: [
         "00:00", "03:00", "06:00",

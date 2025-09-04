@@ -1905,11 +1905,8 @@ class Download(object):
             return
 
         # get minimum and maximum possible dates
-        if cams_dict['fetch_dates'] is True:
-            min_start_date, max_end_date = self.fetch_cams_dates(url, cams_dict)
-        else: # TODO: change this
-            min_start_date, max_end_date = datetime.strptime('2013-01-01', '%Y-%m-%d'), datetime.strptime('2024-12-31', '%Y-%m-%d')
-
+        min_start_date, max_end_date = self.fetch_cams_dates(url, cams_dict)
+        
         # convert the selected dates to datetetime
         cams_start_date = datetime.strptime(self.start_date, "%Y%m%d")
         cams_end_date = datetime.strptime(self.end_date, "%Y%m%d")
@@ -2032,14 +2029,7 @@ class Download(object):
 
                     # add type to the request if the dataset has it
                     if 'type' in cams_dict:
-                        request["type"] = []
-                        # if interim or validated reanalysis in the dataset, add it ro the request
-                        if 'validated_reanalysis' in cams_dict['type']:
-                            for reanalysis in ['validated_reanalysis','interim_reanalysis']:
-                                if request['year'][0] in cams_dict['type'][reanalysis]:
-                                    request["type"].append(reanalysis)
-                        else:
-                            request["type"].append(cams_dict['type'])
+                        request["type"] = cams_dict['type']
 
                     # add the experiment if models are available in the dataset
                     if cams_dict['model'] == True:
@@ -2058,15 +2048,18 @@ class Download(object):
                     if 'data_format' in cams_dict:
                         request['data_format'] = cams_dict['data_format']
 
-                    # get file name and final path
-                    file_name = f"{species}_{current_cams_date.strftime('%Y%m%d')}.nc"
+                    # get filename depending whether it is a download for the whole month or just a day
+                    date_format = '%Y%m' if cams_dict['forecast'] is False else '%Y%m%d'
+                    
+                    # get final path
+                    file_name = f"{species}_{current_cams_date.strftime(date_format)}.nc"
                     final_path = join(final_dir, file_name)
 
                     # get temporal path
                     temp_path = join(temp_dir, 'zip_file')
 
                     # print the request
-                    self.logger.info(f"'dataset = {cams_dict['dataset']}'")
+                    self.logger.info(f"dataset = '{cams_dict['dataset']}'")
                     self.logger.info('request = {')
                     for k,v in request.items():
                         if type(v) == str:
