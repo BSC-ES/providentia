@@ -31,3 +31,4 @@ paramiko==3.4.0
 memray==1.17.1
 cdsapi==0.7.6
 selenium==4.35.0
+cdsapi==0.7.6
