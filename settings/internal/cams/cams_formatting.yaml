@@ -19,10 +19,9 @@ cams_reanalysis:
   regional:
     longitude: longitude
     latitude: latitude
-    level: level
     time: time
   global:
     longitude: longitude
     latitude: latitude
     model_level: level
-    forecast_period: time
+    valid_time: time

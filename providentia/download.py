@@ -43,6 +43,7 @@ interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'int
 mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 cams_options = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_dataset.yaml')))
 cams_variables_level = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_variables_level.yaml')))
+cams_formatting = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_formatting.yaml')))
 
 class Download(object):
     def __init__(self, **kwargs):
@@ -2011,7 +2012,7 @@ class Download(object):
 
                     # create the request
                     request = {
-                    "variable": [cams_species],
+                    "variable": cams_species,
                     }
 
                     # add leadtime hour to the request if the dataset has it
@@ -2020,14 +2021,14 @@ class Download(object):
 
                     # add type to the request if the dataset has it
                     if 'type' in cams_dict:
-                        request["type"] = [cams_dict['type']]
+                        request["type"] = cams_dict['type']
 
                     # if it's forecast one file per day, analysis one file per month
                     if cams_dict['month_names'] is False:
-                        request["date"] = [f"{current_cams_date_str}/{next_cams_date_str}"]
+                        request["date"] = f"{current_cams_date_str}/{next_cams_date_str}"
                     else:
-                        request["year"] = [f"{current_cams_date.year}"]
-                        request["month"] = [f"{current_cams_date.strftime('%m')}"] 
+                        request["year"] = current_cams_date.year
+                        request["month"] = f"{current_cams_date.strftime('%m')}"
 
                     # add type to the request if the dataset has it
                     if 'type' in cams_dict:
@@ -2042,12 +2043,12 @@ class Download(object):
 
                     # add the experiment if models are available in the dataset
                     if cams_dict['model'] == True:
-                        request["model"] = [exp_id]
+                        request["model"] = exp_id
 
                     # get the level and apply it if the species is multi level
                     level_variable = 'level' if 'level' in cams_dict else 'model_level'
                     if cams_species in cams_variables_level[url]['multi']:
-                        request[level_variable] = [cams_dict[level_variable]]
+                        request[level_variable] = cams_dict[level_variable]
                     
                     # add time to the request
                     if 'time' in cams_dict:
@@ -2058,7 +2059,7 @@ class Download(object):
                         request['data_format'] = cams_dict['data_format']
 
                     # get file name and final path
-                    file_name = f"{species}-000_{current_cams_date.strftime('%Y%m%d')}.nc"
+                    file_name = f"{species}_{current_cams_date.strftime('%Y%m%d')}.nc"
                     final_path = join(final_dir, file_name)
 
                     # get temporal path
