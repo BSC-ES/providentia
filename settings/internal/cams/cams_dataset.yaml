@@ -101,7 +101,6 @@ cams_forecast:
     resolution: 
       multi: 3hourly
       single: hourly
-    type: forecast
     url: https://ads.atmosphere.copernicus.eu/datasets/cams-global-atmospheric-composition-forecasts?tab=download
     variable:
       - 2m_dewpoint_temperature
@@ -260,7 +259,11 @@ cams_reanalysis:
     fetch_dates: true
     model_level: 60
     month_names: false
-    time: 00:00
+    time: [
+        "00:00", "03:00", "06:00",
+        "09:00", "12:00", "15:00",
+        "18:00", "21:00"
+    ]
     data_format: netcdf_zip
     calendar: prolectic_gregorian
     model: false
