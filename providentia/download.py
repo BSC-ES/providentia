@@ -1981,15 +1981,19 @@ class Download(object):
         cdsapirc_path = join(os.getenv("HOME"),'.cdsapirc')
         if not os.path.isfile(cdsapirc_path):
             
-            # ask the user whether they want to crete the file in the home directory
-            create_file = input(f"'.cdsapirc' file not found. Creating it at {cdsapirc_path}. Do you agree? ([y]/n)").lower()
+            # ask the user whether they want to create the file in the home directory
+            create_file = input(f"'.cdsapirc' file not found. Creating it at {cdsapirc_path}. Do you agree? ([y]/n) ").lower()
             while create_file not in ['','y','n']:
-                create_file = input(f"'.cdsapirc' file not found. Creating it at {cdsapirc_path}. Do you agree? ([y]/n)").lower()
+                create_file = input(f"'.cdsapirc' file not found. Creating it at {cdsapirc_path}. Do you agree? ([y]/n) ").lower()
 
+            # create file if user agreed with it
             if create_file in ['', 'y']: 
+                # ask the user for the personal access token
+                personal_access_token = input("Enter your personal access token, which you can find at https://cds.climate.copernicus.eu/how-to-api: ")
+                # create the .cdsapirc file with the user's acces token
                 with open(cdsapirc_path, "w") as f:
                     f.write("url: https://ads.atmosphere.copernicus.eu/api\n")
-                    f.write("key: 6101c82f-6d0b-4278-ac89-82743a81502c\n") # TODO get the user key
+                    f.write(f"key: {personal_access_token}\n")
             else:
                 self.logger.error("Error: Cannot proceed without '.cdsapirc'. CAMS experiment data download requires this file.")
                 sys.exit(1)
@@ -2134,6 +2138,17 @@ class Download(object):
                         self.logger.info(f"Downloading {final_path}") # TODO change message
                         client.retrieve(dataset, request, target=temp_path)
                     except requests.exceptions.HTTPError as err:
+                        # invalid credential on .cdsapirc
+                        if err.response.status_code == 401: 
+                            self.logger.info(
+                                "\nBad request (401): Client Error. Invalid credentials in the .cdsapirc file. "
+                                "Removing authentication file...\n"
+                                "Please run the program again so Providentia can recreate the file automatically, "
+                                "or manually create a new .cdsapirc file by following the instructions at: "
+                                "https://cds.climate.copernicus.eu/how-to-api"
+                            )
+                            os.remove(cdsapirc_path)
+                            return
                         # bad request
                         if err.response.status_code == 400: 
                             self.logger.info("\nBad request (400): The server could not understand the request.")
