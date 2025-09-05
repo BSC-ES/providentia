@@ -1883,7 +1883,7 @@ class Download(object):
         exp_id, stream = None, None
         
         if u_count == 1: # e.g. cams_forecast
-            if 'experiments' in cams_dict:
+            if 'models' in cams_dict:
                 msg = f"The experiment '{config_expid}' is missing the model. Please add one (e.g., '{config_expid}_ensemble')."
                 show_message(self, msg)
                 return
@@ -1892,33 +1892,20 @@ class Download(object):
             # extract last element
             last_element = config_expid.rsplit('_', 1)[1]
 
-            if cams_dict['stream'] is True and 'experiment' in cams_dict: 
-                
-                if last_element in ['validated','interim']: # e.g. cams_reanalysis_interim
-                    stream = last_element
-                    stream += "_reanalysis"
-                elif last_element in cams_dict["experiments"]: # e.g. cams_reanalysis_ensemble
-                    exp_id = last_element
-                else:
-                    msg = f"'{last_element}' is not valid for the '{dataset}' dataset."    
-                    show_message(self, msg)
-                    return
-                
-            elif 'experiments' in cams_dict: # e.g. cams_analysis_ensemble
+            if cams_dict['stream'] is True and last_element in ['validated','interim']:
+                msg = f"The '{dataset}' dataset needs a model before the stream. Please add one (e.g., '{prefix}_ensemble_{last_element}')."    
+                show_message(self, msg)
+                return
+
+            elif 'models' in cams_dict: # e.g. cams_analysis_ensemble
                 exp_id = last_element
 
                 # make sure the experiment is available in the dataset
-                if exp_id not in cams_dict["experiments"]:
-                    msg = f"Cannot find the {exp_id} experiment in the '{dataset}' dataset."    
+                if exp_id not in cams_dict["models"]:
+                    msg = f"Cannot find the {exp_id} model in the '{dataset}' dataset."    
                     show_message(self, msg)
                     return
-                
-                # make sure the experiment is available in the dataset
-                if exp_id not in cams_dict["experiments"]:
-                    msg = f"Cannot find the {exp_id} experiment in the '{dataset}' dataset."    
-                    show_message(self, msg)
-                    return
-                
+                                
             else:
                 # if there are three elements and they
                 msg = f"The '{dataset}' dataset does not admit models or streams, change the experiment in the configuration file to '{prefix}'."    
@@ -1928,15 +1915,15 @@ class Download(object):
         elif u_count == 3:
             prefix, exp_id, stream = config_expid.rsplit('_', 2)
 
-            if not (cams_dict['stream'] is True and 'experiment' in cams_dict): 
+            if not (cams_dict['stream'] is True and 'models' in cams_dict): 
                 # if there are three elements and they
-                msg = f"The '{dataset}' dataset does not admit models or streams, change the experiment in the configuration file to '{prefix}'."    
+                msg = f"The '{dataset}' dataset does not admit models and streams, change the experiment in the configuration file."    
                 show_message(self, msg)
                 return
 
             # make sure the experiment is available in the dataset
-            if exp_id not in cams_dict["experiments"]:
-                msg = f"Cannot find the {exp_id} experiment in the '{dataset}' dataset."    
+            if exp_id not in cams_dict["models"]:
+                msg = f"Cannot find the {exp_id} model in the '{dataset}' dataset."    
                 show_message(self, msg)
                 return
             
@@ -2107,7 +2094,7 @@ class Download(object):
                         request["type"] = cams_dict['type']
 
                     # add the experiment if models are available in the dataset
-                    if 'experiments' in cams_dict:
+                    if 'models' in cams_dict:
                         request["model"] = exp_id
 
                     # get the level and apply it if the species is multi level
