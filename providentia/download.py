@@ -2172,7 +2172,7 @@ class Download(object):
 
                     # format the cams files and move them to the corresponding folder
                     self.logger.info(f"Formatting {final_path}\n") 
-                    self.format_cams(join(temp_dir,zip_file_name), final_path, species, prefix, domain)
+                    self.format_cams(join(temp_dir,zip_file_name), final_path, species, prefix, domain, resolution)
 
                     # add one day to the date
                     current_cams_date = next_cams_date + timedelta(days=1)    
@@ -2197,7 +2197,7 @@ class Download(object):
 
         return time.strftime('%Y-%m-%d')
     
-    def format_cams(self, input_filepath, output_filepath, species, prefix, domain): 
+    def format_cams(self, input_filepath, output_filepath, species, prefix, domain, resolution): 
         # get file formatting 
         cams_providentia_map = cams_formatting[prefix][domain]
 
@@ -2254,9 +2254,17 @@ class Download(object):
                 output_var.setncattr('coordinates', 'latitude longitude')
                 output_var.setncattr('grid_mapping', 'crs')
                 output_var.setncattr('units', input_var.units)
+            
+            # get the data from 
+            if output_var_name == "time":  
+                data = np.arange(len(input_var[:]))
+                if resolution == "3hourly":
+                    data *= 3
+            else:
+                data = input_var[:]
 
             # add the data to the variable
-            output_var[:] = input_var[:]
+            output_var[:] = data
         
         # add grid_mapping
         output_file[species].setncattr('grid_mapping', 'crs')
