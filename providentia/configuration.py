@@ -255,7 +255,7 @@ class ProvConfiguration:
                 # treat leaving the field blank as default
                 if value == '':
                     return self.var_defaults[key]
-                # parse multiple species only in interpolation and download
+                # parse multiple resolutions only in interpolation and download
                 if self.read_instance.interpolation or self.read_instance.download:
                     return [res.strip() for res in value.split(',')]
                 else:        
@@ -798,13 +798,16 @@ class ProvConfiguration:
     
     # TODO use inheritance in the future 
     # TODO add more checking, for now only this is enough
-    def check_experiment_interpolation(self, full_experiment, deactivate_warning):
+    def check_non_interpolated_experiment(self, full_experiment, deactivate_warning):
         # TODO Check if i can only import one time
         from warnings_prv import show_message
 
         """ Checks if experiment, domain and ensemble option combination works 
         for interpolation or the download of non interpolated experiments
         Returns if experiment if valid and the experiment type (if there is one) """
+
+        # get the cams possible datasets
+        experiment_options = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_dataset.yaml')))
         
         # get the splitted experiment
         experiment, domain, ensemble_option = full_experiment.split('-')
@@ -816,40 +819,42 @@ class ProvConfiguration:
         # search if the experiment id is in the interp_experiments file
         # initialize experiment search variables
         experiment_exists = False
-        msg = ""
 
-        # for HPC machines, search in interp_experiments
-        # if it's local interpolation, don't enter
-        if not (self.read_instance.machine == "local" and self.read_instance.interpolation is True):
+        # for HPC machines download (copy), search in interp_experiments
+        if self.read_instance.machine != "local" and self.read_instance.download is True:
             for experiment_type, experiment_dict in interp_experiments.items():
                 if experiment in experiment_dict["experiments"]:
                     experiment_exists = True
                     break
             
-            msg += f"Cannot find the experiment ID '{experiment}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
+            msg = f"Cannot find the experiment ID '{experiment}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
 
-        # get directory from data_paths if it doesn't exists in the interp_experiments file 
-        # if executed from the hpc machines and want to do a download, don't enter
-        if experiment_exists is False and not (self.read_instance.machine != "local" and self.read_instance.download is True):
-            # get the path to the non interpolated experiments
-            # in the current machine if it is an intepolation
+        if self.read_instance.machine == "local":
+            # if it's a cams experiment, the experiment is directly valid
+            if experiment.startswith(tuple(experiment_options.keys())):
+                return True, [full_experiment]
+
+            # get directory from data_paths if it doesn't exists in the interp_experiments file if it's a local interpolation
             if self.read_instance.interpolation is True:
-                exp_to_interp_path = join(self.read_instance.exp_to_interp_root, experiment)
-                if os.path.exists(exp_to_interp_path):
-                    experiment_exists = True
-            # in the remote machine if it is a local download
-            else:
-                # connect to the remote machine
-                self.read_instance.connect()        
-                # get all possible experiments
-                exp_to_interp_path = join(self.read_instance.exp_to_interp_remote_path,experiment,domain)
-                try:
-                    self.read_instance.sftp.stat(exp_to_interp_path)
-                    experiment_exists = True
-                except FileNotFoundError:
-                    pass     
+                # get the path to the non interpolated experiments
+                # in the current machine if it is an intepolation
+                if self.read_instance.interpolation is True:
+                    exp_to_interp_path = join(self.read_instance.exp_to_interp_root, experiment)
+                    if os.path.exists(exp_to_interp_path):
+                        experiment_exists = True
+                # in the remote machine if it is a local download
+                else:
+                    # connect to the remote machine
+                    self.read_instance.connect()        
+                    # get all possible experiments
+                    exp_to_interp_path = join(self.read_instance.exp_to_interp_remote_path,experiment,domain)
+                    try:
+                        self.read_instance.sftp.stat(exp_to_interp_path)
+                        experiment_exists = True
+                    except FileNotFoundError:
+                        pass   
             
-            msg += f"Cannot find the {experiment} experiment with the {domain} domain in '{self.read_instance.exp_to_interp_root}'."
+            msg = f"Cannot find the {experiment} experiment with the {domain} domain in '{self.read_instance.exp_to_interp_root}'."
 
         # if experiment does not exist, exit
         # supressed warning deactivation
@@ -859,7 +864,7 @@ class ProvConfiguration:
         return experiment_exists, [full_experiment]
     
     # TODO maybe remove this one and keep the download check since its much cleaner
-    def check_experiment_download(self, full_experiment, deactivate_warning):
+    def check_interpolated_experiment(self, full_experiment, deactivate_warning):
         """ Check individual experiment and get list of options."""
 
         # TODO Check if i can only import one time
@@ -994,7 +999,7 @@ class ProvConfiguration:
                 else:
                     is_ghost = check_for_ghost(network)
                     if is_ghost != previous_is_ghost:
-                        error = 'Error: "network" must be all GHOST or non-GHOST'
+                        error = 'Error: "network" must be all GHOST or non-GHOST.'
                         self.read_instance.logger.error(error)
                         sys.exit(1)
                     previous_is_ghost = is_ghost
@@ -1171,19 +1176,13 @@ class ProvConfiguration:
                 msg = "Experiment alias could not be set."
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
-        # before checking the experiment check that the remote download has the interpolated tag as False, if not exit
-        if self.read_instance.download and MACHINE in ["storage5", "nord3v2", "nord4"] and self.read_instance.interpolated is True:
-            error = F"Error: Nothing from the {self.read_instance.section} section was copied to gpfs, change the interpolated field to 'False'."
-            self.read_instance.logger.error(error)
-            sys.exit(1)
-
         # get correct check experiment function
         # TODO do it using heritage
         # if the current mode is interpolation or the experiment i want to download is not interpolated
         if self.read_instance.interpolation or (self.read_instance.download and self.read_instance.interpolated is False):
-            check_experiment_fun = self.check_experiment_interpolation
+            check_experiment_fun = self.check_non_interpolated_experiment
         elif self.read_instance.download:
-            check_experiment_fun = self.check_experiment_download
+            check_experiment_fun = self.check_interpolated_experiment
         else:
             check_experiment_fun = self.check_experiment
 
@@ -1640,8 +1639,7 @@ def read_conf(self, fpath=None):
                 if line.strip()[0] == '#':
                     all_sections_commented.append(line.strip())
                 else:
-                    line_strip = line.strip().split('#')[0]
-                    all_sections.append(line_strip.strip())
+                    all_sections.append(line.strip())
 
     # get repeated elements
     repetition_counts = {section:subsections_modified.count(section) for section in subsections_modified}
@@ -1659,7 +1657,7 @@ def read_conf(self, fpath=None):
         with open(fpath) as file:
             for line in file:
                 # allow # after first character to partially comment lines
-                line_strip = line.split('#')[0].strip()
+                line_strip = line.strip().split('#')[0]
                 
                 # get current section                        
                 if '[' in line and ']' in line and '[[' not in line and ']]' not in line:

@@ -1,0 +1,27 @@
+cams_analysis:
+  regional:
+    longitude: longitude
+    latitude: latitude
+    level: level
+    time: time
+cams_forecast:
+  regional:
+    longitude: longitude
+    latitude: latitude
+    level: level
+    time: time
+  global:
+    longitude: longitude
+    latitude: latitude
+    model_level: level
+    forecast_period: time
+cams_reanalysis:
+  regional:
+    lon: longitude
+    lat: latitude
+    time: time
+  global:
+    longitude: longitude
+    latitude: latitude
+    model_level: level
+    valid_time: time
