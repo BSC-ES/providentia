@@ -1014,10 +1014,9 @@ class ProvConfiguration:
             self.read_instance.network = [self.read_instance.network[0]]
             self.read_instance.species = [self.read_instance.species[0]]
 
-        if self.read_instance.network:
-            # initialise networkspeci as first network and species pair
-            self.read_instance.networkspeci = '{}|{}'.format(self.read_instance.network[0],
-                                                            self.read_instance.species[0]) 
+        # initialise networkspeci as first network and species pair
+        self.read_instance.networkspeci = '{}|{}'.format(self.read_instance.network[0],
+                                                         self.read_instance.species[0]) 
 
         # check have resolution information, TODO when refactoring init change this way of checking defaults
         # if report, throw message, stating are using default instead
