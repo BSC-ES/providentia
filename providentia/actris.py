@@ -20,7 +20,7 @@ from providentia.auxiliar import CURRENT_PATH, join, pad_array
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
 # load ACTRIS mapping files
-parameters_dict = yaml.safe_load(open(join(
+ghost_actris_variables = yaml.safe_load(open(join(
     PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'ghost_actris_variables.yaml')))
 metadata_dict = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'metadata.yaml')))
