@@ -1258,13 +1258,11 @@ class ExperimentInterpolation(object):
                     else:
                         cut_model_data = self.monthly_model_data[:, self.nearest_neighbour_inds[ii,:int(self.interp_n_neighbours)],
                                                                     self.nearest_neighbour_inds[ii,int(self.interp_n_neighbours):]]
-
                     # create mask where data == NaN or infinite
                     invalid_mask = ~np.isfinite(cut_model_data)
                     
                     # create masked array
                     cut_model_data = np.ma.MaskedArray(cut_model_data, mask=invalid_mask)
-
                     # interpolate masked array across time dimension using interpolated weights per station
                     interp_vals = np.ma.average(cut_model_data, weights=station_weights, axis=-1)
 

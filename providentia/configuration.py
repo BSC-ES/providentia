@@ -1640,7 +1640,8 @@ def read_conf(self, fpath=None):
                 if line.strip()[0] == '#':
                     all_sections_commented.append(line.strip())
                 else:
-                    all_sections.append(line.strip())
+                    line_strip = line.strip().split('#')[0]
+                    all_sections.append(line_strip.strip())
 
     # get repeated elements
     repetition_counts = {section:subsections_modified.count(section) for section in subsections_modified}
@@ -1658,7 +1659,7 @@ def read_conf(self, fpath=None):
         with open(fpath) as file:
             for line in file:
                 # allow # after first character to partially comment lines
-                line_strip = line.strip().split('#')[0]
+                line_strip = line.split('#')[0].strip()
                 
                 # get current section                        
                 if '[' in line and ']' in line and '[[' not in line and ']]' not in line:
