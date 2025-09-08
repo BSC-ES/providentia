@@ -13,6 +13,7 @@ from matplotlib.colors import cnames
 from matplotlib.projections import PolarAxes
 import mpl_toolkits.axisartist.floating_axes as fa
 import mpl_toolkits.axisartist.grid_finder as gf
+from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
 from pypdf import PdfReader, PdfWriter
@@ -151,18 +152,79 @@ def get_land_polygon_resolution(selection):
     return land_polygon_resolutions[selection]
 
 
-def update_plotting_parameters(instance):
-    """ Function that updates plotting parameters (colour and zorder) for data labels.
+def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels_to_add=None, daily_forecast=False):
+    """
+    Function that updates plotting parameters (colour, zorder, and grid edges) 
+    for data labels in a Report or Dashboard instance.
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
+    :param instance: Instance of class Report or Dashboard
+    :type instance: object
+    :param data_labels_to_remove: List of data labels to remove from plotting parameters
+    :param data_labels_to_add: List of data labels to add/update plotting parameters
+    :param daily_forecast: Boolean indicating whether daily forecast adjustments are needed
     """
 
-    # generate a list of RGB tuples for number of experiments there are
-    sns.reset_orig()
+    # Reset plotting parameters if no labels to add or remove are specified
+    if (data_labels_to_add is None) & (data_labels_to_remove is None):
+        instance.plotting_params = {}        
+        data_labels_to_add = instance.data_labels  # Add all current data_labels
+
+    # Add grid edge plotting parameters for data labels to add
+    if data_labels_to_add is not None:
+        # Extract unique base labels, stripping '-day', '-daily', '-combined' suffixes
+        unique_base_data_labels = np.unique(
+            [data_label.split('-day')[0].split('-daily')[0].split('-combined')[0] for data_label in data_labels_to_add]
+        )
+        processed_data_labels = []  # Track labels that have already been processed
+
+        for unique_base_data_label in unique_base_data_labels:
+            if unique_base_data_label == instance.observations_data_label:
+                # Observations do not require grid edges
+                instance.plotting_params[unique_base_data_label] = {}
+            else:
+                # Stop if all data labels have been processed
+                if len(processed_data_labels) == len(data_labels_to_add):
+                    break
+                for valid_networkspeci in instance.networkspecies:
+                    if len(processed_data_labels) == len(data_labels_to_add):
+                        break
+                    if daily_forecast:
+                        # For daily forecast, copy grid edge info from removed labels
+                        for data_label in data_labels_to_add:
+                            relevant_inds = [ii for ii, data_label_to_remove in enumerate(data_labels_to_remove) if data_label in data_label_to_remove]
+                            instance.plotting_params[data_label] = {}
+                            instance.plotting_params[data_label]['grid_edge_longitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_longitude'] 
+                            instance.plotting_params[data_label]['grid_edge_latitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_latitude'] 
+                            processed_data_labels.append(data_label)
+                    elif unique_base_data_label in instance.files_to_read[valid_networkspeci]:
+                        # Open NetCDF file to extract grid edges
+                        exp_nc_root = Dataset(instance.files_to_read[valid_networkspeci][unique_base_data_label][0])
+                        for data_label in data_labels_to_add:
+                            if data_label not in processed_data_labels:
+                                base_data_label = data_label.split('-day')[0].split('-daily')[0].split('-combined')[0]
+                                if base_data_label == unique_base_data_label:
+                                    instance.plotting_params[data_label] = {}
+                                    instance.plotting_params[data_label]['grid_edge_longitude'] = exp_nc_root['grid_edge_longitude'][:]
+                                    instance.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
+                                    processed_data_labels.append(data_label)
+                        exp_nc_root.close()  # Close NetCDF file
+
+    # Remove plotting parameters for labels marked for removal
+    if data_labels_to_remove is not None:
+        for data_label in data_labels_to_remove:
+            del instance.plotting_params[data_label]
+
+    # Add colour and zorder for observations
+    instance.plotting_params[instance.observations_data_label]['colour'] = instance.plot_characteristics_templates['general']['obs_markerfacecolor']
+    instance.plotting_params[instance.observations_data_label]['zorder'] = instance.plot_characteristics_templates['general']['obs_zorder']
+
+    # Generate a list of RGB tuples for the number of experiments
+    sns.reset_orig()  # Reset seaborn to default
     color_palette = instance.plot_characteristics_templates['general']['legend_color_palette']
     color_palettes = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/color_palettes.yaml')))
+
     if color_palette in color_palettes.keys():
+        # Check that the number of colors matches the number of experiments
         if (len(instance.data_labels) - 1) > len(color_palettes[color_palette]):
             error = "Error: The number of experiments and palette colors should be equal. "
             error += f"Add more colors to your palette '{color_palette}' in settings/color_palettes.yaml "
@@ -172,22 +234,19 @@ def update_plotting_parameters(instance):
         else:
             clrs = sns.color_palette(color_palettes[color_palette])
     else:
+        # If palette not in YAML, generate colors automatically
         clrs = sns.color_palette(color_palette, n_colors=len(instance.data_labels)-1)
 
-    # add colour and zorder for observations
-    instance.plotting_params[instance.observations_data_label]['colour'] = instance.plot_characteristics_templates['general']['obs_markerfacecolor']
-    instance.plotting_params[instance.observations_data_label]['zorder'] = instance.plot_characteristics_templates['general']['obs_zorder']
-
-    # add colours and zorder for each experiment
+    # Add colours and zorder for each experiment (non-observations)
     experiment_ind = 1
     for data_label in instance.data_labels:
         if data_label != instance.observations_data_label:
-            # define colour for experiment
+            # Define colour for experiment
             instance.plotting_params[data_label]['colour'] = clrs[experiment_ind-1]
-            # define zorder for experiment (obs zorder + experiment_ind)
+            # Define zorder for experiment relative to observations
             instance.plotting_params[data_label]['zorder'] = \
                 instance.plotting_params[instance.observations_data_label]['zorder'] + experiment_ind
-            # update count of experiments
+            # Update count of experiments
             experiment_ind += 1
 
 
@@ -574,24 +633,35 @@ def create_statistical_timeseries(read_instance, canvas_instance, chunk_stat, ch
     
     z_statistic_sign = get_z_statistic_sign(chunk_stat)
 
+    # if have forecast data in memory, set the forecast type
+    forecast_type = None
+    if read_instance.daily_forecast:
+        forecast_type = 'daily'
+    elif read_instance.combined_forecast:
+        forecast_type = 'combined'
+
     if (z_statistic_sign == 'bias') or (bias):
         if read_instance.observations_data_label in cut_data_labels:
             cut_data_labels.remove(read_instance.observations_data_label)
         stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, chunk_stat, 
                                          [read_instance.observations_data_label]*len(cut_data_labels), 
                                          cut_data_labels, chunk_resolution=chunk_resolution, 
-                                         statistic_aggregation=read_instance.timeseries_statistic_aggregation)
+                                         statistic_aggregation=read_instance.timeseries_statistic_aggregation,
+                                         forecast_type=forecast_type)
     else:
         stats_calc = calculate_statistic(read_instance, canvas_instance, networkspeci, 
                                          chunk_stat, cut_data_labels, [], chunk_resolution=chunk_resolution,
-                                         statistic_aggregation=read_instance.timeseries_statistic_aggregation) 
+                                         statistic_aggregation=read_instance.timeseries_statistic_aggregation,
+                                         forecast_type=forecast_type) 
 
-    if chunk_resolution == read_instance.active_resolution:
+    if (chunk_resolution == read_instance.active_resolution) & (forecast_type != 'daily'):
         chunk_dates = read_instance.time_index
     else:
         chunk_dates = canvas_instance.grouped_ts_index
 
     timeseries_data = pd.DataFrame(index=chunk_dates, columns=cut_data_labels, dtype=np.float32)
+
+    print(chunk_dates.shape, stats_calc.shape)
 
     for chunk_date_idx, chunk_date in enumerate(chunk_dates):
         for label_idx, data_label in enumerate(cut_data_labels):

@@ -299,8 +299,20 @@
                                       "font-size": "9.5pt", 
                                       "color": "black"}},
 
-   "settings_icon":              {"QPushButton": {
+    "settings_icon":             {"QPushButton": {
                                       "border": "None"},
+                                  "QToolTip": {
+                                      "font-family": "SansSerif", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "color": "black"}},
+
+    "settings_checkbox":         {"QCheckBox": {
+                                      "font-family": "SansSerif", 
+                                      "font-style": "normal", 
+                                      "font-size": "9.5pt", 
+                                      "height": "20", 
+                                      "color": "black"},
                                   "QToolTip": {
                                       "font-family": "SansSerif", 
                                       "font-style": "normal", 

@@ -35,7 +35,7 @@ from .plotting import Plotting
 from .plot_aux import get_map_extent
 from .plot_formatting import format_axis, harmonise_xy_lims_paradigm, log_validity, set_axis_label, set_axis_title
 from .plot_options import annotation, linear_regression, log_axes, smooth, threshold
-from .read_aux import get_possible_resampling_resolutions, do_resampling
+from .read_aux import get_possible_resampling_resolutions, get_frequency_code
 from .statistics import *
 from .warnings_prv import show_message
 
@@ -254,7 +254,7 @@ class Canvas(FigureCanvas):
                 if relevant_temporal_resolution in self.read_instance.periodic_relevant_temporal_resolutions:
                     axs_to_reset.append(sub_ax)
         elif isinstance(ax, list):
-            axs_to_reset = copy.deepcopy(ax)
+            axs_to_reset = copy.copy(ax)
         else:
             axs_to_reset.append(ax)
 
@@ -309,71 +309,44 @@ class Canvas(FigureCanvas):
     def handle_resampling_update(self):
         """ Function which handles updates of resampling. """
 
-        # update resampling resolution
-        self.read_instance.resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
+        if not self.read_instance.block_config_bar_handling_updates:
 
-        # return if nothing has been loaded yet
-        if not hasattr(self.read_instance, 'data_in_memory'):
-            return None
-
-        if not self.read_instance.block_MPL_canvas_updates:
-
-            # set active resolution, resampling_resolution when set, otherwise resolution
-            if self.read_instance.resampling_resolution != 'None':
-                self.read_instance.active_resolution = self.read_instance.resampling_resolution
-            else:
-                self.read_instance.active_resolution = self.read_instance.resolution
-
-            # remove timeseries chunk resolution if resampling resolution is lower or equal to chunk resolution
-            chunk_resolution = self.timeseries_chunk_resolution.currentText()
-            chunk_stat = self.timeseries_chunk_stat.currentText()
-            if (chunk_stat != 'None') and (chunk_resolution != 'None'):
-                available_chunk_resolutions = get_possible_resampling_resolutions(self.read_instance.active_resolution)
-                if chunk_resolution not in available_chunk_resolutions:
-                    #msg = "Timeseries chunk resolution and statistic will be set to 'None' "
-                    #msg += f"because resampling resolution ({self.read_instance.active_resolution}) "
-                    #msg += f"is coarser or equal to the set chunk resolution ({chunk_resolution})."
-                    #show_message(self.read_instance, msg)
-                    self.timeseries_chunk_stat.setCurrentText("None")
-                    self.timeseries_chunk_resolution.setCurrentText("None")
-
-            # disable MDA8 stat from periodic, statsummary and timeseries chunk statistic plots if active resolution is not hourly
-            self.read_instance.block_MPL_canvas_updates = True
-            self.handle_statsummary_statistics_update()
-            for stat in self.active_statsummary_stats['basic']:
-                if 'MDA8' in stat:
-                    self.active_statsummary_stats['basic'].remove(stat)
-            for stat in self.active_statsummary_stats['expbias']:
-                if 'MDA8' in stat:
-                    self.active_statsummary_stats['expbias'].remove(stat)
-            self.handle_periodic_statistic_update()
-            self.update_timeseries_chunk_statistics()
-            self.read_instance.block_MPL_canvas_updates = False
+            # return if nothing has been loaded yet
+            if not hasattr(self.read_instance, 'data_in_memory'):
+                return None
 
             # update mouse cursor to a waiting cursor
             if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
                 self.read_instance.cursor_function = 'handle_resampling_update'
                 QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-            # update represenativity and period fields
-            update_representativity_fields(self.read_instance)
-            update_period_fields(self.read_instance)
+            # update resampling statistics
+            self.update_resampling_statistics()
 
-            # resample data
-            do_resampling(self.read_instance)
+            # deactivate MPL canvas updates while updating things
+            original_block_MPL_canvas_updates = copy.deepcopy(self.read_instance.block_MPL_canvas_updates)
+            self.read_instance.block_MPL_canvas_updates = True
 
-            # update data filters
-            self.handle_data_filter_update()
+            # disable MDA8 stat from periodic, statsummary and timeseries chunk statistic plots if active resolution is not hourly
+            self.handle_statsummary_statistics_update()
+            self.handle_periodic_statistic_update()
+            self.update_timeseries_chunk_statistics()
+            
+            # # restore block_MPL_canvas_updates
+            self.read_instance.block_MPL_canvas_updates = original_block_MPL_canvas_updates
 
             # update layout fields
             self.read_instance.update_layout_fields(self)
 
-            # if have selected stations on map, then now remake plots
-            if hasattr(self, 'relative_selected_station_inds'):
-                if len(self.relative_selected_station_inds) > 0:
+            # update plots?
+            if not self.read_instance.block_MPL_canvas_updates:
 
-                    # update associated plots with selected stations
-                    self.update_associated_active_dashboard_plots()
+                # if have selected stations on map, then now remake plots
+                if hasattr(self, 'relative_selected_station_inds'):
+                    if len(self.relative_selected_station_inds) > 0:
+
+                        # update associated plots with selected stations
+                        self.update_associated_active_dashboard_plots()
 
             # draw changes
             self.figure.canvas.draw_idle()
@@ -383,6 +356,64 @@ class Canvas(FigureCanvas):
                 QtWidgets.QApplication.restoreOverrideCursor()
 
         return None
+
+    def update_resampling_statistics(self):
+        """Update resampling statistics."""
+
+        # turn off handling updates to configuration bar
+        self.read_instance.block_config_bar_handling_updates = True
+
+        # get available resampling resolutions, removing base resolution
+        available_resampling_resolutions = get_possible_resampling_resolutions(self.read_instance.resolution, 
+                                                                               daily_forecast=self.read_instance.daily_forecast)
+        available_resampling_resolutions.remove(self.read_instance.resolution)
+
+        # remove resolutions if resampled data would be less than 2 timesteps
+        resampling_resolutions = copy.deepcopy(available_resampling_resolutions)
+        for resampling_resolution in resampling_resolutions:
+            # get active frequency code
+            active_frequency_code = get_frequency_code(resampling_resolution)
+
+            # get test time array of new resolution
+            start_date = str(self.read_instance.start_date)
+            end_date = str(self.read_instance.end_date)
+            time_array = pd.date_range(start=datetime.datetime(int(start_date[:4]), int(start_date[4:6]),
+                                                               int(start_date[6:8])),
+                                       end=datetime.datetime(int(end_date[:4]), int(end_date[4:6]), int(end_date[6:8])),
+                                       freq=active_frequency_code)[:-1]
+
+            # remove resolution when the data consists only of less than 2 timesteps
+            if len(time_array) < 2:
+                available_resampling_resolutions.remove(resampling_resolution)
+            
+        # get current selected resampling resolution 
+        current_resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
+
+        # update resampling resolution field
+        available_resampling_resolutions = ['None',] + available_resampling_resolutions
+        self.read_instance.cb_resampling_resolution.clear()
+        self.read_instance.cb_resampling_resolution.addItems(available_resampling_resolutions)
+
+        # if currently selected resampling resolution in the available resampling options, set it as active again
+        # otherwise it will be None
+        if current_resampling_resolution in available_resampling_resolutions:
+            self.read_instance.cb_resampling_resolution.setCurrentText(current_resampling_resolution)
+        # show message stating that are setting resampling resolution to None
+        else:
+            msg = f"The resampling resolution will be set to 'None' as the active resampling resolution ({current_resampling_resolution}) is not allowed."
+            show_message(self.read_instance, msg)
+
+        # update resampling resolution
+        self.read_instance.resampling_resolution = self.read_instance.cb_resampling_resolution.currentText()
+
+        # set active resolution, resampling_resolution when set, otherwise resolution
+        if self.read_instance.resampling_resolution != 'None':
+            self.read_instance.active_resolution = self.read_instance.resampling_resolution
+        else:
+            self.read_instance.active_resolution = self.read_instance.resolution
+
+        # allow handling updates to the canvas and configuration bar again
+        self.read_instance.block_config_bar_handling_updates = False
 
     def update_active_map(self):
         """ Function that updates plotted map z statistic and updates associated plots. """
@@ -534,7 +565,6 @@ class Canvas(FigureCanvas):
             self.read_instance.block_MPL_canvas_updates = True
             # update plot statistics
             self.handle_map_z_statistic_update()
-            self.handle_resampling_update()
             self.handle_timeseries_chunk_statistic_update()
             self.handle_periodic_statistic_update()
             self.handle_statsummary_statistics_update()
@@ -945,7 +975,7 @@ class Canvas(FigureCanvas):
                 self.lower_canvas_cover.show()
 
             elif len(self.relative_selected_station_inds) > 0:
-                
+
                 # get selected station data
                 get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
                                           networkspecies=[self.read_instance.networkspeci])
@@ -1109,34 +1139,74 @@ class Canvas(FigureCanvas):
         """
         
         if not self.read_instance.block_config_bar_handling_updates:
-            
+
             # update mouse cursor to a waiting cursor
             if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
                 self.read_instance.cursor_function = 'handle_timeseries_chunk_statistic_update'
                 QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-            # set variable that blocks configuration bar handling updates until all changes
-            # to the timeseries chunk statistic combobox are made
-            self.read_instance.block_config_bar_handling_updates = True
-
             # update chunk statistic / resolution
             self.update_timeseries_chunk_statistics()
 
-            # allow handling updates to the configuration bar again
-            self.read_instance.block_config_bar_handling_updates = False
+            # get new chunk stat and chunk resolution
+            new_chunk_stat = self.timeseries_chunk_stat.currentText()
+            new_chunk_resolution = self.timeseries_chunk_resolution.currentText()
 
             # update plotted timeseries chunk statistic
             if not self.read_instance.block_MPL_canvas_updates:
 
-                # get selected station data
-                get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
-                                          networkspecies=[self.read_instance.networkspeci])
+                # work out if need to update timseries plot or not
+                # calculate previous number not None 
+                if (self.read_instance.previous_chunk_stat == 'None') & (self.read_instance.previous_chunk_resolution == 'None'):
+                    previous_set = 0
+                elif (self.read_instance.previous_chunk_stat != 'None') & (self.read_instance.previous_chunk_resolution != 'None'):
+                    previous_set = 2
+                else:
+                    previous_set = 1
 
-                # update plot                                                                         
-                self.update_associated_active_dashboard_plot("timeseries")
-  
-            # draw changes
-            self.figure.canvas.draw_idle()
+                # calculate new number not None 
+                if (new_chunk_stat == 'None') & (new_chunk_resolution == 'None'):
+                    new_set = 0
+                elif (new_chunk_stat != 'None') & (new_chunk_resolution != 'None'):
+                    new_set = 2
+                else:
+                    new_set = 1
+
+                # work out if just one of chunk stat or resolution have changed
+                if (self.read_instance.previous_chunk_stat != new_chunk_stat) or (self.read_instance.previous_chunk_resolution != new_chunk_resolution):
+                    have_changed = True
+                else:
+                    have_changed = False
+
+                do_update = False
+                # if both fields active and at least one has changed from previous then update plot
+                if (new_set == 2) & (have_changed):
+                    do_update = True
+                # elif previous fields were both active and at least one is not, then update plot
+                elif (previous_set == 2) & (new_set != 2):
+                     do_update = True
+
+                # set previous chunk stat and resolution
+                self.read_instance.previous_chunk_stat = new_chunk_stat
+                self.read_instance.previous_chunk_resolution = new_chunk_resolution
+
+                # update timeseries plot
+                if do_update:
+
+                    # get selected station data
+                    get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
+                                            networkspecies=[self.read_instance.networkspeci])
+
+                    # update plot                                                                         
+                    self.update_associated_active_dashboard_plot("timeseries")
+
+                    # draw changes
+                    self.figure.canvas.draw_idle()
+            
+            # set previous chunk stat and resolution
+            else:
+                self.read_instance.previous_chunk_stat = new_chunk_stat
+                self.read_instance.previous_chunk_resolution = new_chunk_resolution
 
             # restore mouse cursor to normal
             if self.read_instance.cursor_function == 'handle_timeseries_chunk_statistic_update':
@@ -1144,6 +1214,86 @@ class Canvas(FigureCanvas):
 
         return None
     
+    def update_timeseries_chunk_statistics(self):
+        """ Update timeseries chunk statistic and aggregation statistic.
+        """
+
+        # turn off handling updates to configuration bar
+        self.read_instance.block_config_bar_handling_updates = True
+
+        # get currently selected statistic
+        chunk_stat = self.timeseries_chunk_stat.currentText()
+
+        # get currently selected resolution
+        chunk_resolution = self.timeseries_chunk_resolution.currentText()
+
+        # update timeseries chunk statistics
+        if (not self.read_instance.temporal_colocation) or (len(self.read_instance.data_labels) == 1):
+            available_timeseries_chunk_stats = ["None",] + list(copy.deepcopy(self.read_instance.basic_z_stats))
+        else:
+            available_timeseries_chunk_stats = ["None",] + list(copy.deepcopy(self.read_instance.basic_and_bias_z_stats))
+
+        # update available timeseries chunk resolutions
+        available_timeseries_chunk_resolutions = ["None",] + get_possible_resampling_resolutions(self.read_instance.active_resolution,
+                                                                                                 daily_forecast=self.read_instance.daily_forecast)
+
+        # if active resolution is not hourly, then MDA8 cannot be available as stat
+        if self.read_instance.active_resolution != 'hourly':
+            available_timeseries_chunk_stats.remove('MDA8')
+            if chunk_stat == 'MDA8':
+                chunk_stat = 'None'
+                chunk_resolution = 'None'  
+                msg = f"The timeseries chunk statistic and chunk resolution will be set to 'None' as MDA8 can only be calculated when the active resolution is hourly."
+                show_message(self.read_instance, msg)
+            
+        # if chunk stat is MDA8, the chunk resolution has to be None or daily (if available)
+        if chunk_stat == 'MDA8':
+            available_timeseries_chunk_resolutions = ['None','daily']
+            if chunk_resolution not in available_timeseries_chunk_resolutions:
+                chunk_resolution = 'None'
+                msg = f"The timeseries chunk resolution will be set to 'None' as MDA8 can only be calculated for a daily chunk resolution."
+                show_message(self.read_instance, msg)
+
+        # if zstat is empty string, it is because fields are being initialised for the first time
+        if chunk_stat == "":
+            # set timeseries chunk statistic to be None
+            chunk_stat = available_timeseries_chunk_stats[0]
+
+        # if resolution is empty string, it is because fields are being initialised for the first time
+        if chunk_resolution == "":
+            # set timeseries resolution to be None
+            chunk_resolution = available_timeseries_chunk_resolutions[0]
+
+        # update timeseries chunk statistic combobox (clear, then add items)
+        self.timeseries_chunk_stat.clear()
+        self.timeseries_chunk_stat.addItems(available_timeseries_chunk_stats)
+
+        # update timeseries chunk resolution combobox (clear, then add items)
+        self.timeseries_chunk_resolution.clear()
+        self.timeseries_chunk_resolution.addItems(available_timeseries_chunk_resolutions)
+
+        # maintain currently selected timeseries resolution (if exists in new item list)
+        if chunk_resolution in available_timeseries_chunk_resolutions:
+            self.timeseries_chunk_resolution.setCurrentText(chunk_resolution)
+        # if does not exist then chunk resolution is None, so make chunk stat that also
+        # also throw error stating why it happened
+        else:
+            chunk_stat = 'None'
+            msg = "Timeseries chunk resolution and statistic will be set to 'None' "
+            msg += f"as the active chunk resolution ({chunk_resolution}) is not valid for "
+            msg += "the active resolution or resampling resolution. "
+            show_message(self.read_instance, msg)
+        
+        # maintain currently selected timeseries chunk statistic (if exists in new item list)
+        if chunk_stat in available_timeseries_chunk_stats:
+            self.timeseries_chunk_stat.setCurrentText(chunk_stat)
+        # if does not exist then chunk stat is None, so make chunk resolution that also
+        else:
+            self.timeseries_chunk_resolution.setCurrentText("None")
+
+        # allow handling updates to the configuration bar again
+        self.read_instance.block_config_bar_handling_updates = False
+
     def handle_periodic_statistic_update(self):
         """ Function that handles update of plotted periodic statistic
             upon interaction with periodic statistic combobox.
@@ -1186,6 +1336,9 @@ class Canvas(FigureCanvas):
             # maintain currently selected periodic statistic (if exists in new item list)
             if zstat in available_periodic_stats:
                 self.periodic_stat.setCurrentText(zstat)
+            elif zstat == 'MDA8':
+                msg = f"Periodic statistic is being reset to {self.periodic_stat.currentText()}. MDA8 can only be calculated when the active resolution is hourly."
+                show_message(self.read_instance, msg)
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
@@ -1335,6 +1488,7 @@ class Canvas(FigureCanvas):
 
             # get stats from selection
             else:
+
                 # save previous stats in list
                 previous_active_statsummary_stats = copy.deepcopy(self.active_statsummary_stats[statistic_type])
 
@@ -1363,6 +1517,35 @@ class Canvas(FigureCanvas):
                 if previous_not_current:
                     for stat in previous_not_current:
                         self.active_statsummary_stats[statistic_type].remove(stat)
+
+            # remove MDA8 if active resolution is not hourly
+            if self.read_instance.active_resolution != 'hourly':
+                basic_stats_to_remove = []
+                bias_stats_to_remove = []
+                for stat in self.active_statsummary_stats['basic']:
+                    if 'MDA8' in stat:
+                        basic_stats_to_remove.append(stat)
+                for stat in self.active_statsummary_stats['expbias']:
+                    if 'MDA8' in stat:
+                        bias_stats_to_remove.append(stat)
+                        
+                if (len(basic_stats_to_remove) > 0) or (len(bias_stats_to_remove) > 0):
+                    for stat in basic_stats_to_remove:
+                        self.active_statsummary_stats['basic'].remove(stat)
+                    for stat in bias_stats_to_remove:
+                        self.active_statsummary_stats['expbias'].remove(stat)
+
+                    for stat_type in self.read_instance.current_statsummary_stats:
+                        for resolution in self.read_instance.current_statsummary_stats[stat_type]:
+                            stats_to_remove = []
+                            for stat in self.read_instance.current_statsummary_stats[stat_type][resolution]:
+                                if 'MDA8' in stat:
+                                    stats_to_remove.append(stat)
+                            for stat in stats_to_remove:
+                                self.read_instance.current_statsummary_stats[stat_type][resolution].remove(stat)
+
+                    msg = f"Removing all MDA8 statistics from statsummary plot as active resolution is not hourly."
+                    show_message(self.read_instance, msg)
 
             # allow handling updates to the configuration bar again
             self.read_instance.block_config_bar_handling_updates = False
@@ -2523,7 +2706,7 @@ class Canvas(FigureCanvas):
         self.update_smooth_min_points(plot_type, smooth_min_points)
 
         return None
-    
+
     def update_plot_option(self):
         """ Function to handle the update of the plot options. """
 
@@ -2800,7 +2983,7 @@ class Canvas(FigureCanvas):
                                           self.read_instance.networkspeci, 
                                           plot_type,
                                           self.plot_characteristics[plot_type])
-
+                        
                     # option 'bias'
                     elif option == 'bias':
                         
@@ -3433,64 +3616,6 @@ class Canvas(FigureCanvas):
         self.figure.canvas.draw_idle()
 
         return None
-
-    def update_timeseries_chunk_statistics(self):
-        """ Update timeseries chunk statistic and agreggreation statistic.
-        """
-
-        # get currently selected statistic
-        chunk_stat = self.timeseries_chunk_stat.currentText()
-
-        # get currently selected resolution
-        chunk_resolution = self.timeseries_chunk_resolution.currentText()
-            
-        # update timeseries chunk statistics
-        if (not self.read_instance.temporal_colocation) or (len(self.read_instance.data_labels) == 1):
-            available_timeseries_chunk_stats = ["None",] + list(copy.deepcopy(self.read_instance.basic_z_stats))
-        else:
-            available_timeseries_chunk_stats = ["None",] + list(copy.deepcopy(self.read_instance.basic_and_bias_z_stats))
-
-        # update available timeseries chunk resolutions
-        available_timeseries_chunk_resolutions = ["None",] + get_possible_resampling_resolutions(self.read_instance.active_resolution)
-
-        # if active resolution is not hourly, then MDA8 cannot be available as stat
-        if self.read_instance.active_resolution != 'hourly':
-            available_timeseries_chunk_stats.remove('MDA8')
-            if chunk_stat == 'MDA8':
-                chunk_stat = 'None'
-                chunk_resolution = 'None'  
-            
-        # if chunk stat is MDA8, the chunk resolution has to be None or daily (if available)
-        if chunk_stat == 'MDA8':
-            available_timeseries_chunk_resolutions = ['None','daily']
-            if chunk_resolution not in available_timeseries_chunk_resolutions:
-                chunk_resolution = 'None'
-
-        # if zstat is empty string, it is because fields are being initialised for the first time
-        if chunk_stat == "":
-            # set timeseries chunk statistic to be None
-            chunk_stat = available_timeseries_chunk_stats[0]
-
-        # if resolution is empty string, it is because fields are being initialised for the first time
-        if chunk_resolution == "":
-            # set timeseries resolution to be None
-            chunk_resolution = available_timeseries_chunk_resolutions[0]
-
-        # update timeseries chunk statistic combobox (clear, then add items)
-        self.timeseries_chunk_stat.clear()
-        self.timeseries_chunk_stat.addItems(available_timeseries_chunk_stats)
-
-        # update timeseries chunk resolution combobox (clear, then add items)
-        self.timeseries_chunk_resolution.clear()
-        self.timeseries_chunk_resolution.addItems(available_timeseries_chunk_resolutions)
-
-        # maintain currently selected timeseries chunk statistic (if exists in new item list)
-        if chunk_stat in available_timeseries_chunk_stats:
-            self.timeseries_chunk_stat.setCurrentText(chunk_stat)
-
-        # maintain currently selected timeseries resolution (if exists in new item list)
-        if chunk_resolution in available_timeseries_chunk_resolutions:
-            self.timeseries_chunk_resolution.setCurrentText(chunk_resolution)
 
     def update_aggregation_statistic(self):
         """ Update general aggregation statistic

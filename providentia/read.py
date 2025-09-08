@@ -20,7 +20,7 @@ from .fields_menus import (init_representativity, init_period, init_metadata,
 from .plot_aux import update_plotting_parameters
 from .read_aux import (check_for_ghost, get_default_qa, get_frequency_code, get_yearmonths_to_read, 
                        init_shared_vars_read_netcdf_data, read_netcdf_data, read_netcdf_metadata, 
-                       do_resampling)
+                       check_forecast_dimension)
 from .spatial_colocation import SpatialColocation
 from .warnings_prv import show_message
 
@@ -44,7 +44,7 @@ class DataReader:
         # changing time dimension ?
         if ('reset' in operations) or ('read_left' in operations) or ('read_right' in operations) or ('cut_left' in operations) or ('cut_right' in operations):
 
-            # turn off read from configuration
+            # if reset is not in operations then cannot be reading from conf file
             if 'reset' not in operations:
                 self.read_instance.from_conf = False
 
@@ -115,7 +115,7 @@ class DataReader:
                 # get yearmonths in data range (incomplete months are removed for monthly resolution)
                 self.read_instance.yearmonths = list(np.unique(['{}0{}'.format(dti.year,dti.month) if len(str(dti.month)) == 1 else '{}{}'.format(dti.year,dti.month) \
                                                                 for dti in self.read_instance.time_array]))
-                
+        
                 # get time array as integer timestamps
                 self.read_instance.timestamp_array = self.read_instance.time_array.asi8
 
@@ -167,12 +167,21 @@ class DataReader:
             if (not self.read_instance.report) and (not self.read_instance.library):
                 self.read_instance.mpl_canvas.filter_data = None
 
-            # data
+            # get list of yearmonths to read
+            yearmonths_to_read = get_yearmonths_to_read(self.read_instance.yearmonths, self.read_instance.start_date,
+                                                        self.read_instance.end_date, self.read_instance.resolution)
+
+            # check if any of the experiment data has a forecast dimension to handle 
+            # only for report / library modes as dashboard handled previously
+            if (self.read_instance.report) or (self.read_instance.library):
+                self.check_forecast(yearmonths_to_read=yearmonths_to_read)
+
+            # create data in memory array
             self.read_instance.data_in_memory = {networkspeci: 
-                                                 np.full((len(self.read_instance.data_labels),
-                                                          len(self.read_instance.station_references[networkspeci]),
-                                                          len(self.read_instance.time_array)),
-                                                          np.NaN, dtype=np.float32) for networkspeci in self.read_instance.networkspecies}
+                                                np.full((len(self.read_instance.data_labels),
+                                                        len(self.read_instance.station_references[networkspeci]),
+                                                        len(self.read_instance.time_array)),
+                                                        np.NaN, dtype=np.float32) for networkspeci in self.read_instance.networkspecies} 
 
             # filter data (if active)
             if self.read_instance.filter_species:
@@ -264,10 +273,6 @@ class DataReader:
                                                               np.NaN, dtype=self.read_instance.metadata_dtype) 
                                                               for networkspeci in self.read_instance.networkspecies}
 
-            # get list of yearmonths to read
-            yearmonths_to_read = get_yearmonths_to_read(self.read_instance.yearmonths, self.read_instance.start_date,
-                                                        self.read_instance.end_date, self.read_instance.resolution)
-
             # read data 
             self.read_data(yearmonths_to_read, self.read_instance.data_labels)
 
@@ -296,25 +301,7 @@ class DataReader:
                 self.read_instance.measurement_units = {speci.split('|')[1]:self.read_instance.parameter_dictionary[speci.split('|')[1]]['standard_units'] 
                                                         for speci in self.read_instance.networkspecies}
 
-            # reset plotting params
-            self.read_instance.plotting_params = {}
-
-            # iterate through data labels
-            for data_label in self.read_instance.data_labels:
-                self.read_instance.plotting_params[data_label] = {}
-
-                # get experiment specific grid edges for exp, from first relevant file
-                if data_label != self.read_instance.observations_data_label:
-                    # iterate through networkspecies until find one which has valid files to read
-                    for valid_networkspeci in self.read_instance.networkspecies:
-                        if data_label in self.files_to_read[valid_networkspeci]:
-                            exp_nc_root = Dataset(self.files_to_read[valid_networkspeci][data_label][0])
-                            self.read_instance.plotting_params[data_label]['grid_edge_longitude'] = exp_nc_root['grid_edge_longitude'][:]
-                            self.read_instance.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
-                            exp_nc_root.close()
-                            break
-            
-            # update plotting parameters colours and zorder
+            # update plotting parameters colours, zorder and experiment grid edges
             update_plotting_parameters(self.read_instance) 
 
         # need to read on left / read on right / cut on left / cut on right (for dashboard)
@@ -449,24 +436,15 @@ class DataReader:
                     # get list of yearmonths to read
                     yearmonths_to_read = get_yearmonths_to_read(self.read_instance.yearmonths, self.read_instance.start_date,
                                                                 self.read_instance.previous_start_date, self.read_instance.resolution)
-                                                            
-                    # check which yearmonths_to_read previously read
-                    yearmonths_previously_read = np.isin(yearmonths_to_read, self.read_instance.previous_yearmonths)
 
-                    # get yearmonths not currently accounted for
-                    if isinstance(yearmonths_to_read, list):
-                        yearmonths_to_read = np.asarray(yearmonths_to_read)
-                    yearmonths_to_read = list(yearmonths_to_read[~yearmonths_previously_read])
+                    # count number of yermonths not in previous yearmonths
+                    n_new_yearmonths = np.count_nonzero(~np.isin(yearmonths_to_read, self.read_instance.previous_yearmonths))
 
-                    # keep current month to update data array if number of months has not changed but number of days has
-                    if len(yearmonths_to_read) == 0:
-                        yearmonths_to_read = get_yearmonths_to_read(self.read_instance.yearmonths, self.read_instance.start_date,
-                                                                    self.read_instance.previous_start_date, self.read_instance.resolution)
-
-                    # add space for new data on left edge of the metadata array
-                    self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]] = \
-                        np.concatenate((np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), len(yearmonths_to_read)), 
-                            np.NaN, dtype=self.read_instance.metadata_dtype), self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]]), axis=1)
+                    # add space for new data on left edge of the metadata array (if needed)
+                    if n_new_yearmonths > 0:
+                        self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]] = \
+                            np.concatenate((np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_yearmonths), 
+                                np.NaN, dtype=self.read_instance.metadata_dtype), self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]]), axis=1)
 
                     # insert space for new data on left edge of the data array
                     self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
@@ -502,25 +480,16 @@ class DataReader:
                     yearmonths_to_read = get_yearmonths_to_read(self.read_instance.yearmonths, self.read_instance.previous_end_date,
                                                                 self.read_instance.end_date, self.read_instance.resolution)
 
-                    # check which yearmonths_to_read previously read
-                    yearmonths_previously_read = np.isin(yearmonths_to_read, self.read_instance.previous_yearmonths)
+                    # count number of yermonths not in previous yearmonths
+                    n_new_yearmonths = np.count_nonzero(~np.isin(yearmonths_to_read, self.read_instance.previous_yearmonths))
 
-                    # get yearmonths not currently accounted for
-                    if isinstance(yearmonths_to_read, list):
-                        yearmonths_to_read = np.asarray(yearmonths_to_read)
-                    yearmonths_to_read = list(yearmonths_to_read[~yearmonths_previously_read])
-
-                    # keep current month to update data array if number of months has not changed but number of days has
-                    if len(yearmonths_to_read) == 0:
-                        yearmonths_to_read = get_yearmonths_to_read(self.read_instance.yearmonths, self.read_instance.previous_end_date,
-                                                                    self.read_instance.end_date, self.read_instance.resolution)
-
-                    # add space for new data on right edge of the metadata array
-                    self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]] = \
-                        np.concatenate((self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]], 
-                            np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), len(yearmonths_to_read)), 
-                                np.NaN, dtype=self.read_instance.metadata_dtype)), axis=1)
-
+                    # add space for new data on right edge of the metadata array (if needed)
+                    if n_new_yearmonths > 0:
+                        self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]] = \
+                            np.concatenate((self.read_instance.metadata_in_memory[self.read_instance.networkspecies[0]], 
+                                np.full((len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), n_new_yearmonths), 
+                                    np.NaN, dtype=self.read_instance.metadata_dtype)), axis=1)
+                    
                     # insert space for new data on right edge of the data array
                     self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
                         np.concatenate((self.read_instance.data_in_memory[self.read_instance.networkspecies[0]], 
@@ -557,16 +526,12 @@ class DataReader:
             self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
                 np.delete(self.read_instance.data_in_memory[self.read_instance.networkspecies[0]], experiments_to_remove_inds, axis=0)
 
-            # remove plotting paramaters for experiments removed
-            for experiment in experiments_to_remove:
-                del self.read_instance.plotting_params[experiment]
-
         # need to read experiment/s ? 
         if 'read_exp' in operations: 
 
             # insert space for new experiments in data array
-            for experiment in experiments_to_read:
-                experiments_to_read_ind = self.read_instance.data_labels.index(experiment) 
+            for experiment_to_read in experiments_to_read:
+                experiments_to_read_ind = self.read_instance.data_labels.index(experiment_to_read) 
                 
                 self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
                     np.insert(self.read_instance.data_in_memory[self.read_instance.networkspecies[0]], 
@@ -582,20 +547,10 @@ class DataReader:
             # read data
             self.read_data(yearmonths_to_read, experiments_to_read)       
 
-            # add experiment specific grid edges for exp to plotting params
-            for experiment_to_read in experiments_to_read:
-                self.read_instance.plotting_params[experiment_to_read] = {}
-                exp_nc_root = Dataset(self.files_to_read[self.read_instance.networkspecies[0]][experiment_to_read][0])
-                self.read_instance.plotting_params[experiment_to_read]['grid_edge_longitude'] = \
-                    exp_nc_root['grid_edge_longitude'][:]
-                self.read_instance.plotting_params[experiment_to_read]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
-                exp_nc_root.close()
-
-        # need to read or/and remove experiment/s ? 
-        if ('read_exp' in operations) or ('remove_exp' in operations): 
-            
-            # update plotting parameters colours and zorder
-            update_plotting_parameters(self.read_instance) 
+        # if removing or adding experiments, update plotting parameters colours, zorder and experiment grid edges
+        if ('remove_exp' in operations) or ('read_exp' in operations): 
+            update_plotting_parameters(self.read_instance, data_labels_to_remove=experiments_to_remove, 
+                                       data_labels_to_add=experiments_to_read)
 
         # for non-GHOST delete valid station indices variables because we do not want to 
         # remove the stations with 0 valid measurements before the filter has been updated, 
@@ -611,9 +566,20 @@ class DataReader:
         if self.read_instance.from_conf:
             metadata_conf(self.read_instance)
 
-        # do resampling of data (if necessary)
-        do_resampling(self.read_instance)
+        # determine if have daily forecast active or not
+        self.read_instance.daily_forecast = np.any([True for data_label in self.read_instance.data_labels if '-daily' in data_label])
 
+        # determine if have combined forecast active or not
+        self.read_instance.combined_forecast = np.any([True for data_label in self.read_instance.data_labels if '-combined' in data_label])
+
+        # if have reading daily or combined forecast data, make original copy of data labels, experiments and plotting params, 
+        # as will be modified later and may need restoring
+        if (self.read_instance.daily_forecast) or (self.read_instance.combined_forecast):
+            self.read_instance.original_data_labels = copy.deepcopy(self.read_instance.data_labels)
+            self.read_instance.original_data_labels_raw = copy.deepcopy(self.read_instance.data_labels_raw)
+            self.read_instance.original_experiments = copy.deepcopy(self.read_instance.experiments)
+            self.read_instance.original_plotting_params = copy.deepcopy(self.read_instance.plotting_params)
+        
         # print basic information species
         self.read_instance.logger.info('\nOBSERVATIONS')
         for network in self.read_instance.networkspecies:
@@ -625,11 +591,20 @@ class DataReader:
         # print experiments after observations
         if self.read_instance.experiments:
             self.read_instance.logger.info("EXPERIMENTS")
+            exps_printed = []
             for experiment, alias in self.read_instance.experiments.items():
-                str_experiment = f" - {experiment}"
-                if self.read_instance.alias_flag: 
-                   str_experiment += f" ({alias})"
-                self.read_instance.logger.info(str_experiment)
+                if '-daily' in experiment:
+                    experiment = '{}-daily'.format(experiment.split('-daily')[0])
+                    alias = '{}-daily'.format(alias.split('-daily')[0])
+                if '-combined' in experiment:
+                    experiment = '{}-combined'.format(experiment.split('-combined')[0])
+                    alias = '{}-combined'.format(alias.split('-combined')[0])
+                if experiment not in exps_printed:
+                    str_experiment = f" - {experiment}"
+                    if self.read_instance.alias_flag: 
+                        str_experiment += f" ({alias})"
+                    self.read_instance.logger.info(str_experiment)
+                    exps_printed.append(experiment)
         self.read_instance.logger.info("")
 
     def read_basic_metadata(self):     
@@ -640,8 +615,6 @@ class DataReader:
             If have multiple species, then spatially colocate across species 
             to get matching stations across stations.
         """
-
-        start_time = time.time()
 
         # define dictionaries for storing basic metadata across all species to read
         self.read_instance.station_references = {}
@@ -813,16 +786,276 @@ class DataReader:
                     if ns in self.read_instance.station_names:
                         self.read_instance.station_names[ns] = self.read_instance.station_names[ns][ns_intersects]
 
-    def read_data(self, yearmonths_to_read, data_labels):
-        """ Function that handles reading of observational/experiment data.
 
-            :param yearmonths_to_read: list of yearmonths to read
-            :type yearmonths_to_read: list
-            :param data_labels: Data arrays to plot
-            :type data_labels: list
+    def check_forecast(self, yearmonths_to_read=None, data_labels=None, networkspecies=None, dashboard_interactive=False):
+        """ For experiment data, check if there is a forecast dimension in the data files,
+            and if so, determine which forecast days to read for each data label (per networkspeci).
         """
 
-        start_time = time.time()
+        # set data labels if not defined
+        passed_data_labels = True
+        if data_labels is None:
+            passed_data_labels = False
+            data_labels = copy.deepcopy(self.read_instance.data_labels)
+
+        # set networkspecies if not defined
+        if networkspecies is None:
+            networkspecies = self.read_instance.networkspecies
+
+        # set yearmonths_to_read if not defined
+        if yearmonths_to_read is None:
+            # gather currently selected variables
+            start_date = self.read_instance.le_start_date.text()
+            end_date = self.read_instance.le_end_date.text()
+            resolution = self.read_instance.selected_resolution
+            
+            # get active frequency code
+            active_frequency_code = get_frequency_code(resolution)
+
+            # get time array
+            time_array = pd.date_range(start=datetime.datetime(int(start_date[:4]), int(start_date[4:6]), int(start_date[6:8])),
+                                        end=datetime.datetime(int(end_date[:4]), int(end_date[4:6]), int(end_date[6:8])),
+                                        freq=active_frequency_code)[:-1]
+
+            # get yearmonths in data range (incomplete months are removed for monthly resolution)
+            yearmonths = list(np.unique(['{}0{}'.format(dti.year,dti.month) if len(str(dti.month)) == 1 else '{}{}'.format(dti.year,dti.month) \
+                            for dti in time_array]))
+
+            # get yearmonths to read
+            yearmonths_to_read = get_yearmonths_to_read(yearmonths, start_date, end_date, resolution)
+
+        # if reading from conf file, and no forecast variable set, or if only one data label is being read, then do not check forecast dimension
+        if (self.read_instance.from_conf) & ((not self.read_instance.forecast) or (len(self.read_instance.data_labels) == 1)):
+            # set forecast_indices_per_data_label to be empty dictionary
+            self.read_instance.forecast_indices_per_data_label = {}
+            for networkspeci in networkspecies:
+                self.read_instance.forecast_indices_per_data_label[networkspeci] = {}
+                for data_label in data_labels:
+                    self.read_instance.forecast_indices_per_data_label[networkspeci][data_label] = {}
+            return
+
+        # else, if reading forecast data, then check if there is a forecast dimension in the data files
+        else:
+
+            # if not loading from a conf and not interactively selecting experiments on dashboard then return
+            if (not self.read_instance.from_conf) & (not dashboard_interactive):
+                return
+
+            # get forecast type and wanted forecast days from forecast field
+            wanted_forecast_days = []
+            # if using dashboard interactively, want to take all available forecast days
+            if dashboard_interactive:
+                forecast_type = 'all'
+            else:
+                # iterate through all forecast variables set and get forecast type and wanted forecast days
+                for fct_ii, fct in enumerate(self.read_instance.forecast):
+                    # on first pass get forecast_type
+                    if fct_ii == 0:
+                        if 'day' in fct:
+                            forecast_type = 'day'
+                        elif 'combined' in fct:
+                            forecast_type = 'combined'
+                        elif 'daily' in fct:
+                            forecast_type = 'daily' 
+
+                    # remove forecast_type from forecast variable
+                    fct = fct.split(forecast_type)[-1]
+                    # if no forecast day then set forecast type
+                    if fct == '':
+                        wanted_forecast_days.append(forecast_type)
+                    # elif colon in string then get range of days 
+                    elif ':' in fct:
+                        colon_split = fct.split(':')
+                        start_fct_day = int(colon_split[0])
+                        end_fct_day = int(colon_split[1])+1
+                        # do not allow forecast day to start before 1, manually set it to 1
+                        if start_fct_day < 1:
+                            start_fct_day = 1
+                        fct_days = np.arange(start_fct_day,end_fct_day,dtype=np.int32)
+                        for fct_day in fct_days:
+                            wanted_forecast_days.append(fct_day)
+                    # else just 1 specific day
+                    else:
+                        wanted_forecast_days.append(int(fct))
+
+            # re-initialise dictionaries to store available and wanted forecast indices per data label, per networkspeci
+            # the selected ones are reset if processing all data labels again, or does not exist,
+            # and all available ones are intialised if do not exist
+            if (not passed_data_labels) or (not hasattr(self.read_instance, 'forecast_indices_per_data_label')):
+                self.read_instance.forecast_indices_per_data_label = {}
+            if not hasattr(self.read_instance, 'available_forecast_indices_per_data_label'):
+                self.read_instance.available_forecast_indices_per_data_label = {}
+
+            # set lists to store unique new data labels to add and remove across networkspecies 
+            unique_data_labels_to_add = []
+            unique_data_labels_raw_to_add = []
+            unique_data_labels_to_remove = []
+            unique_data_labels_raw_to_remove = []
+
+            # iterate through network, speci pairs
+            for networkspeci in networkspecies:
+
+                # get indivudual network and species strings
+                network = networkspeci.split('|')[0]
+                speci = networkspeci.split('|')[1]
+
+                # add dictionary of files to read
+                files_to_read = {}
+
+                # add dictionary for available and selected forecast indices per data label for this networkspeci
+                if networkspeci not in self.read_instance.forecast_indices_per_data_label:
+                    self.read_instance.forecast_indices_per_data_label[networkspeci] = {}
+                if networkspeci not in self.read_instance.available_forecast_indices_per_data_label:
+                    self.read_instance.available_forecast_indices_per_data_label[networkspeci] = {}
+
+                # iterate through data labels
+                for data_label in data_labels:
+
+                    # get raw data label (non-alias)
+                    # if have not yet clicked read button, this can be empty list so handle this
+                    if data_label in self.read_instance.data_labels:
+                        data_label_raw = self.read_instance.data_labels_raw[self.read_instance.data_labels.index(data_label)]
+                    else:
+                        data_label_raw = data_label
+
+                    # get species matrix
+                    matrix = self.read_instance.parameter_dictionary[speci]['matrix']
+
+                    # only check experiment data labels
+                    if data_label != self.read_instance.observations_data_label:
+
+                        if '/' in network:
+                            file_root = \
+                                '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
+                                                            data_label_raw, self.read_instance.resolution, speci, 
+                                                            network.replace('/', '-'), speci)
+                        else:
+                            file_root = \
+                                '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
+                                                            data_label_raw, self.read_instance.resolution, speci, network, speci)
+                        try:
+                            available_yearmonths = self.read_instance.available_experiment_data[network][self.read_instance.resolution][speci][data_label_raw]
+                        except KeyError:
+                            continue
+
+                        # get intersection of yearmonths_to_read and available_yearmonths
+                        yearmonths_to_read_intersect = list(set(yearmonths_to_read) & set(available_yearmonths))
+                        files_to_read[data_label] = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in yearmonths_to_read_intersect])[0]
+
+                # read forecast dimension for each experiment
+                # if only one data label, then read forecast dimension directly
+                if len(files_to_read) == 1:
+                    returned_data = check_forecast_dimension(files_to_read[list(files_to_read.keys())[0]])
+                    returned_data = [returned_data]
+                # if more than one data label, then read forecast dimension in parallel
+                elif len(files_to_read) > 1:
+                    tuple_arguments = []
+                    for data_label in files_to_read:
+                        tuple_arguments.append((files_to_read[data_label]))
+                    pool = multiprocessing.Pool(self.read_instance.n_cpus)
+                    returned_data = pool.map(check_forecast_dimension, tuple_arguments)
+                    pool.close()
+                    pool.join()
+
+                # unzip returned data
+                n_forecast_days = np.array(returned_data, dtype=np.int32) 
+
+                # if have forecast dimension for any of the data labels, then cross reference with the forecast field to know how which forecast days to read
+                data_labels_to_remove = []
+                data_labels_raw_to_remove = []
+                data_labels_to_add = []
+                data_labels_raw_to_add = []
+                for data_label, n_forecast_day in zip(list(files_to_read.keys()),n_forecast_days):
+                    # initialise forecast_indices_per_data_label
+                    self.read_instance.forecast_indices_per_data_label[networkspeci][data_label] = {}
+                    # have forecast data?
+                    if n_forecast_day > 0:
+
+                        # set available_forecast_indices_per_data_label
+                        self.read_instance.available_forecast_indices_per_data_label[networkspeci][data_label] = np.arange(0, n_forecast_day, dtype=np.int32)
+                        
+                        # if not dashboard interative selection, set new data labels, data labels to remove and forecast_indices_per_data_label
+                        if forecast_type != 'all':
+                        
+                            # set to remove current data labels (with no forecast information)
+                            data_labels_to_remove.append(data_label)
+                            data_labels_raw_to_remove.append(self.read_instance.data_labels_raw[self.read_instance.data_labels.index(data_label)])
+  
+                            # if have combined, daily, or day selected, want to take all available forecast days
+                            if wanted_forecast_days[0] in ['combined', 'daily', 'day']:
+                                for wanted_forecast_index in range(n_forecast_day):
+                                    # add new data labels and forecast_indices_per_data_label
+                                    data_labels_to_add.append('{}-{}{}'.format(data_label, forecast_type, wanted_forecast_index+1))
+                                    data_labels_raw_to_add.append('{}-{}{}'.format(self.read_instance.data_labels_raw[self.read_instance.data_labels.index(data_label)], forecast_type, wanted_forecast_index+1))
+                                    self.read_instance.forecast_indices_per_data_label[networkspeci][data_label][data_labels_to_add[-1]] = wanted_forecast_index
+                            # otherwise have specific wanted forecast days
+                            else:
+                                # iterate through wanted forecast days
+                                for wanted_forecast_day in wanted_forecast_days:
+                                    # check if wanted forecast in available forecast
+                                    if wanted_forecast_day <= n_forecast_day:
+                                        # add new data labels and forecast_indices_per_data_label
+                                        data_labels_to_add.append('{}-{}{}'.format(data_label, forecast_type, wanted_forecast_day))
+                                        data_labels_raw_to_add.append('{}-{}{}'.format(self.read_instance.data_labels_raw[self.read_instance.data_labels.index(data_label)], forecast_type, wanted_forecast_day))
+                                        self.read_instance.forecast_indices_per_data_label[networkspeci][data_label][data_labels_to_add[-1]] = wanted_forecast_day-1
+
+                    # no forecast data
+                    else:
+                        self.read_instance.available_forecast_indices_per_data_label[networkspeci][data_label] = np.array([], dtype=np.int32)
+
+                # store unique data labels to keep and remove across networkspecies
+                for data_label_to_remove in data_labels_to_remove:
+                    if data_label_to_remove not in unique_data_labels_to_remove:
+                        unique_data_labels_to_remove.append(data_label_to_remove)
+                for data_label_raw_to_remove in data_labels_raw_to_remove:
+                    if data_label_raw_to_remove not in unique_data_labels_raw_to_remove:
+                        unique_data_labels_raw_to_remove.append(data_label_raw_to_remove)
+                for data_label_to_add in data_labels_to_add:
+                    if data_label_to_add not in unique_data_labels_to_add:
+                        unique_data_labels_to_add.append(data_label_to_add)
+                for data_label_raw_to_add in data_labels_raw_to_add:
+                    if data_label_raw_to_add not in unique_data_labels_raw_to_add:
+                        unique_data_labels_raw_to_add.append(data_label_raw_to_add)
+
+            # update data labels and experiments (if not selecting interactively on dashboard)
+            if not dashboard_interactive:
+
+                if (len(unique_data_labels_to_remove) > 0) & (len(unique_data_labels_to_add) > 0):
+
+                    new_data_labels = []
+                    new_data_labels_raw = []
+                    new_experiments = {}
+
+                    for data_label, data_label_raw in zip(self.read_instance.data_labels, self.read_instance.data_labels_raw):
+                        if data_label not in unique_data_labels_to_remove:
+                            new_data_labels.append(data_label)
+                            new_data_labels_raw.append(data_label_raw)
+                            if data_label != self.read_instance.observations_data_label:
+                                new_experiments[data_label_raw] = data_label
+                        else:
+                            for data_label_to_add, data_label_raw_to_add in zip(unique_data_labels_to_add, unique_data_labels_raw_to_add):
+                                base_data_label_to_add = data_label_to_add.split('-day')[0].split('-daily')[0].split('-combined')[0]
+                                if base_data_label_to_add == data_label:
+                                    new_data_labels.append(data_label_to_add)
+                                    new_data_labels_raw.append(data_label_raw_to_add)
+                                    new_experiments[data_label_raw_to_add] = data_label_to_add
+
+                    self.read_instance.data_labels = new_data_labels
+                    self.read_instance.data_labels_raw = new_data_labels_raw
+                    self.read_instance.experiments = new_experiments
+
+            # otherwise, return n_forecast_days
+            else:
+                return n_forecast_days[0]
+
+
+    def read_data(self, yearmonths_to_read, data_labels):
+        """ Function that handles reading of observational/experiment data.
+        #    :param yearmonths_to_read: list of yearmonths to read
+        #    :type yearmonths_to_read: list
+        #    :param data_labels: Data arrays to plot
+        #    :type data_labels: list
+        """
 
         # create arrays to share across processes (for parallel multiprocessing use)
         # this only works for numerical dtypes, i.e. not strings
@@ -837,7 +1070,7 @@ class DataReader:
             flags_shared[:] = self.read_instance.flags
 
         # create dictionary for saving files to read
-        self.files_to_read = {}
+        self.read_instance.files_to_read = {}
 
         # iterate through networkspecies + filter_networkspecies
         for networkspeci in (self.read_instance.networkspecies + self.read_instance.filter_networkspecies):
@@ -853,13 +1086,21 @@ class DataReader:
             speci = networkspeci.split('|')[1]
 
             # add dictionary of files to read per network-speci 
-            self.files_to_read[networkspeci] = {}
+            self.read_instance.files_to_read[networkspeci] = {}
 
             # iterate through data labels
             for data_label in data_labels:
 
                 # get raw data label (non-alias)
                 data_label_raw = self.read_instance.data_labels_raw[self.read_instance.data_labels.index(data_label)]
+
+                # get base data label and data label raw (i.e. without -dayN or -daily or -combined suffix for forecast data)
+                base_data_label = data_label.split('-day')[0].split('-daily')[0].split('-combined')[0]
+                base_data_label_raw = data_label_raw.split('-day')[0].split('-daily')[0].split('-combined')[0]
+
+                # if already have base data label in files_to_read, then continue
+                if base_data_label in self.read_instance.files_to_read[networkspeci]:
+                    continue
 
                 # get species matrix
                 matrix = self.read_instance.parameter_dictionary[speci]['matrix']
@@ -896,20 +1137,20 @@ class DataReader:
                     elif '/' in network:
                         file_root = \
                             '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
-                                                        data_label_raw, self.read_instance.resolution, speci, 
+                                                        base_data_label_raw, self.read_instance.resolution, speci, 
                                                         network.replace('/', '-'), speci)
                     else:
                         file_root = \
                             '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
-                                                       data_label_raw, self.read_instance.resolution, speci, network, speci)
+                                                       base_data_label_raw, self.read_instance.resolution, speci, network, speci)
                     try:
-                        available_yearmonths = self.read_instance.available_experiment_data[network][self.read_instance.resolution][speci][data_label_raw]
+                        available_yearmonths = self.read_instance.available_experiment_data[network][self.read_instance.resolution][speci][base_data_label_raw]
                     except KeyError:
                         continue
 
                 # get intersection of yearmonths_to_read and available_yearmonths
                 yearmonths_to_read_intersect = list(set(yearmonths_to_read) & set(available_yearmonths))
-                self.files_to_read[networkspeci][data_label] = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in yearmonths_to_read_intersect])
+                self.read_instance.files_to_read[networkspeci][base_data_label] = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in yearmonths_to_read_intersect])
                 
             # if active qa == default qa, no need to screen by QA, so inform reading function of this
             default_qa = get_default_qa(self.read_instance, speci)
@@ -969,21 +1210,35 @@ class DataReader:
                                      'observations_data_label', 'data_label', 'data_labels', 
                                      'reading_ghost', 'ghost_data_vars_to_read', 
                                      'metadata_dtype', 'metadata_vars_to_read', 'default_qa_active', 'filter_read', 
-                                     'network']
+                                     'network', 'forecast_indices']
             tuple_arguments = []
 
-            for data_label in self.files_to_read[networkspeci]:
-                for fname in self.files_to_read[networkspeci][data_label]:
+            # iterate through base data labels
+            for base_data_label in self.read_instance.files_to_read[networkspeci]:
+                # set forecast indices
+                # no forecast indices if loading observations
+                if base_data_label == self.read_instance.observations_data_label:
+                    forecast_indices = np.array([], dtype=np.int32)
+                # no forecast indices if loading non-forecast experiment
+                elif len(self.read_instance.forecast_indices_per_data_label[networkspeci][base_data_label]) == 0:
+                    forecast_indices = np.array([], dtype=np.int32)
+                # get forecast indices if loading forecast experiment
+                else:
+                    forecast_indices = np.array([self.read_instance.forecast_indices_per_data_label[networkspeci][base_data_label][data_label] 
+                                                 for data_label in data_labels if data_label in self.read_instance.forecast_indices_per_data_label[networkspeci][base_data_label]], dtype=np.int32)
+                    
+                for fname in self.read_instance.files_to_read[networkspeci][base_data_label]:
                     tuple_arguments.append((fname, self.read_instance.station_references[networkspeci], 
                                             self.read_instance.station_names[networkspeci], speci, 
-                                            self.read_instance.observations_data_label, data_label, data_labels, 
+                                            self.read_instance.observations_data_label, 
+                                            base_data_label, data_labels, 
                                             self.read_instance.reading_ghost, 
                                             self.read_instance.ghost_data_vars_to_read, 
                                             self.read_instance.metadata_dtype, 
                                             self.read_instance.metadata_vars_to_read,
                                             self.read_instance.logger,
                                             default_qa_active, filter_read, 
-                                            self.read_instance.network[0]))
+                                            network, forecast_indices))
   
             returned_data = pool.map(read_netcdf_data, tuple_arguments)
 

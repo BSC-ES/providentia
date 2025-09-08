@@ -555,6 +555,7 @@
           "linestyle": "None",
         },
       "legend": { "handles": { "marker": "o", "color": "white" } },
+      "margin_padding": {"x": 0.05, "y": 0.05},
       "dashboard":
         {
           "plot_options":

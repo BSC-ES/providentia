@@ -138,7 +138,7 @@ class SubmitInterpolation(object):
         # iterate through desired experiment IDs and its types
         for exp_dom_ens, alias in self.experiments.items():
             
-            experiment_to_process, grid_type, ensemble_option = exp_dom_ens.split("-") 
+            experiment_to_process, grid_type, ensemble = exp_dom_ens.split("-") 
 
             print('\nEXPERIMENT: {0}'.format(alias))
 
@@ -337,15 +337,15 @@ class SubmitInterpolation(object):
                             if len(obs_files) == 0:
                                 continue
                             
-                            # determine if ensemble option is member or emsemble stat
-                            ensemble_member = ensemble_option.isdigit()
+                            # determine if ensemble is member or emsemble stat
+                            ensemble_member = ensemble.isdigit()
 
-                            # check if ensemble option is ensemble stat and get all relevant experiment files
+                            # check if ensemble is ensemble stat and get all relevant experiment files
                             if not ensemble_member:
                                 ensemble_stat = True
                                 exp_files_all = np.sort(glob.glob('{}/{}/{}/ensemble-stats/{}_{}/{}*{}.nc'.format(
                                     exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
-                                    ensemble_option, speci_to_process, ensemble_option)))
+                                    ensemble, speci_to_process, ensemble)))
                             else:
                                 ensemble_stat = False
                                 exp_files_all = np.sort(glob.glob('{}/{}/{}/{}/{}*.nc'.format(
@@ -361,7 +361,7 @@ class SubmitInterpolation(object):
 
                             # ensemble stat?
                             if ensemble_stat:
-                                available_ensemble = [ensemble_option]    
+                                available_ensemble = [ensemble]    
 
                             # not ensemble stat?
                             else:                                
@@ -377,11 +377,11 @@ class SubmitInterpolation(object):
                                     # get intersection between desired ensemble members to process and those 
                                     # available in directory
                                     # if no members defined explicitly to process, process them all 
-                                    if ensemble_option == 'allmembers':
+                                    if ensemble == 'allmembers':
                                         available_ensemble = unique_ensemble_members
                                     else:
-                                        if ensemble_option in unique_ensemble_members:
-                                            available_ensemble = [ensemble_option]
+                                        if ensemble in unique_ensemble_members:
+                                            available_ensemble = [ensemble]
                                         else:
                                             continue
                                 # if there's no ensemble number in the file name
@@ -389,14 +389,14 @@ class SubmitInterpolation(object):
                                     have_ensemble_members = False
                                     # if have defined ensemble members to process, then continue as no files in this 
                                     # directory have ensemble member number
-                                    if ensemble_option not in ['allmembers', '000']:
+                                    if ensemble not in ['allmembers', '000']:
                                         continue
                                     # otherwise, proceed (tag files as ensemble member '000' for sake of operation)
                                     else:
                                         available_ensemble = ['000']
                             
-                            # iterate through available ensemble options to process                    
-                            for available_ensemble_option in available_ensemble:
+                            # iterate through available ensemble to process                    
+                            for available_ensemble in available_ensemble:
                         
                                 # limit experiment files to be just those for specific ensemble member 
                                 # (where neccessary) 
@@ -404,7 +404,7 @@ class SubmitInterpolation(object):
                                 exp_files = copy.deepcopy(exp_files_all)
                                 if ensemble_stat == False:
                                     if have_ensemble_members == True:
-                                        exp_file_speci = '{}-{}'.format(speci_to_process, available_ensemble_option)
+                                        exp_file_speci = '{}-{}'.format(speci_to_process, available_ensemble)
                                         exp_files = np.sort([f for f in exp_files_all if '{}_'.format(exp_file_speci) 
                                                             in f])                        
                                 
@@ -451,7 +451,7 @@ class SubmitInterpolation(object):
 
                                 # create Providentia experiment code (expid-region-ensembleoption)
                                 prov_exp_code = '{}-{}-{}'.format(experiment_to_process, grid_type, 
-                                                                available_ensemble_option)
+                                                                available_ensemble)
        
                                 # create directories to store slurm output/error logs for interpolation task of 
                                 # specific combination of iterated variables (if does not already exist)

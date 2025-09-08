@@ -600,7 +600,7 @@ class Plotting:
             if 'dp' in ghost_var_dict:
                 str_to_plot += '{}: {:.{}f}'.format(ghost_var_dict[var_str_name],
                                                     np.nanmedian(self.canvas_instance.selected_station_metadata[
-                                                    networkspeci][ghost_var].astype(np.float32)), 
+                                                                 networkspeci][ghost_var].astype(np.float32)),
                                                     ghost_var_dict['dp'])
 
             # if str then get unique elements or percentage dependent on n uniques
@@ -1200,9 +1200,9 @@ class Plotting:
                     period_x_grid = []
 
                     # get grouped data per period
-                    grouped_data = group_periodic(self.read_instance, self.canvas_instance, networkspeci, 
-                                                  violin_resolution, False, self.read_instance.statistic_mode, '',
-                                                  self.canvas_instance.selected_station_data[networkspeci]['active_mode'])
+                    grouped_data = group_periodic(self.read_instance, self.canvas_instance, networkspeci,
+                                                  violin_resolution, False, self.read_instance.statistic_mode, '', 
+                                                  self.canvas_instance.selected_station_data[networkspeci]['per_station'])
 
                     # iterate through periods
                     for group in grouped_data:

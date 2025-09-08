@@ -417,3 +417,6 @@ class NavigationToolbar(NavigationToolbar2QT):
         
         # filter
         self.read_instance.mpl_canvas.handle_data_filter_update()
+
+        # reset from_conf variable to False after reading and filtering is complete
+        self.read_instance.from_conf = False

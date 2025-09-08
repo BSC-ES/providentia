@@ -13,6 +13,7 @@ import xarray as xr
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import write_conf
+from .statistics import do_resampling, merge_forecast_days
 
 # get current path and providentia root path
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
@@ -68,7 +69,10 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
         # if apply_filters is active get the filtered data array
         # also temporally resample data if required
         if apply_filters:
+            # get valid station indices
             valid_station_inds = prv.valid_station_inds_temporal_colocation[networkspeci][prv.observations_data_label]
+            
+            # get filtered data array
             data_array = copy.deepcopy(prv.data_in_memory_filtered[networkspeci])
             
             # apply NaNs for temporal colocation
@@ -77,11 +81,31 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
             # cut data array for valid station inds
             data_array = np.take(data_array, valid_station_inds, axis=1)
 
+            # do resampling (if set)
+            if prv.resampling_resolution != 'None':
+                data_array, time_array_resampled = do_resampling(prv, data_array, writing=True)
+
+            # set time array
+            time_array = prv.time_index_after_filter
+            
         # otherwise, take unfiltered array
         else:
+            # get valid station indices (all)
             valid_station_inds = np.arange(prv.data_in_memory[networkspeci].shape[1], dtype=np.int32)
+            
+            # get unfiltered data array
             data_array = copy.deepcopy(prv.data_in_memory[networkspeci])
 
+            # if daily or combined forecast need to merge forecast days separated as different experiments in 1 tiled dimension
+            if (prv.daily_forecast) or (prv.combined_forecast):
+            
+                # merge forecast days as different experiments to same dimension (tiled)
+                unique_base_data_labels = [label.split('-daily')[0].split('-combined')[0] for label in prv.data_labels]
+                data_array = merge_forecast_days(prv, networkspeci, prv.original_data_labels, unique_base_data_labels, data_array)
+
+            # set time array
+            time_array = prv.time_index_after_filter
+            
         # save data / metadata
         save_data_dict['{}_data'.format(networkspeci)] = data_array
         save_data_dict['{}_metadata'.format(networkspeci)] = np.take(prv.metadata_in_memory[networkspeci], 
@@ -94,7 +118,7 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
             save_data_dict['{}_flags'.format(networkspeci)] = np.unique(prv.flags)
 
     # save out key variables 
-    save_data_dict['time'] = prv.time_array
+    save_data_dict['time'] = time_array
     save_data_dict['resolution'] = prv.resolution
     save_data_dict['data_labels'] = prv.data_labels
     save_data_dict['start_date'] = prv.start_date
@@ -109,7 +133,7 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
 
     # save resampled time and resolution
     if (prv.resampling_resolution != 'None') & (apply_filters):
-        save_data_dict['time_resampled'] = prv.time_index
+        save_data_dict['time_resampled'] = time_array_resampled
         save_data_dict['resampling_resolution'] = prv.resampling_resolution
 
     # save out statistical information
@@ -208,19 +232,6 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
     if prv.reading_ghost:
         fout.data_version = prv.ghost_version
 
-    # netcdf dimensions
-    fout.createDimension('data_label', len(prv.data_labels))
-    fout.createDimension('time', len(prv.time_array))
-    fout.createDimension('month', len(prv.yearmonths))
-    # create resampling resolution if needed
-    if (prv.resampling_resolution != 'None') & (apply_filters):
-        fout.createDimension('time_resampled', len(prv.time_index))
-    # create GHOST variables
-    if prv.reading_ghost:
-        fout.createDimension('qa', len(list(standard_QA_name_to_QA_code.keys())))
-        fout.createDimension('flag', len(list(standard_data_flag_name_to_data_flag_code.keys())))
-        fout.createDimension('ghost_data_variable', len(prv.ghost_data_vars_to_read))
-
     # iterate through networkspecies 
     for speci_ii, networkspeci in enumerate(prv.networkspecies):
 
@@ -240,23 +251,60 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
        
         # get data array
         # if apply_filters is active get the filtered data array
+        # also temporally resample data if required
         if apply_filters:
+            # get valid station indices
             valid_station_inds = prv.valid_station_inds_temporal_colocation[networkspeci][prv.observations_data_label]
+            
+            # get filtered data array
             data_array = copy.deepcopy(prv.data_in_memory_filtered[networkspeci])
-
+            
             # apply NaNs for temporal colocation
             data_array[:, prv.temporal_colocation_nans[networkspeci]] = np.NaN
 
             # cut data array for valid station inds
             data_array = np.take(data_array, valid_station_inds, axis=1)
 
+            # do resampling (if set)
+            if prv.resampling_resolution != 'None':
+                data_array, time_array_resampled = do_resampling(prv, data_array, writing=True)
+
+            # set time array
+            time_array = prv.time_index_after_filter
+            
         # otherwise, take unfiltered array
         else:
+            # get valid station indices (all)
             valid_station_inds = np.arange(prv.data_in_memory[networkspeci].shape[1], dtype=np.int32)
+            
+            # get unfiltered data array
             data_array = copy.deepcopy(prv.data_in_memory[networkspeci])
 
-        # set variables independent of network / speci on first pass
+            # if daily or combined forecast need to merge forecast days separated as different experiments in 1 tiled dimension
+            if (prv.daily_forecast) or (prv.combined_forecast):
+            
+                # merge forecast days as different experiments to same dimension (tiled)
+                unique_base_data_labels = [label.split('-daily')[0].split('-combined')[0] for label in prv.data_labels]
+                data_array = merge_forecast_days(prv, networkspeci, prv.original_data_labels, unique_base_data_labels, data_array)
+
+            # set time array
+            time_array = prv.time_index_after_filter
+
+        # set dimensions and variables independent of network / speci on first pass
         if speci_ii == 0:
+
+            # netcdf dimensions
+            fout.createDimension('data_label', len(prv.data_labels))
+            fout.createDimension('time', len(time_array))
+            fout.createDimension('month', len(prv.yearmonths))
+            # create resampling resolution if needed
+            if (prv.resampling_resolution != 'None') & (apply_filters):
+                fout.createDimension('time_resampled', len(time_array_resampled))
+            # create GHOST variables
+            if prv.reading_ghost:
+                fout.createDimension('qa', len(list(standard_QA_name_to_QA_code.keys())))
+                fout.createDimension('flag', len(list(standard_data_flag_name_to_data_flag_code.keys())))
+                fout.createDimension('ghost_data_variable', len(prv.ghost_data_vars_to_read))
 
             # time
             current_data_type = type_map[data_format_dict['time']['data_type']]
@@ -283,17 +331,9 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
             var.calendar = 'standard'
             var.tz = 'UTC'
             if prv.resolution in ['3hourly', '6hourly']:
-                # get indices of time_array in an array with all hours from start date to end date
-                all_hours_array = pd.to_datetime(np.arange(datetime(int(str(prv.start_date)[0:4]), 
-                                                                    int(str(prv.start_date)[4:6]), 
-                                                                    int(str(prv.start_date)[6:8])), 
-                                                           datetime(int(str(prv.end_date)[0:4]), 
-                                                                    int(str(prv.end_date)[4:6]), 
-                                                                    int(str(prv.end_date)[6:8])), 
-                                                           timedelta(hours=1)))
-                time_var = np.where(np.in1d(all_hours_array, prv.time_array))[0]
+                time_var = ((time_array - time_array[0]) / pd.Timedelta(hours=1)).astype(int).to_numpy()
             else:
-                time_var = np.arange(len(prv.time_array))
+                time_var = np.arange(len(time_array))
             var[:] = time_var
 
             # time resampled - create variable if have resampled data, and apply_filters is active
@@ -326,17 +366,9 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
                 var.calendar = 'standard'
                 var.tz = 'UTC'
                 if prv.resampling_resolution in ['3hourly', '6hourly']:
-                    # get indices of time_index in an array with all hours from start date to end date
-                    all_hours_array = pd.to_datetime(np.arange(datetime(int(str(prv.start_date)[0:4]), 
-                                                                        int(str(prv.start_date)[4:6]), 
-                                                                        int(str(prv.start_date)[6:8])), 
-                                                            datetime(int(str(prv.end_date)[0:4]), 
-                                                                     int(str(prv.end_date)[4:6]), 
-                                                                     int(str(prv.end_date)[6:8])), 
-                                                            timedelta(hours=1)))
-                    time_var_resampled = np.where(np.in1d(all_hours_array, prv.time_index))[0]
+                    time_var_resampled = ((time_array_resampled - time_array_resampled[0]) / pd.Timedelta(hours=1)).astype(int).to_numpy()
                 else:
-                    time_var_resampled = np.arange(len(prv.time_index))
+                    time_var_resampled = np.arange(len(time_array_resampled))
                 var[:] = time_var_resampled
                 
             # miscellaneous variables 
@@ -526,8 +558,8 @@ def export_configuration(prv, cname, separator="||"):
                           'end_date': prv.end_date}
 
     # experiments
-    if prv.experiments_menu['checkboxes']['keep_selected']:
-        options['section']['experiments'] = ",".join(str(i) for i in prv.experiments_menu['checkboxes']['keep_selected'])
+    if prv.experiments_menu['experiments']['keep_selected']:
+        options['section']['experiments'] = ",".join(str(i) for i in prv.experiments_menu['experiments']['keep_selected'])
 
     # colocation variables
     options['section'].update({'temporal_colocation': prv.temporal_colocation,

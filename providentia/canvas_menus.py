@@ -35,11 +35,12 @@ class SettingsMenu(object):
         self.comboboxes = {}
         self.checkable_comboboxes = {}
         self.sliders = {}
+        self.checkboxes = {}
 
         for element_name in self.elements:
             element_settings = settings_dict[plot_type][element_name]
             element_type = element_settings['element_type']
-            if element_type in ['button', 'container', 'label', 'combobox', 'checkable_combobox', 'slider']:
+            if element_type in ['button', 'container', 'label', 'combobox', 'checkable_combobox', 'slider', 'checkbox']:
 
                 # Add element
                 element = getattr(self, 'add_' + element_type)(element_settings)
@@ -73,7 +74,7 @@ class SettingsMenu(object):
                     self.container = element
                 elif element_type in ['button', 'label', 'slider']:
                     getattr(self, element_type + 's')[element_name] = element
-                elif element_type in ['combobox', 'checkable_combobox']:
+                elif element_type in ['combobox', 'checkable_combobox', 'checkbox']:
                     getattr(self, element_type + 'es')[element_name] = element
 
             else:
@@ -211,6 +212,26 @@ class SettingsMenu(object):
 
         return checkable_combobox
 
+    def add_checkbox(self, element_settings):
+        """ Add checkbox
+
+        Parameters
+        ----------
+        element_settings : dict
+            Settings
+
+        Returns
+        -------
+        QtWidgets.QCheckbox
+            Combobox
+        """
+
+        combobox = set_formatting(QtWidgets.QCheckBox(element_settings['text'], self.canvas_instance), 
+                                  formatting_dict[element_settings['formatting_dict']])
+        combobox.stateChanged.connect(partial(self.connect, element_settings['function']))
+
+        return combobox
+
     def get_elements(self):
         """ Get elements inside menu settings
         
@@ -224,8 +245,9 @@ class SettingsMenu(object):
         comboboxes = list(self.comboboxes.values())
         labels = list(self.labels.values())
         checkable_comboboxes = list(self.checkable_comboboxes.values())
+        checkboxes = list(self.checkboxes.values())
 
-        return [self.container] + sliders + comboboxes + labels + checkable_comboboxes
+        return [self.container] + sliders + comboboxes + labels + checkable_comboboxes + checkboxes
 
     def connect(self, function):
         """ Connect element to functions in settings dictionary """
