@@ -1,0 +1,466 @@
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/32/37/HV/3237-HVFZ.nc:
+  ebas_instrument_name: Magee_AE31_FNK_dry
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: GR02L_aethalometer_AE31_control_lev0_0_0_1
+  ebas_revision_date: '20170630111902'
+  ebas_station_altitude: 150.0 m
+  ebas_station_code: GR0002R
+  ebas_station_latitude: '35.3377990723'
+  ebas_station_longitude: '25.6693992615'
+  resolution: hourly
+  time_coverage_end: 2014-10-31T22:00:00 UTC
+  time_coverage_start: 2013-12-31T22:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Location
+  - pressure_qc
+  - pressure_ebasmetadata
+  - temperature_qc
+  - temperature_ebasmetadata
+  - Wavelength
+  - equivalent_black_carbon_amean_qc
+  - equivalent_black_carbon_amean_ebasmetadata
+  - equivalent_black_carbon_prec1587_qc
+  - equivalent_black_carbon_prec1587_ebasmetadata
+  - equivalent_black_carbon_perc8413_qc
+  - equivalent_black_carbon_perc8413_ebasmetadata
+  - pressure
+  - temperature
+  - equivalent_black_carbon_amean
+  - equivalent_black_carbon_prec1587
+  - equivalent_black_carbon_perc8413
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Q/V2/RB/3QV2-RBN5.nc:
+  ebas_instrument_name: aethalometer_22
+  ebas_method_ref: FI01L_aethalometer
+  ebas_revision_date: '20130924000000'
+  ebas_station_altitude: 310.0 m
+  ebas_station_code: FI0022R
+  ebas_station_latitude: '66.320278'
+  ebas_station_longitude: '29.401667'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2012-05-17T21:00:00 UTC
+  time_coverage_start: 2012-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/3R/GV/MG/3RGV-MGMP.nc:
+  ebas_instrument_name: AE02
+  ebas_method_ref: GB02L_abs_coef
+  ebas_revision_date: '20120726000000'
+  ebas_station_altitude: 137.0 m
+  ebas_station_code: GB0036R
+  ebas_station_latitude: '51.573056'
+  ebas_station_longitude: '-1.316667'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2012-01-01T00:00:00 UTC
+  time_coverage_start: 2011-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/74/RQ/AB/74RQ-AB9G.nc:
+  ebas_instrument_name: TE_MAAP
+  ebas_method_ref: DE09L_maap
+  ebas_revision_date: '20100331000000'
+  ebas_station_altitude: 975.0 m
+  ebas_station_code: DE0043G
+  ebas_station_latitude: '47.8014984131'
+  ebas_station_longitude: '11.009619'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2008-01-01T00:00:00 UTC
+  time_coverage_start: 2006-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/9X/5B/KR/9X5B-KR3N.nc:
+  ebas_instrument_name: Metrohm
+  ebas_method_ref: DE08L_IFT_Mueller_Atmos_Env_33_1679-1685_1999
+  ebas_revision_date: '20140501000000'
+  ebas_station_altitude: 86.0 m
+  ebas_station_code: DE0044R
+  ebas_station_latitude: '51.5255'
+  ebas_station_longitude: '12.9277'
+  ebas_statistics: arithmetic mean
+  resolution: daily
+  time_coverage_end: 2003-01-01T08:00:00 UTC
+  time_coverage_start: 2001-01-01T08:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/AG/Y9/QW/AGY9-QWTB.nc:
+  ebas_instrument_name: Magee_AE33_FNK_dry
+  ebas_measurement_height: 5.0 m
+  ebas_method_ref: GR02L_aethalometer_AE33_control_lev0_0_0_1
+  ebas_revision_date: '20150730000000'
+  ebas_station_altitude: 150.0 m
+  ebas_station_code: GR0002R
+  ebas_station_latitude: '35.3377990723'
+  ebas_station_longitude: '25.6693992615'
+  resolution: hourly
+  time_coverage_end: 2014-12-31T22:00:00 UTC
+  time_coverage_start: 2014-10-31T22:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Location
+  - pressure_qc
+  - pressure_ebasmetadata
+  - temperature_qc
+  - temperature_ebasmetadata
+  - Wavelength
+  - equivalent_black_carbon_amean_qc
+  - equivalent_black_carbon_amean_ebasmetadata
+  - equivalent_black_carbon_prec1587_qc
+  - equivalent_black_carbon_prec1587_ebasmetadata
+  - equivalent_black_carbon_perc8413_qc
+  - equivalent_black_carbon_perc8413_ebasmetadata
+  - pressure
+  - temperature
+  - equivalent_black_carbon_amean
+  - equivalent_black_carbon_prec1587
+  - equivalent_black_carbon_perc8413
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/DG/S4/8Z/DGS4-8ZWN.nc:
+  ebas_instrument_name: AE02
+  ebas_method_ref: GB02L_AE_1
+  ebas_revision_date: '20150731000000'
+  ebas_station_altitude: 137.0 m
+  ebas_station_code: GB0036R
+  ebas_station_latitude: '51.573056'
+  ebas_station_longitude: '-1.316667'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2015-01-01T00:00:00 UTC
+  time_coverage_start: 2012-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/FJ/UT/BW/FJUT-BWWW.nc:
+  ebas_instrument_name: LT0015R_AE31-HS_827
+  ebas_method_ref: LT01L_filter+light_attenuation
+  ebas_revision_date: '20160706061105'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: LT0015R
+  ebas_station_latitude: '55.37611111111111'
+  ebas_station_longitude: '21.030555555555555'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2011-01-01T00:00:00 UTC
+  time_coverage_start: 2010-02-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - Location
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - Wavelength
+  - attenuation_coefficient_qc
+  - attenuation_coefficient_ebasmetadata
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+  - flow_rate
+  - flow_rate_qc
+  - flow_rate_ebasmetadata
+  - relative_humidity
+  - attenuation_coefficient
+  - equivalent_black_carbon
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/G5/WH/UT/G5WH-UT6C.nc:
+  ebas_instrument_name: MAAP_Carusso_43
+  ebas_method_ref: DE08L_maap
+  ebas_revision_date: '20080101000000'
+  ebas_station_altitude: 975.0 m
+  ebas_station_code: DE0043G
+  ebas_station_latitude: '47.8014984131'
+  ebas_station_longitude: '11.009619'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2007-02-03T01:00:00 UTC
+  time_coverage_start: 2006-06-01T01:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/JS/EU/4T/JSEU-4T3Z.nc:
+  ebas_instrument_name: AE01
+  ebas_method_ref: GB03L_AE_1
+  ebas_revision_date: '20120730000000'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: GB0048R
+  ebas_station_latitude: '55.79216'
+  ebas_station_longitude: '-3.2429'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2012-01-01T00:00:00 UTC
+  time_coverage_start: 2011-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/KS/9E/PS/KS9E-PSHJ.nc:
+  ebas_instrument_name: AE10
+  ebas_method_ref: CH02L_abs_coef
+  ebas_revision_date: '20010509000000'
+  ebas_station_altitude: 3578.0 m
+  ebas_station_code: CH0001G
+  ebas_station_latitude: '46.5475'
+  ebas_station_longitude: '7.985'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2001-01-01T00:00:00 UTC
+  time_coverage_start: 1995-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/M3/TP/DD/M3TP-DDWQ.nc:
+  ebas_instrument_name: LT0015R_AE31-HS_827
+  ebas_method_ref: LT01L_filter+light_attenuation
+  ebas_revision_date: '20110610000000'
+  ebas_station_altitude: 5.0 m
+  ebas_station_code: LT0015R
+  ebas_station_latitude: '55.37611111111111'
+  ebas_station_longitude: '21.030555555555555'
+  ebas_statistics: arithmetic mean
+  resolution: Unrecognised (P0000-00-00T00:00:00)
+  time_coverage_end: 2009-01-01T00:00:00 UTC
+  time_coverage_start: 2008-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - pressure
+  - pressure_qc
+  - pressure_ebasmetadata
+  - Location
+  - relative_humidity_qc
+  - relative_humidity_ebasmetadata
+  - temperature
+  - temperature_qc
+  - temperature_ebasmetadata
+  - Wavelength
+  - attenuation_coefficient_qc
+  - attenuation_coefficient_ebasmetadata
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+  - flow_rate
+  - flow_rate_qc
+  - flow_rate_ebasmetadata
+  - relative_humidity
+  - attenuation_coefficient
+  - equivalent_black_carbon
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/MK/73/KZ/MK73-KZHF.nc:
+  ebas_instrument_name: aethalometer_9
+  ebas_method_ref: FI01L_aethalometer
+  ebas_revision_date: '20130924000000'
+  ebas_station_altitude: 7.0 m
+  ebas_station_code: FI0009R
+  ebas_station_latitude: '59.779167'
+  ebas_station_longitude: '21.377222'
+  ebas_statistics: arithmetic mean
+  resolution: 3hourly
+  time_coverage_end: 2012-05-17T21:00:00 UTC
+  time_coverage_start: 2012-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/TX/CS/25/TXCS-25MX.nc:
+  ebas_instrument_name: TE_MAAP
+  ebas_method_ref: DE09L_maap
+  ebas_revision_date: '20100331000000'
+  ebas_station_altitude: 975.0 m
+  ebas_station_code: DE0043G
+  ebas_station_latitude: '47.8014984131'
+  ebas_station_longitude: '11.009619'
+  resolution: hourly
+  time_coverage_end: 2010-01-01T00:00:00 UTC
+  time_coverage_start: 2009-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Location
+  - pressure_qc
+  - pressure_ebasmetadata
+  - temperature_qc
+  - temperature_ebasmetadata
+  - Wavelength
+  - aerosol_absorption_coefficient_amean_qc
+  - aerosol_absorption_coefficient_amean_ebasmetadata
+  - aerosol_absorption_coefficient_prec1587_qc
+  - aerosol_absorption_coefficient_prec1587_ebasmetadata
+  - aerosol_absorption_coefficient_perc8413_qc
+  - aerosol_absorption_coefficient_perc8413_ebasmetadata
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+  - pressure
+  - temperature
+  - aerosol_absorption_coefficient_amean
+  - aerosol_absorption_coefficient_prec1587
+  - aerosol_absorption_coefficient_perc8413
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/UA/AY/Z2/UAAY-Z28U.nc:
+  ebas_instrument_name: TE_MAAP
+  ebas_method_ref: DE09L_maap
+  ebas_revision_date: '20100331000000'
+  ebas_station_altitude: 975.0 m
+  ebas_station_code: DE0043G
+  ebas_station_latitude: '47.8014984131'
+  ebas_station_longitude: '11.009619'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2009-01-01T00:00:00 UTC
+  time_coverage_start: 2008-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - aerosol_absorption_coefficient
+  - aerosol_absorption_coefficient_qc
+  - aerosol_absorption_coefficient_ebasmetadata
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/WF/5W/BR/WF5W-BRX7.nc:
+  ebas_instrument_name: MageeAE31_420
+  ebas_method_ref: CA08L_aethalometer
+  ebas_revision_date: '20150216155444'
+  ebas_station_altitude: 210.0 m
+  ebas_station_code: CA0420G
+  ebas_station_latitude: '82.4991455078'
+  ebas_station_longitude: '-62.3415260315'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2012-12-29T23:00:00 UTC
+  time_coverage_start: 2011-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+  - equivalent_black_carbon
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/YK/M8/X9/YKM8-X9W8.nc:
+  ebas_instrument_name: aethalometer_17
+  ebas_method_ref: FI01L_aethalometer
+  ebas_revision_date: '20130923000000'
+  ebas_station_altitude: 4.0 m
+  ebas_station_code: FI0017R
+  ebas_station_latitude: '60.526667'
+  ebas_station_longitude: '27.686111'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2012-05-17T21:00:00 UTC
+  time_coverage_start: 2011-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z7/JF/V3/Z7JF-V39E.nc:
+  ebas_instrument_name: Magee_Model_AE6
+  ebas_method_ref: CA05L_optical_attenuation_10meter
+  ebas_revision_date: '20070307000000'
+  ebas_station_altitude: 210.0 m
+  ebas_station_code: CA0420G
+  ebas_station_latitude: '82.4991455078'
+  ebas_station_longitude: '-62.3415260315'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 1993-01-01T00:00:00 UTC
+  time_coverage_start: 1989-05-29T16:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - Wavelength
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
+  - flow_rate
+  - flow_rate_qc
+  - flow_rate_ebasmetadata
+  - equivalent_black_carbon
+https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZW/HV/8U/ZWHV-8U8E.nc:
+  ebas_instrument_name: AE01
+  ebas_method_ref: GB03L_AE_1
+  ebas_revision_date: '20150731000000'
+  ebas_station_altitude: 260.0 m
+  ebas_station_code: GB0048R
+  ebas_station_latitude: '55.79216'
+  ebas_station_longitude: '-3.2429'
+  ebas_statistics: arithmetic mean
+  resolution: hourly
+  time_coverage_end: 2015-01-01T00:00:00 UTC
+  time_coverage_start: 2012-01-01T00:00:00 UTC
+  variables:
+  - time
+  - time_bnds
+  - metadata_time
+  - metadata_time_bnds
+  - equivalent_black_carbon
+  - equivalent_black_carbon_qc
+  - equivalent_black_carbon_ebasmetadata
