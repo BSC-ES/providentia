@@ -233,7 +233,7 @@ class Download(object):
                 except:
                     pass
 
-            # reset domain and ensemble options for new section
+            # reset domain and ensemble for new section
             self.domain = []
             self.ensemble = []
 
@@ -823,10 +823,10 @@ class Download(object):
         # get resolution and species combinations
         res_spec_dir = []
         
-        # domain and ensemble option are part of the experiment name, all united by dash (-)
+        # domain and ensemble are part of the experiment name, all united by dash (-)
         experiment_new = experiment
 
-        # domain and ensemble option are directories
+        # domain and ensemble are directories
         experiment_old = experiment.replace("-","/")
         
         # get remote directory format depending on the GHOST version
@@ -1190,13 +1190,13 @@ class Download(object):
                         
                         # example: od550du_2019040212.nc (0,1)
                         if format == (0,1):
-                            # when there is no ensemble option in the name only allmembers and 000 are valid
+                            # when there is no ensemble in the name only allmembers and 000 are valid
                             if ensemble == '000' or ensemble == 'allmembers':
                                 nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
 
                         # example: od550du-000_2021020812.nc (1,1)
                         elif format == (1,1):
-                            # filter by ensemble option in case that ensemble option is not allmembers
+                            # filter by ensemble in case that ensemble is not allmembers
                             if ensemble != 'allmembers':
                                 nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble,nc_files))
                            
@@ -1215,9 +1215,9 @@ class Download(object):
                         # filter the nc files to only get the ones that have the correct species and stats
                         nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == ensemble, nc_files))
                 
-                # if there is no options with the ensemble option, tell the user
+                # if there is no options with the ensemble, tell the user
                 if nc_files == []:
-                    msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble} ensemble option."
+                    msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble} ensemble."
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -1420,13 +1420,13 @@ class Download(object):
                         
                         # example: od550du_2019040212.nc (0,1)
                         if format == (0,1):
-                            # when there is no ensemble option in the name only allmembers and 000 are valid
+                            # when there is no ensemble in the name only allmembers and 000 are valid
                             if ensemble == '000' or ensemble == 'allmembers':
                                 nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
                         
                         # example: od550du-000_2021020812.nc (1,1)
                         elif format == (1,1):
-                            # filter by ensemble option in case that ensemble option is not allmembers
+                            # filter by ensemble in case that ensemble is not allmembers
                             if ensemble != 'allmembers':
                                 nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble,nc_files))
                            
@@ -1445,9 +1445,9 @@ class Download(object):
                         # filter the nc files to only get the ones that have the correct species and stats
                         nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == ensemble, nc_files))
                         
-                # if there is no options with the ensemble option, tell the user
+                # if there is no options with the ensemble, tell the user
                 if nc_files == []:
-                    msg = f"There is no data available in esarchive for the {exp_id} experiment with the {domain} domain with the {ensemble} ensemble option."
+                    msg = f"There is no data available in esarchive for the {exp_id} experiment with the {domain} domain with the {ensemble} ensemble."
                     show_message(self, msg, deactivate=initial_check)
                     continue
                 
@@ -1602,7 +1602,7 @@ class Download(object):
             experiments = []
             for experiment_dict in interp_experiments.values():
                 experiments += experiment_dict["experiments"]
-            # get all the domain and ensemble options combinations 
+            # get all the domain and ensemble combinations 
             experiment_list = []
             # TODO hardcoded
             for domain in ["ip", "d03", "d01", "regional", "eu", "reg", "ex", "bcn", "cat", "d02", "global","regional_i01", "regional_i02", "regional_i03"]:

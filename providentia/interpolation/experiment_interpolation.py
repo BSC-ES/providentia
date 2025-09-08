@@ -64,14 +64,14 @@ class ExperimentInterpolation(object):
         self.original_speci_to_process            = submit_args['original_speci_to_process']
         self.unique_id                            = submit_args['job_id']
         self.prov_exp_code                        = submit_args['prov_exp_code']
-        self.experiment_to_process, self.grid_type, self.ensemble_option = self.prov_exp_code.split('-')
+        self.experiment_to_process, self.grid_type, self.ensemble = self.prov_exp_code.split('-')
         
         # get year/month string
         self.year = self.yearmonth[:4]
         self.month = self.yearmonth[4:]
 
-        # determine if ensemble option is member or emsemble stat
-        self.ensemble_member = self.ensemble_option.isdigit()
+        # determine if ensemble is member or emsemble stat
+        self.ensemble_member = self.ensemble.isdigit()
 
         # dictionary to save utilized interpolation variables
         self.interpolation_variables = {}
@@ -156,9 +156,9 @@ class ExperimentInterpolation(object):
             # drop all analysis files ending with '_an.nc' which are not in ensemble-stats
             all_model_files = [f for f in all_model_files if '_an.nc' not in f] 
 
-            # isolate model files to be only those associated with relevant ensemble option
+            # isolate model files to be only those associated with relevant ensemble
             self.model_files = np.sort([f for f in all_model_files if '{}-{}_'.format(
-                self.speci_to_process,self.ensemble_option) in f])
+                self.speci_to_process,self.ensemble) in f])
             
             # if the number of remaining model files is 0, this is because the files
             # do not contain an ensemble member number, therefore take all model files
@@ -169,12 +169,12 @@ class ExperimentInterpolation(object):
             self.model_files = np.sort(glob.glob('{}/{}/{}/ensemble-stats/{}_{}/{}*{}*{}.nc'\
                                                 .format(exp_dir, self.grid_type,
                                                         self.model_temporal_resolution,
-                                                        self.speci_to_process, self.ensemble_option, 
-                                                        self.speci_to_process, self.yearmonth, self.ensemble_option)))
+                                                        self.speci_to_process, self.ensemble, 
+                                                        self.speci_to_process, self.yearmonth, self.ensemble)))
             
         # if have hour in model fname, and it is not 0 then insert previous file also to get times from previous yearmonth that are offset
         if not self.ensemble_member:
-            first_file_date = self.model_files[0].replace('_' + self.ensemble_option, '').split('_')[-1][:-3]
+            first_file_date = self.model_files[0].replace('_' + self.ensemble, '').split('_')[-1][:-3]
         else:
             first_file_date = self.model_files[0].split('_')[-1][:-3]  
         if len(first_file_date) == 10:
@@ -192,16 +192,16 @@ class ExperimentInterpolation(object):
                     prev_month_files_final = np.sort(glob.glob('{}/{}/{}/ensemble-stats/{}_{}/{}*{}*{}.nc'\
                                                         .format(exp_dir, self.grid_type,
                                                                 self.model_temporal_resolution,
-                                                                self.speci_to_process, self.ensemble_option, 
-                                                                self.speci_to_process, prev_yearmonth, self.ensemble_option)))
+                                                                self.speci_to_process, self.ensemble, 
+                                                                self.speci_to_process, prev_yearmonth, self.ensemble)))
 
                 if self.ensemble_member:
                     # drop all analysis files ending with '_an.nc' which are not in ensemble-stats
                     prev_month_files = [f for f in prev_month_files if '_an.nc' not in f] 
 
-                    # isolate model files to be only those associated with relevant ensemble option
+                    # isolate model files to be only those associated with relevant ensemble
                     prev_month_files_final = np.sort([f for f in prev_month_files if '{}-{}_'.format(
-                        self.speci_to_process,self.ensemble_option) in f])
+                        self.speci_to_process,self.ensemble) in f])
                     
                     # if the number of remaining model files is 0, this is because the files
                     # do not contain an ensemble member number, therefore take all model files
@@ -761,7 +761,7 @@ class ExperimentInterpolation(object):
 
                 # get date from filename
                 if not self.ensemble_member:
-                    file_date = model_file.replace('_' + self.ensemble_option, '').split('_')[-1][:-3]
+                    file_date = model_file.replace('_' + self.ensemble, '').split('_')[-1][:-3]
                 else:
                     file_date = model_file.split('_')[-1][:-3]    
 
@@ -849,7 +849,7 @@ class ExperimentInterpolation(object):
                 
                 # get date from filename
                 if not self.ensemble_member:
-                    file_date = model_file.replace('_' + self.ensemble_option, '').split('_')[-1][:-3]
+                    file_date = model_file.replace('_' + self.ensemble, '').split('_')[-1][:-3]
                 else:
                     file_date = model_file.split('_')[-1][:-3]                
                 
@@ -1211,7 +1211,7 @@ class ExperimentInterpolation(object):
 
                     # create measured variable
                     if self.forecast:
-                        measured_var = root_grp.createVariable(self.original_speci_to_process, 'f4', ('station', 'forecast_day', 'time'))
+                        measured_var = root_grp.createVariable(self.original_speci_to_process, 'f4', ('station', 'time', 'forecast_day'))
                     else:
                         measured_var = root_grp.createVariable(self.original_speci_to_process, 'f4', ('station', 'time'))
                     # GHOST
@@ -1246,7 +1246,10 @@ class ExperimentInterpolation(object):
                 # set all values to be NaN
                 station_weights = self.inverse_dists[ii,:]
                 if np.all(station_weights == 0):
-                    interp_vals = np.full(len(self.yearmonth_time), np.NaN, dtype=np.float32)
+                    if self.forecast:
+                        interp_vals = np.full((len(self.yearmonth_time), self.forecast_days), np.NaN, dtype=np.float32)
+                    else:
+                        interp_vals = np.full(len(self.yearmonth_time), np.NaN, dtype=np.float32)
                 else:
                     # get reciprocal model data at N nearest neighbours to observational station 
                     if self.forecast:
@@ -1255,13 +1258,13 @@ class ExperimentInterpolation(object):
                     else:
                         cut_model_data = self.monthly_model_data[:, self.nearest_neighbour_inds[ii,:int(self.interp_n_neighbours)],
                                                                     self.nearest_neighbour_inds[ii,int(self.interp_n_neighbours):]]
-                    
+
                     # create mask where data == NaN or infinite
                     invalid_mask = ~np.isfinite(cut_model_data)
                     
                     # create masked array
                     cut_model_data = np.ma.MaskedArray(cut_model_data, mask=invalid_mask)
-                    
+
                     # interpolate masked array across time dimension using interpolated weights per station
                     interp_vals = np.ma.average(cut_model_data, weights=station_weights, axis=-1)
 
@@ -1272,7 +1275,6 @@ class ExperimentInterpolation(object):
             root_grp.close() 
         
         except Exception as e:
-            self.log_file_str += str(interp_vals.shape)
             self.log_file_str += 'File {} could not be written. Error: {}.\n'.format(netCDF_fname, e)
             create_output_logfile(1, self.log_file_str)
 

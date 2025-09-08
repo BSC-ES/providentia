@@ -6,7 +6,7 @@ from PIL import Image
 
 import cartopy
 import cartopy.feature as cfeature
-from datetime import datetime
+from datetime import datetime, timedelta
 import matplotlib
 import matplotlib as mpl 
 import matplotlib.dates as mdates
@@ -347,6 +347,16 @@ def harmonise_xy_lims_paradigm(read_instance, canvas_instance, relevant_axs, bas
                 left = xlim[0]
                 right = xlim[1]
 
+            #round left/right datetimes to the nearest day
+            if left.hour >= 12:
+                left = datetime(left.year, left.month, left.day) + timedelta(days=1)
+            else:
+                left = datetime(left.year, left.month, left.day)
+            if right.hour >= 12:
+                right = datetime(right.year, right.month, right.day) + timedelta(days=1)
+            else:
+                right = datetime(right.year, right.month, right.day)
+
             # get number of days
             n_days = (right - left).days
 
@@ -357,8 +367,6 @@ def harmonise_xy_lims_paradigm(read_instance, canvas_instance, relevant_axs, bas
 
             # if there's more than 3 months, define time slices as the first day of the month
             if n_days >= 3 * 30:
-                # remove hours, minutes and seconds from the right and end dates
-                left, right = datetime(left.year, left.month, left.day), datetime(right.year, right.month, right.day)
 
                 # get the first and last days of each month
                 months_start = pd.date_range(left, right, freq='MS')
@@ -414,7 +422,7 @@ def harmonise_xy_lims_paradigm(read_instance, canvas_instance, relevant_axs, bas
                 n_ticks = min(periods, len(steps))
                 xticks = steps[np.linspace(0, len(steps) - 1, n_ticks, dtype=int)]
                
-            # show hours if number of days is less than 7
+            #show hours if number of days is less than 7
             if n_days < 7:
                 ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d %Hh'))
             else:
@@ -422,26 +430,34 @@ def harmonise_xy_lims_paradigm(read_instance, canvas_instance, relevant_axs, bas
             
             # set modified xticks
             for ax in relevant_axs_active:
-                ax.xaxis.set_ticks(xticks)
 
-            # get the date format to create the margin
-            clip_left = mdates.date2num(left)
-            clip_right = mdates.date2num(right)
+                # if daily forecast is active, do specific formatting to show forecast days
+                if read_instance.daily_forecast:
+                    if ((right-left).total_seconds() / 3600) <= 24:
+                        freq = '3h'
+                    elif ((right-left).total_seconds() / 3600) <= 48:
+                        freq = '6h'
+                    else:
+                        freq = '12h'
+                    xticks = pd.date_range(left, right, freq=freq)  
+                    xticklabels = []
+                    start_pd_dt = xticks[0]
+                    for pd_dt in xticks:
+                        pd_dt_diff = pd_dt - start_pd_dt
+                        day = pd_dt_diff.days + 1 + (read_instance.active_forecast_days[0] - 1)
+                        hour = pd_dt.strftime("%H")
+                        if int(hour) == 0:
+                            label = 'Day{} {}h'.format(day, hour)
+                        else:
+                            label = '{}h'.format(hour)
+                        xticklabels.append(label)
+                    ax.xaxis.set_ticks(xticks,labels=xticklabels)
+                else:
+                    ax.xaxis.set_ticks(xticks)
 
-            # get the len of the original y axis
-            ylen = ax.get_ylim()[1] - ax.get_ylim()[0]
-
-            # create the rectangle that will define the margin
-            clip_rect = mpatches.Rectangle(
-                (clip_left, ax.get_ylim()[0] + ylen*0.05),
-                clip_right - clip_left,
-                ylen * 0.9,       
-                transform=ax.transData
-            )
-
-            # set the margin
-            for ts in canvas_instance.plotting.timeseries_plot:
-                ts[0].set_clip_path(clip_rect)
+            # pad the margins
+            ax.margins(**plot_characteristics['margin_padding'])
+            
 
 def set_axis_title(read_instance, relevant_axis, title, plot_characteristics):
     """ Set title of plot axis.

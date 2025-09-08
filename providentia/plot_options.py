@@ -4,7 +4,7 @@ from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker
 import numpy as np
 
 from .read_aux import drop_nans
-from .statistics import calculate_statistic, get_z_statistic_info, exceedance_lim
+from .statistics import get_selected_station_data, calculate_statistic, get_z_statistic_info, exceedance_lim
 from .warnings_prv import show_message
 from .plot_aux import create_statistical_timeseries
 

@@ -90,14 +90,15 @@ def init_experiments(instance):
     if not hasattr(instance, 'experiments_menu'):
         instance.experiments_menu = {'window_title': 'Experiments', 
                                      'page_title': 'Select Experiment/s', 
-                                     'checkboxes':{}}
+                                     'experiments': {}}
         instance.experiments_menu['select_buttons'] = ['all', 'clear']
     
     # reset fields
-    instance.experiments_menu['checkboxes']['labels'] = [] 
-    instance.experiments_menu['checkboxes']['keep_default'] = [] 
-    instance.experiments_menu['checkboxes']['keep_selected'] = [] 
-    instance.experiments_menu['checkboxes']['map_vars'] = [] 
+    instance.experiments_menu['experiments']['labels'] = [] 
+    instance.experiments_menu['experiments']['keep_selected'] = [] 
+    instance.experiments_menu['experiments']['forecast'] = {} 
+    instance.experiments_menu['experiments']['forecast_days'] = {}
+    instance.experiments_menu['experiments']['map_vars'] = [] 
 
 
 def init_multispecies(instance):
@@ -278,17 +279,17 @@ def update_representativity_fields(instance):
     network_type = 'ghost' if instance.reading_ghost else 'nonghost'
 
     # set resolution to get representativity information based on active resolution
-    if instance.active_resolution in ['hourly', 'hourly_instantaneous']:
+    if instance.resolution in ['hourly', 'hourly_instantaneous']:
         resolution = 'hourly'
-    elif instance.active_resolution in ['3hourly', '3hourly_instantaneous']:
+    elif instance.resolution in ['3hourly', '3hourly_instantaneous']:
         resolution = '3hourly'
-    elif instance.active_resolution in ['6hourly', '6hourly_instantaneous']:
+    elif instance.resolution in ['6hourly', '6hourly_instantaneous']:
         resolution = '6hourly'
-    elif instance.active_resolution == 'daily':
+    elif instance.resolution == 'daily':
         resolution = 'daily'
-    elif instance.active_resolution == 'monthly':
+    elif instance.resolution == 'monthly':
         resolution = 'monthly'
-    elif instance.active_resolution == 'annual':
+    elif instance.resolution == 'annual':
         resolution = 'annual'
 
     instance.representativity_menu['rangeboxes']['map_vars'] = instance.representativity_info[network_type][resolution]['map_vars']
@@ -319,11 +320,11 @@ def update_period_fields(instance):
     """
 
     # hourly/3hourly/6hourly temporal resolution?
-    if 'hourly' in instance.active_resolution:
+    if 'hourly' in instance.resolution:
         instance.period_menu['checkboxes']['labels'] = ['Daytime', 'Nighttime', 'Weekday', 'Weekend',
                                                         'Spring', 'Summer', 'Autumn', 'Winter']
     # daily temporal resolution?
-    elif instance.active_resolution == 'daily':
+    elif instance.resolution == 'daily':
         instance.period_menu['checkboxes']['labels'] = ['Weekday', 'Weekend', 
                                                         'Spring', 'Summer', 'Autumn', 'Winter']
         # drop selected fields from higher temporal resolutions
@@ -335,7 +336,7 @@ def update_period_fields(instance):
                 instance.period_menu['checkboxes']['remove_selected'].remove(label)
 
     # monthly temporal resolution?
-    elif instance.active_resolution == 'monthly':
+    elif instance.resolution == 'monthly':
         instance.period_menu['checkboxes']['labels'] = ['Spring', 'Summer', 'Autumn', 'Winter']
         # drop selected fields from higher temporal resolutions
         labels_to_remove = ['Daytime', 'Nighttime', 'Weekday', 'Weekend']
@@ -346,7 +347,7 @@ def update_period_fields(instance):
                 instance.period_menu['checkboxes']['remove_selected'].remove(label)
 
     # annual temporal resolution?
-    elif instance.active_resolution == 'annual':
+    elif instance.resolution == 'annual':
         instance.period_menu['checkboxes']['labels'] = []
         # drop selected fields from higher temporal resolutions
         labels_to_remove = ['Daytime', 'Nighttime', 'Weekday', 'Weekend', 'Spring', 'Summer', 'Autumn', 'Winter']
