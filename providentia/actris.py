@@ -22,7 +22,7 @@ from providentia.auxiliar import CURRENT_PATH, join, pad_array
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
 # load ACTRIS mapping files
-parameters_dict = yaml.safe_load(open(join(
+ghost_actris_variables = yaml.safe_load(open(join(
     PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'ghost_actris_variables.yaml')))
 metadata_dict = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'metadata.yaml')))
@@ -96,7 +96,7 @@ def get_files_per_var(download_instance, var):
     page = 0
     while True:
         # set up URL with pagination
-        url = f"{base_url}/{parameters_dict[var]}/page/{page}"
+        url = f"{base_url}/{ghost_actris_variables[var]}/page/{page}"
         response = requests.get(url)
 
         # check if the response is valid and contains data
