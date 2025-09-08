@@ -661,8 +661,6 @@ def create_statistical_timeseries(read_instance, canvas_instance, chunk_stat, ch
 
     timeseries_data = pd.DataFrame(index=chunk_dates, columns=cut_data_labels, dtype=np.float32)
 
-    print(chunk_dates.shape, stats_calc.shape)
-
     for chunk_date_idx, chunk_date in enumerate(chunk_dates):
         for label_idx, data_label in enumerate(cut_data_labels):
             timeseries_data.loc[chunk_date, data_label] = stats_calc[chunk_date_idx][label_idx]

@@ -422,7 +422,7 @@ def harmonise_xy_lims_paradigm(read_instance, canvas_instance, relevant_axs, bas
                 n_ticks = min(periods, len(steps))
                 xticks = steps[np.linspace(0, len(steps) - 1, n_ticks, dtype=int)]
                
-            #show hours if number of days is less than 7
+            # show hours if number of days is less than 7
             if n_days < 7:
                 ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%Y-%m-%d %Hh'))
             else:

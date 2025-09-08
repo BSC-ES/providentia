@@ -20,8 +20,7 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from getpass import getpass
 
-from .actris import (get_files_path, temporally_average_data, get_data,
-                     get_files_per_var, is_wavelength_var, get_files_to_download,
+from .actris import (get_files_path, get_data, get_files_per_var, is_wavelength_var, get_files_to_download,
                      get_files_info, parameters_dict)
 from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import ProvConfiguration, load_conf
@@ -193,8 +192,9 @@ class Download(object):
                             if not initial_check_nc_files or files_to_download:
                                 download_ghost(network, initial_check=False, files_to_download=files_to_download)
                         # ACTRIS
-                        elif network == 'actris/actris':
-                            self.download_actris_network()
+                        elif network == 'actris/actris':   
+                            for resolution in self.resolution:
+                                self.download_actris_network(resolution)
                         # non-GHOST
                         else:
                             initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
@@ -1628,9 +1628,8 @@ class Download(object):
                     
         return valid_nc_files        
     
-    def download_actris_network(self):
-        
-        resolution = self.resolution[0]
+    def download_actris_network(self, resolution):
+
         target_start_date = datetime(int(self.start_date[:4]), int(self.start_date[4:6]), int(self.start_date[6:8]), 0)
         target_end_date = datetime(int(self.end_date[:4]), int(self.end_date[4:6]), int(self.end_date[6:8]), 23, 59, 59) - timedelta(days=1)
 
@@ -1659,9 +1658,9 @@ class Download(object):
             if not os.path.isfile(path):
                 # get files information
                 self.logger.info(f'\nFile containing information of the files available in Thredds for {var} ({path}) does not exist, creating.')
-                combined_data = get_files_per_var(var)
+                combined_data = get_files_per_var(self, var)
                 all_files = combined_data[var]['files']
-                files_info = get_files_info(all_files, var, path)
+                files_info = get_files_info(self, all_files, var, path)
                     
             # if file exists
             else:
@@ -1683,12 +1682,15 @@ class Download(object):
                     files_info = {k: v for k, v in files_info.items() if k.strip() and v}
                 else:
                     # get files information
-                    combined_data = get_files_per_var(var)
+                    combined_data = get_files_per_var(self, var)
                     all_files = combined_data[var]['files']
-                    files_info = get_files_info(all_files, var, path)
+                    files_info = get_files_info(self, all_files, var, path)
             
             # go to next variable if no data is found
-            if len(files_info) == 0:
+            if files_info is not None:
+                if len(files_info) == 0:
+                    continue
+            else:
                 continue
 
             # filter files by resolution and dates
@@ -1710,45 +1712,19 @@ class Download(object):
                             if file not in files[station]:
                                 files[station].append(file)
 
-            # files = dict(list(files.items())[0:1])
+            # files = dict(list(files.items())[62:65])
             if len(files) != 0:
 
-                # get data and metadata for each file within period and temporally average to standard times
+                # get data for each file within period and temporally average to standard times
                 start = time.time()
-                combined_ds, metadata, wavelength = get_data(files, var, actris_parameter, resolution, 
-                                                             target_start_date, target_end_date, files_info,
-                                                             self.ghost_version)
+                combined_ds, wavelength = get_data(self, files, var, actris_parameter, resolution, 
+                                                   target_start_date, target_end_date, files_info,
+                                                   self.ghost_version, self.n_cpus)
+                if combined_ds is None:
+                    continue
                 end = time.time()
                 elapsed_minutes = (end - start) / 60
-                print(f"Time to read data: {elapsed_minutes:.2f} minutes")
-
-                # add metadata
-                for key, value in metadata[resolution].items():
-                    if key in ['latitude', 'longitude']:
-                        value = [float(val) for val in value]
-                    elif key in ['altitude', 'sampling_height']:
-                        value = [float(val.replace('m', '').strip()) if isinstance(val, str) else val for val in value]
-                    combined_ds[key] = xr.Variable(data=value, dims=('station'))
-
-                # calculate measurement_altitude if altitude and sampling_height exist
-                if ('altitude' in combined_ds.keys()) and ('sampling_height' in combined_ds.keys()):
-                    value = combined_ds['altitude'].values + combined_ds['sampling_height'].values
-                    combined_ds['measurement_altitude'] = xr.Variable(data=value, dims=('station'))
-
-                # add units for lat and lon
-                # TODO: Check attrs geospatial_lat_units and geospatial_lon_units
-                combined_ds.latitude.attrs['units'] = 'degrees_north'
-                combined_ds.longitude.attrs['units'] = 'degrees_east'
-
-                # add general attrs
-                combined_ds.attrs['data_license'] = 'BSD-3-Clause. Copyright 2025 Alba Vilanova Cortezón'
-                combined_ds.attrs['source'] = 'Observations'
-                combined_ds.attrs['institution'] = 'Barcelona Supercomputing Center'
-                combined_ds.attrs['creator_name'] = 'Alba Vilanova Cortezón'
-                combined_ds.attrs['creator_email'] = 'alba.vilanova@bsc.es'
-                combined_ds.attrs['application_area'] = 'Monitoring atmospheric composition'
-                combined_ds.attrs['domain'] = 'Atmosphere'
-                combined_ds.attrs['observed_layer'] = 'Land surface'
+                self.logger.info(f"Time to read data: {elapsed_minutes:.2f} minutes")
 
                 # save data per year and month
                 path = join(self.nonghost_root, f'actris/actris/{resolution}/{var}')
@@ -1785,10 +1761,14 @@ class Download(object):
                             # n_stations_diff = previous_n_stations - current_n_stations
                             # if n_stations_diff > 0:
                             #     self.logger.info(f'Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
-                            
+
                             # remove file if it exists
                             if os.path.isfile(filename):
                                 os.system("rm {}".format(filename))
+
+                            # do not save if empty
+                            if len(combined_ds_yearmonth[var].values) == 0:
+                                continue
                                 
                             # save file
                             combined_ds_yearmonth.to_netcdf(filename)
@@ -1801,7 +1781,7 @@ class Download(object):
                 self.logger.info(f'Total number of saved files: {saved_files}')
 
             else:
-                self.logger.info('No files were found')
+                self.logger.info(f'No files were found at {resolution} resolution for {var}')
 
 
     def check_time(self, size, file_size):

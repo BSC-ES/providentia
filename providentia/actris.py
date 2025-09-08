@@ -1,6 +1,7 @@
 import bisect
 import copy
 import csv
+import ctypes
 import datetime
 import itertools
 import os
@@ -14,6 +15,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from netCDF4 import Dataset
+import multiprocessing
 
 from providentia.auxiliar import CURRENT_PATH, join, pad_array
 
@@ -33,6 +35,8 @@ variable_mapping = {k: v for k,
 flags_dict = yaml.safe_load(
     open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'flags.yaml')))
 
+# initialise dictionary for storing pointers to shared memory variables in read step 
+shared_memory_vars = {}
 
 def create_variable_mapping_file():
 
@@ -68,7 +72,7 @@ def create_ghost_variables_file(ghost_version):
                              ', '.join(standard_parameters[key]['ebas_parameter_name'])])
 
 
-def get_files_per_var(var):
+def get_files_per_var(download_instance, var):
     """Get all files available in ACTRIS server per variable
 
     Parameters
@@ -97,7 +101,7 @@ def get_files_per_var(var):
 
         # check if the response is valid and contains data
         if response.status_code != 200:
-            print(
+            download_instance.logger.error(
                 f"Error fetching page {page}. Status code: {response.status_code}")
             break
 
@@ -202,10 +206,23 @@ def create_time_pairs(time):
     return time_pairs
 
 
-def datetime_to_fractional_minutes_from_reference(dateFuture):
-    '''get reference start datetime'''
-    datePast = datetime.datetime(1,1,1,0,0)
-    difference = dateFuture - datePast
+def datetime_to_fractional_minutes_from_reference(date):
+    """Get datetime in fractional minutes
+
+    Parameters
+    ----------
+    date : datetime.datetime
+        Datetime
+
+    Returns
+    -------
+    int
+        Datetime in fractional minutes
+    """
+
+    past_date = datetime.datetime(1,1,1,0,0)
+    difference = date - past_date
+    
     return difference.total_seconds() / datetime.timedelta(minutes=1).total_seconds()
                     
 
@@ -309,7 +326,6 @@ def temporally_average_data(station_ds, var, ghost_version, standard_time_pairs,
     station_qa_data = []
 
     # remove station selection
-    station_ds = station_ds.isel(station=0)
     station_var = station_ds[var].values
     station_flag = station_ds['flag'].values
     station_time_bnds = station_ds['time_bnds'].values
@@ -320,11 +336,13 @@ def temporally_average_data(station_ds, var, ghost_version, standard_time_pairs,
 
     # get timedelta between start and end times
     valid_timedeltas =  np.array([(end_time - start_time).astype('timedelta64[m]').astype(np.float32) 
-                                    for (end_time, start_time) in zip(end_times, start_times)])
+                                  for (end_time, start_time) in zip(end_times, start_times)])
     
     # get measurement start and end times as integers
-    valid_start_times = np.array([datetime_to_fractional_minutes_from_reference(t) for t in pd.to_datetime(start_times).to_pydatetime()])
-    valid_end_times = np.array([datetime_to_fractional_minutes_from_reference(t) for t in pd.to_datetime(end_times).to_pydatetime()])
+    valid_start_times = np.array([datetime_to_fractional_minutes_from_reference(t) 
+                                  for t in pd.to_datetime(start_times).to_pydatetime()])
+    valid_end_times = np.array([datetime_to_fractional_minutes_from_reference(t) 
+                                for t in pd.to_datetime(end_times).to_pydatetime()])
 
     # initialise variable for finding relevant measurement indices
     last_relevant_index = 0
@@ -332,7 +350,11 @@ def temporally_average_data(station_ds, var, ghost_version, standard_time_pairs,
     for i, (standard_start_date, standard_end_date) in enumerate(standard_time_pairs):
         
         # get window indices
-        window_indices, right_overlap, left_overlap = get_window_indices(standard_start_date, standard_end_date, valid_start_times, valid_end_times, last_relevant_index)
+        window_indices, right_overlap, left_overlap = get_window_indices(standard_start_date, 
+                                                                         standard_end_date, 
+                                                                         valid_start_times, 
+                                                                         valid_end_times, 
+                                                                         last_relevant_index)
 
         # only one overlap value
         if len(window_indices) == 1:
@@ -423,7 +445,7 @@ def is_wavelength_var(actris_parameter):
     return wavelength_var
 
 
-def get_files_info(files, var, path):
+def get_files_info(download_instance, files, var, path):
     """Read variables, resolution, start date and end date from all files in ACTRIS server per variable.
 
     Parameters
@@ -482,8 +504,9 @@ def get_files_info(files, var, path):
         with open(path, 'w') as file:
             yaml.dump(datasets, file, default_flow_style=False)
     else:
-        print(f'Error: No data could be found for {var}')
-
+        download_instance.logger.error(f'Error: No data could be found for {var}')
+        return
+    
     return files_info
 
 
@@ -548,7 +571,8 @@ def select_station_file(urls, files_info):
         urls_data_levels = np.unique(attrs_dict['ebas_data_level'])
         # if we have different data levels
         if len(urls_data_levels) > 1:
-            is_max = attrs_dict['ebas_data_level'] == attrs_dict['ebas_data_level'][np.argmax(np.float32(attrs_dict['ebas_data_level']))]
+            max_level_ind = np.nanargmax(np.float32([np.nan if x == '' else x for x in attrs_dict['ebas_data_level']]))
+            is_max = attrs_dict['ebas_data_level'] == attrs_dict['ebas_data_level'][max_level_ind]
             
             # remove urls if the data level is not the maximum of all files
             for attr in ['ebas_statistics', 'ebas_data_level', 'ebas_revision_date']:
@@ -575,8 +599,179 @@ def select_station_file(urls, files_info):
     return url
 
 
-def get_data(files, var, actris_parameter, resolution, target_start_date, target_end_date, files_info, 
-             ghost_version):
+def read_data(args):
+
+    (i, station, urls, data_shape, flag_shape, qa_shape,
+     metadata_shape, files_info, var, actris_parameter, ebas_component,
+     target_start_date, target_end_date,
+     variable_mapping, metadata_dict, standard_time_pairs,
+     vfunc, ghost_version) = args
+
+    local_errors = ""
+    local_warnings = ""
+
+    # open files
+    try:
+        if len(urls) > 1:
+            url = select_station_file(urls, files_info)
+            if url is None:
+                return station, local_errors, local_warnings
+        else:
+            url = urls[0]
+
+        nc = Dataset(url, mode='r')
+        ds = xr.open_dataset(xr.backends.NetCDF4DataStore(nc))
+
+        possible_vars, possible_var = get_var_in_file(ds, var, actris_parameter, ebas_component)
+        if possible_var is None:
+            local_errors = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}.'
+            return station, local_errors, local_warnings
+
+    except Exception as error:
+        local_errors = f'Opening file: {error}.'
+        return station, local_errors, local_warnings
+  
+    # remove time duplicates if any (keep first)
+    ds = ds.sel(time=~ds['time'].to_index().duplicated())
+    
+    # select data in period range
+    ds = ds.sel(time=slice(target_start_date, target_end_date))
+    if ds.time.size == 0:
+        local_warnings += f'No data available after filtering by time.'
+        return station, local_errors, local_warnings
+
+    # rename qc dimension
+    ds = ds.rename_dims({f'{possible_var}_qc_flags': 'N_flag_codes'})
+
+    # get lowest level if tower height is in coordinates
+    if 'Tower_inlet_height' in list(ds.coords):
+        local_warnings += f'Taking data from first height (Tower_inlet_height={min(ds.Tower_inlet_height.values)}). '
+        ds = ds.sel(Tower_inlet_height=min(
+            ds.Tower_inlet_height.values), drop=True)
+
+    # get data at desired wavelength if wavelength is in coordinates
+    if 'Wavelength' in list(ds[possible_var].coords) or 'Wavelengthx' in list(ds[possible_var].coords):
+        # Select most common wavelength for black carbon (name does not provide it)
+        if var == 'sconcbc':
+            wavelength = 880
+            local_warnings += f'Wavelength appears in dimensions. Selected wavelength: {wavelength}. '
+        # Get wavelength from variable name for other variables
+        else:
+            wavelength = float(re.findall(r'\d+', var)[0])
+
+        # Select data for wavelength
+        found_wavelength = False
+        if 'Wavelengthx' in list(ds[possible_var].coords):
+            if wavelength in ds.Wavelengthx.values:
+                ds = ds.sel(Wavelengthx=wavelength, drop=True)
+                found_wavelength = True
+            else:
+                existing_wavelengths = ds.Wavelengthx.values
+        elif 'Wavelength' in list(ds[possible_var].coords):
+            if wavelength in ds.Wavelength.values:
+                ds = ds.sel(Wavelength=wavelength, drop=True)
+                found_wavelength = True
+            else:
+                existing_wavelengths = ds.Wavelength.values
+
+        if not found_wavelength:
+            local_warnings += f'Data at {wavelength}nm could not be found. Existing wavelengths: {existing_wavelengths}. '
+            return station, local_errors, local_warnings
+
+    # remove artifact and fraction (sconcoc)
+    # TODO: Discuss this
+    if 'Artifact' in list(ds.coords):
+        local_warnings += f'Taking data from first artifact dimension (Artifact={ds.Artifact.values[0]}). '
+        ds = ds.isel(Artifact=0, drop=True)
+    if 'Fraction' in list(ds.coords):
+        local_warnings += f'Taking data from first fraction dimension (Fraction={ds.Fraction.values[0]}). '
+        ds = ds.isel(Fraction=0, drop=True)
+
+    # read variable
+    da_var = ds[possible_var]
+
+    # avoid datasets that do not have defined units
+    if 'ebas_unit' not in da_var.attrs:
+        local_errors = f'No units were defined.'
+        return station, local_errors, local_warnings
+
+    # avoid datasets that do not have the same units as in variable mapping
+    if da_var.attrs['ebas_unit'] != variable_mapping[actris_parameter]['units']:
+        local_errors = f"Units {da_var.attrs['ebas_unit']} do not match those in variable mapping "
+        local_errors += f"dictionary ({variable_mapping[actris_parameter]['units']})."
+        return station, local_errors, local_warnings
+
+    # remove all attributes except units
+    da_var_attrs = copy.deepcopy(da_var.attrs)
+    da_var.attrs = {key: value for key,
+                    value in da_var.attrs.items() if key in ['ebas_unit', 'ebas_station_code']}
+    
+    # read quality control data
+    try:
+        flag_data = ds[f'{possible_var}_qc'].transpose(
+            "time", "N_flag_codes")
+    except:
+        local_errors = "Flag data could not be transposed."
+        return station, local_errors, local_warnings
+
+    # rename variable to BSC standards
+    station_ds = da_var.to_dataset(name=var)
+
+    # add time bounds
+    station_ds['time_bnds'] = ds['time_bnds']
+
+    # add quality control data
+    station_ds['flag'] = flag_data
+
+    # temporally average data from original times to standard times
+    station_averaged_data, station_flag_data, station_qa_data = temporally_average_data(station_ds, var, ghost_version, standard_time_pairs, vfunc)
+    if np.isnan(station_averaged_data).all():
+        local_warnings += 'No data after temporal averaging.'
+        return station, local_errors, local_warnings
+
+    data_np = np.frombuffer(shared_memory_vars['data'], dtype=np.float32).reshape(data_shape)
+    flag_np = np.frombuffer(shared_memory_vars['flag'], dtype=np.float32).reshape(flag_shape)
+    qa_np = np.frombuffer(shared_memory_vars['qa'], dtype=np.float32).reshape(qa_shape)
+
+    data_np[i, :] = station_averaged_data
+    flag_np[i, :, :] = station_flag_data
+    qa_np[i, :, :] = station_qa_data
+
+    # save metadata
+    metadata_np = {}
+    for ghost_key, ebas_key in metadata_dict.items():
+        metadata_np[ghost_key] = np.frombuffer(shared_memory_vars['metadata'][ghost_key], dtype='S75').reshape(metadata_shape)
+        if ebas_key in da_var_attrs.keys():
+            val =  da_var_attrs[ebas_key]
+        elif ebas_key in ds.attrs.keys():
+            val = ds.attrs[ebas_key]
+        else:
+            val = str(np.nan)
+        metadata_np[ghost_key][i] = val.encode('utf-8')
+
+    return station, local_errors, local_warnings
+
+
+def init_shared_vars_read_data(shared_data, shared_flag_data, shared_qa_data, shared_metadata):
+    shared_memory_vars['data'] = shared_data
+    shared_memory_vars['flag'] = shared_flag_data
+    shared_memory_vars['qa'] = shared_qa_data
+    shared_memory_vars['metadata'] = {}
+    for ghost_key in metadata_dict.keys():
+        shared_memory_vars['metadata'][ghost_key] = shared_metadata[ghost_key]
+
+
+def ghost_validity_flag_mapper(flag):
+    if np.isnan(flag):
+        return np.nan
+    elif flag == 0:
+        return flags_dict['000']["GHOST_decreed_validity"][0]
+    else:
+        return flags_dict[str(int(flag))]["GHOST_decreed_validity"][0]
+    
+
+def get_data(download_instance, files, var, actris_parameter, resolution, target_start_date, target_end_date, 
+             files_info, ghost_version, n_cpus):
     """Read variable and metadata data standarising dimensions
 
     Parameters
@@ -604,10 +799,6 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
         Wavelength
     """
 
-    # combine datasets that have the same variable and resolution
-    metadata = {}
-    metadata[resolution] = {}
-
     # get EBAS component
     ebas_component = variable_mapping[actris_parameter]['var']
 
@@ -627,170 +818,104 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
 
     standard_time = pd.date_range(start=target_start_date, end=target_end_date,
                                   freq=frequency).to_pydatetime()
+    
+    # get dimension of new arrays
+    n_stations = len(files)
+    n_times = len(standard_time)
+    data_shape = (n_stations, n_times)
+    flag_shape = (n_stations, n_times, 186)
+    qa_shape = (n_stations, n_times, 2)
+    metadata_shape = (n_stations)
 
     # initialise averaged data
-    averaged_data = np.full(
-        (len(files.items()), len(standard_time)), fill_value=np.nan, dtype=np.float32)
-    averaged_flag_data = np.full(
-        (len(files.items()), len(standard_time), 186), fill_value=np.nan, dtype=np.float32)
-    averaged_qa_data = np.full(
-        (len(files.items()), len(standard_time), 2), fill_value=np.nan, dtype=np.float32)
+    averaged_data = np.full(data_shape, fill_value=np.nan, dtype=np.float32)
+    averaged_flag_data = np.full(flag_shape, fill_value=np.nan, dtype=np.float32)
+    averaged_qa_data = np.full(qa_shape, fill_value=np.nan, dtype=np.float32)
 
     # define vectorize function to get GHOST_decreed_validity by overlap flags later
-    vfunc = np.vectorize(
-        lambda flag: np.nan if np.isnan(flag) 
-                    else flags_dict['000']["GHOST_decreed_validity"][0] if flag == 0 
-                    else flags_dict[str(int(flag))]["GHOST_decreed_validity"][0],
-        otypes=['O']
-    )
+    vfunc = np.vectorize(ghost_validity_flag_mapper, otypes=['O'])
 
     # create pairs of valid dates
     standard_time_pairs = create_time_pairs(standard_time)
 
-    errors = {}
-    warnings = {}
-    tqdm_iter = tqdm(
-        files.items(), bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}', desc=f"Reading data")
-    for i, (station, urls) in enumerate(tqdm_iter):
+    # create data specific arrays to share across processes (for parallel multiprocessing use)
+    shared_data = multiprocessing.RawArray(ctypes.c_float, int(np.prod(data_shape)))
+    shared_flag_data = multiprocessing.RawArray(ctypes.c_float, int(np.prod(flag_shape)))
+    shared_qa_data = multiprocessing.RawArray(ctypes.c_float, int(np.prod(qa_shape)))
+    shared_metadata = {}
+    for ghost_key in metadata_dict.keys():
+        shared_metadata[ghost_key] = multiprocessing.RawArray(ctypes.c_char, int(np.prod(metadata_shape)*75))
 
-        # open files
-        try:
-            if len(urls) > 1:
-                url = select_station_file(urls, files_info)
-                if url is None:
-                    continue
-            else:
-                url = urls[0]
+    # read data and metadata in parallel
+    errors = []
+    warnings = []
+    args_list = [
+        (
+            i, station, urls, data_shape, flag_shape, qa_shape, metadata_shape,
+            files_info, var, actris_parameter, ebas_component,
+            target_start_date, target_end_date,
+            variable_mapping, metadata_dict, standard_time_pairs,
+            vfunc, ghost_version
+        )
+        for i, (station, urls) in enumerate(files.items())
+    ]
+    pool = multiprocessing.Pool(
+        processes=n_cpus,
+        initializer=init_shared_vars_read_data,
+        initargs=(shared_data, shared_flag_data, shared_qa_data, shared_metadata)
+    )
+    for station, error, warning in tqdm(
+            pool.imap(read_data, args_list),
+            total=len(args_list),
+            desc="Reading data",
+            bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt}'
+        ):
+        if error:
+            errors.append(f'{station} - Error: {error}')
+        if warning:
+            warnings.append(f'{station} - Warning: {warning}')
 
-            nc = Dataset(url, mode='r')
-            ds = xr.open_dataset(xr.backends.NetCDF4DataStore(nc))
+    # print errors and warnings if any
+    if errors:
+        download_instance.logger.info("=== ERRORS ===")
+        for e in errors:
+            download_instance.logger.info(e)
 
-            possible_vars, possible_var = get_var_in_file(ds, var, actris_parameter, ebas_component)
-            if possible_var is None:
-                errors[
-                    station] = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}.'
-                continue
+    if warnings:
+        download_instance.logger.info("=== WARNINGS ===")
+        for w in warnings:
+            download_instance.logger.info(w)
+            
+    pool.close()
+    
+    # wait for worker processes to terminate before continuing
+    pool.join()
 
-        except Exception as error:
-            errors[station] = f'{i} - Error opening file: {error}.'
-            continue
+    if (len(errors) + len(warnings)) == len(args_list):
+        download_instance.logger.info('All datasets have thrown an error or warning, aborting.')
+        return None, None
 
-        warnings[station] = ""
-
-        # remove time duplicates if any (keep first)
-        ds = ds.sel(time=~ds['time'].to_index().duplicated())
-
-        # select data in period range
-        ds = ds.sel(time=slice(target_start_date, target_end_date))
-
-        # assign station code as dimension
-        ds = ds.expand_dims(dim={'station': [i]})
-
-        # rename qc dimension
-        ds = ds.rename_dims({f'{possible_var}_qc_flags': 'N_flag_codes'})
-
-        # get lowest level if tower height is in coordinates
-        if 'Tower_inlet_height' in list(ds.coords):
-            warnings[station] += f'Taking data from first height (Tower_inlet_height={min(ds.Tower_inlet_height.values)}). '
-            ds = ds.sel(Tower_inlet_height=min(
-                ds.Tower_inlet_height.values), drop=True)
-
-        # get data at desired wavelength if wavelength is in coordinates
-        if 'Wavelength' in list(ds.coords) or 'Wavelengthx' in list(ds.coords):
-            # Select most common wavelength for black carbon (name does not provide it)
-            if var == 'sconcbc':
-                wavelength = 880
-                warnings[
-                    station] += f'Wavelength appears in dimensions. Selected wavelength: {wavelength}. '
-            # Get wavelength from variable name for other variables
-            else:
-                wavelength = float(re.findall(r'\d+', var)[0])
-
-            # Select data for wavelength
-            found_wavelength = False
-            if 'Wavelengthx' in list(ds.coords):
-                if wavelength in ds.Wavelengthx.values:
-                    ds = ds.sel(Wavelengthx=wavelength, drop=True)
-                    found_wavelength = True
-                else:
-                    existing_wavelengths = ds.Wavelengthx.values
-            elif 'Wavelength' in list(ds.coords):
-                if wavelength in ds.Wavelength.values:
-                    ds = ds.sel(Wavelength=wavelength, drop=True)
-                    found_wavelength = True
-                else:
-                    existing_wavelengths = ds.Wavelength.values
-
-            if not found_wavelength:
-                warnings[station] += f'Data at {wavelength}nm could not be found. Existing wavelengths: {existing_wavelengths}. '
-                continue
-
-        # remove artifact and fraction (sconcoc)
-        # TODO: Discuss this
-        if 'Artifact' in list(ds.coords):
-            warnings[station] += f'Taking data from first artifact dimension (Artifact={ds.Artifact.values[0]}). '
-            ds = ds.isel(Artifact=0, drop=True)
-        if 'Fraction' in list(ds.coords):
-            warnings[station] += f'Taking data from first fraction dimension (Fraction={ds.Fraction.values[0]}). '
-            ds = ds.isel(Fraction=0, drop=True)
-
-        # read variable
-        da_var = ds[possible_var]
-
-        # avoid datasets that do not have defined units
-        if 'ebas_unit' not in da_var.attrs:
-            errors[station] = f'No units were defined.'
-            continue
-
-        # avoid datasets that do not have the same units as in variable mapping
-        if da_var.attrs['ebas_unit'] != variable_mapping[actris_parameter]['units']:
-            errors[station] = f"Units {da_var.attrs['ebas_unit']} do not match those in variable mapping "
-            errors[station] += f"dictionary ({variable_mapping[actris_parameter]['units']})."
-            continue
-
-        # save metadata
-        for ghost_key, ebas_key in metadata_dict.items():
-            # create key if it does not exist
-            if ghost_key not in metadata[resolution].keys():
-                metadata[resolution][ghost_key] = []
-
-            # search value in var attrs
-            if ebas_key in da_var.attrs.keys():
-                metadata[resolution][ghost_key].append(da_var.attrs[ebas_key])
-            # search value in ds attrs
-            elif ebas_key in ds.attrs.keys():
-                metadata[resolution][ghost_key].append(ds.attrs[ebas_key])
-            # not found -> nan
-            else:
-                metadata[resolution][ghost_key].append(np.nan)
-
-        # remove all attributes except units
-        da_var.attrs = {key: value for key,
-                        value in da_var.attrs.items() if key in ['ebas_unit', 'ebas_station_code']}
-
-        # read quality control data
-        flag_data = ds[f'{possible_var}_qc'].transpose(
-            "station", "time", "N_flag_codes")
-
-        # rename variable to BSC standards
-        station_ds = da_var.to_dataset(name=var)
-
-        # add time bounds
-        station_ds['time_bnds'] = ds['time_bnds']
-
-        # add quality control data
-        station_ds['flag'] = flag_data
-
-        # temporally average data from original times to standard times
-        station_averaged_data, station_flag_data, station_qa_data = temporally_average_data(station_ds, var, ghost_version, standard_time_pairs, vfunc)
-
-        # save
-        averaged_data[i, :] = station_averaged_data
-        averaged_flag_data[i, :, :] = station_flag_data
-        averaged_qa_data[i, :, :] = station_qa_data
+    # get combined data and metadata after read
+    averaged_data = np.frombuffer(shared_data, dtype=np.float32).reshape(data_shape)
+    averaged_flag_data = np.frombuffer(shared_flag_data, dtype=np.float32).reshape(flag_shape)
+    averaged_qa_data = np.frombuffer(shared_qa_data, dtype=np.float32).reshape(qa_shape)
+    metadata = {}
+    for ghost_key in metadata_dict.keys():
+        metadata[ghost_key] = np.frombuffer(shared_metadata[ghost_key], dtype='S75').reshape(metadata_shape)
 
     # create dataset with averaged data
     units = variable_mapping[actris_parameter]['units']
+    
+    # case for temperature (t2), unit converter assumes multiple units when there is a space
+    if units == 'deg C':
+        units = 'degC'
+    # case for lsco, lbsco and absco
+    elif units == '1/Mm':
+        units = 'Mm-1'
+    # case for od
+    elif units == 'no unit':
+        units = 'unitless'
+
     combined_ds = xr.Dataset(
         data_vars={
             var: (['station', 'time'], averaged_data,
@@ -824,20 +949,38 @@ def get_data(files, var, actris_parameter, resolution, target_start_date, target
     )
     combined_ds['qa'] = da_qa
 
-    # show errors
-    if len(errors) > 0:
-        print(f'Collected errors ({len(errors)}):')
-        for file, error in errors.items():
-            print(f'{file} - Error: {error}')
+    # add metadata
+    for key, value in metadata.items():
+        if key in ['latitude', 'longitude']:
+            value = [float(val) if val != b'' else np.nan for val in value]
+        elif key in ['altitude', 'sampling_height']:
+            value = [float(val.decode('utf-8').replace('m', '').strip()) 
+                     if val != b'' else np.nan for val in value]
+        else:
+            value = [val.decode('utf-8') for val in value]
+        combined_ds[key] = xr.Variable(data=value, dims=('station'))
 
-    # show warnings
-    if len(warnings) > 0 and all(len(warning) > 0 for warning in warnings.values()):
-        print(f'Collected warnings ({len(warnings)}):')
-        for file, warning in warnings.items():
-            if len(warning) > 0:
-                print(f'{file} - Warning: {warning}')
+    # calculate measurement_altitude if altitude and sampling_height exist
+    if ('altitude' in combined_ds.keys()) and ('sampling_height' in combined_ds.keys()):
+        value = combined_ds['altitude'].values + combined_ds['sampling_height'].values
+        combined_ds['measurement_altitude'] = xr.Variable(data=value, dims=('station'))
 
-    return combined_ds, metadata, wavelength
+    # add units for lat and lon
+    # TODO: Check attrs geospatial_lat_units and geospatial_lon_units
+    combined_ds.latitude.attrs['units'] = 'degrees_north'
+    combined_ds.longitude.attrs['units'] = 'degrees_east'
+
+    # add general attrs
+    combined_ds.attrs['data_license'] = f'BSD-3-Clause. Copyright {datetime.datetime.now().year} Alba Vilanova Cortezón'
+    combined_ds.attrs['source'] = 'Observations'
+    combined_ds.attrs['institution'] = 'Barcelona Supercomputing Center'
+    combined_ds.attrs['creator_name'] = 'Alba Vilanova Cortezón'
+    combined_ds.attrs['creator_email'] = 'alba.vilanova@bsc.es'
+    combined_ds.attrs['application_area'] = 'Monitoring atmospheric composition'
+    combined_ds.attrs['domain'] = 'Atmosphere'
+    combined_ds.attrs['observed_layer'] = 'Land surface'
+
+    return combined_ds, wavelength
 
 
 def get_files_to_download(nonghost_root, target_start_date, target_end_date, resolution, var):

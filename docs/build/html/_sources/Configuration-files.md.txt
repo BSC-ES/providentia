@@ -62,7 +62,9 @@ It is **mandatory** to define sections to launch Providentia. Their names must b
 | resolution | ✓ | Temporal resolution of the observations you want to load (e.g. `3hourly`). |
 | start_date | ✓ | Comparison start date in YYYYMMDD format (e.g. `20170101`). |
 | end_date | ✓ | Comparison end date in YYYYMMDD format (e.g. `20180601`). |
-| experiments | ✗ | ID of interpolated experiment using providentia-interpolation. The experiment IDs can be mapped to different names by adding a list of alternative names after the experiment IDs (e.g. `exp1, exp2 (altexp1, altexp2)`). |
+| experiments | ✗ | ID of experiment. The experiment IDs can be mapped to different names by adding a list of alternative names after the experiment IDs (e.g. `exp1, exp2 (altexp1, altexp2)`). After interpolation experiment IDs will consist of 3 separate strings [ID-domain-ensemble]. The domain and ensemble  |
+| domain | ✗ | Domain of the experiment. Can be multiple. |
+| ensemble | ✗ | Ensemble member number or ensemble statistic of the experiment. defaults to all members available. Can be multiple. |  
 | temporal_colocation | ✗ | Boolean variable to set if you want to temporally colocate the observation and experiment data. |
 | spatial_colocation | ✗ | Boolean variable to set if you want to spatially colocate the observation and experiment data across multiple species. |
 | statistic_mode | ✗ | Statistic mode: Temporal&#124;Spatial (default), Spatial&#124;Temporal or Flattened. |
@@ -85,11 +87,13 @@ It is **mandatory** to define sections to launch Providentia. Their names must b
 | harmonise_summary | ✗ | Boolean variable to set if you wish to harmonise axes limits across subsections for summary report. |
 | observations_data_label | ✗ | Alias for observational data |
 | remove_extreme_stations | ✗ | Type of extreme stations removal, from the options given in `remove_extreme_stations.yaml`. |
-| resampling_resolution | ✗ | Resolution you want to resample your data to. Options: `hourly`, `daily`, `monthly`, `annual`.|
-| forecast | ✗ | Indicates if data comes from forecast, this affects how the timesteps are taken in the interpolation. |
-| forecast_day | ✗ | Day of the model forecast to analyse. |
+| resampling_resolution | ✗ | Resolution you want to resample your data to. Options: `hourly`, `3hourly`, `6hourly`, `daily`, `monthly`, `annual`.|
+| forecast | ✗ | Controls how forecast data is handled. Valid options are `dayN` (e.g. `day1`) or `daily`. If this field is not empty in the interpolation, all forecast data will be processed.|
+| interp_n_neighbours | ✗ | The number of nearest neighbours to use in the interpolation of experiment output to observational stations. If not set, this defaults to `4`.|
+| interp_spinup_timesteps | ✗ | Needs to be a number|
+| interp_experiment_downsampling | ✗ | mean or median|
+| interp_experiment_upsampling | ✗ | None, fill or gaps|
 | interp_multiprocessing | ✗ | Use multiprocessing instead of greasy to interpolate in HPC machines. |
-| interpolated | ✗ | Indicates if the experiments are interpolated or to interpolate. If the variable is False, this can be used to download non-interpolated experiments into local machines. |
   
 Defining a list of experiments is optional since the user might only want to check the observations data.
 
