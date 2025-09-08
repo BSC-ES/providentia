@@ -148,7 +148,7 @@ class DataReader:
                             show_message(self.read_instance, msg)
                         elif networkspeci in self.read_instance.filter_networkspecies:
                             self.read_instance.filter_networkspecies.remove(networkspeci)
-                            self.read_instance.filter_species.remove(networkspeci.split('|')[1])
+                            del self.read_instance.filter_species[networkspeci.split('|')[1]]
                             msg = 'There is no available observational data for the filter network|species: {}. Dropping.'.format(networkspeci)
                             show_message(self.read_instance, msg)
 
@@ -282,7 +282,7 @@ class DataReader:
                 nonghost_standard_units = {}
                 for speci in self.read_instance.nonghost_units.keys():
                     input_units = self.read_instance.nonghost_units[speci]
-                    if input_units != '-':
+                    if input_units not in ['-', 'unitless']:
                         output_units = copy.deepcopy(input_units)
                         formula = self.read_instance.parameter_dictionary[speci]['chemical_formula']
                         conv_obj = unit_converter.convert_units(input_units, output_units, 1, measured_species=formula)
@@ -690,7 +690,8 @@ class DataReader:
                     show_message(self.read_instance, msg)
                 elif networkspeci in self.read_instance.filter_networkspecies:
                     self.read_instance.filter_networkspecies.remove(networkspeci)
-                    self.read_instance.filter_species.remove(networkspeci.split('|')[1])
+                    if networkspeci.split('|')[1] in self.read_instance.filter_species:
+                        del self.read_instance.filter_species[networkspeci.split('|')[1]]
                     msg = 'There is no available observational data for the filter network|species: {}. Dropping.'.format(networkspeci)
                     show_message(self.read_instance, msg)
                 continue

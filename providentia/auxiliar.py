@@ -109,6 +109,10 @@ def pad_array(arr, length, pad_value=np.nan):
 
 def get_machine():
 
+    # return github machine if tests are running in actions
+    if os.getenv("GITHUB_ACTIONS") == "true":
+        return "github"
+    
     # get BSC machine name (if have one)
     machine = os.environ.get('BSC_MACHINE', None)
 
