@@ -17,8 +17,8 @@ cams_forecast:
     forecast_period: time
 cams_reanalysis:
   regional:
-    longitude: longitude
-    latitude: latitude
+    lon: longitude
+    lat: latitude
     time: time
   global:
     longitude: longitude
