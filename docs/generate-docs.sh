@@ -1,14 +1,14 @@
 #!/bin/sh
 
 # Try to remove wiki, uploads and previous docs
-rm -rf Providentia.wiki
+rm -rf providentia.wiki
 rm -rf source/uploads
 rm -rf source/*.md
 
 # Cloning wiki to get Markdown files
 echo "Cloning wiki..."
-git clone https://earth.bsc.es/gitlab/ac/Providentia.wiki.git
-cd Providentia.wiki
+git clone https://earth.bsc.es/gitlab/ac/providentia.wiki.git
+cd providentia.wiki
 
 echo "Copying md files..."
 
@@ -17,7 +17,7 @@ mv * ../source/
 
 # Removing wiki
 cd ..
-rm -rf Providentia.wiki
+rm -rf providentia.wiki
 
 # Removing unused files
 cd source

@@ -12,7 +12,6 @@ import yaml
 import matplotlib
 from matplotlib import colors
 import matplotlib.pyplot as plt
-import numba
 import numpy as np
 import pandas as pd
 import scipy.stats as st
@@ -111,8 +110,6 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
 
             # cut data array for valid data labels
             data_array = data_array[valid_data_labels_mask]
-
-            start = time.time()
 
             # do resampling
             data_array = do_resampling(read_instance, data_array)
@@ -956,7 +953,6 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 # otherwise take active mode
                 else:
                     data_array_b = canvas_instance.selected_station_data[networkspeci]['active_mode'][data_label_b_indices]
-
             # if need to mask data, then do so
             if mask is not None:
                 data_array_b[mask[data_label_b_indices]] = np.NaN

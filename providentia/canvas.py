@@ -975,7 +975,6 @@ class Canvas(FigureCanvas):
                 self.lower_canvas_cover.show()
 
             elif len(self.relative_selected_station_inds) > 0:
-
                 # get selected station data
                 get_selected_station_data(read_instance=self.read_instance, canvas_instance=self, 
                                           networkspecies=[self.read_instance.networkspeci])
@@ -1139,7 +1138,6 @@ class Canvas(FigureCanvas):
         """
         
         if not self.read_instance.block_config_bar_handling_updates:
-
             # update mouse cursor to a waiting cursor
             if QtWidgets.QApplication.overrideCursor() != QtCore.Qt.WaitCursor:
                 self.read_instance.cursor_function = 'handle_timeseries_chunk_statistic_update'
@@ -1488,7 +1486,6 @@ class Canvas(FigureCanvas):
 
             # get stats from selection
             else:
-
                 # save previous stats in list
                 previous_active_statsummary_stats = copy.deepcopy(self.active_statsummary_stats[statistic_type])
 
@@ -2706,7 +2703,6 @@ class Canvas(FigureCanvas):
         self.update_smooth_min_points(plot_type, smooth_min_points)
 
         return None
-
     def update_plot_option(self):
         """ Function to handle the update of the plot options. """
 
