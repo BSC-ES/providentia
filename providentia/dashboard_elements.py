@@ -129,7 +129,6 @@ def center(window):
         )
     )
 
-            
 class ComboBox(QtWidgets.QComboBox):
     """ Modify default class of PyQT5 combobox. """
 
@@ -175,21 +174,15 @@ class ComboBox(QtWidgets.QComboBox):
         # add vertical scroll bar
         self.view().setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
 
-
 class CheckableComboBox(QtWidgets.QComboBox):
-    """ Create combobox with multiple selection options.
-        Reference: https://gis.stackexchange.com/questions/350148/qcombobox-multiple-selection-pyqt5. 
-    """
-    
     def __init__(self, *args, **kwargs):
-
         super().__init__(*args, **kwargs)
 
         # make the combo editable to set a custom text, but readonly
         self.setEditable(True)
-        self.setMaxVisibleItems(20)
-        self.lineEdit().setPlaceholderText('Select option/s:')
         self.lineEdit().setReadOnly(True)
+        self.lineEdit().setPlaceholderText('Select option/s:')
+        self.setMaxVisibleItems(20)
         self.currentTextChanged.connect(self.fixCursorPosition)
 
         # make the lineedit the same color as QComboBox
@@ -221,9 +214,8 @@ class CheckableComboBox(QtWidgets.QComboBox):
         self.updateText()
         super().resizeEvent(event)
 
-    def eventFilter(self, object, event):
-
-        if object == self.lineEdit():
+    def eventFilter_old(self, obj, event):
+        if obj == self.lineEdit():
             if event.type() == QtCore.QEvent.MouseButtonRelease:
                 if self.closeOnLineEditClick:
                     self.hidePopup()
@@ -232,10 +224,16 @@ class CheckableComboBox(QtWidgets.QComboBox):
                 return True
             return False
 
-        if object == self.view().viewport():
+        if obj == self.view().viewport():
             if event.type() == QtCore.QEvent.MouseButtonRelease:
                 index = self.view().indexAt(event.pos())
+                if not index.isValid():
+                    return False
                 item = self.model().item(index.row())
+
+                if not (item.flags() & QtCore.Qt.ItemIsEnabled):
+                    return True
+
                 if item.checkState() == QtCore.Qt.Checked:
                     item.setCheckState(QtCore.Qt.Unchecked)
                 else:
@@ -244,80 +242,148 @@ class CheckableComboBox(QtWidgets.QComboBox):
 
         return False
 
-    def showPopup(self):
+    def eventFilter(self, obj, event):
+        if obj == self.lineEdit():
+            if event.type() == QtCore.QEvent.MouseButtonRelease:
+                if self.closeOnLineEditClick:
+                    self.hidePopup()
+                else:
+                    self.showPopup()
+                return True
+            return False
 
+        if obj == self.view().viewport():
+            if event.type() == QtCore.QEvent.MouseButtonRelease:
+                index = self.view().indexAt(event.pos())
+                if not index.isValid():
+                    return False
+
+                item = self.model().item(index.row())
+                if not (item.flags() & QtCore.Qt.ItemIsEnabled):
+                    return True
+
+                # Toggle check state
+                item.setCheckState(
+                    QtCore.Qt.Unchecked if item.checkState() == QtCore.Qt.Checked
+                    else QtCore.Qt.Checked
+                )
+
+                # Save current visual state
+                row_to_restore = index.row()
+                scroll_value = self.view().verticalScrollBar().value()
+
+                # Hide now; reopen after the layout/menu has settled
+                self.hidePopup()
+
+                def _reopen_and_restore():
+                    # Block repaints during reopen to avoid flicker
+                    self.setUpdatesEnabled(False)
+                    self.view().setUpdatesEnabled(False)
+
+                    self.showPopup()
+
+                    # Restore scroll & selection
+                    try:
+                        self.view().verticalScrollBar().setValue(scroll_value)
+                    except RuntimeError:
+                        pass  # view may be recreated
+
+                    if 0 <= row_to_restore < self.model().rowCount():
+                        idx = self.model().index(row_to_restore, 0)
+                        if idx.isValid():
+                            self.view().setCurrentIndex(idx)
+                            self.view().scrollTo(idx)
+
+                    self.view().setUpdatesEnabled(True)
+                    self.setUpdatesEnabled(True)
+
+                # Defer to next cycle so geometry changes (from text update) are applied
+                QtCore.QTimer.singleShot(0, _reopen_and_restore)
+                return True
+
+        return False
+
+    def showPopup(self):
+        model = self.model()
+        
+        # Find the first enabled item
+        first_enabled_index = -1
+        for i in range(model.rowCount()):
+            item = model.item(i)
+            if item.flags() & QtCore.Qt.ItemIsEnabled:
+                first_enabled_index = i
+                break
+
+        # Open the popup first
         super().showPopup()
 
-        # increase the width of the elements on popup so they can be read
-        self.view().setMinimumWidth(self.view().sizeHintForColumn(0) + 10)
+        # Highlight the first enabled item in the popup view only
+        if first_enabled_index != -1:
+            idx = model.index(first_enabled_index, 0)
+            self.view().selectionModel().clearSelection()      # clear any existing selection
+            self.view().selectionModel().setCurrentIndex(
+                idx,
+                QtCore.QItemSelectionModel.SelectCurrent
+            )
+            self.view().scrollTo(idx)
 
-        # when the popup is displayed, a click on the lineedit should close it
+        # Adjust popup width
+        width = self.view().sizeHintForColumn(0) + 40
+        self.view().setMinimumWidth(width)
         self.closeOnLineEditClick = True
 
     def hidePopup(self):
-        
         super().hidePopup()
-        
-        # used to prevent immediate reopening when clicking on the lineEdit
         self.startTimer(100)
-        
-        # refresh the display text when closing
         self.updateText()
 
     def timerEvent(self, event):
-        
-        # after timeout, kill timer, and reenable click on line edit
         self.killTimer(event.timerId())
         self.closeOnLineEditClick = False
 
     def updateText(self):
-        
-        texts = []
-        for i in range(self.model().rowCount()):
-            if self.model().item(i).checkState() == QtCore.Qt.Checked:
-                texts.append(self.model().item(i).text())
-        text = ", ".join(texts)
+        texts = [
+            self.model().item(i).text()
+            for i in range(self.model().rowCount())
+            if self.model().item(i).checkState() == QtCore.Qt.Checked
+        ]
+        self.lineEdit().setText(", ".join(texts))
 
-        # compute elided text (with "...")
-        # metrics = QtGui.QFontMetrics(self.lineEdit().font())
-        # elidedText = metrics.elidedText(text, QtCore.Qt.ElideRight, self.lineEdit().width())
-
-        self.lineEdit().setText(text)
-
-    def addItem(self, text, data=None):
-
+    def addItem(self, text, data=None, enabled=True):
         item = QtGui.QStandardItem()
         item.setText(text)
-        if data is None:
-            item.setData(text)
-        else:
-            item.setData(data)
-        item.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable)
+        item.setData(data if data is not None else text)
+        flags = QtCore.Qt.ItemIsUserCheckable
+        if enabled:
+            flags |= QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
+        item.setFlags(flags)
         item.setData(QtCore.Qt.Unchecked, QtCore.Qt.CheckStateRole)
+
+        if not enabled:
+            item.setData(QtGui.QBrush(QtGui.QColor(150, 150, 150)), QtCore.Qt.ForegroundRole)
+
         self.model().appendRow(item)
 
-    def addItems(self, texts, datalist=None):
+        # Highlight the first enabled item if nothing is selected
+        if self.currentIndex() == -1:
+            for i in range(self.model().rowCount()):
+                first_item = self.model().item(i)
+                if first_item.flags() & QtCore.Qt.ItemIsEnabled:
+                    self.setCurrentIndex(i)
+                    break
 
+    def addItems(self, texts, datalist=None, enabled_list=None):
         for i, text in enumerate(texts):
-            try:
-                data = datalist[i]
-            except (TypeError, IndexError):
-                data = None
-            self.addItem(text, data)
+            data = datalist[i] if datalist and i < len(datalist) else None
+            enabled = enabled_list[i] if enabled_list and i < len(enabled_list) else True
+            self.addItem(text, data, enabled)
 
     def currentData(self, all=False):
-        
-        # return the list of selected items data
-        res = []
-        for i in range(self.model().rowCount()):
-            if not all:
-                if self.model().item(i).checkState() == QtCore.Qt.Checked:
-                    res.append(self.model().item(i).data())
-            else:
-                res.append(self.model().item(i).data())
-
-        return res
-
+        return [
+            self.model().item(i).data()
+            for i in range(self.model().rowCount())
+            if all or self.model().item(i).checkState() == QtCore.Qt.Checked
+        ]
 
 class QVLine(QtWidgets.QFrame):
     """ Define class that generates vertical separator line. """

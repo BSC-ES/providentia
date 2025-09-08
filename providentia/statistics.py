@@ -6,18 +6,22 @@ import datetime
 import json
 import os
 import sys
+import time
 import yaml
 
 import matplotlib
 from matplotlib import colors
 import matplotlib.pyplot as plt
+import numba
 import numpy as np
 import pandas as pd
 import scipy.stats as st
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .calculate import Stats, ExpBias
-from .read_aux import get_frequency_code
+from .read_aux import (get_frequency_code, get_chunk_size,
+                       get_periodic_nonrelevant_temporal_resolutions, get_periodic_relevant_temporal_resolutions)
+from .warnings_prv import show_message
 
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
@@ -79,7 +83,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             canvas_instance.selected_station_stddev_max[networkspeci] = 0.0      
 
         # get data array for networkspeci
-        data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci][:,:,:])
+        data_array = copy.deepcopy(read_instance.data_in_memory_filtered[networkspeci])
 
         # temporally colocate data array
         if read_instance.temporal_colocation:
@@ -108,21 +112,105 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             # cut data array for valid data labels
             data_array = data_array[valid_data_labels_mask]
 
+            start = time.time()
+
+            # do resampling
+            data_array = do_resampling(read_instance, data_array)
+
+            # if have daily forecast active, reshape array to have forecast dimension
+            if read_instance.daily_forecast:
+
+                # group data per hour, shape after is (24, label, station, time_per_hour_tiled)
+                data_array_forecast_grouped = group_periodic(read_instance, canvas_instance, networkspeci, 'hour', False, '', '', data_array)
+
+                # reshape to add a forecast day dimension, shape after is (24, label, station, time_per_hour, fct)
+                data_array_forecast_grouped_rs = np.reshape(data_array_forecast_grouped, 
+                                                            (data_array_forecast_grouped.shape[0], data_array_forecast_grouped.shape[1], data_array_forecast_grouped.shape[2], -1, read_instance.max_forecast_days), 
+                                                            order='F')
+
+                # aggregate across the time dimension, after this shape is (24, label, station, fct)
+                data_array_forecast_agg = aggregation(data_array_forecast_grouped_rs, read_instance.timeseries_statistic_aggregation, axis=-2)
+
+                # move per hour dimension from first to second last
+                data_array_forecast_agg = data_array_forecast_agg.transpose(1, 2, 0, 3)
+
+                # reshape to remove the forecast day dimension, and just have a statistic per hour
+                data_array_forecast_agg = np.reshape(data_array_forecast_agg,
+                                                    (data_array_forecast_agg.shape[0], data_array_forecast_agg.shape[1], -1), 
+                                                    order='F') 
+
+                # set data array for timeseries
+                data_array_ts = data_array_forecast_agg
+
+                #set time_index
+                # determine steps per day based on resolution
+                if read_instance.active_resolution == 'hourly':
+                    steps_per_day = 24
+                elif read_instance.active_resolution == '3hourly':
+                    steps_per_day = 8    # 24 / 3
+                elif read_instance.active_resolution == '6hourly':
+                    steps_per_day = 4    # 24 / 6
+                elif read_instance.active_resolution == 'daily':
+                    steps_per_day = 1
+
+                # take the first 'steps_per_day' timestamps as the base block
+                base_block = read_instance.time_index[:steps_per_day]
+
+                # shift the block for each active forecast day
+                time_index_blocks = [base_block + pd.Timedelta(days=(day-1)) for day in read_instance.active_forecast_days]
+
+                # concatenate all blocks
+                time_index = pd.DatetimeIndex(np.concatenate(time_index_blocks))
+
+            # if have all combined forecast active, reshape array to have forecast dimension
+            elif read_instance.combined_forecast:
+
+                # reshape to add a forecast day dimension
+                data_array_rs = np.reshape(data_array, 
+                                           (data_array.shape[0], data_array.shape[1], -1, read_instance.max_forecast_days), 
+                                           order='F')
+
+                # aggregate across the forecast day dimension, after this shape is (label, station, time)
+                data_array_forecast_agg = aggregation(data_array_rs, read_instance.timeseries_statistic_aggregation, axis=-1)
+
+                # set data array for timeseries
+                data_array_ts = data_array_forecast_agg
+
+                # set time index 
+                time_index = read_instance.time_index[:data_array_forecast_agg.shape[-1]]
+
+            # otherwise, set data array for timeseries and time_index
+            else:
+                data_array_ts = data_array
+                time_index = read_instance.time_index
+
             # save timeseries array
             if len(canvas_instance.station_inds[networkspeci]) == 1:
-                canvas_instance.selected_station_data[networkspeci]['timeseries'] = data_array[:,0,:]
+                canvas_instance.selected_station_data[networkspeci]['timeseries'] = data_array_ts[:,0,:]
             else:
-                canvas_instance.selected_station_data[networkspeci]['timeseries'] = aggregation(data_array, read_instance.timeseries_statistic_aggregation, axis=1)
+                canvas_instance.selected_station_data[networkspeci]['timeseries'] = aggregation(data_array_ts, read_instance.timeseries_statistic_aggregation, axis=1)
 
             # save data per station
             if read_instance.statistic_mode == 'Spatial|Temporal':
-                # if statistic aggregation is the same as the timeseries statistic aggregation then can take the timeseries
-                if read_instance.statistic_aggregation == read_instance.timeseries_statistic_aggregation:
-                    canvas_instance.selected_station_data[networkspeci]['per_station'] = canvas_instance.selected_station_data[networkspeci]['timeseries'][:,np.newaxis,:]
-                # otherwise do aggregation
+                # if have daily forecast active then do not want to use tiled timeseries array for per station data
+                # rather we want the standard aggregated time series across the data period 
+                if read_instance.daily_forecast:
+                    # do aggregation across stations
+                    if len(canvas_instance.station_inds[networkspeci]) == 1:
+                        spatial_agg = data_array[:,0,:]
+                    else:
+                        spatial_agg = aggregation(data_array, read_instance.statistic_aggregation, axis=1)
+                    canvas_instance.selected_station_data[networkspeci]['per_station'] = spatial_agg[:,np.newaxis,:]
+
+                # non-daily forecast cases
                 else:
-                    aggregated_data = aggregation(data_array, read_instance.statistic_aggregation, axis=1)
-                    canvas_instance.selected_station_data[networkspeci]['per_station'] = aggregated_data[:,np.newaxis,:]
+                    # if statistic aggregation is the same as the timeseries statistic aggregation then can take the timeseries
+                    if read_instance.statistic_aggregation == read_instance.timeseries_statistic_aggregation:
+                        canvas_instance.selected_station_data[networkspeci]['per_station'] = canvas_instance.selected_station_data[networkspeci]['timeseries'][:,np.newaxis,:]
+                    # otherwise do aggregation
+                    else:
+                        aggregated_data = aggregation(data_array_ts, read_instance.statistic_aggregation, axis=1)
+                        canvas_instance.selected_station_data[networkspeci]['per_station'] = aggregated_data[:,np.newaxis,:]
 
             elif read_instance.statistic_mode in ['Temporal|Spatial', 'Flattened']:
                 canvas_instance.selected_station_data[networkspeci]['per_station'] = data_array
@@ -130,7 +218,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             # transform timeseries to pandas dataframe
             canvas_instance.selected_station_data[networkspeci]['timeseries'] = pd.DataFrame(canvas_instance.selected_station_data[networkspeci]['timeseries'].T, 
                                                                                              columns=canvas_instance.selected_station_data_labels[networkspeci], 
-                                                                                             index=read_instance.time_index)
+                                                                                             index=time_index)
 
             # flatten data across stations
             canvas_instance.selected_station_data[networkspeci]['flat'] = canvas_instance.selected_station_data[networkspeci]['per_station'].reshape(canvas_instance.selected_station_data[networkspeci]['per_station'].shape[0],
@@ -156,7 +244,131 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             canvas_instance.selected_station_data_min[networkspeci] = current_min
             canvas_instance.selected_station_data_max[networkspeci] = current_max
             canvas_instance.selected_station_stddev_max[networkspeci] = np.nanmax(np.nanstd(canvas_instance.selected_station_data[networkspeci]['flat'], axis=-1))
+
+def do_resampling(read_instance, data_array, writing=False):
+
+    """ Function which handles resampling of data """
+
+    # if resampling resolution is None, then do not resample
+    if read_instance.resampling_resolution == 'None':
+        do_resampling = False
+    else:
+        do_resampling = True
+
+    # update relevant/nonrelevant periodic temporal resolutions 
+    if not writing:
+        read_instance.periodic_relevant_temporal_resolutions = get_periodic_relevant_temporal_resolutions(read_instance.active_resolution)    
+        read_instance.periodic_nonrelevant_temporal_resolutions = get_periodic_nonrelevant_temporal_resolutions(read_instance.active_resolution) 
+
+    # need to do resampling
+    if do_resampling:
+
+        # transform resolution to code for .resample function
+        temporal_resolution_to_output_code = get_frequency_code(read_instance.resampling_resolution)       
+
+        # flatten data label dimension for creation of pandas dataframe
+        data_array_reduced = data_array.reshape(data_array.shape[0]*data_array.shape[1], data_array.shape[2])
+
+        # determine number of forecast days (if daily or combined forecast is active)
+        if (read_instance.daily_forecast) or (read_instance.combined_forecast):
+            forecast_days = read_instance.max_forecast_days
+        # otherwise set it as 1
+        else:
+            forecast_days = 1
+
+        # set n base times
+        n_base_times = len(read_instance.time_array)
+        resampled_dfs = []
+
+        # iterate through each forecast day and resample data
+        for day in range(forecast_days):
+            # slice the portion of data for this forecast day
+            start = day * n_base_times
+            end = (day + 1) * n_base_times
             
+            # create DataFrame for this forecast day
+            df_day = pd.DataFrame(
+                data_array_reduced[:, start:end].T,  # transpose so time is rows
+                index=pd.DatetimeIndex(read_instance.time_array),
+                columns=np.arange(data_array_reduced.shape[0]),
+                dtype=np.float32
+            )
+            
+            # resample for this forecast day
+            df_day_resampled = df_day.resample(temporal_resolution_to_output_code).mean()
+            
+            # append df if have more than 1 forecast day
+            if forecast_days > 1:
+                resampled_dfs.append(df_day_resampled)
+
+        # concatenate resampled dfs across each forecast day
+        if forecast_days > 1:
+            data_array_df_resampled = pd.concat(resampled_dfs)
+        # otherwise just take only resampled df
+        else:
+            data_array_df_resampled = df_day_resampled
+
+        # save back out as numpy array (reshaping to get back networkspecies dimension)
+        data_array_resampled = data_array_df_resampled.to_numpy().transpose()
+        data_array_resampled = data_array_resampled.reshape(data_array.shape[0], data_array.shape[1], data_array_resampled.shape[1])
+
+        # update time index and return
+        if writing:
+            return data_array_resampled, data_array_df_resampled.index
+        else:
+            read_instance.time_index = data_array_df_resampled.index
+            return data_array_resampled
+
+    # resampling not neccessary?
+    else:
+        if writing:
+            return data_array, read_instance.time_index_after_filter
+        else:
+            read_instance.time_index = read_instance.time_index_after_filter
+            return data_array
+
+def merge_forecast_days(read_instance, networkspeci, data_labels, unique_base_data_labels, data_array):
+    """
+    Function which joins different forecast days separated as different expertiments as 1 tiled experiment.
+    Observations are repeatedly tiled to macth the tiled experiment shape.
+    Non-forecst experiments also change to match the shape but only the first forecast day is filled.
+    """
+
+    # get n_labels and n_stations of data array
+    n_labels, n_stations, _ = data_array.shape
+
+    # set block size (len of original time array)
+    block_size = len(read_instance.time_array)
+
+    # Create a new array filled with NaNs to store updated forecast data
+    new_data_in_memory = np.full(
+        (len(unique_base_data_labels), n_stations, read_instance.max_forecast_days * block_size),
+        np.nan, dtype=np.float32
+    )
+
+    # Iterate over each unique base label
+    for base_label_ii, base_label in enumerate(unique_base_data_labels):
+        # Find indices of all data_labels that match this base label
+        relevant_inds = np.array([i for i, lbl in enumerate(data_labels) if base_label in lbl], dtype=np.int32)
+
+        if len(relevant_inds) == 0:
+            continue  # Skip if no matching labels
+
+        for j, ind in enumerate(relevant_inds):
+            data_block = data_array[ind, :, :]  # Extract data for this label
+            if base_label == read_instance.observations_data_label:
+                # Observations are repeated across all forecast days
+                for day in range(read_instance.max_forecast_days):
+                    new_data_in_memory[base_label_ii, :, day*block_size:(day+1)*block_size] = data_block
+            else:
+                # For forecast data, place each day in its corresponding block
+                new_data_in_memory[base_label_ii, :, j*block_size:(j+1)*block_size] = data_block
+                # If there are no forecast indices and this is the first block, stop
+                if (len(read_instance.forecast_indices_per_data_label[networkspeci][base_label]) == 0) & (j == 0):
+                    break
+
+    return new_data_in_memory
+
 def boxplot_inner_fences(data):
 
     ''' Using adjusted boxplot methodology, calaculate Tukey inner fences of data, which beyond these limits data are 
@@ -185,9 +397,9 @@ def boxplot_inner_fences(data):
     else:    
 
         #calculate the 25th percentile 
-        p25 = np.nanpercentile(data, 25)
+        p25 = np.nanpercentile(data, 25, method='nearest')
         #calculate the 75th percentile 
-        p75 = np.nanpercentile(data, 75)
+        p75 = np.nanpercentile(data, 75, method='nearest')
 
         #calculate the interquartile range
         iqr = p75-p25
@@ -214,180 +426,274 @@ def get_station_inds(read_instance, canvas_instance, networkspeci, station_index
 
     return station_inds
 
-def group_periodic(read_instance, canvas_instance, networkspeci, period_resolution, per_station, statistic_mode, base_zstat, data_array):
-    """ Function that groups data into periodic chunks
+def group_periodic(read_instance, canvas_instance, networkspeci, period_resolution, 
+                   per_station, statistic_mode, base_zstat, data_array,
+                   return_nan_padding_counts=False):
+    """
+    Function that groups data into periodic chunks.
 
-        :param read_instance: Instance of class Dashboard or Report
-        :type read_instance: object
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
-        :param networkspeci: Current networkspeci (e.g. EBAS|sconco3)
-        :type networkspeci: str
-        :param period_resolution: period resolution to group data into 
-        :type period_resolution: str
-        :param per_station: indication if are calculating integrated statistic across selected stations, or per station
-        :type per_station: boolean  
-        :param statistic_mode: active statistic mode
-        :type statistic_mode: str
-        :param base_zstat: Statistic
-        :type base_zstat: str 
-        :param data_array: data array to temporally group
-        :type data_array: list
-        :return: nested list of temporally grouped data
-        :rtype: list
+    Input:  (label, station, time)
+    Output: (chunk, label, station, chunk_time)
 
+    Periodic grouping is done for hours of the day, days of the week, or months of the year.
+    Applies NaN padding where chunk lengths differ, and tracks padding counts.
     """
 
-    # get all temporal periods for current resolution
+    # ------------------------------------------------------------------
+    # Get all periods for current resolution
+    # ------------------------------------------------------------------
+    # For example, for 'hour' resolution: all_periods = array of hours 0-23 repeated for all days
     all_periods = getattr(read_instance.time_index, period_resolution)
-    
-    # get all unique temporal periods for current resolution
+
+    # Extract unique periods (e.g., unique hours, weekdays, or months)
     canvas_instance.unique_periods = np.unique(all_periods)
 
-    # create list to store grouped data
-    periodic_data = []
+    # ------------------------------------------------------------------
+    # Iterate through each unique period and collect data
+    # ------------------------------------------------------------------
+    periodic_data = []   # list to store data arrays per period
+    max_chunk_len = 0    # track maximum length of chunks (for NaN padding)
 
-    # iterate through unique temporal periods and store associated data with each period, per data label
     for periodic_xtick in canvas_instance.unique_periods:
-        # get mask for current period
+        # Create boolean mask for current period
         valid_period = all_periods == periodic_xtick
 
-        # get associated data with period
-        period_data = data_array[:,:,valid_period]
-        
-        # if have valid data for period, append it
-        # otherwise, append empty list
-        if period_data.size > 0:
-             # flatten group when flattened stat mode is active and per_station option is not active 
-            if (statistic_mode == 'Flattened') & (not per_station) & (base_zstat not in ['NStations','MDA8']):
-                period_data = period_data.reshape(period_data.shape[0],1,period_data.shape[1]*period_data.shape[2])
-        else:
-            period_data = []
-        
-        # append period data
+        # Extract data corresponding to current period
+        period_data = data_array[:, :, valid_period]
+
+        # Update max_chunk_len to know how much padding is needed
+        chunk_len = period_data.shape[-1]
+        if chunk_len > max_chunk_len:
+            max_chunk_len = chunk_len
+
         periodic_data.append(period_data)
-    
+
+    # ------------------------------------------------------------------
+    # Pad each period to max_chunk_len with NaNs
+    # ------------------------------------------------------------------
+    nan_padding_counts = []
+    padded_groups = []
+    for group in periodic_data:
+        pad_len = max_chunk_len - group.shape[-1]  # number of NaNs to add
+        if pad_len > 0:
+            pad_shape = list(group.shape[:-1]) + [pad_len]  # shape for padding
+            group = np.concatenate([group, np.full(pad_shape, np.nan)], axis=-1)
+        padded_groups.append(group)
+        nan_padding_counts.append(pad_len)
+
+    # Stack into single numpy array: (chunk, label, station, chunk_time)
+    periodic_data = np.stack(padded_groups, axis=0)
+    nan_padding_counts = np.array(nan_padding_counts, dtype=np.int32)
+
+    # ------------------------------------------------------------------
+    # Flattened mode
+    # ------------------------------------------------------------------
+    if (statistic_mode == 'Flattened') and (not per_station) and (base_zstat not in ['NStations','MDA8']):
+
+        # grouped_data shape before flattening: (n_chunks, n_labels, n_stations, chunk_time)
+        n_chunks, n_labels, n_stations, chunk_time = periodic_data.shape
+
+        # Flatten stations and chunk_time into single axis
+        periodic_data = periodic_data.reshape(n_chunks, n_labels, 1, n_stations * chunk_time)
+
+        # Scale nan_padding_counts to match the flattened last axis
+        nan_padding_counts = nan_padding_counts * n_stations  # total padded NaNs per chunk
+
+        # Reshape for broadcasting
+        nan_padding_counts = nan_padding_counts[:, np.newaxis, np.newaxis]  # shape (n_chunks, 1, 1)
+
+    else:
+        # Non-flattened mode: reshape for broadcasting
+        nan_padding_counts = nan_padding_counts[:, np.newaxis, np.newaxis]
+
+    # ------------------------------------------------------------------
+    # Return data
+    # ------------------------------------------------------------------
+    if return_nan_padding_counts:
+        return periodic_data, nan_padding_counts
     return periodic_data
 
-def group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolution, per_station, statistic_mode, base_zstat, data_array):
-    """ Function that groups data into temporal chunks
+def group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolution, 
+                   per_station, statistic_mode, base_zstat, data_array,
+                   prev_nan_padding_counts=None, return_nan_padding_counts=False):
+    """
+    Function that groups data into temporal chunks.
 
-        :param read_instance: Instance of class Dashboard or Report
-        :type read_instance: object
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
-        :param networkspeci: Current networkspeci (e.g. EBAS|sconco3)
-        :type networkspeci: str
-        :param chunk_resolution: temporal resolution to chunk data into
-        :type chunk_resolution: str
-        :param per_station: indication if are calculating integrated statistic across selected stations, or per station
-        :type per_station: boolean
-        :param statistic_mode: active statistic mode
-        :type statistic_mode: str
-        :param base_zstat: Statistic
-        :type base_zstat: str 
-        :param data_array: data array to temporally group
-        :type data_array: list
-        :return: nested list of temporally grouped data
-        :rtype: list
-
+    Handles both non-forecast data (3D -> 4D) and forecast data (5D -> 5D).
+    Applies NaN padding where chunk lengths differ, and tracks padding counts.
     """
 
-    # get new frequency and time index
+    # get existing timeseries data 
     timeseries_data = canvas_instance.selected_station_data[networkspeci]['timeseries']
+
+    # get frequency code for new resolution
     new_freq = get_frequency_code(chunk_resolution)
-    canvas_instance.grouped_ts_index = timeseries_data.asfreq(new_freq).index
+    
+    # get new resampled timeseries indices
+    if chunk_resolution == "monthly":
+        canvas_instance.grouped_ts_index = timeseries_data.index.to_period("M").to_timestamp().unique().sort_values()
+    elif chunk_resolution == "annual":
+        canvas_instance.grouped_ts_index = timeseries_data.index.to_period("Y").to_timestamp().unique().sort_values()
+    else:
+        canvas_instance.grouped_ts_index = timeseries_data.index.floor(new_freq).unique().sort_values()
 
-    # set list to store grouped data
-    grouped_data = []
+    # ------------------------------------------------------------------
+    # 3D NON-FORECAST CASE
+    # ------------------------------------------------------------------
+    if data_array.ndim == 3:
+        n_labels, n_stations, n_times = data_array.shape
 
-    # get timeseries data for each chunk
-    for index in canvas_instance.grouped_ts_index:
+        grouped_data = []
+        max_chunk_len = 0  # track maximum length of chunks (for NaN padding)
+        nan_padding_counts = []
 
-        # is 3hourly chunk resolution?
-        if new_freq == "h":
-            start_date = datetime.datetime(year=index.year, 
-                                            month=index.month, 
-                                            day=index.day, 
-                                            hour=index.hour)  
-            end_date = datetime.datetime(year=index.year, 
-                                         month=index.month, 
-                                         day=index.day, 
-                                         hour=index.hour)
+        for index in canvas_instance.grouped_ts_index:
+            # Determine start and end date for current chunk based on resolution
+            if new_freq == "h":
+                start_date = end_date = index
+            elif new_freq == "3h":
+                start_date = index
+                end_date = index + datetime.timedelta(hours=2)
+            elif new_freq == "6h":
+                start_date = index
+                end_date = index + datetime.timedelta(hours=5)
+            elif new_freq == "D":
+                start_date = datetime.datetime(index.year, index.month, index.day, 0)
+                end_date   = datetime.datetime(index.year, index.month, index.day, 23)
+            elif new_freq == "MS":
+                start_date = datetime.datetime(index.year, index.month, 1, 0)
+                end_day = monthrange(index.year, index.month)[1]
+                end_date = datetime.datetime(index.year, index.month, end_day, 23)
+            elif new_freq == "YS":
+                start_date = datetime.datetime(index.year, 1, 1, 0)
+                end_date   = datetime.datetime(index.year, 12, 31, 23)
 
-        # is 3hourly chunk resolution?
-        elif new_freq == "3h":
-            start_date = datetime.datetime(year=index.year, 
-                                            month=index.month, 
-                                            day=index.day, 
-                                            hour=index.hour)  
-            end_date = datetime.datetime(year=index.year, 
-                                         month=index.month, 
-                                         day=index.day, 
-                                         hour=index.hour+2)
-        # is 6hourly chunk resolution?
-        elif new_freq == "6h":
-            start_date = datetime.datetime(year=index.year, 
-                                            month=index.month, 
-                                            day=index.day, 
-                                            hour=index.hour)     
-            end_date = datetime.datetime(year=index.year, 
-                                         month=index.month, 
-                                         day=index.day, 
-                                         hour=index.hour+5)
-        # is daily chunk resolution?
-        elif new_freq == "D":
-            start_date = datetime.datetime(year=index.year, 
-                                           month=index.month, 
-                                           day=index.day, 
-                                           hour=0)
-            end_date = datetime.datetime(year=index.year, 
-                                         month=index.month, 
-                                         day=index.day, 
-                                         hour=23)
-        # is monthly chunk resolution?
-        elif new_freq == "MS":
-            start_date = datetime.datetime(year=index.year, 
-                                           month=index.month, 
-                                           day=1,
-                                           hour=0)
-            end_day = monthrange(index.year, index.month)[1]
-            end_date = datetime.datetime(year=index.year, 
-                                         month=index.month, 
-                                         day=end_day, 
-                                         hour=23)
-        # is annual chunk resolution?
-        elif new_freq == "YS":
-            start_date = datetime.datetime(year=index.year, 
-                                           month=1, 
-                                           day=1,
-                                           hour=0)
-            end_date = datetime.datetime(year=index.year, 
-                                         month=12, 
-                                         day=31, 
-                                         hour=23)
-        
-        time_indices = timeseries_data.index.get_indexer(timeseries_data[start_date:end_date].index)
-        cut_data = np.take(data_array, time_indices, axis=-1)
-        
-        # if have valid data for period, append it
-        # otherwise, append empty list
-        if cut_data.size > 0:
-            # flatten group when flattened stat mode is active, and per_station option is not active, and not calculating NStations
-            if (statistic_mode == 'Flattened') & (not per_station) & (base_zstat not in ['NStations','MDA8']):
-                cut_data = cut_data.reshape(cut_data.shape[0], 1, cut_data.shape[1] * cut_data.shape[2])
+            # Get the indices corresponding to this chunk
+            time_indices = timeseries_data.index.get_indexer(timeseries_data[start_date:end_date].index)
+            cut_data = np.take(data_array, time_indices, axis=-1)
+
+            # Update max_chunk_len to know how much NaN padding is needed
+            chunk_len = cut_data.shape[-1]
+            if chunk_len > max_chunk_len:
+                max_chunk_len = chunk_len
+
+            grouped_data.append(cut_data)
+
+        # Pad each chunk to max_chunk_len with NaNs if needed
+        padded_groups = []
+        for group in grouped_data:
+            pad_len = max_chunk_len - group.shape[-1]
+            if pad_len > 0:
+                pad_shape = list(group.shape[:-1]) + [pad_len]
+                group = np.concatenate([group, np.full(pad_shape, np.nan)], axis=-1)
+            padded_groups.append(group)
+            nan_padding_counts.append(pad_len)
+
+        # Stack into single array with shape: (chunk, label, station, chunk_time)
+        grouped_data = np.stack(padded_groups, axis=0)
+        nan_padding_counts = np.array(nan_padding_counts, dtype=np.float32)
+
+    # ------------------------------------------------------------------
+    # 5D FORECAST CASE
+    # ------------------------------------------------------------------
+    elif data_array.ndim == 5:
+        # Monthly/annual not allowed for forecast data
+        if chunk_resolution in ["monthly", "annual"]:
+            raise ValueError("Cannot group forecast data to monthly or annual resolution.")
+
+        #get chunk size
+        chunk_size = get_chunk_size(read_instance.active_resolution, chunk_resolution)
+
+        n_chunks, n_labels, n_stations, n_forecast, n_times_in_chunk = data_array.shape
+        n_out_chunks = int(np.ceil(n_chunks / chunk_size))
+
+        # Pad the data array if the number of chunks is not divisible by chunk_size
+        pad_chunks = n_out_chunks * chunk_size - n_chunks
+        if pad_chunks > 0:
+            pad_shape = (pad_chunks, n_labels, n_stations, n_forecast, n_times_in_chunk)
+            pad_array = np.full(pad_shape, np.nan)
+            data_array = np.concatenate([data_array, pad_array], axis=0)
+
+        # Reshape and transpose to regroup chunks
+        grouped_data = data_array.reshape(
+            n_out_chunks, chunk_size, n_labels, n_stations, n_forecast, n_times_in_chunk
+        )
+        grouped_data = grouped_data.transpose(0, 2, 3, 4, 1, 5)
+        grouped_data = grouped_data.reshape(
+            n_out_chunks, n_labels, n_stations, n_forecast, chunk_size * n_times_in_chunk
+        )
+
+        # ----- NaN padding counts -----
+        if prev_nan_padding_counts is not None:
+            prev_nan_padding_counts = np.squeeze(prev_nan_padding_counts)
+            if pad_chunks > 0:
+                prev_nan_padding_counts = np.concatenate([
+                    prev_nan_padding_counts,
+                    np.zeros(pad_chunks, dtype=np.float32)
+                ])
+            prev_nan_padding_counts = prev_nan_padding_counts.reshape(n_out_chunks, chunk_size)
+            nan_padding_counts = prev_nan_padding_counts.sum(axis=1)
         else:
-            cut_data = []
+            nan_padding_counts = np.zeros(n_out_chunks, dtype=np.float32)
 
-        # append cut data
-        grouped_data.append(cut_data)
+        if pad_chunks > 0:
+            # add NaNs for padded chunks
+            nan_padding_counts[-1] += (
+                pad_chunks * n_labels * n_stations * n_forecast * n_times_in_chunk
+            )
+
+    else:
+        raise ValueError("Input array must be 3D or 5D.")
+
+    # ------------------------------------------------------------------
+    # Flattened mode
+    # ------------------------------------------------------------------
+    if (statistic_mode == 'Flattened') and (not per_station) and (base_zstat not in ['NStations','MDA8']):
+        if grouped_data.ndim == 4:
+            # grouped_data shape: (n_chunks, n_labels, n_stations, chunk_time)
+            n_chunks, n_labels, n_stations, chunk_time = grouped_data.shape
+
+            # flatten stations and chunk_time into one axis
+            grouped_data = grouped_data.reshape(n_chunks, n_labels, 1, n_stations * chunk_time)
+
+            # scale nan_padding_counts to match the new flattened last axis
+            nan_padding_counts = nan_padding_counts * n_stations
+
+            # reshape for broadcasting
+            nan_padding_counts = nan_padding_counts[:, np.newaxis, np.newaxis]  # (n_chunks, 1, 1)
+
+        elif grouped_data.ndim == 5:
+            # grouped_data shape: (n_chunks, n_labels, n_stations, n_forecast, chunk_time)
+            n_chunks, n_labels, n_stations, n_forecast, chunk_time = grouped_data.shape
+
+            # reorder and flatten stations and chunk_time
+            grouped_data = grouped_data.transpose(0, 1, 3, 2, 4)
+            grouped_data = grouped_data.reshape(n_chunks, n_labels, 1, n_forecast, n_stations * chunk_time)
+
+            # scale nan_padding_counts to match flattened last axis
+            nan_padding_counts = nan_padding_counts * n_stations
+            nan_padding_counts = nan_padding_counts[:, np.newaxis, np.newaxis, np.newaxis]
+
+    else:
+        # Non-flattened mode: reshape nan_padding_counts for broadcasting
+        if grouped_data.ndim == 4:
+            nan_padding_counts = nan_padding_counts[:, np.newaxis, np.newaxis]
+
+        elif grouped_data.ndim == 5:
+            nan_padding_counts = nan_padding_counts[:, np.newaxis, np.newaxis, np.newaxis]
+
+    if return_nan_padding_counts:
+        return grouped_data, nan_padding_counts
 
     return grouped_data
+
+
 
 def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, data_labels_a, 
                         data_labels_b, map=False, per_station=False, period=None, chunk_resolution=None, 
                         reduction=True, mask=None, statistic_mode=None, statistic_aggregation=None, 
-                        periodic_statistic_mode=None, periodic_statistic_aggregation=None):
+                        periodic_statistic_mode=None, periodic_statistic_aggregation=None,
+                        forecast_type=None):
     """Function that calculates a statistic for data labels, either absolute or bias, 
        for different aggregation modes.
     """
@@ -426,8 +732,36 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
     stats_calc = {}
     for zstat in zstats:
 
+        #print()
+
+        # initialise nan_padding_counts as None (used to track padded NaNs in grouped arrays)
+        nan_padding_counts_a = None
+        nan_padding_counts_b = None
+
         # get zstat information 
         zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat)
+
+        if z_statistic_period is not None:
+            pp = z_statistic_period
+        elif period is not None:
+            pp = period
+
+        #if (z_statistic_period is not None) & (period is not None) & (chunk_resolution is not None):
+        #    print('Stat:{}, Mode:{}, zstat period:{}, period:{}, resolution:{}'.format(zstat, statistic_mode, z_statistic_period, period, chunk_resolution))
+        #elif (z_statistic_period is not None) & (period is not None):
+        #    print('Stat:{}, Mode:{}, zstat period:{}, period:{}'.format(zstat, statistic_mode, z_statistic_period, period))
+        #elif (z_statistic_period is not None) & (chunk_resolution is not None):
+        #    print('Stat:{}, Mode:{}, zstat period:{}, resolution:{}'.format(zstat, statistic_mode, z_statistic_period, chunk_resolution))
+        #elif (period is not None) & (chunk_resolution is not None):
+        #    print('Stat:{}, Mode:{}, period:{}, resolution:{}'.format(zstat, statistic_mode, period, chunk_resolution))
+        #elif (z_statistic_period is not None):
+        #    print('Stat:{}, Mode:{}, zstat period:{}'.format(zstat, statistic_mode, z_statistic_period))
+        #elif (period is not None):
+        #    print('Stat:{}, Mode:{}, period:{}'.format(zstat, statistic_mode, period))
+        #elif (chunk_resolution is not None):
+        #    print('Stat:{}, Mode:{}, resolution:{}'.format(zstat, statistic_mode, chunk_resolution))
+        #else:
+        #    print('Stat:{}, Mode:{}'.format(zstat, statistic_mode))
 
         # for map statistics, get active map valid station indices and then data_labels_a data 
         if (map) or (per_station):
@@ -486,26 +820,46 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
             else:
                 data_array_a = canvas_instance.selected_station_data[networkspeci]['active_mode'][data_label_a_indices]
 
+        #print('Data Array a: ', data_array_a.shape)
+
         # if need to mask data, then do so
         if mask is not None:
             data_array_a[mask[data_label_a_indices]] = np.NaN
 
+        # if need to reshape forecast data, then do so
+        if forecast_type == 'daily':
+
+            # group data per hour, shape after is (24, label, station, time_per_hour_tiled)
+            data_array_a, nan_padding_counts_a = group_periodic(read_instance, canvas_instance, networkspeci, 'hour', False, '', '', data_array_a, return_nan_padding_counts=True)
+                
+            #print('Data Array a, forecast daily group periodic: ', data_array_a.shape)
+
+            # reshape to add a forecast day dimension, shape after is (24, label, station, fct, time_per_hour)
+            data_array_a = np.reshape(data_array_a, 
+                                      (data_array_a.shape[0], data_array_a.shape[1], data_array_a.shape[2], read_instance.max_forecast_days, -1), 
+                                      order='F')
+
+            #print('Data Array a, reshape forecast period: ', data_array_a.shape)
+
         # if need to temporally chunk data, then do so
         if chunk_resolution is not None:
-            if ((chunk_resolution == read_instance.active_resolution) & (statistic_mode in ['Temporal|Spatial', 'Spatial|Temporal'])) or ((chunk_resolution == read_instance.active_resolution) & (statistic_mode == 'Flattened') & (base_zstat in ['NStations','MDA8'])):
+            if ((chunk_resolution == read_instance.active_resolution) & (statistic_mode in ['Temporal|Spatial', 'Spatial|Temporal']) & (forecast_type != 'daily')) or ((chunk_resolution == read_instance.active_resolution) & (statistic_mode == 'Flattened') & (base_zstat in ['NStations','MDA8']) & (forecast_type != 'daily')):
                 data_array_a = np.expand_dims(np.transpose(data_array_a, (2,0,1)), -1)
                 if len(data_labels_b) == 0:
                     chunk_resolution = None
             else:
-                data_array_a = group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolution, per_station, statistic_mode, base_zstat, data_array_a)            
+                data_array_a, nan_padding_counts_a = group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolution, per_station, statistic_mode, base_zstat, data_array_a, prev_nan_padding_counts=nan_padding_counts_a, return_nan_padding_counts=True)            
+            #print('Data Array a, group temporal: ', data_array_a.shape)
 
         # if need to group data for a period, then do so
         # this can be for calculating statistics per period, or an integated periodic statistic
-        if period is not None:
-            data_array_a = group_periodic(read_instance, canvas_instance, networkspeci, period, per_station, statistic_mode, base_zstat, data_array_a)
+        elif period is not None:
+            data_array_a, nan_padding_counts_a = group_periodic(read_instance, canvas_instance, networkspeci, period, per_station, statistic_mode, base_zstat, data_array_a, return_nan_padding_counts=True)
+            #print('Data Array a, group periodic: ', data_array_a.shape)
 
-        if z_statistic_period is not None:
-            data_array_a = group_periodic(read_instance, canvas_instance, networkspeci, z_statistic_period, per_station, statistic_mode, base_zstat, data_array_a)
+        elif z_statistic_period is not None:
+            data_array_a, nan_padding_counts_a = group_periodic(read_instance, canvas_instance, networkspeci, z_statistic_period, per_station, statistic_mode, base_zstat, data_array_a, return_nan_padding_counts=True)
+            #print('Data Array a, group periodic: ', data_array_a.shape)
 
         # get dictionary containing necessary information for calculation of selected statistic
         if z_statistic_type == 'basic':
@@ -525,7 +879,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
             # need to do the aggregation inside function for the calculation of NStations and MDA8
             # this is due to handling excepetions in how these are calculated across modes
-            if base_zstat in ['NStations','MDA8']:
+            elif base_zstat in ['NStations','MDA8']:
                 function_arguments['statistic_mode'] = statistic_mode
                 function_arguments['statistic_aggregation'] = statistic_aggregation
                 function_arguments['per_station'] = per_station
@@ -533,38 +887,47 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                     function_arguments['periodic_statistic_mode'] = periodic_statistic_mode
                     function_arguments['periodic_statistic_aggregation'] = periodic_statistic_aggregation
 
+            # add argument to correct caculation of Data%, when using groups because of padded NaNs
+            elif (base_zstat == 'Data%') & (nan_padding_counts_a is not None):
+                function_arguments['nan_padding_counts'] = nan_padding_counts_a
+
             # calculate statistics
             
-            # calculate statistics per periodic grouping per station
-            if (period is not None) or (chunk_resolution is not None):
-                z_statistic = np.array([getattr(Stats, stats_dict['function'])(group, **function_arguments) 
-                                        for group in data_array_a])
-
             # calculate periodic statistic per station
-            elif z_statistic_period is not None:
+            if z_statistic_period is not None:
                 # if periodic statistic mode is cycle, then aggregate per periodic grouping, and then calculate stat
                 if periodic_statistic_mode == 'Cycle':
                     # aggregation in each group, per station, by periodic statistic
-                    z_statistic = np.array([aggregation(group, periodic_statistic_aggregation, axis=-1)
-                                            for group in data_array_a]).transpose()
+                    z_statistic = aggregation(data_array_a, periodic_statistic_aggregation, axis=-1).transpose()
+
+                    #print('Calculating Stat, Cycle Aggregation ', z_statistic.shape)
+
+                    # need to reshape nan_padding_counts if set as argument
+                    if 'nan_padding_counts' in function_arguments:
+                        # sum over the chunk axis (first axis) to get total padded NaNs per label/station,
+                        # then broadcast to match z_statistic non-time axes
+                        function_arguments['nan_padding_counts'] = np.broadcast_to(function_arguments['nan_padding_counts'].sum(axis=0), z_statistic.shape[:-1])
 
                     # calculate statistic per station (removing period dimension)
-                    z_statistic = np.array(getattr(Stats, stats_dict['function'])(z_statistic, **function_arguments)).transpose()
+                    z_statistic = getattr(Stats, stats_dict['function'])(z_statistic, **function_arguments).transpose()
 
                 # if periodic statistic mode is independent, then calculate stats independently per periodic grouping,
                 # and then aggregate 
                 elif periodic_statistic_mode == 'Independent':
                     # calculate statistic per periodic grouping per station
-                    z_statistic = np.array([getattr(Stats, stats_dict['function'])(group, **function_arguments)
-                                            for group in data_array_a]).transpose()
+                    z_statistic = getattr(Stats, stats_dict['function'])(data_array_a, **function_arguments).transpose()
                     
+                    #print('Calculating Stat, Independent Aggregation ', z_statistic.shape)
+
                     # aggregate data per station (removing period dimension)
                     if base_zstat != 'NStations':
                         z_statistic = aggregation(z_statistic, periodic_statistic_aggregation, axis=-1).transpose()
 
             # calculate statistics per station 
             else:
-                z_statistic = np.array(getattr(Stats, stats_dict['function'])(data_array_a, **function_arguments))
+                z_statistic = getattr(Stats, stats_dict['function'])(data_array_a, **function_arguments)
+            
+            #print('Calculated Stat: ', z_statistic.shape)
 
         # else, get data_labels_b data then calculate 'difference' statistic
         else:
@@ -593,26 +956,37 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 # otherwise take active mode
                 else:
                     data_array_b = canvas_instance.selected_station_data[networkspeci]['active_mode'][data_label_b_indices]
-            
+
             # if need to mask data, then do so
             if mask is not None:
                 data_array_b[mask[data_label_b_indices]] = np.NaN
 
+            # if need to reshape forecast data, then do so
+            if forecast_type == 'daily':
+
+                # group data per hour, shape after is (24, label, station, time_per_hour_tiled)
+                data_array_b, nan_padding_counts_b = group_periodic(read_instance, canvas_instance, networkspeci, 'hour', False, '', '', data_array_b, return_nan_padding_counts=True)
+                    
+                # reshape to add a forecast day dimension, shape after is (24, label, station, fct, time_per_hour)
+                data_array_b = np.reshape(data_array_b, 
+                                          (data_array_b.shape[0], data_array_b.shape[1], data_array_b.shape[2], read_instance.max_forecast_days, -1), 
+                                          order='F')
+
             # if need to temporally chunk data, then do so
             if chunk_resolution is not None:
-                if ((chunk_resolution == read_instance.active_resolution) & (statistic_mode in ['Temporal|Spatial', 'Spatial|Temporal'])) or ((chunk_resolution == read_instance.active_resolution) & (statistic_mode == 'Flattened') & (base_zstat in ['NStations','MDA8'])):
+                if ((chunk_resolution == read_instance.active_resolution) & (statistic_mode in ['Temporal|Spatial', 'Spatial|Temporal']) & (forecast_type != 'daily')) or ((chunk_resolution == read_instance.active_resolution) & (statistic_mode == 'Flattened') & (base_zstat in ['NStations','MDA8']) & (forecast_type != 'daily')):
                     data_array_b = np.expand_dims(np.transpose(data_array_b, (2,0,1)), -1)
                     chunk_resolution = None
                 else:
-                    data_array_b = group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolution, per_station, statistic_mode, base_zstat, data_array_b)
+                    data_array_b, nan_padding_counts_b = group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolution, per_station, statistic_mode, base_zstat, data_array_b, prev_nan_padding_counts=nan_padding_counts_b, return_nan_padding_counts=True)
 
             # if need to group data for a period, then do so
             # this can be for calculating statistics per period, or an integated periodic statistic
-            if period is not None:
-                data_array_b = group_periodic(read_instance, canvas_instance, networkspeci, period, per_station, statistic_mode, base_zstat, data_array_b)
+            elif period is not None:
+                data_array_b, nan_padding_counts_b = group_periodic(read_instance, canvas_instance, networkspeci, period, per_station, statistic_mode, base_zstat, data_array_b, return_nan_padding_counts=True)
 
-            if z_statistic_period is not None:
-                data_array_b = group_periodic(read_instance, canvas_instance, networkspeci, z_statistic_period, per_station, statistic_mode, base_zstat, data_array_b)
+            elif z_statistic_period is not None:
+                data_array_b, nan_padding_counts_b = group_periodic(read_instance, canvas_instance, networkspeci, z_statistic_period, per_station, statistic_mode, base_zstat, data_array_b, return_nan_padding_counts=True)
 
             # is the difference statistic basic (i.e. mean)?
             if z_statistic_type == 'basic':
@@ -627,7 +1001,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
                 # need to do the aggregation inside function for the calculation of NStations and MDA8
                 # this is due to handling excepetions in how these are calculated across modes
-                if base_zstat in ['NStations','MDA8']:
+                elif base_zstat in ['NStations','MDA8']:
                     function_arguments_a['statistic_mode'] = statistic_mode
                     function_arguments_a['statistic_aggregation'] = statistic_aggregation
                     function_arguments_a['per_station'] = per_station
@@ -637,37 +1011,39 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
                 function_arguments_b = copy.deepcopy(function_arguments_a)
 
+                # add argument to correct caculation of Data%, when using groups because of padded NaNs
+                if (base_zstat == 'Data%') & (nan_padding_counts_a is not None):
+                    function_arguments_a['nan_padding_counts'] = nan_padding_counts_a
+                if (base_zstat == 'Data%') & (nan_padding_counts_b is not None):
+                    function_arguments_b['nan_padding_counts'] = nan_padding_counts_b
+
                 # calculate statistics for data_labels_a and data_labels_b, then subtract data_labels_b - data_labels_a
-                
-                # calculate statistics per periodic grouping per station
-                if (period is not None) or (chunk_resolution is not None):
-                    statistic_a = np.array([getattr(Stats, stats_dict['function'])(group, **function_arguments_a) 
-                                            for group in data_array_a])
-                    statistic_b = np.array([getattr(Stats, stats_dict['function'])(group, **function_arguments_b) 
-                                            for group in data_array_b])
-                
+                                
                 # calculate periodic statistic per station
-                elif z_statistic_period is not None:
+                if z_statistic_period is not None:
                     # if periodic statistic mode is cycle, then aggregate per periodic grouping, and then calculate stat
                     if periodic_statistic_mode == 'Cycle':
                         # aggregation in each group, per station, by periodic statistic
-                        statistic_a = np.array([aggregation(group, periodic_statistic_aggregation, axis=-1)
-                                            for group in data_array_a]).transpose()
-                        statistic_b = np.array([aggregation(group, periodic_statistic_aggregation, axis=-1)
-                                            for group in data_array_b]).transpose()
+                        statistic_a = aggregation(data_array_a, periodic_statistic_aggregation, axis=-1).transpose()
+                        statistic_b = aggregation(data_array_b, periodic_statistic_aggregation, axis=-1).transpose()
                         
+                        # need to reshape nan_padding_counts if set as argument
+                        if 'nan_padding_counts' in function_arguments_a:
+                            # sum over the chunk axis (first axis) to get total padded NaNs per label/station,
+                            # then broadcast to match z_statistic non-time axes
+                            function_arguments_a['nan_padding_counts'] = np.broadcast_to(function_arguments_a['nan_padding_counts'].sum(axis=0), statistic_a.shape[:-1])
+                            function_arguments_b['nan_padding_counts'] = np.broadcast_to(function_arguments_b['nan_padding_counts'].sum(axis=0), statistic_b.shape[:-1])
+
                         # calculate statistic per station (removing period dimension)
-                        statistic_a = np.array(getattr(Stats, stats_dict['function'])(statistic_a, **function_arguments_a)).transpose()
-                        statistic_b = np.array(getattr(Stats, stats_dict['function'])(statistic_b, **function_arguments_b)).transpose()
+                        statistic_a = getattr(Stats, stats_dict['function'])(statistic_a, **function_arguments_a).transpose()
+                        statistic_b = getattr(Stats, stats_dict['function'])(statistic_b, **function_arguments_b).transpose()
 
                     # if periodic statistic mode is independent, then calculate stats independently per periodic grouping,
                     # and then aggregate 
                     elif periodic_statistic_mode == 'Independent':
                         # calculate statistic per periodic grouping per station
-                        statistic_a = np.array([getattr(Stats, stats_dict['function'])(group, **function_arguments_a)
-                                                for group in data_array_a]).transpose()
-                        statistic_b = np.array([getattr(Stats, stats_dict['function'])(group, **function_arguments_b)
-                                                for group in data_array_b]).transpose()
+                        statistic_a = getattr(Stats, stats_dict['function'])(data_array_a, **function_arguments_a).transpose()
+                        statistic_b = getattr(Stats, stats_dict['function'])(data_array_b, **function_arguments_b).transpose()
 
                         # aggregate data per station (removing period dimension)
                         if base_zstat != 'NStations':
@@ -676,8 +1052,8 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
                 # calculate statistics per station 
                 else:
-                    statistic_a = np.array(getattr(Stats, stats_dict['function'])(data_array_a, **function_arguments_a))
-                    statistic_b = np.array(getattr(Stats, stats_dict['function'])(data_array_b, **function_arguments_b))
+                    statistic_a = getattr(Stats, stats_dict['function'])(data_array_a, **function_arguments_a)
+                    statistic_b = getattr(Stats, stats_dict['function'])(data_array_b, **function_arguments_b)
 
                 # take difference: statistic_b - statistic_a
                 z_statistic = statistic_b - statistic_a
@@ -706,41 +1082,43 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
                 # calculate statistics
             
-                # calculate statistics per periodic grouping per station
-                if (period is not None) or (chunk_resolution is not None):
-                    z_statistic = np.array([getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':group_a,'exp':group_b}})
-                                            for group_a, group_b in zip(data_array_a, data_array_b)])
-
                 # calculate periodic statistic per station
-                elif z_statistic_period is not None:
+                if z_statistic_period is not None:
                     # if periodic statistic mode is cycle, then aggregate per periodic grouping, and then calculate stat
                     if periodic_statistic_mode == 'Cycle':
                         # aggregation in each group, per station, by periodic statistic
-                        statistic_a = np.array([aggregation(group, periodic_statistic_aggregation, axis=-1)
-                                            for group in data_array_a]).transpose()
-                        statistic_b = np.array([aggregation(group, periodic_statistic_aggregation, axis=-1)
-                                            for group in data_array_b]).transpose()
+                        statistic_a = aggregation(data_array_a, periodic_statistic_aggregation, axis=-1).transpose()
+                        statistic_b = aggregation(data_array_b, periodic_statistic_aggregation, axis=-1).transpose()
                         
                         # calculate statistic per station (removing period dimension)
-                        z_statistic = np.array(getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':statistic_a,'exp':statistic_b}})).transpose()
+                        z_statistic = getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':statistic_a,'exp':statistic_b}}).transpose()
 
                     # if periodic statistic mode is independent, then calculate stats independently per periodic grouping,
                     # and then aggregate 
                     elif periodic_statistic_mode == 'Independent':
                         # calculate statistic per periodic grouping per station
-                        z_statistic = np.array([getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':group_a,'exp':group_b}})
-                                                for group_a, group_b in zip(data_array_a, data_array_b)]).transpose()
+                        z_statistic = getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':data_array_a,'exp':data_array_b}}).transpose()
 
                         # aggregate data per station (removing period dimension)
                         z_statistic = aggregation(z_statistic, periodic_statistic_aggregation, axis=-1).transpose()
 
                 # calculate statistics per station 
                 else:
-                    z_statistic = np.array(getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':data_array_a,'exp':data_array_b}}))
+                    z_statistic = getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':data_array_a,'exp':data_array_b}})
 
         # if any calculated statistics are infinite, then set them to be NaNs 
         finite_boolean = np.isfinite(z_statistic)
         z_statistic[~finite_boolean] = np.NaN
+
+        # reshape forecast data
+        if forecast_type == 'daily':
+            if base_zstat in ['NStations','MDA8']:
+                n_chunks, n_labels, n_forecast_days = z_statistic.shape
+                z_statistic = z_statistic.transpose(0, 2, 1).reshape(-1, n_labels, order='F')
+            else:
+                n_chunks, n_labels, n_stations, n_forecast_days = z_statistic.shape
+                z_statistic = z_statistic.transpose(0, 3, 1, 2).reshape(-1, n_labels, n_stations, order='F')
+            #print('Calculated Stat Forecast reshape: ', z_statistic.shape)
 
         # return map statistics
         if map:
@@ -765,6 +1143,8 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                     else:
                         z_statistic = np.squeeze(z_statistic, axis=-1)
             stats_calc[zstat] = z_statistic
+
+            #print('Final: ', z_statistic.shape)
 
     # return statistics calculated (if just one statistic then remove dict)
     if len(zstats) == 1:
@@ -1252,7 +1632,7 @@ def aggregation(data_array, statistic_aggregation, axis=0):
     elif statistic_aggregation in ['p1', 'p5', 'p10', 'p25', 'p75', 'p90', 'p95', 'p99']:
         aggregated_data = np.nanpercentile(data_array, 
                                            q=int(statistic_aggregation.split('p')[1]),
-                                           axis=axis)
+                                           axis=axis, method='nearest')
     else:
         error = 'Aggregation statistic {0} is not available. '.format(statistic_aggregation)
         error += 'The options are: Mean, Median, p1, p5, p10, p25, p75, p90, p95 and p99'
@@ -1260,7 +1640,6 @@ def aggregation(data_array, statistic_aggregation, axis=0):
         sys.exit(1) 
 
     return aggregated_data
-
 
 def exceedance_lim(networkspeci):
     """ Return the exceedance limit depending on the species input. 
@@ -1336,7 +1715,7 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels)
             data_array_reduced = data_array.reshape(data_array.shape[0]*data_array.shape[1], data_array.shape[2])
             
             # create pandas dataframe of data array
-            data_array_df = pd.DataFrame(data_array_reduced.transpose(), index=read_instance.time_array, 
+            data_array_df = pd.DataFrame(data_array_reduced.transpose(), index=read_instance.time_index, 
                                          columns=np.arange(data_array_reduced.shape[0]), dtype=np.float32)
             # resample data array
             data_array_df_resampled = data_array_df.resample('D', axis=0).mean()

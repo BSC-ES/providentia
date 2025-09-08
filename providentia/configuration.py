@@ -14,10 +14,13 @@ import sys
 import time
 import yaml
 
+import matplotlib
 import numpy as np
 import pandas as pd
 
 from providentia.auxiliar import CURRENT_PATH, join, get_machine
+from providentia.read_aux import check_for_ghost, get_default_qa
+from providentia.warnings_prv import show_message
 
 # get current path and providentia root path
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
@@ -60,10 +63,6 @@ class ProvConfiguration:
 
     def parse_parameter(self, key, value, deactivate_warning=False):
         """ Parse a parameter. """
-        
-        # import show_mesage from warnings
-        sys.path.append(join(PROVIDENTIA_ROOT, 'providentia'))
-        from warnings_prv import show_message
         
         # make sure we don't pass strings instead of booleans for true and false
         if value == 'true':
@@ -255,7 +254,7 @@ class ProvConfiguration:
                 # treat leaving the field blank as default
                 if value == '':
                     return self.var_defaults[key]
-                # parse multiple species only in interpolation and download
+                # parse multiple resolutions only in interpolation and download
                 if self.read_instance.interpolation or self.read_instance.download:
                     return [res.strip() for res in value.split(',')]
                 else:        
@@ -282,16 +281,6 @@ class ProvConfiguration:
                 # throw error if start_date is empty str
                 value = str(value)
                 return value.strip()
-        
-        elif key == 'forecast':
-            # parse forecast 
-
-            if isinstance(value, str):
-                # parse multiple forecast variables
-                if ',' in value:
-                    return [fct.strip() for fct in value.split(',')]
-                else:
-                    return [value.strip()]
 
         elif key == 'qa':
             # parse qa
@@ -440,12 +429,14 @@ class ProvConfiguration:
                 # split list, if only one ensemble, then creates list of one element
                 ensemble_opts = []
                 for opt in str(value).split(","):
+                    #strip opt
+                    opt = opt.strip()
                     # if it is a number, then make it 3 digits, if not it stays as it is
                     if opt.isdigit():
-                        opt = opt.strip().zfill(3)
+                        opt = opt.zfill(3)
                     # check that it does not start with stat
                     elif opt.startswith('stat'):
-                        error = "Error: ensemble option cannot start with 'stat'.\n" \
+                        error = "Error: 'ensemble' cannot start with 'stat'.\n" \
                         "For ensemble statistics, simply define them based on the stat name provided in the filename, such as:\n" \
                         "   · 'av' for ensemble average\n" \
                         "   · 'av_an' for ensemble analysis average"
@@ -454,10 +445,19 @@ class ProvConfiguration:
                     
                     ensemble_opts.append(opt)
 
-                ensemble_opts = [opt.strip().zfill(3) if opt.isdigit() else opt for opt in str(value).split(",")]  
                 return ensemble_opts
             else:
                 return []
+            
+        elif key == 'forecast':
+            # parse forecast 
+
+            if isinstance(value, str):
+                # parse multiple forecast variables
+                if ',' in value:
+                    return [fct.strip().lower() for fct in value.split(',')]
+                else:
+                    return [value.strip().lower()]
             
         elif key == 'experiments':
             # parse experiments
@@ -628,136 +628,257 @@ class ProvConfiguration:
         # if no special parsing treatment for variable, simply return value
         return value
 
-    def decompose_experiments(self):
-        """ Get experiment components (experiment-domain-ensemble) and fill the class variables with their value."""
+    def decompose_experiments(self, deactivate_warning):
+        """ Get experiment components (experiment-domain-ensemble-forecast) and fill the class variables with their value."""
 
-        # get possible domains
-        possible_domains = default_values["domain"]
+        # make sure there are experiments for interpolation mode
+        if (self.read_instance.interpolation) and (len(self.read_instance.experiments) == 0):
+            error = 'Error: No experiments were provided in the configuration file.'
+            self.read_instance.logger.error(error)
+            sys.exit(1)
 
         # get separated experiment parts list
         split_experiments = [exp.split("-") for exp in self.read_instance.experiments]
 
-        # check if all the experiments are written in the same way
-        if len(set([len(exp) for exp in split_experiments])) > 1:
-            error = (f"Error: All the experiments have to follow the same structure: [expID], [expID]-[domain], [expID]-[ensembleNum] or [expID]-[domain]-[ensembleNum].")
-            self.read_instance.logger.error(error)
-            sys.exit(1)
+        # get default domain and ensemble
+        default_domain = default_values["domain"]
+        if self.read_instance.interpolation:
+            default_ensemble = ["000"]
+        else:
+            default_ensemble = default_values["ensemble"]
 
-        # get original domain and ensemble options as passed in the configuration file
+        # get original domain, ensemble and forecast as passed in the configuration file
         config_domain = copy.deepcopy(self.read_instance.domain) 
         config_ensemble = copy.deepcopy(self.read_instance.ensemble)
+        config_forecast = copy.deepcopy(self.read_instance.forecast)
 
-        # initialize experiment id, domain and ensemble options for each of the experiments
-        exp_id, exp_dom, exp_ens = None, None, None
+        # get function for checking formating of experiment for current mode
+        # if the current mode is interpolation or the experiment wanted to be downloaded is not interpolated
+        if self.read_instance.interpolation or (self.read_instance.download and self.read_instance.interpolated is False):
+            check_experiment_func = self.check_experiment_interpolation
+        elif self.read_instance.download:
+            check_experiment_func = self.check_experiment_download
+        else:
+            check_experiment_func = self.check_experiment
 
-        # initialize lists to hold domains/ensemble options inside the experiments
-        exp_domains_list = []
-        exp_ensemble_list = []
-        exp_ids_list = []
+        # initialise lists to store experiments / aliases/ domain / ensemble / forecast to update class variables
+        experiments = []
+        aliases = []
+        domains = []
+        ensembles = []
+        forecasts = []
 
-        # iterate through all the experiments
-        for exp_i, split_experiment in enumerate(split_experiments):
-            # get experiment name and save into list
-            exp_id = split_experiment[0]
-            exp_ids_list.append(exp_id)
+        # iterate through each experiment string
+        for exp_ii, split_experiment in enumerate(split_experiments):
 
-            # [expID]-[domain] or [expID]-[ensembleNum] 
-            if len(split_experiment) == 2:
-                end_experiment = split_experiment[-1]
+            # if experiment is composed by more than 4 parts, exit
+            if len(split_experiment) > 4:
+                error = 'Invalid experiment format, experiments have to consist of four elements maximum.'
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+
+            # set alias if have one
+            if exp_ii < len(self.read_instance.alias): 
+                alias = self.read_instance.alias[exp_ii]
+            else:
+                alias = None
+
+            # initialise expID, domain, ensemble and forecast for the experiment
+            exp_id = None
+            exp_dom = None
+            exp_ens = None
+            exp_fct = None
+
+            # iterate through experiment parts and come up with list of experiments, 
+            # using information from each of domain, ensemble, forecast fields when not in experiments field,
+            # otherwise default values are used
+            for experiment_part_ii, experiment_part in enumerate(split_experiment):
+
+                # have expID part?
+                if experiment_part_ii == 0:
+                    exp_id = copy.deepcopy(experiment_part)
+
+                # have domain part?
+                elif experiment_part in default_domain: 
+                    exp_dom = copy.deepcopy(experiment_part)
                 
-                # [expID]-[domain]
-                if end_experiment in possible_domains: 
-                    # other experiment goes by the format [expID]-[ensembleNum]
-                    if exp_ens:
-                        error = (f"Error: All the experiments have to follow the same structure: [expID], [expID]-[domain], [expID]-[ensembleNum] or [expID]-[domain]-[ensembleNum].")
-                        self.read_instance.logger.error(error)
-                        sys.exit(1)
-                    exp_dom = end_experiment
-                    exp_domains_list.append(exp_dom)
-                # [expID]-[ensembleNum]   
-                else:
-                    # other experiment goes by the format [expID]-[domain]
-                    if exp_dom:
-                        error = (f"Error: All the experiments have to follow the same structure: [expID], [expID]-[domain], [expID]-[ensembleNum] or [expID]-[domain]-[ensembleNum].")
-                        self.read_instance.logger.error(error)
-                        sys.exit(1)
+                # have forecast part?
+                elif ('day' in experiment_part) or ('daily' in experiment_part) or ('combined' in experiment_part): 
+                    exp_fct = experiment_part.strip().lower()
 
-                    exp_ens = end_experiment
+                # have ensemble part?
+                else:
+                    exp_ens = copy.deepcopy(experiment_part)
                     # if it is a number, then make it 3 digits, if not it stays as it is
                     if exp_ens.isdigit():
                         exp_ens = exp_ens.strip().zfill(3)
                     # check that it does not start with stat
                     elif exp_ens.startswith('stat'):
-                            error = f"Error: ensemble option {exp_ens} cannot start with 'stat'.\n" \
+                            error = f"Error: 'ensemble' {exp_ens} cannot start with 'stat'.\n" \
                             "For ensemble statistics, simply define them based on the stat name provided in the filename, such as:\n" \
                             "   · 'av' for ensemble average\n" \
                             "   · 'av_an' for ensemble analysis average"
                             self.read_instance.logger.error(error)
                             sys.exit(1)
-                    exp_ensemble_list.append(exp_ens)
 
-            # [expID]-[domain]-[ensembleNum]
-            elif len(split_experiment) == 3:               
-                exp_dom, exp_ens = split_experiment[1], split_experiment[2]
-                exp_domains_list.append(exp_dom)
-                # if it is a number, then make it 3 digits, if not it stays as it is
-                if exp_ens.isdigit():
-                    exp_ens = exp_ens.strip().zfill(3)
-                # check that it does not start with stat
-                elif exp_ens.startswith('stat'):
-                        error = f"Error: ensemble option {exp_ens} cannot start with 'stat'.\n" \
-                        "For ensemble statistics, simply define them based on the stat name provided in the filename, such as:\n" \
-                        "   · 'av' for ensemble average\n" \
-                        "   · 'av_an' for ensemble analysis average"
-                        self.read_instance.logger.error(error)
-                        sys.exit(1)
-                exp_ensemble_list.append(exp_ens)
-                        
-            # if experiment is composed by more than 3 parts, exit
-            elif len(split_experiment) > 3:
-                error = 'Invalid experiment format, experiments have to consist of three elements maximum.'
-                self.read_instance.logger.error(error)
-                sys.exit(1)
-
-            # throw error if domain has been defined in configuration file and in experiment name
-            if exp_dom and config_domain:
+            # throw error if domain has been defined in both domain and experiment fields
+            if (exp_dom) and (config_domain):
                 error = f"Error: Unable to set domain(s) as {', '.join(config_domain)} because the "
-                error += f"experiment {self.read_instance.experiments[exp_i]} already contains the domain."
+                error += f"experiment {self.read_instance.experiments[exp_ii]} already contains information about the domain."
                 self.read_instance.logger.error(error)
                 sys.exit(1)
-            # if there is no domain, fill it with the list from the experiments names
-            elif not config_domain:
-                self.read_instance.domain = exp_domains_list
-            
-            # throw error if ensemble options has been defined in configuration file and in experiment name
-            if exp_ens and config_ensemble:
-                error = f"Error: Unable to set ensemble option(s) as {', '.join(config_ensemble)} because the "
-                error +=  f"experiment {self.read_instance.experiments[exp_i]} already contains the ensemble option."                  
+            # elif if have domain information from experiment field, then use that
+            elif exp_dom:
+                dom = [exp_dom]
+            # elif if have domain information from domain field, then use that
+            elif config_domain:
+                dom = copy.deepcopy(config_domain)
+            # else no information for domain from domain or experiment fields, then set default value
+            else:
+                dom = copy.deepcopy(default_domain)
+                       
+            # throw error if ensemble has been defined in both ensemble and experiment fields
+            if (exp_ens) and (config_ensemble):
+                error = f"Error: Unable to set 'ensemble' as {', '.join(config_ensemble)} because the "
+                error +=  f"experiment {self.read_instance.experiments[exp_ii]} already contains information about the ensemble."                  
                 self.read_instance.logger.error(error)
                 sys.exit(1)
-            # if there is no ensemble option, fill it with the list from the experiments names
-            elif not config_ensemble:
-                self.read_instance.ensemble = exp_ensemble_list
-            
-            # add experiment id to the experiment ids list
-            self.read_instance.exp_ids = exp_ids_list
+            # elif if have ensemble information from experiment field, then use that
+            elif exp_ens:
+                ens = [exp_ens]
+            # elif if have ensemble information from ensemble field, then use that
+            elif config_ensemble:
+                ens = copy.deepcopy(config_ensemble)
+            # else no information for ensemble from ensemble or experiment fields, then set default value
+            else:
+                ens = copy.deepcopy(default_ensemble)
 
-        # when there's no domain/ensemble opt passed in the config file or got from the experiment, then set the default option to true
-        if not self.read_instance.domain:
-            self.default_domain = True
-        if not self.read_instance.ensemble:
-            self.default_ensemble = True
+            # throw error if forecast has been defined in both forecast and experiment fields
+            if (exp_fct) and (config_forecast):
+                error = f"Error: Unable to set 'forecast' as {', '.join(config_forecast)} because the "
+                error +=  f"experiment {self.read_instance.experiments[exp_ii]} already contains information about the forecast."                  
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+            # elif if have forecast information from experiment field, then use that
+            elif exp_fct:
+                fct = [exp_fct]
+            # elif if have forecast information from forecast field, then use that
+            elif config_forecast:
+                fct = copy.deepcopy(config_forecast)
+            # else no information for forecast from forecast or experiment fields, then set default value (None)
+            else:
+                fct = [None]
 
-        # set the bool which tells you if domain/ensemble have to be combined as it was done in interpolation mode or not
-        self.combined_domain, self.combined_ensemble = bool(config_domain or self.default_domain), bool(config_ensemble or self.default_ensemble)
+            # iterate through combinations of all expIDs, domain, ensemble and forecast and put together experiment str
+            if exp_id is not None:
+                for d in dom:
+                    for e in ens:
+                        # set experiment str
+                        experiment = '{}-{}-{}'.format(exp_id, d, e)
 
-    def check_experiment(self, full_experiment, deactivate_warning):
-        # TODO Check if i can only import one time
-        from warnings_prv import show_message
+                        # check experiment validity
+                        altered_experiments = check_experiment_func(experiment, deactivate_warning)
 
+                        #iterate through returned experiments and re-split experiment
+                        for altered_experiment in altered_experiments:
+                            altered_experiment_split = altered_experiment.split('-')
+
+                            # determine if have just expID, or also domain and ensemble
+                            exp_id_alt = altered_experiment_split[0]
+                            if len(altered_experiment_split) == 1:
+                                d_alt = None
+                                e_alt = None
+                            else:
+                                d_alt = altered_experiment_split[1]
+                                e_alt = altered_experiment_split[2]
+                            
+                            # iterate through forecast and set final experiment str
+                            for f in fct:
+                                if d_alt is None:
+                                    final_experiment = '{}'.format(exp_id_alt)
+                                else:
+                                    final_experiment = '{}-{}-{}'.format(exp_id_alt, d_alt, e_alt)
+
+                                # append domain, ensemble, and forecast to arrays if not None, and not already set
+                                if (d_alt is not None) & (d_alt not in domains):
+                                    domains.append(d_alt)
+                                if (e_alt is not None) & (e_alt not in ensembles):
+                                    ensembles.append(e_alt)
+                                if (f is not None) & (f not in forecasts):
+                                    forecasts.append(f)
+
+                                # set final experiment str (if not already set), as well as alias (if not None)
+                                if final_experiment not in experiments:
+                                    experiments.append(final_experiment)
+                                    if alias is not None:
+                                        aliases.append(alias)
+
+        # set experiments dictionary mapping experiments to aliases
+        # it is mandatory to have the same number of experiments and alises, otherwise alises are dropped
+        if (len(experiments) == len(aliases)) & (len(experiments) > 0): 
+            self.read_instance.alias_flag = True
+            experiments = {exp:alias for exp, alias in zip(experiments, aliases)}
+        else:
+            self.read_instance.alias_flag = False
+            experiments = {exp:exp for exp in experiments}
+
+        # show warning if alias not possible to be set
+        if (not self.read_instance.alias_flag) & (len(aliases) > 0):
+            msg = "Experiment aliases could not be set."
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+
+        # if experiments were passed but there is no valid experiment, show warning, or exit in interpolation case
+        if (self.read_instance.experiments != []) and (experiments == {}):
+            msg = 'No experiment data available.'
+            if self.read_instance.interpolation:
+                error = "Error: " + msg
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+            else:
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+
+        # if there is no domain set in configuration file, set it with values derived from experiment field and defaults (if not empty list)
+        if not config_domain:
+            if len(domains) > 0:
+                self.read_instance.domain = domains
+        
+        # if there is no ensemble set in configuration file, set it with values derived from experiment field and defaults (if not empty list)
+        if not config_ensemble:
+            if len(ensembles) > 0:
+                self.read_instance.ensemble = ensembles
+        
+        # if there is no forecast set in configuration file, set it with values derived from experiment field (if not empty list)
+        if not config_forecast:
+            if len(forecasts) > 0:
+                self.read_instance.forecast = forecasts
+
+        # check if forecast field is set correctly, otherwise throw error 
+
+        # do not allow combined, daily, or day to be selected together 
+        if len(self.read_instance.forecast) > 1:  
+            combined_flag = False
+            daily_flag = False
+            day_flag = False
+            for fct in self.read_instance.forecast:
+                if 'combined' in fct:
+                    combined_flag = True
+                if 'daily' in fct:
+                    daily_flag = True
+                if 'day' in fct:
+                    day_flag = True
+            if (combined_flag & daily_flag) or (combined_flag & day_flag) or (daily_flag & day_flag):
+                error = "Error: 'combined', 'daily', or 'day options cannot be simultaneously selected for 'forecast' variable."
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+
+        # set class variable experiments with experiments dictionary that have now fully set
+        self.read_instance.experiments = experiments
+
+    def check_experiment(self, experiment, deactivate_warning):
         """ Check individual experiment and get list of options. """
-        # split full experiment
-        experiment, domain, ensemble_option = full_experiment.split('-')
+
+        # split experiment
+        expid, domain, ensemble = experiment.split('-')
         
         # get all possible experiments
         exp_path = join(self.read_instance.exp_root,self.read_instance.ghost_version)
@@ -769,51 +890,48 @@ class ProvConfiguration:
         # remove possible ghost versions if they are not really in the directories
         possible_ghost_versions = list(set(os.listdir(self.read_instance.exp_root)) & set(self.read_instance.possible_ghost_versions))
 
-        # if ensemble options is allmembers, get all the possible ensemble options
-        if ensemble_option == "allmembers":
-            exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.possible_experiments))
+        # if ensemble is allmembers, get all the possible ensemble members
+        if ensemble == "allmembers":
+            exp_found = list(filter(lambda x:x.startswith(expid+'-'+domain), self.possible_experiments))
            
             # search for other ghost versions
             if not exp_found:
                 for ghost_version in possible_ghost_versions:
-                    ghost_exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), os.listdir(join(self.read_instance.exp_root,ghost_version))))
+                    ghost_exp_found = list(filter(lambda x:x.startswith(expid+'-'+domain), os.listdir(join(self.read_instance.exp_root,ghost_version))))
                     if ghost_exp_found:
                         available_ghost_versions.append(ghost_version)
-        # if it is a concrete ensemble option, then just get the experiment from the list
+        # if it is a concrete ensemble, then just get the experiment from the list
         else:
-            exp_found = [full_experiment] if full_experiment in self.possible_experiments else []
+            exp_found = [experiment] if experiment in self.possible_experiments else []
 
             # search for other ghost versions
             if not exp_found:
-                available_ghost_versions = list(filter(lambda x:full_experiment in os.listdir(join(self.read_instance.exp_root,x)), possible_ghost_versions))
+                available_ghost_versions = list(filter(lambda x:experiment in os.listdir(join(self.read_instance.exp_root,x)), possible_ghost_versions))
         
         # if not found because of the ghost version, tell the user
         if available_ghost_versions and ('/' not in self.read_instance.network[0]):
-            msg = f"There is no data available for {full_experiment} experiment for the current"
+            msg = f"There is no data available for {experiment} experiment for the current"
             msg += f" GHOST version ({self.read_instance.ghost_version}). Please check one of the available versions:"
             msg += f" {', '.join(sorted(available_ghost_versions))}"
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
-        return bool(exp_found), exp_found
+        return exp_found
     
     # TODO use inheritance in the future 
     # TODO add more checking, for now only this is enough
-    def check_experiment_interpolation(self, full_experiment, deactivate_warning):
-        # TODO Check if i can only import one time
-        from warnings_prv import show_message
-
-        """ Checks if experiment, domain and ensemble option combination works 
-        for interpolation or the download of non interpolated experiments
+    def check_experiment_interpolation(self, experiment, deactivate_warning):     
+        """ Checks if experiment, domain and ensemble combination works 
+        for interpolation or the download of non-interpolated experiments
         Returns if experiment if valid and the experiment type (if there is one) """
         
-        # get the splitted experiment
-        experiment, domain, ensemble_option = full_experiment.split('-')
+        # split experiment
+        expid, domain, ensemble = experiment.split('-')
 
-        # accept asterisk to download all experiments
-        if experiment == '*':
-            return True, experiment
+        # accept asterisk to download all experiments (non-interpolated)
+        if expid == '*':
+            return [expid]
         
-        # search if the experiment id is in the interp_experiments file
+        # search if the expid is in the interp_experiments file
         # initialize experiment search variables
         experiment_exists = False
         msg = ""
@@ -822,11 +940,11 @@ class ProvConfiguration:
         # if it's local interpolation, don't enter
         if not (self.read_instance.machine == "local" and self.read_instance.interpolation is True):
             for experiment_type, experiment_dict in interp_experiments.items():
-                if experiment in experiment_dict["experiments"]:
+                if expid in experiment_dict["experiments"]:
                     experiment_exists = True
                     break
             
-            msg += f"Cannot find the experiment ID '{experiment}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
+            msg += f"Cannot find the experiment ID '{expid}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
 
         # get directory from data_paths if it doesn't exists in the interp_experiments file 
         # if executed from the hpc machines and want to do a download, don't enter
@@ -834,7 +952,7 @@ class ProvConfiguration:
             # get the path to the non interpolated experiments
             # in the current machine if it is an intepolation
             if self.read_instance.interpolation is True:
-                exp_to_interp_path = join(self.read_instance.exp_to_interp_root, experiment)
+                exp_to_interp_path = join(self.read_instance.exp_to_interp_root, expid)
                 if os.path.exists(exp_to_interp_path):
                     experiment_exists = True
             # in the remote machine if it is a local download
@@ -842,38 +960,38 @@ class ProvConfiguration:
                 # connect to the remote machine
                 self.read_instance.connect()        
                 # get all possible experiments
-                exp_to_interp_path = join(self.read_instance.exp_to_interp_remote_path,experiment,domain)
+                exp_to_interp_path = join(self.read_instance.exp_to_interp_remote_path,expid,domain)
                 try:
                     self.read_instance.sftp.stat(exp_to_interp_path)
                     experiment_exists = True
                 except FileNotFoundError:
                     pass     
             
-            msg += f"Cannot find the {experiment} experiment with the {domain} domain in '{self.read_instance.exp_to_interp_root}'."
+            msg += f"Cannot find the experiment ID {expid} with the {domain} domain in '{self.read_instance.exp_to_interp_root}'."
 
         # if experiment does not exist, exit
         # supressed warning deactivation
         if experiment_exists is False:
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
+            exp_found = []
+        else:
+            exp_found = [experiment]
 
-        return experiment_exists, [full_experiment]
+        return exp_found
     
     # TODO maybe remove this one and keep the download check since its much cleaner
-    def check_experiment_download(self, full_experiment, deactivate_warning):
+    def check_experiment_download(self, experiment, deactivate_warning):
         """ Check individual experiment and get list of options."""
 
-        # TODO Check if i can only import one time
-        from warnings_prv import show_message
-
-        # split full experiment
-        experiment, domain, ensemble_option = full_experiment.split('-')
+        # split experiment
+        expid, domain, ensemble = experiment.split('-')
 
         # accept asterisk to download all experiments
-        if experiment == '*':
-            return True, experiment
+        if expid == '*':
+            return [expid]
         
         # all experiments pass this check because the real one is in the remote machine
-        exp_found = [full_experiment]
+        exp_found = [experiment]
         
         # connect to the remote machine
         self.read_instance.connect()        
@@ -883,9 +1001,9 @@ class ProvConfiguration:
         self.possible_experiments = self.read_instance.sftp.listdir(exp_path)
 
         # TODO repeated code, put this into a method in the future?
-        # if ensemble options is allmembers, get all the possible ensemble options
-        if ensemble_option == "allmembers":
-            exp_found = list(sorted(filter(lambda x:x.startswith(experiment+'-'+domain), self.possible_experiments)))
+        # if ensemble is allmembers, get all the possible ensemble
+        if ensemble == "allmembers":
+            exp_found = list(sorted(filter(lambda x:x.startswith(expid+'-'+domain), self.possible_experiments)))
            
             if not exp_found:
                 # initialise list of possible ghost versions
@@ -893,28 +1011,19 @@ class ProvConfiguration:
                 
                 # search for other ghost versions
                 for ghost_version in self.read_instance.possible_ghost_versions:
-                    ghost_exp_found = list(filter(lambda x:x.startswith(experiment+'-'+domain), self.read_instance.sftp.listdir(join(self.read_instance.exp_remote_path,ghost_version))))
+                    ghost_exp_found = list(filter(lambda x:x.startswith(expid+'-'+domain), self.read_instance.sftp.listdir(join(self.read_instance.exp_remote_path,ghost_version))))
                     if ghost_exp_found:
                         available_ghost_versions.append(ghost_version)
 
-                msg = f"There is no experiment {experiment}-{domain} data for the current ghost version ({self.read_instance.ghost_version})." 
+                msg = f"There is no experiment {expid}-{domain} data for the current ghost version ({self.read_instance.ghost_version})." 
                 if available_ghost_versions:
                     msg += f" Please, check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
 
-        return bool(exp_found), exp_found        
+        return exp_found        
 
     def check_validity(self, deactivate_warning=False):
         """ Check validity of set variables after parsing. """
-       
-        # import matplotlib for Taylor Diagrams
-        import matplotlib
-
-        # import check_for_ghost and get_default_qa
-        from read_aux import check_for_ghost, get_default_qa
-
-        # import show_mesage from warnings
-        from warnings_prv import show_message
 
         # check if species is valid
         if self.read_instance.species:
@@ -1119,116 +1228,14 @@ class ProvConfiguration:
                 error = "Error: interp_experiment_upsampling must be 'mean' or 'median'. Using '{}' as default.".format(default)
                 self.read_instance.logger.error(error) 
 
-        # TODO MAYBE CHANGE THIS initialization to somewhere else or take it from another place
-        # TODO and should it be provconf or no????
-        # initialise possible domains
-        self.default_domain = False
-        self.default_ensemble = False
-
-        # make sure there are experiments in interpolation
-        if self.read_instance.interpolation and (len(self.read_instance.experiments) == 0):
-            error = 'Error: No experiments were provided in the configuration file.'
-            self.read_instance.logger.error(error)
-            sys.exit(1)
-
-        # get domain, ensemble options, experiment ids and flag to get the default values of these variables
-        self.decompose_experiments()
-
-        # check have domain information, TODO ONLY FOR INTERPOLATION
-        # TODO think if we need one separated variable for this one because it is already included on experiments
-        # if report, throw message, stating are using default instead
-        if self.read_instance.experiments and self.default_domain:
-            default = default_values['domain']
-            msg = "Domain (domain) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
-            self.read_instance.domain = default
-
-        # check have ensemble information, TODO ONLY FOR INTERPOLATION
-        # TODO think if we need one separated variable for this one because it is already included on experiments
-        # if report, throw message, stating are using default instead
-        # TODO maybe think this a bit better, if i dont pass it it should check better if i already passed it in experiments and so
-        if self.read_instance.experiments and self.default_ensemble:
-            if self.read_instance.interpolation:
-                default = ["000"]
-            else:
-                default = default_values['ensemble']
-            msg = "Ensemble options (ensemble) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
-            self.read_instance.ensemble = default
-
-        # check if alias can be set (in case there is an alias)
-        if self.read_instance.alias:
-            # to set an alias is mandatory to have the same number of experiments and legends
-            if len(self.read_instance.experiments)==len(self.read_instance.alias): 
-                # if all experiments are full length ([expID]-[domain]-[ensembleNum]) or there's only one experiment with only one possible combination,
-                # then they can be set as alias     
-                if all([len(exp.split("-"))==3 for exp in self.read_instance.experiments]) or \
-                    (len(self.read_instance.experiments) == 1 and len(self.read_instance.domain) == 1 and len(self.read_instance.ensemble) == 1):
-                    self.read_instance.alias_flag = True
-            
-            # show warning if alias not possible to be set
-            if not deactivate_warning and not self.read_instance.alias_flag:
-                msg = "Experiment alias could not be set."
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+        # set expID, domain, ensemble, forecast from experiment name
+        self.decompose_experiments(deactivate_warning)
 
         # before checking the experiment check that the remote download has the interpolated tag as False, if not exit
         if self.read_instance.download and MACHINE in ["storage5", "nord3v2", "nord4"] and self.read_instance.interpolated is True:
             error = F"Error: Nothing from the {self.read_instance.section} section was copied to gpfs, change the interpolated field to 'False'."
             self.read_instance.logger.error(error)
             sys.exit(1)
-
-        # get correct check experiment function
-        # TODO do it using heritage
-        # if the current mode is interpolation or the experiment i want to download is not interpolated
-        if self.read_instance.interpolation or (self.read_instance.download and self.read_instance.interpolated is False):
-            check_experiment_fun = self.check_experiment_interpolation
-        elif self.read_instance.download:
-            check_experiment_fun = self.check_experiment_download
-        else:
-            check_experiment_fun = self.check_experiment
-
-        # temp dictionary to store experiments
-        final_experiments = []
-        correct_experiments = {}
-
-        # join experiments
-        for exp_i, experiment in enumerate(self.read_instance.exp_ids):
-            # experiment, domain, ensemble
-            if self.combined_domain and self.combined_ensemble:
-                final_experiments += [f'{experiment}-{domain}-{ens_opt}' for domain in self.read_instance.domain for ens_opt in self.read_instance.ensemble]
-            else:
-                if self.combined_domain or self.combined_ensemble:
-                    # experiment-ensemble, domain
-                    if self.combined_domain:
-                        final_experiments += [f'{experiment}-{domain}-{self.read_instance.ensemble[exp_i]}' for domain in self.read_instance.domain]
-                    # experiment-domain, ensemble 
-                    else:
-                        final_experiments += [f'{experiment}-{self.read_instance.domain[exp_i]}-{ens_opt}' for ens_opt in self.read_instance.ensemble]
-                # experiment-domain-ensemble
-                else:
-                    final_experiments.append(f'{experiment}-{self.read_instance.domain[exp_i]}-{self.read_instance.ensemble[exp_i]}')
-
-        for exp_i, experiment in enumerate(final_experiments):
-            exp_is_valid, valid_exp_list = check_experiment_fun(experiment, deactivate_warning)
-            if exp_is_valid:
-                for valid_exp in valid_exp_list:
-                    if self.read_instance.alias_flag:
-                        correct_experiments[valid_exp] = self.read_instance.alias[exp_i]
-                    else:
-                        correct_experiments[valid_exp] = valid_exp
-        
-        # if experiments were passed and there's no valid experiment, show warning
-        if self.read_instance.experiments != [] and correct_experiments == {}:
-            msg = 'No experiment data available.'
-            if self.read_instance.interpolation:
-                error = "Error: " + msg
-                self.read_instance.logger.error(error)
-                sys.exit(1)
-            else:
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-
-        # replace experiments by new ones found
-        self.read_instance.experiments = correct_experiments
 
         # check calibration factor
         if self.read_instance.calibration_factor:
@@ -1447,13 +1454,6 @@ class ProvConfiguration:
                 self.read_instance.qa = self.read_instance.qa_per_species[list(self.read_instance.qa_per_species.keys())[0]]
             else:
                 self.read_instance.qa_per_species = {speci:self.read_instance.qa for speci in species_plus_filter_species}
-
-        # for forecast, do not allow dayN and daily to be provided together 
-        if self.read_instance.forecast:
-            if (len(self.read_instance.forecast) > 1) & ('daily' in self.read_instance.forecast):
-                error = 'Error: "forecast" variable cannot contain both "dayN" and "daily".'
-                self.read_instance.logger.error(error)
-                sys.exit(1)
 
         # add to qa
         if self.read_instance.add_qa:
@@ -1810,8 +1810,7 @@ def load_conf(self, fpath=None):
     """ Load existing configurations from file
         for running Providentia.
     """
-    sys.path.append(join(PROVIDENTIA_ROOT, 'providentia'))
-    from configuration import read_conf
+    from providentia.configuration import read_conf
 
     if fpath is None:
         self.read_instance.logger.info("No configuration file found")
@@ -1828,8 +1827,6 @@ def split_options(read_instance, conf_string, separator="||"):
     """ For the options in the configuration that define the keep and remove
         options. Returns the values in two lists, the keeps and removes.
     """
-    # import show_mesage from warnings
-    from .warnings_prv import show_message
     
     keeps, removes = [], []
 

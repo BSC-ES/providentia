@@ -479,7 +479,8 @@ class Library:
                 zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=chunk_stat)
                 
                 # get available chunk timeseries resolutions
-                available_timeseries_chunk_resolutions = get_possible_resampling_resolutions(self.active_resolution)
+                available_timeseries_chunk_resolutions = get_possible_resampling_resolutions(self.active_resolution,
+                                                                                             daily_forecast=self.daily_forecast)
 
                 # show warning if it is not
                 if chunk_resolution not in available_timeseries_chunk_resolutions:

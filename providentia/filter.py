@@ -1,19 +1,21 @@
 """ Class that filters observational/experiment data into memory as required """
 
+import ast
 import copy
 import json
 import os
 import yaml
 import sys
+import time
 
 import numpy as np
 import pandas as pd
-import ast
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .calculate import Stats, ExpBias
 from .configuration import split_options
-from .statistics import get_z_statistic_info, exceedance_lim
+from .plot_aux import update_plotting_parameters
+from .statistics import merge_forecast_days, get_z_statistic_info, exceedance_lim
 from .warnings_prv import show_message
 
 
@@ -40,17 +42,33 @@ class DataFilter:
         self.filter_by_data_availability()
         self.filter_by_metadata()
         self.filter_extreme_stations()
-        self.temporally_colocate_data()
         self.apply_calibration_factor()
+        self.forecast_daily_switch()
+        self.temporally_colocate_data()
         self.get_valid_stations()
+
+        # save time index after filter in case it is overwritten later and can be reset
+        self.read_instance.time_index_after_filter = copy.deepcopy(self.read_instance.time_index)
 
     def reset_data_filter(self):
         """ Resets data arrays to be un-filtered"""
 
-        self.read_instance.data_in_memory_filtered = copy.deepcopy(self.read_instance.data_in_memory_resampled)
+        # reset data in memory
+        self.read_instance.data_in_memory_filtered = copy.deepcopy(self.read_instance.data_in_memory)
         self.read_instance.temporal_colocation_nans = {}
         self.read_instance.valid_station_inds = {}
         self.read_instance.valid_station_inds_temporal_colocation = {}
+
+        # reset time index to original time array
+        self.read_instance.time_index = self.read_instance.time_array
+
+        # if are reading daily or combined forecast data restore data labels, experiments and plotting params
+        # to how they were upon read
+        if (self.read_instance.daily_forecast) or (self.read_instance.combined_forecast):
+            self.read_instance.data_labels = copy.deepcopy(self.read_instance.original_data_labels)
+            self.read_instance.data_labels_raw = copy.deepcopy(self.read_instance.original_data_labels_raw)
+            self.read_instance.experiments = copy.deepcopy(self.read_instance.original_experiments)
+            self.read_instance.plotting_params = copy.deepcopy(self.read_instance.original_plotting_params)
 
     def filter_by_species(self):
         """ Function which filters read species by other species.
@@ -157,14 +175,8 @@ class DataFilter:
         """ Filter data for selected periods (keeping or removing data, as defined). """
 
         # set appropriate data and variable name arrays
-        if self.read_instance.resampling_resolution == 'None':
-            if self.read_instance.reading_ghost:
-                data_array = self.read_instance.ghost_data_in_memory
-                varname_array = self.read_instance.ghost_data_vars_to_read
-        else:
-            if self.read_instance.reading_ghost:
-                data_array = self.read_instance.ghost_data_in_memory_period
-                varname_array = self.read_instance.active_period_vars
+        data_array = self.read_instance.ghost_data_in_memory
+        varname_array = self.read_instance.ghost_data_vars_to_read
 
         keeps, removes = [], []
         if (self.read_instance.report) or (self.read_instance.library):
@@ -188,7 +200,7 @@ class DataFilter:
             if 'Nighttime' in keeps:
                 day_night_codes_to_keep.append(1)
             if len(day_night_codes_to_keep) == 1:
-                if 'hourly' in self.read_instance.active_resolution:
+                if 'hourly' in self.read_instance.resolution:
                     day_night_index = varname_array.index('day_night_code')
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
@@ -201,7 +213,7 @@ class DataFilter:
             if 'Weekend' in keeps:
                 weekday_weekend_codes_to_keep.append(1)
             if len(weekday_weekend_codes_to_keep) == 1:
-                if self.read_instance.active_resolution not in ['monthly','annual']:
+                if self.read_instance.resolution not in ['monthly','annual']:
                     weekday_weekend_index = varname_array.index('weekday_weekend_code')
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
@@ -218,7 +230,7 @@ class DataFilter:
             if 'Winter' in keeps:
                 season_codes_to_keep.append(3)
             if (len(season_codes_to_keep) > 0) & (len(season_codes_to_keep) < 4):
-                if self.read_instance.active_resolution != 'annual':
+                if self.read_instance.resolution != 'annual':
                     season_index = varname_array.index('season_code')
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
@@ -232,7 +244,7 @@ class DataFilter:
             if 'Nighttime' in removes:
                 day_night_codes_to_remove.append(1)
             if len(day_night_codes_to_remove) > 0:
-                if 'hourly' in self.read_instance.active_resolution:
+                if 'hourly' in self.read_instance.resolution:
                     day_night_index = varname_array.index('day_night_code')
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
@@ -245,7 +257,7 @@ class DataFilter:
             if 'Weekend' in removes:
                 weekday_weekend_codes_to_remove.append(1)
             if len(weekday_weekend_codes_to_remove) > 0:
-                if self.read_instance.active_resolution not in ['monthly','annual']:
+                if self.read_instance.resolution not in ['monthly','annual']:
                     weekday_weekend_index = varname_array.index('weekday_weekend_code')
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
@@ -262,7 +274,7 @@ class DataFilter:
             if 'Winter' in removes:
                 season_codes_to_remove.append(3)
             if len(season_codes_to_remove) > 0:
-                if self.read_instance.active_resolution != 'annual':
+                if self.read_instance.resolution != 'annual':
                     season_index = varname_array.index('season_code')
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
@@ -290,12 +302,8 @@ class DataFilter:
         if self.read_instance.reading_ghost:
 
             # get appropriate data and variable name arrays
-            if self.read_instance.resampling_resolution == 'None':
-                data_array = self.read_instance.ghost_data_in_memory
-                varname_array = self.read_instance.ghost_data_vars_to_read
-            else:
-                data_array = self.read_instance.ghost_data_in_memory_representativity
-                varname_array = self.read_instance.native_GHOST_representativity_vars
+            data_array = self.read_instance.ghost_data_in_memory
+            varname_array = self.read_instance.ghost_data_vars_to_read
 
             # iterate through data availability variables
             for var_ii, var in enumerate(active_data_availablity_vars):
@@ -337,7 +345,7 @@ class DataFilter:
 
                 # get period associate with variable
                 period = var.split('_')[0]
-                period_inds = np.arange(len(self.read_instance.time_index))
+                period_inds = np.arange(len(self.read_instance.time_array))
 
                 # daily variable?
                 if period == 'daily':
@@ -595,6 +603,167 @@ class DataFilter:
                                     invalid_stations = eval('calc_stat{}'.format(specific_stat_argument))
                                     self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,invalid_stations,:] = np.NaN
                                     
+    def apply_calibration_factor(self):
+        """ Apply calibration factor to add or subtract a number to the experiments, 
+            multiply or divide the experiment data by a certain value.
+        """
+
+        if self.read_instance.calibration_factor:
+
+            # iterate through networkspecies  
+            for networkspeci_ii, networkspeci in enumerate(self.read_instance.networkspecies):      
+                
+                # remove observations from data labels
+                relevant_data_labels = copy.deepcopy(self.read_instance.data_labels)
+                relevant_data_labels.remove(self.read_instance.observations_data_label)
+
+                # get calibration factor per experiment
+                for data_label_ii, data_label in enumerate(relevant_data_labels):
+
+                    # get calibration factor per experiment
+                    if isinstance(self.read_instance.calibration_factor, dict):
+                        exp_label = list(self.read_instance.experiments.keys())[
+                            list(self.read_instance.experiments.values()).index(data_label)]
+                        if exp_label not in self.read_instance.calibration_factor:
+                            msg = f"No calibration factor applied to experiment {exp_label}."
+                            self.read_instance.logger.info(msg)
+                            continue
+                        calibration_factor = self.read_instance.calibration_factor[exp_label]
+                    else:
+                        calibration_factor = self.read_instance.calibration_factor
+
+                    # get calibration factor per networkspeci
+                    if (len(self.read_instance.networkspecies) > 1) and (',' in calibration_factor):
+                        calibration_factor = calibration_factor.split(',')[networkspeci_ii]
+                    
+                    msg = 'Applying calibration factor: '
+                    msg += '{0} in {1} experiment'.format(calibration_factor, data_label)
+                    self.read_instance.logger.info(msg)
+                    
+                    # apply calibration factor
+                    if calibration_factor.count('*') == 1 and calibration_factor[0] == '*':
+                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] *= \
+                            float(calibration_factor.replace('*', ''))
+                    elif calibration_factor.count('/') == 1 and calibration_factor[0] == '/':
+                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] /= \
+                            float(calibration_factor.replace('/', ''))
+                    elif calibration_factor.count('-') == 1 and calibration_factor[0] == '-':
+                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] -= \
+                            float(calibration_factor.replace('-', ''))
+                    elif calibration_factor.count('+') == 1 and calibration_factor[0] == '+':
+                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] += \
+                            float(calibration_factor)
+                    else:
+                        error = f"Error: Invalid format '{calibration_factor}' in calibration factor. Accepted formats are: '+num', '-num', '*num', or '/num'."
+                        self.read_instance.logger.error(error)
+                        sys.exit(1)
+
+    def forecast_daily_switch(self):
+        """
+        Adjust the in-memory forecast data and experiment labels to handle 
+        daily or combined forecasts. 
+
+        This function performs several key operations:
+        1. Early exit if neither daily_forecast nor combined_forecast are active.
+        2. Extracts unique base data labels by removing '-daily' and '-combined' suffixes.
+        3. Determines the maximum number of forecast days across all labels 
+        and collects active forecast days.
+        4. Rebuilds the in-memory data array (data_in_memory_filtered) to 
+        combine forecast day data separated as different experiments to the same dimension.
+        5. Updates the global time index to match the tiled forecast data.
+        6. Updates experiments, data_labels, and data_labels_raw to include 
+        '-daily' or '-combined' suffixes as appropriate.
+        7. Updates plotting parameters to reflect the new data structure.
+
+        Note:
+            - Observational data is repeated across all forecast days.
+            - Forecast data is tiled in same dimension corresponding to each forecast day.
+            - The function assumes `read_instance` contains all necessary 
+            attributes (data_labels, data_in_memory_filtered, forecast_indices_per_data_label, etc.).
+        """
+
+        # Exit early if neither daily_forecast nor combined_forecast are active
+        if (not self.read_instance.daily_forecast) and (not self.read_instance.combined_forecast):
+            return
+
+        # Extract base labels by removing '-daily' and '-combined' suffixes from data_labels
+        base_data_labels = [label.split('-daily')[0].split('-combined')[0] for label in self.read_instance.data_labels]
+        # Keep unique base labels while preserving order
+        unique_base_data_labels = list(dict.fromkeys(base_data_labels))
+
+        # Pass 1: Determine the maximum number of forecast days across all labels 
+        # and collect which forecast days are actually active
+        self.read_instance.max_forecast_days = 0
+        self.read_instance.active_forecast_days = []
+        for networkspeci in self.read_instance.networkspecies:
+            for base_data_label in base_data_labels:
+                if base_data_label != self.read_instance.observations_data_label:
+                    current_count = 0
+                    for data_label in self.read_instance.data_labels:
+                        if base_data_label in data_label:
+                            current_count += 1 
+                            # Check if this label has forecast indices for the current network
+                            if data_label in self.read_instance.forecast_indices_per_data_label[networkspeci][base_data_label]:
+                                forecast_day = self.read_instance.forecast_indices_per_data_label[networkspeci][base_data_label][data_label] + 1
+                                # Collect active forecast days, avoiding duplicates
+                                if forecast_day not in self.read_instance.active_forecast_days:
+                                    self.read_instance.active_forecast_days.append(forecast_day)
+
+                    # Update max_forecast_days if current label has more forecast days
+                    if current_count > self.read_instance.max_forecast_days:
+                        self.read_instance.max_forecast_days = current_count
+
+        # Sort the active forecast days for consistent ordering
+        self.read_instance.active_forecast_days = np.sort(self.read_instance.active_forecast_days)
+
+        # Pass 2: Rebuild the in-memory data array to merge forecast days separated as different experiments to same dimension (tiled)
+        for networkspeci in self.read_instance.networkspecies:
+
+            # merge forecast days as different experiments to same dimension (tiled)
+            new_data_in_memory = merge_forecast_days(self.read_instance, networkspeci, self.read_instance.data_labels, 
+                                                     unique_base_data_labels, self.read_instance.data_in_memory_filtered[networkspeci])
+
+            # Replace old filtered data with the newly built array
+            self.read_instance.data_in_memory_filtered[networkspeci] = new_data_in_memory
+
+        # Rebuild the global time index by tiling the original time array for each forecast day
+        self.read_instance.time_index = pd.DatetimeIndex(np.tile(self.read_instance.time_array, self.read_instance.max_forecast_days))
+
+        # Update experiment labels and data_labels to reflect daily or combined forecasts
+        data_labels_to_remove = []
+        data_labels_to_add = set()
+        new_experiments = {}
+
+        for exp_raw, exp in self.read_instance.experiments.items():
+            if ('-daily' in exp) or ('-combined' in exp):
+                if self.read_instance.daily_forecast:
+                    new_exp = f"{exp.split('-daily')[0]}-daily"
+                    new_exp_raw = f"{exp_raw.split('-daily')[0]}-daily"
+                elif self.read_instance.combined_forecast:  
+                    new_exp = f"{exp.split('-combined')[0]}-combined"
+                    new_exp_raw = f"{exp_raw.split('-combined')[0]}-combined"
+                if new_exp_raw not in new_experiments:
+                    new_experiments[new_exp_raw] = new_exp
+                data_labels_to_remove.append(exp)
+                data_labels_to_add.add(new_exp)
+            else:
+                # Keep experiments without '-daily' or '-combined' unchanged
+                new_experiments[exp_raw] = exp
+
+        # Update the experiments dictionary
+        self.read_instance.experiments = dict(new_experiments)
+        # Rebuild the data_labels and raw data_labels including observations first
+        self.read_instance.data_labels = [self.read_instance.observations_data_label] + list(self.read_instance.experiments.values())
+        self.read_instance.data_labels_raw = [self.read_instance.observations_data_label] + list(self.read_instance.experiments.keys())
+
+        # Update plotting parameters to reflect changes in labels and daily forecasts
+        update_plotting_parameters(
+            self.read_instance,
+            data_labels_to_remove=data_labels_to_remove,
+            data_labels_to_add=list(data_labels_to_add),
+            daily_forecast=True
+        )
+
 
     def temporally_colocate_data(self):
         """ Define function which temporally colocates observational and experiment data.
@@ -732,58 +901,3 @@ class DataFilter:
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = \
                         valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int32)[station_data_availability_number > 1]]
-
-    def apply_calibration_factor(self):
-        """ Apply calibration factor to add or subtract a number to the experiments, 
-            multiply or divide the experiment data by a certain value.
-        """
-
-        if self.read_instance.calibration_factor:
-
-            # iterate through networkspecies  
-            for networkspeci_ii, networkspeci in enumerate(self.read_instance.networkspecies):      
-                
-                # remove observations from data labels
-                relevant_data_labels = copy.deepcopy(self.read_instance.data_labels)
-                relevant_data_labels.remove(self.read_instance.observations_data_label)
-
-                # get calibration factor per experiment
-                for data_label_ii, data_label in enumerate(relevant_data_labels):
-
-                    # get calibration factor per experiment
-                    if isinstance(self.read_instance.calibration_factor, dict):
-                        exp_label = list(self.read_instance.experiments.keys())[
-                            list(self.read_instance.experiments.values()).index(data_label)]
-                        if exp_label not in self.read_instance.calibration_factor:
-                            msg = f"No calibration factor applied to experiment {exp_label}."
-                            self.read_instance.logger.info(msg)
-                            continue
-                        calibration_factor = self.read_instance.calibration_factor[exp_label]
-                    else:
-                        calibration_factor = self.read_instance.calibration_factor
-
-                    # get calibration factor per networkspeci
-                    if (len(self.read_instance.networkspecies) > 1) and (',' in calibration_factor):
-                        calibration_factor = calibration_factor.split(',')[networkspeci_ii]
-                    
-                    msg = 'Applying calibration factor: '
-                    msg += '{0} in {1} experiment'.format(calibration_factor, data_label)
-                    self.read_instance.logger.info(msg)
-                    
-                    # apply calibration factor
-                    if calibration_factor.count('*') == 1 and calibration_factor[0] == '*':
-                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] *= \
-                            float(calibration_factor.replace('*', ''))
-                    elif calibration_factor.count('/') == 1 and calibration_factor[0] == '/':
-                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] /= \
-                            float(calibration_factor.replace('/', ''))
-                    elif calibration_factor.count('-') == 1 and calibration_factor[0] == '-':
-                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] -= \
-                            float(calibration_factor.replace('-', ''))
-                    elif calibration_factor.count('+') == 1 and calibration_factor[0] == '+':
-                        self.read_instance.data_in_memory_filtered[networkspeci][data_label_ii+1,:,:] += \
-                            float(calibration_factor)
-                    else:
-                        error = f"Error: Invalid format '{calibration_factor}' in calibration factor. Accepted formats are: '+num', '-num', '*num', or '/num'."
-                        self.read_instance.logger.error(error)
-                        sys.exit(1)

@@ -424,7 +424,7 @@ class HoverAnnotation(object):
                 self.update_vline_position()
 
                 # add time to annotation text
-                text_label += ("<p style='white-space:pre'><i>Time: {0}</i>").format(time.astype('datetime64[us]').astype(datetime.datetime).strftime("%m/%d/%Y %H:%M:%S"))
+                text_label += ("<p style='white-space:pre'><i>Time: {0}</i>").format(time.astype('datetime64[us]').astype(datetime.datetime).strftime("%d/%m/%Y %H:%M:%S"))
 
             # get colour for data label
             colour = self.canvas_instance.read_instance.plotting_params[data_label]['colour']

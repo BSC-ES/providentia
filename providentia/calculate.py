@@ -68,7 +68,7 @@ class Stats(object):
         if data.size == 0:
             return np.NaN
         else:
-            return np.nanpercentile(data, percentile, axis=-1)
+            return np.nanpercentile(data, percentile, axis=-1, method='nearest')
 
     @staticmethod
     def calculate_standard_deviation(data):
@@ -127,31 +127,45 @@ class Stats(object):
             return np.nanmax(data,axis=-1)
 
     @staticmethod
-    def calculate_data_avail_fraction(data):
-        """ Calculate data availability fraction
-            (i.e. fraction of total data array not equal to NaN).
-            Round it to the nearest integer.
+    def calculate_data_avail_fraction(data, nan_padding_counts=None):
+        """
+        Calculate data availability fraction (% of non-NaN values).
+        Corrects for padded NaNs if nan_padding_counts is provided.
 
-            :param data: array of data
-            :type data: numpy.ndarray
-            :return: data availability percent
-            :rtype: numpy.float64
+        Parameters
+        ----------
+        data : np.ndarray
+            Input data array. Can be:
+            - (label, station, time) for raw data
+            - (chunk, label, station, chunk_time) for grouped data
+        nan_padding_counts : np.ndarray or None, optional
+            Number of padded NaNs per chunk (from grouping).
+            Only relevant when data is grouped.
+
+        Returns
+        -------
+        np.ndarray
+            Data availability percentage.
+            Shape matches data[..., 0] (i.e. everything except time axis).
         """
         if data.size == 0:
             return np.NaN
-        else:
-            return np.round((100. / data.shape[-1]) * \
-                   (np.count_nonzero(~np.isnan(data), axis=-1)), 0)
 
-    @staticmethod
-    def calculate_data_avail_number(data):
-        """ Calculate data availability absolute number
-            (i.e. number of total data measurements not equal to NaN).
-        """
-        if data.size == 0:
-            return np.NaN
+        # Count valid values
+        valid_counts = np.count_nonzero(~np.isnan(data), axis=-1)
+
+        # Denominator: correct for padded NaNs if provided
+        if nan_padding_counts is not None:
+            denom = data.shape[-1] - nan_padding_counts
         else:
-            return np.count_nonzero(~np.isnan(data), axis=-1).astype('float32')
+            denom = data.shape[-1]
+
+        # Avoid division by zero
+        denom = np.where(denom == 0, np.nan, denom)
+
+        # Return data %
+        return (100.0 / denom) * valid_counts
+
 
     @staticmethod
     def calculate_stations_number(data, statistic_mode, statistic_aggregation, per_station,
@@ -161,13 +175,19 @@ class Stats(object):
             return np.NaN
         else:
 
+            # if array is 5d are reading daily forecast data, so make neccesary adjustments to calculation
+            if data.ndim == 5:
+                relevant_dim = -3
+            else:
+                relevant_dim = -2
+
             # get number of stations that do not have missing values
             # if calculating periodic statistic for cycle mode, then aggregate across first dimension
             # this due to inconsistent way Nstations is calculated with respect to other statistics
             if periodic_statistic_mode == 'Cycle':
                 stations_number = np.count_nonzero(~np.isnan(data), axis=0).astype('float32').transpose()
             else:
-                stations_number = np.count_nonzero(~np.isnan(data), axis=-2).astype('float32')
+                stations_number = np.count_nonzero(~np.isnan(data), axis=relevant_dim).astype('float32')
 
             # if calculating periodic statistic for independent mode, then aggregate across last dimension
             # this due to inconsistent way Nstations is calculated with respect to other statistics
@@ -184,23 +204,17 @@ class Stats(object):
                     stations_number = aggregation(stations_number, 'Median', axis=-1)
 
             return stations_number
-    
+
+
     @staticmethod
-    def max_repeated_nans_fraction(data):
-        """ Get % of total period of the maximum run of consecutive NaNs in array. """
+    def calculate_data_avail_number(data):
+        """ Calculate data availability absolute number
+            (i.e. number of total data measurements not equal to NaN).
+        """
         if data.size == 0:
             return np.NaN
         else:
-            max_gap_pc = []
-            for station_ind in range(data.shape[-2]):
-                mask = np.concatenate(([False],np.isnan(data[station_ind]),[False]))
-                if ~mask.any():
-                    max_gap_pc.append(0)
-                else:
-                    idx = np.nonzero(mask[1:] != mask[:-1])[0]
-                    max_gap_pc.append((idx[1::2] - idx[::2]).max())
-
-            return np.array(max_gap_pc) * (100. / data.shape[-1])
+            return np.count_nonzero(~np.isnan(data), axis=-1).astype('float32')
 
     @staticmethod
     def calculate_exceedances(data, threshold=0):
@@ -224,10 +238,12 @@ class Stats(object):
 
             #calculate MDA8
             start_inds = np.arange(0,17)
-            end_inds = np.arange(8,25)
-            mda8_arr = np.full((data.shape[0], data.shape[1], 17), np.NaN, dtype=np.float32)
+            end_inds = np.arange(8,25)            
+            mda8_arr = np.full((*data.shape[:-1], 17), np.nan, dtype=np.float32)
+
             for window_ind, (start_ind, end_ind) in enumerate(zip(start_inds, end_inds)):
-                mda8_arr[:,:,window_ind] = np.nanmean(data[:,:,start_ind:end_ind], axis=-1)
+                mda8_arr[..., window_ind] = np.nanmean(data[..., start_ind:end_ind], axis=-1)
+
             mda8 = np.nanmax(mda8_arr, axis=-1)
 
             # do aggregation (if not calculating periodic statistic, or per station)
@@ -326,7 +342,7 @@ class ExpBias(object):
             elif normalisation_type == 'sum':
                 mb = (mb / nansumwrapper(obs, axis=-1)) * 100.0
             elif normalisation_type == 'iq':
-                mb = (mb / (np.nanpercentile(obs, 75, axis=-1) - np.nanpercentile(obs, 25, axis=-1))) * 100.0
+                mb = (mb / (np.nanpercentile(obs, 75, axis=-1, method='nearest') - np.nanpercentile(obs, 25, axis=-1, method='nearest'))) * 100.0
             elif normalisation_type == 'stdev':
                 mb = (mb / np.nanstd(obs, axis=-1)) * 100.0
             return mb
@@ -355,7 +371,7 @@ class ExpBias(object):
             elif normalisation_type == 'sum':
                 me = (me / nansumwrapper(obs, axis=-1)) * 100.0 
             elif normalisation_type == 'iq':
-                me = (me / (np.nanpercentile(obs, 75, axis=-1) - np.nanpercentile(obs, 25, axis=-1))) * 100.0 
+                me = (me / (np.nanpercentile(obs, 75, axis=-1, method='nearest') - np.nanpercentile(obs, 25, axis=-1, method='nearest'))) * 100.0 
             elif normalisation_type == 'stdev':
                 me = (me / np.nanstd(obs, axis=-1)) * 100.0 
             return me
@@ -453,7 +469,7 @@ class ExpBias(object):
             elif normalisation_type == 'rmse':
                 rmse = (rmse / nansumwrapper(obs, axis=-1)) * 100.0 
             elif normalisation_type == 'iq':
-                rmse = (rmse / (np.nanpercentile(obs, 75, axis=-1) - np.nanpercentile(obs, 25, axis=-1))) * 100.0 
+                rmse = (rmse / (np.nanpercentile(obs, 75, axis=-1, method='nearest') - np.nanpercentile(obs, 25, axis=-1, method='nearest'))) * 100.0 
             elif normalisation_type == 'stdev':
                 rmse = (rmse / np.nanstd(obs, axis=-1)) * 100.0 
             return rmse
@@ -536,7 +552,7 @@ class ExpBias(object):
 
     @staticmethod
     def calculate_fairmode_stats(obs, exp, u_95r_RV, RV, alpha, beta, exc_threshold, plot, type='assessment'):
-        """ Calculate FAIRMODE statistics for target plot
+        """ Calculate FAIRMODE statistics
             See here: https://fairmode.jrc.ec.europa.eu/document/fairmode/WG1/Guidance_MQO_Bench_vs3.3_20220519.pdf
 
         Parameters
@@ -630,5 +646,8 @@ class ExpBias(object):
                 return mean, exc, t_bias, t_R, t_sd, h_perc
 
         else:
-            return np.NaN, np.NaN, np.NaN
+            if plot == 'target':
+                return np.NaN, np.NaN, np.NaN
+            elif plot == 'summary':
+                return np.NaN, np.NaN, np.NaN, np.NaN, np.NaN, np.NaN
         

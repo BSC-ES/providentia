@@ -524,7 +524,7 @@ class Report:
 
         # compress PDF using ghostscript if desired (at 300 DPI)
         if self.compression:
-            self.logger.info('\nCompressing PDF')
+            self.logger.info('\nCompressing PDF\n')
             os.system("gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/printer -dNOPAUSE -dQUIET -dBATCH -sOutputFile={} {}".format(reports_path,reports_path_temp))
             os.system("rm {}".format(reports_path_temp))
         else:
@@ -1523,7 +1523,8 @@ class Report:
                     chunk_resolution = plot_type.split('-')[2].split('_')[0]
                     
                     # get available chunk timeseries resolutions
-                    available_timeseries_chunk_resolutions = get_possible_resampling_resolutions(self.active_resolution)
+                    available_timeseries_chunk_resolutions = get_possible_resampling_resolutions(self.active_resolution,
+                                                                                                 daily_forecast=self.daily_forecast)
 
                     # show warning if it is not available
                     if chunk_resolution not in available_timeseries_chunk_resolutions:
