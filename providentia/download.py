@@ -3,10 +3,14 @@ import os
 import shutil
 
 from base64 import decodebytes
+import cdsapi
 import copy
 from dotenv import dotenv_values
+import json 
+from netCDF4 import Dataset
 import numpy as np
 import paramiko 
+import re 
 import requests
 import signal
 import subprocess
@@ -15,13 +19,17 @@ import time
 from tqdm import tqdm
 import xarray as xr
 import yaml
+import zipfile   
 
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from getpass import getpass
 
-from .actris import (get_files_path, get_data, get_files_per_var, is_wavelength_var, get_files_to_download,
-                     get_files_info, parameters_dict)
+from .actris import (get_files_path, temporally_average_data, get_data,
+                     get_files_per_var, is_wavelength_var, get_files_to_download,
+                     get_files_info, ghost_actris_variables)
+from .cams import (Cams, cams_options, ghost_cams_variables, 
+                    cams_variables_level)
 from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import ProvConfiguration, load_conf
 from .read_aux import check_for_ghost
@@ -35,7 +43,6 @@ REMOTE_MACHINE = "storage5"
 data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
-
 
 class Download(object):
     def __init__(self, **kwargs):
@@ -142,6 +149,15 @@ class Download(object):
             for k, val in self.section_opts.items():
                 setattr(self, k, self.provconf.parse_parameter(k, val))
 
+            # if there's experiments, ask the user whether they want interpolated or non-interpolated
+            if self.experiments:
+                # self.interpolated = input("Experiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
+                # while self.interpolated.lower() not in ['','y','n']:
+                #     self.interpolated = input("Experiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
+
+                # # set the interpolated parameter  
+                self.interpolated = False
+
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             self.provconf.check_validity(deactivate_warning=True)
 
@@ -216,15 +232,20 @@ class Download(object):
                     download_experiment_fun = self.copy_non_interpolated_experiment
                 # local experiment download
                 else:
-                    # get function to download experiment depending on the configuration file field
-                    download_experiment_fun = self.download_experiment if self.interpolated is True else self.download_non_interpolated_experiment
-
-            # iterate the experiments download
-            for experiment in self.experiments.keys():
-                initial_check_nc_files = download_experiment_fun(experiment, initial_check=True)
-                files_to_download = self.select_files_to_download(initial_check_nc_files)
-                if not initial_check_nc_files or files_to_download:
-                    download_experiment_fun(experiment, initial_check=False, files_to_download=files_to_download)
+                    for experiment in self.experiments:
+                        # CAMS experiment
+                        if experiment.startswith(tuple(cams_options.keys())):
+                            self.download_cams_experiment(experiment)
+                        # BSC machines
+                        else:
+                            download_experiment_fun = self.download_experiment if self.interpolated else self.download_non_interpolated_experiment
+                    
+                            # iterate the experiments download
+                            for experiment in self.experiments.keys():
+                                initial_check_nc_files = download_experiment_fun(experiment, initial_check=True)
+                                files_to_download = self.select_files_to_download(initial_check_nc_files)
+                                if not initial_check_nc_files or files_to_download:
+                                    download_experiment_fun(experiment, initial_check=False, files_to_download=files_to_download)
 
             # remove section variables from memory
             for k in self.section_opts:
@@ -422,7 +443,7 @@ class Download(object):
         not_available_resolutions = set(self.resolution) - set(self.nonghost_available_resolutions)
         if not_available_resolutions:
             available_resolutions = set(self.resolution) - not_available_resolutions
-            msg = f"The resolution/s {', '.join(not_available_resolutions)} could not be found on {join(PROVIDENTIA_ROOT,'settings','init_prov.yaml')} nonghost_available_resolutions list."
+            msg = f"The resolution/s {', '.join(available_resolutions)} could not be found on {join(PROVIDENTIA_ROOT,'settings','init_prov.yaml')} nonghost_available_resolutions list."
             msg += "\nPlease, add the necessary resolutions to the list and execute again."
             show_message(self, msg, deactivate=initial_check)
             return
@@ -1431,7 +1452,6 @@ class Download(object):
                                 nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble,nc_files))
                            
                         else:
-                            # TODO delete this in the future
                             error = "It is not possible to copy this nc file type yet. Please, contact the developers.", nc_files
                             self.logger.error(error)
                             sys.exit(1)
@@ -1636,11 +1656,11 @@ class Download(object):
         for var in self.species:
             
             # check if variable name is available
-            if var not in parameters_dict.keys():
+            if var not in ghost_actris_variables.keys():
                 self.logger.info(f'Data for {var} cannot be downloaded')
                 continue
             else:
-                actris_parameter = parameters_dict[var]
+                actris_parameter = ghost_actris_variables[var]
 
             # get files that were already downloaded
             initial_check_nc_files = get_files_to_download(self.nonghost_root, target_start_date, target_end_date, resolution, var)
@@ -1742,7 +1762,7 @@ class Download(object):
                             wavelength_var = is_wavelength_var(actris_parameter)
                             if wavelength_var and wavelength is not None:
                                 extra_info = f' at {wavelength}nm'
-                            combined_ds_yearmonth.attrs['title'] = f'Surface {parameters_dict[var]}{extra_info} in the ACTRIS network in {year}-{month:02d}.'
+                            combined_ds_yearmonth.attrs['title'] = f'Surface {ghost_actris_variables[var]}{extra_info} in the ACTRIS network in {year}-{month:02d}.'
 
                             # order attrs
                             custom_order = ['title', 'institution', 'creator_name', 'creator_email',
@@ -1783,13 +1803,177 @@ class Download(object):
             else:
                 self.logger.info(f'No files were found at {resolution} resolution for {var}')
 
+    def download_cams_experiment(self, experiment): 
+        # print current_experiment
+        self.logger.info('\n'+'-'*40)
+        self.logger.info(f"\nDownloading {experiment} experiment data from the Atmosphere Data Store...")
+
+        # get experiment id and the domain
+        config_expid, domain, ensemble_options = experiment.split("-")
+        
+        # count underscores to determine format
+        u_count = config_expid.count('_')
+
+        # get the prefix
+        prefix = config_expid.rsplit('_', u_count-1)[0]
+
+        # check if the domain is the correct one for the dataset
+        if domain not in cams_options[prefix]:
+            possible_domains = "', '".join(cams_options[prefix])
+            msg = (
+            f"The current domain '{domain}' is not valid for the CAMS dataset."
+            f"It must be '{possible_domains}'.")            
+            show_message(self, msg)
+            return
+
+        # get the dictionary with the dataset characteristics
+        cams_dict = cams_options[prefix][domain]
+
+        # get CAMS dataset and url
+        dataset = cams_dict["dataset"]
+        url = cams_dict['url']
+
+        # create class to get the functions to handle cams
+        cams = Cams(self)
+        
+        # make the necessary checks to the experiment
+        exp_id, stream = cams.get_experiment(cams_dict, u_count, config_expid, dataset, ensemble_options)
+    
+        # make the necessary checks to the dates
+        cams_start_date, cams_end_date = cams.control_dates(url, cams_dict)
+
+        # create cdsapirc file in case it was not created
+        cdsapirc_path = join(os.getenv("HOME"),'.cdsapirc')
+
+        # create csapirc file necessary for the download
+        if not os.path.isfile(cdsapirc_path):
+            cams.create_cdsapirc(cdsapirc_path)
+
+        # iterate through the species
+        for species in self.species: 
+            # check if species is in the ghost_cams_variables file
+            if species not in ghost_cams_variables:
+                msg = f"The species '{species}' is not available in CAMS."
+                show_message(self, msg)
+                continue
+        
+            # get the species in the cams vocabulary
+            cams_species = ghost_cams_variables[species]
+
+            # check if the mapped species are available in the dataset
+            if cams_species not in cams_dict['variable']:
+                msg = f"Mapped species '{cams_species}' for input species '{species}' is not available in the CAMS '{dataset}' dataset."          
+                show_message(self, msg)
+                continue
+            
+            # get the species' level
+            level = 'multi' if cams_species in cams_variables_level[url]['multi'] else 'single'
+
+            # iterate throught the resolutions
+            for resolution in self.resolution:
+                # get the resolution for the cams dataset
+                correct_resolution = cams_dict["resolution"] if type(cams_dict["resolution"]) == str else cams_dict["resolution"][level]
+                
+                # check if the resolution is the correct one for the dataset
+                if resolution != correct_resolution:
+                    msg = (
+                    f"The current resolution '{resolution}' is not valid. It must be '{correct_resolution}'.")            
+                    show_message(self, msg)
+                    continue
+
+                # get directory structure
+                dir_tail = join(config_expid, domain, resolution, species)
+
+                # get temporal and final dir
+                temp_dir = join(self.exp_to_interp_root,'.temp', dir_tail)
+                final_dir = join(self.exp_to_interp_root, dir_tail)
+
+                # create temporal and final dirs to store the middle zip file with its directories
+                os.makedirs(temp_dir, exist_ok=True)
+                os.makedirs(final_dir, exist_ok=True)
+
+                # create client
+                self.logger.info('')
+                client = cdsapi.Client(retry_max=1, quiet=True)
+
+                # iterate through the dates
+                current_cams_date = cams_start_date
+                while current_cams_date <= cams_end_date:
+
+                    # add one day or one month depending if it is forecast or analysis
+                    if cams_dict['forecast'] is False:
+                        next_cams_date = current_cams_date.replace(day=1) + relativedelta(months=1) - timedelta(days=1)
+                        next_cams_date = cams_end_date if next_cams_date > cams_end_date else next_cams_date
+                    else:
+                        next_cams_date =  current_cams_date
+
+                    # create dictionary to do the request
+                    request = cams.create_request(cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, exp_id)
+
+                    # get filename depending whether it is a download for the whole month or just a day
+                    date_format = '%Y%m' if cams_dict['forecast'] is False else '%Y%m%d'
+                    
+                    # get final path
+                    file_name = f"{species}_{current_cams_date.strftime(date_format)}.nc"
+                    final_path = join(final_dir, file_name)
+
+                    # get temporal path
+                    temp_path = join(temp_dir, 'zip_file')
+
+                    # print the request
+                    cams.print_request(cams_dict['dataset'], request)
+
+                    # make the request
+                    try:
+                        self.logger.info(f"Downloading {final_path}") # TODO change message
+                        client.retrieve(dataset, request, target=temp_path)
+                    except requests.exceptions.HTTPError as err:
+                        # invalid credential on .cdsapirc
+                        if err.response.status_code == 401: 
+                            self.logger.info(
+                                "\nBad request (401): Client Error. Invalid credentials in the .cdsapirc file. "
+                                "Removing authentication file...\n"
+                                "Please run the program again so Providentia can recreate the file automatically, "
+                                "or manually create a new .cdsapirc file by following the instructions at: "
+                                "https://cds.climate.copernicus.eu/how-to-api"
+                            )
+                            os.remove(cdsapirc_path)
+                            return
+                        # bad request
+                        if err.response.status_code == 400: 
+                            self.logger.info("\nBad request (400): The server could not understand the request.")
+                            self.logger.info(f"Details: {err}")
+                        # connection error
+                        elif err.response.status_code == 500: 
+                            self.logger.info("\nServer error (500): The server encountered an error while processing the request.")
+                            self.logger.info(f"Details: {err}")
+                            self.logger.info("Please try again later.")
+                            return
+                        else:
+                            self.logger.info(f"\nUnexpected error ({err.response.status_code}):")
+                            self.logger.info(f"Details: {err}")
+                        # make the next download
+                        continue
+
+                    # extract file 
+                    with zipfile.ZipFile(temp_path, 'r') as zip_ref:
+                        zip_file_name = zip_ref.namelist()[0]
+                        zip_ref.extractall(temp_dir)
+
+                    # format the cams files and move them to the corresponding folder
+                    cams.format_data(join(temp_dir,zip_file_name), final_path, species, prefix, domain, resolution, final_path)
+
+                    # add one day to the date
+                    current_cams_date = next_cams_date + timedelta(days=1)    
+
+                # remove the temp directory tail
+                shutil.rmtree(join(self.exp_to_interp_root,'.temp'))
 
     def check_time(self, size, file_size):
         if (time.time() - self.ncfile_dl_start_time) > self.timeoutLimit:
             error = 'Download timeout, try later.'
             self.logger.error(error)
             sys.exit(1)
-            
             
     def sighandler(self, *unused):
         self.logger.info('\nKeyboard Interrupt. Stopping execution.')

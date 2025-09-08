@@ -923,6 +923,9 @@ class ProvConfiguration:
         """ Checks if experiment, domain and ensemble combination works 
         for interpolation or the download of non-interpolated experiments
         Returns if experiment if valid and the experiment type (if there is one) """
+
+        # get the cams possible datasets
+        experiment_options = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_dataset.yaml')))
         
         # split experiment
         expid, domain, ensemble = experiment.split('-')
@@ -934,11 +937,9 @@ class ProvConfiguration:
         # search if the expid is in the interp_experiments file
         # initialize experiment search variables
         experiment_exists = False
-        msg = ""
 
-        # for HPC machines, search in interp_experiments
-        # if it's local interpolation, don't enter
-        if not (self.read_instance.machine == "local" and self.read_instance.interpolation is True):
+        # for HPC machines download (copy), search in interp_experiments
+        if self.read_instance.machine != "local" and self.read_instance.download is True:
             for experiment_type, experiment_dict in interp_experiments.items():
                 if expid in experiment_dict["experiments"]:
                     experiment_exists = True
@@ -946,11 +947,12 @@ class ProvConfiguration:
             
             msg += f"Cannot find the experiment ID '{expid}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
 
-        # get directory from data_paths if it doesn't exists in the interp_experiments file 
-        # if executed from the hpc machines and want to do a download, don't enter
-        if experiment_exists is False and not (self.read_instance.machine != "local" and self.read_instance.download is True):
-            # get the path to the non interpolated experiments
-            # in the current machine if it is an intepolation
+        if self.read_instance.machine == "local":
+            # if it's a cams experiment, the experiment is directly valid
+            if experiment.startswith(tuple(experiment_options.keys())):
+                return True, [full_experiment]
+
+            # get directory from data_paths if it doesn't exists in the interp_experiments file if it's a local interpolation
             if self.read_instance.interpolation is True:
                 exp_to_interp_path = join(self.read_instance.exp_to_interp_root, expid)
                 if os.path.exists(exp_to_interp_path):
@@ -1103,7 +1105,7 @@ class ProvConfiguration:
                 else:
                     is_ghost = check_for_ghost(network)
                     if is_ghost != previous_is_ghost:
-                        error = 'Error: "network" must be all GHOST or non-GHOST'
+                        error = 'Error: "network" must be all GHOST or non-GHOST.'
                         self.read_instance.logger.error(error)
                         sys.exit(1)
                     previous_is_ghost = is_ghost
