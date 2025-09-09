@@ -437,6 +437,7 @@ def is_wavelength_var(actris_parameter):
 
     wavelength_var = False
     if actris_parameter in ['aerosol particle light absorption coefficient',
+                            'aerosol particle optical depth',
                             'aerosol particle light hemispheric backscatter coefficient',
                             'aerosol particle light scattering coefficient',
                             'aerosol particle equivalent black carbon mass concentration']:
@@ -491,6 +492,11 @@ def get_files_info(download_instance, files, var, path):
                     'ebas_station_code']:
             if var in ds.ncattrs():
                 files_info[file][var] = ds.getncattr(var)
+
+        if "Wavelength" in files_info[file]['variables']:
+            wavelengths = ds.variables["Wavelength"][:]
+            wavelengths = [float(w) for w in wavelengths]
+            files_info[file]['wavelengths'] = wavelengths
 
     # create file
     datasets = {
@@ -802,9 +808,6 @@ def get_data(download_instance, files, var, actris_parameter, resolution, target
     # get EBAS component
     ebas_component = variable_mapping[actris_parameter]['var']
 
-    # initialise wavelength
-    wavelength = None
-    
     # get valid dates frequency
     if resolution == 'hourly':
         frequency = 'h'
@@ -980,7 +983,7 @@ def get_data(download_instance, files, var, actris_parameter, resolution, target
     combined_ds.attrs['domain'] = 'Atmosphere'
     combined_ds.attrs['observed_layer'] = 'Land surface'
 
-    return combined_ds, wavelength
+    return combined_ds
 
 
 def get_files_to_download(nonghost_root, target_start_date, target_end_date, resolution, var):

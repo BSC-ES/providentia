@@ -45,11 +45,11 @@ precal: precipitation aluminium mass concentration
 precas: precipitation arsenic mass concentration
 precca: precipitation calcium mass concentration
 preccd: precipitation cadmium mass concentration
-preccl: 'precipitation chloride mass concentration '
+preccl: precipitation chloride mass concentration
 preccobalt: precipitation cobalt mass concentration
 preccr: precipitation chromium mass concentration
 preccu: precipitation copper mass concentration
-precfe: 'precipitation iron mass concentration '
+precfe: precipitation iron mass concentration
 prechg: precipitation mercury mass concentration
 preck: precipitation potassium mass concentration
 precmg: precipitation magnesium mass concentration
@@ -57,12 +57,12 @@ precmn: precipitation manganese mass concentration
 precmsa: precipitation methanesulfonic acid mass concentration
 precna: precipitation sodium mass concentration
 precnh4: precipitation ammonium mass concentration
-precni: 'precipitation nickel mass concentration '
-precno3: 'precipitation nitrate mass concentration '
+precni: precipitation nickel mass concentration
+precno3: precipitation nitrate mass concentration
 precpb: precipitation lead mass concentration
 precse: precipitation selenium mass concentration
-precso4: 'precipitation sulphate mass concentration '
-precv: 'precipitation vanadium mass concentration '
+precso4: precipitation sulphate mass concentration
+precv: precipitation vanadium mass concentration
 preczn: precipitation zinc mass concentration
 pshltr: air pressure
 sconcal: aerosol particle aluminium mass concentration
@@ -128,7 +128,7 @@ sconcso4: aerosol particle sulphate mass concentration
 sconcv: aerosol particle vanadium mass concentration
 sconczn: aerosol particle zinc mass concentration
 t2: air temperature
-wetal: 'deposition aluminium mass flux '
+wetal: deposition aluminium mass flux
 wetas: deposition arsenic mass flux
 wetbap: deposition benzo(a)pyrene mass flux
 wetcd: deposition cadmium mass flux

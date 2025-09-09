@@ -26,6 +26,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/24/E4/BB/24E4-BBHF.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/24/JD/A4/24JD-A44B.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_DE08_1
@@ -60,6 +64,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/24/JD/A4/24JD-A44B.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/25/6F/UH/256F-UHB9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_5012_PM10
@@ -95,6 +101,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/25/6F/UH/256F-UHB9.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/25/UR/N5/25UR-N5VZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_DE08_SSL
@@ -123,6 +131,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/25/UR/N5/25UR-N5VZ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/29/JA/32/29JA-32BB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_MSA
@@ -155,6 +165,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/29/JA/32/29JA-32BB.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2B/NJ/8K/2BNJ-8KXT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_NM
@@ -183,6 +201,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2B/NJ/8K/2BNJ-8KXT.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2E/XP/83/2EXP-83T4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_Czechglobe
@@ -222,6 +242,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2E/XP/83/2EXP-83T4.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 470.0
+  - 520.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2F/F9/P4/2FF9-P4Y6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: filter_absorption_photometer_Magee_AE31
@@ -250,6 +274,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2F/F9/P4/2FF9-P4Y6.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2K/6F/W9/2K6F-W97S.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE31
@@ -289,6 +321,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2K/6F/W9/2K6F-W97S.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2P/C2/SU/2PC2-SUU9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-3W_UGR
@@ -317,6 +357,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2P/C2/SU/2PC2-SUU9.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2P/DE/5F/2PDE-5FKD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE31B
@@ -345,6 +389,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2P/DE/5F/2PDE-5FKD.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 470.0
+  - 520.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2R/D8/GH/2RD8-GHWV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-3W_BND_pm10
@@ -373,6 +421,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2R/D8/GH/2RD8-GHWV.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2R/FD/UJ/2RFD-UJFE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: filter_absorption_photometer_Magee_AE31
@@ -401,6 +453,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2R/FD/UJ/2RFD-UJFE.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2S/PG/QS/2SPG-QSDH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_MSA
@@ -436,6 +496,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2S/PG/QS/2SPG-QSDH.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2V/GT/23/2VGT-23GV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_SMR_pm1
@@ -472,6 +534,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2V/GT/23/2VGT-23GV.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2Z/PB/3F/2ZPB-3FD4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-1W_BRW_pm1
@@ -500,6 +564,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2Z/PB/3F/2ZPB-3FD4.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/32/HJ/FQ/32HJ-FQ3K.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_CAO
@@ -528,6 +594,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/32/HJ/FQ/32HJ-FQ3K.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/34/Q7/T4/34Q7-T4P2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_Czechglobe
@@ -563,6 +637,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/34/Q7/T4/34Q7-T4P2.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 470.0
+  - 520.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/39/HQ/4W/39HQ-4WYV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_LND_MR
@@ -586,6 +664,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/39/HQ/4W/39HQ-4WYV.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3A/K7/Q8/3AK7-Q8RU.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_CPT
@@ -621,6 +707,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3A/K7/Q8/3AK7-Q8RU.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3D/NX/22/3DNX-228N.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012
@@ -644,6 +734,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3D/NX/22/3DNX-228N.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3D/RR/DD/3DRR-DD5G.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP02
@@ -679,6 +771,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3D/RR/DD/3DRR-DD5G.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3H/Y2/PD/3HY2-PDRV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_PAL
@@ -795,6 +889,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3P/XG/RZ/3PXG-RZE9.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Q/9Z/RR/3Q9Z-RRBC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: PSAP_CUSTOM_ASP
@@ -833,6 +929,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Q/9Z/RR/3Q9Z-RRBC.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Q/CP/5B/3QCP-5BHT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_MLO_pm1
@@ -865,6 +963,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Q/CP/5B/3QCP-5BHT.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3R/HY/EK/3RHY-EKZG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_PUY
@@ -900,6 +1002,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3R/HY/EK/3RHY-EKZG.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3T/5K/SP/3T5K-SPG9.nc:
   ebas_instrument_name: MAAP01
   ebas_method_ref: JP12L_MAAP01_mac_10.3m2g-1_STP
@@ -921,6 +1025,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3T/5K/SP/3T5K-SPG9.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 639.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Z/38/2A/3Z38-2AFS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_Heerlen
@@ -944,6 +1050,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Z/38/2A/3Z38-2AFS.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/43/FU/C7/43FU-C7TM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_PDI_dry
@@ -972,6 +1080,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/43/FU/C7/43FU-C7TM.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/43/FV/YV/43FV-YVUD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MISU_PSAP-1W_TRL_dry
@@ -1006,6 +1122,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/43/FV/YV/43FV-YVUD.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 522.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/44/5Q/6A/445Q-6AGS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-3W_WHI_pm1
@@ -1034,6 +1152,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/44/5Q/6A/445Q-6AGS.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/47/65/36/4765-36FU.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_Melpitz
@@ -1062,6 +1184,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/47/65/36/4765-36FU.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/47/RX/E9/47RX-E99A.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_MSY
@@ -1097,6 +1221,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/47/RX/E9/47RX-E99A.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4A/XJ/JC/4AXJ-JCTK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_MSY
@@ -1133,6 +1259,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4A/XJ/JC/4AXJ-JCTK.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4B/C8/EH/4BC8-EHRE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_BCN
@@ -1161,6 +1289,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4B/C8/EH/4BC8-EHRE.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4C/4P/PZ/4C4P-PZ8T.nc:
   ebas_data_level: '2'
   ebas_instrument_name: AE31_AMY01
@@ -1189,6 +1325,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4C/4P/PZ/4C4P-PZ8T.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4F/5X/UP/4F5X-UPSN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_pm1
@@ -1224,6 +1368,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4F/5X/UP/4F5X-UPSN.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4G/AH/JM/4GAH-JM9N.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BOS_pm1
@@ -1255,6 +1401,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4G/AH/JM/4GAH-JM9N.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4K/W2/PY/4KW2-PYDE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MISU_PSAP-1W_TRL
@@ -1282,6 +1432,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4K/W2/PY/4KW2-PYDE.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 522.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4M/ZZ/2S/4MZZ-2SDA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_pm1
@@ -1305,6 +1457,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4M/ZZ/2S/4MZZ-2SDA.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4T/RV/X9/4TRV-X9JR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BEO
@@ -1337,6 +1491,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4T/RV/X9/4TRV-X9JR.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4Y/A6/2S/4YA6-2SQF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_5012_N030
@@ -1371,6 +1529,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4Y/A6/2S/4YA6-2SQF.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/53/FN/YP/53FN-YP9K.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_BIR_dry
@@ -1406,6 +1566,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/53/FN/YP/53FN-YP9K.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 470.0
+  - 522.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5B/KQ/UM/5BKQ-UMJN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MISU_PSAP-1W_TRL_dry
@@ -1441,6 +1605,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5B/KQ/UM/5BKQ-UMJN.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 522.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5C/65/84/5C65-84C8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_PUY
@@ -1479,6 +1645,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5C/65/84/5C65-84C8.nc:
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
   - flow_rate
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5D/EJ/4D/5DEJ-4DDM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_MSY_pm10
@@ -1511,6 +1679,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5D/EJ/4D/5DEJ-4DDM.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5G/5T/ZZ/5G5T-ZZF7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_MAAP_SN050-PM10amb
@@ -1546,6 +1716,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5G/5T/ZZ/5G5T-ZZF7.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5G/BT/GB/5GBT-GBKY.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_IPR
@@ -1574,6 +1746,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5G/BT/GB/5GBT-GBKY.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 470.0
+  - 520.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5H/88/GR/5H88-GRPK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: filter_absorption_photometer_Magee_AE16
@@ -1602,6 +1778,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5H/88/GR/5H88-GRPK.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 880.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5H/EB/73/5HEB-73XZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_PAL
@@ -1637,6 +1815,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5H/EB/73/5HEB-73XZ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5H/PS/YE/5HPS-YEZH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33
@@ -1660,6 +1840,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5H/PS/YE/5HPS-YEZH.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5H/U4/B8/5HU4-B83G.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP01
@@ -1695,6 +1883,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5H/U4/B8/5HU4-B83G.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5N/X8/W9/5NX8-W9HG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE31B
@@ -1733,6 +1923,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5N/X8/W9/5NX8-W9HG.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 450.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5P/25/V8/5P25-V8E6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_WSA_pm1
@@ -1768,6 +1966,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5P/25/V8/5P25-V8E6.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5Q/DQ/WE/5QDQ-WEFZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: AE31_AMY01
@@ -1796,6 +1996,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5Q/DQ/WE/5QDQ-WEFZ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5R/6Y/AX/5R6Y-AXDH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE16_pm1
@@ -1824,6 +2032,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5R/6Y/AX/5R6Y-AXDH.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 880.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5T/9T/HG/5T9T-HGF9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_TRL_dry
@@ -1852,6 +2062,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5T/9T/HG/5T9T-HGF9.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 470.0
+  - 522.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5T/NT/KK/5TNT-KK2K.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_ARN_pm10
@@ -1880,6 +2094,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5T/NT/KK/5TNT-KK2K.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5T/NU/GQ/5TNU-GQCA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_Scientific_model_5012
@@ -1915,6 +2133,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5T/NU/GQ/5TNU-GQCA.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5U/9R/UP/5U9R-UPM8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_PAL
@@ -1943,6 +2163,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5U/9R/UP/5U9R-UPM8.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 525.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5V/M2/7V/5VM2-7VC8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE22_FIK
@@ -1971,6 +2199,9 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5V/M2/7V/5VM2-7VC8.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 880.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5W/D4/DD/5WD4-DDK9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_PAL
@@ -2010,6 +2241,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5W/D4/DD/5WD4-DDK9.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5Z/NP/E5/5ZNP-E5T2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_Helsinki_Kallio_pm1
@@ -2033,6 +2266,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5Z/NP/E5/5ZNP-E5T2.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/62/6F/C9/626F-C9N6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MISU_PSAP-1W_BIR
@@ -2060,6 +2295,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/62/6F/C9/626F-C9N6.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 522.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/63/6C/AW/636C-AWSY.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_WHI
@@ -2088,6 +2325,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/63/6C/AW/636C-AWSY.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/68/PW/NJ/68PW-NJKQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_BIR_dry
@@ -2203,6 +2444,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6D/2A/KK/6D2A-KKRW.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6D/S8/KG/6DS8-KGYD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_DMV
@@ -2230,6 +2473,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6D/S8/KG/6DS8-KGYD.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6E/E6/G5/6EE6-G53V.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Aethalometer
@@ -2258,6 +2503,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6E/E6/G5/6EE6-G53V.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 525.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6G/9H/UY/6G9H-UYNE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_Boesel
@@ -2293,6 +2546,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6G/9H/UY/6G9H-UYNE.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6G/W4/NR/6GW4-NRHT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee31_NA01
@@ -2321,6 +2576,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6G/W4/NR/6GW4-NRHT.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6J/WW/PF/6JWW-PFPR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_GSN_pm10
@@ -2349,6 +2612,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6J/WW/PF/6JWW-PFPR.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6M/MC/BZ/6MMC-BZWH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_PUY
@@ -2387,6 +2654,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6M/MC/BZ/6MMC-BZWH.nc:
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
   - flow_rate
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6M/PA/4G/6MPA-4G9Y.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_LfULG_Annaberg-Buchholz
@@ -2422,6 +2691,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6M/PA/4G/6MPA-4G9Y.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6T/D3/MF/6TD3-MF4U.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_CPR_pm1
@@ -2454,6 +2725,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6T/D3/MF/6TD3-MF4U.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6U/GY/7Y/6UGY-7Y2T.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-1W_ALT_pm1
@@ -2482,6 +2757,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6U/GY/7Y/6UGY-7Y2T.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6V/5Q/PT/6V5Q-PT2S.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_MALTA
@@ -2550,6 +2827,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6Z/2R/DE/6Z2R-DEZP.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6Z/NH/JF/6ZNH-JFD9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_pm10
@@ -2585,6 +2870,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6Z/NH/JF/6ZNH-JFD9.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/75/F4/6A/75F4-6AZY.nc:
   ebas_instrument_name: MAAP01
   ebas_method_ref: IT06L_MAAP01_met
@@ -2615,6 +2908,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/75/F4/6A/75F4-6AZY.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7C/ZG/22/7CZG-22T9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: filter_absorption_photometer_Magee_AE16
@@ -2643,6 +2938,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7C/ZG/22/7CZG-22T9.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 880.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7K/BE/7T/7KBE-7T3T.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-1W_BRW_pm10
@@ -2671,6 +2968,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7K/BE/7T/7KBE-7T3T.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7M/2A/YG/7M2A-YGDC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: PSAP_SE04
@@ -2705,6 +3004,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7M/2A/YG/7M2A-YGDC.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 520.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7U/FV/N7/7UFV-N74Q.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_TRL_dry
@@ -2740,6 +3041,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7U/FV/N7/7UFV-N74Q.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7Y/6C/TZ/7Y6C-TZKB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_PAL
@@ -2778,6 +3087,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7Y/6C/TZ/7Y6C-TZKB.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 525.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7Y/B8/6W/7YB8-6WRB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_EGB_pm1
@@ -2806,6 +3123,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7Y/B8/6W/7YB8-6WRB.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7Z/KR/MY/7ZKR-MY59.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-1W_ETL_pm25
@@ -2834,6 +3155,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7Z/KR/MY/7ZKR-MY59.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/82/V8/AM/82V8-AMJ6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_MSY
@@ -2862,6 +3185,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/82/V8/AM/82V8-AMJ6.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/83/FA/38/83FA-38GK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE16_9003_PDM
@@ -2901,6 +3232,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/83/FA/38/83FA-38GK.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 880.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/84/NH/3X/84NH-3X9F.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-1W_GSN_pm1
@@ -2929,6 +3262,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/84/NH/3X/84NH-3X9F.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/84/YX/5Q/84YX-5QPU.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_CPT_pm1
@@ -2964,6 +3299,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/84/YX/5Q/84YX-5QPU.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/85/25/F8/8525-F8TK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_Waldhof_pm10
@@ -2999,6 +3338,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/85/25/F8/8525-F8TK.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/85/EE/NV/85EE-NVQV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_GSN_pm10
@@ -3031,6 +3372,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/85/EE/NV/85EE-NVQV.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/87/EM/U7/87EM-U7GK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Aethalometer_RIG
@@ -3064,6 +3409,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/87/EM/U7/87EM-U7GK.nc:
   - relative_humidity
   - temperature
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8B/BM/AB/8BBM-ABAH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-1W_KPS_pm1
@@ -3092,6 +3445,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8B/BM/AB/8BBM-ABAH.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8B/WJ/84/8BWJ-8495.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_TK
@@ -3115,6 +3470,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8B/WJ/84/8BWJ-8495.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8C/5A/6Y/8C5A-6YCB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33
@@ -3138,6 +3501,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8C/5A/6Y/8C5A-6YCB.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8F/W3/HW/8FW3-HW4M.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_55_CIEMAT
@@ -3166,6 +3537,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8F/W3/HW/8FW3-HW4M.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8J/XH/78/8JXH-78TN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_BIR_dry
@@ -3201,6 +3580,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8J/XH/78/8JXH-78TN.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Q/BU/SX/8QBU-SX4G.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE31B
@@ -3236,6 +3623,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Q/BU/SX/8QBU-SX4G.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8R/7P/NE/8R7P-NEAG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BOS_pm10
@@ -3267,6 +3662,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8R/7P/NE/8R7P-NEAG.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8X/SG/MG/8XSG-MG3Z.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31
@@ -3295,6 +3694,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8X/SG/MG/8XSG-MG3Z.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Y/EW/TU/8YEW-TUPV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_BRW
@@ -3323,6 +3730,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Y/EW/TU/8YEW-TUPV.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/95/DK/26/95DK-26ZW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-1W_SGP
@@ -3350,6 +3765,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/95/DK/26/95DK-26ZW.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/96/MN/PN/96MN-PNCV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_DEM_dry_pm10
@@ -3379,6 +3796,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/96/MN/PN/96MN-PNCV.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/97/DJ/FX/97DJ-FXQF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-1W_WHI_pm1
@@ -3434,6 +3859,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/98/UY/Q7/98UY-Q7K6.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9B/7K/RJ/9B7K-RJ27.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_WHI
@@ -3466,6 +3895,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9B/7K/RJ/9B7K-RJ27.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9B/W7/JE/9BW7-JEMR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_NMY
@@ -3494,6 +3927,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9B/W7/JE/9BW7-JEMR.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9G/M3/GW/9GM3-GWX9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_NMY
@@ -3549,6 +3984,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9K/9U/PG/9K9U-PGR9.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9N/HN/HJ/9NHN-HJJY.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_ita_hakkila
@@ -3572,6 +4015,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9N/HN/HJ/9NHN-HJJY.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9P/VV/V9/9PVV-V9CD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee31_GR01
@@ -3611,6 +4062,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9P/VV/V9/9PVV-V9CD.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Q/CV/9C/9QCV-9CKV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_JFJ
@@ -3639,6 +4098,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Q/CV/9C/9QCV-9CKV.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9R/SF/6Z/9RSF-6ZZD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_DMV_pm10
@@ -3674,6 +4141,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9R/SF/6Z/9RSF-6ZZD.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9X/R4/T7/9XR4-T7Y3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-1W_EGB_pm1
@@ -3702,6 +4171,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9X/R4/T7/9XR4-T7Y3.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Y/HX/QE/9YHX-QEJM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_MSA
@@ -3738,6 +4209,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Y/HX/QE/9YHX-QEJM.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/A2/6H/FY/A26H-FYDF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_ETL_pm1
@@ -3766,6 +4239,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/A2/6H/FY/A26H-FYDF.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/A3/8N/BM/A38N-BMCS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BND_pm10
@@ -3798,6 +4275,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/A3/8N/BM/A38N-BMCS.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/A6/GB/J5/A6GB-J5YR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BND_pm1
@@ -3826,6 +4307,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/A6/GB/J5/A6GB-J5YR.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/A7/W7/AV/A7W7-AV5Z.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33
@@ -3849,6 +4334,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/A7/W7/AV/A7W7-AV5Z.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/A8/S6/79/A8S6-79HB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_Groningen
@@ -3872,6 +4365,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/A8/S6/79/A8S6-79HB.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/A9/RV/3R/A9RV-3R7H.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_DMV
@@ -3907,6 +4402,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/A9/RV/3R/A9RV-3R7H.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AA/RF/5X/AARF-5X82.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo-MAAP_5012-ASP_2017
@@ -3935,6 +4432,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AA/RF/5X/AARF-5X82.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AB/UT/T4/ABUT-T4AH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_B
@@ -3969,6 +4468,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AB/UT/T4/ABUT-T4AH.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AC/4T/5U/AC4T-5UZ5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE33
@@ -4007,6 +4508,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AC/4T/5U/AC4T-5UZ5.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 450.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AK/PZ/PM/AKPZ-PMVQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_PAL
@@ -4042,6 +4551,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AK/PZ/PM/AKPZ-PMVQ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AQ/U7/FQ/AQU7-FQDE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE22_FIK_pm10
@@ -4070,6 +4581,9 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AQ/U7/FQ/AQU7-FQDE.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 880.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AQ/VT/Q4/AQVT-Q4U6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_Helsinki_Keha_I_pm1
@@ -4093,6 +4607,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AQ/VT/Q4/AQVT-Q4U6.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AR/KM/29/ARKM-29P2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_RDM
@@ -4116,6 +4632,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AR/KM/29/ARKM-29P2.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AV/CF/SW/AVCF-SW3S.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Carusso_MAAP_42545-15_No011
@@ -4144,6 +4662,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AV/CF/SW/AVCF-SW3S.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AW/V7/7H/AWV7-7H2U.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_ARN_pm10
@@ -4176,6 +4696,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AW/V7/7H/AWV7-7H2U.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AW/XX/HU/AWXX-HUWA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: AE33_HPB_dry
@@ -4215,6 +4739,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AW/XX/HU/AWXX-HUWA.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 468.0
+  - 527.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/B2/FP/KC/B2FP-KCX4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE31B
@@ -4250,6 +4782,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/B2/FP/KC/B2FP-KCX4.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 450.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/B7/PY/YH/B7PY-YHSD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_MSY
@@ -4285,6 +4825,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/B7/PY/YH/B7PY-YHSD.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/B8/Z2/EP/B8Z2-EPRW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-1W_WHI_pm1
@@ -4313,6 +4855,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/B8/Z2/EP/B8Z2-EPRW.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/B9/8T/US/B98T-USSA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE30_SIR_ambient
@@ -4341,6 +4885,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/B9/8T/US/B98T-USSA.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 570.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BA/GB/5Q/BAGB-5QSA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_MSY
@@ -4373,6 +4925,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BA/GB/5Q/BAGB-5QSA.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BK/33/HJ/BK33-HJUX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_SGP_pm1
@@ -4401,6 +4955,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BK/33/HJ/BK33-HJUX.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BK/H2/HX/BKH2-HXAW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-3W_BRW_pm10
@@ -4429,6 +4987,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BK/H2/HX/BKH2-HXAW.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BM/YT/K9/BMYT-K93K.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-1W_WHI_pm1
@@ -4457,6 +5019,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BM/YT/K9/BMYT-K93K.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BQ/5K/32/BQ5K-3236.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_TRL_dry
@@ -4492,6 +5056,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BQ/5K/32/BQ5K-3236.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 470.0
+  - 522.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BQ/AF/CY/BQAF-CYMK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE31
@@ -4531,6 +5099,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BQ/AF/CY/BQAF-CYMK.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BS/DN/JD/BSDN-JDKV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE16_SUM
@@ -4558,6 +5134,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BS/DN/JD/BSDN-JDKV.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 880.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BT/VX/4A/BTVX-4AVV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_UGR
@@ -4593,6 +5171,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BT/VX/4A/BTVX-4AVV.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BW/2F/PG/BW2F-PGW3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_MAAP_SN050-PM10amb
@@ -4631,6 +5211,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BW/2F/PG/BW2F-PGW3.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BZ/MC/X7/BZMC-X7MR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE31B
@@ -4670,6 +5252,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BZ/MC/X7/BZMC-X7MR.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 450.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BZ/Y6/2J/BZY6-2J46.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_SN82
@@ -4697,6 +5287,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BZ/Y6/2J/BZY6-2J46.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/C7/9R/5G/C79R-5GSD.nc:
   ebas_data_level: '0'
   ebas_instrument_name: MISU_PSAP-1W_BIR_dry
@@ -4732,6 +5324,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/C7/9R/5G/C79R-5GSD.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 522.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/C8/TJ/YE/C8TJ-YE8J.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_GSN_pm1
@@ -4764,6 +5358,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/C8/TJ/YE/C8TJ-YE8J.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/C9/A3/FJ/C9A3-FJDQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_DEM_dry
@@ -4791,6 +5389,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/C9/A3/FJ/C9A3-FJDQ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CE/KW/2R/CEKW-2RPF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_SMR_pm1
@@ -4823,6 +5429,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CE/KW/2R/CEKW-2RPF.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CH/2E/6X/CH2E-6XE7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: AE31_AMY01
@@ -4851,6 +5461,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CH/2E/6X/CH2E-6XE7.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CH/CY/6K/CHCY-6KPC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_Boesel
@@ -4886,6 +5504,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CH/CY/6K/CHCY-6KPC.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CM/8D/YY/CM8D-YY68.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_Helsinki_Tikkurila
@@ -4909,6 +5529,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CM/8D/YY/CM8D-YY68.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CN/45/D7/CN45-D7ES.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-1W_WHI_pm10
@@ -4937,6 +5559,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CN/45/D7/CN45-D7ES.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CN/B8/CW/CNB8-CW2Z.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-3W_CPR_pm10
@@ -4965,6 +5589,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CN/B8/CW/CNB8-CW2Z.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CP/NT/S4/CPNT-S4KQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP01Le
@@ -4992,6 +5620,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CP/NT/S4/CPNT-S4KQ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CP/YF/PS/CPYF-PS6G.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE31B
@@ -5027,6 +5657,11 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CP/YF/PS/CPYF-PS6G.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 520.0
+  - 590.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CQ/UN/FA/CQUN-FAY6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012
@@ -5065,6 +5700,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CQ/UN/FA/CQUN-FAY6.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CQ/XA/VD/CQXA-VDRP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: AE31_AMY01_pm10
@@ -5087,6 +5724,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CQ/XA/VD/CQXA-VDRP.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CS/ND/Z9/CSND-Z93X.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-3W_WHI_pm1
@@ -5115,6 +5760,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CS/ND/Z9/CSND-Z93X.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CW/SS/UH/CWSS-UH38.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_CPR_pm10
@@ -5147,6 +5796,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CW/SS/UH/CWSS-UH38.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/CX/YV/M8/CXYV-M8F4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_5012_CHACALTAYA_BOLIVIA
@@ -5182,6 +5835,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/CX/YV/M8/CXYV-M8F4.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/D2/AD/4J/D2AD-4J7G.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_DEM_dry_pm10
@@ -5210,6 +5865,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/D2/AD/4J/D2AD-4J7G.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DA/NC/N8/DANC-N8ZW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_02
@@ -5239,6 +5902,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DA/NC/N8/DANC-N8ZW.nc:
   - pressure
   - temperature
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DB/G3/B3/DBG3-B3Z6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_JFJ
@@ -5266,6 +5931,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DB/G3/B3/DBG3-B3Z6.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DC/J6/HF/DCJ6-HFA9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_pirkkola
@@ -5289,6 +5962,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DC/J6/HF/DCJ6-HFA9.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DH/BX/DH/DHBX-DHH5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE31A
@@ -5317,6 +5998,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DH/BX/DH/DHBX-DHH5.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DJ/7T/6Z/DJ7T-6ZFV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-3W_LLN_pm10
@@ -5345,6 +6034,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DJ/7T/6Z/DJ7T-6ZFV.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DN/8E/SF/DN8E-SFAU.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BOS_pm10
@@ -5376,6 +6069,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DN/8E/SF/DN8E-SFAU.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DR/57/AP/DR57-APT3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_HG
@@ -5399,6 +6096,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DR/57/AP/DR57-APT3.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DR/KA/6R/DRKA-6R68.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10
@@ -5422,6 +6121,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DR/KA/6R/DRKA-6R68.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DS/FU/PW/DSFU-PWWK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_MSY
@@ -5457,6 +6158,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DS/FU/PW/DSFU-PWWK.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DX/MR/3B/DXMR-3B3R.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_TRL_dry
@@ -5485,6 +6188,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DX/MR/3B/DXMR-3B3R.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 470.0
+  - 522.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DY/NA/3H/DYNA-3HFG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BOS_pm1
@@ -5516,6 +6223,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DY/NA/3H/DYNA-3HFG.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/E2/H3/BS/E2H3-BSBT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_Nijmegen_Ruyterstraat
@@ -5539,6 +6250,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/E2/H3/BS/E2H3-BSBT.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/E9/PU/KV/E9PU-KVQW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-3W_ALT_pm1
@@ -5567,6 +6280,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/E9/PU/KV/E9PU-KVQW.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/E9/S5/JR/E9S5-JRND.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-3W_THD_pm10
@@ -5595,6 +6312,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/E9/S5/JR/E9S5-JRND.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ED/P5/MF/EDP5-MF3A.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_TNO
@@ -5629,6 +6350,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ED/P5/MF/EDP5-MF3A.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ED/U7/DK/EDU7-DKXP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BOS_pm10
@@ -5660,6 +6383,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ED/U7/DK/EDU7-DKXP.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EJ/DP/Q2/EJDP-Q2TQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_BIR_dry
@@ -5688,6 +6415,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EJ/DP/Q2/EJDP-Q2TQ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 470.0
+  - 522.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EJ/NV/P4/EJNV-P42X.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_5012_PM10
@@ -5727,6 +6458,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EJ/NV/P4/EJNV-P42X.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EJ/X2/CA/EJX2-CAUS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP01_MTC
@@ -5763,6 +6496,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EJ/X2/CA/EJX2-CAUS.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EM/QF/WX/EMQF-WX7U.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_PUY
@@ -5804,6 +6539,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EM/QF/WX/EMQF-WX7U.nc:
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
   - flow_rate
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EQ/QJ/HN/EQQJ-HNFE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_LLN_pm10
@@ -5836,6 +6573,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EQ/QJ/HN/EQQJ-HNFE.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/F6/5Y/6W/F65Y-6W4J.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BOS_pm1
@@ -5867,6 +6608,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/F6/5Y/6W/F65Y-6W4J.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/F8/CV/YA/F8CV-YA4N.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_RZW
@@ -5890,6 +6635,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/F8/CV/YA/F8CV-YA4N.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FA/6W/C8/FA6W-C8JD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_ALT_pm1
@@ -5922,6 +6669,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FA/6W/C8/FA6W-C8JD.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FD/4W/65/FD4W-65XH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_DE08
@@ -5949,6 +6700,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FD/4W/65/FD4W-65XH.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FH/ZE/PN/FHZE-PNUB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ZEP-PSAP-1
@@ -5971,6 +6724,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FH/ZE/PN/FHZE-PNUB.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 525.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FJ/W7/JA/FJW7-JAWH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-3W_THD_pm1
@@ -5999,6 +6754,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FJ/W7/JA/FJW7-JAWH.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FQ/KV/CU/FQKV-CUNW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_MLO_pm1
@@ -6027,6 +6786,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FQ/KV/CU/FQKV-CUNW.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FX/QJ/XK/FXQJ-XKVS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-1W_ALT
@@ -6054,6 +6817,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FX/QJ/XK/FXQJ-XKVS.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/G2/ZR/52/G2ZR-52SE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_Aethalometer_AE31
@@ -6093,6 +6858,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/G2/ZR/52/G2ZR-52SE.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/G3/5P/QJ/G35P-QJVP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-1W_SGP
@@ -6129,6 +6902,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/G3/5P/QJ/G35P-QJVP.nc:
   - aerosol_absorption_coefficient_pm10_prec1587
   - aerosol_absorption_coefficient_pm1_perc8413
   - aerosol_absorption_coefficient_pm10_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/G3/H7/6H/G3H7-6HUX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BRW_pm10
@@ -6157,6 +6932,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/G3/H7/6H/G3H7-6HUX.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GA/A3/QP/GAA3-QPQW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_THD_pm10
@@ -6189,6 +6968,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GA/A3/QP/GAA3-QPQW.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GD/E9/G4/GDE9-G4HR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_DE08_1
@@ -6223,6 +7006,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GD/E9/G4/GDE9-G4HR.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GE/DE/2H/GEDE-2HYJ.nc:
   ebas_instrument_name: MAAP01
   ebas_method_ref: IT06L_MAAP01_met
@@ -6253,6 +7038,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GE/DE/2H/GEDE-2HYJ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GJ/S4/U3/GJS4-U3TN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_LE-EIBA
@@ -6281,6 +7068,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GJ/S4/U3/GJS4-U3TN.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GM/J9/JC/GMJ9-JCC8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-1W_ETL_pm1
@@ -6309,6 +7098,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GM/J9/JC/GMJ9-JCC8.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GQ/4Y/2Y/GQ4Y-2YFM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-1W_BND_pm10
@@ -6337,6 +7128,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GQ/4Y/2Y/GQ4Y-2YFM.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GR/4V/RP/GR4V-RP2U.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_JFJ
@@ -6365,6 +7158,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GR/4V/RP/GR4V-RP2U.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GR/DM/Z9/GRDM-Z9AM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_PAR2
@@ -6388,6 +7189,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GR/DM/Z9/GRDM-Z9AM.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GX/MR/D8/GXMR-D82U.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_TIK
@@ -6427,6 +7236,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GX/MR/D8/GXMR-D82U.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/H2/6M/58/H26M-58PQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10
@@ -6450,6 +7267,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H2/6M/58/H26M-58PQ.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/H3/H9/DJ/H3H9-DJTF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_DE08_pm10_LE_M
@@ -6485,6 +7304,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H3/H9/DJ/H3H9-DJTF.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/H4/CW/FU/H4CW-FUZF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_CPR_pm10
@@ -6513,6 +7334,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H4/CW/FU/H4CW-FUZF.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/H4/HB/8C/H4HB-8CPV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-1W_GSN_pm10
@@ -6541,6 +7366,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H4/HB/8C/H4HB-8CPV.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/H8/MG/VU/H8MG-VUV5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_ALT
@@ -6569,6 +7396,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H8/MG/VU/H8MG-VUV5.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/H8/WX/FY/H8WX-FY2W.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE31A_7400609
@@ -6604,6 +7433,11 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H8/WX/FY/H8WX-FY2W.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 520.0
+  - 590.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/H9/5E/FZ/H95E-FZYQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-3W_ALT_pm10
@@ -6632,6 +7466,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H9/5E/FZ/H95E-FZYQ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/H9/93/6M/H993-6MCQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-1W_BND_pm1
@@ -6660,6 +7498,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H9/93/6M/H993-6MCQ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HA/6C/UW/HA6C-UWQG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_sn53
@@ -6688,6 +7528,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HA/6C/UW/HA6C-UWQG.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HC/D8/6M/HCD8-6MJT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_ETL_pm1
@@ -6720,6 +7568,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HC/D8/6M/HCD8-6MJT.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HE/ZW/44/HEZW-44P6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_DEM_dry
@@ -6748,6 +7600,13 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HE/ZW/44/HEZW-44P6.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HF/RB/PD/HFRB-PDEF.nc:
   ebas_instrument_name: TE_MAAP
   ebas_method_ref: DE09L_maap
@@ -6781,6 +7640,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HF/RB/PD/HFRB-PDEF.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HG/Y7/QZ/HGY7-QZ2V.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33
@@ -6804,6 +7665,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HG/Y7/QZ/HGY7-QZ2V.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HK/YX/8X/HKYX-8XTG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_CPR_pm1
@@ -6832,6 +7701,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HK/YX/8X/HKYX-8XTG.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HX/KG/UH/HXKG-UHS5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_PAL
@@ -6954,6 +7827,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HY/AM/C9/HYAM-C97G.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HY/UX/J7/HYUX-J7ME.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_PAL
@@ -6989,6 +7866,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HY/UX/J7/HYUX-J7ME.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/J2/79/ZP/J279-ZPY8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_DMV
@@ -7023,6 +7902,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/J2/79/ZP/J279-ZPY8.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/J4/SA/GY/J4SA-GYYF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BOS_pm10
@@ -7054,6 +7935,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/J4/SA/GY/J4SA-GYYF.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/J9/GD/ED/J9GD-EDHP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_GSN_pm1
@@ -7082,6 +7967,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/J9/GD/ED/J9GD-EDHP.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JB/XJ/UJ/JBXJ-UJW4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_Helsinki_Mannerheimintie_pm1
@@ -7105,6 +7994,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JB/XJ/UJ/JBXJ-UJW4.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JD/EA/MR/JDEA-MRVB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_GIF_ambient
@@ -7133,6 +8024,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JD/EA/MR/JDEA-MRVB.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JH/T8/36/JHT8-36XP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-1W_THD_pm10
@@ -7161,6 +8060,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JH/T8/36/JHT8-36XP.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JJ/CB/MF/JJCB-MF7A.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_EGB_pm1
@@ -7193,6 +8094,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JJ/CB/MF/JJCB-MF7A.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JP/WT/3M/JPWT-3M4H.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-1W_KPS_pm10
@@ -7221,6 +8126,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JP/WT/3M/JPWT-3M4H.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JQ/6V/QG/JQ6V-QGNV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_DE08_pm10
@@ -7255,6 +8162,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JQ/6V/QG/JQ6V-QGNV.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JS/TN/YB/JSTN-YB38.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_HG
@@ -7278,6 +8187,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JS/TN/YB/JSTN-YB38.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JX/ZS/BB/JXZS-BBZK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-1W_WSA_pm1
@@ -7313,6 +8230,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JX/ZS/BB/JXZS-BBZK.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JY/U8/E7/JYU8-E79U.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33
@@ -7336,6 +8255,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JY/U8/E7/JYU8-E79U.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/K6/FS/ET/K6FS-ET3C.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Carusso_MAAP_42545-15_No011
@@ -7364,6 +8291,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/K6/FS/ET/K6FS-ET3C.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/K7/K6/VF/K7K6-VFZ3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_TNO
@@ -7395,6 +8324,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/K7/K6/VF/K7K6-VFZ3.nc:
   - temperature
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/K9/W3/BE/K9W3-BE5S.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31
@@ -7433,6 +8364,13 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/K9/W3/BE/K9W3-BE5S.nc:
   - aerosol_absorption_coefficient_prec1587_1
   - aerosol_absorption_coefficient_perc8413_0
   - aerosol_absorption_coefficient_perc8413_1
+  wavelengths:
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KA/PH/X6/KAPH-X6UJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_TLL_dry
@@ -7461,6 +8399,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KA/PH/X6/KAPH-X6UJ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KB/8N/QU/KB8N-QUVE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE30_SIR_ambient_pm25
@@ -7489,6 +8435,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KB/8N/QU/KB8N-QUVE.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 570.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KB/Z2/YB/KBZ2-YBRX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_ALT_pm1
@@ -7517,6 +8471,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KB/Z2/YB/KBZ2-YBRX.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KE/DP/8Q/KEDP-8Q29.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_MSY_pm10
@@ -7552,6 +8510,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KE/DP/8Q/KEDP-8Q29.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KE/JZ/ED/KEJZ-EDZK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_A
@@ -7587,6 +8547,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KE/JZ/ED/KEJZ-EDZK.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KG/HP/HG/KGHP-HG8D.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_SMR_pm1
@@ -7622,6 +8584,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KG/HP/HG/KGHP-HG8D.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KR/72/7F/KR72-7FKU.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_marche
@@ -7645,6 +8609,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KR/72/7F/KR72-7FKU.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KR/VU/ZX/KRVU-ZXUF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP01Le
@@ -7672,6 +8644,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KR/VU/ZX/KRVU-ZXUF.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KW/2R/EH/KW2R-EHAE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_Helsinki_Leppavaara
@@ -7695,6 +8669,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KW/2R/EH/KW2R-EHAE.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KX/4N/M4/KX4N-M475.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_KOS_dry
@@ -7730,6 +8706,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KX/4N/M4/KX4N-M475.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 470.0
+  - 520.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KY/R7/C4/KYR7-C4AC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_pm10
@@ -7765,6 +8745,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KY/R7/C4/KYR7-C4AC.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/M2/DT/6R/M2DT-6RK4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_MSA
@@ -7800,6 +8782,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/M2/DT/6R/M2DT-6RK4.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/M5/VX/4P/M5VX-4PZE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_SMR_pm10
@@ -7835,6 +8819,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/M5/VX/4P/M5VX-4PZE.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/M6/YY/SR/M6YY-SRH4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_DE08_SSL
@@ -7870,6 +8856,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/M6/YY/SR/M6YY-SRH4.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MD/TD/PX/MDTD-PX2V.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Carusso_MAAP_42545-15_No011
@@ -7897,6 +8885,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MD/TD/PX/MDTD-PX2V.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MD/XX/TN/MDXX-TN4Y.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_ETL_pm1
@@ -7929,6 +8919,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MD/XX/TN/MDXX-TN4Y.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MM/56/WH/MM56-WHCG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-3W_WHI_pm1
@@ -7957,6 +8951,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MM/56/WH/MM56-WHCG.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MS/ZG/RC/MSZG-RCZT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012
@@ -7992,6 +8990,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MS/ZG/RC/MSZG-RCZT.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MZ/95/26/MZ95-26MZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_LND_NK
@@ -8015,6 +9015,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MZ/95/26/MZ95-26MZ.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/N2/5F/AP/N25F-APDJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_BIR_dry
@@ -8043,6 +9051,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/N2/5F/AP/N25F-APDJ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 470.0
+  - 522.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/N5/DS/N4/N5DS-N4MW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_ARN_pm1
@@ -8071,6 +9083,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/N5/DS/N4/N5DS-N4MW.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/N7/GC/CS/N7GC-CSAC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-1W_ALT_pm10
@@ -8099,6 +9115,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/N7/GC/CS/N7GC-CSAC.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NB/XD/K3/NBXD-K3EH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_KPS_pm10
@@ -8131,6 +9149,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NB/XD/K3/NBXD-K3EH.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NC/JR/N9/NCJR-N97Q.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee31_NA01
@@ -8169,6 +9191,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NC/JR/N9/NCJR-N97Q.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ND/DV/NK/NDDV-NKE8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_DEM_dry
@@ -8208,6 +9238,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ND/DV/NK/NDDV-NKE8.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NF/V8/QF/NFV8-QFW5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE31A
@@ -8231,6 +9269,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NF/V8/QF/NFV8-QFW5.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NF/Y9/57/NFY9-57TV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_GSN
@@ -8266,6 +9312,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NF/Y9/57/NFY9-57TV.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NH/BS/CY/NHBS-CYE5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-3W_MLO_pm10
@@ -8294,6 +9344,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NH/BS/CY/NHBS-CYE5.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NJ/5Q/MV/NJ5Q-MVXB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_SAL
@@ -8333,6 +9387,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NJ/5Q/MV/NJ5Q-MVXB.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 470.0
+  - 520.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NR/PP/59/NRPP-59KP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_OPE_ambient
@@ -8361,6 +9419,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NR/PP/59/NRPP-59KP.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NS/6U/EY/NS6U-EYWG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_FNK_dry
@@ -8389,6 +9455,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NS/6U/EY/NS6U-EYWG.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NS/XP/SA/NSXP-SAFN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_CHMI_Usti
@@ -8424,6 +9498,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NS/XP/SA/NSXP-SAFN.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NZ/GW/TF/NZGW-TFJ6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_TNO
@@ -8446,6 +9522,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NZ/GW/TF/NZGW-TFJ6.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NZ/MC/BD/NZMC-BD7M.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Carusso_MAAP_42545_15_No011
@@ -8474,6 +9552,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NZ/MC/BD/NZMC-BD7M.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/P2/US/TY/P2US-TYS2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Aethalometer
@@ -8507,6 +9587,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/P2/US/TY/P2US-TYS2.nc:
   - relative_humidity
   - temperature
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/P4/4E/RY/P44E-RYBW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_PAR1
@@ -8530,6 +9618,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/P4/4E/RY/P44E-RYBW.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/P4/AC/37/P4AC-37QA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_CHC_ambient
@@ -8557,6 +9653,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/P4/AC/37/P4AC-37QA.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/P7/JB/67/P7JB-67NS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_SUM_pm25
@@ -8585,6 +9689,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/P7/JB/67/P7JB-67NS.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/P9/Y8/DB/P9Y8-DBJM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_JFJ
@@ -8613,6 +9721,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/P9/Y8/DB/P9Y8-DBJM.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PB/RT/8E/PBRT-8EDA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BND_pm1
@@ -8645,6 +9761,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PB/RT/8E/PBRT-8EDA.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PD/2T/FW/PD2T-FWY2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-3W_BRW_pm1
@@ -8673,6 +9793,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PD/2T/FW/PD2T-FWY2.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PG/NU/T2/PGNU-T282.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33
@@ -8696,6 +9820,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PG/NU/T2/PGNU-T282.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PK/RS/RJ/PKRS-RJ2H.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-1W_MLO_pm1
@@ -8724,6 +9856,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PK/RS/RJ/PKRS-RJ2H.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PM/GD/ZN/PMGD-ZNF6.nc:
   ebas_data_level: '0'
   ebas_instrument_name: MISU_PSAP-1W_BIR_dry
@@ -8758,6 +9892,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PM/GD/ZN/PMGD-ZNF6.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 522.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PR/7K/4S/PR7K-4STP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_SGP_pm10
@@ -8786,6 +9922,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PR/7K/4S/PR7K-4STP.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PR/BY/NQ/PRBY-NQH2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo-MAAP_5012_NMY
@@ -8814,6 +9954,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PR/BY/NQ/PRBY-NQH2.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PU/CA/DE/PUCA-DEXM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_Enschede
@@ -8837,6 +9979,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PU/CA/DE/PUCA-DEXM.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PU/MH/8H/PUMH-8HPE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_DE08L_LE-Eiba
@@ -8865,6 +10009,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PU/MH/8H/PUMH-8HPE.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PY/S8/4N/PYS8-4N8W.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee31_NA01
@@ -8894,6 +10040,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PY/S8/4N/PYS8-4N8W.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q3/XK/SQ/Q3XK-SQZ4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: LT0015R_AE31-HS_827
@@ -8932,6 +10086,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q3/XK/SQ/Q3XK-SQZ4.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q5/NN/G2/Q5NN-G2FB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_CPT
@@ -8967,6 +10129,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q5/NN/G2/Q5NN-G2FB.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q9/Q7/8C/Q9Q7-8C4S.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_PUY
@@ -9002,6 +10168,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q9/Q7/8C/Q9Q7-8C4S.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QH/8P/UM/QH8P-UMVP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33
@@ -9025,6 +10193,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QH/8P/UM/QH8P-UMVP.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QH/UR/8N/QHUR-8NUX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_S02-00267_Lille
@@ -9053,6 +10229,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QH/UR/8N/QHUR-8NUX.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QM/M5/AS/QMM5-ASUM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee31_GR01
@@ -9081,6 +10265,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QM/M5/AS/QMM5-ASUM.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QP/HY/KB/QPHY-KBR3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_MLO_pm10
@@ -9113,6 +10305,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QP/HY/KB/QPHY-KBR3.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QS/9D/35/QS9D-35UC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_BIR_dry_pm10
@@ -9148,6 +10344,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QS/9D/35/QS9D-35UC.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QT/8T/H6/QT8T-H6V9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeA22
@@ -9186,6 +10386,9 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QT/8T/H6/QT8T-H6V9.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 880.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QT/VC/73/QTVC-7335.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE31B
@@ -9214,6 +10417,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QT/VC/73/QTVC-7335.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QX/ZR/CJ/QXZR-CJJW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_THD_pm10
@@ -9242,6 +10453,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QX/ZR/CJ/QXZR-CJJW.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/R2/UG/ME/R2UG-MEWH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_DE08_pm10_LE_M
@@ -9270,6 +10485,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/R2/UG/ME/R2UG-MEWH.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/R5/ET/KA/R5ET-KA45.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE31B
@@ -9309,6 +10526,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/R5/ET/KA/R5ET-KA45.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RJ/4F/QN/RJ4F-QNAD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_02
@@ -9343,6 +10568,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RJ/4F/QN/RJ4F-QNAD.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RJ/YD/YS/RJYD-YSAQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_NGL
@@ -9378,6 +10605,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RJ/YD/YS/RJYD-YSAQ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RK/XV/NW/RKXV-NWKK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: PSAP_02
@@ -9433,6 +10662,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RN/V3/T9/RNV3-T9PM.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RS/5W/4J/RS5W-4JBK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_ZEP_dry
@@ -9468,6 +10699,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RS/5W/4J/RS5W-4JBK.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RS/63/ME/RS63-MEWT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: filter_absorption_photometer_Magee_AE31
@@ -9496,6 +10735,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RS/63/ME/RS63-MEWT.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RX/HN/ZN/RXHN-ZN4N.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_SSL
@@ -9531,6 +10778,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RX/HN/ZN/RXHN-ZN4N.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/S4/MM/DB/S4MM-DBCU.nc:
   ebas_data_level: '1'
   ebas_instrument_name: Thermo_5012_TNO
@@ -9566,6 +10815,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/S4/MM/DB/S4MM-DBCU.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/S4/UN/E9/S4UN-E9K8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31
@@ -9593,6 +10844,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/S4/UN/E9/S4UN-E9K8.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/S7/GU/B2/S7GU-B2Q4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BRW_pm1
@@ -9625,6 +10884,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/S7/GU/B2/S7GU-B2Q4.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SC/EG/UQ/SCEG-UQPY.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33
@@ -9648,6 +10911,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SC/EG/UQ/SCEG-UQPY.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SC/XF/69/SCXF-69RE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE8_BRW
@@ -9676,6 +10947,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SC/XF/69/SCXF-69RE.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SD/MJ/6S/SDMJ-6S2B.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_ARN_pm10
@@ -9708,6 +10981,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SD/MJ/6S/SDMJ-6S2B.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SF/58/G9/SF58-G9RJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_DW
@@ -9731,6 +11008,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SF/58/G9/SF58-G9RJ.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SH/JV/HU/SHJV-HUX3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_5012_PM10
@@ -9766,6 +11045,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SH/JV/HU/SHJV-HUX3.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SK/P4/33/SKP4-33S5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_SMR_aerosol
@@ -9801,6 +11082,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SK/P4/33/SKP4-33S5.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SQ/AE/J9/SQAE-J9WA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee31_NA01
@@ -9828,6 +11111,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SQ/AE/J9/SQAE-J9WA.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SX/45/K7/SX45-K772.nc:
   ebas_data_level: '2'
   ebas_instrument_name: PSAP_NO01
@@ -9855,6 +11146,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SX/45/K7/SX45-K772.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 522.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SX/T5/8R/SXT5-8R4X.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_DE0003R_aerosol
@@ -9882,6 +11175,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SX/T5/8R/SXT5-8R4X.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SZ/23/45/SZ23-45GK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_WHI
@@ -9914,6 +11209,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SZ/23/45/SZ23-45GK.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/T5/6A/V6/T56A-V6TZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_LEE
@@ -9942,6 +11241,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/T5/6A/V6/T56A-V6TZ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/T9/WW/26/T9WW-26YA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_TK
@@ -9965,6 +11266,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/T9/WW/26/T9WW-26YA.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TA/WF/MF/TAWF-MFDW.nc:
   ebas_data_level: '0'
   ebas_instrument_name: Radiance-Research_PSAP-3W_BIR_dry
@@ -10000,6 +11303,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TA/WF/MF/TAWF-MFDW.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 470.0
+  - 522.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TB/TB/3C/TBTB-3CEQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE31A
@@ -10039,6 +11346,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TB/TB/3C/TBTB-3CEQ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TC/F6/PV/TCF6-PVYP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_SN46
@@ -10066,6 +11381,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TC/F6/PV/TCF6-PVYP.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TK/TY/2A/TKTY-2A2T.nc:
   ebas_data_level: '2'
   ebas_instrument_name: AE33_HPB
@@ -10105,6 +11422,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TK/TY/2A/TKTY-2A2T.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 468.0
+  - 527.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TK/YZ/V3/TKYZ-V3V3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_Melpitz
@@ -10140,6 +11465,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TK/YZ/V3/TKYZ-V3V3.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TN/HZ/25/TNHZ-25R2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_THD_pm1
@@ -10172,6 +11499,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TN/HZ/25/TNHZ-25R2.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TR/DN/GN/TRDN-GNET.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_ARN_pm1
@@ -10204,6 +11535,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TR/DN/GN/TRDN-GNET.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TS/KC/PB/TSKC-PB67.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33
@@ -10227,6 +11562,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TS/KC/PB/TSKC-PB67.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TV/ND/EZ/TVND-EZGR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_MSY
@@ -10255,6 +11598,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TV/ND/EZ/TVND-EZGR.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TW/GF/SW/TWGF-SWAR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_Czechglobe
@@ -10294,6 +11645,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TW/GF/SW/TWGF-SWAR.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 470.0
+  - 520.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TX/CS/25/TXCS-25MX.nc:
   ebas_instrument_name: TE_MAAP
   ebas_method_ref: DE09L_maap
@@ -10330,6 +11685,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TX/CS/25/TXCS-25MX.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TZ/58/4Z/TZ58-4Z5F.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_TIK
@@ -10365,6 +11722,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TZ/58/4Z/TZ58-4Z5F.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/U4/JN/MF/U4JN-MFNU.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_DEM_dry_pm10
@@ -10393,6 +11752,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/U4/JN/MF/U4JN-MFNU.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/U5/Y2/NZ/U5Y2-NZUD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ASP-PSAP-1
@@ -10420,6 +11787,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/U5/Y2/NZ/U5Y2-NZUD.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/U7/H8/QY/U7H8-QYHC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_Veldhoven
@@ -10443,6 +11812,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/U7/H8/QY/U7H8-QYHC.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UA/33/QX/UA33-QXJN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE31B
@@ -10482,6 +11853,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UA/33/QX/UA33-QXJN.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UA/AY/Z2/UAAY-Z28U.nc:
   ebas_instrument_name: TE_MAAP
   ebas_method_ref: DE09L_maap
@@ -10533,6 +11912,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UC/HS/QK/UCHS-QKZT.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UD/RS/E4/UDRS-E4ZD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-1W_ETL_pm1
@@ -10561,6 +11948,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UD/RS/E4/UDRS-E4ZD.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UE/UG/4N/UEUG-4NCD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_MLO_pm10
@@ -10589,6 +11978,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UE/UG/4N/UEUG-4NCD.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UG/VY/E9/UGVY-E92W.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-1W_THD_pm1
@@ -10617,6 +12010,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UG/VY/E9/UGVY-E92W.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UM/77/2R/UM77-2RHU.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_118
@@ -10651,6 +12046,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UM/77/2R/UM77-2RHU.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UP/C7/HV/UPC7-HV8S.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_DE08_1
@@ -10685,6 +12082,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UP/C7/HV/UPC7-HV8S.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UP/NF/8U/UPNF-8U4B.nc:
   ebas_data_level: '2'
   ebas_instrument_name: PSAP_CUSTOM_ZEP
@@ -10712,6 +12111,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UP/NF/8U/UPNF-8U4B.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 525.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UT/HM/SM/UTHM-SM2V.nc:
   ebas_data_level: '2'
   ebas_instrument_name: PSAP_SNXX
@@ -10735,6 +12136,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UT/HM/SM/UTHM-SM2V.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 530.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UW/MC/6F/UWMC-6FZC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BRW_pm1
@@ -10763,6 +12166,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UW/MC/6F/UWMC-6FZC.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/V2/H7/SG/V2H7-SGUR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33
@@ -10786,6 +12193,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/V2/H7/SG/V2H7-SGUR.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/V3/VX/EY/V3VX-EYMA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-3W_LLN_pm1
@@ -10814,6 +12229,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/V3/VX/EY/V3VX-EYMA.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/V5/8E/AB/V58E-ABSD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_ZUGSPITZE
@@ -10849,6 +12268,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/V5/8E/AB/V58E-ABSD.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/V7/8A/NG/V78A-NG6E.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-1W_SGP_pm10
@@ -10877,6 +12298,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/V7/8A/NG/V78A-NG6E.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VB/4E/U5/VB4E-U5NP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_CPT
@@ -10926,6 +12349,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VB/4E/U5/VB4E-U5NP.nc:
   - aerosol_absorption_coefficient_pm10_prec1587
   - aerosol_absorption_coefficient_pm1_perc8413
   - aerosol_absorption_coefficient_pm10_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VB/7A/E3/VB7A-E3FK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_ETL_pm1
@@ -10958,6 +12385,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VB/7A/E3/VB7A-E3FK.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VC/RD/73/VCRD-73GB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_SUM
@@ -10990,6 +12421,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VC/RD/73/VCRD-73GB.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VD/JH/RN/VDJH-RNYD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_Nijmegen
@@ -11013,6 +12448,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VD/JH/RN/VDJH-RNYD.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VJ/4R/TM/VJ4R-TMNR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_B
@@ -11052,6 +12489,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VJ/4R/TM/VJ4R-TMNR.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VJ/M7/8B/VJM7-8BP7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_MEL
@@ -11080,6 +12519,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VJ/M7/8B/VJM7-8BP7.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VM/5P/H3/VM5P-H3CJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_BKT_dry
@@ -11108,6 +12549,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VM/5P/H3/VM5P-H3CJ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VM/RK/VC/VMRK-VC7X.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_DE08_1
@@ -11142,6 +12591,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VM/RK/VC/VMRK-VC7X.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VN/PC/AX/VNPC-AXX7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE22_FIK_dry
@@ -11170,6 +12621,9 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VN/PC/AX/VNPC-AXX7.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 880.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VR/MP/3U/VRMP-3UCA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_sn48
@@ -11198,6 +12652,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VR/MP/3U/VRMP-3UCA.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VS/H7/U2/VSH7-U2WR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BOS_pm10
@@ -11229,6 +12691,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VS/H7/U2/VSH7-U2WR.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VV/WG/VH/VVWG-VHQK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_DE08L_LE-Eiba
@@ -11264,6 +12730,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VV/WG/VH/VVWG-VHQK.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VW/74/Y8/VW74-Y8T5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012
@@ -11298,6 +12766,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VW/74/Y8/VW74-Y8T5.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VW/M9/9K/VWM9-9KZK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_ALT_pm10
@@ -11330,6 +12800,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VW/M9/9K/VWM9-9KZK.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VZ/3F/JV/VZ3F-JVWY.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP01
@@ -11365,6 +12839,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VZ/3F/JV/VZ3F-JVWY.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/W5/YE/7Q/W5YE-7QHY.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_THD_pm1
@@ -11393,6 +12869,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/W5/YE/7Q/W5YE-7QHY.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/W9/M7/AV/W9M7-AVYC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MISU_PSAP-1W_BIR_dry
@@ -11427,6 +12907,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/W9/M7/AV/W9M7-AVYC.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 522.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WB/PY/XN/WBPY-XNYW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31
@@ -11450,6 +12932,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WB/PY/XN/WBPY-XNYW.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WD/BQ/7F/WDBQ-7FNB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_SUM_pm25
@@ -11482,6 +12972,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WD/BQ/7F/WDBQ-7FNB.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WG/NV/S9/WGNV-S92T.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BRW_pm10
@@ -11514,6 +13008,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WG/NV/S9/WGNV-S92T.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WG/VP/AV/WGVP-AVSJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_KPS
@@ -11549,6 +13047,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WG/VP/AV/WGVP-AVSJ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WH/SY/YZ/WHSY-YZMB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_ALT_pm10
@@ -11577,6 +13079,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WH/SY/YZ/WHSY-YZMB.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WJ/JV/4N/WJJV-4N4F.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE31_BKT_dry
@@ -11605,6 +13111,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WJ/JV/4N/WJJV-4N4F.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WK/F9/K8/WKF9-K8F7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Maido_Magee_AE42-7
@@ -11633,6 +13147,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WK/F9/K8/WKF9-K8F7.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WP/94/2X/WP94-2XXV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BOS_pm1
@@ -11664,6 +13186,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WP/94/2X/WP94-2XXV.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WS/R6/NX/WSR6-NXP7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33
@@ -11687,6 +13213,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WS/R6/NX/WSR6-NXP7.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WT/DY/HT/WTDY-HTGN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_WSA_pm10
@@ -11722,6 +13256,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WT/DY/HT/WTDY-HTGN.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WU/Y6/5E/WUY6-5E2W.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_ARN_pm1
@@ -11754,6 +13290,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WU/Y6/5E/WUY6-5E2W.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/X7/4Q/28/X74Q-28DF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-3W_MLO_pm1
@@ -11782,6 +13322,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/X7/4Q/28/X74Q-28DF.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/X7/GU/NT/X7GU-NT5B.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_ARN_pm10
@@ -11810,6 +13354,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/X7/GU/NT/X7GU-NT5B.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/X8/PV/EW/X8PV-EWE3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_TNO
@@ -11844,6 +13392,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/X8/PV/EW/X8PV-EWE3.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XA/UX/8S/XAUX-8S7T.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_LLN_pm1
@@ -11876,6 +13426,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XA/UX/8S/XAUX-8S7T.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XK/Y8/JR/XKY8-JRXN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_LE-West
@@ -11911,6 +13465,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XK/Y8/JR/XKY8-JRXN.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XN/UJ/Q6/XNUJ-Q6JQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-1W_SGP_pm1
@@ -11939,6 +13495,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XN/UJ/Q6/XNUJ-Q6JQ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XP/2S/VH/XP2S-VHP2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_S02-00267_Lille
@@ -11967,6 +13525,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XP/2S/VH/XP2S-VHP2.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XS/9R/36/XS9R-36JF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-3W_WHI_pm1
@@ -11995,6 +13561,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XS/9R/36/XS9R-36JF.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XU/MZ/RJ/XUMZ-RJJM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_PAL
@@ -12034,6 +13604,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XU/MZ/RJ/XUMZ-RJJM.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XW/Z6/8G/XWZ6-8GKZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_WHI
@@ -12066,6 +13638,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XW/Z6/8G/XWZ6-8GKZ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y4/34/5A/Y434-5AY7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_DE08
@@ -12093,6 +13669,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y4/34/5A/Y434-5AY7.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y5/5C/U6/Y55C-U67P.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_BIR_dry_pm1
@@ -12128,6 +13706,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y5/5C/U6/Y55C-U67P.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y7/6F/6W/Y76F-6W3M.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo-MAAP_5012-368
@@ -12156,6 +13738,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Y7/6F/6W/Y76F-6W3M.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YC/B5/Z3/YCB5-Z3ZJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: RadianceResearch_PSAP-1W_MLO_pm10
@@ -12184,6 +13768,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YC/B5/Z3/YCB5-Z3ZJ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YD/VG/78/YDVG-78NK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_SN82
@@ -12219,6 +13805,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YD/VG/78/YDVG-78NK.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YG/VM/WR/YGVM-WRMG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_ARN_pm1
@@ -12247,6 +13835,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YG/VM/WR/YGVM-WRMG.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YH/EP/P2/YHEP-P29M.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP-5012_DE08
@@ -12274,6 +13866,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YH/EP/P2/YHEP-P29M.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YP/T8/JH/YPT8-JHKS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE337_JFJ
@@ -12296,6 +13890,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YP/T8/JH/YPT8-JHKS.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YQ/ER/FK/YQER-FKXG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MageeAE31A
@@ -12331,6 +13933,11 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YQ/ER/FK/YQER-FKXG.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 520.0
+  - 590.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YT/4X/TJ/YT4X-TJ9M.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Multiangle_Absorption_Photometer
@@ -12366,6 +13973,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YT/4X/TJ/YT4X-TJ9M.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YU/FR/2H/YUFR-2H2D.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_KPS
@@ -12401,6 +14010,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YU/FR/2H/YUFR-2H2D.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YW/HC/AG/YWHC-AGWH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_ALT
@@ -12428,6 +14041,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YW/HC/AG/YWHC-AGWH.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z2/VF/7V/Z2VF-7VYQ.nc:
   ebas_instrument_name: MAAP01_1
   ebas_method_ref: IT06L_MAAP01_met
@@ -12462,6 +14077,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z2/VF/7V/Z2VF-7VYQ.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z4/K8/CY/Z4K8-CY8N.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_BND_pm10
@@ -12490,6 +14107,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z4/K8/CY/Z4K8-CY8N.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z8/P4/WS/Z8P4-WSR8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-1W_EGB_pm1
@@ -12526,6 +14147,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z8/P4/WS/Z8P4-WSR8.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZB/PJ/B9/ZBPJ-B966.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_SPO
@@ -12558,6 +14183,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZB/PJ/B9/ZBPJ-B966.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZC/5H/5E/ZC5H-5EWN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP_GF10_Helsinki_Toolontulli
@@ -12581,6 +14210,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZC/5H/5E/ZC5H-5EWN.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 670.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZC/T5/SC/ZCT5-SCB2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Magee_AE33_rekola
@@ -12604,6 +14235,14 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZC/T5/SC/ZCT5-SCB2.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 370.0
+  - 470.0
+  - 520.0
+  - 590.0
+  - 660.0
+  - 880.0
+  - 950.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZD/BN/E5/ZDBN-E572.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-3W_CPT_pm10
@@ -12639,6 +14278,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZD/BN/E5/ZDBN-E572.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 530.0
+  - 660.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZG/NC/2M/ZGNC-2ME3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_HAC
@@ -12670,6 +14313,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZG/NC/2M/ZGNC-2ME3.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZT/Y9/C4/ZTY9-C4GW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Radiance-Research_PSAP-1W_WHI_pm25
@@ -12698,6 +14345,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZT/Y9/C4/ZTY9-C4GW.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZW/38/D8/ZW38-D89D.nc:
   ebas_data_level: '2'
   ebas_instrument_name: AE16_AMY01
@@ -12721,6 +14370,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZW/38/D8/ZW38-D89D.nc:
   - aerosol_absorption_coefficient_qc
   - aerosol_absorption_coefficient_ebasmetadata
   - aerosol_absorption_coefficient
+  wavelengths:
+  - 880.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZW/R7/C2/ZWR7-C225.nc:
   ebas_data_level: '2'
   ebas_instrument_name: GMD_CLAP-3W_ETL_pm1
@@ -12753,6 +14404,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZW/R7/C2/ZWR7-C225.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 467.0
+  - 528.0
+  - 652.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZY/XT/TU/ZYXT-TUU2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Thermo_5012_MSY_pm10
@@ -12781,6 +14436,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZY/XT/TU/ZYXT-TUU2.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 637.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZY/XV/J8/ZYXV-J87G.nc:
   ebas_data_level: '2'
   ebas_instrument_name: MAAP01_snr080
@@ -12816,3 +14473,5 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZY/XV/J8/ZYXV-J87G.nc:
   - aerosol_absorption_coefficient_amean
   - aerosol_absorption_coefficient_prec1587
   - aerosol_absorption_coefficient_perc8413
+  wavelengths:
+  - 670.0
