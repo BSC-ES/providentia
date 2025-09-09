@@ -16,8 +16,10 @@ import pandas as pd
 import xarray as xr
 from netCDF4 import Dataset
 import multiprocessing
+from dateutil.relativedelta import relativedelta
 
 from providentia.auxiliar import CURRENT_PATH, join, pad_array
+from .warnings_prv import show_message
 
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
@@ -1023,3 +1025,182 @@ def get_files_to_download(nonghost_root, target_start_date, target_end_date, res
         current_date = current_date.replace(year=next_year, month=next_month)
 
     return paths
+
+
+def download_actris_network(instance, resolution):
+
+    target_start_date = datetime.datetime(int(instance.start_date[:4]), 
+                                          int(instance.start_date[4:6]), 
+                                          int(instance.start_date[6:8]), 0)
+    target_end_date = datetime.datetime(int(instance.end_date[:4]), 
+                                        int(instance.end_date[4:6]), 
+                                        int(instance.end_date[6:8]), 23, 59, 59) - datetime.timedelta(days=1)
+
+    for var in instance.species:
+        
+        # check if variable name is available
+        if var not in ghost_actris_variables.keys():
+            instance.logger.info(f'Data for {var} cannot be downloaded')
+            continue
+        else:
+            actris_parameter = ghost_actris_variables[var]
+
+        # get files that were already downloaded
+        initial_check_nc_files = get_files_to_download(instance.nonghost_root, target_start_date, target_end_date, 
+                                                       resolution, var)
+        files_to_download = instance.select_files_to_download(initial_check_nc_files)
+        if not files_to_download:
+            msg = f"\nFiles were already downloaded for {var} at {resolution} "
+            msg += f"resolution between {target_start_date} and {target_end_date}."
+            show_message(instance, msg, deactivate=False)     
+            continue 
+        
+        # get files info path
+        path = get_files_path(var)
+
+        # if file does not exist
+        if not os.path.isfile(path):
+            # get files information
+            instance.logger.info(f'\nFile containing information of the files available in Thredds for {var} ({path}) does not exist, creating.')
+            combined_data = get_files_per_var(instance, var)
+            all_files = combined_data[var]['files']
+            files_info = get_files_info(instance, all_files, var, path)
+                
+        # if file exists
+        else:
+            # ask if user wants to update file information from NILU Thredds
+            if instance.origin_update_choice not in ['y','n']:
+                while instance.origin_update_choice not in ['y','n']:
+                    instance.origin_update_choice = input(f"\nFile containing information of the files available in Thredds for {var} ({path}) already exists. Do you want to update it (y/n)? ").lower() 
+                # ask if user wants to remember the decision
+                remind_txt = None
+                while remind_txt not in ['y','n']:
+                    remind_txt = input("\nDo you want to remember your decision for future downloads (y/n)? ").lower() 
+                # save the decision
+                if remind_txt == 'y':
+                    with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
+                        f.write(f"ORIGIN_UPDATE={instance.origin_update_choice}\n")
+            if instance.origin_update_choice == 'n':
+                # get files information
+                files_info = yaml.safe_load(open(join(CURRENT_PATH, path)))
+                files_info = {k: v for k, v in files_info.items() if k.strip() and v}
+            else:
+                # get files information
+                combined_data = get_files_per_var(instance, var)
+                all_files = combined_data[var]['files']
+                files_info = get_files_info(instance, all_files, var, path)
+        
+        # go to next variable if no data is found
+        if files_info is not None:
+            if len(files_info) == 0:
+                continue
+        else:
+            continue
+
+        # get wavelength
+        wavelength_var = is_wavelength_var(actris_parameter)
+        if wavelength_var:
+            # select most common wavelength for black carbon (name does not provide it)
+            if var == 'sconcbc':
+                wavelength = 880
+                instance.logger.info(f'Wavelength appears in dimensions. Selected wavelength: {wavelength}.')
+            # get wavelength from variable name for other variables
+            else:
+                wavelength = float(re.findall(r'\d+', var)[0])
+        else:
+            wavelength = None
+
+        # filter files by resolution and dates
+        instance.logger.info('Filtering files by resolution and dates...')
+        files = {}
+        for file, attributes in files_info.items():
+            if attributes["resolution"] == resolution:
+                start_date = datetime.datetime.strptime(attributes["time_coverage_start"], "%Y-%m-%dT%H:%M:%S UTC")
+                end_date = datetime.datetime.strptime(attributes["time_coverage_end"], "%Y-%m-%dT%H:%M:%S UTC")
+                for file_to_download in files_to_download:
+                    file_to_download_yearmonth = file_to_download.split(f'{var}_')[1].split('.nc')[0]
+                    file_to_download_start_date = datetime.datetime.strptime(file_to_download_yearmonth, "%Y%m")
+                    file_to_download_end_date = datetime.datetime(file_to_download_start_date.year, 
+                                                                  file_to_download_start_date.month, 1) + relativedelta(months=1, seconds=-1)
+                    if file_to_download_start_date <= end_date and file_to_download_end_date >= start_date:
+                        if 'wavelengths' in attributes:
+                            if wavelength is None:
+                                instance.logger.error(f'Dataset has wavelength in its dimensions but wavelength is None. Revise if ACTRIS parameter ({actris_parameter}) is included in is_wavelength_var function.')
+                                break
+                            if wavelength not in attributes['wavelengths']:
+                                continue
+                        # from filtered files, save those that are provided multiple times
+                        station = attributes["ebas_station_code"]
+                        if station not in files:
+                            files[station] = []
+                        if file not in files[station]:
+                            files[station].append(file)
+
+        if len(files) != 0:
+
+            # get data for each file within period and temporally average to standard times
+            # start = time.time()
+            combined_ds = get_data(instance, files, var, actris_parameter, resolution, 
+                                    target_start_date, target_end_date, files_info,
+                                    instance.ghost_version, instance.n_cpus)
+            if combined_ds is None:
+                continue
+            # end = time.time()
+            # elapsed_minutes = (end - start) / 60
+            # instance.logger.info(f"Time to read data: {elapsed_minutes:.2f} minutes")
+
+            # save data per year and month
+            path = join(instance.nonghost_root, f'actris/actris/{resolution}/{var}')
+            if not os.path.isdir(path):
+                os.makedirs(path, exist_ok=True)
+            saved_files = 0
+            for year, ds_year in combined_ds.groupby('time.year'):
+                for month, ds_month in ds_year.groupby('time.month'):
+                    filename = f"{path}/{var}_{year}{month:02d}.nc"
+                    if filename in files_to_download:
+                        combined_ds_yearmonth = combined_ds.sel(time=f"{year}-{month:02d}")
+
+                        # add title to attrs
+                        extra_info = ''
+                        if wavelength_var and wavelength is not None:
+                            extra_info = f' at {wavelength}nm'
+                        combined_ds_yearmonth.attrs['title'] = f'Surface {ghost_actris_variables[var]}{extra_info} in the ACTRIS network in {year}-{month:02d}.'
+
+                        # order attrs
+                        custom_order = ['title', 'institution', 'creator_name', 'creator_email',
+                                        'source', 'application_area', 'domain', 'observed_layer',
+                                        'data_license']
+                        ordered_attrs = {key: combined_ds_yearmonth.attrs[key] 
+                                        for key in custom_order 
+                                        if key in combined_ds_yearmonth.attrs}
+                        combined_ds_yearmonth.attrs = ordered_attrs
+
+                        # remove stations if all variable data is nan
+                        # previous_n_stations = len(combined_ds_yearmonth.station)
+                        combined_ds_yearmonth = combined_ds_yearmonth.dropna(dim="station", subset=[var], how="all")
+                        combined_ds_yearmonth = combined_ds_yearmonth.assign_coords(station=range(len(combined_ds_yearmonth.station)))
+                        # current_n_stations = len(combined_ds_yearmonth.station)
+                        # n_stations_diff = previous_n_stations - current_n_stations
+                        # if n_stations_diff > 0:
+                        #     instance.logger.info(f'Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
+
+                        # remove file if it exists
+                        if os.path.isfile(filename):
+                            os.system("rm {}".format(filename))
+
+                        # do not save if empty
+                        if len(combined_ds_yearmonth[var].values) == 0:
+                            continue
+                            
+                        # save file
+                        combined_ds_yearmonth.to_netcdf(filename)
+
+                        # change permissions
+                        os.system("chmod 777 {}".format(filename))
+                        instance.logger.info(f"Saved: {filename}")
+                        saved_files += 1
+                        
+            instance.logger.info(f'Total number of saved files: {saved_files}')
+
+        else:
+            instance.logger.info(f'No files were found at {resolution} resolution for {var}')

@@ -6,11 +6,7 @@ from base64 import decodebytes
 import cdsapi
 import copy
 from dotenv import dotenv_values
-import json 
-from netCDF4 import Dataset
-import numpy as np
 import paramiko 
-import re 
 import requests
 import signal
 import subprocess
@@ -21,13 +17,11 @@ import xarray as xr
 import yaml
 import zipfile   
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from getpass import getpass
 
-from .actris import (get_files_path, temporally_average_data, get_data,
-                     get_files_per_var, is_wavelength_var, get_files_to_download,
-                     get_files_info, ghost_actris_variables)
+from .actris import download_actris_network
 from .cams import (Cams, cams_options, ghost_cams_variables, 
                     cams_variables_level)
 from providentia.auxiliar import CURRENT_PATH, join
@@ -210,7 +204,7 @@ class Download(object):
                         # ACTRIS
                         elif network == 'actris/actris':   
                             for resolution in self.resolution:
-                                self.download_actris_network(resolution)
+                                download_actris_network(self, resolution)
                         # non-GHOST
                         else:
                             initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
@@ -1648,178 +1642,6 @@ class Download(object):
                     
         return valid_nc_files        
     
-    def download_actris_network(self, resolution):
-
-        target_start_date = datetime(int(self.start_date[:4]), int(self.start_date[4:6]), int(self.start_date[6:8]), 0)
-        target_end_date = datetime(int(self.end_date[:4]), int(self.end_date[4:6]), int(self.end_date[6:8]), 23, 59, 59) - timedelta(days=1)
-
-        for var in self.species:
-            
-            # check if variable name is available
-            if var not in ghost_actris_variables.keys():
-                self.logger.info(f'Data for {var} cannot be downloaded')
-                continue
-            else:
-                actris_parameter = ghost_actris_variables[var]
-
-            # get files that were already downloaded
-            initial_check_nc_files = get_files_to_download(self.nonghost_root, target_start_date, target_end_date, resolution, var)
-            files_to_download = self.select_files_to_download(initial_check_nc_files)
-            if not files_to_download:
-                msg = f"\nFiles were already downloaded for {var} at {resolution} "
-                msg += f"resolution between {target_start_date} and {target_end_date}."
-                show_message(self, msg, deactivate=False)     
-                continue 
-            
-            # get files info path
-            path = get_files_path(var)
-
-            # if file does not exist
-            if not os.path.isfile(path):
-                # get files information
-                self.logger.info(f'\nFile containing information of the files available in Thredds for {var} ({path}) does not exist, creating.')
-                combined_data = get_files_per_var(self, var)
-                all_files = combined_data[var]['files']
-                files_info = get_files_info(self, all_files, var, path)
-                    
-            # if file exists
-            else:
-                # ask if user wants to update file information from NILU Thredds
-                if self.origin_update_choice not in ['y','n']:
-                    while self.origin_update_choice not in ['y','n']:
-                        self.origin_update_choice = input(f"\nFile containing information of the files available in Thredds for {var} ({path}) already exists. Do you want to update it (y/n)? ").lower() 
-                    # ask if user wants to remember the decision
-                    remind_txt = None
-                    while remind_txt not in ['y','n']:
-                        remind_txt = input("\nDo you want to remember your decision for future downloads (y/n)? ").lower() 
-                    # save the decision
-                    if remind_txt == 'y':
-                        with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
-                            f.write(f"ORIGIN_UPDATE={self.origin_update_choice}\n")
-                if self.origin_update_choice == 'n':
-                    # get files information
-                    files_info = yaml.safe_load(open(join(CURRENT_PATH, path)))
-                    files_info = {k: v for k, v in files_info.items() if k.strip() and v}
-                else:
-                    # get files information
-                    combined_data = get_files_per_var(self, var)
-                    all_files = combined_data[var]['files']
-                    files_info = get_files_info(self, all_files, var, path)
-            
-            # go to next variable if no data is found
-            if files_info is not None:
-                if len(files_info) == 0:
-                    continue
-            else:
-                continue
-
-            # get wavelength
-            wavelength_var = is_wavelength_var(actris_parameter)
-            if wavelength_var:
-                # select most common wavelength for black carbon (name does not provide it)
-                if var == 'sconcbc':
-                    wavelength = 880
-                    self.logger.info(f'Wavelength appears in dimensions. Selected wavelength: {wavelength}.')
-                # get wavelength from variable name for other variables
-                else:
-                    wavelength = float(re.findall(r'\d+', var)[0])
-            else:
-                wavelength = None
-
-            # filter files by resolution and dates
-            self.logger.info('Filtering files by resolution and dates...')
-            files = {}
-            for file, attributes in files_info.items():
-                if attributes["resolution"] == resolution:
-                    start_date = datetime.strptime(attributes["time_coverage_start"], "%Y-%m-%dT%H:%M:%S UTC")
-                    end_date = datetime.strptime(attributes["time_coverage_end"], "%Y-%m-%dT%H:%M:%S UTC")
-                    for file_to_download in files_to_download:
-                        file_to_download_yearmonth = file_to_download.split(f'{var}_')[1].split('.nc')[0]
-                        file_to_download_start_date = datetime.strptime(file_to_download_yearmonth, "%Y%m")
-                        file_to_download_end_date = datetime(file_to_download_start_date.year, file_to_download_start_date.month, 1) + relativedelta(months=1, seconds=-1)
-                        if file_to_download_start_date <= end_date and file_to_download_end_date >= start_date:
-                            if 'wavelengths' in attributes:
-                                if wavelength is None:
-                                    self.logger.error(f'Dataset has wavelength in its dimensions but wavelength is None. Revise if ACTRIS parameter ({actris_parameter}) is included in is_wavelength_var function.')
-                                    break
-                                if wavelength not in attributes['wavelengths']:
-                                    continue
-                            # from filtered files, save those that are provided multiple times
-                            station = attributes["ebas_station_code"]
-                            if station not in files:
-                                files[station] = []
-                            if file not in files[station]:
-                                files[station].append(file)
-
-            if len(files) != 0:
-
-                # get data for each file within period and temporally average to standard times
-                start = time.time()
-                combined_ds = get_data(self, files, var, actris_parameter, resolution, 
-                                       target_start_date, target_end_date, files_info,
-                                       self.ghost_version, self.n_cpus)
-                if combined_ds is None:
-                    continue
-                end = time.time()
-                elapsed_minutes = (end - start) / 60
-                self.logger.info(f"Time to read data: {elapsed_minutes:.2f} minutes")
-
-                # save data per year and month
-                path = join(self.nonghost_root, f'actris/actris/{resolution}/{var}')
-                if not os.path.isdir(path):
-                    os.makedirs(path, exist_ok=True)
-                saved_files = 0
-                for year, ds_year in combined_ds.groupby('time.year'):
-                    for month, ds_month in ds_year.groupby('time.month'):
-                        filename = f"{path}/{var}_{year}{month:02d}.nc"
-                        if filename in files_to_download:
-                            combined_ds_yearmonth = combined_ds.sel(time=f"{year}-{month:02d}")
-
-                            # add title to attrs
-                            extra_info = ''
-                            if wavelength_var and wavelength is not None:
-                                extra_info = f' at {wavelength}nm'
-                            combined_ds_yearmonth.attrs['title'] = f'Surface {ghost_actris_variables[var]}{extra_info} in the ACTRIS network in {year}-{month:02d}.'
-
-                            # order attrs
-                            custom_order = ['title', 'institution', 'creator_name', 'creator_email',
-                                            'source', 'application_area', 'domain', 'observed_layer',
-                                            'data_license']
-                            ordered_attrs = {key: combined_ds_yearmonth.attrs[key] 
-                                            for key in custom_order 
-                                            if key in combined_ds_yearmonth.attrs}
-                            combined_ds_yearmonth.attrs = ordered_attrs
-
-                            # remove stations if all variable data is nan
-                            # previous_n_stations = len(combined_ds_yearmonth.station)
-                            combined_ds_yearmonth = combined_ds_yearmonth.dropna(dim="station", subset=[var], how="all")
-                            combined_ds_yearmonth = combined_ds_yearmonth.assign_coords(station=range(len(combined_ds_yearmonth.station)))
-                            # current_n_stations = len(combined_ds_yearmonth.station)
-                            # n_stations_diff = previous_n_stations - current_n_stations
-                            # if n_stations_diff > 0:
-                            #     self.logger.info(f'Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
-
-                            # remove file if it exists
-                            if os.path.isfile(filename):
-                                os.system("rm {}".format(filename))
-
-                            # do not save if empty
-                            if len(combined_ds_yearmonth[var].values) == 0:
-                                continue
-                                
-                            # save file
-                            combined_ds_yearmonth.to_netcdf(filename)
-
-                            # change permissions
-                            os.system("chmod 777 {}".format(filename))
-                            self.logger.info(f"Saved: {filename}")
-                            saved_files += 1
-                            
-                self.logger.info(f'Total number of saved files: {saved_files}')
-
-            else:
-                self.logger.info(f'No files were found at {resolution} resolution for {var}')
-
     def download_cams_experiment(self, experiment): 
         # print current_experiment
         self.logger.info('\n'+'-'*40)
