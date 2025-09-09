@@ -21,7 +21,7 @@ from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from getpass import getpass
 
-from .actris import download_actris_network
+from .actris import Actris
 from .cams import (Cams, cams_options, ghost_cams_variables, 
                     cams_variables_level)
 from providentia.auxiliar import CURRENT_PATH, join
@@ -204,7 +204,8 @@ class Download(object):
                         # ACTRIS
                         elif network == 'actris/actris':   
                             for resolution in self.resolution:
-                                download_actris_network(self, resolution)
+                                actris = Actris(self, resolution)
+                                actris.download_actris_network()
                         # non-GHOST
                         else:
                             initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
