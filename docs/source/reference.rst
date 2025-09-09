@@ -1,5 +1,6 @@
+=========
 Reference
----------
+=========
 
 .. automodule:: providentia.library
    :members:
