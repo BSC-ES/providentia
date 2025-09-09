@@ -950,7 +950,7 @@ class ProvConfiguration:
         if self.read_instance.machine == "local":
             # if it's a cams experiment, the experiment is directly valid
             if experiment.startswith(tuple(experiment_options.keys())):
-                return True, [experiment]
+                return [experiment]
 
             # get directory from data_paths if it doesn't exists in the interp_experiments file if it's a local interpolation
             if self.read_instance.interpolation is True:
