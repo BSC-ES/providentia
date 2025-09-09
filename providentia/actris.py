@@ -74,7 +74,7 @@ def create_ghost_variables_file(ghost_version):
                              ', '.join(standard_parameters[key]['ebas_parameter_name'])])
 
 
-def get_files_per_var(download_instance, var):
+def get_files_per_var(instance, var):
     """Get all files available in ACTRIS server per variable
 
     Parameters
@@ -103,7 +103,7 @@ def get_files_per_var(download_instance, var):
 
         # check if the response is valid and contains data
         if response.status_code != 200:
-            download_instance.logger.error(
+            instance.logger.error(
                 f"Error fetching page {page}. Status code: {response.status_code}")
             break
 
@@ -448,7 +448,7 @@ def is_wavelength_var(actris_parameter):
     return wavelength_var
 
 
-def get_files_info(download_instance, files, var, path):
+def get_files_info(instance, files, var, path):
     """Read variables, resolution, start date and end date from all files in ACTRIS server per variable.
 
     Parameters
@@ -512,7 +512,7 @@ def get_files_info(download_instance, files, var, path):
         with open(path, 'w') as file:
             yaml.dump(datasets, file, default_flow_style=False)
     else:
-        download_instance.logger.error(f'Error: No data could be found for {var}')
+        instance.logger.error(f'Error: No data could be found for {var}')
         return
     
     return files_info
@@ -778,7 +778,7 @@ def ghost_validity_flag_mapper(flag):
         return flags_dict[str(int(flag))]["GHOST_decreed_validity"][0]
     
 
-def get_data(download_instance, files, var, actris_parameter, resolution, target_start_date, target_end_date, 
+def get_data(instance, files, var, actris_parameter, resolution, target_start_date, target_end_date, 
              files_info, ghost_version, n_cpus):
     """Read variable and metadata data standarising dimensions
 
@@ -882,14 +882,14 @@ def get_data(download_instance, files, var, actris_parameter, resolution, target
 
     # print errors and warnings if any
     if errors:
-        download_instance.logger.info("=== ERRORS ===")
+        instance.logger.info("=== ERRORS ===")
         for e in errors:
-            download_instance.logger.info(e)
+            instance.logger.info(e)
 
     if warnings:
-        download_instance.logger.info("=== WARNINGS ===")
+        instance.logger.info("=== WARNINGS ===")
         for w in warnings:
-            download_instance.logger.info(w)
+            instance.logger.info(w)
             
     pool.close()
     
@@ -897,7 +897,7 @@ def get_data(download_instance, files, var, actris_parameter, resolution, target
     pool.join()
 
     if (len(errors) + len(warnings)) == len(args_list):
-        download_instance.logger.info('All datasets have thrown an error or warning, aborting.')
+        instance.logger.info('All datasets have thrown an error or warning, aborting.')
         return None, None
 
     # get combined data and metadata after read
