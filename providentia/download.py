@@ -1713,6 +1713,19 @@ class Download(object):
             else:
                 continue
 
+            # get wavelength
+            wavelength_var = is_wavelength_var(actris_parameter)
+            if wavelength_var:
+                # select most common wavelength for black carbon (name does not provide it)
+                if var == 'sconcbc':
+                    wavelength = 880
+                    self.logger.info(f'Wavelength appears in dimensions. Selected wavelength: {wavelength}.')
+                # get wavelength from variable name for other variables
+                else:
+                    wavelength = float(re.findall(r'\d+', var)[0])
+            else:
+                wavelength = None
+
             # filter files by resolution and dates
             self.logger.info('Filtering files by resolution and dates...')
             files = {}
@@ -1725,6 +1738,12 @@ class Download(object):
                         file_to_download_start_date = datetime.strptime(file_to_download_yearmonth, "%Y%m")
                         file_to_download_end_date = datetime(file_to_download_start_date.year, file_to_download_start_date.month, 1) + relativedelta(months=1, seconds=-1)
                         if file_to_download_start_date <= end_date and file_to_download_end_date >= start_date:
+                            if 'wavelengths' in attributes:
+                                if wavelength is None:
+                                    self.logger.error(f'Dataset has wavelength in its dimensions but wavelength is None. Revise if ACTRIS parameter ({actris_parameter}) is included in is_wavelength_var function.')
+                                    break
+                                if wavelength not in attributes['wavelengths']:
+                                    continue
                             # from filtered files, save those that are provided multiple times
                             station = attributes["ebas_station_code"]
                             if station not in files:
@@ -1732,14 +1751,13 @@ class Download(object):
                             if file not in files[station]:
                                 files[station].append(file)
 
-            # files = dict(list(files.items())[62:65])
             if len(files) != 0:
 
                 # get data for each file within period and temporally average to standard times
                 start = time.time()
-                combined_ds, wavelength = get_data(self, files, var, actris_parameter, resolution, 
-                                                   target_start_date, target_end_date, files_info,
-                                                   self.ghost_version, self.n_cpus)
+                combined_ds = get_data(self, files, var, actris_parameter, resolution, 
+                                       target_start_date, target_end_date, files_info,
+                                       self.ghost_version, self.n_cpus)
                 if combined_ds is None:
                     continue
                 end = time.time()
@@ -1759,7 +1777,6 @@ class Download(object):
 
                             # add title to attrs
                             extra_info = ''
-                            wavelength_var = is_wavelength_var(actris_parameter)
                             if wavelength_var and wavelength is not None:
                                 extra_info = f' at {wavelength}nm'
                             combined_ds_yearmonth.attrs['title'] = f'Surface {ghost_actris_variables[var]}{extra_info} in the ACTRIS network in {year}-{month:02d}.'

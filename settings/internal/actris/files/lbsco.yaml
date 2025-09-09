@@ -34,6 +34,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/25/YH/2M/25YH-2MZE.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2E/3H/V5/2E3H-V5E7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_M9003_DMV
@@ -70,6 +74,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2E/3H/V5/2E3H-V5E7.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 525.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2F/GN/NP/2FGN-NP9C.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000_BKT_dry
@@ -114,6 +120,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2F/GN/NP/2FGN-NP9C.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/2Y/PB/YP/2YPB-YP9F.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_LLN_pm1
@@ -161,6 +171,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/2Y/PB/YP/2YPB-YP9F.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/36/SC/3N/36SC-3NDD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: nephelometer_Ecotech_Aurora3000
@@ -208,6 +222,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/36/SC/3N/36SC-3NDD.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3D/U5/U6/3DU5-U6BQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563
@@ -255,6 +273,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3D/U5/U6/3DU5-U6BQ.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3G/5S/YZ/3G5S-YZP8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BND_pm10
@@ -299,6 +321,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3G/5S/YZ/3G5S-YZP8.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3N/PD/AK/3NPD-AKFX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SGP_pm10
@@ -346,6 +372,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3N/PD/AK/3NPD-AKFX.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Z/KP/QJ/3ZKP-QJE3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BND_pm1
@@ -393,6 +423,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/3Z/KP/QJ/3ZKP-QJE3.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/42/5M/N3/425M-N3DZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000
@@ -440,6 +474,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/42/5M/N3/425M-N3DZ.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/43/AE/JH/43AE-JHP8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora_3000
@@ -487,6 +525,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/43/AE/JH/43AE-JHP8.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/43/FA/5B/43FA-5BJV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000_DemStation
@@ -534,6 +576,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/43/FA/5B/43FA-5BJV.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/44/TN/VW/44TN-VW8J.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_PAL_dry
@@ -581,6 +627,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/44/TN/VW/44TN-VW8J.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4B/88/PB/4B88-PB4B.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_TRL
@@ -628,6 +678,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4B/88/PB/4B88-PB4B.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4H/V8/D2/4HV8-D26F.nc:
   ebas_data_level: 3a
   ebas_instrument_name: NILU_DMPSmodel2_BIR
@@ -672,6 +726,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4H/V8/D2/4HV8-D26F.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4N/XY/8P/4NXY-8PF7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_PLA
@@ -719,6 +777,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4N/XY/8P/4NXY-8PF7.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4P/VN/59/4PVN-59XD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SGP__pm10
@@ -766,6 +828,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4P/VN/59/4PVN-59XD.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/4Z/NQ/KK/4ZNQ-KK4W.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SGP_pm1
@@ -813,6 +879,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/4Z/NQ/KK/4ZNQ-KK4W.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/52/US/FA/52US-FAV7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ARN_pm10
@@ -860,6 +930,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/52/US/FA/52US-FAV7.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/58/AG/VS/58AG-VSDR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_2009
@@ -907,6 +981,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/58/AG/VS/58AG-VSDR.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/59/G8/BE/59G8-BEJT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SMR_pm1
@@ -954,6 +1032,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/59/G8/BE/59G8-BEJT.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5B/VZ/DF/5BVZ-DF7H.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SGP
@@ -1008,6 +1090,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5B/VZ/DF/5BVZ-DF7H.nc:
   - aerosol_light_scattering_coefficient_pm10_prec1587
   - aerosol_light_scattering_coefficient_pm1_perc8413
   - aerosol_light_scattering_coefficient_pm10_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5F/56/UE/5F56-UEE8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000_PDI_dry
@@ -1052,6 +1138,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5F/56/UE/5F56-UEE8.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/5H/9R/SM/5H9R-SM3F.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Aurora3000_KOS
@@ -1099,6 +1189,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/5H/9R/SM/5H9R-SM3F.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/64/PQ/X9/64PQ-X9F2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_GSN_pm1
@@ -1146,6 +1240,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/64/PQ/X9/64PQ-X9F2.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/6M/AF/KR/6MAF-KRSU.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_WHI_pm1
@@ -1264,6 +1362,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/6U/UW/43/6UUW-43Y4.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/74/RG/YC/74RG-YCU6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_Melpitz
@@ -1311,6 +1413,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/74/RG/YC/74RG-YCU6.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/78/ZU/DT/78ZU-DT4W.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000_DemStation
@@ -1358,6 +1464,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/78/ZU/DT/78ZU-DT4W.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7B/N7/WD/7BN7-WDQS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI3563_sernum_1025
@@ -1401,6 +1511,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7B/N7/WD/7BN7-WDQS.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7F/QG/WA/7FQG-WA7A.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SMR_pm10
@@ -1448,6 +1562,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7F/QG/WA/7FQG-WA7A.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7R/7D/DD/7R7D-DDSQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Neph_TSI_3563133901
@@ -1495,6 +1613,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7R/7D/DD/7R7D-DDSQ.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/7W/RP/X6/7WRP-X69Y.nc:
   ebas_data_level: '2'
   ebas_instrument_name: nephelometer_Ecotech_Aurora3000
@@ -1542,6 +1664,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/7W/RP/X6/7WRP-X69Y.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/83/XS/VN/83XS-VNDG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BND_pm10
@@ -1589,6 +1715,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/83/XS/VN/83XS-VNDG.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/88/HR/GX/88HR-GXFZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SN70738230-PM10amb
@@ -1636,6 +1766,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/88/HR/GX/88HR-GXFZ.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8C/F6/KK/8CF6-KKRW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI3563
@@ -1682,6 +1816,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8C/F6/KK/8CF6-KKRW.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8F/EM/GH/8FEM-GHXE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora_MSY
@@ -1729,6 +1867,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8F/EM/GH/8FEM-GHXE.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8H/7S/JF/8H7S-JFC6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BEO
@@ -1776,6 +1918,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8H/7S/JF/8H7S-JFC6.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8N/SZ/G9/8NSZ-G993.nc:
   ebas_data_level: '2'
   ebas_instrument_name: nephelometer_Ecotech_Aurora3000
@@ -1824,6 +1970,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8N/SZ/G9/8NSZ-G993.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Q/2N/S5/8Q2N-S5PS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_WHI_pm1
@@ -1871,6 +2021,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Q/2N/S5/8Q2N-S5PS.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Q/CM/UX/8QCM-UXPG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ETL_pm25
@@ -1918,6 +2072,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Q/CM/UX/8QCM-UXPG.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8X/MA/SE/8XMA-SE9E.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563
@@ -1964,6 +2122,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8X/MA/SE/8XMA-SE9E.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Y/X3/3M/8YX3-3MF8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_CPR_pm1
@@ -2011,6 +2173,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/8Y/X3/3M/8YX3-3MF8.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9A/JQ/TF/9AJQ-TFBW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_2009
@@ -2057,6 +2223,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9A/JQ/TF/9AJQ-TFBW.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9D/FX/2Y/9DFX-2YGQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SMR_pm1
@@ -2104,6 +2274,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9D/FX/2Y/9DFX-2YGQ.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9S/6M/T4/9S6M-T48H.nc:
   ebas_data_level: '2'
   ebas_instrument_name: tsi_neph_3563_aerosol
@@ -2139,6 +2313,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9S/6M/T4/9S6M-T48H.nc:
   - temperature
   - aerosol_light_backscattering_coefficient
   - aerosol_light_scattering_coefficient
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9X/RW/3H/9XRW-3H2S.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BND_pm1
@@ -2176,6 +2354,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9X/RW/3H/9XRW-3H2S.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Z/89/Y8/9Z89-Y85N.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_EGB_pm1
@@ -2223,6 +2405,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/9Z/89/Y8/9Z89-Y85N.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/A2/43/ZY/A243-ZY5B.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BOS_pm10
@@ -2269,6 +2455,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/A2/43/ZY/A243-ZY5B.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/A3/DC/SH/A3DC-SHB7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BRW_pm1
@@ -2316,6 +2506,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/A3/DC/SH/A3DC-SHB7.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/A6/24/E6/A624-E6XJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ARN_pm10
@@ -2363,6 +2557,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/A6/24/E6/A624-E6XJ.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AD/96/G6/AD96-G6VN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: nephelometer_Ecotech_Aurora3000
@@ -2411,6 +2609,9 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AD/96/G6/AD96-G6VN.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AM/KB/55/AMKB-557Z.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_WHI_pm10
@@ -2458,6 +2659,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AM/KB/55/AMKB-557Z.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AN/HS/AU/ANHS-AUN5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ALT_pm10
@@ -2505,6 +2710,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AN/HS/AU/ANHS-AUN5.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/AR/BV/RY/ARBV-RYSG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI3563_70622035
@@ -2548,6 +2757,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/AR/BV/RY/ARBV-RYSG.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/B3/JQ/4S/B3JQ-4SQX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_DE08
@@ -2595,6 +2808,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/B3/JQ/4S/B3JQ-4SQX.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/B4/RZ/XX/B4RZ-XXH8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_KPS_pm10
@@ -2642,6 +2859,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/B4/RZ/XX/B4RZ-XXH8.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/B5/R6/3F/B5R6-3FSR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_WSA_pm1
@@ -2686,6 +2907,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/B5/R6/3F/B5R6-3FSR.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/B8/8G/TW/B88G-TW7Z.nc:
   ebas_data_level: 3a
   ebas_instrument_name: UHEL_DMPS_HYY_01
@@ -2730,6 +2955,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/B8/8G/TW/B88G-TW7Z.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/B8/ZN/5C/B8ZN-5CH9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora_3000_MSA
@@ -2777,6 +3006,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/B8/ZN/5C/B8ZN-5CH9.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/B9/3S/G2/B93S-G2UH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ARN_pm1
@@ -2824,6 +3057,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/B9/3S/G2/B93S-G2UH.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BC/CT/FC/BCCT-FCJU.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SN70738230-PM10amb
@@ -2868,6 +3105,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BC/CT/FC/BCCT-FCJU.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BJ/7K/JF/BJ7K-JFJY.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ETL_pm10
@@ -2915,6 +3156,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BJ/7K/JF/BJ7K-JFJY.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BP/PN/MZ/BPPN-MZBH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BIR_dry
@@ -2961,6 +3206,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BP/PN/MZ/BPPN-MZBH.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BP/YT/QS/BPYT-QSGV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ALT_pm1
@@ -3008,6 +3257,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BP/YT/QS/BPYT-QSGV.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/BW/F3/Q4/BWF3-Q47G.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ARN
@@ -3055,6 +3308,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/BW/F3/Q4/BWF3-Q47G.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/C3/EU/GJ/C3EU-GJQX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BRW_pm10
@@ -3102,6 +3359,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/C3/EU/GJ/C3EU-GJQX.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/C6/KB/U6/C6KB-U6Q2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SPO
@@ -3149,6 +3410,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/C6/KB/U6/C6KB-U6Q2.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/C8/HZ/S6/C8HZ-S6N3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ETL_pm1
@@ -3196,6 +3461,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/C8/HZ/S6/C8HZ-S6N3.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/C9/85/SA/C985-SAJJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_PUY
@@ -3243,6 +3512,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/C9/85/SA/C985-SAJJ.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/D4/79/UF/D479-UFCT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI3563
@@ -3290,6 +3563,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/D4/79/UF/D479-UFCT.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/D7/TX/3J/D7TX-3J63.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_MLO_pm1
@@ -3337,6 +3614,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/D7/TX/3J/D7TX-3J63.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DJ/YD/CQ/DJYD-CQS2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ARN_pm10
@@ -3384,6 +3665,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DJ/YD/CQ/DJYD-CQS2.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DK/SM/23/DKSM-23N8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_PLA
@@ -3431,6 +3716,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DK/SM/23/DKSM-23N8.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DN/MG/G4/DNMG-G48Z.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_EGB_pm1
@@ -3478,6 +3767,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DN/MG/G4/DNMG-G48Z.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DQ/YE/34/DQYE-34D4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000_DemStation
@@ -3525,6 +3818,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DQ/YE/34/DQYE-34D4.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DU/SG/S4/DUSG-S43V.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_WSA_pm10
@@ -3572,6 +3869,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DU/SG/S4/DUSG-S43V.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/DX/G8/KJ/DXG8-KJQW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora_3000_FNK_dry
@@ -3620,6 +3921,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/DX/G8/KJ/DXG8-KJQW.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/E7/NU/PA/E7NU-PAR3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: nephelometer_Ecotech_Aurora3000
@@ -3667,6 +3972,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/E7/NU/PA/E7NU-PAR3.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ED/EF/S8/EDEF-S8BR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora_4000
@@ -3711,6 +4020,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ED/EF/S8/EDEF-S8BR.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EG/6N/DX/EG6N-DX3U.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Aurora_3000_CIEMAT
@@ -3749,6 +4062,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EG/6N/DX/EG6N-DX3U.nc:
   - aerosol_light_backscattering_coefficient_amean
   - aerosol_light_backscattering_coefficient_prec1587
   - aerosol_light_backscattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EQ/2B/MZ/EQ2B-MZRH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: nephelometer_Ecotech_Aurora4000
@@ -3797,6 +4114,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EQ/2B/MZ/EQ2B-MZRH.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EQ/Y6/ZF/EQY6-ZF32.nc:
   ebas_data_level: '2'
   ebas_instrument_name: NEPH_01
@@ -3822,6 +4143,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EQ/Y6/ZF/EQY6-ZF32.nc:
   - aerosol_light_scattering_coefficient_ebasmetadata
   - aerosol_light_backscattering_coefficient
   - aerosol_light_scattering_coefficient
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EU/NM/XG/EUNM-XG9P.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_WHI_pm25
@@ -3869,6 +4194,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EU/NM/XG/EUNM-XG9P.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/EU/VP/EK/EUVP-EK5R.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Neph_TSI_3563133901
@@ -3916,6 +4245,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/EU/VP/EK/EUVP-EK5R.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/F5/ED/V9/F5ED-V98W.nc:
   ebas_data_level: 3a
   ebas_instrument_name: SMPS_IFT
@@ -3960,6 +4293,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/F5/ED/V9/F5ED-V98W.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/F9/WM/UZ/F9WM-UZ9P.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI3563_142101
@@ -4006,6 +4343,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/F9/WM/UZ/F9WM-UZ9P.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FB/EV/7N/FBEV-7NEM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ECOTECHneph_Vavihill01
@@ -4054,6 +4395,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FB/EV/7N/FBEV-7NEM.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 520.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FM/GF/3Q/FMGF-3QGE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_TNO
@@ -4100,6 +4445,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FM/GF/3Q/FMGF-3QGE.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FR/P7/QE/FRP7-QETB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_AURORA3000_MSA_dry
@@ -4147,6 +4496,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FR/P7/QE/FRP7-QETB.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/FU/46/HZ/FU46-HZE4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000_MSA_aerosol
@@ -4194,6 +4547,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/FU/46/HZ/FU46-HZE4.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/G2/44/6H/G244-6H6F.nc:
   ebas_data_level: '2'
   ebas_instrument_name: nephelometer_Ecotech_Aurora3000
@@ -4242,6 +4599,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/G2/44/6H/G244-6H6F.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/G2/KW/4Z/G2KW-4ZEZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000_MSA_pm10
@@ -4289,6 +4650,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/G2/KW/4Z/G2KW-4ZEZ.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/G5/EF/CW/G5EF-CWW8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI3563
@@ -4311,6 +4676,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/G5/EF/CW/G5EF-CWW8.nc:
   - aerosol_light_backscattering_coefficient_qc
   - aerosol_light_backscattering_coefficient_ebasmetadata
   - aerosol_light_backscattering_coefficient
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GV/U2/SG/GVU2-SGYU.nc:
   ebas_data_level: 3a
   ebas_instrument_name: NILU_DMPSmodel2_TRL
@@ -4355,6 +4722,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GV/U2/SG/GVU2-SGYU.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/GZ/8Y/J4/GZ8Y-J4MP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_WHI_pm1
@@ -4402,6 +4773,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/GZ/8Y/J4/GZ8Y-J4MP.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/H4/WH/7N/H4WH-7NEE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_Neph_CAO
@@ -4449,6 +4824,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/H4/WH/7N/H4WH-7NEE.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HB/VH/SB/HBVH-SBQY.nc:
   ebas_data_level: '2'
   ebas_instrument_name: nephelometer_Ecotech_Aurora3000
@@ -4486,6 +4865,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HB/VH/SB/HBVH-SBQY.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HH/EA/VJ/HHEA-VJ7P.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_TNO
@@ -4533,6 +4916,9 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HH/EA/VJ/HHEA-VJ7P.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HJ/WE/ZU/HJWE-ZUQ6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora_3000_FNK_dry
@@ -4580,6 +4966,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HJ/WE/ZU/HJWE-ZUQ6.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HK/U5/WJ/HKU5-WJVH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: nephelometer_Ecotech_Aurora3000
@@ -4628,6 +5018,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HK/U5/WJ/HKU5-WJVH.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/HK/Y7/RJ/HKY7-RJ93.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_PAL_dry
@@ -4675,6 +5069,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/HK/Y7/RJ/HKY7-RJ93.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JH/QG/QG/JHQG-QGJK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Neph_TSI_3563133901
@@ -4722,6 +5120,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JH/QG/QG/JHQG-QGJK.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JJ/7D/3V/JJ7D-3VUP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563
@@ -4758,6 +5160,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JJ/7D/3V/JJ7D-3VUP.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/JN/YB/S7/JNYB-S7XB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SGP
@@ -4805,6 +5211,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/JN/YB/S7/JNYB-S7XB.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KC/BQ/KE/KCBQ-KEFZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Aurora_3000
@@ -4852,6 +5262,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KC/BQ/KE/KCBQ-KEFZ.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KK/AS/T5/KKAS-T5D5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_pm10
@@ -4899,6 +5313,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KK/AS/T5/KKAS-T5D5.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/KZ/JN/ND/KZJN-NDUB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: nephelometer_TSI_3563
@@ -4946,6 +5364,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/KZ/JN/ND/KZJN-NDUB.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MB/A9/PA/MBA9-PAF9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SMR_pm1
@@ -4993,6 +5415,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MB/A9/PA/MBA9-PAF9.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ME/HQ/BR/MEHQ-BRK9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_GSN_pm10
@@ -5040,6 +5466,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ME/HQ/BR/MEHQ-BRK9.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MF/A8/TF/MFA8-TFAZ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: nephelometer_Ecotech_Aurora3000
@@ -5088,6 +5518,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MF/A8/TF/MFA8-TFAZ.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MJ/U9/WS/MJU9-WSNC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI3563_1081
@@ -5134,6 +5568,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MJ/U9/WS/MJU9-WSNC.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MM/EG/VW/MMEG-VWVD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_WSA_pm1
@@ -5181,6 +5619,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MM/EG/VW/MMEG-VWVD.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MM/FV/UX/MMFV-UX3U.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_KOS_dry
@@ -5228,6 +5670,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MM/FV/UX/MMFV-UX3U.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/MN/N8/DZ/MNN8-DZ5Z.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI3563
@@ -5275,6 +5721,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/MN/N8/DZ/MNN8-DZ5Z.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NG/GP/YA/NGGP-YA24.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_JFJ_dry
@@ -5322,6 +5772,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NG/GP/YA/NGGP-YA24.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NS/KN/7F/NSKN-7FVH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_JFJ_dry
@@ -5348,6 +5802,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NS/KN/7F/NSKN-7FVH.nc:
   - aerosol_light_backscattering_coefficient_ebasmetadata
   - temperature
   - aerosol_light_backscattering_coefficient
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NU/P4/F2/NUP4-F2Y9.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_MLO_aerosol
@@ -5395,6 +5851,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NU/P4/F2/NUP4-F2Y9.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NV/CT/PS/NVCT-PSYM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ARN_pm1
@@ -5442,6 +5902,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NV/CT/PS/NVCT-PSYM.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/NY/5G/G3/NY5G-G3Q5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_WHI_pm1
@@ -5489,6 +5953,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/NY/5G/G3/NY5G-G3Q5.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/P2/CH/2P/P2CH-2PT6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ETL_pm1
@@ -5536,6 +6004,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/P2/CH/2P/P2CH-2PT6.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PD/BC/8B/PDBC-8BEF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000_CHC_ambient
@@ -5584,6 +6056,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PD/BC/8B/PDBC-8BEF.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PH/X4/R4/PHX4-R4UX.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_MLO_pm10
@@ -5631,6 +6107,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PH/X4/R4/PHX4-R4UX.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PK/TJ/62/PKTJ-62WN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_WSA_pm10
@@ -5675,6 +6155,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PK/TJ/62/PKTJ-62WN.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PW/R3/J3/PWR3-J3G6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ECOTECHneph_Vavihill01_aerosol
@@ -5722,6 +6206,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PW/R3/J3/PWR3-J3G6.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 520.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PW/YG/MH/PWYG-MHVF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_TRL
@@ -5769,6 +6257,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PW/YG/MH/PWYG-MHVF.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PY/6X/XK/PY6X-XK83.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SMR_pm10
@@ -5816,6 +6308,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PY/6X/XK/PY6X-XK83.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PY/8T/FX/PY8T-FXPS.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_KPS_pm1
@@ -5863,6 +6359,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PY/8T/FX/PY8T-FXPS.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/PZ/5N/QT/PZ5N-QTTA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ZSF
@@ -5910,6 +6410,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/PZ/5N/QT/PZ5N-QTTA.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q4/BN/8J/Q4BN-8JZR.nc:
   ebas_data_level: '1'
   ebas_instrument_name: TSI_3563_TNO
@@ -5957,6 +6461,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Q4/BN/8J/Q4BN-8JZR.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QE/C6/W5/QEC6-W57W.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora_3000
@@ -6004,6 +6512,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QE/C6/W5/QEC6-W57W.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QG/SE/EY/QGSE-EYMR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ARN_pm1
@@ -6051,6 +6563,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QG/SE/EY/QGSE-EYMR.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QG/ZS/5X/QGZS-5XKM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: ECOTECHneph_Vavihill01_aerosol
@@ -6095,6 +6611,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QG/ZS/5X/QGZS-5XKM.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 520.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QS/S6/6C/QSS6-6CRV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_AURORA3000_MSY_dry
@@ -6142,6 +6662,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QS/S6/6C/QSS6-6CRV.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QX/KM/RK/QXKM-RKNP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_2009
@@ -6189,6 +6713,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QX/KM/RK/QXKM-RKNP.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QY/RV/WZ/QYRV-WZVC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_M9003_DMV_pm10
@@ -6226,6 +6754,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QY/RV/WZ/QYRV-WZVC.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 525.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/QZ/9U/DJ/QZ9U-DJQU.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000_MSY
@@ -6273,6 +6803,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/QZ/9U/DJ/QZ9U-DJQU.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/R4/XX/U2/R4XX-U2YA.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_TRL
@@ -6319,6 +6853,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/R4/XX/U2/R4XX-U2YA.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/R6/M8/B3/R6M8-B36T.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_WHI_pm1
@@ -6366,6 +6904,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/R6/M8/B3/R6M8-B36T.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RD/YR/69/RDYR-69K8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_CPR_pm10
@@ -6413,6 +6955,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RD/YR/69/RDYR-69K8.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RF/XZ/6H/RFXZ-6HFT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI3563
@@ -6456,6 +7002,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RF/XZ/6H/RFXZ-6HFT.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RF/YE/QQ/RFYE-QQRH.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_KPS_pm1
@@ -6503,6 +7053,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RF/YE/QQ/RFYE-QQRH.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RM/6G/8C/RM6G-8CY3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI3563_sernum_1027_and_1025
@@ -6546,6 +7100,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RM/6G/8C/RM6G-8CY3.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RP/WX/UE/RPWX-UE7D.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_JFJ_dry
@@ -6593,6 +7151,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RP/WX/UE/RPWX-UE7D.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/RS/87/B5/RS87-B5V3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_pm10
@@ -6640,6 +7202,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/RS/87/B5/RS87-B5V3.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/S6/UZ/TC/S6UZ-TCAV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BIR_dry
@@ -6687,6 +7253,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/S6/UZ/TC/S6UZ-TCAV.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SD/5C/T7/SD5C-T7X3.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_WHI_pm1
@@ -6734,6 +7304,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SD/5C/T7/SD5C-T7X3.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SG/RH/DD/SGRH-DDPC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI3561_sernum_1035
@@ -6777,6 +7351,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SG/RH/DD/SGRH-DDPC.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SJ/JB/4R/SJJB-4RPJ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_Neph_3563
@@ -6824,6 +7400,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SJ/JB/4R/SJJB-4RPJ.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SV/F8/H9/SVF8-H9BR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_HacStation
@@ -6871,6 +7451,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SV/F8/H9/SVF8-H9BR.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SX/85/G9/SX85-G98A.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_NMY_dry
@@ -6917,6 +7501,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SX/85/G9/SX85-G98A.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SX/9V/WQ/SX9V-WQAD.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_TRL
@@ -6964,6 +7552,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SX/9V/WQ/SX9V-WQAD.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/SX/XB/M2/SXXB-M27Z.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SN70738230-PM10amb
@@ -7011,6 +7603,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/SX/XB/M2/SXXB-M27Z.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/T2/4B/22/T24B-22ZQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_NMY_dry
@@ -7054,6 +7650,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/T2/4B/22/T24B-22ZQ.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/T6/2A/B2/T62A-B2EN.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_LLN_pm10
@@ -7101,6 +7701,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/T6/2A/B2/T62A-B2EN.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/T6/Q7/ZC/T6Q7-ZCQY.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_UGR
@@ -7148,6 +7752,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/T6/Q7/ZC/T6Q7-ZCQY.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/T7/X7/9M/T7X7-9MK7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI3563_70810508
@@ -7184,6 +7792,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/T7/X7/9M/T7X7-9MK7.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/T9/ZX/W8/T9ZX-W8N8.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_JFJ_dry
@@ -7231,6 +7843,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/T9/ZX/W8/T9ZX-W8N8.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TG/8X/A9/TG8X-A965.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ZEP_dry
@@ -7277,6 +7893,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TG/8X/A9/TG8X-A965.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TK/D8/4Q/TKD8-4QP5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Aurora4000_PRG
@@ -7325,6 +7945,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TK/D8/4Q/TKD8-4QP5.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TN/J6/RU/TNJ6-RUD2.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_GSN_aerosol
@@ -7372,6 +7996,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TN/J6/RU/TNJ6-RUD2.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TN/MS/9R/TNMS-9RC5.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Aurora3000_KOS
@@ -7419,6 +8047,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TN/MS/9R/TNMS-9RC5.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/TR/J4/5M/TRJ4-5MYE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ARN_pm10
@@ -7466,6 +8098,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/TR/J4/5M/TRJ4-5MYE.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/U3/A2/H8/U3A2-H86D.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_Neph_3563
@@ -7513,6 +8149,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/U3/A2/H8/U3A2-H86D.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/UM/GK/SS/UMGK-SSZM.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Aurora_3000_CIEMAT
@@ -7560,6 +8200,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/UM/GK/SS/UMGK-SSZM.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/V6/AS/X7/V6AS-X7Z4.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_EGB
@@ -7596,6 +8240,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/V6/AS/X7/V6AS-X7Z4.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/V9/GN/45/V9GN-4538.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000_JFJ_dry
@@ -7643,6 +8291,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/V9/GN/45/V9GN-4538.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VF/5P/RR/VF5P-RRGF.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_MEL_dry
@@ -7690,6 +8342,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VF/5P/RR/VF5P-RRGF.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VG/QQ/SZ/VGQQ-SZM6.nc:
   ebas_data_level: '2'
   ebas_instrument_name: nephelometer_Ecotech_Aurora4000
@@ -7738,6 +8394,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VG/QQ/SZ/VGQQ-SZM6.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VH/FZ/D5/VHFZ-D5FQ.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_TIK
@@ -7785,6 +8445,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VH/FZ/D5/VHFZ-D5FQ.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VK/7W/CV/VK7W-CVQT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_CPT_pm10
@@ -7832,6 +8496,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VK/7W/CV/VK7W-CVQT.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VM/CT/23/VMCT-23ZB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: IN3563
@@ -7878,6 +8546,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VM/CT/23/VMCT-23ZB.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VR/34/B4/VR34-B44S.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_CPT_pm1
@@ -7925,6 +8597,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VR/34/B4/VR34-B44S.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VY/9P/HX/VY9P-HXGG.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_DE08
@@ -7972,6 +8648,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VY/9P/HX/VY9P-HXGG.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/VY/VE/BC/VYVE-BCA7.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SUM
@@ -8019,6 +8699,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/VY/VE/BC/VYVE-BCA7.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/W7/SU/N2/W7SU-N2MR.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_1998
@@ -8066,6 +8750,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/W7/SU/N2/W7SU-N2MR.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WB/UD/CT/WBUD-CTEP.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_THD_pm10
@@ -8113,6 +8801,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WB/UD/CT/WBUD-CTEP.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WU/8G/KG/WU8G-KG7X.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_PAL_dry
@@ -8160,6 +8852,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WU/8G/KG/WU8G-KG7X.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/WZ/RA/3T/WZRA-3TQB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SUM
@@ -8207,6 +8903,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/WZ/RA/3T/WZRA-3TQB.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XD/NX/UD/XDNX-UD8D.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BND_pm1
@@ -8251,6 +8951,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XD/NX/UD/XDNX-UD8D.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XJ/J2/29/XJJ2-29BY.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000_DemStation_pm10
@@ -8298,6 +9002,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XJ/J2/29/XJJ2-29BY.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XK/FC/A9/XKFC-A995.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Aurora_3000_CIEMAT
@@ -8335,6 +9043,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XK/FC/A9/XKFC-A995.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XM/QG/SD/XMQG-SDDV.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000_TLL_dry
@@ -8379,6 +9091,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XM/QG/SD/XMQG-SDDV.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XP/27/YD/XP27-YDGT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_PAL_dry
@@ -8423,6 +9139,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XP/27/YD/XP27-YDGT.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XQ/DN/69/XQDN-693Z.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_THD_pm1
@@ -8470,6 +9190,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XQ/DN/69/XQDN-693Z.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/XZ/4Q/EB/XZ4Q-EBRW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_SUM
@@ -8517,6 +9241,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/XZ/4Q/EB/XZ4Q-EBRW.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YA/WG/ZU/YAWG-ZUGT.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora3000_MSA_aerosol
@@ -8564,6 +9292,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YA/WG/ZU/YAWG-ZUGT.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YH/DY/R8/YHDY-R8HC.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_pm1
@@ -8611,6 +9343,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YH/DY/R8/YHDY-R8HC.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YQ/5R/BB/YQ5R-BBYB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_TNO
@@ -8633,6 +9369,8 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YQ/5R/BB/YQ5R-BBYB.nc:
   - aerosol_light_backscattering_coefficient_qc
   - aerosol_light_backscattering_coefficient_ebasmetadata
   - aerosol_light_backscattering_coefficient
+  wavelengths:
+  - 550.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/YU/8U/3R/YU8U-3RSW.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Neph_TSI_356313390
@@ -8680,6 +9418,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/YU/8U/3R/YU8U-3RSW.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z5/F8/N6/Z5F8-N6QY.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_BOS_pm1
@@ -8726,6 +9468,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z5/F8/N6/Z5F8-N6QY.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z6/JU/SQ/Z6JU-SQ9B.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_PAL_dry
@@ -8773,6 +9519,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z6/JU/SQ/Z6JU-SQ9B.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z9/CG/R9/Z9CG-R9MB.nc:
   ebas_data_level: '2'
   ebas_instrument_name: IN3563
@@ -8807,6 +9557,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/Z9/CG/R9/Z9CG-R9MB.nc:
   - temperature
   - aerosol_light_backscattering_coefficient
   - aerosol_light_scattering_coefficient
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZA/QZ/B9/ZAQZ-B9AK.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563_ARN_pm1
@@ -8854,6 +9608,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZA/QZ/B9/ZAQZ-B9AK.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZB/CB/VJ/ZBCB-VJZE.nc:
   ebas_data_level: '2'
   ebas_instrument_name: TSI_3563
@@ -8901,6 +9659,10 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZB/CB/VJ/ZBCB-VJZE.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 550.0
+  - 700.0
 https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZH/2R/PZ/ZH2R-PZ47.nc:
   ebas_data_level: '2'
   ebas_instrument_name: Ecotech_Aurora_4000
@@ -8945,3 +9707,7 @@ https://thredds.nilu.no/thredds/dodsC/ebas_doi/ZH/2R/PZ/ZH2R-PZ47.nc:
   - aerosol_light_scattering_coefficient_amean
   - aerosol_light_scattering_coefficient_prec1587
   - aerosol_light_scattering_coefficient_perc8413
+  wavelengths:
+  - 450.0
+  - 525.0
+  - 635.0
