@@ -1,8 +1,8 @@
-# Redirecting Output to a File
+# Redirecting output to a file
 
 Providentia provides the option to save its output in a log file. 
 
-## Supported Modes
+## Supported modes
 
 The logging feature is available in the following modes:
 - **Dashboard**
@@ -18,7 +18,7 @@ To enable logging, use the `--logfile` argument when running Providentia from th
 
 To enable logging in a notebook, set the `logfile` argument when calling `Interactive`, as explained below. In this case, each Providentia object will be linked to a single log file.
 
-### Default Logging
+### Default logging
 ```bash
 ./bin/providentia --logfile
 ```
@@ -30,7 +30,7 @@ Interactive(conf='debug.conf',logfile=True)
 
 This command will create a log file inside the `logs` folder within the directory corresponding to the active mode. For example, logs generated in dashboard mode will be saved in `logs/dashboard`. The log files are named with a timestamp in the format `%Y%m%d%H%M%S.log`, such as `20250313123045.log`.
 
-### Custom Log Filename
+### Custom log filename
 If you want to specify a custom filename, you can provide it as an argument:
 ```bash
 ./bin/providentia --logfile=custom_filename
@@ -42,7 +42,7 @@ Interactive(conf='debug.conf',logfile='custom_filename')
 ```
 This will save the log file with the name `custom_filename` inside the default `logs` folder.
 
-### Custom Log File Path
+### Custom log file path
 You can also define a custom file path, absolute or relative:
 ```bash
 ./bin/providentia --logfile=/custom/path/custom_filename

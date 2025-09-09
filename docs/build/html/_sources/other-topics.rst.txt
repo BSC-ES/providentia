@@ -14,3 +14,4 @@ Other topics
    Colocation.md
    Multispecies-filtering.md
    Redirecting-output-to-a-file.md
+   Running-the-tool-on-debug.md
