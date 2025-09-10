@@ -652,6 +652,15 @@ class ProvConfiguration:
         config_ensemble = copy.deepcopy(self.read_instance.ensemble)
         config_forecast = copy.deepcopy(self.read_instance.forecast)
 
+        # if there's experiments, ask the user whether they want interpolated or non-interpolated
+        if self.read_instance.experiments and self.read_instance.download:
+            interpolated = input("Experiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
+            while interpolated.lower() not in ['','y','n']:
+                interpolated = input("Experiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
+
+            # set the interpolated parameter  
+            self.interpolated = interpolated.lower() in ['','y']
+
         # get function for checking formating of experiment for current mode
         # if the current mode is interpolation or the experiment wanted to be downloaded is not interpolated
         if self.read_instance.interpolation or (self.read_instance.download and self.read_instance.interpolated is False):
