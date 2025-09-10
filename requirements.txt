@@ -31,5 +31,3 @@ paramiko==3.4.0
 memray==1.17.1
 coverage-badge==1.1.2
 cdsapi==0.7.6
-selenium==4.35.0
-cdsapi==0.7.6
