@@ -186,6 +186,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--remove_extreme_stations",
                                      dest="remove_extreme_stations",
                                      help="remove extreme stations using defined statistic limits")
+            self.parser.add_argument("--interpolated",
+                                     dest="interpolated",
+                                     help="indicates whether the experiment to be downloaded is interpolated")
             self.parser.add_argument("--report_type",
                                      dest="report_type",
                                      help="define plot options")
