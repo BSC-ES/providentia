@@ -510,5 +510,5 @@ class Cams:
                     # add one day to the date
                     current_cams_date = next_cams_date + timedelta(days=1)    
 
-                # remove the temp directory tail
-                shutil.rmtree(join(self.download_instance.exp_to_interp_root,'.temp'))
+                    # remove the temp directory tail
+                    shutil.rmtree(join(self.download_instance.exp_to_interp_root,'.temp'))
