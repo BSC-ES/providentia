@@ -3,9 +3,9 @@ import os
 import shutil
 
 from base64 import decodebytes
-import cdsapi
 import copy
 from dotenv import dotenv_values
+from getpass import getpass
 import paramiko 
 import requests
 import signal
@@ -14,16 +14,10 @@ import tarfile
 import time
 from tqdm import tqdm
 import xarray as xr
-import yaml
-import zipfile   
-
-from datetime import timedelta
-from dateutil.relativedelta import relativedelta
-from getpass import getpass
+import yaml 
 
 from .actris import Actris
-from .cams import (Cams, cams_options, ghost_cams_variables, 
-                    cams_variables_level)
+from .cams import (Cams, cams_options)
 from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import ProvConfiguration, load_conf
 from .read_aux import check_for_ghost
@@ -221,7 +215,8 @@ class Download(object):
                     for experiment in self.experiments:
                         # CAMS experiment
                         if experiment.startswith(tuple(cams_options.keys())):
-                            self.download_cams_experiment(experiment)
+                            cams = Cams(self)
+                            cams.download_cams_experiment(experiment)
                         # BSC machines
                         else:
                             download_experiment_fun = self.download_experiment if self.interpolated else self.download_non_interpolated_experiment
@@ -1633,172 +1628,6 @@ class Download(object):
                     valid_nc_files.append(nc_file)
                     
         return valid_nc_files        
-    
-    def download_cams_experiment(self, experiment): 
-        # print current_experiment
-        self.logger.info('\n'+'-'*40)
-        self.logger.info(f"\nDownloading {experiment} experiment data from the Atmosphere Data Store...")
-
-        # get experiment id and the domain
-        config_expid, domain, ensemble_options = experiment.split("-")
-        
-        # count underscores to determine format
-        u_count = config_expid.count('_')
-
-        # get the prefix
-        prefix = config_expid.rsplit('_', u_count-1)[0]
-
-        # check if the domain is the correct one for the dataset
-        if domain not in cams_options[prefix]:
-            possible_domains = "', '".join(cams_options[prefix])
-            msg = (
-            f"The current domain '{domain}' is not valid for the CAMS dataset."
-            f"It must be '{possible_domains}'.")            
-            show_message(self, msg)
-            return
-
-        # get the dictionary with the dataset characteristics
-        cams_dict = cams_options[prefix][domain]
-
-        # get CAMS dataset and url
-        dataset = cams_dict["dataset"]
-        url = cams_dict['url']
-
-        # create class to get the functions to handle cams
-        cams = Cams(self)
-        
-        # make the necessary checks to the experiment
-        exp_id, stream = cams.get_experiment(cams_dict, u_count, config_expid, dataset, ensemble_options)
-    
-        # make the necessary checks to the dates
-        cams_start_date, cams_end_date = cams.control_dates(url, cams_dict)
-
-        # create cdsapirc file in case it was not created
-        cdsapirc_path = join(os.getenv("HOME"),'.cdsapirc')
-
-        # create csapirc file necessary for the download
-        if not os.path.isfile(cdsapirc_path):
-            cams.create_cdsapirc(cdsapirc_path)
-
-        # iterate through the species
-        for species in self.species: 
-            # check if species is in the ghost_cams_variables file
-            if species not in ghost_cams_variables:
-                msg = f"The species '{species}' is not available in CAMS."
-                show_message(self, msg)
-                continue
-        
-            # get the species in the cams vocabulary
-            cams_species = ghost_cams_variables[species]
-
-            # check if the mapped species are available in the dataset
-            if cams_species not in cams_dict['variable']:
-                msg = f"Mapped species '{cams_species}' for input species '{species}' is not available in the CAMS '{dataset}' dataset."          
-                show_message(self, msg)
-                continue
-            
-            # get the species' level
-            level = 'multi' if cams_species in cams_variables_level[url]['multi'] else 'single'
-
-            # iterate throught the resolutions
-            for resolution in self.resolution:
-                # get the resolution for the cams dataset
-                correct_resolution = cams_dict["resolution"] if type(cams_dict["resolution"]) == str else cams_dict["resolution"][level]
-                
-                # check if the resolution is the correct one for the dataset
-                if resolution != correct_resolution:
-                    msg = (
-                    f"The current resolution '{resolution}' is not valid. It must be '{correct_resolution}'.")            
-                    show_message(self, msg)
-                    continue
-
-                # get directory structure
-                dir_tail = join(config_expid, domain, resolution, species)
-
-                # get temporal and final dir
-                temp_dir = join(self.exp_to_interp_root,'.temp', dir_tail)
-                final_dir = join(self.exp_to_interp_root, dir_tail)
-
-                # create temporal and final dirs to store the middle zip file with its directories
-                os.makedirs(temp_dir, exist_ok=True)
-                os.makedirs(final_dir, exist_ok=True)
-
-                # create client
-                self.logger.info('')
-                client = cdsapi.Client(retry_max=1, quiet=True)
-
-                # iterate through the dates
-                current_cams_date = cams_start_date
-                while current_cams_date <= cams_end_date:
-
-                    # add one day or one month depending if it is forecast or analysis
-                    if cams_dict['forecast'] is False:
-                        next_cams_date = current_cams_date.replace(day=1) + relativedelta(months=1) - timedelta(days=1)
-                        next_cams_date = cams_end_date if next_cams_date > cams_end_date else next_cams_date
-                    else:
-                        next_cams_date =  current_cams_date
-
-                    # create dictionary to do the request
-                    request = cams.create_request(cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, exp_id)
-
-                    # get filename depending whether it is a download for the whole month or just a day
-                    date_format = '%Y%m' if cams_dict['forecast'] is False else '%Y%m%d'
-                    
-                    # get final path
-                    file_name = f"{species}_{current_cams_date.strftime(date_format)}.nc"
-                    final_path = join(final_dir, file_name)
-
-                    # get temporal path
-                    temp_path = join(temp_dir, 'zip_file')
-
-                    # print the request
-                    cams.print_request(cams_dict['dataset'], request)
-
-                    # make the request
-                    try:
-                        self.logger.info(f"Downloading {final_path}") # TODO change message
-                        client.retrieve(dataset, request, target=temp_path)
-                    except requests.exceptions.HTTPError as err:
-                        # invalid credential on .cdsapirc
-                        if err.response.status_code == 401: 
-                            self.logger.info(
-                                "\nBad request (401): Client Error. Invalid credentials in the .cdsapirc file. "
-                                "Removing authentication file...\n"
-                                "Please run the program again so Providentia can recreate the file automatically, "
-                                "or manually create a new .cdsapirc file by following the instructions at: "
-                                "https://cds.climate.copernicus.eu/how-to-api"
-                            )
-                            os.remove(cdsapirc_path)
-                            return
-                        # bad request
-                        if err.response.status_code == 400: 
-                            self.logger.info("\nBad request (400): The server could not understand the request.")
-                            self.logger.info(f"Details: {err}")
-                        # connection error
-                        elif err.response.status_code == 500: 
-                            self.logger.info("\nServer error (500): The server encountered an error while processing the request.")
-                            self.logger.info(f"Details: {err}")
-                            self.logger.info("Please try again later.")
-                            return
-                        else:
-                            self.logger.info(f"\nUnexpected error ({err.response.status_code}):")
-                            self.logger.info(f"Details: {err}")
-                        # make the next download
-                        continue
-
-                    # extract file 
-                    with zipfile.ZipFile(temp_path, 'r') as zip_ref:
-                        zip_file_name = zip_ref.namelist()[0]
-                        zip_ref.extractall(temp_dir)
-
-                    # format the cams files and move them to the corresponding folder
-                    cams.format_data(join(temp_dir,zip_file_name), final_path, species, prefix, domain, resolution, final_path)
-
-                    # add one day to the date
-                    current_cams_date = next_cams_date + timedelta(days=1)    
-
-                # remove the temp directory tail
-                shutil.rmtree(join(self.exp_to_interp_root,'.temp'))
 
     def check_time(self, size, file_size):
         if (time.time() - self.ncfile_dl_start_time) > self.timeoutLimit:
