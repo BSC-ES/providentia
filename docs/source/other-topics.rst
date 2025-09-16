@@ -5,6 +5,7 @@ Other topics
 .. toctree::
    :maxdepth: 2
 
+   Connection-setup.md
    Command-line-configuration.md
    Data-flags-and-QA-names-and-codes.md
    Representativity-filters.md

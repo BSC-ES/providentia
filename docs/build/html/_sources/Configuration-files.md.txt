@@ -129,7 +129,7 @@ Additionally, we can apply metadata filters. In the subsection for Madrid, we co
 area_classification = keep: rural || remove: urban-suburban
 ```
 
-If you do not know which names can be used to filter the metadata, you should use the dashboard to select the fields, export the configuration [exporting feature](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Dashboard#exporting-data-or-configuration) and copy the fields that you want from there.
+If you do not know which names can be used to filter the metadata, you should use the dashboard to select the fields, export the configuration [exporting feature](Dashboard#exporting-configuration-files-and-data) and copy the fields that you want from there.
 
 `NOTE: The field names in the configuration files are case-insensitive, meaning that if you use capitals or small-cases (providing that the spelling is correct), then the field will be read properly.`
 
