@@ -1,9 +1,9 @@
 WMO_region: ebas_station_wmo_region
 altitude: ebas_station_altitude
 associated_networks: naming_authority
-contact_email_address: publisher_email
-contact_institution: publisher_institution
-contact_name: publisher_name
+contact_email_address: creator_email
+contact_institution: creator_institution
+contact_name: creator_name
 data_level: ebas_data_level
 data_licence: license
 land_use: ebas_station_land_use
