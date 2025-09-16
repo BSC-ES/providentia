@@ -16,9 +16,9 @@ Namely, these are:
 | constraint | Memory constraint. | medmem (to use nodes with 64GB of memory) |
 | version | Print version of Providentia. | |
 | clean | Removes log files. | |
-| logfile | Redirects output to a file. More info in the [wiki page](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Redirecting-output-to-a-file). | |
-| debug | Start [debug mode](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Interactive-mode#starting-a-jupyter-notebook). | |
-| interactive | Open a Jupyter notebook to [use Providentia as a library](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Run-the-tool#running-the-tool-on-a-bsc-machine). | |
+| logfile | Redirects output to a file. More info in the [wiki page](Redirecting-output-to-a-file). | |
+| debug | Start [debug mode](Running-the-tool-on-debug). | |
+| notebook | Open a Jupyter notebook to [use Providentia as a library](Notebook). | |
 | conf | Configuration file path. | |
 | config | Configuration file path. | |
 | config_dir | Path to all configuration files. | |
@@ -28,7 +28,7 @@ Namely, these are:
 | generate_file_tree | Generate file tree to update data directories | |
 | file_tree | Generate file tree to update data directories | |
 | gft | Generate file tree to update data directories | |
-| offline | Start [reports](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Run-the-tool#generate-a-report). | |
+| report | Start [reports](Report). | |
 | network | Network you want to load observations from. Can be multiple (e.g. `CAPMoN, EBAS`). Adding a wild card (\*) is going to expand to certain variables (vconc* → vconc1, vconc2, etc.). | EBAS |
 | species | Species to load. Can be multiple (e.g. `sconco3, sconcno2`). | sconco3 |
 | resolution | Temporal resolution of the observations you want to load (e.g. `3hourly`). | hourly |

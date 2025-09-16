@@ -87,11 +87,11 @@ The *FILTER* button will set all the selected fields under the *Filters* section
 
 ### Statistics
 
-This section provides ways to spatially visualise specific statistical information across all loaded stations. You can read more details about how the statistics are calculated in [Statistics](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Statistics).
+This section provides ways to spatially visualise specific statistical information across all loaded stations. You can read more details about how the statistics are calculated in [Statistics](Statistics).
 
 ### Colocation
 
-It is possible to activate and deactivate the temporal colocation from the dashboard by using this checkbox. More details can be found in [Colocation](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Colocation).
+It is possible to activate and deactivate the temporal colocation from the dashboard by using this checkbox. More details can be found in [Colocation](Colocation).
 
 ### Resampling
 
