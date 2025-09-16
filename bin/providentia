@@ -556,6 +556,12 @@ elif [ "${ip}" == "84.88.185.205" ]; then
 else
     echo "INFO: Running on a local machine..."
     
+    # check if conda is installed
+    if ! command -v conda >/dev/null 2>&1; then
+        echo "Conda is not installed, please read the instructions on how to get started at https://providentia.readthedocs.io/en/latest/Getting-started.html."
+        exit 1
+    fi
+
     # load modules from conda environment
     active_env=false
     eval "$(conda shell.bash hook)"
