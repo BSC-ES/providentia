@@ -11,7 +11,7 @@ If you do not want to download the data and instead you prefer to use an HPC mac
 Independently of the machine, use the following command to get a copy of the repository in your local or HPC machine:
 
 ```
-git clone https://earth.bsc.es/gitlab/ac/Providentia.git
+git clone https://github.com/BSC-ES/providentia.git
 ```
 
 When you have finished cloning the repository from Gitlab, you are automatically in the branch `master`. It is recommended to use that branch as it contains the latest features and bug fixes.
