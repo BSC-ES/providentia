@@ -377,7 +377,7 @@ class Cams:
             msg = (
             f"The current domain '{domain}' is not valid for the CAMS dataset."
             f"It must be '{possible_domains}'.")            
-            show_message(self, msg)
+            show_message(self.download_instance, msg)
             return
 
         # get the dictionary with the dataset characteristics
@@ -398,7 +398,7 @@ class Cams:
             # check if species is in the ghost_cams_variables file
             if species not in ghost_cams_variables:
                 msg = f"The species '{species}' is not available in CAMS."
-                show_message(self, msg)
+                show_message(self.download_instance, msg)
                 continue
         
             # get the species in the cams vocabulary
@@ -407,7 +407,7 @@ class Cams:
             # check if the mapped species are available in the dataset
             if cams_species not in cams_dict['variable']:
                 msg = f"Mapped species '{cams_species}' for input species '{species}' is not available in the CAMS '{dataset}' dataset."          
-                show_message(self, msg)
+                show_message(self.download_instance, msg)
                 continue
             
             # get the species' level
@@ -422,7 +422,7 @@ class Cams:
                 if resolution != correct_resolution:
                     msg = (
                     f"The current resolution '{resolution}' is not valid. It must be '{correct_resolution}'.")            
-                    show_message(self, msg)
+                    show_message(self.download_instance, msg)
                     continue
 
                 # get directory structure
