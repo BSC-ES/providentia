@@ -306,7 +306,7 @@ class ExperimentInterpolation(object):
                 # Z dimension is valid if == 'z' or 'lev' or 'alt' or 'height'
                 if self.have_vertical_dimension:
                     if ((self.z_varname != 'lev') & (self.z_varname != 'z') & (self.z_varname != 'alt')
-                        & (self.z_varname != 'height')):
+                        & (self.z_varname != 'height')  & (self.z_varname != 'level')):
                         self.log_file_str += 'Z dimension incorrectly named. Terminating process.'
                         create_output_logfile(1, self.log_file_str)
 
