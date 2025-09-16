@@ -10,7 +10,7 @@ Providentia is designed to allow on-the-fly and offline analysis of experiment o
 Use the following command to get a copy of the repository:
 
 ```
-git clone https://github.com/bsc-es/providentia.git
+git clone https://github.com/BSC-ES/providentia.git
 ```
 
 # Run

@@ -4,14 +4,14 @@ The first thing you need to decide is whether you want to use Providentia on HPC
 
 We always recommend working on local machines because the interactive features of the dashboard are faster and you do not need to wait in queue to use the software. The only disadvantage is that the data (experiments and observations) stored on HPC cannot be accessed. To solve this we developed the [download mode](Download), which allows you to download data from HPC directly onto your local machine.
 
-If you do not want to download the data and instead you prefer to use an HPC machine for your analysis, we recommend reading the Wiki section [Connection setup](Connection-setup)
+If you do not want to download the data and instead you prefer to use an HPC machine for your analysis, we recommend reading the Wiki section [Connection setup](Connection-setup).
 
 ## Cloning the project
 
 Independently of the machine, use the following command to get a copy of the repository in your local or HPC machine:
 
 ```
-git clone https://earth.bsc.es/gitlab/ac/Providentia.git
+git clone https://github.com/bsc-es/providentia
 ```
 
 When you have finished cloning the repository from Gitlab, you are automatically in the branch `master`. It is recommended to use that branch as it contains the latest features and bug fixes.
@@ -26,7 +26,7 @@ Before running the tool, we suggest checking if conda is installed on your machi
 
 If the dashboard opens, it worked!
 
-If it didn't and it is because conda is missing, you can follow the steps on [this page](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) to install it. If you encountered any other problem, feel free to [contact us](https://earth.bsc.es/gitlab/ac/providentia/-/wikis/home#contact-persons).
+If it didn't and it is because conda is missing, you can follow the steps on [this page](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) to install it. If you encountered any other problem, feel free to [contact us](home).
 
 By default, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total memory. This can be modified as desired using the bash options. You can check the available options with:
 
@@ -79,7 +79,7 @@ A Jupyter notebook can be launched with the following command:
 ./bin/providentia --notebook
 ```        
 
-Some examples on how to use Providentia's backend functions can be found in [the notebooks folder](https://earth.bsc.es/gitlab/ac/providentia/-/tree/master/notebooks).
+Some examples on how to use Providentia's backend functions can be found in [the notebooks folder](https://github.com/BSC-ES/providentia/tree/master/notebooks).
 
 Providentia can also be imported and used in your own Python scripts.
 
@@ -100,6 +100,6 @@ Providentia allows saving its output to a log file using the `--logfile` option:
 ./bin/providentia --logfile <filename>
 ```
 
-More details [here](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Redirecting-output-to-a-file).
+More details [here](Redirecting-output-to-a-file).
 
 Enjoy!

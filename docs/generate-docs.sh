@@ -22,9 +22,6 @@ rm -rf providentia.wiki
 # Removing unused files
 cd source
 rm _sidebar.md
-rm Tips-and-tricks-for-developers.md
-rm Connection-setup.md
-rm FAQ.md
 
 # Generating docs
 cd ..
