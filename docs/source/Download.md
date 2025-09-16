@@ -45,7 +45,7 @@ There are currently four types of downloads available:
        - It only copies from the paths that are specified in `interp_experiments.yaml`. 
    - **How to get this type of download:** Set the `interpolated` field in the configuration file to `False`.
 
-*To know how to define an experiment in `interp_experiments.yaml`, please visit [this page](https://earth.bsc.es/gitlab/ac/Providentia/-/wikis/Interpolation#define-experiments).
+*To know how to define an experiment in `interp_experiments.yaml`, please visit [this page](Interpolation#define-experiments).
 
 ## Where to download from
 
