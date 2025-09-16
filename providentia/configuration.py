@@ -972,13 +972,16 @@ class ProvConfiguration:
                 self.read_instance.connect()        
                 # get all possible experiments
                 exp_to_interp_path = join(self.read_instance.exp_to_interp_remote_path,expid,domain)
+
                 try:
                     self.read_instance.sftp.stat(exp_to_interp_path)
                     experiment_exists = True
+                    
                 except FileNotFoundError:
                     pass     
             
-            msg += f"Cannot find the experiment ID {expid} with the {domain} domain in '{self.read_instance.exp_to_interp_root}'."
+            if experiment_exists is False:
+                msg += f"Cannot find the experiment ID {expid} with the {domain} domain in '{self.read_instance.exp_to_interp_root}'."
 
         # if experiment does not exist, exit
         # supressed warning deactivation
