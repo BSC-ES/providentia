@@ -308,194 +308,201 @@ class SubmitInterpolation(object):
                             
                                 if have_valid_resolution:
                                     break
+                    
+                    # iterate through the possible resolutions
+                    for temporal_resolution_to_output in resolutions_to_keep:
+                        # only proceed if have valid resolution
+                        if have_valid_resolution:
 
-                    # only proceed if have valid resolution
-                    if have_valid_resolution:
-                        
-                        # iterate through observational networks to interpolate against
-                        for network_to_interpolate_against in self.network:
+                            # iterate through observational networks to interpolate against
+                            for network_to_interpolate_against in self.network:
 
-                            # define if network is in GHOST format
-                            self.reading_ghost = check_for_ghost(network_to_interpolate_against)
+                                # define if network is in GHOST format
+                                self.reading_ghost = check_for_ghost(network_to_interpolate_against)
 
-                            # get all relevant observational files
-                            # GHOST
-                            if self.reading_ghost:
-                                obs_files = np.sort(glob.glob(
-                                    self.ghost_root + '/{}/{}/{}/{}/{}*.nc'.format(
-                                        network_to_interpolate_against, self.ghost_version, 
-                                        temporal_resolution_to_output, original_speci_to_process, 
-                                        original_speci_to_process)))
-                            # non-GHOST
-                            else:
-                                obs_files = np.sort(glob.glob(
-                                    self.nonghost_root + '/{}/{}/{}/{}*.nc'.format(
-                                        network_to_interpolate_against, temporal_resolution_to_output,
-                                        original_speci_to_process, original_speci_to_process)))
-
-                            # if have no observational files then continue
-                            if len(obs_files) == 0:
-                                continue
-                            
-                            # determine if ensemble is member or emsemble stat
-                            ensemble_member = ensemble.isdigit()
-
-                            # check if ensemble is ensemble stat and get all relevant experiment files
-                            if not ensemble_member:
-                                ensemble_stat = True
-                                exp_files_all = np.sort(glob.glob('{}/{}/{}/ensemble-stats/{}_{}/{}*{}.nc'.format(
-                                    exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
-                                    ensemble, speci_to_process, ensemble)))
-                            else:
-                                ensemble_stat = False
-                                exp_files_all = np.sort(glob.glob('{}/{}/{}/{}/{}*.nc'.format(
-                                    exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
-                                    speci_to_process)))    
-                                
-                                # drop all analysis files ending with '_an.nc' which are not in ensemble-stats
-                                exp_files_all = np.array([f for f in exp_files_all if '_an.nc' not in f])
-
-                            # if have no relevant experiment files then continue
-                            if len(exp_files_all) == 0:
-                                continue
-
-                            # ensemble stat?
-                            if ensemble_stat:
-                                available_ensemble = [ensemble]    
-
-                            # not ensemble stat?
-                            else:                                
-                                
-                                # determine if simulation generates files with ensemble member numbers or not 
-                                # (test first file)
-                                # if the ensemble number is in the nc file name next to species
-                                if exp_files_all[0].split('/')[-1].rsplit('_', 1)[0] != speci_to_process:
-                                    have_ensemble_members = True
-                                    # if have ensemble members in filename, get all unique numbers
-                                    unique_ensemble_members = np.unique([f.split('/{}-'.format(speci_to_process))[-1][:3] 
-                                                                        for f in exp_files_all])
-                                    # get intersection between desired ensemble members to process and those 
-                                    # available in directory
-                                    # if no members defined explicitly to process, process them all 
-                                    if ensemble == 'allmembers':
-                                        available_ensemble = unique_ensemble_members
-                                    else:
-                                        if ensemble in unique_ensemble_members:
-                                            available_ensemble = [ensemble]
-                                        else:
-                                            continue
-                                # if there's no ensemble number in the file name
+                                # get all relevant observational files
+                                # GHOST
+                                if self.reading_ghost:
+                                    print(
+                                        self.ghost_root + '/{}/{}/{}/{}/{}*.nc'.format(
+                                            network_to_interpolate_against, self.ghost_version, 
+                                            temporal_resolution_to_output, original_speci_to_process, 
+                                            original_speci_to_process),"ob")
+                                    obs_files = np.sort(glob.glob(
+                                        self.ghost_root + '/{}/{}/{}/{}/{}*.nc'.format(
+                                            network_to_interpolate_against, self.ghost_version, 
+                                            temporal_resolution_to_output, original_speci_to_process, 
+                                            original_speci_to_process)))
+                                # non-GHOST
                                 else:
-                                    have_ensemble_members = False
-                                    # if have defined ensemble members to process, then continue as no files in this 
-                                    # directory have ensemble member number
-                                    if ensemble not in ['allmembers', '000']:
-                                        continue
-                                    # otherwise, proceed (tag files as ensemble member '000' for sake of operation)
+                                    obs_files = np.sort(glob.glob(
+                                        self.nonghost_root + '/{}/{}/{}/{}*.nc'.format(
+                                            network_to_interpolate_against, temporal_resolution_to_output,
+                                            original_speci_to_process, original_speci_to_process)))
+
+                                # if have no observational files then continue
+                                if len(obs_files) == 0:
+                                    continue
+                                
+                                # determine if ensemble is member or emsemble stat
+                                ensemble_member = ensemble.isdigit()
+
+                                # check if ensemble is ensemble stat and get all relevant experiment files
+                                if not ensemble_member:
+                                    ensemble_stat = True
+                                    exp_files_all = np.sort(glob.glob('{}/{}/{}/ensemble-stats/{}_{}/{}*{}.nc'.format(
+                                        exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
+                                        ensemble, speci_to_process, ensemble)))
+                                else:
+                                    ensemble_stat = False
+                                    exp_files_all = np.sort(glob.glob('{}/{}/{}/{}/{}*.nc'.format(
+                                        exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
+                                        speci_to_process)))    
+                                    
+                                    # drop all analysis files ending with '_an.nc' which are not in ensemble-stats
+                                    exp_files_all = np.array([f for f in exp_files_all if '_an.nc' not in f])
+
+                                # if have no relevant experiment files then continue
+                                if len(exp_files_all) == 0:
+                                    continue
+
+                                # ensemble stat?
+                                if ensemble_stat:
+                                    available_ensemble = [ensemble]    
+
+                                # not ensemble stat?
+                                else:                                
+                                    
+                                    # determine if simulation generates files with ensemble member numbers or not 
+                                    # (test first file)
+                                    # if the ensemble number is in the nc file name next to species
+                                    if exp_files_all[0].split('/')[-1].rsplit('_', 1)[0] != speci_to_process:
+                                        have_ensemble_members = True
+                                        # if have ensemble members in filename, get all unique numbers
+                                        unique_ensemble_members = np.unique([f.split('/{}-'.format(speci_to_process))[-1][:3] 
+                                                                            for f in exp_files_all])
+                                        # get intersection between desired ensemble members to process and those 
+                                        # available in directory
+                                        # if no members defined explicitly to process, process them all 
+                                        if ensemble == 'allmembers':
+                                            available_ensemble = unique_ensemble_members
+                                        else:
+                                            if ensemble in unique_ensemble_members:
+                                                available_ensemble = [ensemble]
+                                            else:
+                                                continue
+                                    # if there's no ensemble number in the file name
                                     else:
-                                        available_ensemble = ['000']
+                                        have_ensemble_members = False
+                                        # if have defined ensemble members to process, then continue as no files in this 
+                                        # directory have ensemble member number
+                                        if ensemble not in ['allmembers', '000']:
+                                            continue
+                                        # otherwise, proceed (tag files as ensemble member '000' for sake of operation)
+                                        else:
+                                            available_ensemble = ['000']
+                                
+                                # iterate through available ensemble to process                    
+                                for available_ensemble in available_ensemble:
                             
-                            # iterate through available ensemble to process                    
-                            for available_ensemble in available_ensemble:
-                        
-                                # limit experiment files to be just those for specific ensemble member 
-                                # (where neccessary) 
-                                exp_file_speci = copy.deepcopy(speci_to_process)
-                                exp_files = copy.deepcopy(exp_files_all)
-                                if ensemble_stat == False:
-                                    if have_ensemble_members == True:
-                                        exp_file_speci = '{}-{}'.format(speci_to_process, available_ensemble)
-                                        exp_files = np.sort([f for f in exp_files_all if '{}_'.format(exp_file_speci) 
-                                                            in f])                        
-                                
-                                # get all observational file start dates (year and month)
-                                obs_files_dates = []
-                                for obs_file in obs_files:
-                                    obs_file_date = obs_file.split('{}_'.format(original_speci_to_process))[-1].split('_')[0].split('.nc')[0]
-                                    obs_files_dates=np.append(obs_files_dates,obs_file_date[:6])
-
-                                # get all experiment file start dates (year and month)
-                                exp_files_dates = []   
-                                for exp_file in exp_files:
-                                    exp_file_date = exp_file.split('{}_'.format(exp_file_speci))[-1].split('_')[0].split('.nc')[0]
-                                    exp_files_dates=np.append(exp_files_dates,exp_file_date[:6])
-
-                                # remove observational files outside date ranges 
-                                obs_files_ii = np.array([obs_files_ii for obs_files_ii, obs_files_date in enumerate(obs_files_dates) 
-                                                        if ((int(obs_files_date) >= int(self.start_date)) 
-                                                            and (int(obs_files_date) < int(self.end_date)))])       
-                                if len(obs_files_ii) == 0:
-                                    obs_files = []
+                                    # limit experiment files to be just those for specific ensemble member 
+                                    # (where neccessary) 
+                                    exp_file_speci = copy.deepcopy(speci_to_process)
+                                    exp_files = copy.deepcopy(exp_files_all)
+                                    if ensemble_stat == False:
+                                        if have_ensemble_members == True:
+                                            exp_file_speci = '{}-{}'.format(speci_to_process, available_ensemble)
+                                            exp_files = np.sort([f for f in exp_files_all if '{}_'.format(exp_file_speci) 
+                                                                in f])                        
+                                    
+                                    # get all observational file start dates (year and month)
                                     obs_files_dates = []
-                                    continue
-                                obs_files = obs_files[obs_files_ii]
-                                obs_files_dates = obs_files_dates[obs_files_ii]
+                                    for obs_file in obs_files:
+                                        obs_file_date = obs_file.split('{}_'.format(original_speci_to_process))[-1].split('_')[0].split('.nc')[0]
+                                        obs_files_dates=np.append(obs_files_dates,obs_file_date[:6])
 
-                                # remove experiment files outside date ranges 
-                                exp_files_ii = np.array([exp_files_ii for exp_files_ii, exp_files_date in enumerate(exp_files_dates) 
-                                                        if ((int(exp_files_date) >= int(self.start_date)) 
-                                                            and (int(exp_files_date) < int(self.end_date)))])      
-                                if len(exp_files_ii) == 0:
-                                    exp_files = []
-                                    exp_files_dates = []
-                                    continue
-                                exp_files = exp_files[exp_files_ii]
-                                exp_files_dates = exp_files_dates[exp_files_ii]
-                                
-                                # get intersection of file yearmonths between observations and experiment
-                                intersect_yearmonths = np.intersect1d(obs_files_dates, exp_files_dates)
+                                    # get all experiment file start dates (year and month)
+                                    exp_files_dates = []   
+                                    for exp_file in exp_files:
+                                        exp_file_date = exp_file.split('{}_'.format(exp_file_speci))[-1].split('_')[0].split('.nc')[0]
+                                        exp_files_dates=np.append(exp_files_dates,exp_file_date[:6])
 
-                                # if have no intersecting months, continue
-                                if len(intersect_yearmonths) == 0:
-                                    continue
+                                    # remove observational files outside date ranges 
+                                    obs_files_ii = np.array([obs_files_ii for obs_files_ii, obs_files_date in enumerate(obs_files_dates) 
+                                                            if ((int(obs_files_date) >= int(self.start_date)) 
+                                                                and (int(obs_files_date) < int(self.end_date)))])       
+                                    if len(obs_files_ii) == 0:
+                                        obs_files = []
+                                        obs_files_dates = []
+                                        continue
+                                    obs_files = obs_files[obs_files_ii]
+                                    obs_files_dates = obs_files_dates[obs_files_ii]
 
-                                # create Providentia experiment code (expid-region-ensembleoption)
-                                prov_exp_code = '{}-{}-{}'.format(experiment_to_process, grid_type, 
-                                                                available_ensemble)
-       
-                                # create directories to store slurm output/error logs for interpolation task of 
-                                # specific combination of iterated variables (if does not already exist)
-                                if not os.path.exists('{}/{}/{}/{}/{}'.format(self.interpolation_log_dir, 
-                                                                                prov_exp_code, 
-                                                                                original_speci_to_process, 
-                                                                                network_to_interpolate_against, 
-                                                                                temporal_resolution_to_output)):
-                                    os.makedirs('{}/{}/{}/{}/{}'.format(self.interpolation_log_dir, prov_exp_code, 
-                                                                        original_speci_to_process, 
-                                                                        network_to_interpolate_against, 
-                                                                        temporal_resolution_to_output))
+                                    # remove experiment files outside date ranges 
+                                    exp_files_ii = np.array([exp_files_ii for exp_files_ii, exp_files_date in enumerate(exp_files_dates) 
+                                                            if ((int(exp_files_date) >= int(self.start_date)) 
+                                                                and (int(exp_files_date) < int(self.end_date)))])      
+                                    if len(exp_files_ii) == 0:
+                                        exp_files = []
+                                        exp_files_dates = []
+                                        continue
+                                    exp_files = exp_files[exp_files_ii]
+                                    exp_files_dates = exp_files_dates[exp_files_ii]
+                                    
+                                    # get intersection of file yearmonths between observations and experiment
+                                    intersect_yearmonths = np.intersect1d(obs_files_dates, exp_files_dates)
 
-                                # iterate through intersecting yearmonths and write all current variable arguments 
-                                # to arguments file
-                                for yearmonth in intersect_yearmonths:
+                                    # if have no intersecting months, continue
+                                    if len(intersect_yearmonths) == 0:
+                                        continue
 
-                                    # append current iterative arguments to arguments list               
-                                    self.arguments.append("{} {} {} {} {} {} {} {}".format(prov_exp_code, 
-                                                                                        model_temporal_resolution, 
-                                                                                        speci_to_process, 
-                                                                                        network_to_interpolate_against, 
-                                                                                        temporal_resolution_to_output, 
-                                                                                        yearmonth, 
-                                                                                        original_speci_to_process,
-                                                                                        self.slurm_job_id))
+                                    # create Providentia experiment code (expid-region-ensembleoption)
+                                    prov_exp_code = '{}-{}-{}'.format(experiment_to_process, grid_type, 
+                                                                    available_ensemble)
+        
+                                    # create directories to store slurm output/error logs for interpolation task of 
+                                    # specific combination of iterated variables (if does not already exist)
+                                    if not os.path.exists('{}/{}/{}/{}/{}'.format(self.interpolation_log_dir, 
+                                                                                    prov_exp_code, 
+                                                                                    original_speci_to_process, 
+                                                                                    network_to_interpolate_against, 
+                                                                                    temporal_resolution_to_output)):
+                                        os.makedirs('{}/{}/{}/{}/{}'.format(self.interpolation_log_dir, prov_exp_code, 
+                                                                            original_speci_to_process, 
+                                                                            network_to_interpolate_against, 
+                                                                            temporal_resolution_to_output))
 
-                                    # append root name of .out file that will be output for each processed task
-                                    self.output_log_roots.append('{}/{}/{}/{}/{}/{}'.format(self.interpolation_log_dir, 
-                                                                                            prov_exp_code, 
-                                                                                            original_speci_to_process, 
+                                    # iterate through intersecting yearmonths and write all current variable arguments 
+                                    # to arguments file
+                                    for yearmonth in intersect_yearmonths:
+
+                                        # append current iterative arguments to arguments list               
+                                        self.arguments.append("{} {} {} {} {} {} {} {}".format(prov_exp_code, 
+                                                                                            model_temporal_resolution, 
+                                                                                            speci_to_process, 
                                                                                             network_to_interpolate_against, 
                                                                                             temporal_resolution_to_output, 
-                                                                                            yearmonth))
+                                                                                            yearmonth, 
+                                                                                            original_speci_to_process,
+                                                                                            self.slurm_job_id))
 
-                                    # remove previous output logs
-                                    previous_logs = glob.glob('{}/{}/{}/{}/{}/{}*'.format(self.interpolation_log_dir, 
-                                                                                            prov_exp_code, 
-                                                                                            original_speci_to_process, 
-                                                                                            network_to_interpolate_against, 
-                                                                                            temporal_resolution_to_output, 
-                                                                                            yearmonth))
-                                    for previous_log in previous_logs:
-                                        os.remove(previous_log) 
+                                        # append root name of .out file that will be output for each processed task
+                                        self.output_log_roots.append('{}/{}/{}/{}/{}/{}'.format(self.interpolation_log_dir, 
+                                                                                                prov_exp_code, 
+                                                                                                original_speci_to_process, 
+                                                                                                network_to_interpolate_against, 
+                                                                                                temporal_resolution_to_output, 
+                                                                                                yearmonth))
+
+                                        # remove previous output logs
+                                        previous_logs = glob.glob('{}/{}/{}/{}/{}/{}*'.format(self.interpolation_log_dir, 
+                                                                                                prov_exp_code, 
+                                                                                                original_speci_to_process, 
+                                                                                                network_to_interpolate_against, 
+                                                                                                temporal_resolution_to_output, 
+                                                                                                yearmonth))
+                                        for previous_log in previous_logs:
+                                            os.remove(previous_log) 
 
             # boolean that says if there was any new valid data in the iteration
             new_arguments = last_arguments != self.arguments
