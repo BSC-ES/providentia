@@ -355,6 +355,13 @@ class Cams:
         self.download_instance.logger.info('\n'+'-'*40)
         self.download_instance.logger.info(f"\nDownloading {experiment} experiment data from the Atmosphere Data Store...")
 
+        # create cdsapirc file in case it was not created
+        cdsapirc_path = join(os.getenv("HOME"),'.cdsapirc')
+
+        # create csapirc file necessary for the download
+        if not os.path.isfile(cdsapirc_path):
+            self.create_cdsapirc(cdsapirc_path)
+
         # get experiment id and the domain
         config_expid, domain, ensemble_options = experiment.split("-")
         
@@ -385,13 +392,6 @@ class Cams:
     
         # make the necessary checks to the dates
         cams_start_date, cams_end_date = self.control_dates(url, cams_dict)
-
-        # create cdsapirc file in case it was not created
-        cdsapirc_path = join(os.getenv("HOME"),'.cdsapirc')
-
-        # create csapirc file necessary for the download
-        if not os.path.isfile(cdsapirc_path):
-            self.create_cdsapirc(cdsapirc_path)
 
         # iterate through the species
         for species in self.download_instance.species: 
@@ -510,5 +510,5 @@ class Cams:
                     # add one day to the date
                     current_cams_date = next_cams_date + timedelta(days=1)    
 
-                # remove the temp directory tail
-                shutil.rmtree(join(self.download_instance.exp_to_interp_root,'.temp'))
+                    # remove the temp directory tail
+                    shutil.rmtree(join(self.download_instance.exp_to_interp_root,'.temp'))

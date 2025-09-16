@@ -1443,7 +1443,7 @@ def interpolation(config, **kwargs):
     # save original stdout
     orig_stdout = sys.stdout
     # redirict stdout to file
-    sys.stdout = open('logs/interpolation/management_logs/{}.out'.format(unique_id), 'w')
+    sys.stdout = open(join(PROVIDENTIA_ROOT,'logs','interpolation','management_logs', f'{unique_id}.out'), 'w')
     # do interpolation
     interpolation.main(**kwargs)
     # reset stdout
