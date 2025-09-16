@@ -12,3 +12,5 @@ Contents
    other-topics.rst
    reference.rst
    Evolution.md
+   Tips-and-tricks-for-developers.md
+   FAQ.md

@@ -50,6 +50,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference.html">Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Evolution.html">Evolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FAQ.html">FAQ</a></li>
 </ul>
 
         </div>
@@ -1566,7 +1568,7 @@
     <span class="c1"># save original stdout</span>
     <span class="n">orig_stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
     <span class="c1"># redirict stdout to file</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;logs/interpolation/management_logs/</span><span class="si">{}</span><span class="s1">.out&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">unique_id</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span><span class="s1">&#39;logs&#39;</span><span class="p">,</span><span class="s1">&#39;interpolation&#39;</span><span class="p">,</span><span class="s1">&#39;management_logs&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">unique_id</span><span class="si">}</span><span class="s1">.out&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
     <span class="c1"># do interpolation</span>
     <span class="n">interpolation</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="c1"># reset stdout</span>
