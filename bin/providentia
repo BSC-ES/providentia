@@ -535,7 +535,6 @@ elif [ "${ip}" == "84.88.185.205" ]; then
         conda install -c conda-forge cartopy -y --override-channels
         conda install -c conda-forge jupyterlab -y --override-channels
         conda install -c conda-forge ghostscript -y --override-channels
-        conda install -c conda-forge KDEpy -y --override-channels
 
         pip install -r requirements.txt
         active_env=true
@@ -581,7 +580,6 @@ else
         conda install -c conda-forge cartopy -y --override-channels
         conda install -c conda-forge jupyterlab -y --override-channels
         conda install -c conda-forge ghostscript -y --override-channels
-        conda install -c conda-forge KDEpy -y --override-channels
 
         pip install -r requirements.txt
         active_env=true
