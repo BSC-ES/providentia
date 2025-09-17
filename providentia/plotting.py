@@ -9,7 +9,7 @@ import yaml
 import cartopy
 import cartopy.crs as ccrs
 from datetime import datetime
-from KDEpy import FFTKDE
+# from KDEpy import FFTKDE
 from itertools import groupby
 import matplotlib
 import matplotlib.image as mpimg
