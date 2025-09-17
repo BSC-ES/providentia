@@ -156,7 +156,7 @@ class Download(object):
                     main_species = copy.deepcopy(self.species)
 
                     # if there are GHOST networks, ask the user whether they want to download it from zenodo or HPC machines
-                    if self.read_instance.reading_ghost:
+                    if self.reading_ghost:
                         # ask whether the user wants to download from the zenodo or bsc machine
                             bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
                             while bsc_download.lower() not in ['','y','n']:
@@ -164,8 +164,8 @@ class Download(object):
                     
                     # get the download function 
                     download_fun = (
-                    self.download_ghost_network_sftp if self.read_instance.reading_ghost(network) and bsc_download.lower() in ['', 'y']
-                    else self.download_ghost_network_zenodo if self.read_instance.reading_ghost(network)
+                    self.download_ghost_network_sftp if self.reading_ghost(network) and bsc_download.lower() in ['', 'y']
+                    else self.download_ghost_network_zenodo if self.reading_ghost(network)
                     else self.download_nonghost_network)
                     
                     # download network observations with species and filter_species
