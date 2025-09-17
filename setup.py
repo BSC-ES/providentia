@@ -8,7 +8,6 @@ REQUIREMENTS = {
         'jupyterlab',
         'cartopy',
         'ghostscript',
-        'KDEpy',
         'matplotlib==3.9.1',
         'netCDF4==1.7.2',
         'numpy==1.26.4',

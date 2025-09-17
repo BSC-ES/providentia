@@ -316,7 +316,6 @@ conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v
 conda install -c conda-forge cartopy --override-channels
 conda install -c conda-forge jupyterlab --override-channels
 conda install -c conda-forge ghostscript --override-channels
-conda install -c conda-forge KDEpy --override-channels
 pip install -r requirements.txt
 ```
 
@@ -330,7 +329,6 @@ conda activate providentia-env
 conda install -c conda-forge cartopy --override-channels
 conda install -c conda-forge jupyterlab --override-channels
 conda install -c conda-forge ghostscript --override-channels
-conda install -c conda-forge KDEpy --override-channels
 conda install -c conda-forge dask --override-channels
 pip install -r requirements.txt
 ```
