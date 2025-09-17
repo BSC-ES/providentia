@@ -112,15 +112,6 @@ class Download(object):
             # initialise remote hostname
             self.remote_hostname = "transfer1.bsc.es"
 
-            # create empty directories for all the paths if they don't exist
-            for path in [self.nonghost_root,self.ghost_root,self.exp_root,self.exp_to_interp_root]:
-                if not os.path.exists(path):
-                    try:
-                        os.makedirs(path)
-                    except PermissionError as error:
-                        os.system(f"sudo mkdir -p {path}")
-                        os.system(f"sudo chmod o+w {path}")
-
             # initialise ssh 
             self.ssh = None
 
@@ -163,6 +154,19 @@ class Download(object):
                     
                     # save main species
                     main_species = copy.deepcopy(self.species)
+
+                    # if there are GHOST networks, ask the user whether they want to download it from zenodo or HPC machines
+                    if self.read_instance.reading_ghost:
+                        # ask whether the user wants to download from the zenodo or bsc machine
+                            bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
+                            while bsc_download.lower() not in ['','y','n']:
+                                bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
+                    
+                    # get the download function 
+                    download_fun = (
+                    self.download_ghost_network_sftp if self.read_instance.reading_ghost(network) and bsc_download.lower() in ['', 'y']
+                    else self.download_ghost_network_zenodo if self.read_instance.reading_ghost(network)
+                    else self.download_nonghost_network)
                     
                     # download network observations with species and filter_species
                     for network, filter_species in combined_networks:
@@ -170,33 +174,18 @@ class Download(object):
                         if filter_species is not None:
                             self.species = [filter_species]
 
-                        # get the files to be downloaded, check if they were already downloaded 
-                        # GHOST
-                        if check_for_ghost(network):
-                            # ask whether the user wants to download from the zenodo or bsc machine
-                            bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
-                            while bsc_download.lower() not in ['','y','n']:
-                                bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
-                            
-                            # get the zenodo or bsc machine depending on the user answer
-                            download_ghost = self.download_ghost_network_sftp if bsc_download.lower() in ['','y'] else self.download_ghost_network_zenodo
-                            
-                            # download GHOST network
-                            initial_check_nc_files = download_ghost(network, initial_check=True)
-                            files_to_download = self.select_files_to_download(initial_check_nc_files)
-                            if not initial_check_nc_files or files_to_download:
-                                download_ghost(network, initial_check=False, files_to_download=files_to_download)
                         # ACTRIS
-                        elif network == 'actris/actris':   
+                        if network == 'actris/actris':   
                             for resolution in self.resolution:
                                 actris = Actris(self, resolution)
                                 actris.download_actris_network()
-                        # non-GHOST
+                        # GHOST and non-GHOST 
                         else:
-                            initial_check_nc_files = self.download_nonghost_network(network, initial_check=True)
+                            # download GHOST network
+                            initial_check_nc_files = download_fun(network, initial_check=True)
                             files_to_download = self.select_files_to_download(initial_check_nc_files)
                             if not initial_check_nc_files or files_to_download:
-                                self.download_nonghost_network(network, initial_check=False, files_to_download=files_to_download)
+                                download_fun(network, initial_check=False, files_to_download=files_to_download)
 
                     # get orignal species back
                     self.species = main_species
