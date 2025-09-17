@@ -2726,5 +2726,5 @@ class Plotting:
 
                 # marker size is calculated using an exponential equation
                 # the maximum size is 40 (very low densities)
-                # see https://earth.bsc.es/gitlab/ac/Providentia/-/issues/210
+                # see https://github.com/BSC-ES/providentia/issues/199
                 plot_characteristics['plot']['s'] = 1.2**(-density)*40

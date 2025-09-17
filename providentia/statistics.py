@@ -1479,7 +1479,7 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
         if 'cb_tick_params' in plot_characteristics:
             # remove ticks for discrete colourbars
             # we do this because different screen resolutions slightly offset the tick position
-            # https://earth.bsc.es/gitlab/ac/Providentia/-/issues/166
+            # https://github.com/BSC-ES/providentia/issues/159
             if plot_characteristics['cb']['discrete']:
                 plot_characteristics['cb_tick_params']['size'] = 0
             cb.ax.tick_params(**plot_characteristics['cb_tick_params'])
