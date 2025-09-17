@@ -17,6 +17,7 @@ release = '2.4.0'
 extensions = ["myst_parser", "sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc", "sphinx_rtd_theme"]
 templates_path = ['_templates']
 exclude_patterns = []
+myst_heading_anchors = 2
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

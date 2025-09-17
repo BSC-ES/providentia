@@ -4,7 +4,7 @@ Currently, it is possible to export three different types of files: configuratio
 
 ## .conf file format (Providentia)
 
-Users can download their configurations (.conf) and use the corresponding files to create reports or launch Providentia again. In [Getting started)](Getting-started) you can learn how to load your configurations through the command line or [from the dashboard](Dashboard#loading-a-configuration-file).
+Users can download their configurations (.conf) and use the corresponding files to create reports or launch Providentia again. In [Getting started](Getting-started) you can learn how to load your configurations through the command line or {ref}`from the dashboard <loading-a-configuration-file>`.
 
 ## Saved variables (Numpy and NetCDF)
 

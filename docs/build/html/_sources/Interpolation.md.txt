@@ -52,6 +52,7 @@ To check the status/output of an interpolation job, the following log files are 
  
 If the interpolation is succesful, the resulted interpolated files are stored under the directory : `/gpfs/projects/bsc32/AC_cache/recon/exp_interp/` followed by the latest version of GHOST used by the interpolation.
 
+(define-experiments)=
 ## Define experiments
 
 All the experiments that are runned in the interpolation need to be defined in `/settings/interp_experiments.yaml`.
