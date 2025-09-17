@@ -164,8 +164,8 @@ class Download(object):
                     
                     # get the download function 
                     download_fun = (
-                    self.download_ghost_network_sftp if self.reading_ghost(network) and bsc_download.lower() in ['', 'y']
-                    else self.download_ghost_network_zenodo if self.reading_ghost(network)
+                    self.download_ghost_network_sftp if self.reading_ghost and bsc_download.lower() in ['', 'y']
+                    else self.download_ghost_network_zenodo if self.reading_ghost
                     else self.download_nonghost_network)
                     
                     # download network observations with species and filter_species
