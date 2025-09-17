@@ -946,6 +946,7 @@ class ProvConfiguration:
         # search if the expid is in the interp_experiments file
         # initialize experiment search variables
         experiment_exists = False
+        msg = ""
 
         # for HPC machines download (copy), search in interp_experiments
         if self.read_instance.machine != "local" and self.read_instance.download is True:
@@ -980,8 +981,7 @@ class ProvConfiguration:
                 except FileNotFoundError:
                     pass     
             
-            if experiment_exists is False:
-                msg += f"Cannot find the experiment ID {expid} with the {domain} domain in '{self.read_instance.exp_to_interp_root}'."
+            msg += f"Cannot find the experiment ID {expid} with the {domain} domain in '{exp_to_interp_path}'."
 
         # if experiment does not exist, exit
         # supressed warning deactivation
