@@ -1,7 +1,5 @@
 # Interpolation
 
-In version 2.4.0 in September 2024, our [old tool Providentia Interpolation](https://earth.bsc.es/gitlab/ac/providentia-interpolation) was merged into Providentia and since then it is refered as the Interpolation mode.
-
 This mode allows users to spatially interpolate experiment output against available observational stations to be viewable in **Providentia**. 
 
 The Interpolation mode allows to interpolate experiments against **GHOST** and **non-GHOST** observations.

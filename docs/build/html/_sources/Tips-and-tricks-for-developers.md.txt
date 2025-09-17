@@ -191,20 +191,6 @@ pytest tests/test_read_data.py
 
 To run a specific test, you will need to edit these files and comment the functions you are not interested in testing.
 
-If the tests pass in your local machine but the pipeline keeps failing in Gitlab, you will need to connect to the dust machine (where the runner is) and connect as a superuser in order to run the tests there:
-
-```
-ssh username@bscesdust02.bsc.es
-sudo su
-cd /home/gitlab-runner
-conda activate /home/gitlab-runner/providentia-env
-cd Providentia
-git pull
-pytest tests
-```
-
-Note that you probably don't have access to this machine, if this is the case contact Francesco Benincasa.
-
 If you want to see the coverage report use:
 
 ```
