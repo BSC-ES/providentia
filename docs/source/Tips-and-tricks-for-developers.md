@@ -286,13 +286,11 @@ Prior to that you should update the paths to the volumes (/data, /home/avilanov/
 
 ## Generate the docs
 
-Activate your conda environment, navigate to docs and simply run:
+First edit the .md files under docs/source, then navigate to docs and simply run:
 ```
-conda activate providentia-env
-cd docs
-bash generate-docs.sh
+make clean
+make html
 ```
-This will get the current wiki and copy certain pages.
 
 ## Create providentia-env_v2.4.0 in MN5
 

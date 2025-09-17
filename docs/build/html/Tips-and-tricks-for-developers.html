@@ -357,13 +357,11 @@ done
 </section>
 <section id="generate-the-docs">
 <h2>Generate the docs<a class="headerlink" href="#generate-the-docs" title="Link to this heading"></a></h2>
-<p>Activate your conda environment, navigate to docs and simply run:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">providentia</span><span class="o">-</span><span class="n">env</span>
-<span class="n">cd</span> <span class="n">docs</span>
-<span class="n">bash</span> <span class="n">generate</span><span class="o">-</span><span class="n">docs</span><span class="o">.</span><span class="n">sh</span>
+<p>First edit the .md files under docs/source, then navigate to docs and simply run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">clean</span>
+<span class="n">make</span> <span class="n">html</span>
 </pre></div>
 </div>
-<p>This will get the current wiki and copy certain pages.</p>
 </section>
 <section id="create-providentia-env-v2-4-0-in-mn5">
 <h2>Create providentia-env_v2.4.0 in MN5<a class="headerlink" href="#create-providentia-env-v2-4-0-in-mn5" title="Link to this heading"></a></h2>
