@@ -1109,18 +1109,16 @@ class ProvConfiguration:
                 sys.exit(1)
 
         # throw error if one of networks are non all GHOST or non-GHOST
-        # in download mode it is allowed to have mixed networks #TODO Change this
-        if not self.read_instance.download and not self.read_instance.interpolation:
-            for network_ii, network in enumerate(self.read_instance.network):
-                if network_ii == 0:
-                    previous_is_ghost = check_for_ghost(network)
-                else:
-                    is_ghost = check_for_ghost(network)
-                    if is_ghost != previous_is_ghost:
-                        error = 'Error: "network" must be all GHOST or non-GHOST.'
-                        self.read_instance.logger.error(error)
-                        sys.exit(1)
-                    previous_is_ghost = is_ghost
+        for network_ii, network in enumerate(self.read_instance.network):
+            if network_ii == 0:
+                self.read_instance.reading_ghost = check_for_ghost(network)
+            else:
+                is_ghost = check_for_ghost(network)
+                if is_ghost != self.read_instance.reading_ghost:
+                    error = 'Error: "network" must be all GHOST or non-GHOST.'
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
+                self.read_instance.reading_ghost = is_ghost
 
         # if are using dashboard then just take first network/species pair, as multivar not supported yet
         if ((len(self.read_instance.network) > 1) and (len(self.read_instance.species) > 1) and 
@@ -1241,6 +1239,16 @@ class ProvConfiguration:
                 default = default_values['interp_experiment_upsampling']
                 error = "Error: interp_experiment_upsampling must be 'mean' or 'median'. Using '{}' as default.".format(default)
                 self.read_instance.logger.error(error) 
+
+        # create empty directories for the observations and experiments
+        if MACHINE == "local":
+            for path in [self.read_instance.nonghost_root, self.read_instance.ghost_root, self.read_instance.exp_root, self.read_instance.exp_to_interp_root]:
+                if not os.path.exists(path):
+                    try:
+                        os.makedirs(path)
+                    except PermissionError as error:
+                        os.system(f"sudo mkdir -p {path}")
+                        os.system(f"sudo chmod o+w {path}")
 
         # set expID, domain, ensemble, forecast from experiment name
         self.decompose_experiments(deactivate_warning)
