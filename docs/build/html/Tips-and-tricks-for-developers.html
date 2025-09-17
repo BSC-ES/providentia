@@ -278,17 +278,6 @@
 </pre></div>
 </div>
 <p>To run a specific test, you will need to edit these files and comment the functions you are not interested in testing.</p>
-<p>If the tests pass in your local machine but the pipeline keeps failing in Gitlab, you will need to connect to the dust machine (where the runner is) and connect as a superuser in order to run the tests there:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="n">username</span><span class="nd">@bscesdust02</span><span class="o">.</span><span class="n">bsc</span><span class="o">.</span><span class="n">es</span>
-<span class="n">sudo</span> <span class="n">su</span>
-<span class="n">cd</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">gitlab</span><span class="o">-</span><span class="n">runner</span>
-<span class="n">conda</span> <span class="n">activate</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">gitlab</span><span class="o">-</span><span class="n">runner</span><span class="o">/</span><span class="n">providentia</span><span class="o">-</span><span class="n">env</span>
-<span class="n">cd</span> <span class="n">Providentia</span>
-<span class="n">git</span> <span class="n">pull</span>
-<span class="n">pytest</span> <span class="n">tests</span>
-</pre></div>
-</div>
-<p>Note that you probably don’t have access to this machine, if this is the case contact Francesco Benincasa.</p>
 <p>If you want to see the coverage report use:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">coverage</span> <span class="n">report</span> <span class="o">-</span><span class="n">i</span> <span class="o">-</span><span class="n">m</span>
 </pre></div>

@@ -48,7 +48,7 @@ setup(
     author="Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Amalia Vradi, Francesco Benincasa",
     author_email="dene.bowdalo@bsc.es, alba.vilanova@bsc.es, paula.serrano@bsc.es, amalia.vradi@bsc.es, francesco.benincasa@bsc.es",
     packages=find_packages(),
-    url="https://earth.bsc.es/gitlab/ac/Providentia",
+    url="https://github.com/BSC-ES/providentia",
     keywords=["earth sciences", "atmospheric composition",
               "evaluation", "verification", "observations", "air quality"],
     description="Providentia is designed to allow on-the-fly, offline and interactive analysis of experiment outputs, with respect to processed observational data.",
