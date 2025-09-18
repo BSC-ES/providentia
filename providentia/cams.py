@@ -173,7 +173,7 @@ class Cams:
             if 'models' in cams_dict:
                 msg = f"The experiment '{config_expid}' is missing the model. Please add one (e.g., '{config_expid}_ensemble')."
                 show_message(self.download_instance, msg)
-                return None, None
+                return None, None, True
 
         elif u_count == 2:
             # extract last element
@@ -182,19 +182,19 @@ class Cams:
             if cams_dict['stream'] is True and 'models' in cams_dict: # e.g. cams_reanalysis_ensemble-regional
                 msg = f"The '{dataset}' dataset needs a model and a stream. E.g. 'cams_reanalysis_ensemble_interim')."    
                 show_message(self.download_instance, msg)
-                return None, None
+                return None, None, True
             elif 'models' in cams_dict: # e.g. cams_analysis_ensemble
                 exp_id = last_element
                 # make sure the experiment is available in the dataset
                 if exp_id not in cams_dict["models"]:
                     msg = f"Cannot find the {exp_id} model in the '{dataset}' dataset."    
                     show_message(self.download_instance, msg)
-                    return None, None
+                    return None, None, True
             else:
                 # if there are three elements and they
                 msg = f"The '{dataset}' dataset does not admit models or streams."    
                 show_message(self.download_instance, msg)
-                return None, None
+                return None, None, True
                 
         elif u_count == 3:
 
@@ -202,7 +202,7 @@ class Cams:
                 # if there are three elements and they
                 msg = f"The '{dataset}' dataset does not admit models and streams, change the experiment in the configuration file."    
                 show_message(self.download_instance, msg)
-                return None, None
+                return None, None, True
             
             # extract the last two elements
             _, exp_id, stream = config_expid.rsplit('_', 2)
@@ -211,13 +211,13 @@ class Cams:
             if exp_id not in cams_dict["models"]:
                 msg = f"Cannot find the {exp_id} model in the '{dataset}' dataset."    
                 show_message(self.download_instance, msg)
-                return None, None
+                return None, None, True
             
             # make sure the stream is valid
             if stream not in ['validated','interim']:
                 msg = f"'{stream}' is not a valid stream. Availabe streams: validated, interim."    
                 show_message(self.download_instance, msg)
-                return None, None
+                return None, None, True
             
             # add reanalysis sufix to the stream
             stream += '_reanalysis'
@@ -226,7 +226,7 @@ class Cams:
         else:
             msg = f"The '{config_expid}' format is not valid."    
             show_message(self.download_instance, msg)
-            return None, None
+            return None, None, True
 
         # only ensemble options allmembers and 000 are valid
         if ensemble_options not in ['000', 'allmembers']:
@@ -234,9 +234,9 @@ class Cams:
             f"The current ensemble option '{ensemble_options}' is not valid for the CAMS '{dataset}' dataset."
             f"It must be '000' or 'allmembers'.")            
             show_message(self.download_instance, msg)
-            return None, None
+            return None, None, True
         
-        return exp_id, stream
+        return exp_id, stream, False
 
     def extract_date(self, input_file, prefix, domain):
         
@@ -383,10 +383,10 @@ class Cams:
         url = cams_dict['url']
         
         # make the necessary checks to the experiment
-        exp_id, stream = self.get_experiment(cams_dict, u_count, config_expid, dataset, ensemble_options)
+        exp_id, stream, invalid_experiment = self.get_experiment(cams_dict, u_count, config_expid, dataset, ensemble_options)
     
         # stop download if the experiment format is not correct
-        if exp_id is None and stream is None:
+        if invalid_experiment:
             return
     
         # make the necessary checks to the dates
