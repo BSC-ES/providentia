@@ -135,7 +135,16 @@ class Cams:
         # get the level and apply it if the species is multi level
         level_variable = 'level' if 'level' in cams_dict else 'model_level'
         if cams_species in cams_variables_level[url]['multi']:
-            request[level_variable] = cams_dict[level_variable]
+            # choose the maximum level if there was a level increase at some point
+            if 'level_boundary' in cams_dict:
+                boundary_date = datetime.combine(cams_dict['level_boundary'], datetime.min.time())
+                if current_cams_date <= boundary_date:
+                    request[level_variable] = cams_dict[level_variable]['before_increase']
+                else: 
+                    request[level_variable] = cams_dict[level_variable]['after_increase']
+            # without a level increase, just get the level
+            else:
+                request[level_variable] = cams_dict[level_variable]
         
         # add time to the request
         if 'time' in cams_dict:
