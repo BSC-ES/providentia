@@ -6,7 +6,6 @@ dependencies:
   - cartopy
   - jupyterlab
   - ghostscript
-  - KDEpy
   - pip
   - pip:
     - -r requirements.txt

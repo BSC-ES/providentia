@@ -126,6 +126,7 @@ In order from left to right, these are:
 - **Pan button**: To move around the map and the plots.
 - **Figure button**: To save a screenshot of the current map view and plots.
 
+(exporting-configuration-files-and-data)=
 #### Exporting configuration files and data
 
 If you click on the export button, a pop-up window will appear to ask you where you want to store your output. From this window you can select what export format you want to use.
@@ -135,6 +136,7 @@ If you click on the export button, a pop-up window will appear to ask you where 
 
 ![image__2_](uploads/4a2f194e376881d8851de8be6d888334/image__2_.jpg)
 
+(loading-a-configuration-file)=
 #### Loading a configuration file
 
 Providentia has the option to load a configuration file that you have either written from scratch, or that you had exported during a past evaluation. 

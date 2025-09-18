@@ -191,20 +191,6 @@ pytest tests/test_read_data.py
 
 To run a specific test, you will need to edit these files and comment the functions you are not interested in testing.
 
-If the tests pass in your local machine but the pipeline keeps failing in Gitlab, you will need to connect to the dust machine (where the runner is) and connect as a superuser in order to run the tests there:
-
-```
-ssh username@bscesdust02.bsc.es
-sudo su
-cd /home/gitlab-runner
-conda activate /home/gitlab-runner/providentia-env
-cd Providentia
-git pull
-pytest tests
-```
-
-Note that you probably don't have access to this machine, if this is the case contact Francesco Benincasa.
-
 If you want to see the coverage report use:
 
 ```
@@ -300,13 +286,11 @@ Prior to that you should update the paths to the volumes (/data, /home/avilanov/
 
 ## Generate the docs
 
-Activate your conda environment, navigate to docs and simply run:
+First edit the .md files under docs/source, then navigate to docs and simply run:
 ```
-conda activate providentia-env
-cd docs
-bash generate-docs.sh
+make clean
+make html
 ```
-This will get the current wiki and copy certain pages.
 
 ## Create providentia-env_v2.4.0 in MN5
 
@@ -316,7 +300,6 @@ conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v
 conda install -c conda-forge cartopy --override-channels
 conda install -c conda-forge jupyterlab --override-channels
 conda install -c conda-forge ghostscript --override-channels
-conda install -c conda-forge KDEpy --override-channels
 pip install -r requirements.txt
 ```
 
@@ -330,7 +313,6 @@ conda activate providentia-env
 conda install -c conda-forge cartopy --override-channels
 conda install -c conda-forge jupyterlab --override-channels
 conda install -c conda-forge ghostscript --override-channels
-conda install -c conda-forge KDEpy --override-channels
 conda install -c conda-forge dask --override-channels
 pip install -r requirements.txt
 ```

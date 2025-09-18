@@ -1,7 +1,5 @@
 # Interpolation
 
-In version 2.4.0 in September 2024, our [old tool Providentia Interpolation](https://earth.bsc.es/gitlab/ac/providentia-interpolation) was merged into Providentia and since then it is refered as the Interpolation mode.
-
 This mode allows users to spatially interpolate experiment output against available observational stations to be viewable in **Providentia**. 
 
 The Interpolation mode allows to interpolate experiments against **GHOST** and **non-GHOST** observations.
@@ -54,6 +52,7 @@ To check the status/output of an interpolation job, the following log files are 
  
 If the interpolation is succesful, the resulted interpolated files are stored under the directory : `/gpfs/projects/bsc32/AC_cache/recon/exp_interp/` followed by the latest version of GHOST used by the interpolation.
 
+(define-experiments)=
 ## Define experiments
 
 All the experiments that are runned in the interpolation need to be defined in `/settings/interp_experiments.yaml`.
