@@ -674,7 +674,8 @@ class ExperimentInterpolation(object):
             input_values = {'temperature':293.15, 'pressure':1013.25, 'molar_mass':unit_converter.get_molecular_mass(speci_chemical_formula), 
                                                                                                                      model_quantity:1.0}
             conv_obj = unit_converter.convert_units(input_units, obs_speci_units, input_values, 
-                                                    conversion_input_quantity=model_quantity)
+                                                    conversion_input_quantity=model_quantity,
+                                                    measured_species=speci_chemical_formula)
             self.conversion_factor = conv_obj.conversion_factor
         else:
             conv_obj = unit_converter.convert_units(self.mod_speci_units, obs_speci_units, 1.0, 
