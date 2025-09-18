@@ -1,6 +1,6 @@
 # FAQ
 
-If you encounter any error, please check the FAQ. For other problems, you can create an issue in GitLab or contact us directly.
+If you encounter any error, please check the FAQ. For other problems, you can create an issue in Github or contact us directly.
 
 ## Providentia's graphic interface appears distorted/magnified
 
@@ -29,7 +29,7 @@ When this error occurs, you should go to your home directory, remove .Xauthority
 This error here:
 
 ```
-fatal: unable to access 'https://earth.bsc.es/gitlab/ac/Providentia.git/': Failed to connect to earth.bsc.es port 443: Connection timed out
+fatal: unable to access 'https://github.com/BSC-ES/providentia.git/': Failed to connect to earth.bsc.es port 443: Connection timed out
 ```
 
 happens when you connect to a node that has no internet connection. If you are on MN5, try cloning Providentia from glogin4, the only one that can connect.
@@ -38,7 +38,7 @@ happens when you connect to a node that has no internet connection. If you are o
 
 On days where gpfs is full and there is no available disk space, we get this error when trying to interpolate. To avoid this, we recommend using Providentia locally. These are the steps to be followed:
 
-* Clone the Providentia repository using `git clone https://earth.bsc.es/gitlab/ac/Providentia.git`.
+* Clone the Providentia repository using `git clone https://github.com/BSC-ES/providentia.git`.
 * Open the dashboard using `/bin/providentia`, this will create the conda environment in your machine.
 * Add your experiment ID in `settings/interp_experiments.yaml` so that Providentia can know where to download the data from.
 * Add `interpolated=False` in your configuration file to indicate that you want to download data that has not yet been interpolated.
