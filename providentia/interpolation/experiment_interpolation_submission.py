@@ -971,7 +971,7 @@ class SubmitInterpolation(object):
             #restore stdout to console
             sys.stdout = sys.__stdout__
             #open management logfile and print contents
-            with open('logs/interpolation/management_logs/{}.out'.format(self.slurm_job_id), 'r') as f:
+            with open(join(PROVIDENTIA_ROOT, 'logs', 'interpolation', 'management_logs', f'{self.slurm_job_id}.out'), 'r') as f:
                 for line_ii, line in enumerate(f):
                     #only print line if not previously printed
                     if line_ii > self.current_line:
