@@ -670,7 +670,7 @@ class ExperimentInterpolation(object):
             if speci_chemical_formula == '':
                 self.log_file_str += 'Cannot determine speci chemical formula needed for unit conversion. Terminating process.'
                 create_output_logfile(1, self.log_file_str)            
-            input_units ={'temperature':'K', 'pressure':'hPa', 'molar_mass':'kg mol-1', model_quantity:self.mod_speci_units}
+            input_units = {'temperature':'K', 'pressure':'hPa', 'molar_mass':'kg mol-1', model_quantity:self.mod_speci_units}
             input_values = {'temperature':293.15, 'pressure':1013.25, 'molar_mass':unit_converter.get_molecular_mass(speci_chemical_formula), 
                                                                                                                      model_quantity:1.0}
             conv_obj = unit_converter.convert_units(input_units, obs_speci_units, input_values, 
