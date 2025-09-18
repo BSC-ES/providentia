@@ -301,7 +301,7 @@ class Actris:
         end_times = station_time_bnds[:, 1]
 
         # get timedelta between start and end times
-        valid_timedeltas =  np.array([(end_time - start_time).astype('timedelta64[m]').astype(np.float32) 
+        valid_timedeltas = np.array([(end_time - start_time).astype('timedelta64[m]').astype(np.float32) 
                                     for (end_time, start_time) in zip(end_times, start_times)])
         
         # get measurement start and end times as integers
@@ -712,7 +712,7 @@ class Actris:
         for ghost_key, ebas_key in metadata_dict.items():
             metadata_np[ghost_key] = np.frombuffer(shared_memory_vars['metadata'][ghost_key], dtype='S75').reshape(metadata_shape)
             if ebas_key in da_var_attrs.keys():
-                val =  da_var_attrs[ebas_key]
+                val = da_var_attrs[ebas_key]
             elif ebas_key in ds.attrs.keys():
                 val = ds.attrs[ebas_key]
             else:
@@ -721,7 +721,11 @@ class Actris:
 
         return station, local_errors, local_warnings
 
-    def init_shared_vars_read_data(self, shared_data, shared_flag_data, shared_qa_data, shared_metadata):
+    def init_shared_vars_read_data(self, shared_data, shared_flag_data, shared_qa_data, shared_metadata, data_shape):
+        # multiprocessing.RawArray does not support NaN initialisation and initialised to zeros
+        # replace 0 by nan before reading data so that if there are any errors we can later drop the stations
+        shared_data = np.frombuffer(shared_data, dtype=np.float32).reshape(data_shape)
+        shared_data[:] = np.nan
         shared_memory_vars['data'] = shared_data
         shared_memory_vars['flag'] = shared_flag_data
         shared_memory_vars['qa'] = shared_qa_data
@@ -823,7 +827,7 @@ class Actris:
         pool = multiprocessing.Pool(
             processes=self.download_instance.n_cpus,
             initializer=self.init_shared_vars_read_data,
-            initargs=(shared_data, shared_flag_data, shared_qa_data, shared_metadata)
+            initargs=(shared_data, shared_flag_data, shared_qa_data, shared_metadata, data_shape)
         )
         for station, error, warning in tqdm(
                 pool.imap(self.read_data, args_list),
