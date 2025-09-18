@@ -14,7 +14,7 @@ Independently of the machine, use the following command to get a copy of the rep
 git clone https://github.com/bsc-es/providentia
 ```
 
-When you have finished cloning the repository from Gitlab, you are automatically in the branch `master`. It is recommended to use that branch as it contains the latest features and bug fixes.
+When you have finished cloning the repository from Github, you are automatically in the branch `master`. It is recommended to use that branch as it contains the latest features and bug fixes.
 
 ## Running the tool the first time
 

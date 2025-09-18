@@ -93,7 +93,7 @@
              
   <section id="faq">
 <h1>FAQ<a class="headerlink" href="#faq" title="Link to this heading"></a></h1>
-<p>If you encounter any error, please check the FAQ. For other problems, you can create an issue in GitLab or contact us directly.</p>
+<p>If you encounter any error, please check the FAQ. For other problems, you can create an issue in Github or contact us directly.</p>
 <section id="providentia-s-graphic-interface-appears-distorted-magnified">
 <h2>Providentia’s graphic interface appears distorted/magnified<a class="headerlink" href="#providentia-s-graphic-interface-appears-distorted-magnified" title="Link to this heading"></a></h2>
 <p>For some particular cases, it can happen that when the application is launched, the graphics of the tools appear weird, as if magnified, like in the following picture:</p>
@@ -116,7 +116,7 @@
 <section id="fatal-error-when-cloning-providentia-on-hpc">
 <h2>Fatal error when cloning Providentia on HPC<a class="headerlink" href="#fatal-error-when-cloning-providentia-on-hpc" title="Link to this heading"></a></h2>
 <p>This error here:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fatal</span><span class="p">:</span> <span class="n">unable</span> <span class="n">to</span> <span class="n">access</span> <span class="s1">&#39;https://earth.bsc.es/gitlab/ac/Providentia.git/&#39;</span><span class="p">:</span> <span class="n">Failed</span> <span class="n">to</span> <span class="n">connect</span> <span class="n">to</span> <span class="n">earth</span><span class="o">.</span><span class="n">bsc</span><span class="o">.</span><span class="n">es</span> <span class="n">port</span> <span class="mi">443</span><span class="p">:</span> <span class="n">Connection</span> <span class="n">timed</span> <span class="n">out</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fatal</span><span class="p">:</span> <span class="n">unable</span> <span class="n">to</span> <span class="n">access</span> <span class="s1">&#39;https://github.com/BSC-ES/providentia.git/&#39;</span><span class="p">:</span> <span class="n">Failed</span> <span class="n">to</span> <span class="n">connect</span> <span class="n">to</span> <span class="n">earth</span><span class="o">.</span><span class="n">bsc</span><span class="o">.</span><span class="n">es</span> <span class="n">port</span> <span class="mi">443</span><span class="p">:</span> <span class="n">Connection</span> <span class="n">timed</span> <span class="n">out</span>
 </pre></div>
 </div>
 <p>happens when you connect to a node that has no internet connection. If you are on MN5, try cloning Providentia from glogin4, the only one that can connect.</p>
@@ -125,7 +125,7 @@
 <h2>HDF error on HPC<a class="headerlink" href="#hdf-error-on-hpc" title="Link to this heading"></a></h2>
 <p>On days where gpfs is full and there is no available disk space, we get this error when trying to interpolate. To avoid this, we recommend using Providentia locally. These are the steps to be followed:</p>
 <ul class="simple">
-<li><p>Clone the Providentia repository using <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://earth.bsc.es/gitlab/ac/Providentia.git</span></code>.</p></li>
+<li><p>Clone the Providentia repository using <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/BSC-ES/providentia.git</span></code>.</p></li>
 <li><p>Open the dashboard using <code class="docutils literal notranslate"><span class="pre">/bin/providentia</span></code>, this will create the conda environment in your machine.</p></li>
 <li><p>Add your experiment ID in <code class="docutils literal notranslate"><span class="pre">settings/interp_experiments.yaml</span></code> so that Providentia can know where to download the data from.</p></li>
 <li><p>Add <code class="docutils literal notranslate"><span class="pre">interpolated=False</span></code> in your configuration file to indicate that you want to download data that has not yet been interpolated.</p></li>

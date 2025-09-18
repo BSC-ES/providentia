@@ -30,7 +30,6 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
         Qt5/5.14.1-GCCcore-8.3.0 \
         OpenMPI/4.0.5-GCC-8.3.0-nord3-v2 \
         pyproj/3.2.1-foss-2019b-Python-3.7.4 \
-        kdepy/1.1.1-foss-2019b-Python-3.7.4 \
         jupyterlab/3.0.9-foss-2019b-Python-3.7.4 \
         pypdf/3.6.0-foss-2019b-Python-3.7.4 \
         matplotlib/3.4.3-foss-2019b-Python-3.7.4 \
@@ -58,7 +57,6 @@ elif [ "${ip}" == "84.88.185.48" ]; then
         PyQt5/5.15.5-GCCcore-11.2.0 \
         Cartopy/0.22.0-foss-2021b-Python-3.9.6 \
         Seaborn/0.12.2-foss-2021b-Python-3.9.6 \
-        kdepy/1.1.8-foss-2021b-Python-3.9.6 \
         Ghostscript/10.01.2-GCCcore-11.2.0 \
         cftime/1.0.3.4-foss-2021b-Python-3.9.6
         
