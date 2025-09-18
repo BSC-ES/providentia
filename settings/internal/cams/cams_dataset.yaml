@@ -166,7 +166,10 @@ cams_forecast:
             '100', '101', '102', '103', '104', '105', '106', '107', '108', '109', '110', '111', '112', '113', '114', '115', '116',
             '117', '118', '119', '120' ]
     forecast: true
-    model_level: '137'
+    model_level: 
+      before_increase : '60'
+      after_increase : '137'
+    level_boundary : 2019-07-09
     month_names: false
     time: 00:00
     data_format: netcdf_zip
