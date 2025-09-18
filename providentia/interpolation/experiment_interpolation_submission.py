@@ -323,11 +323,6 @@ class SubmitInterpolation(object):
                                 # get all relevant observational files
                                 # GHOST
                                 if self.reading_ghost:
-                                    print(
-                                        self.ghost_root + '/{}/{}/{}/{}/{}*.nc'.format(
-                                            network_to_interpolate_against, self.ghost_version, 
-                                            temporal_resolution_to_output, original_speci_to_process, 
-                                            original_speci_to_process),"ob")
                                     obs_files = np.sort(glob.glob(
                                         self.ghost_root + '/{}/{}/{}/{}/{}*.nc'.format(
                                             network_to_interpolate_against, self.ghost_version, 

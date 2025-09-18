@@ -68,7 +68,7 @@ class Cams:
         if int(self.download_instance.start_date) >= int(self.download_instance.end_date):
             msg = f'Start date ({self.download_instance.start_date}) exceeds end date ({self.download_instance.end_date}).'
             show_message(self.download_instance, msg, print=True)
-            return
+            return None, None
 
         # get minimum and maximum possible dates
         min_start_date, max_end_date = self.fetch_cams_dates(url, cams_dict)
@@ -81,7 +81,7 @@ class Cams:
         if min_start_date > cams_end_date or max_end_date < cams_start_date:
             msg = f"The selected dates are unavailable. Please choose dates between {min_start_date.strftime('%Y-%m-%d')} and {max_end_date.strftime('%Y-%m-%d')}."
             show_message(self.download_instance, msg)
-            return
+            return None, None
 
         # check if the start date is within limits
         if min_start_date > cams_start_date:
@@ -93,6 +93,7 @@ class Cams:
 
         return cams_start_date, cams_end_date
 
+    # TODO check that message in stream does not get repeated in the loop
     # TODO check if it is plaussible to keep this code as a separate function since there is a continue
     def create_request(self, cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, exp_id):
         # create the request
@@ -115,18 +116,13 @@ class Cams:
 
         # add interim and or validated stream to the request
         if cams_dict['stream'] is True:
-            # if the stream was not passed by the user, get the available ones
-            if stream == None:
-                request["type"] = cams_stream[request["year"]]
-            else:
-                # check whether the stream is available for the year
-                if stream not in cams_stream[request["year"]]:
-                    msg = (
-                    f"The current stream '{stream}' is not available for the current date: {request['month']}-{request['year']}. Continuing....")            
-                    show_message(self.download_instance, msg)
-                    # continue
+            # check whether the stream is available for the year
+            if stream not in cams_stream[request["year"]]:
+                msg = f"The current stream '{stream}' is not available for the current date: {request['month']}-{request['year']}. Continuing...."          
+                show_message(self.download_instance, msg)
+                # continue
                 
-                request["type"] = stream
+            request["type"] = stream
 
         # add type to the request if the dataset has it
         if 'type' in cams_dict:
@@ -177,52 +173,51 @@ class Cams:
             if 'models' in cams_dict:
                 msg = f"The experiment '{config_expid}' is missing the model. Please add one (e.g., '{config_expid}_ensemble')."
                 show_message(self.download_instance, msg)
-                return
+                return None, None
 
         elif u_count == 2:
             # extract last element
             last_element = config_expid.rsplit('_', 1)[1]
 
-            if cams_dict['stream'] is True and last_element in ['validated','interim']:
-                msg = f"The '{dataset}' dataset needs a model before the stream. Please add one (e.g., '{prefix}_ensemble_{last_element}')."    
+            if cams_dict['stream'] is True and 'models' in cams_dict: # e.g. cams_reanalysis_ensemble-regional
+                msg = f"The '{dataset}' dataset needs a model and a stream. E.g. 'cams_reanalysis_ensemble_interim')."    
                 show_message(self.download_instance, msg)
-                return
-
+                return None, None
             elif 'models' in cams_dict: # e.g. cams_analysis_ensemble
                 exp_id = last_element
-
                 # make sure the experiment is available in the dataset
                 if exp_id not in cams_dict["models"]:
                     msg = f"Cannot find the {exp_id} model in the '{dataset}' dataset."    
                     show_message(self.download_instance, msg)
-                    return
-                                
+                    return None, None
             else:
                 # if there are three elements and they
-                msg = f"The '{dataset}' dataset does not admit models or streams, change the experiment in the configuration file to '{prefix}'."    
+                msg = f"The '{dataset}' dataset does not admit models or streams."    
                 show_message(self.download_instance, msg)
-                return
+                return None, None
                 
         elif u_count == 3:
-            _, exp_id, stream = config_expid.rsplit('_', 2)
 
             if not (cams_dict['stream'] is True and 'models' in cams_dict): 
                 # if there are three elements and they
                 msg = f"The '{dataset}' dataset does not admit models and streams, change the experiment in the configuration file."    
                 show_message(self.download_instance, msg)
-                return
+                return None, None
+            
+            # extract the last two elements
+            _, exp_id, stream = config_expid.rsplit('_', 2)
 
             # make sure the experiment is available in the dataset
             if exp_id not in cams_dict["models"]:
                 msg = f"Cannot find the {exp_id} model in the '{dataset}' dataset."    
                 show_message(self.download_instance, msg)
-                return
+                return None, None
             
             # make sure the stream is valid
             if stream not in ['validated','interim']:
                 msg = f"'{stream}' is not a valid stream. Availabe streams: validated, interim."    
                 show_message(self.download_instance, msg)
-                return
+                return None, None
             
             # add reanalysis sufix to the stream
             stream += '_reanalysis'
@@ -231,7 +226,7 @@ class Cams:
         else:
             msg = f"The '{config_expid}' format is not valid."    
             show_message(self.download_instance, msg)
-            return
+            return None, None
 
         # only ensemble options allmembers and 000 are valid
         if ensemble_options not in ['000', 'allmembers']:
@@ -239,7 +234,7 @@ class Cams:
             f"The current ensemble option '{ensemble_options}' is not valid for the CAMS '{dataset}' dataset."
             f"It must be '000' or 'allmembers'.")            
             show_message(self.download_instance, msg)
-            return
+            return None, None
         
         return exp_id, stream
 
@@ -390,8 +385,16 @@ class Cams:
         # make the necessary checks to the experiment
         exp_id, stream = self.get_experiment(cams_dict, u_count, config_expid, dataset, ensemble_options)
     
+        # stop download if the experiment format is not correct
+        if exp_id is None and stream is None:
+            return
+    
         # make the necessary checks to the dates
         cams_start_date, cams_end_date = self.control_dates(url, cams_dict)
+
+        # stop download if the dates are not correct
+        if cams_start_date is None and cams_end_date is None:
+            return
 
         # iterate through the species
         for species in self.download_instance.species: 

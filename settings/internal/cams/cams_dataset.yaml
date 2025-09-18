@@ -170,7 +170,7 @@ cams_forecast:
     month_names: false
     time: 00:00
     data_format: netcdf_zip
-    calendar: prolectic_gregorian
+    calendar: proleptic_gregorian
     stream: false
 cams_reanalysis:
   regional:
@@ -257,5 +257,5 @@ cams_reanalysis:
         "18:00", "21:00"
     ]
     data_format: netcdf_zip
-    calendar: prolectic_gregorian
+    calendar: proleptic_gregorian
     stream: false
