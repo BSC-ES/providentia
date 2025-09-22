@@ -144,18 +144,25 @@ class Download(object):
 
                 # networks
                 if self.network:
-                    
+
+                    if self.network == ["*"]:
+                        # get user input to know which kind of network wants
+                        download_source = input("\nDo you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n): ")
+                        while download_source.lower() not in ['','y','n']:
+                            download_source = input("\nDo you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n): ")
+                        self.reading_ghost = download_source.lower() in ['','y']
+
                     # if there are GHOST networks, ask the user whether they want to download it from zenodo or HPC machines
                     if self.reading_ghost:
                         # ask whether the user wants to download from the zenodo or bsc machine
                         self.bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
                         while self.bsc_download.lower() not in ['','y','n']:
                             self.bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
-
+                   
                     # get all networks if wildcard is passed
                     if self.network == ["*"]:
                         self.get_all_networks()
-                       
+
                     # combine all networks and species combinations to download (for network and filter species)
                     combined_networks = [(network, None) for network in self.network] + \
                                         [(network_specie.split('|')[0], network_specie.split('|')[1]) for network_specie in self.filter_species]
@@ -1556,21 +1563,14 @@ class Download(object):
                 zip_network = line.split("/")[-1][:-5]
                 self.zenodo_ghost_available_networks[zip_network] = zip_file_url
 
-    def get_all_networks(self):
-        # get user input to know which kind of network wants
-        download_source = None
-        while download_source is None:
-            download_source = input("\nDo you want to download GHOST, non-GHOST or all networks? (g/n/a) ").lower()
-            download_source = download_source if download_source in ["g","n","a"] else None
-
-        if download_source in ["g","a"]:
+    def get_all_networks(self): 
+        if self.reading_ghost:
             if self.bsc_download.lower() in ['', 'y']:
                 self.network = self.ghost_available_networks
             elif not hasattr(self,"zenodo_ghost_available_networks"): 
                 self.fetch_zenodo_networks()
                 self.network = list(self.zenodo_ghost_available_networks.keys())
-
-        if download_source in ["n","a"]:
+        else:
             self.network = self.nonghost_available_networks
     
     def get_all_experiments(self):
