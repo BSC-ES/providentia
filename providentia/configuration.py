@@ -948,8 +948,9 @@ class ProvConfiguration:
         experiment_exists = False
         msg = ""
 
-        # for HPC machines download (copy), search in interp_experiments
-        if self.read_instance.machine != "local" and self.read_instance.download is True:
+        # HPC machines download (copy) and hpc interpolation
+        if self.read_instance.machine != "local":
+            # search in interp_experiments
             for experiment_type, experiment_dict in interp_experiments.items():
                 if expid in experiment_dict["experiments"]:
                     experiment_exists = True
@@ -957,41 +958,58 @@ class ProvConfiguration:
             
             msg += f"Cannot find the experiment ID '{expid}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
 
-        if self.read_instance.machine == "local":
-            # if it's a cams experiment, the experiment is directly valid
-            if experiment.startswith(tuple(experiment_options.keys())):
-                return [experiment]
-
-            # get directory from data_paths if it doesn't exists in the interp_experiments file if it's a local interpolation
-            if self.read_instance.interpolation is True:
+            # hpc interpolation
+            if experiment_exists is False and self.read_instance.interpolation is True:
+                # search in hpc exp_to_interp_path
                 exp_to_interp_path = join(self.read_instance.exp_to_interp_root, expid)
                 if os.path.exists(exp_to_interp_path):
                     experiment_exists = True
-            # in the remote machine if it is a local download
-            else:
-                # connect to the remote machine
-                self.read_instance.connect()        
-                # get all possible experiments
-                exp_to_interp_path = join(self.read_instance.exp_to_interp_remote_path,expid,domain)
+                
+                msg += f"Cannot find the experiment ID {expid} with the {domain} domain in '{exp_to_interp_path}'."
+        
+        # local download and interpolation
+        else:
+            # cams experiment is directly valid
+            if experiment.startswith(tuple(experiment_options.keys())):
+                return [experiment]
 
-                try:
-                    self.read_instance.sftp.stat(exp_to_interp_path)
+            # local interpolation
+            if self.read_instance.interpolation is True:
+                # search in local exp_to_interp_path
+                exp_to_interp_path = join(self.read_instance.exp_to_interp_root, expid)
+                if os.path.exists(exp_to_interp_path):
                     experiment_exists = True
-                    
-                except FileNotFoundError:
-                    pass     
+
+                msg += f"Cannot find the experiment ID {expid} with the {domain} domain in '{exp_to_interp_path}'."
             
-            msg += f"Cannot find the experiment ID {expid} with the {domain} domain in '{exp_to_interp_path}'."
+            # local download
+            else:
+                # search in interp_experiments
+                for experiment_type, experiment_dict in interp_experiments.items():
+                    if expid in experiment_dict["experiments"]:
+                        experiment_exists = True
+                        break
+                
+                msg += f"Cannot find the experiment ID '{expid}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
+
+                # search in hpc exp_to_interp_path
+                if experiment_exists is False:
+                    self.read_instance.connect() 
+                    exp_to_interp_path = join(self.read_instance.exp_to_interp_remote_path,expid,domain)
+
+                    try:
+                        self.read_instance.sftp.stat(exp_to_interp_path)
+                        experiment_exists = True
+                    except FileNotFoundError:
+                        msg += f"Cannot find the experiment ID {expid} with the {domain} domain in '{exp_to_interp_path}'."
 
         # if experiment does not exist, exit
         # supressed warning deactivation
         if experiment_exists is False:
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
-            exp_found = []
-        else:
-            exp_found = [experiment]
+            return []
 
-        return exp_found
+        return [experiment]
     
     # TODO maybe remove this one and keep the download check since its much cleaner
     def check_experiment_download(self, experiment, deactivate_warning):
