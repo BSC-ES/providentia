@@ -444,8 +444,7 @@ class Cams:
                 temp_dir = join(self.download_instance.exp_to_interp_root,'.temp', dir_tail)
                 final_dir = join(self.download_instance.exp_to_interp_root, dir_tail)
 
-                # create temporal and final dirs to store the middle zip file with its directories
-                os.makedirs(temp_dir, exist_ok=True)
+                # create dir
                 os.makedirs(final_dir, exist_ok=True)
 
                 # create client
@@ -472,6 +471,9 @@ class Cams:
                     # get final path
                     file_name = f"{species}_{current_cams_date.strftime(date_format)}.nc"
                     final_path = join(final_dir, file_name)
+                    
+                    # create temporal dir to store the middle zip file with its directories
+                    os.makedirs(temp_dir, exist_ok=True)
 
                     # get temporal path
                     temp_path = join(temp_dir, 'zip_file')
@@ -523,4 +525,4 @@ class Cams:
                     current_cams_date = next_cams_date + timedelta(days=1)    
 
                     # remove the temp directory tail
-                    shutil.rmtree(join(self.download_instance.exp_to_interp_root,'.temp'))
+                    shutil.rmtree(temp_dir)
