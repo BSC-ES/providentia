@@ -148,9 +148,9 @@ class Download(object):
                     # if there are GHOST networks, ask the user whether they want to download it from zenodo or HPC machines
                     if self.reading_ghost:
                         # ask whether the user wants to download from the zenodo or bsc machine
-                        self.bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
+                        self.bsc_download = input("Do you want to download from the BSC remote machine? (Otherwise, GHOST data will be retrieved from Zenodo) ([y]/n): ")
                         while self.bsc_download.lower() not in ['','y','n']:
-                            self.bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
+                            self.bsc_download = input("Do you want to download from the BSC remote machine? (Otherwise, GHOST data will be retrieved from Zenodo) ([y]/n): ")
 
                     # get all networks if wildcard is passed
                     if self.network == ["*"]:
