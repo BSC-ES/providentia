@@ -141,13 +141,21 @@ class Download(object):
                     error = "Error: No networks were passed."
                     self.logger.error(error)
                     sys.exit(1)
-                
-                # when one of those symbols is passed, get all networks
-                if self.network == ["*"]:
-                    self.get_all_networks()
 
                 # networks
                 if self.network:
+                    
+                    # if there are GHOST networks, ask the user whether they want to download it from zenodo or HPC machines
+                    if self.reading_ghost:
+                        # ask whether the user wants to download from the zenodo or bsc machine
+                        self.bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
+                        while self.bsc_download.lower() not in ['','y','n']:
+                            self.bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
+
+                    # get all networks if wildcard is passed
+                    if self.network == ["*"]:
+                        self.get_all_networks()
+                       
                     # combine all networks and species combinations to download (for network and filter species)
                     combined_networks = [(network, None) for network in self.network] + \
                                         [(network_specie.split('|')[0], network_specie.split('|')[1]) for network_specie in self.filter_species]
@@ -155,13 +163,6 @@ class Download(object):
                     # save main species
                     main_species = copy.deepcopy(self.species)
 
-                    # if there are GHOST networks, ask the user whether they want to download it from zenodo or HPC machines
-                    if self.reading_ghost:
-                        # ask whether the user wants to download from the zenodo or bsc machine
-                            self.bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
-                            while self.bsc_download.lower() not in ['','y','n']:
-                                self.bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
-                    
                     # get the download function 
                     download_fun = (
                     self.download_ghost_network_sftp if self.reading_ghost and self.bsc_download.lower() in ['', 'y']
