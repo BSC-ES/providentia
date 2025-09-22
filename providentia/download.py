@@ -158,13 +158,13 @@ class Download(object):
                     # if there are GHOST networks, ask the user whether they want to download it from zenodo or HPC machines
                     if self.reading_ghost:
                         # ask whether the user wants to download from the zenodo or bsc machine
-                            bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
-                            while bsc_download.lower() not in ['','y','n']:
-                                bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
+                            self.bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
+                            while self.bsc_download.lower() not in ['','y','n']:
+                                self.bsc_download = input("GHOST network detected. Download from the BSC remote machine? (Otherwise, it will be retrieved from Zenodo) ([y]/n): ")
                     
                     # get the download function 
                     download_fun = (
-                    self.download_ghost_network_sftp if self.reading_ghost and bsc_download.lower() in ['', 'y']
+                    self.download_ghost_network_sftp if self.reading_ghost and self.bsc_download.lower() in ['', 'y']
                     else self.download_ghost_network_zenodo if self.reading_ghost
                     else self.download_nonghost_network)
                     
@@ -1563,16 +1563,11 @@ class Download(object):
             download_source = download_source if download_source in ["g","n","a"] else None
 
         if download_source in ["g","a"]:
-            if self.bsc_download_choice == 'y':
+            if self.bsc_download.lower() in ['', 'y']:
                 self.network = self.ghost_available_networks
-            elif self.bsc_download_choice == 'n':
-                if not hasattr(self,"zenodo_ghost_available_networks"): 
-                    self.fetch_zenodo_networks()
-                    self.network = list(self.zenodo_ghost_available_networks.keys())
-            else:
-                error = "Download option not valid, check your .env file."
-                self.logger.error(error)
-                sys.exit(1)
+            elif not hasattr(self,"zenodo_ghost_available_networks"): 
+                self.fetch_zenodo_networks()
+                self.network = list(self.zenodo_ghost_available_networks.keys())
 
         if download_source in ["n","a"]:
             self.network = self.nonghost_available_networks
