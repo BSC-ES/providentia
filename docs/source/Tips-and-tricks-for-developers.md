@@ -8,7 +8,7 @@ This page can be used by developers to better understand certain parts of the co
 - [Check that all reports are created](#check-that-all-reports-are-created)
 - [Run Providentia inside Docker container](#run-providentia-inside-docker-container)
 - [Generate the docs](#generate-the-docs)
-- [Create providentia-env_v2.4.0 in MN5](#create-providentia-env_v240-in-mn5)
+- [Create providentia-env_v3.0.0 in MN5](#create-providentia-env_v230-in-mn5)
 - [Create local environment](#create-local-environment)
 - [Memory Profiling Code](#memory-profiling-code)
 
@@ -179,7 +179,7 @@ It is also possible that the default branch is not set to be the master, you can
 To run all the pipeline tests in your local machine, just run:
 
 ```
-conda activate providentia-env
+conda activate providentia-env_v3.0.0
 pytest tests
 ```
 
@@ -288,15 +288,17 @@ Prior to that you should update the paths to the volumes (/data, /home/avilanov/
 
 First edit the .md files under docs/source, then navigate to docs and simply run:
 ```
+cd docs
+conda activate providentia-env_v3.0.0
 make clean
 make html
 ```
 
-## Create providentia-env_v2.4.0 in MN5
+## Create providentia-env_v3.0.0 in MN5
 
 ```
-conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v2.4.0 -y python=3.11.5 -c conda-forge --override-channels
-conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v2.4.0
+conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0 -y python=3.11.5 -c conda-forge --override-channels
+conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0
 conda install -c conda-forge cartopy --override-channels
 conda install -c conda-forge jupyterlab --override-channels
 conda install -c conda-forge ghostscript --override-channels
@@ -308,8 +310,8 @@ pip install -r requirements.txt
 In order to test modules with pip, you need to create an environment. Once activated, you can start installing modules using either `pip` or `conda`, as in this example:
 
 ```
-conda create -n providentia-env python=3.11.5 -c conda-forge --override-channels
-conda activate providentia-env
+conda create -n providentia-env_v3.0.0 python=3.11.5 -c conda-forge --override-channels
+conda activate providentia-env_v3.0.0
 conda install -c conda-forge cartopy --override-channels
 conda install -c conda-forge jupyterlab --override-channels
 conda install -c conda-forge ghostscript --override-channels
@@ -317,7 +319,7 @@ conda install -c conda-forge dask --override-channels
 pip install -r requirements.txt
 ```
 
-Here we create an environment called `providentia-env` with the Python version 3.11.5, and we install the latest version of Cartopy (with conda, with pip it gives problems), and the Python packages from `requirements.txt` using pip.
+Here we create an environment called `providentia-env_v3.00` with the Python version 3.11.5, and we install the latest version of Cartopy (with conda, with pip it gives problems), and the Python packages from `requirements.txt` using pip.
 
 
 pip install memray
