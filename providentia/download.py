@@ -1188,17 +1188,21 @@ class Download(object):
                         nc_files = list(filter(lambda x:(x.count("-"),x.count("_")) == format and x.endswith(".nc"),nc_files))
                         
                         # example: od550du_2019040212.nc (0,1)
-                        if format == (0,1):
+                        if format == (0, 1):
                             # when there is no ensemble in the name only allmembers and 000 are valid
                             if ensemble == '000' or ensemble == 'allmembers':
                                 nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
 
                         # example: od550du-000_2021020812.nc (1,1)
-                        elif format == (1,1):
+                        elif format == (1, 1):
                             # filter by ensemble in case that ensemble is not allmembers
                             if ensemble != 'allmembers':
                                 nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble,nc_files))
-                           
+                        
+                        # example: od550du_2018011700_av_an.nc
+                        elif format == (0, 3):
+                            nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
+
                         else:
                             # TODO delete this in the future
                             error = f"It is not possible to download this nc file type yet. Please, contact the developers. Files to download: {nc_files}"
