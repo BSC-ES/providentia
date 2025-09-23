@@ -1201,7 +1201,7 @@ class Download(object):
                            
                         else:
                             # TODO delete this in the future
-                            error = "It is not possible to download this nc file type yet. Please, contact the developers.", nc_files
+                            error = f"It is not possible to download this nc file type yet. Please, contact the developers. Files to download: {nc_files}"
                             self.logger.error(error)
                             sys.exit(1)
                     
