@@ -75,7 +75,7 @@ class Cams:
         
         # convert the selected dates to datetetime
         cams_start_date = datetime.strptime(self.download_instance.start_date, "%Y%m%d")
-        cams_end_date = datetime.strptime(self.download_instance.end_date, "%Y%m%d")
+        cams_end_date = datetime.strptime(self.download_instance.end_date, "%Y%m%d") - timedelta(days=1)
 
         # if the minimum date is over the end date
         if min_start_date > cams_end_date or max_end_date < cams_start_date:
