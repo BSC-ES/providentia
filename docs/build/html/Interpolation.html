@@ -53,7 +53,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#starting-an-interpolation">Starting an Interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#checking-output">Checking output</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#define-experiments">Define experiments</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#additional-considerations">Additional Considerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#additional-considerations">Additional considerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#different-resolutions-between-model-and-observations">Different resolutions between model and observations</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
@@ -161,10 +162,14 @@
 <p>If you are using a machine that allows both types of paths, it is recommended to list your <code class="docutils literal notranslate"><span class="pre">gpfs</span></code> paths first. This is because when reading data from the <code class="docutils literal notranslate"><span class="pre">esarchive</span></code>, a major limitation on the read time is the transfer speed between the 2 machines, reading directly from the <code class="docutils literal notranslate"><span class="pre">gpfs</span></code>  directory circumvents this therefore.</p>
 </section>
 <section id="additional-considerations">
-<h2>Additional Considerations<a class="headerlink" href="#additional-considerations" title="Link to this heading"></a></h2>
+<h2>Additional considerations<a class="headerlink" href="#additional-considerations" title="Link to this heading"></a></h2>
 <p>When checking if an experiment is stored in a location with the corresponding domain, resolution, and species, consider that the species might not always be listed under the same name.</p>
 <p>The file <code class="docutils literal notranslate"><span class="pre">internal/mapping_species.yaml</span></code> contains a dictionary mapping original species names to their alternative names.</p>
 <p>Note that the mapping species file is only used when the species name from the configuration file is not found in the expected location, meaning Povidentia first looks for the species written in the configuration file. If it is not found, it then searches for the corresponding mapped species in <code class="docutils literal notranslate"><span class="pre">mapping_species.yaml</span></code>.</p>
+</section>
+<section id="different-resolutions-between-model-and-observations">
+<h2>Different resolutions between model and observations<a class="headerlink" href="#different-resolutions-between-model-and-observations" title="Link to this heading"></a></h2>
+<p>When the resolutions are different the model data downsamples to the observations resolution. For instance, if we have 3 hourly model data and daily observations, the model data will be resampled to daily. For this to happen, we need to set the resolution in our configuration file as the obervations frequency.</p>
 </section>
 </section>
 
