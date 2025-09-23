@@ -8,7 +8,7 @@ This page can be used by developers to better understand certain parts of the co
 - [Check that all reports are created](#check-that-all-reports-are-created)
 - [Run Providentia inside Docker container](#run-providentia-inside-docker-container)
 - [Generate the docs](#generate-the-docs)
-- [Create providentia-env_v3.0.0 in MN5](#create-providentia-env_v240-in-mn5)
+- [Create providentia-env_v3.0.0 in MN5](#create-providentia-env_v300-in-mn5)
 - [Create local environment](#create-local-environment)
 - [Memory Profiling Code](#memory-profiling-code)
 
@@ -319,7 +319,7 @@ conda install -c conda-forge dask --override-channels
 pip install -r requirements.txt
 ```
 
-Here we create an environment called `providentia-env_v3.0.0` with the Python version 3.11.5, and we install the latest version of Cartopy (with conda, with pip it gives problems), and the Python packages from `requirements.txt` using pip.
+Here we create an environment called `providentia-env_v3.00` with the Python version 3.11.5, and we install the latest version of Cartopy (with conda, with pip it gives problems), and the Python packages from `requirements.txt` using pip.
 
 
 pip install memray
