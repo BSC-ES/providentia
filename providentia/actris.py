@@ -922,7 +922,7 @@ class Actris:
                 value = [float(val.decode('utf-8').replace('m', '').strip()) 
                         if val != b'' else np.nan for val in value]
             else:
-                value = [val.decode('utf-8') for val in value]
+                value = [val.decode('utf-8', errors="replace") for val in value]
             combined_ds[key] = xr.Variable(data=value, dims=('station'))
 
         # calculate measurement_altitude if altitude and sampling_height exist
