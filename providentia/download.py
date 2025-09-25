@@ -1117,7 +1117,7 @@ class Download(object):
                 # first try with the original species
                 try:
                     # if it is an ensemble member
-                    if ensemble.isdigit() or ensemble == 'allmembers':
+                    if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
                         res_spec = join(remote_dir,resolution,species)
                     # if it is an ensemble statistic
                     else:
@@ -1132,7 +1132,7 @@ class Download(object):
                         for mapping_speci in mapping_species[speci_to_process]:
                             try:
                                 # if it is an ensemble member
-                                if ensemble.isdigit() or ensemble == 'allmembers':
+                                if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
                                     res_spec = join(remote_dir,resolution, mapping_speci)
                                 # if it is an ensemble statistic
                                 else:
@@ -1173,7 +1173,7 @@ class Download(object):
 
                 if nc_files:
                     # if it is an ensemble member
-                    if ensemble.isdigit() or ensemble == 'allmembers':
+                    if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
                         # get the domain, resolution and species from the path
                         domain, resolution, species = remote_dir.split('/')[-3:]
 
@@ -1237,7 +1237,7 @@ class Download(object):
                 else:
                     # create local directory 
                     # if it is an ensemble member
-                    if ensemble.isdigit() or ensemble == 'allmembers':
+                    if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
                         local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,species)
                     else:
                         local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+ensemble)
@@ -1359,7 +1359,7 @@ class Download(object):
                 species = speci_to_process
 
                 # if it is an ensemble member
-                if ensemble.isdigit() or ensemble == 'allmembers':
+                if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
                     res_spec = join(esarchive_dir,resolution,species)
                 # if it is an ensemble statistic
                 else:
@@ -1371,7 +1371,7 @@ class Download(object):
                     if speci_to_process in mapping_species:
                         for species in mapping_species[speci_to_process]:
                             # if it is an ensemble member
-                            if ensemble.isdigit() or ensemble == 'allmembers':
+                            if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
                                 res_spec = join(esarchive_dir,resolution,species)
                             # if it is an ensemble statistic
                             else:
@@ -1407,7 +1407,7 @@ class Download(object):
 
                 if nc_files:
                     # if it is an ensemble member
-                    if ensemble.isdigit() or ensemble == 'allmembers':
+                    if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
                         # get the domain, resolution and species from the path
                         domain, resolution, species = esarchive_dir.split('/')[-3:]
 
@@ -1433,6 +1433,10 @@ class Download(object):
                             if ensemble != 'allmembers':
                                 nc_files = list(filter(lambda x:x.split("_")[0] == species+'-'+ensemble,nc_files))
                            
+                        # example: od550du_2018011700_av_an.nc
+                        elif format == (0, 3):
+                            nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
+
                         else:
                             error = "It is not possible to copy this nc file type yet. Please, contact the developers.", nc_files
                             self.logger.error(error)
@@ -1465,7 +1469,7 @@ class Download(object):
                 # copy the valid resolution specie date combinations
                 else:
                     # if it is an ensemble member
-                    if ensemble.isdigit() or ensemble == 'allmembers':
+                    if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
                         gpfs_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,species)
                     else:
                         gpfs_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+ensemble)
