@@ -26,8 +26,8 @@ from .configuration import load_conf
 from .configuration import ProvConfiguration
 from .dashboard_elements import ComboBox, QVLine, InputDialog
 from .dashboard_elements import set_formatting
-from .fields_menus import (init_experiments, init_flags, init_qa, update_qa, init_metadata, init_multispecies, init_period, 
-                           init_representativity, metadata_conf, multispecies_conf, representativity_conf, period_conf, 
+from .fields_menus import (init_experiments, init_flags, init_qa, update_qa, init_metadata, init_multispecies, init_period, init_representativity,
+                           metadata_conf, multispecies_conf, representativity_conf, period_conf, 
                            update_representativity_fields, update_period_fields, update_metadata_fields)
 from .plot_aux import get_taylor_diagram_ghelper
 from .plot_formatting import format_axis
