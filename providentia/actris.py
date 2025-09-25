@@ -13,6 +13,7 @@ import time
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
+import pycountry
 import xarray as xr
 from netCDF4 import Dataset
 import multiprocessing
@@ -924,6 +925,11 @@ class Actris:
             else:
                 value = [val.decode('utf-8', errors="replace") for val in value]
             combined_ds[key] = xr.Variable(data=value, dims=('station'))
+        
+        # add country
+        value = [pycountry.countries.get(alpha_2=val[0:2]).name if val else np.nan 
+                 for val in combined_ds['station_reference'].values]
+        combined_ds['country'] = xr.Variable(data=value, dims=('station'))
 
         # calculate measurement_altitude if altitude and sampling_height exist
         if ('altitude' in combined_ds.keys()) and ('sampling_height' in combined_ds.keys()):
@@ -1139,6 +1145,10 @@ class Actris:
                             # n_stations_diff = previous_n_stations - current_n_stations
                             # if n_stations_diff > 0:
                             #     instance.logger.info(f'Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
+                            
+                            # add acknowledgements
+                            dois = ', '.join(x for x in combined_ds_yearmonth.doi.values if x not in ('', '[', ']'))
+                            combined_ds_yearmonth.attrs['acknowledgements'] = f'This data is compiled by measurements from these DOI: {dois}'
 
                             # remove file if it exists
                             if os.path.isfile(filename):
