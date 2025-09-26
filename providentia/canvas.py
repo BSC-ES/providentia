@@ -366,7 +366,7 @@ class Canvas(FigureCanvas):
         # get available resampling resolutions, removing base resolution
         available_resampling_resolutions = get_possible_resampling_resolutions(self.read_instance.resolution, 
                                                                                daily_forecast=self.read_instance.daily_forecast)
-        available_resampling_resolutions.remove(self.read_instance.resolution)
+        available_resampling_resolutions.remove(self.read_instance.resolution.split('_instantaneous')[0])
 
         # remove resolutions if resampled data would be less than 2 timesteps
         resampling_resolutions = copy.deepcopy(available_resampling_resolutions)
