@@ -173,8 +173,9 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
                 # set data array for timeseries
                 data_array_ts = data_array_forecast_agg
 
-                # set time index 
+                # set time index, and set to self
                 time_index = read_instance.time_index[:data_array_forecast_agg.shape[-1]]
+                read_instance.time_index = time_index
 
             # otherwise, set data array for timeseries and time_index
             else:
