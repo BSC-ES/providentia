@@ -138,7 +138,7 @@ class convert_units:
 
     '''
 
-    def __init__(self, input_units, output_units, input_value, precision=-999, measured_species='',
+    def __init__(self, input_units, output_units, input_value, precision=-999, measured_species='', charge=1,
                  conversion_input_quantity=''):
         
         if isinstance(input_units, dict):
@@ -155,6 +155,8 @@ class convert_units:
         
         self.precision                 = int(precision)
         self.measured_species          = str(measured_species)
+        self.charge                    = int(charge)
+        self.absolute_charge           = np.abs(self.charge)
         self.conversion_input_quantity = str(conversion_input_quantity)
         
         # load key dictionaries into self
@@ -205,7 +207,6 @@ class convert_units:
         # process each of the input units into standard SI units, and then calculate output value using conversion formula
 
         elif isinstance(self.input_units, dict):
-    
             # put input quantity names into list
             self.input_quantities = list(self.input_units.keys())
             # add mathematical constants to input quantities
@@ -214,10 +215,10 @@ class convert_units:
     
             # get output units into standardised format and get unified conversion factor to base SI
             self.standardise_unit_form(self.output_units, 'output')
-    
+ 
             # check that have everything correctly configured to convert between input variables --> output variable
             self.check_conversion_validity()
-    
+
             # list for appending input values, converted to SI
             self.SI_input_quantities = {}
     
@@ -229,7 +230,7 @@ class convert_units:
             # get unified conversion factor to base SI
             for quantity in self.input_quantities:
                 if quantity not in self.constants:
-                    
+
                     self.standardise_unit_form(self.input_units[quantity],'input')
     
                     # scaling factor
@@ -292,9 +293,9 @@ class convert_units:
     def check_quantity_agreement(self):
         ''' Check if input quantity is same as output quantity. '''
 
-        # print('cleaned units are: {} --> {}'.format(self.input_cleaned_units,self.output_cleaned_units))
-        # print('reference units are: {} --> {}'.format(self.input_reference_units,self.output_reference_units))
-        # print('standard units are: {} --> {}'.format(self.input_standard_units,self.output_standard_units))
+        #print('cleaned units are: {} --> {}'.format(self.input_cleaned_units,self.output_cleaned_units))
+        #print('reference units are: {} --> {}'.format(self.input_reference_units,self.output_reference_units))
+        #print('standard units are: {} --> {}'.format(self.input_standard_units,self.output_standard_units))
         
         # get SI quantities that are represented by input/output units
         self.input_represented_quantity = self.get_quantity_representation(self.input_reference_units)
@@ -318,7 +319,7 @@ class convert_units:
         
         # get SI quantities represented by output_units
         self.output_represented_quantity = self.get_quantity_representation(self.output_reference_units)
-        
+
         # get conversion formula between input and output quantities
         self.formula = self.get_conversion_formula()
              
@@ -354,7 +355,6 @@ class convert_units:
 
         # is the conversion formula standard (i.e. formula to get just the output quantity)
         if formula_type == 'standard':                   
-    
             # do you have a formula for converting to desired output quantity?
             available_conversion_formulae_quantities = list(self.conversion_formulae.keys())
     
@@ -392,7 +392,9 @@ class convert_units:
                 # defined in conversion_formulae dictionary
                 quantity_formulae = self.conversion_formulae['{}>{}--conversion_factor'.format(self.conversion_input_quantity,self.output_represented_quantity)]
                 for formula in quantity_formulae:
-                    formula_quantities = formula.replace('*','$').replace('/','$').replace('(','').replace(')','').split('$')
+                    formula_quantities = formula.replace('*','$').replace('/','$').replace('1.','').replace('(','').replace(')','').strip().split('$')
+                    if '' in formula_quantities: 
+                        formula_quantities.remove('')
                     # test to see if have all of formula quantities required in input quantities
                     have_quantities = set(formula_quantities).issubset(self.input_quantities)
                     if have_quantities:
@@ -486,7 +488,9 @@ class convert_units:
             units = units.replace('g {} m-3'.format(element), 'g{} m-3'.format(element))
             units = units.replace('mol {}/mol'.format(element), 'mol{}/mol'.format(element))  
             units = units.replace('mol {} mol-1'.format(element), 'mol{} mol-1'.format(element))
-        
+            units = units.replace('g {}/l'.format(element), 'g{}/l'.format(element))  
+            units = units.replace('g {} l-1'.format(element), 'g{} l-1'.format(element))         
+
         # list for appending reference units (to which all units are scaled around)
         reference_units = []
         
@@ -504,7 +508,7 @@ class convert_units:
         else:
             split_per =  units.split('per')
         
-        # join split_per back together to 1 string (ensuring there is 1 character whitespace between seperate units)
+        # join split_per back together to 1 string (ensuring there is 1 character whitespace between separate units)
         split_per = [u.strip() for u in split_per]
         units = ' '.join(split_per)
         
@@ -572,7 +576,8 @@ class convert_units:
                             scaling_factors_to_reference.append(self.standard_prefixes[prefix]['factor'])
                             reference_units.append(self.SI_derived_quantities[quantity]['base_units'])
                             standard_units.append(self.standard_prefixes[prefix]['standard_units']+self.SI_derived_quantities[quantity]['standard_units'])
-            
+
+
         # non-SI units
         for quantity in self.non_SI_quantities:
             for quantity_variant in self.non_SI_quantities[quantity]:
@@ -601,7 +606,7 @@ class convert_units:
                                     reference_units.append(self.SI_base_quantities[quantity]['base_units'])
                                 except:
                                     reference_units.append(self.SI_derived_quantities[quantity]['base_units'])
-        
+
         # sort match list by length of string (biggest first), then alphabetically
         # also sort scaling factors/unit lists with match list 
         match_list, reference_units, standard_units, scaling_factors_to_reference = map(list, zip(*sorted(zip(match_list, 
@@ -626,12 +631,12 @@ class convert_units:
 
         # iteratively get inds of matches in original unit string
         for mm, match_unit in enumerate(match_list):
-           
+
             # only proceed if match still exists in cut original input units
             if match_unit in cut_units:
                 # get all inds of match occurances in unit_string
                 match_inds = [i for i in list(range(len(units))) if units.startswith(match_unit, i)]
-                
+
                 # iterate through match inds, if ind not already part of another distinct unit string then proceed
                 for match_ind in match_inds:
                     if not any(match_ind in x for x in accepted_unit_inds_in_str):
@@ -662,7 +667,7 @@ class convert_units:
                         # create dict of relvant cleaned/reference/standard units
                         relevant_units = {'clean':match_unit, 'reference':reference_units[mm], 'standard':standard_units[mm]}
 
-                        # evaluate if all of relavant indices are in denominator indices list
+                        # evaluate if all of relevant indices are in denominator indices list
                         if all(elem in denominator_inds for elem in relevant_inds): 
                             # if so, then invert all matched units exponents (as in denominator) in cleaned units, reference and standard units 
                             invert_exponents = True
@@ -782,7 +787,7 @@ class convert_units:
                             # if relevant_unit_key is == 'clean', set match unit exponent
                             if relevant_unit_key == 'clean':
                                 match_unit_exponent = copy.deepcopy(new_exponent)
-                            
+
                             # write modified new_unit back into relevant_units dict
                             relevant_units[relevant_unit_key] = copy.deepcopy(new_unit)
                         
@@ -954,7 +959,7 @@ class convert_units:
                                       'electric_charge':              {'unit_name':'coulomb',
                                                                        'base_units':'s A',
                                                                        'standard_units':'C',
-                                                                        'equiv_units':['C','coulomb','coulombs']},
+                                                                       'equiv_units':['C','coulomb','coulombs']},
                                       'electrical_conductance':       {'unit_name':'siemens',
                                                                        'base_units':'kg-1 m-2 s3 A2',
                                                                        'standard_units':'S',
@@ -1012,7 +1017,7 @@ class convert_units:
                                                                        'standard_units':'m-3 kg',
                                                                        'equiv_units':['none']},
                                       'molarity':                     {'unit_name':'mole per cubic metre', 
-                                                                       'base_units':'mol cm-3', 
+                                                                       'base_units':'mol m-3', 
                                                                        'standard_units':'M', 
                                                                        'equiv_units':['Molar','molar','M']},
                                       'molar_heat_capacity':          {'unit_name':'joule per kelvin mole',
@@ -1129,159 +1134,237 @@ class convert_units:
 
         # map non-SI units to SI quantities with conversion factors
         # can be more 1 type of non-SI units for each SI quantity
+        # factor is the number neccessary to multiply by to get to base units
         self.non_SI_quantities = {
-                                  'area':               {'acre':             {'factor':4046.8564224,
-                                                                              'standard_units':'acre',
-                                                                              'units':['acre','acres']}},
-                                  'energy':             {'electronvolt':     {'factor':1.6021766208e-19,
-                                                                              'standard_units':'eV',
-                                                                              'units':['eV','electronvolt','electronvolts']}},
-                                  'length':             {'mile':             {'factor':1609.344,
-                                                                              'standard_units':'miles',
-                                                                              'units':['mi', 'miles', 'mile']},                                                       'feet':            {'factor':0.3048,                                      'standard_units':'ft',             'units':['feet','ft']},                                                               'inch':            {'factor':0.0254,                                     'standard_units':'inch',       'units':['inch','inches']},                                                                             'yard':           {'factor':0.9144,                                        'standard_units':'yd',          'units':['yd','yds','yards','yard']},                                              'astronomical unit':       {'factor':149597870700,                                   'standard_units':'au',           'units':['au']}},
-                                  'mass':               {'gram':             {'factor':1e-3,
-                                                                              'standard_units':'g', 
-                                                                              'units':['g', 'gram', 'grams']},                                                        'metric ton':      {'factor':1e3,                                         'standard_units':'ton',            'units':['ton','tons','tonne','tonnes']},                                             'pound':           {'factor':0.45359237,                                 'standard_units':'lb',         'units':['pounds','lb','lbs']},                                                                         'ounce':          {'factor':0.02834952,                                    'standard_units':'oz',          'units':['oz','ozs','ounce','ounces']},                                            'unified atomic mass unit':{'factor':1.660539040e-27,                                'standard_units':'u',            'units':['u','Da']},                                                                      'gram of carbon':  {'factor':1e-3*(get_molecular_mass(self.measured_species)/(get_molecular_mass('C')*get_N_atoms(self.measured_species,'C'))), 'standard_units':'gC',          'units':['gC','gramC','gramsC']},                                                      'gram of chlorine':{'factor':1e-3*(get_molecular_mass(self.measured_species)/(get_molecular_mass('Cl')*get_N_atoms(self.measured_species,'Cl'))), 'standard_units':'gCl',         'units':['gCl','gramCl','gramsCl']},                                                                                                 'gram of nitrogen':{'factor':1e-3*(get_molecular_mass(self.measured_species)/(get_molecular_mass('N')*get_N_atoms(self.measured_species,'N'))), 'standard_units':'gN',          'units':['gN','gramN','gramsN']},                                                  'gram of sulphur': {'factor':1e-3*(get_molecular_mass(self.measured_species)/(get_molecular_mass('S')*get_N_atoms(self.measured_species,'S'))), 'standard_units':'gS',           'units':['gS','gramS','gramsS']}},       
-                                  'amount of substance':{'mole of carbon':   {'factor':1.0/get_N_atoms(self.measured_species,'C'), 
-                                                                              'standard_units':'molC',
-                                                                              'units':['molC','moleC']},                                                            'mole of chlorine':{'factor':1.0/get_N_atoms(self.measured_species,'Cl'), 'standard_units':'molCl',          'units':['molCl','moleCl']},                                                          'mole of nitrogen':{'factor':1.0/get_N_atoms(self.measured_species,'N'), 'standard_units':'molN',       'units':['molN','moleN']},                                                                              'mole of sulphur':{'factor':1.0/get_N_atoms(self.measured_species,'S'),    'standard_units':'molS',        'units':['molS','moleS']}},
+                                  'amount of substance':{'equivalent':              {'factor':1./self.absolute_charge,
+                                                                                     'standard_units':'Eq',
+                                                                                     'units':['eq','Eq','equiv','Equiv',
+                                                                                              'equivalent','Equivalent',
+                                                                                              'equivalents','Equivalents']},
+                                                         'mole of carbon':          {'factor':1.0/get_N_atoms(self.measured_species,'C'), 
+                                                                                     'standard_units':'molC',
+                                                                                     'units':['molC','moleC']},                                                            
+                                                         'mole of chlorine':        {'factor':1.0/get_N_atoms(self.measured_species,'Cl'), 
+                                                                                     'standard_units':'molCl',          
+                                                                                     'units':['molCl','moleCl']},
+                                                         'mole of hydrogen':        {'factor':1.0/get_N_atoms(self.measured_species,'H'), 
+                                                                                     'standard_units':'molH',          
+                                                                                     'units':['molH','moleH']},                                                            
+                                                         'mole of nitrogen':        {'factor':1.0/get_N_atoms(self.measured_species,'N'), 
+                                                                                     'standard_units':'molN',       
+                                                                                     'units':['molN','moleN']},                                                                              
+                                                         'mole of sulphur':         {'factor':1.0/get_N_atoms(self.measured_species,'S'),    
+                                                                                     'standard_units':'molS',        
+                                                                                     'units':['molS','moleS']}},
+                                  'area':               {'acre':                    {'factor':4046.8564224,
+                                                                                     'standard_units':'acre',
+                                                                                     'units':['acre','acres']}},
+                                  'energy':             {'electronvolt':            {'factor':1.6021766208e-19,
+                                                                                     'standard_units':'eV',
+                                                                                     'units':['eV','electronvolt','electronvolts']}},
+                                  'length':             {'mile':                    {'factor':1609.344,
+                                                                                     'standard_units':'miles',
+                                                                                     'units':['mi', 'miles', 'mile']},                                                       
+                                                         'feet':                    {'factor':0.3048,                                     
+                                                                                     'standard_units':'ft',             
+                                                                                     'units':['feet','ft']},                                                               
+                                                         'inch':                    {'factor':0.0254,                                     
+                                                                                     'standard_units':'inch',       
+                                                                                     'units':['inch','inches']},                                                                             
+                                                         'yard':                    {'factor':0.9144,                                       
+                                                                                     'standard_units':'yd',          
+                                                                                     'units':['yd','yds','yards','yard']},                                              
+                                                         'astronomical unit':       {'factor':149597870700,                                   
+                                                                                     'standard_units':'au',           
+                                                                                     'units':['au']}},
+                                  'mass':               {'gram':                    {'factor':1e-3,
+                                                                                     'standard_units':'g', 
+                                                                                     'units':['g', 'gram', 'grams']},                                                        
+                                                         'metric ton':              {'factor':1e3,                                         
+                                                                                     'standard_units':'ton',            
+                                                                                     'units':['ton','tons','tonne','tonnes', 't']},                                             
+                                                         'pound':                   {'factor':0.45359237,                                 
+                                                                                     'standard_units':'lb',         
+                                                                                     'units':['pounds','lb','lbs']},                                                                         
+                                                         'ounce':                   {'factor':0.02834952,                                    
+                                                                                     'standard_units':'oz',          
+                                                                                     'units':['oz','ozs','ounce','ounces']},                                            
+                                                         'unified atomic mass unit':{'factor':1.660539040e-27,                                
+                                                                                     'standard_units':'u',            
+                                                                                     'units':['u','Da']},                                                                      
+                                                         'gram of carbon':          {'factor':1e-3*(get_molecular_mass(self.measured_species)/(get_molecular_mass('C')*get_N_atoms(self.measured_species,'C'))), 
+                                                                                     'standard_units':'gC',          
+                                                                                     'units':['gC','gramC','gramsC']},                                                      
+                                                         'gram of chlorine':        {'factor':1e-3*(get_molecular_mass(self.measured_species)/(get_molecular_mass('Cl')*get_N_atoms(self.measured_species,'Cl'))), 
+                                                                                     'standard_units':'gCl',         
+                                                                                     'units':['gCl','gramCl','gramsCl']},                                                                                                 
+                                                         'gram of nitrogen':        {'factor':1e-3*(get_molecular_mass(self.measured_species)/(get_molecular_mass('N')*get_N_atoms(self.measured_species,'N'))), 
+                                                                                     'standard_units':'gN',          
+                                                                                     'units':['gN','gramN','gramsN']},
+                                                         'gram of calcium carbonate':{'factor':1e-3*((get_molecular_mass(self.measured_species)/self.absolute_charge)/(get_molecular_mass('CaCO3')/2)), # valence of calcium carbonate is 2
+                                                                                     'standard_units':'gCaCO',          
+                                                                                     'units':['gCaCO','gramCaCO','gramsCaCO']},                                                     
+                                                         'gram of sulphur':         {'factor':1e-3*(get_molecular_mass(self.measured_species)/(get_molecular_mass('S')*get_N_atoms(self.measured_species,'S'))), 
+                                                                                     'standard_units':'gS',           
+                                                                                     'units':['gS','gramS','gramsS']}},       
                                   # note - volumetric fractions and the mole fractions of the components of an ideal gas mixture are interchangeable --> does not hold for liquids
-                                  'mole_fraction':      {'ppmv':             {'factor':1e-6, 
-                                                                              'standard_units':'umol mol-1', 
-                                                                              'units':['ppmv','ppm','Partspermillion',
-                                                                                       'partspermillion', 'ppmV']},                   
-                                                         'ppbv':             {'factor':1e-9,
-                                                                              'standard_units':'nmol mol-1',
-                                                                              'units':['ppbv','ppb','Partsperbillion',
-                                                                                       'partsperbillion','ppbV']}, 
-                                                         'pptv':             {'factor':1e-12, 
-                                                                              'standard_units':'pmol mol-1', 
-                                                                              'units':['pptv','ppt','Partspertrillion',
-                                                                                       'partspertrillion','pptV']}, 
-                                                         'ppmv of carbon':   {'factor':1e-6/(get_N_atoms(self.measured_species,'C')), 
-                                                                              'standard_units':'umolC mol-1', 
-                                                                              'units':['ppmvC','ppmC','partspermillioncarbon',
-                                                                                     'PartspermillionCarbon','ppmVC']}, 
-                                                         'ppmv of chlorine': {'factor':1e-6/(get_N_atoms(self.measured_species,'Cl')), 
-                                                                              'standard_units':'umolCl mol-1', 
-                                                                              'units':['ppmvCl','ppmCl',
-                                                                                       'partspermillionchlorine',
-                                                                                       'PartspermillionChlorine',
-                                                                                       'ppmVCl']}, 
-                                                         'ppmv of nitrogen': {'factor':1e-6/(get_N_atoms(self.measured_species,'N')), 
-                                                                              'standard_units':'umolN mol-1', 
-                                                                              'units':['ppmvN','ppmN',
-                                                                                       'partspermillionnitrogen',
-                                                                                       'PartspermillionNitrogen',
-                                                                                       'ppmVN']}, 
-                                                         'ppmv of sulphur':  {'factor':1e-6/(get_N_atoms(self.measured_species,'S')), 
-                                                                              'standard_units':'umolS mol-1', 
-                                                                              'units':['ppmvS','ppmS',
-                                                                                       'partspermillionsulphur',
-                                                                                       'PartspermillionSulphur',
-                                                                                       'partspermillionsulfur',
-                                                                                       'PartspermillionSulfur',
-                                                                                       'ppmVS']}, 
-                                                          'ppbv of carbon':  {'factor':1e-9/(get_N_atoms(self.measured_species,'C')),       
-                                                                              'standard_units':'nmolC mol-1', 
-                                                                              'units':['ppbvC','ppbC',
-                                                                                       'partsperbillioncarbon',
-                                                                                       'PartsperbillionCarbon',
-                                                                                       'ppbVC']}, 
-                                                          'ppbv of chlorine':{'factor':1e-9/(get_N_atoms(self.measured_species,'Cl')),  
-                                                                              'standard_units':'nmolCl mol-1', 
-                                                                              'units':['ppbvCl','ppbCl',
-                                                                                       'partsperbillionchlorine',
-                                                                                       'PartsperbillionChlorine',
-                                                                                       'ppbVCl']}, 
-                                                          'ppbv of nitrogen':{'factor':1e-9/(get_N_atoms(self.measured_species,'N')), 
-                                                                              'standard_units':'nmolN mol-1', 
-                                                                              'units':['ppbvN','ppbN',
-                                                                                       'partsperbillionnitrogen',
-                                                                                       'PartsperbillionNitrogen',
-                                                                                       'ppbVN']}, 
-                                                          'ppbv of sulphur': {'factor':1e-9/(get_N_atoms(self.measured_species,'S')), 
-                                                                              'standard_units':'nmolS mol-1', 
-                                                                              'units':['ppbvS','ppbS',
-                                                                                       'partsperbillionsulphur',
-                                                                                       'PartsperbillionSulphur',
-                                                                                       'partsperbillionsulfur',
-                                                                                       'PartsperbillionSulfur',
-                                                                                       'ppbVS']}, 
-                                                          'pptv of carbon':  {'factor':1e-12/(get_N_atoms(self.measured_species,'C')), 
-                                                                              'standard_units':'pmolC mol-1', 
-                                                                              'units':['pptvC','pptC',
-                                                                                       'partspertrillioncarbon',
-                                                                                       'PartspertrillionCarbon',
-                                                                                       'pptVC']}, 
-                                                          'pptv of chlorine':{'factor':1e-12/(get_N_atoms(self.measured_species,'Cl')), 
-                                                                               'standard_units':'pmolCl mol-1', 
-                                                                               'units':['pptvCl','pptCl',
-                                                                                        'partspertrillionchlorine',
-                                                                                        'PartspertrillionChlorine',
-                                                                                        'pptVCl']}, 
-                                                          'pptv of nitrogen':{'factor':1e-12/(get_N_atoms(self.measured_species,'N')), 
-                                                                               'standard_units':'pmolN mol-1', 
-                                                                               'units':['pptvN','pptN',
-                                                                                        'partspertrillionnitrogen',
-                                                                                        'PartspertrillionNitrogen',
-                                                                                        'pptVN']}, 
-                                                           'pptv of sulphur':{'factor':1e-12/(get_N_atoms(self.measured_species,'S')), 
-                                                                              'standard_units':'pmolS mol-1', 
-                                                                              'units':['pptvS','pptS',
-                                                                                       'partspertrillionsulphur',
-                                                                                       'PartspertrillionSulphur',
-                                                                                       'partspertrillionsulfur',
-                                                                                       'PartspertrillionSulfur',
-                                                                                       'pptVS']}},
-                                  'pressure':           {'atmosphere':       {'factor':101325, 
-                                                                              'standard_units':'atm', 
-                                                                              'units':['atm', 'atmospheres','atmosphere']},                                         
-                                                         'bar':              {'factor':1e5, 
-                                                                              'standard_units':'bar',
-                                                                              'units':['bar']},                                                                     
-                                                         'torr':             {'factor':133.3224, 
-                                                                              'standard_units':'Torr',
-                                                                              'units':['Torr','torr']}, 
-                                                         'psi':              {'factor':6894.76, 
-                                                                              'standard_units':'psi',
-                                                                              'units':['psi']}},  
-                                  'temperature':        {'celsius':          {'factor':1.0, 
-                                                                              'standard_units':'°C',
-                                                                              'units':['degC','celsius','°C','°Celsius','degreesC','degCelsius','degreesCelsius']}, 
-                                                         'rankine':          {'factor':5./9., 
-                                                                              'standard_units':'°R', 
-                                                                              'units':['degR','rankine','°R','°Rankine','degreesR','degRankine','degreesRankine']}, 
-                                                         'fahrenheit':       {'factor':5./9.,
-                                                                              'standard_units':'°F',
-                                                                              'units':['degF','fahrenheit', '°F', '°Fahrenheit', 'degreesF', 'degFahrenheit', 'degreesFahrenheit']}},
-                                  'time':               {'minute':           {'factor':60.0,
-                                                                              'standard_units':'mins', 
-                                                                              'units':['min','mins','minutes','minute']}, 
-                                                         'hour':             {'factor':3600.0,
-                                                                              'standard_units':'hours',
-                                                                              'units':['hr','hrs','hours','hour']},
-                                                         'day':              {'factor':86400.0, 
-                                                                              'standard_units':'days', 
-                                                                              'units':['day','days']}},
-                                  'volume':             {'litre':            {'factor':1e-3,
-                                                                              'standard_units':'l', 
-                                                                              'units':['l','litre','litres','liters','L']}, 
-                                                         'imperial pint':    {'factor':0.000568261, 
-                                                                              'standard_units':'imperial_pints', 
-                                                                              'units':['pt','pint','pints']},
-                                                         'imperial gallon':  {'factor':0.00454609, 
-                                                                              'standard_units':'gal',
-                                                                              'units':['gal','gallon','gals','gallons']}}}
+                                  'mole_fraction':      {'ppmv':                    {'factor':1e-6, 
+                                                                                     'standard_units':'umol mol-1', 
+                                                                                     'units':['ppmv','ppm','Partspermillion',
+                                                                                              'partspermillion', 'ppmV']},                   
+                                                         'ppbv':                    {'factor':1e-9,
+                                                                                     'standard_units':'nmol mol-1',
+                                                                                     'units':['ppbv','ppb','Partsperbillion',
+                                                                                              'partsperbillion','ppbV']}, 
+                                                         'pptv':                    {'factor':1e-12, 
+                                                                                     'standard_units':'pmol mol-1', 
+                                                                                     'units':['pptv','ppt','Partspertrillion',
+                                                                                              'partspertrillion','pptV']}, 
+                                                         'ppmv of carbon':          {'factor':1e-6/(get_N_atoms(self.measured_species,'C')), 
+                                                                                     'standard_units':'umolC mol-1', 
+                                                                                     'units':['ppmvC','ppmC','partspermillioncarbon',
+                                                                                              'PartspermillionCarbon','ppmVC']}, 
+                                                         'ppmv of chlorine':        {'factor':1e-6/(get_N_atoms(self.measured_species,'Cl')), 
+                                                                                     'standard_units':'umolCl mol-1', 
+                                                                                     'units':['ppmvCl','ppmCl',
+                                                                                              'partspermillionchlorine',
+                                                                                              'PartspermillionChlorine',
+                                                                                              'ppmVCl']}, 
+                                                         'ppmv of nitrogen':        {'factor':1e-6/(get_N_atoms(self.measured_species,'N')), 
+                                                                                     'standard_units':'umolN mol-1', 
+                                                                                     'units':['ppmvN','ppmN',
+                                                                                              'partspermillionnitrogen',
+                                                                                              'PartspermillionNitrogen',
+                                                                                              'ppmVN']}, 
+                                                         'ppmv of sulphur':         {'factor':1e-6/(get_N_atoms(self.measured_species,'S')), 
+                                                                                     'standard_units':'umolS mol-1', 
+                                                                                     'units':['ppmvS','ppmS',
+                                                                                              'partspermillionsulphur',
+                                                                                              'PartspermillionSulphur',
+                                                                                              'partspermillionsulfur',
+                                                                                              'PartspermillionSulfur',
+                                                                                              'ppmVS']}, 
+                                                         'ppbv of carbon':          {'factor':1e-9/(get_N_atoms(self.measured_species,'C')),       
+                                                                                     'standard_units':'nmolC mol-1', 
+                                                                                     'units':['ppbvC','ppbC',
+                                                                                              'partsperbillioncarbon',
+                                                                                              'PartsperbillionCarbon',
+                                                                                              'ppbVC']}, 
+                                                         'ppbv of chlorine':        {'factor':1e-9/(get_N_atoms(self.measured_species,'Cl')),  
+                                                                                     'standard_units':'nmolCl mol-1', 
+                                                                                     'units':['ppbvCl','ppbCl',
+                                                                                              'partsperbillionchlorine',
+                                                                                              'PartsperbillionChlorine',
+                                                                                              'ppbVCl']}, 
+                                                         'ppbv of nitrogen':        {'factor':1e-9/(get_N_atoms(self.measured_species,'N')), 
+                                                                                     'standard_units':'nmolN mol-1', 
+                                                                                     'units':['ppbvN','ppbN',
+                                                                                              'partsperbillionnitrogen',
+                                                                                              'PartsperbillionNitrogen',
+                                                                                              'ppbVN']}, 
+                                                         'ppbv of sulphur':         {'factor':1e-9/(get_N_atoms(self.measured_species,'S')), 
+                                                                                     'standard_units':'nmolS mol-1', 
+                                                                                     'units':['ppbvS','ppbS',
+                                                                                              'partsperbillionsulphur',
+                                                                                              'PartsperbillionSulphur',
+                                                                                              'partsperbillionsulfur',
+                                                                                              'PartsperbillionSulfur',
+                                                                                              'ppbVS']}, 
+                                                         'pptv of carbon':          {'factor':1e-12/(get_N_atoms(self.measured_species,'C')), 
+                                                                                     'standard_units':'pmolC mol-1', 
+                                                                                     'units':['pptvC','pptC',
+                                                                                              'partspertrillioncarbon',
+                                                                                              'PartspertrillionCarbon',
+                                                                                              'pptVC']}, 
+                                                         'pptv of chlorine':        {'factor':1e-12/(get_N_atoms(self.measured_species,'Cl')), 
+                                                                                     'standard_units':'pmolCl mol-1', 
+                                                                                     'units':['pptvCl','pptCl',
+                                                                                              'partspertrillionchlorine',
+                                                                                              'PartspertrillionChlorine',
+                                                                                              'pptVCl']}, 
+                                                         'pptv of nitrogen':        {'factor':1e-12/(get_N_atoms(self.measured_species,'N')), 
+                                                                                     'standard_units':'pmolN mol-1', 
+                                                                                     'units':['pptvN','pptN',
+                                                                                              'partspertrillionnitrogen',
+                                                                                              'PartspertrillionNitrogen',
+                                                                                              'pptVN']}, 
+                                                         'pptv of sulphur':         {'factor':1e-12/(get_N_atoms(self.measured_species,'S')), 
+                                                                                     'standard_units':'pmolS mol-1', 
+                                                                                     'units':['pptvS','pptS',
+                                                                                              'partspertrillionsulphur',
+                                                                                              'PartspertrillionSulphur',
+                                                                                              'partspertrillionsulfur',
+                                                                                              'PartspertrillionSulfur',
+                                                                                              'pptVS']}},
+                                  'pressure':           {'atmosphere':              {'factor':101325, 
+                                                                                     'standard_units':'atm', 
+                                                                                     'units':['atm', 'atmospheres',
+                                                                                              'atmosphere']},                                         
+                                                         'bar':                     {'factor':1e5, 
+                                                                                     'standard_units':'bar',
+                                                                                     'units':['bar']},                                                                     
+                                                         'torr':                    {'factor':133.3224, 
+                                                                                     'standard_units':'Torr',
+                                                                                     'units':['Torr','torr']}, 
+                                                         'psi':                     {'factor':6894.76, 
+                                                                                     'standard_units':'psi',
+                                                                                     'units':['psi']}},  
+                                  'temperature':        {'celsius':                 {'factor':1.0, 
+                                                                                     'standard_units':'°C',
+                                                                                     'units':['degC','celsius','°C',
+                                                                                              '°Celsius','degreesC',
+                                                                                              'degCelsius',
+                                                                                              'degreesCelsius']}, 
+                                                         'rankine':                 {'factor':5./9., 
+                                                                                     'standard_units':'°R', 
+                                                                                     'units':['degR','rankine','°R',
+                                                                                              '°Rankine','degreesR',
+                                                                                              'degRankine',
+                                                                                              'degreesRankine']}, 
+                                                         'fahrenheit':              {'factor':5./9.,
+                                                                                     'standard_units':'°F',
+                                                                                     'units':['degF','fahrenheit', '°F', 
+                                                                                              '°Fahrenheit', 'degreesF', 
+                                                                                              'degFahrenheit', 
+                                                                                              'degreesFahrenheit']}},
+                                  'time':               {'minute':                  {'factor':60.0,
+                                                                                     'standard_units':'mins', 
+                                                                                     'units':['min','mins','minutes',
+                                                                                              'minute']}, 
+                                                         'hour':                    {'factor':3600.0,
+                                                                                     'standard_units':'hours',
+                                                                                     'units':['hr','hrs','hours',
+                                                                                              'hour']},
+                                                         'day':                     {'factor':86400.0, 
+                                                                                     'standard_units':'days', 
+                                                                                     'units':['day','days']},
+                                                        'year':                     {'factor':31536000.0, 
+                                                                                     'standard_units':'years', 
+                                                                                     'units':['year','years', 'yr']}},
+                                  'volume':             {'litre':                   {'factor':1e-3,
+                                                                                     'standard_units':'l', 
+                                                                                     'units':['l','litre','litres',
+                                                                                              'liters','L']}, 
+                                                         'imperial pint':           {'factor':0.000568261, 
+                                                                                     'standard_units':'imperial_pints', 
+                                                                                     'units':['pt','pint','pints']},
+                                                         'imperial gallon':         {'factor':0.00454609, 
+                                                                                     'standard_units':'gal',
+                                                                                     'units':['gal','gallon','gals',
+                                                                                              'gallons']}}}
 
         # quantity conversion formulae
         self.conversion_formulae = {
                                     'mole_fraction':                                ["mass_density*((molar_gas_constant*temperature)/(molar_mass*pressure))",        
                                                                                      "number_density*((molar_gas_constant*temperature)/(avogadro_constant*pressure))"],
                                     'mass_density':                                 ["mole_fraction*((molar_mass*pressure)/(molar_gas_constant*temperature))",
-                                                                                     "(number_density*molar_mass)/avogadro_constant"],
+                                                                                     "(number_density*molar_mass)/avogadro_constant",
+                                                                                     "molarity*molar_mass"],
+                                    'molarity':                                     ["mass_density/molar_mass"],
                                     'number_density':                               ["mole_fraction*((avogadro_constant*pressure)/(molar_gas_constant*temperature))",
                                                                                      "(mass_density*avogadro_constant)/molar_mass"],
                                     'mass_density>mole_fraction--conversion_factor':["((molar_gas_constant*temperature)/(molar_mass*pressure))"],
-                                    'mole_fraction>mass_density--conversion_factor':["((molar_mass*pressure)/(molar_gas_constant*temperature))"]
+                                    'mole_fraction>mass_density--conversion_factor':["((molar_mass*pressure)/(molar_gas_constant*temperature))"],
+                                    'molarity>mass_density--conversion_factor':     ["molar_mass"],
+                                    'mass_density>molarity--conversion_factor':     ["1./molar_mass"]
         }
