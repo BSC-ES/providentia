@@ -17,7 +17,7 @@ import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 import pandas as pd
 
-from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
+from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics, Tee
 from .configuration import load_conf
 from .configuration import ProvConfiguration
 from .fields_menus import (init_metadata, init_period, init_representativity, metadata_conf,
@@ -1447,7 +1447,6 @@ class Providentia:
 
 
     def interpolate(self, **kwargs):
-
         """ Wrapper function for initialising Interpolation class"""
         
         from .interpolation import experiment_interpolation_submission as interpolation
@@ -1455,24 +1454,36 @@ class Providentia:
         kwargs['config'] = self.config
         kwargs['interpolation'] = True
         kwargs['library'] = True   
-        unique_id = '{number:06}'.format(number=random.randint(0, 999999))
+        
+        unique_id = f"{random.randint(0, 999999):06d}"
         kwargs['slurm_job_id'] = unique_id  
+
+        log_path = join(
+            PROVIDENTIA_ROOT,
+            "logs",
+            "interpolation",
+            "management_logs",
+            f"{unique_id}.out"
+        )
+
         # save original stdout
         orig_stdout = sys.stdout
-        # redirict stdout to file
-        sys.stdout = open(join(PROVIDENTIA_ROOT,'logs','interpolation','management_logs', f'{unique_id}.out'), 'w')
-        # do interpolation
-        interpolation.main(**kwargs)
-        # reset stdout
-        sys.stdout = orig_stdout
- 
+        with open(log_path, "w") as f:
+            sys.stdout = Tee(orig_stdout, f)
+            try:
+                # do interpolation
+                interpolation.main(**kwargs)
+            finally:
+                # reset stdout
+                sys.stdout = orig_stdout
+                
 
     def report(self, **kwargs):
         """ Wrapper function for initialising Report class"""
 
         from .report import Report
         
-        kwargs['config'] = sef.config
+        kwargs['config'] = self.config
         kwargs['report'] = True
         provi = Report(**kwargs)
         
