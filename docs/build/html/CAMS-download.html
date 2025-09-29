@@ -21,7 +21,9 @@
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Other topics" href="other-topics.html" />
+    <link rel="prev" title="Statistics" href="Statistics.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -43,11 +45,31 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modes.html">Modes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Configuration-files.html">Configuration files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Plot-types-and-options.html">Plot types and options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Plot-customisation.html">Plot customisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">CAMS Download</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#available-datasets">Available Datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cams-european-air-quality-forecasts">1. CAMS European Air Quality Forecasts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mandatory-fields-for-analysis-data">Mandatory Fields for Analysis Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mandatory-fields-for-forecast-data">Mandatory Fields for Forecast Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#available-models">Available Models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#available-variables-species">Available Variables (Species)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#assumptions">Assumptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example-configuration-files-and-corresponding-api-requests">Example Configuration Files and Corresponding API Requests</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#ghostcams-species-mapping">GHOST–CAMS Species Mapping</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Evolution.html">Evolution</a></li>
@@ -69,6 +91,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="topics-in-depth.html">Topics in depth</a></li>
       <li class="breadcrumb-item active">CAMS Download</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/CAMS-download.md.txt" rel="nofollow"> View page source</a>
@@ -121,9 +144,8 @@
 <div><p>Replace <code class="docutils literal notranslate"><span class="pre">&lt;model&gt;</span></code> with one of the available model names listed below.</p>
 </div></blockquote>
 </section>
-</section>
 <section id="available-models">
-<h2>Available Models<a class="headerlink" href="#available-models" title="Link to this heading"></a></h2>
+<h3>Available Models<a class="headerlink" href="#available-models" title="Link to this heading"></a></h3>
 <p>Use the following model names (same as in the API):</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ensemble</span></code></p></li>
@@ -141,7 +163,7 @@
 </ul>
 </section>
 <section id="available-variables-species">
-<h2>Available Variables (Species)<a class="headerlink" href="#available-variables-species" title="Link to this heading"></a></h2>
+<h3>Available Variables (Species)<a class="headerlink" href="#available-variables-species" title="Link to this heading"></a></h3>
 <p>These are the available species:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ammonia</span></code></p></li>
@@ -166,8 +188,8 @@
 <div><p>Providentia can only read species in GHOST format. The mapping is provided in the <a class="reference internal" href="#ghostcams-species-mapping">GHOST–CAMS Species Mapping</a> section.</p>
 </div></blockquote>
 </section>
-<section id="fixed-settings">
-<h2>Fixed Settings<a class="headerlink" href="#fixed-settings" title="Link to this heading"></a></h2>
+<section id="assumptions">
+<h3>Assumptions<a class="headerlink" href="#assumptions" title="Link to this heading"></a></h3>
 <p>Providentia assumes the following fixed values when downloading data:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">level</span> <span class="pre">=</span> <span class="pre">0</span></code></p></li>
@@ -176,9 +198,9 @@
 </ul>
 </section>
 <section id="example-configuration-files-and-corresponding-api-requests">
-<h2>Example Configuration Files and Corresponding API Requests<a class="headerlink" href="#example-configuration-files-and-corresponding-api-requests" title="Link to this heading"></a></h2>
+<h3>Example Configuration Files and Corresponding API Requests<a class="headerlink" href="#example-configuration-files-and-corresponding-api-requests" title="Link to this heading"></a></h3>
 <section id="example-1-cams-analysis-ensemble">
-<h3>Example 1: CAMS Analysis (Ensemble)<a class="headerlink" href="#example-1-cams-analysis-ensemble" title="Link to this heading"></a></h3>
+<h4>Example 1: CAMS Analysis (Ensemble)<a class="headerlink" href="#example-1-cams-analysis-ensemble" title="Link to this heading"></a></h4>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_analysis_ensemble-regional]</span>
 <span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20250701</span>
 <span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20250801</span>
@@ -204,7 +226,7 @@
 </div>
 </section>
 <section id="example-2-cams-forecast-ensemble">
-<h3>Example 2: CAMS Forecast (Ensemble)<a class="headerlink" href="#example-2-cams-forecast-ensemble" title="Link to this heading"></a></h3>
+<h4>Example 2: CAMS Forecast (Ensemble)<a class="headerlink" href="#example-2-cams-forecast-ensemble" title="Link to this heading"></a></h4>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_forecast_ensemble-regional]</span>
 <span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20250701</span>
 <span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20250702</span>
@@ -238,6 +260,7 @@
 <span class="p">}</span>
 </pre></div>
 </div>
+</section>
 </section>
 </section>
 <section id="ghostcams-species-mapping">
@@ -312,7 +335,10 @@
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Statistics.html" class="btn btn-neutral float-left" title="Statistics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="other-topics.html" class="btn btn-neutral float-right" title="Other topics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
