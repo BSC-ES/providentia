@@ -18,7 +18,9 @@ from pypdf import PdfReader
 from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 from .configuration import load_conf
 from .configuration import ProvConfiguration
-from .fields_menus import update_metadata_fields
+from .fields_menus import (init_representativity, init_period, init_metadata,
+                           update_representativity_fields, update_period_fields, update_metadata_fields,
+                           representativity_conf, period_conf, metadata_conf)
 from .filter import DataFilter
 from .plotting import Plotting
 from .plot_aux import get_taylor_diagram_ghelper, set_map_extent, reorder_pdf_pages
@@ -864,6 +866,25 @@ class Report:
                 str(dict(sorted(self.calibration_factor.items()))) != str(dict(sorted(self.previous_calibration_factor.items())))):
                 # re-read data
                 self.datareader.read_setup(['reset'])
+            else:
+                # update fields available for filtering
+                init_representativity(self)
+                update_representativity_fields(self)
+                representativity_conf(self)
+                init_period(self)
+                update_period_fields(self)
+                period_conf(self)
+                init_metadata(self)
+
+                # for non-GHOST delete valid station indices variables because we do not want to 
+                # remove the stations with 0 valid measurements before the filter has been updated, 
+                # this will happen later
+                if hasattr(self, 'valid_station_inds') and (not self.reading_ghost):
+                    delattr(self, 'valid_station_inds')
+                    delattr(self, 'valid_station_inds_temporal_colocation')
+
+                update_metadata_fields(self)
+                metadata_conf(self)
 
             # set previous QA, flags, filter species and calibration factor as subsection
             self.previous_qa = copy.deepcopy(self.qa)

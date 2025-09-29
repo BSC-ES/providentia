@@ -60,7 +60,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#check-that-all-reports-are-created">Check that all reports are created</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#run-providentia-inside-docker-container">Run Providentia inside Docker container</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#generate-the-docs">Generate the docs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#create-providentia-env-v2-4-0-in-mn5">Create providentia-env_v2.4.0 in MN5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-providentia-env-v3-0-0-in-mn5">Create providentia-env_v3.0.0 in MN5</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#create-local-environment">Create local environment</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#memory-profiling-code">Memory Profiling Code</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#setup">Setup</a></li>
@@ -106,7 +106,7 @@
 <li><p><a class="reference internal" href="#check-that-all-reports-are-created">Check that all reports are created</a></p></li>
 <li><p><a class="reference internal" href="#run-providentia-inside-docker-container">Run Providentia inside Docker container</a></p></li>
 <li><p><a class="reference internal" href="#generate-the-docs">Generate the docs</a></p></li>
-<li><p><a class="reference internal" href="#create-providentia-env-v2-4-0-in-mn5">Create providentia-env_v2.4.0 in MN5</a></p></li>
+<li><p><a class="reference internal" href="#create-providentia-env-v3-0-0-in-mn5">Create providentia-env_v3.0.0 in MN5</a></p></li>
 <li><p><a class="reference internal" href="#create-local-environment">Create local environment</a></p></li>
 <li><p><a class="reference internal" href="#memory-profiling-code">Memory Profiling Code</a></p></li>
 </ul>
@@ -269,7 +269,7 @@
 <section id="run-tests">
 <h2>Run tests<a class="headerlink" href="#run-tests" title="Link to this heading"></a></h2>
 <p>To run all the pipeline tests in your local machine, just run:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">providentia</span><span class="o">-</span><span class="n">env</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">providentia</span><span class="o">-</span><span class="n">env_v3</span><span class="mf">.0.0</span>
 <span class="n">pytest</span> <span class="n">tests</span>
 </pre></div>
 </div>
@@ -358,15 +358,17 @@ done
 <section id="generate-the-docs">
 <h2>Generate the docs<a class="headerlink" href="#generate-the-docs" title="Link to this heading"></a></h2>
 <p>First edit the .md files under docs/source, then navigate to docs and simply run:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">clean</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">docs</span>
+<span class="n">conda</span> <span class="n">activate</span> <span class="n">providentia</span><span class="o">-</span><span class="n">env_v3</span><span class="mf">.0.0</span>
+<span class="n">make</span> <span class="n">clean</span>
 <span class="n">make</span> <span class="n">html</span>
 </pre></div>
 </div>
 </section>
-<section id="create-providentia-env-v2-4-0-in-mn5">
-<h2>Create providentia-env_v2.4.0 in MN5<a class="headerlink" href="#create-providentia-env-v2-4-0-in-mn5" title="Link to this heading"></a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">gpfs</span><span class="o">/</span><span class="n">projects</span><span class="o">/</span><span class="n">bsc32</span><span class="o">/</span><span class="n">repository</span><span class="o">/</span><span class="n">apps</span><span class="o">/</span><span class="n">conda_envs</span><span class="o">/</span><span class="n">providentia</span><span class="o">-</span><span class="n">env_v2</span><span class="mf">.4.0</span> <span class="o">-</span><span class="n">y</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.11.5</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="o">--</span><span class="n">override</span><span class="o">-</span><span class="n">channels</span>
-<span class="n">conda</span> <span class="n">activate</span> <span class="o">/</span><span class="n">gpfs</span><span class="o">/</span><span class="n">projects</span><span class="o">/</span><span class="n">bsc32</span><span class="o">/</span><span class="n">repository</span><span class="o">/</span><span class="n">apps</span><span class="o">/</span><span class="n">conda_envs</span><span class="o">/</span><span class="n">providentia</span><span class="o">-</span><span class="n">env_v2</span><span class="mf">.4.0</span>
+<section id="create-providentia-env-v3-0-0-in-mn5">
+<h2>Create providentia-env_v3.0.0 in MN5<a class="headerlink" href="#create-providentia-env-v3-0-0-in-mn5" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">gpfs</span><span class="o">/</span><span class="n">projects</span><span class="o">/</span><span class="n">bsc32</span><span class="o">/</span><span class="n">repository</span><span class="o">/</span><span class="n">apps</span><span class="o">/</span><span class="n">conda_envs</span><span class="o">/</span><span class="n">providentia</span><span class="o">-</span><span class="n">env_v3</span><span class="mf">.0.0</span> <span class="o">-</span><span class="n">y</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.11.5</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="o">--</span><span class="n">override</span><span class="o">-</span><span class="n">channels</span>
+<span class="n">conda</span> <span class="n">activate</span> <span class="o">/</span><span class="n">gpfs</span><span class="o">/</span><span class="n">projects</span><span class="o">/</span><span class="n">bsc32</span><span class="o">/</span><span class="n">repository</span><span class="o">/</span><span class="n">apps</span><span class="o">/</span><span class="n">conda_envs</span><span class="o">/</span><span class="n">providentia</span><span class="o">-</span><span class="n">env_v3</span><span class="mf">.0.0</span>
 <span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">cartopy</span> <span class="o">--</span><span class="n">override</span><span class="o">-</span><span class="n">channels</span>
 <span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">jupyterlab</span> <span class="o">--</span><span class="n">override</span><span class="o">-</span><span class="n">channels</span>
 <span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">ghostscript</span> <span class="o">--</span><span class="n">override</span><span class="o">-</span><span class="n">channels</span>
@@ -377,8 +379,8 @@ done
 <section id="create-local-environment">
 <h2>Create local environment<a class="headerlink" href="#create-local-environment" title="Link to this heading"></a></h2>
 <p>In order to test modules with pip, you need to create an environment. Once activated, you can start installing modules using either <code class="docutils literal notranslate"><span class="pre">pip</span></code> or <code class="docutils literal notranslate"><span class="pre">conda</span></code>, as in this example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">providentia</span><span class="o">-</span><span class="n">env</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.11.5</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="o">--</span><span class="n">override</span><span class="o">-</span><span class="n">channels</span>
-<span class="n">conda</span> <span class="n">activate</span> <span class="n">providentia</span><span class="o">-</span><span class="n">env</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">providentia</span><span class="o">-</span><span class="n">env_v3</span><span class="mf">.0.0</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.11.5</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="o">--</span><span class="n">override</span><span class="o">-</span><span class="n">channels</span>
+<span class="n">conda</span> <span class="n">activate</span> <span class="n">providentia</span><span class="o">-</span><span class="n">env_v3</span><span class="mf">.0.0</span>
 <span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">cartopy</span> <span class="o">--</span><span class="n">override</span><span class="o">-</span><span class="n">channels</span>
 <span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">jupyterlab</span> <span class="o">--</span><span class="n">override</span><span class="o">-</span><span class="n">channels</span>
 <span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">ghostscript</span> <span class="o">--</span><span class="n">override</span><span class="o">-</span><span class="n">channels</span>
@@ -386,7 +388,7 @@ done
 <span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
 </pre></div>
 </div>
-<p>Here we create an environment called <code class="docutils literal notranslate"><span class="pre">providentia-env</span></code> with the Python version 3.11.5, and we install the latest version of Cartopy (with conda, with pip it gives problems), and the Python packages from <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> using pip.</p>
+<p>Here we create an environment called <code class="docutils literal notranslate"><span class="pre">providentia-env_v3.00</span></code> with the Python version 3.11.5, and we install the latest version of Cartopy (with conda, with pip it gives problems), and the Python packages from <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> using pip.</p>
 <p>pip install memray</p>
 <p>memray run -o result.bin python your_script.py
 memray flamegraph result.bin  # Creates a flamegraph

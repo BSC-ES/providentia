@@ -405,7 +405,7 @@ class ProvConfiguration:
             else:
                 return []
 
-        elif key == 'domain': # TODO maybe there's no need of domain because it is included on experiments
+        elif key == 'domain':
             # parse domain
 
             if value is not None:
@@ -418,7 +418,7 @@ class ProvConfiguration:
             else:
                 return []
 
-        elif key == 'ensemble': # TODO maybe there's no need of ensemble num because it is included on experiments
+        elif key == 'ensemble':
             # parse ensemble
 
             if value is not None:

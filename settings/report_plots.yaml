@@ -6,7 +6,7 @@
                  "heatmap-RMSE_annotate", "heatmap-r_annotate",
                  "periodic-MB", "periodic-StdDev_bias", "periodic-NMB", "periodic-NME", "periodic-RMSE", "periodic-r",
                  "distribution", "distribution_bias", "scatter"],
-    
+
     "operational": ["statsummary_multispecies", "statsummary_multispecies_bias",
                     "map-Mean", "map-MB", "map-RMSE", "map-r", "map-NMB", "map-NRMSE",
                     "timeseries_annotate", "timeseries_bias_annotate", "distribution", "scatter_annotate",
@@ -36,6 +36,8 @@
 
     "cams2_82": ["metadata", "map-r", "map-MB", "map-RMSE", "map-MFB", "map-MFE", "timeseries_smooth",
                  "timeseries_bias_smooth", "distribution", "scatter_annotate", "statsummary", "statsummary_bias"],
+
+    "cams2_82_test": ["statsummary_multispecies_bias"],          
 
     "custom_obs_mod": ["metadata", "map-Data%_obs", "map-Mean", "map-MB", "timeseries_smooth", "periodic-Mean",
                        "statsummary_bias", "boxplot_multispecies", "table-Median_multispecies"],
@@ -67,6 +69,8 @@
 
     "het_chem": ["periodic-Mean"],
 
-    "debug": ["timeseries-NStations-hourly","timeseries-NStations-daily","timeseries-MDA8-daily","timeseries-MDA8-monthly","fairmode-target","fairmode-statsummary"]
+    #"debug": ["timeseries-NStations-hourly","timeseries-NStations-daily","timeseries-MDA8-daily","timeseries-MDA8-monthly","fairmode-target","fairmode-statsummary"]
+
+    "debug": ["map-Mean"]
 
 }
