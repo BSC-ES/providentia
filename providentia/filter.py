@@ -764,7 +764,6 @@ class DataFilter:
             daily_forecast=True
         )
 
-
     def temporally_colocate_data(self):
         """ Define function which temporally colocates observational and experiment data.
             If spatial colocation is active, then data is also temporally colocated across all network / species,
