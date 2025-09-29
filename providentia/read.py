@@ -79,15 +79,15 @@ class DataReader:
                 msg = 'Extend the time range or enhance the resolution (e.g. from monthly to daily) to create plots. '
                 msg += 'Plots will only be created when period is longer than 2 timesteps.'
                 show_message(self.read_instance, msg)
-                if (self.read_instance.from_conf) and (not self.read_instance.report) and (not self.read_instance.library):
+                if (self.read_instance.from_conf) and (self.read_instance.mode not in ['report', 'library']):
                     error = 'Error: Providentia will not be launched.'
                     self.read_instance.logger.error(error)
                     sys.exit(1) 
-                elif (self.read_instance.report):
+                elif (self.read_instance.mode == 'report'):
                     error = 'Error: Report will not be created.'
                     self.read_instance.logger.error(error)
                     sys.exit(1) 
-                elif (self.read_instance.library):
+                elif (self.read_instance.mode == 'library'):
                     error = 'Error: Data cannot be read.'
                     self.read_instance.logger.error(error)
                     sys.exit(1) 
@@ -164,7 +164,7 @@ class DataReader:
         if 'reset' in operations:  
 
             # uninitialise filter object
-            if (not self.read_instance.report) and (not self.read_instance.library):
+            if self.read_instance.mode not in ['report', 'library']:
                 self.read_instance.mpl_canvas.filter_data = None
 
             # get list of yearmonths to read
@@ -173,7 +173,7 @@ class DataReader:
 
             # check if any of the experiment data has a forecast dimension to handle 
             # only for report / library modes as dashboard handled previously
-            if (self.read_instance.report) or (self.read_instance.library):
+            if self.read_instance.mode in ['report', 'library']:
                 self.check_forecast(yearmonths_to_read=yearmonths_to_read)
 
             # create data in memory array
