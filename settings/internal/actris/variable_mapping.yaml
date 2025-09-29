@@ -1,6 +1,3 @@
-? ''
-: units: deg
-  var: longitude
 (2E)-2-pentene amount fraction:
   units: pmol/mol
   var: trans-2-pentene

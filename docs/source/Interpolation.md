@@ -84,7 +84,7 @@ There's normally two location types of experiment data:
 
 If you are using a machine that allows both types of paths, it is recommended to list your `gpfs` paths first. This is because when reading data from the `esarchive`, a major limitation on the read time is the transfer speed between the 2 machines, reading directly from the `gpfs`  directory circumvents this therefore.
 
-## Additional Considerations
+## Additional considerations
 
 When checking if an experiment is stored in a location with the corresponding domain, resolution, and species, consider that the species might not always be listed under the same name.
 
@@ -92,5 +92,6 @@ The file `internal/mapping_species.yaml` contains a dictionary mapping original 
 
 Note that the mapping species file is only used when the species name from the configuration file is not found in the expected location, meaning Povidentia first looks for the species written in the configuration file. If it is not found, it then searches for the corresponding mapped species in `mapping_species.yaml`.
 
+## Different resolutions between model and observations
 
-
+When the resolutions are different the model data downsamples to the observations resolution. For instance, if we have 3 hourly model data and daily observations, the model data will be resampled to daily. For this to happen, we need to set the resolution in our configuration file as the obervations frequency.
