@@ -75,7 +75,7 @@ class Cams:
         
         # convert the selected dates to datetetime
         cams_start_date = datetime.strptime(self.download_instance.start_date, "%Y%m%d")
-        cams_end_date = datetime.strptime(self.download_instance.end_date, "%Y%m%d")
+        cams_end_date = datetime.strptime(self.download_instance.end_date, "%Y%m%d") - timedelta(days=1)
 
         # if the minimum date is over the end date
         if min_start_date > cams_end_date or max_end_date < cams_start_date:
@@ -264,7 +264,7 @@ class Cams:
 
         return time.strftime('%Y-%m-%d')
 
-    def format_data(self, input_filepath, output_filepath, species, prefix, domain, resolution, final_path): 
+    def format_data(self, input_filepath, output_filepath, species, prefix, domain, resolution, final_path, cams_species, url): 
 
         self.download_instance.logger.info(f"Formatting {final_path}\n") 
 
@@ -282,6 +282,9 @@ class Cams:
         output_file.set_auto_mask(True)	
 
         for input_dim_name, output_dim_name in cams_providentia_map.items():
+            # skip single species
+            if output_dim_name == "level" and 'single' in cams_variables_level[url] and cams_species in cams_variables_level[url]['single']:
+                pass
             # get dimension
             dim = input_file.dimensions[input_dim_name]
             # create the dimension with the new name 
@@ -519,7 +522,8 @@ class Cams:
                         zip_ref.extractall(temp_dir)
 
                     # format the cams files and move them to the corresponding folder
-                    self.format_data(join(temp_dir,zip_file_name), final_path, species, prefix, domain, resolution, final_path)
+                    self.format_data(join(temp_dir,zip_file_name), final_path, species, prefix, 
+                                     domain, resolution, final_path, cams_species, url)
 
                     # add one day to the date
                     current_cams_date = next_cams_date + timedelta(days=1)    
