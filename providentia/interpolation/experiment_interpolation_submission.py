@@ -137,7 +137,7 @@ class SubmitInterpolation(object):
 
         # iterate through desired experiment IDs and its types
         for exp_dom_ens, alias in self.experiments.items():
-            
+
             experiment_to_process, grid_type, ensemble = exp_dom_ens.split("-") 
 
             print('\nEXPERIMENT: {0}'.format(alias))
@@ -234,7 +234,7 @@ class SubmitInterpolation(object):
 
                         # test if have speci directory in ensemble-stats
                         elif os.path.isdir("{}/{}/{}/ensemble-stats".format(exp_dir, grid_type, model_temporal_resolution)):
-
+                            
                             # get all ensemble-stats species
                             experiment_species_ensemblestat = list(np.unique([name.split('_')[0] 
                                                                 for name in os.listdir("{}/{}/{}/ensemble-stats".format(
@@ -261,16 +261,18 @@ class SubmitInterpolation(object):
                                             bin_radius = get_aeronet_bin_radius_from_bin_variable(speci_to_check)
                                             if (bin_radius >= r_edges[0]) & (bin_radius <= r_edges[-1]):
                                                 speci_to_process = copy.deepcopy(speci_to_map)
+                                                print('Found speci to process on mapping', speci_to_process)
                                                 have_valid_resolution = True
                                                 break
                                         else:
                                             speci_to_process = copy.deepcopy(speci_to_map)
+                                            print('Found speci to process on mapping', speci_to_process)
                                             have_valid_resolution = True
                                             break
                                 
                                 if have_valid_resolution:
                                     break
-
+                            
                         # for some variables it is possible to extract the variable information by mapping to a different variable name, with a higher dimensionality
                         # this currently is implemented for 2 cases:
                         # -- 4D binned size distribution
@@ -299,10 +301,12 @@ class SubmitInterpolation(object):
                                             bin_radius = get_aeronet_bin_radius_from_bin_variable(speci_to_check)
                                             if (bin_radius >= r_edges[0]) & (bin_radius <= r_edges[-1]):
                                                 speci_to_process = copy.deepcopy(speci_to_map)
+                                                print('Found speci to process on mapping', speci_to_process)
                                                 have_valid_resolution = True
                                                 break
                                         else:
                                             speci_to_process = copy.deepcopy(speci_to_map)
+                                            print('Found speci to process on mapping', speci_to_process)
                                             have_valid_resolution = True
                                             break
                             
@@ -338,6 +342,8 @@ class SubmitInterpolation(object):
                                 # if have no observational files then continue
                                 if len(obs_files) == 0:
                                     continue
+                                else:
+                                    print(f'{len(obs_files)} observation files for {temporal_resolution_to_output} resolution were found.')
                                 
                                 # determine if ensemble is member or emsemble stat
                                 ensemble_member = ensemble.isdigit()
@@ -345,21 +351,26 @@ class SubmitInterpolation(object):
                                 # check if ensemble is ensemble stat and get all relevant experiment files
                                 if not ensemble_member:
                                     ensemble_stat = True
-                                    exp_files_all = np.sort(glob.glob('{}/{}/{}/ensemble-stats/{}_{}/{}*{}.nc'.format(
+                                    exp_path = '{}/{}/{}/ensemble-stats/{}_{}/{}*{}.nc'.format(
                                         exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
-                                        ensemble, speci_to_process, ensemble)))
+                                        ensemble, speci_to_process, ensemble)
+                                    exp_files_all = np.sort(glob.glob(exp_path))
                                 else:
                                     ensemble_stat = False
-                                    exp_files_all = np.sort(glob.glob('{}/{}/{}/{}/{}*.nc'.format(
+                                    exp_path = '{}/{}/{}/{}/{}*.nc'.format(
                                         exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
-                                        speci_to_process)))    
+                                        speci_to_process)
+                                    exp_files_all = np.sort(glob.glob(exp_path))    
                                     
                                     # drop all analysis files ending with '_an.nc' which are not in ensemble-stats
                                     exp_files_all = np.array([f for f in exp_files_all if '_an.nc' not in f])
 
                                 # if have no relevant experiment files then continue
                                 if len(exp_files_all) == 0:
+                                    print(f'Model files cannot be found for {temporal_resolution_to_output} resolution in {exp_path}.')
                                     continue
+                                else:
+                                    print(f'{len(exp_files_all)} model files for {temporal_resolution_to_output} resolution were found.')
 
                                 # ensemble stat?
                                 if ensemble_stat:
@@ -375,7 +386,7 @@ class SubmitInterpolation(object):
                                         have_ensemble_members = True
                                         # if have ensemble members in filename, get all unique numbers
                                         unique_ensemble_members = np.unique([f.split('/{}-'.format(speci_to_process))[-1][:3] 
-                                                                            for f in exp_files_all])
+                                                                             for f in exp_files_all])
                                         # get intersection between desired ensemble members to process and those 
                                         # available in directory
                                         # if no members defined explicitly to process, process them all 
@@ -399,7 +410,7 @@ class SubmitInterpolation(object):
                                 
                                 # iterate through available ensemble to process                    
                                 for available_ensemble in available_ensemble:
-                            
+
                                     # limit experiment files to be just those for specific ensemble member 
                                     # (where neccessary) 
                                     exp_file_speci = copy.deepcopy(speci_to_process)
@@ -408,7 +419,7 @@ class SubmitInterpolation(object):
                                         if have_ensemble_members == True:
                                             exp_file_speci = '{}-{}'.format(speci_to_process, available_ensemble)
                                             exp_files = np.sort([f for f in exp_files_all if '{}_'.format(exp_file_speci) 
-                                                                in f])                        
+                                                                in f])                    
                                     
                                     # get all observational file start dates (year and month)
                                     obs_files_dates = []
@@ -417,11 +428,10 @@ class SubmitInterpolation(object):
                                         obs_files_dates=np.append(obs_files_dates,obs_file_date[:6])
 
                                     # get all experiment file start dates (year and month)
-                                    exp_files_dates = []   
+                                    exp_files_dates = []
                                     for exp_file in exp_files:
                                         exp_file_date = exp_file.split('{}_'.format(exp_file_speci))[-1].split('_')[0].split('.nc')[0]
                                         exp_files_dates=np.append(exp_files_dates,exp_file_date[:6])
-
                                     # remove observational files outside date ranges 
                                     obs_files_ii = np.array([obs_files_ii for obs_files_ii, obs_files_date in enumerate(obs_files_dates) 
                                                             if ((int(obs_files_date) >= int(self.start_date)) 
@@ -509,17 +519,6 @@ class SubmitInterpolation(object):
                     msg += 'If you want to interpolate data for one month, '
                     msg += 'you need to set the end date to be the next one. \n'
                     msg += 'e.g. For November 2018, this is 201811 to 201812.'
-                else:
-                    if len(exp_files) == 0:
-                        msg += f'Experiment data between {self.start_date} and {self.end_date} cannot be found.\n'
-                    else:
-                        msg += f'Experiment files: {exp_files}\n'
-                        msg += f'Experiment dates: {exp_files_dates}\n'
-                    if len(obs_files) == 0:
-                        msg += f'Observational data between {self.start_date} and {self.end_date} cannot be found.\n'
-                    else:
-                        msg += f'Observational files: {obs_files}\n'
-                        msg += f'Observational dates: {obs_files_dates}\n'
             else:
                 msg = '***INTERSECTING OBSERVATIONAL AND EXPERIMENTAL DATA IS AVAILABLE FOR INTERPOLATION.***' 
                 msg += f'\nExperiment Data Source Path: {exp_dir}'

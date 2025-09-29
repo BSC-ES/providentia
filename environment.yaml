@@ -1,4 +1,4 @@
-name: providentia-env
+name: providentia-env_v3.0.0
 channels:
   - conda-forge
 dependencies:

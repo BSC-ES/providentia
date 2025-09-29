@@ -22,10 +22,10 @@ jobs:
       run: conda env update --file environment.yaml
     - name: Test with pytest
       run: |
-        conda run -n providentia-env coverage run -m pytest tests
-        conda run -n providentia-env coverage report -i -m
+        conda run -n providentia-env_v3.0.0 coverage run -m pytest tests
+        conda run -n providentia-env_v3.0.0 coverage report -i -m
     - name: Generate coverage badge
-      run: conda run -n providentia-env coverage-badge > coverage.svg
+      run: conda run -n providentia-env_v3.0.0 coverage-badge > coverage.svg
     - name: Update coverage badge
       run: |
         git config --global user.name "github-actions[bot]"

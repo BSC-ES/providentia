@@ -21,3 +21,6 @@ sampling_height: ebas_measurement_height
 station_name: ebas_station_name
 station_reference: ebas_station_code
 station_timezone: timezone
+doi: doi # Not in GHOST
+license: license # Not in GHOST
+citation: citation  # Not in GHOST
