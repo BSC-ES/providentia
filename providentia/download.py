@@ -110,7 +110,7 @@ class Download(object):
             self.ghost_url = 'https://zenodo.org/records/10637450'
 
             # initialise remote hostname
-            self.remote_hostname = "transfer1.bsc.es"
+            self.remote_hostname = "transfer2.bsc.es"
 
             # initialise ssh 
             self.ssh = None
