@@ -42,7 +42,7 @@ resolution = hourly
 
 > Replace `<model>` with one of the available model names listed below.
 
-## Available Models
+### Available Models
 
 Use the following model names (same as in the API):
 
@@ -59,7 +59,7 @@ Use the following model names (same as in the API):
 * `monarch`
 * `silam`
 
-## Available Variables (Species)
+### Available Variables (Species)
 
 These are the available species:
 
@@ -83,7 +83,7 @@ These are the available species:
 
 > Providentia can only read species in GHOST format. The mapping is provided in the [GHOST–CAMS Species Mapping](#ghostcams-species-mapping) section.
 
-## Fixed Settings
+### Assumptions
 
 Providentia assumes the following fixed values when downloading data:
 
@@ -91,9 +91,9 @@ Providentia assumes the following fixed values when downloading data:
 * `time = 00:00`
 * `leadtime_hour = 0-96`
 
-## Example Configuration Files and Corresponding API Requests
+### Example Configuration Files and Corresponding API Requests
 
-### Example 1: CAMS Analysis (Ensemble)
+#### Example 1: CAMS Analysis (Ensemble)
 
 ```ini
 [cams_analysis_ensemble-regional]
@@ -120,7 +120,7 @@ request = {
 }
 ```
 
-### Example 2: CAMS Forecast (Ensemble)
+#### Example 2: CAMS Forecast (Ensemble)
 
 ```ini
 [cams_forecast_ensemble-regional]
