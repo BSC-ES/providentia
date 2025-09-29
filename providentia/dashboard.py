@@ -59,6 +59,8 @@ class Dashboard(QtWidgets.QWidget):
         # allow access to methods of parent class QtWidgets.QWidget
         super(Dashboard, self).__init__()
 
+        self.dashboard = True
+        
         # load statistical yamls
         self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
         self.expbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))

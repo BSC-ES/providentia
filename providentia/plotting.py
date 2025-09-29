@@ -100,7 +100,7 @@ class Plotting:
             zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(plot_type)
             
             # check if plot type is correct for report and library modes
-            if (self.read_instance.report) or (self.read_instance.library):
+            if self.read_instance.mode in ['report', 'library']:
 
                 # remove plots where setting 'obs' and 'bias' options together
                 if ('obs' in plot_options) & ('bias' in plot_options): 
@@ -123,12 +123,12 @@ class Plotting:
 
                 # break loop if the plot type is not valid and remove plot type from lists
                 if not valid_plot_type:
-                    if self.read_instance.report:
+                    if self.read_instance.mode == 'report':
                         if plot_type in self.read_instance.summary_plots_to_make:
                             self.read_instance.summary_plots_to_make.remove(plot_type)
                         if plot_type in self.read_instance.station_plots_to_make:
                             self.read_instance.station_plots_to_make.remove(plot_type)
-                    elif self.read_instance.library:
+                    elif self.read_instance.mode == 'library':
                         return valid_plot_type
                     continue
 
@@ -141,7 +141,7 @@ class Plotting:
                 stats_dict = {**self.read_instance.basic_stats, **self.read_instance.expbias_stats}
                 
                 # check if plot type is correct for report and library modes
-                if (self.read_instance.report) or (self.read_instance.library):
+                if self.read_instance.mode in ['report', 'library']:
 
                     # check all defined plot options are allowed for current plot type
                     invalid_plot_options = [plot_option for plot_option in plot_options if plot_option not in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options']]
@@ -182,12 +182,12 @@ class Plotting:
 
                     # break loop if the plot type is not valid and remove plot type from lists
                     if not valid_plot_type:
-                        if self.read_instance.report:
+                        if self.read_instance.mode == 'report':
                             if plot_type in self.read_instance.summary_plots_to_make:
                                 self.read_instance.summary_plots_to_make.remove(plot_type)
                             if plot_type in self.read_instance.station_plots_to_make:
                                 self.read_instance.station_plots_to_make.remove(plot_type)
-                        elif self.read_instance.library:
+                        elif self.read_instance.mode == 'library':
                             return valid_plot_type
                         continue
 
@@ -223,7 +223,7 @@ class Plotting:
                 base_plot_type = plot_type.split('_')[0] 
 
                 # check if plot type is correct for report and library modes
-                if (self.read_instance.report) or (self.read_instance.library):
+                if self.read_instance.mode in ['report', 'library']:
 
                     # check all defined plot options are allowed for current plot type
                     invalid_plot_options = [plot_option for plot_option in plot_options if plot_option not in self.canvas_instance.plot_characteristics_templates[base_plot_type]['plot_options']]
@@ -258,12 +258,12 @@ class Plotting:
 
                     # break loop if the plot type is not valid and remove plot type from lists
                     if not valid_plot_type:
-                        if self.read_instance.report:
+                        if self.read_instance.mode == 'report':
                             if plot_type in self.read_instance.summary_plots_to_make:
                                 self.read_instance.summary_plots_to_make.remove(plot_type)
                             if plot_type in self.read_instance.station_plots_to_make:
                                 self.read_instance.station_plots_to_make.remove(plot_type)
-                        elif self.read_instance.library:
+                        elif self.read_instance.mode == 'library':
                             return valid_plot_type
                         continue
 
@@ -290,7 +290,7 @@ class Plotting:
                     self.canvas_instance.plot_characteristics[plot_type]['figure']['figsize'] = self.canvas_instance.portrait_figsize
 
         # return valid plot type if library mode
-        if self.read_instance.library:
+        if self.read_instance.mode == 'library':
             return valid_plot_type
 
     def make_legend_handles(self, plot_characteristics_legend, data_labels=None, set_obs=True):
@@ -645,12 +645,12 @@ class Plotting:
         plot_txt = relevant_axis.text(0.0, 1.0, str_to_plot, transform=relevant_axis.transAxes, **plot_characteristics['plot'])
 
         # modify limit to wrap text as axis width in pixels
-        if self.read_instance.report: 
+        if self.read_instance.mode == 'report': 
             
             # get axis dimensions in pixels
             ax_width_px = relevant_axis.bbox.width * plot_characteristics['figure']['nrows']
             
-        elif self.read_instance.library:
+        elif self.read_instance.mode == 'library':
 
             # get axis dimensions in pixels
             ax_width_px = relevant_axis.bbox.width
@@ -669,7 +669,7 @@ class Plotting:
         plot_txt._get_wrap_line_width = lambda: ax_width_px
 
         # track plot elements if using dashboard 
-        if (not self.read_instance.report) and (not self.read_instance.library):
+        if self.read_instance.mode not in ['report', 'library']:
             self.track_plot_elements(self.read_instance.observations_data_label, 'metadata', 'plot', [plot_txt], bias=False)
 
     def make_map(self, relevant_axis, networkspeci, plot_characteristics, plot_options, zstat=None, labela='', 
@@ -698,7 +698,7 @@ class Plotting:
                                                                          map=True)
 
         # get marker size (for report and library)
-        if (self.read_instance.report) or (self.read_instance.library):
+        if self.read_instance.mode in ['report', 'library']:
             self.get_markersize(relevant_axis, 'map', networkspeci, plot_characteristics, 
                                 active_map_valid_station_inds=active_map_valid_station_inds)
         # if using dashboard make z_statistic and active_map_valid_station_inds class variables
@@ -713,7 +713,7 @@ class Plotting:
                                                       **plot_characteristics['plot'])
         
         # track plot elements if using dashboard 
-        if (not self.read_instance.report) and (not self.read_instance.library):
+        if self.read_instance.mode not in ['report', 'library']:
             self.track_plot_elements(self.read_instance.observations_data_label, 'map', 'plot', [self.stations_scatter], bias=False)
 
     def make_timeseries(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options, 
@@ -741,7 +741,7 @@ class Plotting:
 
         # skip making timeseries (points) for report and library mode
         # we do not apply this in the dashboard to avoid being unable to see the points on certain changes
-        if ((self.read_instance.report) or (self.read_instance.library)) and ('hidedata' in plot_options):
+        if (self.read_instance.mode in ['report', 'library']) and ('hidedata' in plot_options):
             return
 
         # if 'obs' in plot_options, set data labels to just observations data label
@@ -763,7 +763,7 @@ class Plotting:
         cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
         # get chunking stat and resolution in dashboard
-        if (not self.read_instance.report) and (not self.read_instance.library):
+        if self.read_instance.mode not in ['report', 'library']:
             chunk_stat = self.canvas_instance.timeseries_chunk_stat.currentText()
             chunk_resolution = self.canvas_instance.timeseries_chunk_resolution.currentText()
             chunk_stat = None if chunk_stat == 'None' else chunk_stat
@@ -788,7 +788,7 @@ class Plotting:
                plot_characteristics['bias_line']['y'] = self.read_instance.expbias_stats[chunk_stat]['minimum_bias']
             bias_line = relevant_axis.axhline(**plot_characteristics['bias_line'])
             # track plot elements if using dashboard 
-            if (not self.read_instance.report) and (not self.read_instance.library):
+            if self.read_instance.mode not in ['report', 'library']:
                 self.track_plot_elements('ALL', 'timeseries', 'bias_line', [bias_line], bias=bias)
 
         # iterate through data labels
@@ -814,7 +814,7 @@ class Plotting:
                 ts = timeseries_data[data_label]
             
             # get marker size (for report and library)
-            if (self.read_instance.report) or (self.read_instance.library):
+            if self.read_instance.mode in ['report', 'library']:
                 self.get_markersize(relevant_axis, 'timeseries', networkspeci, plot_characteristics, data=ts)
 
             # make timeseries plot
@@ -823,14 +823,14 @@ class Plotting:
                                                       **plot_characteristics['plot']))
 
             # update maximum smooth value
-            if (not self.read_instance.report) and (not self.read_instance.library):
+            if self.read_instance.mode not in ['report', 'library']:
                 self.canvas_instance.timeseries_smooth_window_sl.setMaximum(len(ts))
                 # To get straight line
                 # if self.canvas_instance.timeseries_smooth_window_sl.value() != (len(ts)*2 - 1):
                 #     self.canvas_instance.timeseries_smooth_window_sl.setMaximum(int(len(ts)*2 - 1))
 
             # track plot elements if using dashboard 
-            if (not self.read_instance.report) and (not self.read_instance.library):
+            if self.read_instance.mode not in ['report', 'library']:
                 self.track_plot_elements(data_label, 'timeseries', 'plot', self.timeseries_plot[-1], bias=bias)
 
     def make_periodic(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options, zstat=None):
@@ -991,7 +991,7 @@ class Plotting:
                         violins.extend(limit_plot)
 
                     # track plot elements if using dashboard 
-                    if (not self.read_instance.report) and (not self.read_instance.library):
+                    if self.read_instance.mode not in ['report', 'library']:
                         self.track_plot_elements(data_label, 'periodic-violin', 'violin_plot_{}'.format(relevant_temporal_resolution), violins, bias=False)
                         self.track_plot_elements(data_label, 'periodic-violin', 'Median_plot_{}'.format(relevant_temporal_resolution), median_plots, bias=False)
 
@@ -1009,7 +1009,7 @@ class Plotting:
                     for mb in minimum_bias:
                         bias_lines += [relevant_sub_ax.axhline(y=mb, **plot_characteristics['bias_line'])]
                     # track plot elements if using dashboard 
-                    if (not self.read_instance.report) and (not self.read_instance.library):
+                    if self.read_instance.mode not in ['report', 'library']:
                         self.track_plot_elements('ALL', 'periodic', 'bias_line_{}'.format(relevant_temporal_resolution), 
                                                  bias_lines, bias=bias)
 
@@ -1038,7 +1038,7 @@ class Plotting:
                                                                **plot_characteristics['plot'])
 
                     # track plot elements if using dashboard 
-                    if (not self.read_instance.report) and (not self.read_instance.library):
+                    if self.read_instance.mode not in ['report', 'library']:
                         self.track_plot_elements(data_label, 'periodic', 'plot_{}'.format(relevant_temporal_resolution), self.periodic_plots, bias=bias)
 
     def make_distribution(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options,
@@ -1110,7 +1110,7 @@ class Plotting:
         if bias:
             bias_line = [relevant_axis.axhline(**plot_characteristics['bias_line'])]
             # track plot elements if using dashboard 
-            if (not self.read_instance.report) and (not self.read_instance.library):
+            if self.read_instance.mode not in ['report', 'library']:
                 self.track_plot_elements('ALL', 'distribution', 'bias_line', bias_line, bias=bias)
             if self.read_instance.observations_data_label in cut_data_labels:
                 cut_data_labels.remove(self.read_instance.observations_data_label)
@@ -1267,7 +1267,7 @@ class Plotting:
                                                             **plot_characteristics['plot'])
 
                 # track plot elements if using dashboard 
-                if (not self.read_instance.report) and (not self.read_instance.library):
+                if self.read_instance.mode not in ['report', 'library']:
                     self.track_plot_elements(data_label, 'distribution', 'plot', self.distribution_plot, bias=bias)
 
         # if have made PDFs for violin plot then return it
@@ -1308,7 +1308,7 @@ class Plotting:
 
         # skip making scatter for report and library mode
         # we do not apply this in the dashboard to avoid being unable to see the points on certain changes
-        if ((self.read_instance.report) or (self.read_instance.library)) and ('hidedata' in plot_options):
+        if (self.read_instance.mode in ['report', 'library']) and ('hidedata' in plot_options):
             return
         
         # get valid data labels for networkspeci
@@ -1345,7 +1345,7 @@ class Plotting:
                 experiment_data = experiment_data[inds_subset]
 
             # get marker size (for report and library)
-            if (self.read_instance.report) or (self.read_instance.library):
+            if self.read_instance.mode in ['report', 'library']:
                 self.get_markersize(relevant_axis, 'scatter', networkspeci, plot_characteristics, data=observations_data)
 
             # create scatter plot
@@ -1354,7 +1354,7 @@ class Plotting:
                                                    **plot_characteristics['plot'])
 
             # track plot elements if using dashboard 
-            if (not self.read_instance.report) and (not self.read_instance.library):
+            if self.read_instance.mode not in ['report', 'library']:
                 self.track_plot_elements(data_label, 'scatter', 'plot', self.scatter_plot, bias=False)
 
     def make_boxplot(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
@@ -1479,7 +1479,7 @@ class Plotting:
                         patch.set(facecolor='white')
 
                     # track plot elements if using dashboard 
-                    if (not self.read_instance.report) and (not self.read_instance.library):
+                    if self.read_instance.mode not in ['report', 'library']:
                         self.track_plot_elements(data_label, 'boxplot', 'plot', boxplot, bias=False)
 
         # set xticklabels 
@@ -1696,7 +1696,7 @@ class Plotting:
                 tick.set_verticalalignment("center")
 
         # track plot elements if using dashboard 
-        if (not self.read_instance.report) and (not self.read_instance.library):
+        if self.read_instance.mode not in ['report', 'library']:
             self.track_plot_elements(self.read_instance.observations_data_label, 'heatmap', 'plot', heatmap, bias=bias)
 
     def make_table(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options,
@@ -1793,7 +1793,7 @@ class Plotting:
             stats_df = stats_df.applymap(lambda x: round_decimal_places(x, decimal_places))
 
         # reports
-        if (self.read_instance.report) or (self.read_instance.library):
+        if self.read_instance.mode in ['report', 'library']:
             
             # get relevant data
             if 'multispecies' not in plot_options:
@@ -1814,7 +1814,7 @@ class Plotting:
             stats_df = stats_df.reset_index()
 
             # hide subsections from station plots or if there is only 1 section
-            if (self.read_instance.report) or (self.read_instance.library):
+            if self.read_instance.mode in ['report', 'library']:
                 if plotting_paradigm == 'station' or len(np.unique(subsections)) == 1:
                     stats_df = stats_df.drop(columns='subsections')
         
@@ -1900,7 +1900,7 @@ class Plotting:
                                     **plot_characteristics['plot'])
 
         # merge cells in networkspecies and subsections columns (if any)
-        if (self.read_instance.report) or (self.read_instance.library):
+        if self.read_instance.mode in ['report', 'library']:
             column_ii = 0
             for column, rows in zip(['networkspecies', 'subsections'], (networkspecies, subsections)):
                 if column in stats_df.columns:
@@ -1926,7 +1926,7 @@ class Plotting:
             table.auto_set_column_width(np.arange(-1, len(col_labels)+1))
 
         # track plot elements if using dashboard 
-        if (not self.read_instance.report) and (not self.read_instance.library):
+        if self.read_instance.mode not in ['report', 'library']:
             if statsummary:
                 self.track_plot_elements(self.read_instance.observations_data_label, 'statsummary', 'plot', [table], bias=bias)
             else:
@@ -1956,7 +1956,7 @@ class Plotting:
             :type stddev_max: float
         """
 
-        if (self.read_instance.report) or (self.read_instance.library):
+        if self.read_instance.mode in ['report', 'library']:
             self.taylor_polar_relevant_axis = relevant_axis.get_aux_axes(
                 PolarAxes.PolarTransform(apply_theta_transforms=False))
 
@@ -2018,7 +2018,7 @@ class Plotting:
             grid_locator1=gl1, tick_formatter1=tf1)
 
         # update axis position and size in dashboard
-        if (not self.read_instance.report) and (not self.read_instance.library):
+        if self.read_instance.mode not in ['report', 'library']:
 
             # find Taylor plot position in layout
             for plot_position in range(2, 6):
@@ -2115,7 +2115,7 @@ class Plotting:
                                                                     label=data_label) 
 
             # track plot elements if using dashboard 
-            if (not self.read_instance.report) and (not self.read_instance.library):
+            if self.read_instance.mode not in ['report', 'library']:
                 self.track_plot_elements(data_label, 'taylor', 'plot', self.taylor_plot, bias=False)
 
         return True
@@ -2129,7 +2129,7 @@ class Plotting:
         
         # skip making plot if there is no valid data
         # library and report modes are already handling this in advance
-        if (not self.read_instance.report) and (not self.read_instance.library) and (not any(valid_station_idxs)):
+        if (self.read_instance.mode not in ['report', 'library']) and (not any(valid_station_idxs)):
             msg = 'No valid data to create FAIRMODE target plot after filtering by coverage.'
             show_message(self.read_instance, msg)
             self.read_instance.handle_layout_update('None', sender=self.canvas_instance.get_plot_type_position('fairmode-target'))
@@ -2260,7 +2260,7 @@ class Plotting:
                 self.fairmode_target_plot.append(stations_dots[0])
 
             # track plot elements if using dashboard 
-            if (not self.read_instance.report) and (not self.read_instance.library):
+            if self.read_instance.mode not in ['report', 'library']:
                 self.track_plot_elements(data_label, 'fairmode-target', 'plot', self.fairmode_target_plot, bias=False)
 
             # add MQI90
@@ -2315,7 +2315,7 @@ class Plotting:
                              **plot_characteristics['markers']['legend'])
 
         # add title if using dashboard 
-        if (not self.read_instance.report) and (not self.read_instance.library):
+        if self.read_instance.mode not in ['report', 'library']:
             set_axis_title(self.read_instance, relevant_axis, fairmode_settings[speci]['title'], 
                            plot_characteristics)
 
@@ -2329,7 +2329,7 @@ class Plotting:
 
         # skip making plot if there is no valid data
         # library and report modes are already handling this in advance
-        if (not self.read_instance.report) and (not self.read_instance.library) and (not any(valid_station_idxs)):
+        if (self.read_instance.mode not in ['report', 'library']) and (not any(valid_station_idxs)):
             msg = 'No valid data to create FAIRMODE target plot after filtering by coverage.'
             show_message(self.read_instance, msg)
             self.read_instance.handle_layout_update('None', sender=self.canvas_instance.get_plot_type_position('fairmode-statsummary'))
@@ -2560,7 +2560,7 @@ class Plotting:
 
             
             # track plot elements if using dashboard 
-            if (not self.read_instance.report) and (not self.read_instance.library):
+            if self.read_instance.mode not in ['report', 'library']:
                 self.track_plot_elements(data_label, 'fairmode-statsummary', 'plot', 
                                          self.fairmode_statsummary_plot, bias=False)
                         
@@ -2606,7 +2606,7 @@ class Plotting:
                     transform=relevant_axis[i*4 + 0].transAxes)
 
         # add title if using dashboard 
-        if (not self.read_instance.report) and (not self.read_instance.library):
+        if self.read_instance.mode not in ['report', 'library']:
             set_axis_title(self.read_instance, relevant_axis, fairmode_settings[speci]['title'], plot_characteristics)
 
 
