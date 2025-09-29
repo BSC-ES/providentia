@@ -535,11 +535,8 @@ class SubmitInterpolation(object):
         
         # if have no arguments for all experiments, return message stating that
         if len(self.arguments) == 0:
-            if len(self.experiments) > 1:
-                error = 'INTERPOLATION CANNOT BE DONE FOR ANY EXPERIMENT'
-                sys.exit(error)
-            else:
-                sys.exit()
+            error = 'INTERPOLATION CANNOT BE DONE FOR ANY EXPERIMENT'
+            sys.exit(error)
 
         # randomise the order of the arguments list
         random.shuffle(self.arguments)     
