@@ -1,5 +1,3 @@
-Here’s your revised **CAMS Download Guide** with **only the necessary edits** to improve clarity and make it understandable in English, while keeping the technical content and structure intact:
-
 # CAMS Download Guide
 
 Providentia's download mode supports downloading experiment data from **Atmosphere Data Store** datasets provided by CAMS:
