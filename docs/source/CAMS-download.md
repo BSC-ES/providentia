@@ -1,8 +1,8 @@
-# CAMS Download Guide
+# CAMS Download
 
 Providentia's download mode supports downloading experiment data from **Atmosphere Data Store** datasets provided by CAMS:
 
-https://ads.atmosphere.copernicus.eu/datasets
+[https://ads.atmosphere.copernicus.eu/datasets](https://ads.atmosphere.copernicus.eu/datasets)
 
 ## Available Datasets
 
