@@ -283,7 +283,7 @@ class Cams:
 
         for input_dim_name, output_dim_name in cams_providentia_map.items():
             # skip single species
-            if output_dim_name == "level" and cams_species in cams_variables_level[url]['single']:
+            if output_dim_name == "level" and 'single' in cams_variables_level[url] and cams_species in cams_variables_level[url]['single']:
                 pass
             # get dimension
             dim = input_file.dimensions[input_dim_name]
