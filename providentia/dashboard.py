@@ -59,8 +59,6 @@ class Dashboard(QtWidgets.QWidget):
         # allow access to methods of parent class QtWidgets.QWidget
         super(Dashboard, self).__init__()
 
-        self.dashboard = True
-        
         # load statistical yamls
         self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
         self.expbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
@@ -98,11 +96,10 @@ class Dashboard(QtWidgets.QWidget):
                         self.current_config = self.sub_opts[kwargs['section']]
                         self.section = kwargs['section']
                     else:
-                        error = 'Error: The section specified in the command line ({0}) does not exist.'.format(kwargs['section'])
-                        tip = 'Tip: For subsections, add the name of the parent section followed by an interpunct (·) '
-                        tip += 'before the subsection name (e.g. SECTIONA·Spain).'
-                        error = error + '\n' + tip
-                        self.logger.error(error)
+                        msg = 'Error: The section specified in the command line ({0}) does not exist.'.format(kwargs['section'])
+                        msg += '\nTip: For subsections, add the name of the parent section followed by an interpunct (·) '
+                        msg += 'before the subsection name (e.g. SECTIONA·Spain). Available: {0}'.format(self.all_sections)
+                        self.logger.error(msg)
                         sys.exit(1)
                 else:
                     # config defined, section undefined
