@@ -152,7 +152,7 @@ def harmonise_xy_lims_paradigm(read_instance, canvas_instance, relevant_axs, bas
             read_instance.periodic_relevant_temporal_resolutions)))
 
     # remove any axes from relevant_axs which are not active (only for report and library)
-    if (read_instance.report) or (read_instance.library):
+    if read_instance.mode in ['report', 'library']:
         relevant_axs_active = []
         mapped_resolutions_active = []
         for ax_ii, ax in enumerate(relevant_axs):

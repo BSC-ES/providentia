@@ -32,69 +32,89 @@ Importing Providentia gives access to the entirety of the Providentia backend. T
 
 Each of the different Providentia modes can be used through the Providentia module, as well as would normally executed via command line. 
 
-After importing Providentia, each mode has its own function which can be called as follows:
+After importing Providentia, you need to create the Providentia object:
+```
+provi = prv.Providentia('interactive_template.conf')
+```
+
+The configuration will become part of the object, therefere you can call the modes like this:
+
+**Download**
+
+To download data:
+
+```
+provi.download()
+```
 
 **Interpolation**
+
+To run an interpolation:
+
 ```
-provi = prv.interpolation('interactive_template.conf')
+provi.interpolation()
 ```
 
 **Dashboard**
+
+To open the dashboard:
+
 ```
-prv.dashboard()
+provi.dashboard()
 ```
 
 **Report**
-```
-provi = prv.report('interactive_template.conf')
-```
 
-**Download**
+To generate a report:
+
 ```
-provi = prv.download('interactive_template.conf')
+provi.report()
 ```
 
 **Library**
-```
-provi = prv.load('interactive_template.conf')
-```
 
-**Notebook**
-```
-provi = prv.notebook()
-```
+To read the data:
 
-The Interpolation, Report, Download and Library modes each require a .conf filename to be passed when calling the function.
+```
+provi.load()
+```
 
 You can pass any arguments you wish when calling each function to override what is set in the loaded .conf file. 
 
-The Report, Download and Library modes each return a class instance which can be used to access to access class methods and attributes. 
-
-The Library mode was specifically designed for this purpose with access to all Providentia sub-functions such as reading, filtering plotting etc. The following sections will discuss
+The Library mode was specifically designed for this purpose with access to all Providentia sub-functions such as reading, filtering plotting etc.
 
 ### Library: Reading and filtering data from a .conf file
 As a first step, data needs to be read and filtered appropriately.
 
 In order to let Providentia know what data is wanted to be read, and what filters to apply, this is all defined in a .conf file (the same as used in the dashboard and report modes). A class instance is created by the following line: 
+
 ```
-provi = prv.load('interactive_template.conf')
+provi = prv.Providentia('interactive_template.conf')
+provi.load()
 ```
+
 where `provi` is the class instance, which can access all of the class variables and methods.  
 
 Only one section-subsection pair in the .conf can be read and filtered by the library at one time, with the exception in the creation of plots with the `multispecies` option (see plotting section). Where there is more than one pair defined in the file, the specific pair wished to be read can be set by passing the section and/or subsection arguments, e.g.:
+
 ```
-provi = prv.load('interactive_template.conf', section='OTHERSECTION', subsection='OTHERSUBSECTION')
+provi = prv.Providentia('interactive_template.conf', section='OTHERSECTION', subsection='OTHERSUBSECTION')
+provi.load()
 ```
+
 If there are multiple section and subsection pairs in the .conf file, and a specific pair is not explicitly set to be read, then simply the first pair is taken to be read.
 
 When wanting to change any data or filters applied to the data, simply update the appropriate the .conf and reinitiate the class instance. 
 
 If wanting to overwrite any arguments in the .conf file, directly in the script, each argument can be simply passed when initiating the class instance, e.g.:
+
 ```
-provi = prv.load('interactive_template.conf', network='EANET')
+provi = prv.Providentia('interactive_template.conf', network='EANET')
+provi.load()
 ```
 
 ### Library: Reset filter
+
 After data has been read and filtered, it will stay filtered until it is reset. This can be done by the following method: 
 
 ```

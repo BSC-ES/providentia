@@ -3,8 +3,8 @@ def show_message(read_instance, msg, from_conf=None, deactivate=False, print=Fal
     # variable used to control when the warnings don't need to be shown
     if deactivate:
         return
-
-    if (read_instance.report) or (read_instance.library) or (read_instance.interpolation) or (read_instance.download) or print:
+    
+    if read_instance.mode in ['report', 'library', 'interpolation', 'download'] or print:
        read_instance.logger.warning('Warning: ' + msg)
     
     else:

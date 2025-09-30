@@ -93,7 +93,7 @@ def linear_regression(read_instance, canvas_instance, relevant_axis, networkspec
                                                  **plot_characteristics['regression'])
             
             # track plot elements if using dashboard 
-            if (not read_instance.report) and (not read_instance.library) :
+            if read_instance.mode not in ['report', 'library']:
                 canvas_instance.plotting.track_plot_elements(data_label, base_plot_type, 'regression', regression_line, bias=False)
 
 
@@ -136,7 +136,7 @@ def smooth(read_instance, canvas_instance, relevant_axis, networkspeci, data_lab
         bias = False
 
     # get chunking stat and resolution in dashboard
-    if (not read_instance.report) and (not read_instance.library):
+    if read_instance.mode not in ['report', 'library']:
         chunk_stat = canvas_instance.timeseries_chunk_stat.currentText()
         chunk_resolution = canvas_instance.timeseries_chunk_resolution.currentText()
         chunk_stat = None if chunk_stat == 'None' else chunk_stat
@@ -186,7 +186,7 @@ def smooth(read_instance, canvas_instance, relevant_axis, networkspeci, data_lab
                                          **plot_characteristics['smooth']['format'])
 
         # track plot elements if using dashboard 
-        if (not read_instance.report) and (not read_instance.library):
+        if read_instance.mode not in ['report', 'library']:
             canvas_instance.plotting.track_plot_elements(data_label, base_plot_type, 'smooth', smooth_line, bias=bias)
 
 
@@ -221,7 +221,7 @@ def threshold(read_instance, canvas_instance, relevant_axis, networkspeci, base_
                                                **plot_characteristics['threshold_line'])
 
     # track plot elements if using dashboard 
-    if (not read_instance.report) and (not read_instance.library):
+    if read_instance.mode not in ['report', 'library']:
         canvas_instance.plotting.track_plot_elements('ALL', base_plot_type, 'threshold', [threshold_line], bias=False)
 
 
@@ -357,7 +357,7 @@ def annotation(read_instance, canvas_instance, relevant_axis, networkspeci, data
         relevant_axis.add_artist(bbox)
 
         # track plot elements if using dashboard 
-        if (not read_instance.report) and (not read_instance.library):
+        if read_instance.mode not in ['report', 'library']:
             canvas_instance.plotting.track_plot_elements('ALL', base_plot_type, 'annotate', [bbox], bias=bias)
     else:
         msg = '{} could not be annotated'.format(base_plot_type)

@@ -67,8 +67,17 @@ class SubmitInterpolation(object):
             if section in self.parent_section_names:
                 self.current_config = self.sub_opts[section]
             else:
-                error = f"Error: Defined section '{section}' does not exist in configuration file."
-                sys.exit(error)
+                # try to get parent section
+                error = f"Error: Defined section '{section}' does not exist in configuration file. Available: {self.parent_section_names}"
+                if '·' in section:
+                    if section.split('·')[0] in self.parent_section_names:
+                        msg = f"Using parent section {section.split('·')[0]} for interpolation"
+                        self.current_config = self.sub_opts[section]
+                        print(msg)
+                    else:
+                        sys.exit(error)       
+                else:
+                    sys.exit(error)        
         else:
             # if no parent section names are found throw an error
             if len(self.parent_section_names) == 0:
@@ -535,11 +544,8 @@ class SubmitInterpolation(object):
         
         # if have no arguments for all experiments, return message stating that
         if len(self.arguments) == 0:
-            if len(self.experiments) > 1:
-                error = 'INTERPOLATION CANNOT BE DONE FOR ANY EXPERIMENT'
-                sys.exit(error)
-            else:
-                sys.exit()
+            error = 'INTERPOLATION CANNOT BE DONE FOR ANY EXPERIMENT'
+            sys.exit(error)
 
         # randomise the order of the arguments list
         random.shuffle(self.arguments)     
@@ -956,8 +962,8 @@ class SubmitInterpolation(object):
     def stdout_to_console(self):
         ''' Function to print stdout to console in library mode'''
 
-        #library mode?
-        if self.library:
+        # library mode?
+        if self.mode == 'library':
             #flush stdout
             sys.stdout.flush()
             #get current stdout

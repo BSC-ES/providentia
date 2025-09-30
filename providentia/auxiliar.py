@@ -147,3 +147,18 @@ def get_machine():
             machine = "local"
 
     return machine
+
+class Tee:
+    """Class to show interpolation output in terminal from notebook"""
+
+    def __init__(self, *streams):
+        self.streams = streams
+
+    def write(self, data):
+        for s in self.streams:
+            s.write(data)
+            s.flush()
+
+    def flush(self):
+        for s in self.streams:
+            s.flush()
