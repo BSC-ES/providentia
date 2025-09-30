@@ -32,6 +32,7 @@ def read_data(inst, path):
 def plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
 
     # make plot
+    inst.load()
     fig = inst.plot(plot_type, plot_options=plot_options, return_plot=True)
 
     # check that a figure has been returned

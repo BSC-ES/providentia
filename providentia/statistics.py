@@ -414,7 +414,7 @@ def get_station_inds(read_instance, canvas_instance, networkspeci, station_index
     if station_index is not None:
         station_inds = np.array([station_index])
     else:
-        if (read_instance.report) or (read_instance.library):
+        if read_instance.mode in ['report', 'library']:
             if read_instance.temporal_colocation:
                 station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][read_instance.observations_data_label]
             else:
