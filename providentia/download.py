@@ -76,11 +76,10 @@ class Download(object):
                     if kwargs['section'] in self.all_sections:
                         self.sections = [kwargs['section']]
                     else:
-                        error = 'Error: The section specified in the command line ({0}) does not exist.'.format(kwargs['section'])
-                        tip = 'Tip: For subsections, add the name of the parent section followed by an interpunct (·) '
-                        tip += 'before the subsection name (e.g. SECTIONA·Spain).'
-                        error = error + '\n' + tip
-                        self.logger.error(error)
+                        msg = 'Error: The section specified in the command line ({0}) does not exist.'.format(kwargs['section'])
+                        msg += '\nTip: For subsections, add the name of the parent section followed by an interpunct (·) '
+                        msg += 'before the subsection name (e.g. SECTIONA·Spain). Available: {0}'.format(self.all_sections)
+                        self.logger.error(msg)
                         sys.exit(1)
                 # if no section passed, then get all the parent sections
                 else:
@@ -118,7 +117,7 @@ class Download(object):
             # initialise boolean thath indicates whether remote machine changed 
             self.switched_remote = False
 
-    def run(self):
+    def run(self, **kwargs):
         for section_ind, section in enumerate(self.sections):
             # update for new section parameters
             self.section = section
@@ -126,8 +125,9 @@ class Download(object):
 
             # update self with section variables
             for k, val in self.section_opts.items():
-                setattr(self, k, self.provconf.parse_parameter(k, val))
-
+                if k not in kwargs:
+                    setattr(self, k, self.provconf.parse_parameter(k, val))
+            
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             self.provconf.check_validity(deactivate_warning=True)
 
@@ -1667,4 +1667,4 @@ def main(**kwargs):
     """ Main function when running download function. """
 
     download = Download(**kwargs)
-    download.run()
+    download.run(**kwargs)
