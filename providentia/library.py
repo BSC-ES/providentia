@@ -1389,11 +1389,11 @@ class Providentia:
         self.datareader = DataReader(self)
 
         # check for self defined plot characteristics file
+        if self.tests:
+            mode = 'tests'
+        else:
+            mode = 'library'
         if self.plot_characteristics_filename == '':
-            if self.tests:
-                mode = 'tests'
-            else:
-                mode = 'library'
             self.plot_characteristics_filename = join(PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')
         plot_characteristics = yaml.safe_load(open(self.plot_characteristics_filename))
         self.plot_characteristics_templates = expand_plot_characteristics(plot_characteristics, mode)
@@ -1431,7 +1431,6 @@ class Providentia:
         # set variable to know if data is in intial state or not
         self.initialised = True
     
-
     def download(self, **kwargs):
         """ Wrapper function for initialising Download class"""
         
