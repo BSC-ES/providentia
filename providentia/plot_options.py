@@ -93,7 +93,7 @@ def linear_regression(read_instance, canvas_instance, relevant_axis, networkspec
                                                  **plot_characteristics['regression'])
             
             # track plot elements if using dashboard 
-            if read_instance not in ['report', 'library']:
+            if read_instance.mode not in ['report', 'library']:
                 canvas_instance.plotting.track_plot_elements(data_label, base_plot_type, 'regression', regression_line, bias=False)
 
 

@@ -63,6 +63,9 @@ class Providentia:
         # set kwargs to self
         self.kwargs = kwargs
 
+        # make configuration file visible to other modes
+        self.kwargs['config'] = config
+
         # update kwargs to detect library mode
         self.kwargs['library'] = True
 
@@ -1165,24 +1168,27 @@ class Providentia:
         # otherwise take first defined section name
         self.sections = copy.deepcopy(self.parent_section_names)
 
-        #check if configuration file has a section title
+        # check if configuration file has a section title
         if len(self.sections) == 0:
             error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
             self.logger.info(error)
             return False
     
-        have_section = False
+        self.have_section = False
         if hasattr(self, 'section'): 
             # check that section actually exists
-            if self.section in self.sections:
-                have_section = True
+            if self.section in self.all_sections:
+                self.have_section = True
             else:
-                msg = "Defined section {} does not exist in configuration file.".format(self.section)
+                msg = 'Error: The section specified in the command line ({0}) does not exist.'.format(self.section)
+                msg += '\nTip: For subsections, add the name of the parent section followed by an interpunct (·) '
+                msg += 'before the subsection name (e.g. SECTIONA·Spain). Available: {0}'.format(self.all_sections)
                 show_message(self, msg)
-        if not have_section:
+
+        if not self.have_section:
             self.section = self.sections[0]
             if len(self.sections) > 1:
-                msg = "Taking first defined section ({}) to be read.".format(self.section)
+                msg = "Taking first defined section ({}).".format(self.section)
                 show_message(self, msg)
 
         # update self with section variables (if not overwritten by kwargs)
@@ -1430,33 +1436,32 @@ class Providentia:
         """ Wrapper function for initialising Download class"""
         
         from .download import Download
-        
-        kwargs['config'] = self.config
+
         kwargs['download'] = True
-        provi = Download(**kwargs)
-        provi.run()
-        
-        return provi
+        parent_kwargs = copy.deepcopy(self.kwargs) 
+        parent_kwargs.update(kwargs)
+        download = Download(**parent_kwargs)
+        download.run(**parent_kwargs)
 
     def dashboard(self, **kwargs):
         """ Wrapper function for initialising Dashboard class"""
 
         from .dashboard import main
         
-        main(**kwargs)
-
+        kwargs['dashboard'] = True
+        parent_kwargs = copy.deepcopy(self.kwargs) 
+        parent_kwargs.update(kwargs)
+        main(**parent_kwargs)
 
     def interpolate(self, **kwargs):
         """ Wrapper function for initialising Interpolation class"""
         
         from .interpolation import experiment_interpolation_submission as interpolation
         
-        kwargs['config'] = self.config
         kwargs['interpolation'] = True
-        kwargs['library'] = True   
         
         unique_id = f"{random.randint(0, 999999):06d}"
-        kwargs['slurm_job_id'] = unique_id  
+        kwargs['slurm_job_id'] = unique_id
 
         log_path = join(
             PROVIDENTIA_ROOT,
@@ -1472,23 +1477,19 @@ class Providentia:
             sys.stdout = Tee(orig_stdout, f)
             try:
                 # do interpolation
-                interpolation.main(**kwargs)
+                parent_kwargs = copy.deepcopy(self.kwargs) 
+                parent_kwargs.update(kwargs)
+                interpolation.main(**parent_kwargs)
             finally:
                 # reset stdout
                 sys.stdout = orig_stdout
                 
-
     def report(self, **kwargs):
         """ Wrapper function for initialising Report class"""
 
         from .report import Report
         
-        kwargs['config'] = self.config
         kwargs['report'] = True
-        provi = Report(**kwargs)
-        
-        return provi
-
-def notebook():
-    """ Wrapper function for opening Jupyter Notebook"""
-    subprocess.run(['./bin/providentia', '--notebook'])
+        parent_kwargs = copy.deepcopy(self.kwargs) 
+        parent_kwargs.update(kwargs)
+        Report(**parent_kwargs)
