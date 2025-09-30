@@ -17,7 +17,7 @@ import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 import pandas as pd
 
-from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
+from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics, Tee
 from .configuration import load_conf
 from .configuration import ProvConfiguration
 from .fields_menus import (init_metadata, init_period, init_representativity, metadata_conf,
@@ -52,16 +52,22 @@ try:
 except NameError:
     jupyter_session = False
 
-class Library:
+class Providentia:
     """ Class for Providentia Library mode"""
 
     def __init__(self, config, **kwargs):
-
+        
         # set config to self
         self.config = config
 
         # set kwargs to self
         self.kwargs = kwargs
+
+        # make configuration file visible to other modes
+        self.kwargs['config'] = config
+
+        # update kwargs to detect library mode
+        self.kwargs['library'] = True
 
         # load statistical yamls
         self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
@@ -72,58 +78,11 @@ class Library:
 
         # set configuration variables, as well as any other defined variables
         valid_config = self.set_config(**self.kwargs)
+
         # if configuration read was not valid then return here
         if not valid_config:
             return
 
-        # generate file trees if needed
-        generate_file_trees(self)
-        
-        # initialise DataReader class
-        self.datareader = DataReader(self)
-
-        # check for self defined plot characteristics file
-        if self.plot_characteristics_filename == '':
-            if self.tests:
-                mode = 'tests'
-            else:
-                mode = 'library'
-            self.plot_characteristics_filename = join(PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')
-        plot_characteristics = yaml.safe_load(open(self.plot_characteristics_filename))
-        self.plot_characteristics_templates = expand_plot_characteristics(plot_characteristics, mode)
-
-        # initialise Plotting class
-        self.plotting = Plotting(read_instance=self, canvas_instance=self)
-
-        # add general plot characteristics to self
-        for k, val in self.plot_characteristics_templates['general'].items():
-            setattr(self, k, val)
-
-        # set some key configuration variables
-        self.periodic_relevant_temporal_resolutions = get_periodic_relevant_temporal_resolutions(self.resolution)
-        self.periodic_nonrelevant_temporal_resolutions = get_periodic_nonrelevant_temporal_resolutions(self.resolution)
-        self.data_labels = [self.observations_data_label] + list(self.experiments.values())
-        self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
-        self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
-
-        # get valid observations in date range
-        get_valid_obs_files_in_date_range(self, self.start_date, self.end_date)
-
-        # update available experiments for selected fields
-        get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
-                              self.network, self.species)
-
-        # read data
-        self.read()  
-        if self.invalid_read:
-            self.logger.info('No valid data to read')
-            return
-
-        # filter
-        self.reset(initialise=True)
-
-        # set variable to know if data is in intial state or not
-        self.initialised = True
 
     def read(self):
         """ Wrapper method to read data. """
@@ -1209,24 +1168,27 @@ class Library:
         # otherwise take first defined section name
         self.sections = copy.deepcopy(self.parent_section_names)
 
-        #check if configuration file has a section title
+        # check if configuration file has a section title
         if len(self.sections) == 0:
             error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
             self.logger.info(error)
             return False
     
-        have_section = False
+        self.have_section = False
         if hasattr(self, 'section'): 
             # check that section actually exists
-            if self.section in self.sections:
-                have_section = True
+            if self.section in self.all_sections:
+                self.have_section = True
             else:
-                msg = "Defined section {} does not exist in configuration file.".format(self.section)
+                msg = 'Error: The section specified in the command line ({0}) does not exist.'.format(self.section)
+                msg += '\nTip: For subsections, add the name of the parent section followed by an interpunct (·) '
+                msg += 'before the subsection name (e.g. SECTIONA·Spain). Available: {0}'.format(self.all_sections)
                 show_message(self, msg)
-        if not have_section:
+
+        if not self.have_section:
             self.section = self.sections[0]
             if len(self.sections) > 1:
-                msg = "Taking first defined section ({}) to be read.".format(self.section)
+                msg = "Taking first defined section ({}).".format(self.section)
                 show_message(self, msg)
 
         # update self with section variables (if not overwritten by kwargs)
@@ -1418,51 +1380,115 @@ class Library:
                 var_data = data[var][:]
                 return var_data
 
-def dashboard(**kwargs):
-    """ Wrapper function for initialising Dashboard class"""
-    from .dashboard import main
-    main(**kwargs)
+    def load(self):
 
-def download(config, **kwargs):
-    """ Wrapper function for initialising Download class"""
-    from .download import Download
-    kwargs['config'] = config
-    kwargs['download'] = True
-    provi = Download(**kwargs)
-    provi.run()
-    return provi
+        # generate file trees if needed
+        generate_file_trees(self)
+        
+        # initialise DataReader class
+        self.datareader = DataReader(self)
 
-def interpolation(config, **kwargs):
-    """ Wrapper function for initialising Interpolation class"""
-    from .interpolation import experiment_interpolation_submission as interpolation
-    kwargs['config'] = config
-    kwargs['interpolation'] = True
-    kwargs['library'] = True   
-    unique_id = '{number:06}'.format(number=random.randint(0, 999999))
-    kwargs['slurm_job_id'] = unique_id  
-    # save original stdout
-    orig_stdout = sys.stdout
-    # redirict stdout to file
-    sys.stdout = open(join(PROVIDENTIA_ROOT,'logs','interpolation','management_logs', f'{unique_id}.out'), 'w')
-    # do interpolation
-    interpolation.main(**kwargs)
-    # reset stdout
-    sys.stdout = orig_stdout
+        # check for self defined plot characteristics file
+        if self.tests:
+            mode = 'tests'
+        else:
+            mode = 'library'
+        if self.plot_characteristics_filename == '':
+            self.plot_characteristics_filename = join(PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')
+        plot_characteristics = yaml.safe_load(open(self.plot_characteristics_filename))
+        self.plot_characteristics_templates = expand_plot_characteristics(plot_characteristics, mode)
 
-def load(config, **kwargs):
-    """ Wrapper function for initialising Library class"""
-    kwargs['library'] = True
-    provi = Library(config, **kwargs)
-    return provi     
+        # initialise Plotting class
+        self.plotting = Plotting(read_instance=self, canvas_instance=self)
 
-def notebook():
-    """ Wrapper function for opening Jupyter Notebook"""
-    subprocess.run(['./bin/providentia', '--notebook'])
+        # add general plot characteristics to self
+        for k, val in self.plot_characteristics_templates['general'].items():
+            setattr(self, k, val)
 
-def report(config, **kwargs):
-    """ Wrapper function for initialising Report class"""
-    from .report import Report
-    kwargs['config'] = config
-    kwargs['report'] = True
-    provi = Report(**kwargs)
-    return provi
+        # set some key configuration variables
+        self.periodic_relevant_temporal_resolutions = get_periodic_relevant_temporal_resolutions(self.resolution)
+        self.periodic_nonrelevant_temporal_resolutions = get_periodic_nonrelevant_temporal_resolutions(self.resolution)
+        self.data_labels = [self.observations_data_label] + list(self.experiments.values())
+        self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
+        self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
+
+        # get valid observations in date range
+        get_valid_obs_files_in_date_range(self, self.start_date, self.end_date)
+
+        # update available experiments for selected fields
+        get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
+                              self.network, self.species)
+
+        # read data
+        self.read()  
+        if self.invalid_read:
+            self.logger.info('No valid data to read')
+            return
+
+        # filter
+        self.reset(initialise=True)
+
+        # set variable to know if data is in intial state or not
+        self.initialised = True
+    
+    def download(self, **kwargs):
+        """ Wrapper function for initialising Download class"""
+        
+        from .download import Download
+
+        kwargs['download'] = True
+        parent_kwargs = copy.deepcopy(self.kwargs) 
+        parent_kwargs.update(kwargs)
+        download = Download(**parent_kwargs)
+        download.run(**parent_kwargs)
+
+    def dashboard(self, **kwargs):
+        """ Wrapper function for initialising Dashboard class"""
+
+        from .dashboard import main
+        
+        kwargs['dashboard'] = True
+        parent_kwargs = copy.deepcopy(self.kwargs) 
+        parent_kwargs.update(kwargs)
+        main(**parent_kwargs)
+
+    def interpolate(self, **kwargs):
+        """ Wrapper function for initialising Interpolation class"""
+        
+        from .interpolation import experiment_interpolation_submission as interpolation
+        
+        kwargs['interpolation'] = True
+        
+        unique_id = f"{random.randint(0, 999999):06d}"
+        kwargs['slurm_job_id'] = unique_id
+
+        log_path = join(
+            PROVIDENTIA_ROOT,
+            "logs",
+            "interpolation",
+            "management_logs",
+            f"{unique_id}.out"
+        )
+
+        # save original stdout
+        orig_stdout = sys.stdout
+        with open(log_path, "w") as f:
+            sys.stdout = Tee(orig_stdout, f)
+            try:
+                # do interpolation
+                parent_kwargs = copy.deepcopy(self.kwargs) 
+                parent_kwargs.update(kwargs)
+                interpolation.main(**parent_kwargs)
+            finally:
+                # reset stdout
+                sys.stdout = orig_stdout
+                
+    def report(self, **kwargs):
+        """ Wrapper function for initialising Report class"""
+
+        from .report import Report
+        
+        kwargs['report'] = True
+        parent_kwargs = copy.deepcopy(self.kwargs) 
+        parent_kwargs.update(kwargs)
+        Report(**parent_kwargs)
