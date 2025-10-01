@@ -484,6 +484,9 @@ class Cams:
                     # print the request
                     self.print_request(cams_dict['dataset'], request)
 
+                    # get last downloaded file in case there was a keyboard interrupt
+                    self.download_instance.latest_nc_file_path = final_path
+
                     # make the request
                     try:
                         self.download_instance.logger.info(f"Downloading {final_path}") # TODO change message
