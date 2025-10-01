@@ -42,7 +42,7 @@ On days where gpfs is full and there is no available disk space, we get this err
 * Open the dashboard using `/bin/providentia`, this will create the conda environment in your machine.
 * Add your experiment ID in `settings/interp_experiments.yaml` so that Providentia can know where to download the data from.
 * Add `interpolated=False` in your configuration file to indicate that you want to download data that has not yet been interpolated.
-* Use the [download mode](Download) to download the observations and experiments to interpolate by `./bin/providentia --config='/path/to/file/example.conf' --download`. If you get an authentication error, review the .env file and redefine the username and password to access storage5 (PRV_USER, PRV_PWD).
+* Use the {ref}`download mode <default-download>`. to download the observations and experiments to interpolate by `./bin/providentia --config='/path/to/file/example.conf' --download`. If you get an authentication error, review the .env file and redefine the username and password to access storage5 (PRV_USER, PRV_PWD).
 * After downloading the data do the interpolation as usual: `./bin/providentia --config='/path/to/file/example.conf' --interp`.
 
 ## Unknown Miniconda3/23.9.0-0 on Nord4

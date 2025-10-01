@@ -166,7 +166,6 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
             <span class="k">return</span>
 
-
     <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to read data. &quot;&quot;&quot;</span>
 
@@ -1329,7 +1328,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">subsection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">have_subsection</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subsections</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Taking first defined subsection (</span><span class="si">{}</span><span class="s2">) to be read.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subsection</span><span class="p">)</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Using the first defined subsection (</span><span class="si">{}</span><span class="s2">).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subsection</span><span class="p">)</span>
                     <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">subsections</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">section</span><span class="p">]</span>

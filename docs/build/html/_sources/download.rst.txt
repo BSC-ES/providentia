@@ -5,6 +5,6 @@ Download
 .. toctree::
    :maxdepth: 2
 
-   Download.md
+   BSC-Zenodo-download.md
    CAMS-download.md
    ACTRIS-download.md
