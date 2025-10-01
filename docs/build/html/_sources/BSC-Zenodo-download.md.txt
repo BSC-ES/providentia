@@ -1,5 +1,7 @@
-# Download
-Now it is possible to download data directly into your machine outside HPC via the download mode. With this, you won't need to spend time waiting for a job to be allocated for you and the tool interactive features will run smoothly as there will be no x11 forwarding.
+(default-download)=
+# BSC and Zenodo
+
+Now it is possible to download data from the HPC machines at BSC and Zenodo directly into your local machine via the download mode. With this, you won't need to spend time waiting for a job to be allocated for you and the tool interactive features will run smoothly as there will be no x11 forwarding.
 
 To download data you just need to add `--download` or `--dl` to your command:
 
