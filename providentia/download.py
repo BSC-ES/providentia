@@ -1521,6 +1521,10 @@ class Download(object):
                             
                             # copy file
                             esarchive_path = join(esarchive_dir, nc_file)
+
+                            # get last downloaded file in case there was a keyboard interrupt
+                            self.latest_nc_file_path = gpfs_path
+
                             try:
                                 with open(os.devnull, 'wb') as devnull:
                                     subprocess.check_call([rsync_command, esarchive_path, gpfs_path], stdout=devnull, stderr=subprocess.STDOUT)
@@ -1641,8 +1645,8 @@ class Download(object):
 
         # delete the las downloaded nc file to avoid corrupted files
         if hasattr(self, 'latest_nc_file_path'):
-            self.logger.info(f"\nDeleting last file to avoid corruption: {self.latest_nc_file_path}...")
             if os.path.isfile(self.latest_nc_file_path):
+                self.logger.info(f"\nDeleting last file to avoid corruption: {self.latest_nc_file_path}...")
                 os.remove(self.latest_nc_file_path)
 
         # remove the output files from dtrsync in case it was a download from storage5
