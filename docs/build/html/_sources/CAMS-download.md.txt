@@ -1,10 +1,10 @@
-# CAMS Download
+# CAMS
 
 Providentia's download mode supports downloading experiment data from **Atmosphere Data Store** datasets provided by CAMS:
 
 [https://ads.atmosphere.copernicus.eu/datasets](https://ads.atmosphere.copernicus.eu/datasets)
 
-## Available Datasets
+## Available datasets
 
 Currently, four CAMS datasets are available for download:
 
@@ -24,7 +24,7 @@ You can download either:
 
 This dataset provides hourly data only. You must set `resolution = hourly` in your configuration file; otherwise, the download will not work.
 
-### Mandatory Fields for Analysis Data
+### Mandatory fields for analysis data
 
 ```ini
 experiment = cams_analysis_<model>
@@ -32,7 +32,7 @@ domain = regional
 resolution = hourly
 ```
 
-### Mandatory Fields for Forecast Data
+### Mandatory fields for forecast data
 
 ```ini
 experiment = cams_forecast_<model>
@@ -42,7 +42,7 @@ resolution = hourly
 
 > Replace `<model>` with one of the available model names listed below.
 
-### Available Models
+### Available models
 
 Use the following model names (same as in the API):
 
@@ -59,7 +59,7 @@ Use the following model names (same as in the API):
 * `monarch`
 * `silam`
 
-### Available Variables (Species)
+### Available variables (Species)
 
 These are the available species:
 
@@ -81,7 +81,7 @@ These are the available species:
 * `sulphur_dioxide`
 * `total_elementary_carbon`
 
-> Providentia can only read species in GHOST format. The mapping is provided in the [GHOST–CAMS Species Mapping](#ghostcams-species-mapping) section.
+> Providentia can only read species in GHOST format. The mapping is provided in the [GHOST–CAMS species mapping](#ghostcams-species-mapping) section.
 
 ### Assumptions
 
@@ -91,7 +91,7 @@ Providentia assumes the following fixed values when downloading data:
 * `time = 00:00`
 * `leadtime_hour = 0-96`
 
-### Example Configuration Files and Corresponding API Requests
+### Example configuration files and corresponding API requests
 
 #### Example 1: CAMS Analysis (Ensemble)
 
@@ -157,7 +157,7 @@ request = {
 }
 ```
 
-## GHOST–CAMS Species Mapping
+## GHOST–CAMS species mapping
 
 Here is the mapping between GHOST variable names and CAMS species:
 

@@ -9,4 +9,3 @@ Topics in depth
    Plot-types-and-options.md
    Plot-customisation.md
    Statistics.md
-   CAMS-download.md

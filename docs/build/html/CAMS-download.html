@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CAMS Download &mdash; Providentia 2.4.0 documentation</title>
+  <title>CAMS &mdash; Providentia 2.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -22,8 +22,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Other topics" href="other-topics.html" />
-    <link rel="prev" title="Statistics" href="Statistics.html" /> 
+    <link rel="next" title="ACTRIS" href="ACTRIS-download.html" />
+    <link rel="prev" title="Download" href="Download.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,28 +48,26 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modes.html">Modes</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Configuration-files.html">Configuration files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Plot-types-and-options.html">Plot types and options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Plot-customisation.html">Plot customisation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Statistics.html">Statistics</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">CAMS Download</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#available-datasets">Available Datasets</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#cams-european-air-quality-forecasts">1. CAMS European Air Quality Forecasts</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#mandatory-fields-for-analysis-data">Mandatory Fields for Analysis Data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mandatory-fields-for-forecast-data">Mandatory Fields for Forecast Data</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#available-models">Available Models</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#available-variables-species">Available Variables (Species)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#assumptions">Assumptions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#example-configuration-files-and-corresponding-api-requests">Example Configuration Files and Corresponding API Requests</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modes.html">Modes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Interpolation.html">Interpolation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Report.html">Report</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="download.html">Download</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Download.html">Download</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">CAMS</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#available-datasets">Available datasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cams-european-air-quality-forecasts">1. CAMS European Air Quality Forecasts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ghostcams-species-mapping">GHOST–CAMS species mapping</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#ghostcams-species-mapping">GHOST–CAMS Species Mapping</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ACTRIS-download.html">ACTRIS</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Notebook.html">Notebook</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a></li>
 <li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Evolution.html">Evolution</a></li>
@@ -91,8 +89,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="topics-in-depth.html">Topics in depth</a></li>
-      <li class="breadcrumb-item active">CAMS Download</li>
+          <li class="breadcrumb-item"><a href="modes.html">Modes</a></li>
+          <li class="breadcrumb-item"><a href="download.html">Download</a></li>
+      <li class="breadcrumb-item active">CAMS</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/CAMS-download.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -102,12 +101,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="cams-download">
-<h1>CAMS Download<a class="headerlink" href="#cams-download" title="Link to this heading"></a></h1>
+  <section id="cams">
+<h1>CAMS<a class="headerlink" href="#cams" title="Link to this heading"></a></h1>
 <p>Providentia’s download mode supports downloading experiment data from <strong>Atmosphere Data Store</strong> datasets provided by CAMS:</p>
 <p><a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets">https://ads.atmosphere.copernicus.eu/datasets</a></p>
 <section id="available-datasets">
-<h2>Available Datasets<a class="headerlink" href="#available-datasets" title="Link to this heading"></a></h2>
+<h2>Available datasets<a class="headerlink" href="#available-datasets" title="Link to this heading"></a></h2>
 <p>Currently, four CAMS datasets are available for download:</p>
 <ol class="arabic simple">
 <li><p><strong>CAMS European Air Quality Forecasts</strong></p></li>
@@ -126,7 +125,7 @@
 </ul>
 <p>This dataset provides hourly data only. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> in your configuration file; otherwise, the download will not work.</p>
 <section id="mandatory-fields-for-analysis-data">
-<h3>Mandatory Fields for Analysis Data<a class="headerlink" href="#mandatory-fields-for-analysis-data" title="Link to this heading"></a></h3>
+<h3>Mandatory fields for analysis data<a class="headerlink" href="#mandatory-fields-for-analysis-data" title="Link to this heading"></a></h3>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_analysis_&lt;model&gt;</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
@@ -134,7 +133,7 @@
 </div>
 </section>
 <section id="mandatory-fields-for-forecast-data">
-<h3>Mandatory Fields for Forecast Data<a class="headerlink" href="#mandatory-fields-for-forecast-data" title="Link to this heading"></a></h3>
+<h3>Mandatory fields for forecast data<a class="headerlink" href="#mandatory-fields-for-forecast-data" title="Link to this heading"></a></h3>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast_&lt;model&gt;</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
@@ -145,7 +144,7 @@
 </div></blockquote>
 </section>
 <section id="available-models">
-<h3>Available Models<a class="headerlink" href="#available-models" title="Link to this heading"></a></h3>
+<h3>Available models<a class="headerlink" href="#available-models" title="Link to this heading"></a></h3>
 <p>Use the following model names (same as in the API):</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ensemble</span></code></p></li>
@@ -163,7 +162,7 @@
 </ul>
 </section>
 <section id="available-variables-species">
-<h3>Available Variables (Species)<a class="headerlink" href="#available-variables-species" title="Link to this heading"></a></h3>
+<h3>Available variables (Species)<a class="headerlink" href="#available-variables-species" title="Link to this heading"></a></h3>
 <p>These are the available species:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ammonia</span></code></p></li>
@@ -185,7 +184,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">total_elementary_carbon</span></code></p></li>
 </ul>
 <blockquote>
-<div><p>Providentia can only read species in GHOST format. The mapping is provided in the <a class="reference internal" href="#ghostcams-species-mapping">GHOST–CAMS Species Mapping</a> section.</p>
+<div><p>Providentia can only read species in GHOST format. The mapping is provided in the <a class="reference internal" href="#ghostcams-species-mapping">GHOST–CAMS species mapping</a> section.</p>
 </div></blockquote>
 </section>
 <section id="assumptions">
@@ -198,7 +197,7 @@
 </ul>
 </section>
 <section id="example-configuration-files-and-corresponding-api-requests">
-<h3>Example Configuration Files and Corresponding API Requests<a class="headerlink" href="#example-configuration-files-and-corresponding-api-requests" title="Link to this heading"></a></h3>
+<h3>Example configuration files and corresponding API requests<a class="headerlink" href="#example-configuration-files-and-corresponding-api-requests" title="Link to this heading"></a></h3>
 <section id="example-1-cams-analysis-ensemble">
 <h4>Example 1: CAMS Analysis (Ensemble)<a class="headerlink" href="#example-1-cams-analysis-ensemble" title="Link to this heading"></a></h4>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_analysis_ensemble-regional]</span>
@@ -264,7 +263,7 @@
 </section>
 </section>
 <section id="ghostcams-species-mapping">
-<h2>GHOST–CAMS Species Mapping<a class="headerlink" href="#ghostcams-species-mapping" title="Link to this heading"></a></h2>
+<h2>GHOST–CAMS species mapping<a class="headerlink" href="#ghostcams-species-mapping" title="Link to this heading"></a></h2>
 <p>Here is the mapping between GHOST variable names and CAMS species:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">absod1020aero</span><span class="p">:</span> <span class="n">total_absorption_aerosol_optical_depth_1020nm</span>
 <span class="n">absod440aero</span><span class="p">:</span> <span class="n">total_absorption_aerosol_optical_depth_440nm</span>
@@ -336,8 +335,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Statistics.html" class="btn btn-neutral float-left" title="Statistics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="other-topics.html" class="btn btn-neutral float-right" title="Other topics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Download.html" class="btn btn-neutral float-left" title="Download" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ACTRIS-download.html" class="btn btn-neutral float-right" title="ACTRIS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
