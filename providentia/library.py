@@ -83,7 +83,6 @@ class Providentia:
         if not valid_config:
             return
 
-
     def read(self):
         """ Wrapper method to read data. """
 
@@ -1225,7 +1224,7 @@ class Providentia:
                 self.subsection = self.subsections[0]
                 have_subsection = True
                 if len(self.subsections) > 1:
-                    msg = "Taking first defined subsection ({}) to be read.".format(self.subsection)
+                    msg = "Using the first defined subsection ({}).".format(self.subsection)
                     show_message(self, msg)
         else:
             self.subsections = [self.section]

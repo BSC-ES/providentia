@@ -2,7 +2,7 @@
 
 The first thing you need to decide is whether you want to use Providentia on HPC or on your local computer. 
 
-We always recommend working on local machines because the interactive features of the dashboard are faster and you do not need to wait in queue to use the software. The only disadvantage is that the data (experiments and observations) stored on HPC cannot be accessed. To solve this we developed the [download mode](Download), which allows you to download data from HPC directly onto your local machine.
+We always recommend working on local machines because the interactive features of the dashboard are faster and you do not need to wait in queue to use the software. The only disadvantage is that the data (experiments and observations) stored on HPC cannot be accessed. To solve this we developed the {ref}`download mode <default-download>`, which allows you to download data from HPC directly onto your local machine.
 
 If you do not want to download the data and instead you prefer to use an HPC machine for your analysis, we recommend reading the Wiki section [Connection setup](Connection-setup).
 

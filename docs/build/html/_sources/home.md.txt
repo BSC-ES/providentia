@@ -10,8 +10,8 @@ Providentia can be used in a variety of ways:
 * [Interpolation](Interpolation), to interpolate the experiments to the observations networks of your interest. 
 * [Dashboard](Dashboard), designed to allow on-the-fly analysis of BSC experiment output.
 * [Report](Report), designed to obtain complete reports and carry out in-depth analysis of BSC experiment output.
-* [Download](Download), to download data from esarchive and Zenodo into your local directories.
-* [Library][{doc}`Library`], allowing use of the Providentia backend functions, and use within your own scripts.
+* {ref}`Download <default-download>`., to download data from esarchive and Zenodo into your local directories.
+* [Library](Library), allowing use of the Providentia backend functions, and use within your own scripts.
 
 ### Training sessions
 

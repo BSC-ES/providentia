@@ -1157,7 +1157,10 @@ class Actris:
                             # do not save if empty
                             if len(combined_ds_yearmonth[var].values) == 0:
                                 continue
-                                
+
+                            # get last downloaded file in case there was a keyboard interrupt
+                            self.download_instance.latest_nc_file_path = filename
+
                             # save file
                             combined_ds_yearmonth.to_netcdf(filename)
 
