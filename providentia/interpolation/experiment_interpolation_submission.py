@@ -42,6 +42,8 @@ class SubmitInterpolation(object):
         # initialize commandline arguments, if given
         provconf = ProvConfiguration(self, **kwargs)
 
+        print('\n')
+
         # update variables from config file
         if self.config != '':  
             read_conf = False
@@ -84,7 +86,7 @@ class SubmitInterpolation(object):
                 error = "Error: No sections were found in the configuration file, make sure to name them using square brackets."
                 sys.exit(error)
             self.current_config = self.sub_opts[self.parent_section_names[0]]
-            print(f"Taking first defined section ({self.parent_section_names[0]}) to be read.")
+            print(f"Warning: Taking first defined section ({self.parent_section_names[0]}) to be read.")
 
         # dictionary that stores utilized interpolation variables
         self.interpolation_variables = {}
@@ -143,13 +145,15 @@ class SubmitInterpolation(object):
         
         # create list of arguments to compare between the iterations
         last_arguments = None
+        
+        print('\nSTART INTERPOLATION')
 
         # iterate through desired experiment IDs and its types
         for exp_dom_ens, alias in self.experiments.items():
 
             experiment_to_process, grid_type, ensemble = exp_dom_ens.split("-") 
 
-            print('\nEXPERIMENT: {0}'.format(alias))
+            print('\nMODEL: {0}\n'.format(alias))
 
             # initialise files lists
             obs_files = []
@@ -336,23 +340,24 @@ class SubmitInterpolation(object):
                                 # get all relevant observational files
                                 # GHOST
                                 if self.reading_ghost:
-                                    obs_files = np.sort(glob.glob(
-                                        self.ghost_root + '/{}/{}/{}/{}/{}*.nc'.format(
-                                            network_to_interpolate_against, self.ghost_version, 
-                                            temporal_resolution_to_output, original_speci_to_process, 
-                                            original_speci_to_process)))
+                                    obs_path = self.ghost_root + '/{}/{}/{}/{}/{}*.nc'.format(
+                                        network_to_interpolate_against, self.ghost_version, 
+                                        temporal_resolution_to_output, original_speci_to_process, 
+                                        original_speci_to_process)
+                                    obs_files = np.sort(glob.glob(obs_path))
                                 # non-GHOST
                                 else:
-                                    obs_files = np.sort(glob.glob(
-                                        self.nonghost_root + '/{}/{}/{}/{}*.nc'.format(
-                                            network_to_interpolate_against, temporal_resolution_to_output,
-                                            original_speci_to_process, original_speci_to_process)))
+                                    obs_path = self.nonghost_root + '/{}/{}/{}/{}*.nc'.format(
+                                        network_to_interpolate_against, temporal_resolution_to_output,
+                                        original_speci_to_process, original_speci_to_process)
+                                    obs_files = np.sort(glob.glob(obs_path))
 
                                 # if have no observational files then continue
                                 if len(obs_files) == 0:
+                                    print(f"Observation files for {network_to_interpolate_against} cannot be found for {temporal_resolution_to_output} resolution in {os.path.dirname(obs_path)}.")
                                     continue
                                 else:
-                                    print(f'{len(obs_files)} observation files for {temporal_resolution_to_output} resolution were found.')
+                                    print(f"{len(obs_files)} observation files for {network_to_interpolate_against} and {temporal_resolution_to_output} resolution were found in {os.path.dirname(obs_path)}.")
                                 
                                 # determine if ensemble is member or emsemble stat
                                 ensemble_member = ensemble.isdigit()
@@ -376,10 +381,10 @@ class SubmitInterpolation(object):
 
                                 # if have no relevant experiment files then continue
                                 if len(exp_files_all) == 0:
-                                    print(f'Model files cannot be found for {temporal_resolution_to_output} resolution in {exp_path}.')
+                                    print(f"Model files cannot be found for {temporal_resolution_to_output} resolution in {os.path.dirname(exp_path)}.")
                                     continue
                                 else:
-                                    print(f'{len(exp_files_all)} model files for {temporal_resolution_to_output} resolution were found.')
+                                    print(f"{len(exp_files_all)} model files for {temporal_resolution_to_output} resolution were found in {os.path.dirname(exp_path)}.")
 
                                 # ensemble stat?
                                 if ensemble_stat:
@@ -523,14 +528,13 @@ class SubmitInterpolation(object):
 
             # if list is empty or have no arguments after iteration, return message stating that
             if len(self.arguments) == 0 or not new_arguments:
-                msg = 'NO INTERSECTING OBSERVATIONAL AND EXPERIMENT DATA FOR INTERPOLATION. \n' 
+                msg = '\nNO INTERSECTING OBSERVATIONAL AND EXPERIMENT DATA FOR INTERPOLATION. \n' 
                 if self.start_date == self.end_date:
                     msg += 'If you want to interpolate data for one month, '
                     msg += 'you need to set the end date to be the next one. \n'
                     msg += 'e.g. For November 2018, this is 201811 to 201812.'
             else:
-                msg = '***INTERSECTING OBSERVATIONAL AND EXPERIMENTAL DATA IS AVAILABLE FOR INTERPOLATION.***' 
-                msg += f'\nExperiment Data Source Path: {exp_dir}'
+                msg = '\n***INTERSECTING OBSERVATIONAL AND EXPERIMENTAL DATA IS AVAILABLE FOR INTERPOLATION.***'
                 
                 # add a warning if nco is not installed
                 _, output = subprocess.getstatusoutput("ncks")
