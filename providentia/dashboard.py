@@ -70,6 +70,8 @@ class Dashboard(QtWidgets.QWidget):
         self.delay = True
         self.delayed_warnings = []
 
+        kwargs['dashboard'] = True
+
         # initialise default configuration variables
         # modified by commandline arguments, if given
         self.provconf = ProvConfiguration(self, **kwargs)
