@@ -284,7 +284,7 @@ class Cams:
         for input_dim_name, output_dim_name in cams_providentia_map.items():
             # skip single species
             if output_dim_name == "level" and 'single' in cams_variables_level[url] and cams_species in cams_variables_level[url]['single']:
-                pass
+                continue
             # get dimension
             dim = input_file.dimensions[input_dim_name]
             # create the dimension with the new name 
@@ -487,37 +487,37 @@ class Cams:
                     # get last downloaded file in case there was a keyboard interrupt
                     self.download_instance.latest_nc_file_path = final_path
 
-                    # make the request
-                    try:
-                        self.download_instance.logger.info(f"Downloading {final_path}") # TODO change message
-                        client.retrieve(dataset, request, target=temp_path)
-                    except requests.exceptions.HTTPError as err:
-                        # invalid credential on .cdsapirc
-                        if err.response.status_code == 401: 
-                            self.download_instance.logger.info(
-                                "\nBad request (401): Client Error. Invalid credentials in the .cdsapirc file. "
-                                "Removing authentication file...\n"
-                                "Please run the program again so Providentia can recreate the file automatically, "
-                                "or manually create a new .cdsapirc file by following the instructions at: "
-                                "https://cds.climate.copernicus.eu/how-to-api"
-                            )
-                            os.remove(cdsapirc_path)
-                            return
-                        # bad request
-                        if err.response.status_code == 400: 
-                            self.download_instance.logger.info("\nBad request (400): The server could not understand the request.")
-                            self.download_instance.logger.info(f"Details: {err}")
-                        # connection error
-                        elif err.response.status_code == 500: 
-                            self.download_instance.logger.info("\nServer error (500): The server encountered an error while processing the request.")
-                            self.download_instance.logger.info(f"Details: {err}")
-                            self.download_instance.logger.info("Please try again later.")
-                            return
-                        else:
-                            self.download_instance.logger.info(f"\nUnexpected error ({err.response.status_code}):")
-                            self.download_instance.logger.info(f"Details: {err}")
-                        # make the next download
-                        continue
+                    # # make the request
+                    # try:
+                    #     self.download_instance.logger.info(f"Downloading {final_path}") # TODO change message
+                    #     client.retrieve(dataset, request, target=temp_path)
+                    # except requests.exceptions.HTTPError as err:
+                    #     # invalid credential on .cdsapirc
+                    #     if err.response.status_code == 401: 
+                    #         self.download_instance.logger.info(
+                    #             "\nBad request (401): Client Error. Invalid credentials in the .cdsapirc file. "
+                    #             "Removing authentication file...\n"
+                    #             "Please run the program again so Providentia can recreate the file automatically, "
+                    #             "or manually create a new .cdsapirc file by following the instructions at: "
+                    #             "https://cds.climate.copernicus.eu/how-to-api"
+                    #         )
+                    #         os.remove(cdsapirc_path)
+                    #         return
+                    #     # bad request
+                    #     if err.response.status_code == 400: 
+                    #         self.download_instance.logger.info("\nBad request (400): The server could not understand the request.")
+                    #         self.download_instance.logger.info(f"Details: {err}")
+                    #     # connection error
+                    #     elif err.response.status_code == 500: 
+                    #         self.download_instance.logger.info("\nServer error (500): The server encountered an error while processing the request.")
+                    #         self.download_instance.logger.info(f"Details: {err}")
+                    #         self.download_instance.logger.info("Please try again later.")
+                    #         return
+                    #     else:
+                    #         self.download_instance.logger.info(f"\nUnexpected error ({err.response.status_code}):")
+                    #         self.download_instance.logger.info(f"Details: {err}")
+                    #     # make the next download
+                    #     continue
 
                     # extract file 
                     with zipfile.ZipFile(temp_path, 'r') as zip_ref:
