@@ -29,6 +29,7 @@ default_values = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interna
 multispecies_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 mapping_species = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
+modes = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'modes.yaml')))
 
 # set current MACHINE
 MACHINE = get_machine()
@@ -52,15 +53,14 @@ class ProvConfiguration:
         modifiable_var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'init_prov.yaml')))
         self.var_defaults.update(modifiable_var_defaults)
 
+        # set mode
+        mode = list(set(modes)&set(kwargs))
+        self.read_instance.mode = mode[0] if mode else 'dashboard'
+
         # if variable is given by command line, set that value, otherwise set as default value 
         for k, val in self.var_defaults.items():
             val = kwargs.get(k, val)
-            # set mode
-            if k in ['dashboard', 'report', 'download', 'library', 'interpolation']:
-                if val is True:
-                    setattr(self.read_instance, 'mode', k)
-            else:
-                setattr(self.read_instance, k, self.parse_parameter(k, val))
+            setattr(self.read_instance, k, self.parse_parameter(k, val))
 
         # direct output to file/screen
         if hasattr(self.read_instance, 'logger') is False:
@@ -1621,12 +1621,7 @@ class ProvConfiguration:
             # default path (the file name depends on the mode)
             else:
                 # get the mode being used right now
-                mode_list = ["report", "library", "download", "interpolation"] 
-                mode = "dashboard"
-                for temp_mode in mode_list:
-                    if getattr(self.read_instance, temp_mode) is True:
-                        mode = temp_mode if temp_mode != "library" else "notebook"
-                file_path = join(PROVIDENTIA_ROOT, 'logs', mode, filename)
+                file_path = join(PROVIDENTIA_ROOT, 'logs', self.read_instance.mode, filename)
 
             # redirect output to a file
             handler = logging.FileHandler(file_path)
