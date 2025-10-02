@@ -145,8 +145,6 @@ class SubmitInterpolation(object):
         
         # create list of arguments to compare between the iterations
         last_arguments = None
-        
-        print('\nSTART INTERPOLATION')
 
         # iterate through desired experiment IDs and its types
         for exp_dom_ens, alias in self.experiments.items():
