@@ -25,7 +25,7 @@ from providentia.warnings_prv import show_message
 # get current path and providentia root path
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'data_paths.yaml')))
-default_values = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_defaults.yaml')))
+defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'defaults.yaml')))
 multispecies_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 mapping_species = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
@@ -61,6 +61,9 @@ class ProvConfiguration:
         for k, val in self.var_defaults.items():
             val = kwargs.get(k, val)
             setattr(self.read_instance, k, self.parse_parameter(k, val))
+                
+        # set default values of the current mode
+        self.default_values = defaults[self.read_instance.mode]
 
         # direct output to file/screen
         if hasattr(self.read_instance, 'logger') is False:
@@ -646,12 +649,8 @@ class ProvConfiguration:
         # get separated experiment parts list
         split_experiments = [exp.split("-") for exp in self.read_instance.experiments]
 
-        # get default domain and ensemble
-        default_domain = default_values["domain"]
-        if self.read_instance.mode == 'interpolation':
-            default_ensemble = ["000"]
-        else:
-            default_ensemble = default_values["ensemble"]
+        # get default ensemble
+        default_ensemble = self.default_values["ensemble"]
 
         # get original domain, ensemble and forecast as passed in the configuration file
         config_domain = copy.deepcopy(self.read_instance.domain) 
@@ -714,7 +713,7 @@ class ProvConfiguration:
                     exp_id = copy.deepcopy(experiment_part)
 
                 # have domain part?
-                elif experiment_part in default_domain: 
+                elif experiment_part in self.read_instance.available_domains: 
                     exp_dom = copy.deepcopy(experiment_part)
                 
                 # have forecast part?
@@ -750,7 +749,7 @@ class ProvConfiguration:
                 dom = copy.deepcopy(config_domain)
             # else no information for domain from domain or experiment fields, then set default value
             else:
-                dom = copy.deepcopy(default_domain)
+                dom = copy.deepcopy(self.read_instance.available_domains)
                        
             # throw error if ensemble has been defined in both ensemble and experiment fields
             if (exp_ens) and (config_ensemble):
@@ -1085,26 +1084,17 @@ class ProvConfiguration:
                 field_name:fields-set(self.var_defaults) 
                 for field_name, fields in self.read_instance.fields_per_section.items()}
           
-        # check have network information, 
-        # if report, throw message, stating are using default instead
-        # in download mode of non interpolated experiments is allowed to not have network, so continue
-        if not self.read_instance.network and not (self.read_instance.mode == 'download' and not self.read_instance.interpolated):
-            if self.read_instance.mode == 'interpolation':
-                default = self.read_instance.ghost_available_networks
-            else:
-                default = default_values['network']
+        # check have network information 
+        if not self.read_instance.network and 'network' in self.default_values:
+            default = self.default_values['network']
             msg = "Network (network) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.network = default
 
-        # check have species information, TODO REFACTOR INTERPOLATION STUFF
-        # if report, throw message, stating are using default instead
+        # check have species information
         # in download mode is allowed to not pass any species, so continue
-        if (not self.read_instance.species and self.read_instance.mode not in ['interpolation', 'download']):
-            if self.read_instance.mode == 'interpolation':
-                default = self.read_instance.available_species
-            else:
-                default = default_values['species']
+        if not self.read_instance.species and 'species' in self.default_values:
+            default = self.default_values['species']
             msg = "Species (species) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.species = default
@@ -1159,13 +1149,10 @@ class ProvConfiguration:
             self.read_instance.networkspeci = '{}|{}'.format(self.read_instance.network[0],
                                                             self.read_instance.species[0]) 
 
-        # check have resolution information, TODO when refactoring init change this way of checking defaults
+        # check have resolution information
         # if report, throw message, stating are using default instead
-        if (not self.read_instance.resolution and (self.read_instance.mode != 'download')):
-            if self.read_instance.mode == 'interpolation':
-                default = ["hourly", "hourly_instantaneous", "daily", "monthly"]
-            else:
-                default = default_values['resolution']
+        if not self.read_instance.resolution and 'resolution' in self.default_values:
+            default = self.default_values['resolution']
             msg = "Resolution (resolution) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.resolution = default
@@ -1176,13 +1163,9 @@ class ProvConfiguration:
         else:
             self.read_instance.active_resolution = self.read_instance.resolution
 
-        # check start_date format, TODO START DATE IS DIFFERENT IN INTERPOLATION (check in the refactoring)
         # if report, throw message, stating are using default instead
-        if not self.read_instance.start_date:
-            if self.read_instance.mode == 'interpolation':
-                default = default_values['start_date'][:6]
-            else:
-                default = default_values['start_date']
+        if not self.read_instance.start_date and 'start_date' in self.default_values:
+            default = self.default_values['start_date']
             msg = "Start date (start_date) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.start_date = default
@@ -1209,13 +1192,9 @@ class ProvConfiguration:
                         self.read_instance.logger.error(error)
                         sys.exit(1)
 
-        # check end_date  format, TODO START DATE IS DIFFERENT IN INTERPOLATION (check in the refactoring)
         # if report, throw message, stating are using default instead
-        if not self.read_instance.end_date:
-            if self.read_instance.mode == 'interpolation':
-                default = default_values['end_date'][:6]
-            else:
-                default = default_values['end_date']
+        if not self.read_instance.end_date and 'end_date' in self.default_values:
+            default = self.default_values['end_date']
             msg = "End date (end_date) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.end_date = default
@@ -1242,11 +1221,9 @@ class ProvConfiguration:
                         self.read_instance.logger.error(error)
                         sys.exit(1)
 
-        # check have interp_n_neighbours information, TODO ONLY FOR INTERPOLATION
-        # if report, throw message, stating are using default instead
-        # TODO CHANGE THE MESSAGE WHEN ITS DEFAULT AND WHEN ITS BECAUSE I DIDNT PUT THE NAME
-        if self.read_instance.mode == 'interpolation' and not self.read_instance.interp_n_neighbours:
-            default = default_values['interp_n_neighbours']
+        # check have interp_n_neighbours information
+        if not self.read_instance.interp_n_neighbours and 'interp_n_neighbours' in self.default_values:
+            default = self.default_values['interp_n_neighbours']
             msg = "Number of neighbours (interp_n_neighbours) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.interp_n_neighbours = default
@@ -1254,14 +1231,14 @@ class ProvConfiguration:
         # check have correct interp_experiment_downsampling information
         if self.read_instance.mode == 'interpolation' and self.read_instance.interp_experiment_downsampling:
             if self.read_instance.interp_experiment_downsampling not in ['mean','median']:
-                default = default_values['interp_experiment_downsampling']
+                default = self.var_defaults['interp_experiment_downsampling']
                 error = "Error: interp_experiment_downsampling must be 'mean' or 'median'. Using '{}' as default.".format(default)
                 self.read_instance.logger.error(error) 
 
         # check have correct interp_experiment_upsampling information
         if self.read_instance.mode == 'interpolation' and self.read_instance.interp_experiment_upsampling:
             if self.read_instance.interp_experiment_upsampling not in ['fill','gaps']:
-                default = default_values['interp_experiment_upsampling']
+                default = self.var_defaults['interp_experiment_upsampling']
                 error = "Error: interp_experiment_upsampling must be 'mean' or 'median'. Using '{}' as default.".format(default)
                 self.read_instance.logger.error(error) 
 
@@ -1313,50 +1290,35 @@ class ProvConfiguration:
             # replace calibration factors by new dictionary
             self.read_instance.calibration_factor = calibration_factor_dict
 
-        # check have statistic_mode information,
-        # if report, throw message, stating are using default instead
-        # TODO not needed in interpolation 
-        if not self.read_instance.statistic_mode and self.read_instance.mode != 'interpolation':
-            default = default_values['statistic_mode']
+        # check have statistic_mode information
+        if not self.read_instance.statistic_mode and 'statistic_mode' in self.default_values:
+            default = self.default_values['statistic_mode']
             self.read_instance.statistic_mode = default
 
-        # check have statistic_aggregation information,
-        # if report, throw message, stating are using default instead
-        # TODO not needed in interpolation 
-        if self.read_instance.mode != 'interpolation':
-            default = default_values['statistic_aggregation'][self.read_instance.statistic_mode]
-            if not self.read_instance.statistic_aggregation:  
-                self.read_instance.statistic_aggregation = default
-            # if statistic_aggregation is defined ensure that it matches with the statistic_mode
-            else:
-                if self.read_instance.statistic_mode == 'Flattened':
-                    self.read_instance.statistic_aggregation = default
+        # check have statistic_aggregation information and ensure that it matches with the statistic_mode
+        if not self.read_instance.statistic_aggregation or self.read_instance.statistic_mode == 'Flattened' and 'statistic_aggregation' in self.default_values:  
+            default = self.default_values['statistic_aggregation'][self.read_instance.statistic_mode]
+            self.read_instance.statistic_aggregation = default
 
-        # check have periodic_statistic_mode information,
-        # if report, throw message, stating are using default instead
-        # TODO not needed in interpolation 
-        if not self.read_instance.periodic_statistic_mode and self.read_instance.mode != 'interpolation':
-            default = default_values['periodic_statistic_mode']
+        # check have periodic_statistic_mode information
+        if not self.read_instance.periodic_statistic_mode and 'periodic_statistic_mode' in self.default_values:
+            default = self.default_values['periodic_statistic_mode']
             self.read_instance.periodic_statistic_mode = default
 
-        # check have periodic_statistic_aggregation information,
-        # if report, throw message, stating are using default instead
-        # TODO not needed in interpolation 
-        if not self.read_instance.periodic_statistic_aggregation and self.read_instance.mode != 'interpolation':
-            default = default_values['periodic_statistic_aggregation']
+        # check have periodic_statistic_aggregation information
+        if not self.read_instance.periodic_statistic_aggregation and 'periodic_statistic_aggregation' in self.default_values:
+            default = self.default_values['periodic_statistic_aggregation']
             self.read_instance.periodic_statistic_aggregation = default
 
-        # check have timeseries_statistic_aggregation information,
-        # if report, throw message, stating are using default instead
-        # TODO not needed in interpolation 
-        if not self.read_instance.timeseries_statistic_aggregation and self.read_instance.mode != 'interpolation':
-            default = default_values['timeseries_statistic_aggregation']
+        # check have timeseries_statistic_aggregation information
+        if not self.read_instance.timeseries_statistic_aggregation and 'timeseries_statistic_aggregation' in self.default_values:
+            default = self.default_values['timeseries_statistic_aggregation']
             self.read_instance.timeseries_statistic_aggregation = default
 
         # check have correct active_dashboard_plots information, 
         # should have 4 plots if non-empty, throw error if using dashboard if not
-        if not self.read_instance.active_dashboard_plots:
-            default = default_values['active_dashboard_plots']
+        if not self.read_instance.active_dashboard_plots and 'active_dashboard_plots' in self.default_values:
+            default = self.default_values['active_dashboard_plots']
             self.read_instance.active_dashboard_plots = default
         # TODO: For Taylor diagrams, remove this piece of code when we stop using Matplotlib 3.3
         else:

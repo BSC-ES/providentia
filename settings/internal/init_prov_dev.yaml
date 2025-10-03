@@ -63,7 +63,7 @@
   "report_filename": "PROVIDENTIA_Report",
   "harmonise_summary": True,
   "harmonise_stations": True,
-  "active_dashboard_plots": null,
+  "active_dashboard_plots": [],
   "resampling_resolution": null,
   "statistic_mode": null,
   "statistic_aggregation": null,

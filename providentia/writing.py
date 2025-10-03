@@ -519,13 +519,14 @@ def export_configuration(prv, cname, separator="||"):
     
     # load initialisation defaults
     init_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'init_prov_dev.yaml')))
-    # load variable defaults
-    var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_defaults.yaml')))
+    # set default values of the current mode
+    defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'defaults.yaml')))
+    default_values = defaults[prv.mode]
     # load modifiable variable defaults
     modifiable_var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'init_prov.yaml')))
     # merge defaults
     merged_defaults = init_defaults.copy()
-    merged_defaults.update(var_defaults)
+    merged_defaults.update(default_values)
     merged_defaults.update(modifiable_var_defaults)
 
     # ensure cname has correct extension
