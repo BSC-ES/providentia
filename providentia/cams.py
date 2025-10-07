@@ -22,6 +22,7 @@ cams_variables_level = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'i
 cams_formatting = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_formatting.yaml')))
 ghost_cams_variables = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'ghost_cams_variables.yaml')))
 cams_stream = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_stream.yaml')))
+cams_species_units = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_species_units.yaml')))
 
 class Cams:
 
@@ -326,7 +327,7 @@ class Cams:
             elif input_var_name == input_species:               
                 output_var.setncattr('coordinates', 'latitude longitude')
                 output_var.setncattr('grid_mapping', 'crs')
-                output_var.setncattr('units', input_var.units)
+                output_var.setncattr('units', cams_species_units[input_var.units])
             
             # get the data from 
             if output_var_name == "time":  
