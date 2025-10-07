@@ -15,6 +15,8 @@ cams_forecast:
     latitude: latitude
     model_level: level
     forecast_period: time
+    forecast_reference_time:
+    valid_time:
 cams_reanalysis:
   regional:
     lon: longitude
