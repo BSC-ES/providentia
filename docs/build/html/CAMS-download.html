@@ -57,6 +57,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">CAMS</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#available-datasets">Available datasets</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cams-european-air-quality-forecasts">1. CAMS European Air Quality Forecasts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cams-global-atmospheric-composition-forecasts">2. CAMS Global Atmospheric Composition Forecasts</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#ghostcams-species-mapping">GHOST–CAMS species mapping</a></li>
 </ul>
 </li>
@@ -192,14 +193,14 @@
 <p>Providentia assumes the following fixed values when downloading data:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">level</span> <span class="pre">=</span> <span class="pre">0</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">=</span> <span class="pre">00:00</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">=</span> <span class="pre">00:00-23:00</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">leadtime_hour</span> <span class="pre">=</span> <span class="pre">0-96</span></code></p></li>
 </ul>
 </section>
 <section id="example-configuration-files-and-corresponding-api-requests">
 <h3>Example configuration files and corresponding API requests<a class="headerlink" href="#example-configuration-files-and-corresponding-api-requests" title="Link to this heading"></a></h3>
-<section id="example-1-cams-analysis-ensemble">
-<h4>Example 1: CAMS Analysis (Ensemble)<a class="headerlink" href="#example-1-cams-analysis-ensemble" title="Link to this heading"></a></h4>
+<section id="example-1-cams-regional-analysis-ensemble-model">
+<h4>Example 1: CAMS Regional Analysis (Ensemble Model)<a class="headerlink" href="#example-1-cams-regional-analysis-ensemble-model" title="Link to this heading"></a></h4>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_analysis_ensemble-regional]</span>
 <span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20250701</span>
 <span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20250801</span>
@@ -218,14 +219,15 @@
     <span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="s1">&#39;2025-07-01/2025-07-31&#39;</span><span class="p">,</span>
     <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="s1">&#39;ensemble&#39;</span><span class="p">,</span>
     <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;00:00&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;01:00&#39;</span><span class="p">,</span> <span class="s1">&#39;02:00&#39;</span><span class="p">,</span> <span class="s1">&#39;03:00&#39;</span><span class="p">,</span> <span class="s1">&#39;04:00&#39;</span><span class="p">,</span> <span class="s1">&#39;05:00&#39;</span><span class="p">,</span> <span class="s1">&#39;06:00&#39;</span><span class="p">,</span> <span class="s1">&#39;07:00&#39;</span><span class="p">,</span> <span class="s1">&#39;08:00&#39;</span><span class="p">,</span> <span class="s1">&#39;09:00&#39;</span><span class="p">,</span> <span class="s1">&#39;10:00&#39;</span><span class="p">,</span> <span class="s1">&#39;11:00&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;12:00&#39;</span><span class="p">,</span> <span class="s1">&#39;13:00&#39;</span><span class="p">,</span> <span class="s1">&#39;14:00&#39;</span><span class="p">,</span> <span class="s1">&#39;15:00&#39;</span><span class="p">,</span> <span class="s1">&#39;16:00&#39;</span><span class="p">,</span> <span class="s1">&#39;17:00&#39;</span><span class="p">,</span> <span class="s1">&#39;18:00&#39;</span><span class="p">,</span> <span class="s1">&#39;19:00&#39;</span><span class="p">,</span> <span class="s1">&#39;20:00&#39;</span><span class="p">,</span> <span class="s1">&#39;21:00&#39;</span><span class="p">,</span> <span class="s1">&#39;22:00&#39;</span><span class="p">,</span> <span class="s1">&#39;23:00&#39;</span><span class="p">],</span>
     <span class="s1">&#39;data_format&#39;</span><span class="p">:</span> <span class="s1">&#39;netcdf_zip&#39;</span><span class="p">,</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 </section>
-<section id="example-2-cams-forecast-ensemble">
-<h4>Example 2: CAMS Forecast (Ensemble)<a class="headerlink" href="#example-2-cams-forecast-ensemble" title="Link to this heading"></a></h4>
+<section id="example-2-cams-regional-forecast-ensemble-model">
+<h4>Example 2: CAMS Regional Forecast (Ensemble Model)<a class="headerlink" href="#example-2-cams-regional-forecast-ensemble-model" title="Link to this heading"></a></h4>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_forecast_ensemble-regional]</span>
 <span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20250701</span>
 <span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20250702</span>
@@ -254,8 +256,175 @@
     <span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="s1">&#39;2025-07-01/2025-07-01&#39;</span><span class="p">,</span>
     <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="s1">&#39;ensemble&#39;</span><span class="p">,</span>
     <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;00:00&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;01:00&#39;</span><span class="p">,</span> <span class="s1">&#39;02:00&#39;</span><span class="p">,</span> <span class="s1">&#39;03:00&#39;</span><span class="p">,</span> <span class="s1">&#39;04:00&#39;</span><span class="p">,</span> <span class="s1">&#39;05:00&#39;</span><span class="p">,</span> <span class="s1">&#39;06:00&#39;</span><span class="p">,</span> <span class="s1">&#39;07:00&#39;</span><span class="p">,</span> <span class="s1">&#39;08:00&#39;</span><span class="p">,</span> <span class="s1">&#39;09:00&#39;</span><span class="p">,</span> <span class="s1">&#39;10:00&#39;</span><span class="p">,</span> <span class="s1">&#39;11:00&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;12:00&#39;</span><span class="p">,</span> <span class="s1">&#39;13:00&#39;</span><span class="p">,</span> <span class="s1">&#39;14:00&#39;</span><span class="p">,</span> <span class="s1">&#39;15:00&#39;</span><span class="p">,</span> <span class="s1">&#39;16:00&#39;</span><span class="p">,</span> <span class="s1">&#39;17:00&#39;</span><span class="p">,</span> <span class="s1">&#39;18:00&#39;</span><span class="p">,</span> <span class="s1">&#39;19:00&#39;</span><span class="p">,</span> <span class="s1">&#39;20:00&#39;</span><span class="p">,</span> <span class="s1">&#39;21:00&#39;</span><span class="p">,</span> <span class="s1">&#39;22:00&#39;</span><span class="p">,</span> <span class="s1">&#39;23:00&#39;</span><span class="p">],</span>
     <span class="s1">&#39;data_format&#39;</span><span class="p">:</span> <span class="s1">&#39;netcdf_zip&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="cams-global-atmospheric-composition-forecasts">
+<h2>2. CAMS Global Atmospheric Composition Forecasts<a class="headerlink" href="#cams-global-atmospheric-composition-forecasts" title="Link to this heading"></a></h2>
+<p><a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets/cams-global-atmospheric-composition-forecasts?tab=download">Dataset Link</a></p>
+<p>You can download <strong>Forecast data</strong>.</p>
+<p>This dataset provides hourly and 3hourly data. In your configuration file, you must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> or <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">3hourly</span></code>, depending on whether the data is single-level or multi-level. Otherwise, the download will fail.</p>
+<section id="mandatory-fields-for-single-level-data">
+<h3>Mandatory fields for single-level data<a class="headerlink" href="#mandatory-fields-for-single-level-data" title="Link to this heading"></a></h3>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
+</pre></div>
+</div>
+</section>
+<section id="mandatory-fields-for-multi-level-data">
+<h3>Mandatory fields for multi-level data<a class="headerlink" href="#mandatory-fields-for-multi-level-data" title="Link to this heading"></a></h3>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3hourly</span>
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h3>Available variables (Species)<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>Whether the data is single or multi depends on the selected species. These are the available species:</p>
+<section id="multi-level">
+<h4>Multi-level:<a class="headerlink" href="#multi-level" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ammonia</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ammonium</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">attenuated_backscatter_due_to_aerosol_532nm_from_ground</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">carbon_monoxide</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ethane</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ethanol</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ethene</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">formaldehyde</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fraction_of_cloud_cover</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">glyoxal</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hydrogen_chloride</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hydrogen_fluoride</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">isoprene</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lead</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">methane</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">methane_sulfonic_acid</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nitrate</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nitric_acid</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nitrogen_dioxide</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nitrogen_monoxide</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ozone</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">peroxyacetyl_nitrate</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">propane</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">propene</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sulphate_aerosol_mixing_ratio</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sulphur_dioxide</span></code></p></li>
+</ul>
+</section>
+<section id="single-level">
+<h4>Single-level:<a class="headerlink" href="#single-level" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">2m_dewpoint_temperature</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2m_temperature</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">asymmetry_factor_1020nm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">asymmetry_factor_440nm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cloud_base_height</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dust_aerosol_optical_depth_550nm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mean_sea_level_pressure</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">particulate_matter_10um</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">particulate_matter_1um</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">particulate_matter_2.5um</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">relative_humidity</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sea_surface_temperature</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">single_scattering_albedo_1020nm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">single_scattering_albedo_440nm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">single_scattering_albedo_550nm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">snow_depth</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">surface_pressure</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">total_absorption_aerosol_optical_depth_1020nm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">total_absorption_aerosol_optical_depth_440nm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">total_absorption_aerosol_optical_depth_550nm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">total_aerosol_optical_depth_1020nm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">total_aerosol_optical_depth_380nm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">total_aerosol_optical_depth_440nm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">total_aerosol_optical_depth_500nm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">total_aerosol_optical_depth_550nm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">total_fine_mode_aerosol_optical_depth_500nm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">total_precipitation</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">visibility</span></code></p></li>
+</ul>
+<blockquote>
+<div><p>Providentia can only read species in GHOST format. The mapping is provided in the <a class="reference internal" href="#ghostcams-species-mapping">GHOST–CAMS species mapping</a> section.</p>
+</div></blockquote>
+</section>
+</section>
+<section id="id2">
+<h3>Assumptions<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<p>Providentia assumes the following fixed values when downloading data:</p>
+<section id="for-single-level-data">
+<h4>For single-level data:<a class="headerlink" href="#for-single-level-data" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">=</span> <span class="pre">00:00</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">leadtime_hour</span> <span class="pre">=</span> <span class="pre">0-120</span></code> (for every hour)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">=</span> <span class="pre">forecast</span></code></p></li>
+</ul>
+</section>
+<section id="for-multi-level-data">
+<h4>For multi-level data:<a class="headerlink" href="#for-multi-level-data" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">model_level</span> <span class="pre">=</span> <span class="pre">60</span></code> (up to and including 2019-07-09) <code class="docutils literal notranslate"><span class="pre">137</span></code> (for data after 2019-07-09, when the levels increased)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">=</span> <span class="pre">00:00</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">leadtime_hour</span> <span class="pre">=</span> <span class="pre">0-120</span></code> (for every three hours)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">=</span> <span class="pre">forecast</span></code></p></li>
+</ul>
+</section>
+</section>
+<section id="id3">
+<h3>Example configuration files and corresponding API requests<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<section id="example-1-cams-global-forecast-single-level-hourly-data">
+<h4>Example 1: CAMS Global Forecast (Single-level, hourly data)<a class="headerlink" href="#example-1-cams-global-forecast-single-level-hourly-data" title="Link to this heading"></a></h4>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_forecast-global-hourly]</span>
+<span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20171201</span><span class="w"> </span>
+<span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20171202</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sst</span>
+<span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
+<span class="na">interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-global-atmospheric-composition-forecasts&#39;</span>
+<span class="n">request</span> <span class="o">=</span> <span class="p">{</span>
+<span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;sea_surface_temperature&#39;</span><span class="p">,</span>
+<span class="s1">&#39;leadtime_hour&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">,</span> <span class="s1">&#39;4&#39;</span><span class="p">,</span> <span class="s1">&#39;5&#39;</span><span class="p">,</span> <span class="s1">&#39;6&#39;</span><span class="p">,</span> <span class="s1">&#39;7&#39;</span><span class="p">,</span> <span class="s1">&#39;8&#39;</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">,</span> <span class="s1">&#39;10&#39;</span><span class="p">,</span> <span class="s1">&#39;11&#39;</span><span class="p">,</span> <span class="s1">&#39;12&#39;</span><span class="p">,</span> <span class="s1">&#39;13&#39;</span><span class="p">,</span> <span class="s1">&#39;14&#39;</span><span class="p">,</span> <span class="s1">&#39;15&#39;</span><span class="p">,</span> <span class="s1">&#39;16&#39;</span><span class="p">,</span> <span class="s1">&#39;17&#39;</span><span class="p">,</span> <span class="s1">&#39;18&#39;</span><span class="p">,</span> <span class="s1">&#39;19&#39;</span><span class="p">,</span> <span class="s1">&#39;20&#39;</span><span class="p">,</span> <span class="s1">&#39;21&#39;</span><span class="p">,</span> <span class="s1">&#39;22&#39;</span><span class="p">,</span> <span class="s1">&#39;23&#39;</span><span class="p">,</span> <span class="s1">&#39;24&#39;</span><span class="p">,</span> <span class="s1">&#39;25&#39;</span><span class="p">,</span> <span class="s1">&#39;26&#39;</span><span class="p">,</span> <span class="s1">&#39;27&#39;</span><span class="p">,</span> <span class="s1">&#39;28&#39;</span><span class="p">,</span> <span class="s1">&#39;29&#39;</span><span class="p">,</span> <span class="s1">&#39;30&#39;</span><span class="p">,</span> <span class="s1">&#39;31&#39;</span><span class="p">,</span> <span class="s1">&#39;32&#39;</span><span class="p">,</span> <span class="s1">&#39;33&#39;</span><span class="p">,</span> <span class="s1">&#39;34&#39;</span><span class="p">,</span> <span class="s1">&#39;35&#39;</span><span class="p">,</span> <span class="s1">&#39;36&#39;</span><span class="p">,</span> <span class="s1">&#39;37&#39;</span><span class="p">,</span> <span class="s1">&#39;38&#39;</span><span class="p">,</span> <span class="s1">&#39;39&#39;</span><span class="p">,</span> <span class="s1">&#39;40&#39;</span><span class="p">,</span> <span class="s1">&#39;41&#39;</span><span class="p">,</span> <span class="s1">&#39;42&#39;</span><span class="p">,</span> <span class="s1">&#39;43&#39;</span><span class="p">,</span> <span class="s1">&#39;44&#39;</span><span class="p">,</span> <span class="s1">&#39;45&#39;</span><span class="p">,</span> <span class="s1">&#39;46&#39;</span><span class="p">,</span> <span class="s1">&#39;47&#39;</span><span class="p">,</span> <span class="s1">&#39;48&#39;</span><span class="p">,</span> <span class="s1">&#39;49&#39;</span><span class="p">,</span> <span class="s1">&#39;50&#39;</span><span class="p">,</span> <span class="s1">&#39;51&#39;</span><span class="p">,</span> <span class="s1">&#39;52&#39;</span><span class="p">,</span> <span class="s1">&#39;53&#39;</span><span class="p">,</span> <span class="s1">&#39;54&#39;</span><span class="p">,</span> <span class="s1">&#39;55&#39;</span><span class="p">,</span> <span class="s1">&#39;56&#39;</span><span class="p">,</span> <span class="s1">&#39;57&#39;</span><span class="p">,</span> <span class="s1">&#39;58&#39;</span><span class="p">,</span> <span class="s1">&#39;59&#39;</span><span class="p">,</span> <span class="s1">&#39;60&#39;</span><span class="p">,</span> <span class="s1">&#39;61&#39;</span><span class="p">,</span> <span class="s1">&#39;62&#39;</span><span class="p">,</span> <span class="s1">&#39;63&#39;</span><span class="p">,</span> <span class="s1">&#39;64&#39;</span><span class="p">,</span> <span class="s1">&#39;65&#39;</span><span class="p">,</span> <span class="s1">&#39;66&#39;</span><span class="p">,</span> <span class="s1">&#39;67&#39;</span><span class="p">,</span> <span class="s1">&#39;68&#39;</span><span class="p">,</span> <span class="s1">&#39;69&#39;</span><span class="p">,</span> <span class="s1">&#39;70&#39;</span><span class="p">,</span> <span class="s1">&#39;71&#39;</span><span class="p">,</span> <span class="s1">&#39;72&#39;</span><span class="p">,</span> <span class="s1">&#39;73&#39;</span><span class="p">,</span> <span class="s1">&#39;74&#39;</span><span class="p">,</span> <span class="s1">&#39;75&#39;</span><span class="p">,</span> <span class="s1">&#39;76&#39;</span><span class="p">,</span> <span class="s1">&#39;77&#39;</span><span class="p">,</span> <span class="s1">&#39;78&#39;</span><span class="p">,</span> <span class="s1">&#39;79&#39;</span><span class="p">,</span> <span class="s1">&#39;80&#39;</span><span class="p">,</span> <span class="s1">&#39;81&#39;</span><span class="p">,</span> <span class="s1">&#39;82&#39;</span><span class="p">,</span> <span class="s1">&#39;83&#39;</span><span class="p">,</span> <span class="s1">&#39;84&#39;</span><span class="p">,</span> <span class="s1">&#39;85&#39;</span><span class="p">,</span> <span class="s1">&#39;86&#39;</span><span class="p">,</span> <span class="s1">&#39;87&#39;</span><span class="p">,</span> <span class="s1">&#39;88&#39;</span><span class="p">,</span> <span class="s1">&#39;89&#39;</span><span class="p">,</span> <span class="s1">&#39;90&#39;</span><span class="p">,</span> <span class="s1">&#39;91&#39;</span><span class="p">,</span> <span class="s1">&#39;92&#39;</span><span class="p">,</span> <span class="s1">&#39;93&#39;</span><span class="p">,</span> <span class="s1">&#39;94&#39;</span><span class="p">,</span> <span class="s1">&#39;95&#39;</span><span class="p">,</span> <span class="s1">&#39;96&#39;</span><span class="p">,</span> <span class="s1">&#39;97&#39;</span><span class="p">,</span> <span class="s1">&#39;98&#39;</span><span class="p">,</span> <span class="s1">&#39;99&#39;</span><span class="p">,</span> <span class="s1">&#39;100&#39;</span><span class="p">,</span> <span class="s1">&#39;101&#39;</span><span class="p">,</span> <span class="s1">&#39;102&#39;</span><span class="p">,</span> <span class="s1">&#39;103&#39;</span><span class="p">,</span> <span class="s1">&#39;104&#39;</span><span class="p">,</span> <span class="s1">&#39;105&#39;</span><span class="p">,</span> <span class="s1">&#39;106&#39;</span><span class="p">,</span> <span class="s1">&#39;107&#39;</span><span class="p">,</span> <span class="s1">&#39;108&#39;</span><span class="p">,</span> <span class="s1">&#39;109&#39;</span><span class="p">,</span> <span class="s1">&#39;110&#39;</span><span class="p">,</span> <span class="s1">&#39;111&#39;</span><span class="p">,</span> <span class="s1">&#39;112&#39;</span><span class="p">,</span> <span class="s1">&#39;113&#39;</span><span class="p">,</span> <span class="s1">&#39;114&#39;</span><span class="p">,</span> <span class="s1">&#39;115&#39;</span><span class="p">,</span> <span class="s1">&#39;116&#39;</span><span class="p">,</span> <span class="s1">&#39;117&#39;</span><span class="p">,</span> <span class="s1">&#39;118&#39;</span><span class="p">,</span> <span class="s1">&#39;119&#39;</span><span class="p">,</span> <span class="s1">&#39;120&#39;</span><span class="p">],</span>
+<span class="s1">&#39;type&#39;</span> <span class="p">:</span> <span class="s1">&#39;forecast&#39;</span><span class="p">,</span>
+<span class="s1">&#39;date&#39;</span> <span class="p">:</span> <span class="s1">&#39;2017-12-01/2017-12-01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;time&#39;</span> <span class="p">:</span> <span class="s1">&#39;00:00&#39;</span><span class="p">,</span>
+<span class="s1">&#39;data_format&#39;</span> <span class="p">:</span> <span class="s1">&#39;netcdf_zip&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="example-2-cams-global-forecast-multi-level-3hourly-data">
+<h4>Example 2: CAMS Global Forecast (Multi-level, 3hourly data)<a class="headerlink" href="#example-2-cams-global-forecast-multi-level-3hourly-data" title="Link to this heading"></a></h4>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_forecast-global-3hourly]</span>
+<span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20200601</span><span class="w">  </span>
+<span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20200602</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sconcno2</span>
+<span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3hourly</span>
+<span class="na">interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-global-atmospheric-composition-forecasts&#39;</span>
+<span class="n">request</span> <span class="o">=</span> <span class="p">{</span>
+<span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;nitrogen_dioxide&#39;</span><span class="p">,</span>
+<span class="s1">&#39;leadtime_hour&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">,</span> <span class="s1">&#39;6&#39;</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">,</span> <span class="s1">&#39;12&#39;</span><span class="p">,</span> <span class="s1">&#39;15&#39;</span><span class="p">,</span> <span class="s1">&#39;18&#39;</span><span class="p">,</span> <span class="s1">&#39;21&#39;</span><span class="p">,</span> <span class="s1">&#39;24&#39;</span><span class="p">,</span> <span class="s1">&#39;27&#39;</span><span class="p">,</span> <span class="s1">&#39;30&#39;</span><span class="p">,</span> <span class="s1">&#39;33&#39;</span><span class="p">,</span> <span class="s1">&#39;36&#39;</span><span class="p">,</span> <span class="s1">&#39;39&#39;</span><span class="p">,</span> <span class="s1">&#39;42&#39;</span><span class="p">,</span> <span class="s1">&#39;45&#39;</span><span class="p">,</span> <span class="s1">&#39;48&#39;</span><span class="p">,</span> <span class="s1">&#39;51&#39;</span><span class="p">,</span> <span class="s1">&#39;54&#39;</span><span class="p">,</span> <span class="s1">&#39;57&#39;</span><span class="p">,</span> <span class="s1">&#39;60&#39;</span><span class="p">,</span> <span class="s1">&#39;63&#39;</span><span class="p">,</span> <span class="s1">&#39;66&#39;</span><span class="p">,</span> <span class="s1">&#39;69&#39;</span><span class="p">,</span> <span class="s1">&#39;72&#39;</span><span class="p">,</span> <span class="s1">&#39;75&#39;</span><span class="p">,</span> <span class="s1">&#39;78&#39;</span><span class="p">,</span> <span class="s1">&#39;81&#39;</span><span class="p">,</span> <span class="s1">&#39;84&#39;</span><span class="p">,</span> <span class="s1">&#39;87&#39;</span><span class="p">,</span> <span class="s1">&#39;90&#39;</span><span class="p">,</span> <span class="s1">&#39;93&#39;</span><span class="p">,</span> <span class="s1">&#39;96&#39;</span><span class="p">,</span> <span class="s1">&#39;99&#39;</span><span class="p">,</span> <span class="s1">&#39;102&#39;</span><span class="p">,</span> <span class="s1">&#39;105&#39;</span><span class="p">,</span> <span class="s1">&#39;108&#39;</span><span class="p">,</span> <span class="s1">&#39;111&#39;</span><span class="p">,</span> <span class="s1">&#39;114&#39;</span><span class="p">,</span> <span class="s1">&#39;117&#39;</span><span class="p">,</span> <span class="s1">&#39;120&#39;</span><span class="p">],</span>
+<span class="s1">&#39;type&#39;</span> <span class="p">:</span> <span class="s1">&#39;forecast&#39;</span><span class="p">,</span>
+<span class="s1">&#39;date&#39;</span> <span class="p">:</span> <span class="s1">&#39;2020-06-01/2020-06-01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;model_level&#39;</span> <span class="p">:</span> <span class="s1">&#39;137&#39;</span><span class="p">,</span>
+<span class="s1">&#39;time&#39;</span> <span class="p">:</span> <span class="s1">&#39;00:00&#39;</span><span class="p">,</span>
+<span class="s1">&#39;data_format&#39;</span> <span class="p">:</span> <span class="s1">&#39;netcdf_zip&#39;</span><span class="p">,</span>
 <span class="p">}</span>
 </pre></div>
 </div>
