@@ -215,6 +215,34 @@ else
     download=false
 fi
 
+# if using download mode then 
+if [[ $PARSED =~ "--report" || $PARSED =~ "--reports" || $PARSED =~ "--offline" || $PARSED =~ "--dl" ]]; then
+    report=true
+    echo $report
+else
+    report=false
+fi
+
+# check for incompatible modes
+mode_bools=("$debug" "$notebook" "$interpolation" "$download" "$report")
+mode_names=("debug" "notebook" "interpolation" "download" "report")
+
+mode_count=0
+enabled_str=""
+
+for i in "${!mode_bools[@]}"; do
+    val="${mode_bools[$i]}"
+    if [[ "$val" == true ]]; then
+        ((++mode_count))
+        enabled_str+=" --${mode_names[$i]}"
+    fi
+done
+
+if (( mode_count >= 2 )); then
+    echo "Error: incompatible arguments detected:${enabled_str}. Please select only one mode." 
+    exit 1
+fi
+
 # determine if need to just execute python if have allocation made (i.e. are in debug mode)
 VALID_HOSTS="p9login1 login0 login1 login2 login3 login4 glogin1 glogin2 glogin3 glogin4 nglogin1 nglogin2 nglogin3 nglogin4"
 HOST=`hostname`

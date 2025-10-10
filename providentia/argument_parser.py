@@ -24,6 +24,21 @@ class ProvArgumentParser(object):
 
         try:
             self.parser = ArgumentParser(description='Main parser for Providentia.')
+            self.parser.add_argument("--download", "--dl",
+                                     dest="download",
+                                     default=False,
+                                     action='store_true',
+                                     help="run Providentia download mode")
+            self.parser.add_argument('--interpolation','--interp','--interpolate', 
+                                     dest="interpolation",
+                                     default=False,
+                                     action='store_true',
+                                     help='runs Providentia Interpolation') 
+            self.parser.add_argument("--report", "--reports", "--offline",
+                                     dest="report",
+                                     default=False,
+                                     action='store_true',
+                                     help="run Providentia report mode")
             self.parser.add_argument('-V', '--version', action='version',
                                      version=providentia.__version__,
                                      help="returns Providentia version number and exit")
@@ -69,21 +84,6 @@ class ProvArgumentParser(object):
                                      default=False,
                                      action='store_true',
                                      help="Whether to disable dynamically creating observational filetrees")
-            self.parser.add_argument("--report", "--reports", "--offline",
-                                     dest="report",
-                                     default=False,
-                                     action='store_true',
-                                     help="run Providentia report mode")
-            self.parser.add_argument("--notebook", "--nb", "--jupyter",
-                                     help="opens a Jupyter Notebook session")
-            self.parser.add_argument("--download", "--dl",
-                                     dest="download",
-                                     default=False,
-                                     action='store_true',
-                                     help="run Providentia download mode")
-            self.parser.add_argument('--interpolation','--interp','--interpolate', 
-                                     action='store_true',
-                                     help='runs Providentia Interpolation') 
             self.parser.add_argument("--slurm_job_id",
                                      dest="slurm_job_id",
                                      help="id of the interpolation sbatch job")     
