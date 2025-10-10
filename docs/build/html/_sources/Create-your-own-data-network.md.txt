@@ -21,7 +21,7 @@ You can learn more about how to create your own datasets with the following tuto
 - Create monthly datasets from CSIC:
 https://earth.bsc.es/gitlab/es/NES/-/blob/master/tutorials/2.Creation/2.5.Create_Points_CSIC.ipynb
 
-Providentia will be able to find these datasets if they are stored in the path specified in the `nonghost_root` key under the corresponding machine in the `settings/data_paths.yaml` file. The name of the network must be included in the `nonghost_available_networks` list in `settings/init_prov.yaml`. For example, in the nord3v2 machine, to get the data from CSIC stored at this location: `/esarchive/obs/csic/csic/monthly/sconcnh3/`, you would need to modify the configuration files as follows.
+Providentia will be able to find these datasets if they are stored in the path specified in the `nonghost_root` key under the corresponding machine in the `settings/data_paths.yaml` file. The name of the network must be included in the `nonghost_available_networks` list in `settings/available_inputs.yaml`. For example, in the nord3v2 machine, to get the data from CSIC stored at this location: `/esarchive/obs/csic/csic/monthly/sconcnh3/`, you would need to modify the configuration files as follows.
 
 Update `data_paths.yaml` so it stores the dataset directory:
 
@@ -33,7 +33,7 @@ Update `data_paths.yaml` so it stores the dataset directory:
 
 ```
 
-Update `init_prov.yaml` by adding the corresponding data network to the `nonghost_available_networks` list:
+Update `available_inputs.yaml` by adding the corresponding data network to the `nonghost_available_networks` list:
 
 ```
 'nonghost_available_networks': [..., 'csic/csic']

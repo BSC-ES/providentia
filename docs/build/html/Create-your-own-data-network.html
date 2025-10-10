@@ -112,7 +112,7 @@
 <li><p>Create monthly datasets from CSIC:
 https://earth.bsc.es/gitlab/es/NES/-/blob/master/tutorials/2.Creation/2.5.Create_Points_CSIC.ipynb</p></li>
 </ul>
-<p>Providentia will be able to find these datasets if they are stored in the path specified in the <code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code> key under the corresponding machine in the <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code> file. The name of the network must be included in the <code class="docutils literal notranslate"><span class="pre">nonghost_available_networks</span></code> list in <code class="docutils literal notranslate"><span class="pre">settings/init_prov.yaml</span></code>. For example, in the nord3v2 machine, to get the data from CSIC stored at this location: <code class="docutils literal notranslate"><span class="pre">/esarchive/obs/csic/csic/monthly/sconcnh3/</span></code>, you would need to modify the configuration files as follows.</p>
+<p>Providentia will be able to find these datasets if they are stored in the path specified in the <code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code> key under the corresponding machine in the <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code> file. The name of the network must be included in the <code class="docutils literal notranslate"><span class="pre">nonghost_available_networks</span></code> list in <code class="docutils literal notranslate"><span class="pre">settings/available_inputs.yaml</span></code>. For example, in the nord3v2 machine, to get the data from CSIC stored at this location: <code class="docutils literal notranslate"><span class="pre">/esarchive/obs/csic/csic/monthly/sconcnh3/</span></code>, you would need to modify the configuration files as follows.</p>
 <p>Update <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code> so it stores the dataset directory:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;nord3v2&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;nonghost_root&quot;</span><span class="p">:</span> <span class="s2">&quot;/esarchive/obs&quot;</span><span class="p">,</span>
@@ -121,7 +121,7 @@ https://earth.bsc.es/gitlab/es/NES/-/blob/master/tutorials/2.Creation/2.5.Create
 
 </pre></div>
 </div>
-<p>Update <code class="docutils literal notranslate"><span class="pre">init_prov.yaml</span></code> by adding the corresponding data network to the <code class="docutils literal notranslate"><span class="pre">nonghost_available_networks</span></code> list:</p>
+<p>Update <code class="docutils literal notranslate"><span class="pre">available_inputs.yaml</span></code> by adding the corresponding data network to the <code class="docutils literal notranslate"><span class="pre">nonghost_available_networks</span></code> list:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;nonghost_available_networks&#39;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="s1">&#39;csic/csic&#39;</span><span class="p">]</span>
 
 </pre></div>
