@@ -48,9 +48,9 @@ class ProvConfiguration:
         self.read_instance = read_instance 
         
         # set variable defaults
-        self.var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'init_prov_dev.yaml')))
+        self.var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'init.yaml')))
         self.var_defaults['config_dir'] = join(PROVIDENTIA_ROOT, self.var_defaults['config_dir'])
-        modifiable_var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'init_prov.yaml')))
+        modifiable_var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'available_inputs.yaml')))
         self.var_defaults.update(modifiable_var_defaults)
 
         # set mode
@@ -650,7 +650,7 @@ class ProvConfiguration:
         split_experiments = [exp.split("-") for exp in self.read_instance.experiments]
 
         # get default ensemble
-        default_ensemble = self.default_values["ensemble"]
+        default_ensemble = [self.default_values["ensemble"]]
 
         # get original domain, ensemble and forecast as passed in the configuration file
         config_domain = copy.deepcopy(self.read_instance.domain) 
@@ -754,7 +754,7 @@ class ProvConfiguration:
             # throw error if ensemble has been defined in both ensemble and experiment fields
             if (exp_ens) and (config_ensemble):
                 error = f"Error: Unable to set 'ensemble' as {', '.join(config_ensemble)} because the "
-                error +=  f"experiment {self.read_instance.experiments[exp_ii]} already contains information about the ensemble."                  
+                error += f"experiment {self.read_instance.experiments[exp_ii]} already contains information about the ensemble."                  
                 self.read_instance.logger.error(error)
                 sys.exit(1)
             # elif if have ensemble information from experiment field, then use that
@@ -932,7 +932,6 @@ class ProvConfiguration:
         return exp_found
     
     # TODO use inheritance in the future 
-    # TODO add more checking, for now only this is enough
     def check_experiment_interpolation(self, experiment, deactivate_warning):     
         """ Checks if experiment, domain and ensemble combination works 
         for interpolation or the download of non-interpolated experiments
@@ -1016,7 +1015,6 @@ class ProvConfiguration:
 
         return [experiment]
     
-    # TODO maybe remove this one and keep the download check since its much cleaner
     def check_experiment_download(self, experiment, deactivate_warning):
         """ Check individual experiment and get list of options."""
 
@@ -1087,6 +1085,7 @@ class ProvConfiguration:
         # check have network information 
         if not self.read_instance.network and 'network' in self.default_values:
             default = self.default_values['network']
+            default = eval(default) if default.startswith("self.") else default
             msg = "Network (network) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.network = default
@@ -1095,9 +1094,10 @@ class ProvConfiguration:
         # in download mode is allowed to not pass any species, so continue
         if not self.read_instance.species and 'species' in self.default_values:
             default = self.default_values['species']
+            default = eval(default) if default.startswith("self.") else default
             msg = "Species (species) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.species = default
+            self.read_instance.species = [default]
 
         # if number of networks and species is not the same,
         # and len of one of network or species == 1,
@@ -1296,7 +1296,8 @@ class ProvConfiguration:
             self.read_instance.statistic_mode = default
 
         # check have statistic_aggregation information and ensure that it matches with the statistic_mode
-        if not self.read_instance.statistic_aggregation or self.read_instance.statistic_mode == 'Flattened' and 'statistic_aggregation' in self.default_values:  
+        if 'statistic_aggregation' in self.default_values and \
+                not (self.read_instance.statistic_aggregation or self.read_instance.statistic_mode == 'Flattened'):  
             default = self.default_values['statistic_aggregation'][self.read_instance.statistic_mode]
             self.read_instance.statistic_aggregation = default
 
@@ -1321,14 +1322,13 @@ class ProvConfiguration:
             default = self.default_values['active_dashboard_plots']
             self.read_instance.active_dashboard_plots = default
         # TODO: For Taylor diagrams, remove this piece of code when we stop using Matplotlib 3.3
-        else:
-            if Version(matplotlib.__version__) < Version("3.8"):
+        elif Version(matplotlib.__version__) < Version("3.8"):
                 if 'taylor' in self.read_instance.active_dashboard_plots:
                     error = 'It is not possible to create Taylor diagrams yet, please remove from settings/report_plots.yaml.'
                     self.read_instance.logger.error(error)
                     sys.exit(1)
 
-        if (len(self.read_instance.active_dashboard_plots) != 4) and (self.read_instance.mode not in ['report', 'library']):
+        if len(self.read_instance.active_dashboard_plots) != 4 and 'active_dashboard_plots' in self.default_values:
             error = 'Error: there must be 4 "active_dashboard_plots"'
             self.read_instance.logger.error(error)
             sys.exit(1)

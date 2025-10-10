@@ -402,7 +402,7 @@ class Download(object):
         # if not valid network, check if user put the network on init_prov 
         # TODO Move to configuration.py
         if network not in self.nonghost_available_networks:
-            msg = f"The {network} network could not be found on {join(PROVIDENTIA_ROOT,'settings','init_prov.yaml')} nonghost_available_networks list."
+            msg = f"The {network} network could not be found on {join(PROVIDENTIA_ROOT,'settings','available_inputs.yaml')} nonghost_available_networks list."
             msg += "\nPlease, add the network to the list and execute again."
             show_message(self, msg, deactivate=initial_check)
             return
@@ -421,7 +421,7 @@ class Download(object):
         not_available_resolutions = set(self.resolution) - set(self.nonghost_available_resolutions)
         if not_available_resolutions:
             available_resolutions = set(self.resolution) - not_available_resolutions
-            msg = f"The resolution/s {', '.join(available_resolutions)} could not be found on {join(PROVIDENTIA_ROOT,'settings','init_prov.yaml')} nonghost_available_resolutions list."
+            msg = f"The resolution/s {', '.join(available_resolutions)} could not be found on {join(PROVIDENTIA_ROOT,'settings','available_inputs.yaml')} nonghost_available_resolutions list."
             msg += "\nPlease, add the necessary resolutions to the list and execute again."
             show_message(self, msg, deactivate=initial_check)
             return

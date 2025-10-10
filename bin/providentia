@@ -218,28 +218,23 @@ fi
 # if using download mode then 
 if [[ $PARSED =~ "--report" || $PARSED =~ "--reports" || $PARSED =~ "--offline" || $PARSED =~ "--dl" ]]; then
     report=true
-    echo $report
 else
     report=false
 fi
 
 # check for incompatible modes
 mode_bools=("$debug" "$notebook" "$interpolation" "$download" "$report")
-mode_names=("debug" "notebook" "interpolation" "download" "report")
-
 mode_count=0
-enabled_str=""
 
 for i in "${!mode_bools[@]}"; do
     val="${mode_bools[$i]}"
     if [[ "$val" == true ]]; then
         ((++mode_count))
-        enabled_str+=" --${mode_names[$i]}"
     fi
 done
 
 if (( mode_count >= 2 )); then
-    echo "Error: incompatible arguments detected:${enabled_str}. Please select only one mode." 
+    echo "Error: incompatible mode arguments detected. Please select only one mode." 
     exit 1
 fi
 

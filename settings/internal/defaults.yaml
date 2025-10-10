@@ -1,74 +1,72 @@
 dashboard:
-    network: EBAS
-    species: [sconco3]
-    resolution: hourly
-    start_date: 20180101
-    end_date: 20190101
-    statistic_mode: Temporal|Spatial
-    statistic_aggregation:
-      Temporal|Spatial: Median
-      Spatial|Temporal: Median
-      Flattened: ''
-    periodic_statistic_mode: Independent
-    periodic_statistic_aggregation: Median
-    timeseries_statistic_aggregation: Median
-    active_dashboard_plots:
-      - timeseries
-      - statsummary
-      - distribution
-      - periodic
-    ensemble: [allmembers]
+  network: EBAS
+  species: sconco3
+  resolution: hourly
+  start_date: 20180101
+  end_date: 20190101
+  statistic_mode: Temporal|Spatial
+  statistic_aggregation:
+    Temporal|Spatial: Median
+    Spatial|Temporal: Median
+    Flattened: ""
+  periodic_statistic_mode: Independent
+  periodic_statistic_aggregation: Median
+  timeseries_statistic_aggregation: Median
+  active_dashboard_plots:
+    - timeseries
+    - statsummary
+    - distribution
+    - periodic
+  ensemble: allmembers
 report:
-    network: EBAS
-    species: [sconco3]
-    resolution: hourly
-    start_date: 20180101
-    end_date: 20190101
-    statistic_mode: Temporal|Spatial
-    statistic_aggregation:
-      Temporal|Spatial: Median
-      Spatial|Temporal: Median
-      Flattened: ''
-    periodic_statistic_mode: Independent
-    periodic_statistic_aggregation: Median
-    timeseries_statistic_aggregation: Median
-    ensemble: [allmembers]
+  network: EBAS
+  species: sconco3
+  resolution: hourly
+  start_date: 20180101
+  end_date: 20190101
+  statistic_mode: Temporal|Spatial
+  statistic_aggregation:
+    Temporal|Spatial: Median
+    Spatial|Temporal: Median
+    Flattened: ""
+  periodic_statistic_mode: Independent
+  periodic_statistic_aggregation: Median
+  timeseries_statistic_aggregation: Median
+  ensemble: allmembers
 library:
-    network: EBAS
-    species: [sconco3]
-    resolution: hourly
-    start_date: 20180101
-    end_date: 20190101
-    statistic_mode: Temporal|Spatial
-    statistic_aggregation:
-      Temporal|Spatial: Median
-      Spatial|Temporal: Median
-      Flattened: ''
-    periodic_statistic_mode: Independent
-    periodic_statistic_aggregation: Median
-    timeseries_statistic_aggregation: Median
-    active_dashboard_plots:
-      - timeseries
-      - statsummary
-      - distribution
-      - periodic
-    ensemble: [allmembers]
+  network: EBAS
+  species: sconco3
+  resolution: hourly
+  start_date: 20180101
+  end_date: 20190101
+  statistic_mode: Temporal|Spatial
+  statistic_aggregation:
+    Temporal|Spatial: Median
+    Spatial|Temporal: Median
+    Flattened: ""
+  periodic_statistic_mode: Independent
+  periodic_statistic_aggregation: Median
+  timeseries_statistic_aggregation: Median
+  active_dashboard_plots:
+    - timeseries
+    - statsummary
+    - distribution
+    - periodic
+  ensemble: allmembers
 interpolation:
-      network: self.read_instance.ghost_available_networks
-      species: self.read_instance.available_species
-      resolution:  
-      - hourly 
-      - hourly_instantaneous 
-      - daily 
-      - monthly 
-      start_date: 20180101
-      end_date: 20190101
-      ensemble: ['000']
+  network: self.read_instance.ghost_available_networks
+  species: self.read_instance.available_species
+  resolution:
+    - hourly
+    - hourly_instantaneous
+    - daily
+    - monthly
+  start_date: 201801
+  end_date: 201901  
+  ensemble: 000
+  interp_n_neighbours: 4
 download:
-      network: ''
-      species: self.read_instance.available_species
-      resolution: ''
-      start_date: 201801
-      end_date: 201901
-      ensemble: ['000']
-      interp_n_neighbours: 4
+  species: self.read_instance.available_species
+  start_date: 20180101
+  end_date: 20190101
+  ensemble: 000
