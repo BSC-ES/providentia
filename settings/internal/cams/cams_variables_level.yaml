@@ -59,7 +59,6 @@ https://ads.atmosphere.copernicus.eu/datasets/cams-global-atmospheric-compositio
   - peroxyacetyl_nitrate
   - propane
   - propene
-  - relative_humidity
   - sulphate_aerosol_mixing_ratio
   - sulphur_dioxide
   single:
@@ -73,6 +72,7 @@ https://ads.atmosphere.copernicus.eu/datasets/cams-global-atmospheric-compositio
   - particulate_matter_10um
   - particulate_matter_1um
   - particulate_matter_2.5um
+  - relative_humidity
   - sea_surface_temperature
   - single_scattering_albedo_1020nm
   - single_scattering_albedo_440nm
@@ -111,7 +111,6 @@ https://ads.atmosphere.copernicus.eu/datasets/cams-global-reanalysis-eac4?tab=do
   - peroxyacetyl_nitrate
   - propane
   - propene
-  - relative_humidity
   - sulphate_aerosol_mixing_ratio
   - sulphur_dioxide
   single:
@@ -122,6 +121,7 @@ https://ads.atmosphere.copernicus.eu/datasets/cams-global-reanalysis-eac4?tab=do
   - particulate_matter_10um
   - particulate_matter_1um
   - particulate_matter_2.5um
+  - relative_humidity
   - sea_surface_temperature
   - snow_depth
   - surface_pressure
