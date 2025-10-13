@@ -52,7 +52,7 @@ class ProvConfiguration:
         modifiable_var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'init_prov.yaml')))
         self.var_defaults.update(modifiable_var_defaults)
 
-        # if variable is given by command line, set that value, otherwise set as default value 
+        # if variable is given by command line, set that value, otherwise set as default value
         for k, val in self.var_defaults.items():
             val = kwargs.get(k, val)
             # set mode
@@ -61,7 +61,7 @@ class ProvConfiguration:
                     setattr(self.read_instance, 'mode', k)
             else:
                 setattr(self.read_instance, k, self.parse_parameter(k, val))
-
+            
         # direct output to file/screen
         if hasattr(self.read_instance, 'logger') is False:
             self.switch_logging()
@@ -1621,11 +1621,7 @@ class ProvConfiguration:
             # default path (the file name depends on the mode)
             else:
                 # get the mode being used right now
-                mode_list = ["report", "library", "download", "interpolation"] 
-                mode = "dashboard"
-                for temp_mode in mode_list:
-                    if getattr(self.read_instance, temp_mode) is True:
-                        mode = temp_mode if temp_mode != "library" else "notebook"
+                mode = self.read_instance.mode if self.read_instance.mode != "library" else "notebook"
                 file_path = join(PROVIDENTIA_ROOT, 'logs', mode, filename)
 
             # redirect output to a file
