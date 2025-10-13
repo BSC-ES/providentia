@@ -22,6 +22,7 @@ cams_variables_level = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'i
 cams_formatting = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_formatting.yaml')))
 ghost_cams_variables = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'ghost_cams_variables.yaml')))
 cams_stream = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_stream.yaml')))
+cams_species_units = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_species_units.yaml')))
 
 class Cams:
 
@@ -283,32 +284,33 @@ class Cams:
 
         for input_dim_name, output_dim_name in cams_providentia_map.items():
             # skip single species
-            if output_dim_name == "level" and 'single' in cams_variables_level[url] and cams_species in cams_variables_level[url]['single']:
-                pass
+            if output_dim_name == "level" and ('single' in cams_variables_level[url] and cams_species in cams_variables_level[url]['single']):
+                continue
+            # skip dimensions not used 
+            if not output_dim_name:
+                continue
             # get dimension
             dim = input_file.dimensions[input_dim_name]
             # create the dimension with the new name 
             output_file.createDimension(output_dim_name, len(dim))
-
-        # get species name in the input file
-        input_species = list(set(input_file.variables) - set(input_file.dimensions))[0] # TODO take into account that cams_forecast_global has two elements
 
         # copy variables
         for input_var_name in input_file.variables:
             # get the output var name
             if input_var_name in cams_providentia_map:
                 output_var_name = cams_providentia_map[input_var_name]
-            elif input_var_name == input_species:
-                output_var_name = species
+                # skip variables not used 
+                if not output_var_name:
+                    continue
             else:
-                continue
+                output_var_name = species
             
             # get the variable
             input_var = input_file[input_var_name]
             
             # change the name of the dimensions into the providentia name
-            output_var_dims = [cams_providentia_map.get(name, name) for name in input_var.dimensions if name in cams_providentia_map]
-            
+            output_var_dims = [cams_providentia_map.get(name, name) for name in input_var.dimensions 
+                               if name in cams_providentia_map and cams_providentia_map[name]]
             # create the variable
             output_var = output_file.createVariable(output_var_name, input_var.datatype, output_var_dims)
 
@@ -323,10 +325,10 @@ class Cams:
                 output_var.positive = 'up'
 
             # add coordinates, grid_mapping and units to the species variable
-            elif input_var_name == input_species:               
+            elif output_var_name == species:               
                 output_var.setncattr('coordinates', 'latitude longitude')
                 output_var.setncattr('grid_mapping', 'crs')
-                output_var.setncattr('units', input_var.units)
+                output_var.setncattr('units', cams_species_units[input_var.units])
             
             # get the data from 
             if output_var_name == "time":  
