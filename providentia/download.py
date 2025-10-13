@@ -338,9 +338,9 @@ class Download(object):
         # if pwd or user changed, ask if user wants to remember credentials
         if (prv_user is not None) or (prv_password is not None):
             # ask user if they want their credentials saved
-            remind_txt = input("\nRemember credentials (y/n)? ")
+            remind_txt = input("\nRemember credentials ([y]/n)? ")
             while remind_txt.lower() not in ['y','n']:
-                remind_txt = input("\nRemember credentials (y/n)? ")
+                remind_txt = input("\nRemember credentials ([y]/n)? ")
             
             # create .env with the input user and/or password
             if remind_txt.lower() == 'y':
@@ -369,19 +369,19 @@ class Download(object):
                 # make the user choose between overwriting or not overwriting
                 if self.overwrite_choice not in ['y','n']:
                     # ask if user wants to overwrite
-                    while self.overwrite_choice not in ['y','n']:
-                        self.overwrite_choice = input("\nThere are some files that were already downloaded in a previous download, do you want to overwrite them (y/n)? ").lower() 
+                    while self.overwrite_choice not in ['y','n','']:
+                        self.overwrite_choice = input("\nThere are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)? ").lower() 
                     # ask if user wants to remember the decision
                     remind_txt = None
-                    while remind_txt not in ['y','n']:
-                        remind_txt = input("\nDo you want to remember your decision for future downloads (y/n)? ").lower() 
+                    while remind_txt not in ['y','n','']:
+                        remind_txt = input("\nDo you want to remember your decision for future downloads ([y]/n)? ").lower() 
                     # save the decision
-                    if remind_txt == 'y':
+                    if remind_txt in ['y','']:
                         with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
-                            f.write(f"OVERWRITE={self.overwrite_choice}\n")
+                            f.write(f"OVERWRITE=y\n")
                 # if user wants to overwrite then add the the files that were 
-                # downloaded before the execution as if they were never download
-                if self.overwrite_choice == 'y':
+                # downloaded before the execution as if they were never downloaded
+                if self.overwrite_choice in ['y','']:
                     not_downloaded_files += downloaded_before_execution_files
                 # change overwritten files boolean to True to indicate that some files were ignored
                 else:
