@@ -216,7 +216,7 @@ else
 fi
 
 # if using download mode then 
-if [[ $PARSED =~ "--report" || $PARSED =~ "--reports" || $PARSED =~ "--offline" || $PARSED =~ "--dl" ]]; then
+if [[ $PARSED =~ "--report" || $PARSED =~ "--reports" || $PARSED =~ "--offline" ]]; then
     report=true
 else
     report=false
