@@ -81,6 +81,13 @@ class ProvConfiguration:
         # when the value is default then it is as if it was a blank value
         if value == 'default':
             return self.var_defaults[key]
+        
+        # the wildcard '*' is not valid in report-related modes
+        elif value == '*' and self.read_instance.mode in ['dashboard', 'report', 'library']:
+            error = f"Error: The wildcard ('*') in the '{key}' parameter is not allowed for the '{self.read_instance.mode}' mode."
+            self.read_instance.logger.error(error)
+            sys.exit(1)
+
 
         # parse config file name
         if key == 'conf':
@@ -1085,26 +1092,24 @@ class ProvConfiguration:
         # check have network information 
         if not self.read_instance.network and 'network' in self.default_values:
             default = self.default_values['network']
-            default = eval(default) if default.startswith("self.") else default
             msg = "Network (network) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.network = default
+            self.read_instance.network = eval(default) if default.startswith("self.") else default
 
         # check have species information
         # in download mode is allowed to not pass any species, so continue
         if not self.read_instance.species and 'species' in self.default_values:
             default = self.default_values['species']
-            default = eval(default) if default.startswith("self.") else default
             msg = "Species (species) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.species = [default]
+            self.read_instance.species = eval(default) if default.startswith("self.") else default
 
         # if number of networks and species is not the same,
         # and len of one of network or species == 1,
         # then duplicate respestive network/species
         # in download mode is allowed to not have a different number, so continue
         # TODO in download mode and interpolation separate this somehow.
-        if len(self.read_instance.network) != len(self.read_instance.species) and not (self.read_instance.mode == 'download' or self.read_instance.mode == 'interpolation'):
+        if len(self.read_instance.network) != len(self.read_instance.species) and not (self.read_instance.mode in ['download', 'interpolation']):
 
             # 1 network?
             if len(self.read_instance.network) == 1:
@@ -1136,7 +1141,7 @@ class ProvConfiguration:
 
         # if are using dashboard then just take first network/species pair, as multivar not supported yet
         if ((len(self.read_instance.network) > 1) and (len(self.read_instance.species) > 1) and 
-            (self.read_instance.mode not in ['interpolation', 'report', 'library', 'download', 'interpolation'])):
+            (self.read_instance.mode == 'dashboard')):
              
             msg = 'Multiple networks/species are not supported in the dashboard. First ones will be taken.'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
@@ -1144,7 +1149,7 @@ class ProvConfiguration:
             self.read_instance.network = [self.read_instance.network[0]]
             self.read_instance.species = [self.read_instance.species[0]]
 
-        if self.read_instance.network:
+        if self.read_instance.network and self.read_instance.species:
             # initialise networkspeci as first network and species pair
             self.read_instance.networkspeci = '{}|{}'.format(self.read_instance.network[0],
                                                             self.read_instance.species[0]) 
@@ -1387,8 +1392,7 @@ class ProvConfiguration:
                 if filter_species.split('|')[1] in invalid_filter_species:
                     del self.read_instance.filter_species[filter_species]
 
-        # TODO change this in the refactoring, not do this in download mode
-        if self.read_instance.mode != 'download': 
+        if self.read_instance.mode not in ['download', 'interpolation']: 
             # create variable for all unique species (plus filter species)
             filter_species = []
             species_plus_filter_species = copy.deepcopy(self.read_instance.species)

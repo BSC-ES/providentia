@@ -7,6 +7,7 @@ import copy
 from dotenv import dotenv_values
 from getpass import getpass
 import paramiko 
+from remotezip import RemoteZip
 import requests
 import signal
 import subprocess
@@ -671,8 +672,6 @@ class Download(object):
             return initial_check_nc_files
 
     def download_ghost_network_zenodo(self, network, initial_check, files_to_download=None):
-        # import remotezip
-        from remotezip import RemoteZip
         
         if not initial_check:
             # print current_network
