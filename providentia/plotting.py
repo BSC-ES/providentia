@@ -2145,6 +2145,7 @@ class Plotting:
         beta = fairmode_settings[speci].get('beta')
         coverage = fairmode_settings[speci].get('coverage')
         exc_threshold = fairmode_settings[speci].get('exc_threshold')
+        percentile = fairmode_settings[speci].get('percentile')
 
         # add target
         main_circle = plt.Circle(**plot_characteristics['auxiliar']['circle']['main'])
@@ -2230,10 +2231,10 @@ class Plotting:
 
                 st_observations_data = observations_data[station_idx, :]
                 st_experiment_data = experiment_data[station_idx, :]
-                
+      
                 x, y, mqi = ExpBias.calculate_fairmode_stats(
                     st_observations_data, st_experiment_data, 
-                    u_95r_RV, RV, alpha, beta, exc_threshold, 'target')
+                    u_95r_RV, RV, alpha, beta, exc_threshold, percentile, 'target')
 
                 x_points.append(x)
                 y_points.append(y)
@@ -2344,6 +2345,7 @@ class Plotting:
         alpha = fairmode_settings[speci].get('alpha')
         beta = fairmode_settings[speci].get('beta')
         exc_threshold = fairmode_settings[speci].get('exc_threshold')
+        percentile = fairmode_settings[speci].get('percentile')
       
         # get station references
         valid_station_references = get_valid_metadata(self, 'station_reference', 
@@ -2373,11 +2375,11 @@ class Plotting:
 
                 st_observations_data = observations_data[station_idx, :]
                 st_experiment_data = experiment_data[station_idx, :]
-                
+
                 mean, exc, t_bias, t_R, t_sd, h_perc = ExpBias.calculate_fairmode_stats(
                     st_observations_data, st_experiment_data, 
-                    u_95r_RV, RV, alpha, beta, exc_threshold, 'summary')
-                
+                    u_95r_RV, RV, alpha, beta, exc_threshold, percentile, 'summary')
+
                 means.append(mean)
                 exceedances.append(exc)
                 t_biases.append(t_bias)
