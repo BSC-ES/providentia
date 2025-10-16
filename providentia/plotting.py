@@ -2147,6 +2147,16 @@ class Plotting:
         exc_threshold = fairmode_settings[speci].get('exc_threshold')
         percentile = fairmode_settings[speci].get('percentile')
 
+        # get RV in threshold per units
+        units = self.read_instance.measurement_units[speci]
+        if units in RV and units in exc_threshold:
+            RV = RV[units]
+            exc_threshold = exc_threshold[units]
+        else: 
+            msg = f'RV and exceedance threshold has not been calculated for units {units}. FAIRMODE plot cannot be calculated.'
+            show_message(self.read_instance, msg)
+            return
+        
         # add target
         main_circle = plt.Circle(**plot_characteristics['auxiliar']['circle']['main'])
         relevant_axis.add_patch(main_circle)
@@ -2346,7 +2356,17 @@ class Plotting:
         beta = fairmode_settings[speci].get('beta')
         exc_threshold = fairmode_settings[speci].get('exc_threshold')
         percentile = fairmode_settings[speci].get('percentile')
-      
+
+        # get RV in threshold per units
+        units = self.read_instance.measurement_units[speci]
+        if units in RV and units in exc_threshold:
+            RV = RV[units]
+            exc_threshold = exc_threshold[units]
+        else: 
+            msg = f'RV and exceedance threshold has not been calculated for units {units}. FAIRMODE plot cannot be calculated.'
+            show_message(self.read_instance, msg)
+            return
+        
         # get station references
         valid_station_references = get_valid_metadata(self, 'station_reference', 
                                                       valid_station_idxs, networkspeci)
