@@ -2153,7 +2153,7 @@ class Plotting:
             RV = RV[units]
             exc_threshold = exc_threshold[units]
         else: 
-            msg = f'RV and exceedance threshold has not been calculated for units {units}. FAIRMODE plot cannot be calculated.'
+            msg = f'RV and exceedance threshold have not been for units {units} in settings/fairmode.yaml. FAIRMODE target plot cannot be calculated.'
             show_message(self.read_instance, msg)
             return
         
@@ -2341,7 +2341,7 @@ class Plotting:
         # skip making plot if there is no valid data
         # library and report modes are already handling this in advance
         if (self.read_instance.mode not in ['report', 'library']) and (not any(valid_station_idxs)):
-            msg = 'No valid data to create FAIRMODE target plot after filtering by coverage.'
+            msg = 'No valid data to create FAIRMODE statistic summary plot after filtering by coverage.'
             show_message(self.read_instance, msg)
             self.read_instance.handle_layout_update('None', sender=self.canvas_instance.get_plot_type_position('fairmode-statsummary'))
             return
@@ -2363,7 +2363,7 @@ class Plotting:
             RV = RV[units]
             exc_threshold = exc_threshold[units]
         else: 
-            msg = f'RV and exceedance threshold has not been calculated for units {units}. FAIRMODE plot cannot be calculated.'
+            msg = f'RV and exceedance threshold have not been defined for units {units} in settings/fairmode.yaml. FAIRMODE statistic summary plot cannot be calculated.'
             show_message(self.read_instance, msg)
             return
         
