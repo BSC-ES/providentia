@@ -1032,19 +1032,26 @@ class PopUpWindow(QtWidgets.QWidget):
         # get widget line
         event_source = self.sender()
         label_ii = int(event_source.objectName().split('_')[1])
+        # get experiment
         experiment = self.menu_current['experiments']['map_vars'][label_ii]
+        # get networkspeci
+        networkspeci = '{}|{}'.format(self.read_instance.selected_network, self.read_instance.selected_species)
 
         # if experiment is checked, check if the experiment is a forecast experiment,
         # and if so populate the combobox  
         if event_source.isChecked():
             # if do not have forecast options for experiment, need to generate them
-            if experiment not in self.menu_current['experiments']['forecast']:
-                
-                # get selected networkspecies
-                networkspecies = ['{}|{}'.format(self.read_instance.selected_network, self.read_instance.selected_species)]
+            #if experiment not in self.menu_current['experiments']['forecast']:
+            evaluate_forecast = False
+            if networkspeci not in self.read_instance.available_forecast_indices_per_data_label:
+                evaluate_forecast = True
+            elif experiment not in self.read_instance.available_forecast_indices_per_data_label[networkspeci]:
+                evaluate_forecast = True
+
+            if evaluate_forecast:
 
                 # check N available forecast days for experiment
-                n_forecast_days = self.read_instance.datareader.check_forecast(data_labels=[experiment], networkspecies=networkspecies, 
+                n_forecast_days = self.read_instance.datareader.check_forecast(data_labels=[experiment], networkspecies=[networkspeci], 
                                                                                dashboard_interactive=True)
 
                 # set available forecast vars

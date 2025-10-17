@@ -249,6 +249,8 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
             # Update count of experiments
             experiment_ind += 1
 
+    print('PLOTTING PARAMS:', instance.plotting_params.keys(), 'DATA LABELS:', instance.data_labels)
+
 
 def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott', xgrid=None):
     """

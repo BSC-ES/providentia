@@ -403,20 +403,21 @@ class NavigationToolbar(NavigationToolbar2QT):
         self.read_instance.update_configuration_bar_fields()
         self.read_instance.config_bar_initialisation = False
         
-        # read
+        # read and filter
         self.read_instance.handle_data_selection_update()
 
         # reset the filter fields
-        self.read_instance.reset_options()
+        #self.read_instance.reset_options()
 
         # set fields available for filtering
         multispecies_conf(self.read_instance)
-        representativity_conf(self.read_instance)
-        period_conf(self.read_instance)
-        metadata_conf(self.read_instance)
+        #representativity_conf(self.read_instance)
+        #period_conf(self.read_instance)
+        #metadata_conf(self.read_instance)
         
         # filter
-        self.read_instance.mpl_canvas.handle_data_filter_update()
+        #print('RELOAD CONF: FILTER')
+        #self.read_instance.mpl_canvas.handle_data_filter_update()
 
         # reset from_conf variable to False after reading and filtering is complete
         self.read_instance.from_conf = False

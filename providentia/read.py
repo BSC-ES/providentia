@@ -51,12 +51,12 @@ class DataReader:
             # determine if reading GHOST or non-GHOST
             self.read_instance.reading_ghost = check_for_ghost(self.read_instance.network[0])
 
-            # re-initialise and update representativity fields and period fields for active resolution
+            # re-initialise and update fields for active resolution
             init_representativity(self.read_instance)
             init_period(self.read_instance)
             update_representativity_fields(self.read_instance)
             update_period_fields(self.read_instance)
-            # if loading from a conf file then load representativity and period fields
+            # if loading from a conf file then load new fields
             if self.read_instance.from_conf:
                 representativity_conf(self.read_instance)
                 period_conf(self.read_instance)
@@ -174,7 +174,7 @@ class DataReader:
             # check if any of the experiment data has a forecast dimension to handle 
             # only for report / library modes as dashboard handled previously
             if (self.read_instance.report) or (self.read_instance.library):
-                self.check_forecast(yearmonths_to_read=yearmonths_to_read)
+                self.check_forecast(yearmonths_to_read=yearmonths_to_read, conf=self.read_instance.from_conf)
 
             # create data in memory array
             self.read_instance.data_in_memory = {networkspeci: 
@@ -300,6 +300,8 @@ class DataReader:
             else:
                 self.read_instance.measurement_units = {speci.split('|')[1]:self.read_instance.parameter_dictionary[speci.split('|')[1]]['standard_units'] 
                                                         for speci in self.read_instance.networkspecies}
+
+            print('UPDATE PP READ/SETUP')
 
             # update plotting parameters colours, zorder and experiment grid edges
             update_plotting_parameters(self.read_instance) 
@@ -549,8 +551,11 @@ class DataReader:
 
         # if removing or adding experiments, update plotting parameters colours, zorder and experiment grid edges
         if ('remove_exp' in operations) or ('read_exp' in operations): 
-            update_plotting_parameters(self.read_instance, data_labels_to_remove=experiments_to_remove, 
-                                       data_labels_to_add=experiments_to_read)
+            print('UPDATE PP: READ EXP')
+            data_labels_to_remove = [exp for exp in experiments_to_remove if exp in list(self.read_instance.plotting_params.keys())]
+            data_labels_to_add = [exp for exp in experiments_to_read if exp not in list(self.read_instance.plotting_params.keys())]
+            update_plotting_parameters(self.read_instance, data_labels_to_remove=data_labels_to_remove, 
+                                       data_labels_to_add=data_labels_to_add)
 
         # for non-GHOST delete valid station indices variables because we do not want to 
         # remove the stations with 0 valid measurements before the filter has been updated, 
@@ -788,10 +793,13 @@ class DataReader:
                         self.read_instance.station_names[ns] = self.read_instance.station_names[ns][ns_intersects]
 
 
-    def check_forecast(self, yearmonths_to_read=None, data_labels=None, networkspecies=None, dashboard_interactive=False):
+    def check_forecast(self, yearmonths_to_read=None, data_labels=None, networkspecies=None, 
+                       conf=False, dashboard_interactive=False):
         """ For experiment data, check if there is a forecast dimension in the data files,
             and if so, determine which forecast days to read for each data label (per networkspeci).
         """
+
+        print('check forecast')
 
         # set data labels if not defined
         passed_data_labels = True
@@ -826,7 +834,7 @@ class DataReader:
             yearmonths_to_read = get_yearmonths_to_read(yearmonths, start_date, end_date, resolution)
 
         # if reading from conf file, and no forecast variable set, or if only one data label is being read, then do not check forecast dimension
-        if (self.read_instance.from_conf) & ((not self.read_instance.forecast) or (len(self.read_instance.data_labels) == 1)):
+        if (conf) & ((not self.read_instance.forecast) or (len(self.read_instance.data_labels) == 1)):
             # set forecast_indices_per_data_label to be empty dictionary
             self.read_instance.forecast_indices_per_data_label = {}
             for networkspeci in networkspecies:
@@ -839,7 +847,7 @@ class DataReader:
         else:
 
             # if not loading from a conf and not interactively selecting experiments on dashboard then return
-            if (not self.read_instance.from_conf) & (not dashboard_interactive):
+            if (not conf) & (not dashboard_interactive):
                 return
 
             # get forecast type and wanted forecast days from forecast field
@@ -945,7 +953,9 @@ class DataReader:
 
                 # read forecast dimension for each experiment
                 # if only one data label, then read forecast dimension directly
-                if len(files_to_read) == 1:
+                if len(files_to_read) == 0:
+                    return
+                elif len(files_to_read) == 1:
                     returned_data = check_forecast_dimension(files_to_read[list(files_to_read.keys())[0]])
                     returned_data = [returned_data]
                 # if more than one data label, then read forecast dimension in parallel
