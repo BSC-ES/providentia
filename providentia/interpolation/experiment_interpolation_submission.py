@@ -878,59 +878,9 @@ class SubmitInterpolation(object):
         # print finalised output to console if in library mode
         self.stdout_to_console()
 
-    # def wait_for_resources_fraction(self, pids, check_interval=0.1):
-    #     """Pause the worker until memory and CPU usage are below fraction limits."""
-        
-    #     mem_total_bytes = psutil.virtual_memory().total
-
-    #     while True:
-    #         mem_used = self.total_worker_memory(pids)
-    #         print(mem_used / (1024**3), mem_total_bytes / (1024**3), flush=True)
-    #         mem_ok = mem_used <= mem_total_bytes * self.mem_frac_limit
-
-    #         cpu_ok = psutil.cpu_percent(interval=0.1) <= self.cpu_frac_limit * 100
-
-    #         if mem_ok and cpu_ok:
-    #             print('MEM', (100.0 / mem_total_bytes) * mem_used, flush=True)
-    #             print('CPU', psutil.cpu_percent(interval=0.1), flush=True)
-    #             break
-    #         else:
-    #             mem_gb = mem_used / (1024**3)
-    #             total_gb = mem_total_bytes / (1024**3)
-    #             print(f"[PID {os.getpid()}] Waiting... Mem {mem_gb:.2f} GB / {total_gb:.2f} GB | "
-    #                  f"CPU {psutil.cpu_percent():.1f}% / {self.cpu_frac_limit*100:.0f}%", flush=True)
-    #             time.sleep(check_interval)
-
-    def wait_for_resources_fraction(self, check_interval=1.0):
-        """
-        Wait until system-wide CPU and memory usage drop below safe fractions.
-        """
-        while True:
-            cpu_usage = psutil.cpu_percent(interval=0.5) / 100.0
-            mem = psutil.virtual_memory()
-            mem_usage = mem.percent / 100.0
-
-            # Break if under thresholds
-            if (cpu_usage < self.cpu_frac_limit) and (mem_usage < self.mem_frac_limit):
-                print(f"CPU: {cpu_usage*100:.1f}% ",
-                      f"MEM: {mem_usage*100:.1f}% ",
-                      flush=True)
-                break
-
-            print(
-                f"[Resource Wait] CPU: {cpu_usage*100:.1f}% "
-                f"(limit {self.cpu_frac_limit*100:.0f}%), "
-                f"MEM: {mem_usage*100:.1f}% "
-                f"(limit {self.mem_frac_limit*100:.0f}%) — pausing...",
-                flush=True
-            )
-
-            time.sleep(check_interval)
-
     def run_command(self, commands):
 
-        # Wait until memory and CPU fractions are safe
-        self.wait_for_resources_fraction()
+        time.sleep(random.uniform(0, 0.5))
 
         arguments_list = commands.strip().split()
         if self.machine == 'nord4':
@@ -944,7 +894,7 @@ class SubmitInterpolation(object):
 
     def submit_job_multiprocessing(self):
 
-        self.mem_per_worker_gb, self.mem_frac_limit, self.cpu_frac_limit = 1.0, 0.9, 0.9
+        #self.mem_per_worker_gb, self.mem_frac_limit, self.cpu_frac_limit = 1.0, 0.9, 0.9
 
         self.commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(
             self.working_directory, argument) for argument in self.arguments]
@@ -958,23 +908,24 @@ class SubmitInterpolation(object):
                 msg = f'Using {n_cpus} CPUs.'
             # use default value not passed through --cores (available cpus by 2)
             else:
-                n_cpus = self.estimate_safe_pool_size()
+                n_cpus = None
                 #n_cpus = max(1, int(self.n_cpus * 0.50))
-                msg = f'Using {n_cpus} out of {self.n_cpus} available CPUs to'
-                msg += ' ensure that other processes keep running. \nIf you encounter any problems'
-                msg += ' consider reducing the number of CPUS by running Providentia using'
-                msg += ' --cores (./bin/providentia --cores=2).'
+                #msg = f'Using {n_cpus} out of {self.n_cpus} available CPUs to'
+                #msg += ' ensure that other processes keep running. \nIf you encounter any problems'
+                #msg += ' consider reducing the number of CPUS by running Providentia using'
+                #msg += ' --cores (./bin/providentia --cores=2).'
         else:
             n_cpus = self.n_cpus
             msg = f'Using {n_cpus} CPUs.'
-        print(msg)
+        #print(msg)
 
         # print current output to console if in library mode
         self.stdout_to_console()
 
         # launch interpolation
-        with multiprocessing.Pool(processes=n_cpus) as pool:
-            pool.map(self.run_command, self.commands)
+        self.adaptive_dynamic_pool_fraction(n_cpus)
+        #with multiprocessing.Pool(processes=n_cpus) as pool:
+        #    pool.map(self.run_command, self.commands)
 
         # stop timer
         total_time = (time.time()-self.start)/60.
@@ -1012,31 +963,129 @@ class SubmitInterpolation(object):
         # print finalised output to console if in library mode
         self.stdout_to_console()
 
-    def estimate_safe_pool_size(self):
+
+    def adaptive_dynamic_pool_fraction(self,
+            n_cpus=None,
+            mem_fraction=0.7,
+            cpu_fraction=0.5,
+            min_mem_gb_per_worker=1.5,
+            check_interval=3.0,
+            max_reduction=0.5,
+            recovery_rate=0.1,
+            stagger_range=(0.0, 1.0)  # seconds for per-job stagger
+        ):
         """
-        Estimate a safe number of worker processes based on memory and CPU limits.
-        Assume minimum memory per worker process.
+        Run a multiprocessing pool with adaptive CPU/memory scaling
+        and queue-based staggered job execution to prevent spikes.
         """
-        vm = psutil.virtual_memory()
-        total_mem_gb = vm.total / (1024**3)
-        avail_mem_gb = vm.available / (1024**3)
 
-        # Calculate safe max workers based on memory
-        max_by_mem = int((avail_mem_gb * self.mem_frac_limit) // self.mem_per_worker_gb)
+        total_mem_gb = psutil.virtual_memory().total / (1024 ** 3)
+        safe_mem_gb = total_mem_gb * mem_fraction
+        available_mem_gb = psutil.virtual_memory().available / (1024 ** 3)
 
-        # Calculate safe max workers based on CPU
-        max_by_cpu = int(self.n_cpus * self.cpu_frac_limit)
+        # Use physical cores
+        physical_cores = psutil.cpu_count(logical=False) or 1
 
-        # Final safe number of workers
-        safe_n = max(1, min(max_by_mem, max_by_cpu))
+        # OS-specific safe swap fraction
+        if self.operating_system == 'Mac':
+            swap_safe_fraction = 0.95
+        elif self.operating_system == "Linux":
+            swap_safe_fraction = 0.8
+        elif self.operating_system == "Windows":
+            swap_safe_fraction = 0.9
 
-        print(f"🧠 Total RAM: {total_mem_gb:.1f} GB | Available: {avail_mem_gb:.1f} GB")
-        print(f"⚙️ N CPUs: {self.n_cpus}")
-        print(f"📏 Memory per worker: {self.mem_per_worker_gb:.2f} GB | Memory safety: {self.mem_frac_limit*100:.0f}%")
-        print(f"📊 CPU safety fraction: {self.cpu_frac_limit*100:.0f}%")
-        print(f"✅ Safe pool size: {safe_n} workers (CPU limit: {max_by_cpu}, Mem limit: {max_by_mem})\n")
+        # Initial estimate of workers
+        if n_cpus is None:
+            max_workers_by_mem = int(available_mem_gb / min_mem_gb_per_worker)
+            max_workers_by_cpu = max(1, int(physical_cores * cpu_fraction))
+            n_workers = min(max_workers_by_mem, max_workers_by_cpu)
+        else:
+            n_workers = n_cpus
 
-        return safe_n
+        print(f"[INIT] n_workers={n_workers} (physical_cores={physical_cores}, safe_mem={safe_mem_gb:.2f} GB)")
+
+        # --- Prepare job queue ---
+        job_queue = multiprocessing.Queue()
+        for cmd in self.commands:
+            job_queue.put(cmd)
+
+        # --- Start worker processes ---
+        processes = []
+        for _ in range(n_workers):
+            p = multiprocessing.Process(target=self.worker_job, args=(cpu_fraction, mem_fraction, swap_safe_fraction, check_interval, stagger_range, job_queue,))
+            p.start()
+            processes.append(p)
+
+        # --- Adaptive monitoring ---
+        while any(p.is_alive() for p in processes):
+            cpu = psutil.cpu_percent(interval=0.5) / 100.0
+            mem = psutil.virtual_memory().percent / 100.0
+            swap = psutil.swap_memory().percent / 100.0
+
+            # Apply adaptive scaling
+            cpu_over = cpu / cpu_fraction
+            mem_over = mem / mem_fraction
+            if self.operating_system == "Mac":
+                overload = max(cpu_over, mem_over)
+            else:
+                swap_over = swap / swap_safe_fraction
+                overload = max(cpu_over, mem_over, swap_over)
+
+            if overload > 1.0:
+                # Reduce workers proportionally to overload
+                reduction_ratio = min((overload - 1.0) * 0.8, max_reduction)
+                new_n_workers = max(1, int(n_workers * (1 - reduction_ratio)))
+                reason = f"↓ Reduce by {reduction_ratio*100:.0f}% (CPU={cpu:.2f}, MEM={mem:.2f}, SWAP={swap:.2f})"
+
+            elif cpu < cpu_fraction * 0.8 and mem < mem_fraction * 0.8:
+                # Increase workers gradually, at least +1
+                new_n_workers = min(max(n_workers + 1, int(n_workers * (1 + recovery_rate))), physical_cores)
+                reason = f"↑ Recover {recovery_rate*100:.0f}% (CPU={cpu:.2f}, MEM={mem:.2f}, SWAP={swap:.2f})"
+
+            else:
+                new_n_workers = n_workers
+                reason = f"Stable (CPU={cpu:.2f}, MEM={mem:.2f}, SWAP={swap:.2f})"
+
+            print(f"[ADAPT] {reason} → {new_n_workers} workers")
+            n_workers = new_n_workers
+            time.sleep(check_interval)
+
+
+        # Wait for all workers to finish
+        for p in processes:
+            p.join()
+
+        print("[POOL] All jobs completed.")
+
+
+    def worker_job(self, cpu_fraction, mem_fraction, swap_safe_fraction, check_interval, stagger_range, queue):
+        while not queue.empty():
+            try:
+                cmd = queue.get_nowait()
+            except Exception:
+                break
+
+            # --- Wait for safe CPU/memory/swap ---
+            while True:
+                cpu = psutil.cpu_percent(interval=0.5) / 100.0
+                mem = psutil.virtual_memory().percent / 100.0
+                swap = psutil.swap_memory().percent / 100.0
+
+                if self.operating_system == "Mac":
+                    overload = max(cpu / cpu_fraction, mem / mem_fraction)
+                else:
+                    swap_over = swap / swap_safe_fraction
+                    overload = max(cpu / cpu_fraction, mem / mem_fraction, swap_over)
+
+                if overload <= 1.0:
+                    break
+                time.sleep(check_interval)
+
+            # --- Optional stagger to smooth spikes ---
+            time.sleep(random.uniform(*stagger_range))
+
+            # --- Run command ---
+            self.run_command(cmd)
 
     def stdout_to_console(self):
         ''' Function to print stdout to console in library mode'''
