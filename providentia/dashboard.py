@@ -541,23 +541,22 @@ class Dashboard(QtWidgets.QWidget):
         # launch with configuration file?
         if self.from_conf: 
             
-            # read
+            # read and filter
             self.handle_data_selection_update()
 
-            # set filtered multispecies if any
-            multispecies_conf(self)
-
             # set fields available for filtering
-            representativity_conf(self)
-            period_conf(self)
-            metadata_conf(self)
-            self.mpl_canvas.handle_data_filter_update()
+            multispecies_conf(self)
+            #representativity_conf(self)
+            #period_conf(self)
+            #metadata_conf(self)
+            #print('DASHBOARD INIT CONF/FILTER')
+            #self.mpl_canvas.handle_data_filter_update()
 
             # for non-GHOST, we call update_metadata_fields after filtering to remove the stations that have
             # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained 
             # after filtering
-            if not self.reading_ghost:
-                update_metadata_fields(self)
+            #if not self.reading_ghost:
+            #    update_metadata_fields(self)
 
             # reset from_conf variable to False after reading and filtering is complete
             self.from_conf = False
@@ -841,6 +840,11 @@ class Dashboard(QtWidgets.QWidget):
                                                                 if previous_selected_experiment in
                                                                 self.experiments_menu['experiments']['map_vars']]
 
+        
+        n_forecast_days = self.datareader.check_forecast(data_labels=self.experiments_menu['experiments']['keep_selected'], 
+                                                         networkspecies=['{}|{}'.format(self.selected_network, self.selected_species)], 
+                                                         dashboard_interactive=True)
+
         # update default qa
         default_qa = get_default_qa(self, self.selected_species)
         previous_default_qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_default']) 
@@ -981,7 +985,7 @@ class Dashboard(QtWidgets.QWidget):
             if (event_source == self.le_start_date) or (event_source == self.le_end_date):
                 self.date_range_has_changed = True
 
-            # initalise multispecies tab if network, resolution, matrix or species change
+            # reinitalise multispecies tab if network, resolution, matrix or species change
             if event_source in [self.cb_network, self.cb_resolution, self.cb_matrix, self.cb_species]:
                 init_multispecies(self)
 
@@ -1269,11 +1273,14 @@ class Dashboard(QtWidgets.QWidget):
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
         self.networkspeci = self.networkspecies[0]
         self.filter_species = copy.deepcopy(self.selected_filter_species)
+
+        print(self.experiments)
+
         # if are loading from a conf file pass through check for forecast dimension (if available)
         if self.from_conf:
-            self.data_labels = [self.observations_data_label] + list(self.experiments.values())
-            self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
-            self.datareader.check_forecast()
+            #self.data_labels = [self.observations_data_label] + list(self.experiments.values())
+            #self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
+            #self.datareader.check_forecast()
 
             # update options selected on experiments pop-up
             for experiment in self.experiments:
@@ -1456,11 +1463,14 @@ class Dashboard(QtWidgets.QWidget):
         # do not have read operations?
         if len(read_operations) == 0:
 
+            print('NO READ')
+
             # if have no read operations and have some forecast data, then need to do a little work to ensure data labels and experiments are correctly set
             if len(self.forecast) > 0:
 
                 new_experiments = {}
                 data_labels_to_remove = []
+                data_labels_to_add = []
 
                 for experiment, alias in self.experiments.items():
                     if ('-daily' in experiment) or ('-combined' in experiment):
@@ -1473,19 +1483,27 @@ class Dashboard(QtWidgets.QWidget):
                         if new_experiment not in new_experiments: 
                             new_experiments[new_experiment] = new_alias
                         data_labels_to_remove.append(alias)
+                        data_labels_to_add.append(new_alias)
                     else:
                         # Keep experiments without '-daily' or '-combined' unchanged
                         new_experiments[experiment] = alias
                 
+                print('UPDATE PP: DASHBOARD/FORECAST')
                 self.experiments = dict(new_experiments)
                 self.data_labels = [self.observations_data_label] + list(self.experiments.values())
                 self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
-                update_plotting_parameters(self, data_labels_to_add=self.experiments.values(), 
-                                            data_labels_to_remove=data_labels_to_remove)
+
+                # check if need to add or remove updated data labels from plotting parameters
+                data_labels_to_remove = [exp for exp in data_labels_to_remove if exp in list(self.plotting_params.keys())]
+                data_labels_to_add = [exp for exp in data_labels_to_add if exp not in list(self.plotting_params.keys())]
+                update_plotting_parameters(self, data_labels_to_add=data_labels_to_add, 
+                                           data_labels_to_remove=data_labels_to_remove)
 
         # have read operations?
         else:
             
+            print('READ')
+
             # if reading/cutting observations then cover canvas to do updates gracefully
             if ('reset' in read_operations) or ('cut_left' in read_operations) or ('cut_right' in read_operations) or\
                ('read_left' in read_operations) or ('read_right' in read_operations):
@@ -1533,6 +1551,7 @@ class Dashboard(QtWidgets.QWidget):
             self.mpl_canvas.update_resampling_statistics()
 
             # run function to update filter
+            print('FILTER: DASHBOARD/READ')
             self.mpl_canvas.handle_data_filter_update()
 
             # for non-GHOST, we call update_metadata_fields after filtering to remove the stations that have
@@ -1617,6 +1636,7 @@ class Dashboard(QtWidgets.QWidget):
         self.le_maximum_value.setText(str(species_upper_limit))
         
         # unfilter data
+        print('FILTER: DASHBOARD/RESET')
         self.mpl_canvas.handle_data_filter_update()
         
         # for non-GHOST, we call update_metadata_fields after filtering to remove the stations that have

@@ -756,11 +756,15 @@ class DataFilter:
         self.read_instance.data_labels = [self.read_instance.observations_data_label] + list(self.read_instance.experiments.values())
         self.read_instance.data_labels_raw = [self.read_instance.observations_data_label] + list(self.read_instance.experiments.keys())
 
+        print('UPDATE PP: FILTER/FORECAST')
+
         # Update plotting parameters to reflect changes in labels and daily forecasts
+        data_labels_to_remove = [exp for exp in data_labels_to_remove if exp in list(self.read_instance.plotting_params.keys())]
+        data_labels_to_add = [exp for exp in list(data_labels_to_add) if exp not in list(self.read_instance.plotting_params.keys())]
         update_plotting_parameters(
             self.read_instance,
             data_labels_to_remove=data_labels_to_remove,
-            data_labels_to_add=list(data_labels_to_add),
+            data_labels_to_add=data_labels_to_add,
             daily_forecast=True
         )
 
