@@ -42,8 +42,15 @@ class Cams:
     def fetch_cams_dates(self, url, cams_dict):
         
         # send HTTP GET request and get the text
-        response = requests.get(url)
-        r = response.text
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            r = response.text
+        except requests.exceptions.ReadTimeout:
+            minstart, maxend = datetime.strptime("19990101", "%Y%m%d"), datetime.now()
+            msg = f"Request timed out when accessing {url}. Using {minstart} and {maxend} as minimum and maximum dates."
+            show_message(self.download_instance, msg, print=True)
+            return minstart, maxend       
         
         # do the webscrapping depending if there is whole dates or only month
         if cams_dict['month_names'] is False:
