@@ -366,6 +366,44 @@ class Cams:
         output_file.close()
         input_file.close()           
 
+    def split_nc_file(self, input_filepath, all_dates, cams_dict):
+        input_file = Dataset(input_filepath, 'r')
+
+        # loop through the possible dates
+        for i, date in enumerate(all_dates):
+            # create a new file for each slice
+            output_filepath = cams_dict["file_format"].replace("yyyy", f"{date.year:04d}") \
+                            .replace("mm", f"{date.month:02d}") \
+                            .replace("dd", f"{date.day:02d}")
+            output_file = Dataset(output_filepath, 'w', format='NETCDF4')
+
+            # copy all the dimensions to the new file, leave forecas_reference_time as one
+            for dim in ['forecast_period', 'model_level', 'latitude', 'longitude']:
+                output_file.createDimension(dim, input_file.dimensions[dim].size)  
+            output_file.createDimension('forecast_reference_time', 1)  
+
+            # create the variable in the new dataset and assign it the slice
+            output_var = output_file.createVariable('forecast_reference_time', input_file['forecast_reference_time'].datatype, 1)
+            slice_data = input_file['forecast_reference_time'][:, i, :, :, :]
+            output_var[:] = slice_data
+
+            # copy all other variables from the original dataset
+            for input_var_name in input_file.variables:
+                # skip forecast_reference_time
+                if input_var_name == 'forecast_reference_time': 
+                    continue
+                input_var = input_file[input_var_name]
+                # create the same variable in the new file
+                output_var = output_file.createVariable(input_var_name, input_var.datatype, input_var.dimensions)
+                # copy data
+                output_var[:] = input_var[:]
+
+            # close new dataset
+            output_file.close()
+
+        # close original dataset
+        input_file.close()   
+
     def download_cams_experiment(self, experiment): 
         # print current_experiment
         self.download_instance.logger.info('\n'+'-'*40)
@@ -528,6 +566,11 @@ class Cams:
                     else:
                         all_dates = [current_cams_date]
 
+                    # split the forecast file
+                    if cams_dict["split"] is True:
+                        self.split_nc_file(zip_file_name, all_dates, cams_dict)
+                        
+                    # iterate through all dates to format each of the day files
                     for date in all_dates:
 
                         # get the file format
