@@ -1,5 +1,5 @@
 (default-download)=
-# BSC and Zenodo
+# General
 
 Now it is possible to download data from the HPC machines at BSC and Zenodo directly into your local machine via the download mode. With this, you won't need to spend time waiting for a job to be allocated for you and the tool interactive features will run smoothly as there will be no x11 forwarding.
 

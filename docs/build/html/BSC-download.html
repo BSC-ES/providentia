@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Modes &mdash; Providentia 2.4.0 documentation</title>
+  <title>BSC &mdash; Providentia 2.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -22,8 +22,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Interpolation" href="Interpolation.html" />
-    <link rel="prev" title="Getting started" href="Getting-started.html" /> 
+    <link rel="next" title="Zenodo" href="Zenodo-download.html" />
+    <link rel="prev" title="Download" href="download.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,11 +48,18 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Modes</a><ul>
+<li class="toctree-l1 current"><a class="reference internal" href="modes.html">Modes</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Interpolation.html">Interpolation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Report.html">Report</a></li>
-<li class="toctree-l2"><a class="reference internal" href="download.html">Download</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="download.html">Download</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="download.html#general">General</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">BSC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Zenodo-download.html">Zenodo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CAMS-download.html">CAMS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ACTRIS-download.html">ACTRIS</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Notebook.html">Notebook</a></li>
 </ul>
@@ -79,9 +86,11 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Modes</li>
+          <li class="breadcrumb-item"><a href="modes.html">Modes</a></li>
+          <li class="breadcrumb-item"><a href="download.html">Download</a></li>
+      <li class="breadcrumb-item active">BSC</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/modes.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/BSC-download.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -89,56 +98,16 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="modes">
-<h1>Modes<a class="headerlink" href="#modes" title="Link to this heading"></a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="Interpolation.html">Interpolation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Interpolation.html#starting-an-interpolation">Starting an Interpolation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Interpolation.html#checking-output">Checking output</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Interpolation.html#define-experiments">Define experiments</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Interpolation.html#additional-considerations">Additional considerations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Interpolation.html#different-resolutions-between-model-and-observations">Different resolutions between model and observations</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="Dashboard.html">Dashboard</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Dashboard.html#interface">Interface</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="Report.html">Report</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Report.html#plot-types-and-options">Plot types and options</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Report.html#plot-selection">Plot selection</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Report.html#cover-page">Cover page</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="download.html">Download</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="download.html#general">General</a></li>
-<li class="toctree-l2"><a class="reference internal" href="BSC-download.html">BSC</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Zenodo-download.html">Zenodo</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CAMS-download.html">CAMS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ACTRIS-download.html">ACTRIS</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="Library.html">Library</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Library.html#importing-providentia">Importing Providentia</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Library.html#features">Features</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="Notebook.html">Notebook</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Notebook.html#launching-a-jupyter-notebook">Launching a Jupyter notebook</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Notebook.html#importing-providentia">Importing Providentia</a></li>
-</ul>
-</li>
-</ul>
-</div>
+  <section id="bsc">
+<h1>BSC<a class="headerlink" href="#bsc" title="Link to this heading"></a></h1>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Getting-started.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Interpolation.html" class="btn btn-neutral float-right" title="Interpolation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="download.html" class="btn btn-neutral float-left" title="Download" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Zenodo-download.html" class="btn btn-neutral float-right" title="Zenodo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
