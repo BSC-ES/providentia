@@ -48,7 +48,7 @@ class Cams:
             r = response.text
         except requests.exceptions.ReadTimeout:
             minstart, maxend = datetime.strptime("19990101", "%Y%m%d"), datetime.now()
-            msg = f"Request timed out when accessing {url}. Using {minstart} and {maxend} as minimum and maximum dates."
+            msg = f"Request timed out when accessing {url}. Using {minstart.strftime('%Y-%m-%d')} and {maxend.strftime('%Y-%m-%d')} as minimum and maximum dates."
             show_message(self.download_instance, msg, print=True)
             return minstart, maxend       
         
@@ -115,7 +115,7 @@ class Cams:
         if 'type' in cams_dict:
             request["type"] = cams_dict['type']
 
-        # if it's forecast one file per day, analysis one file per month
+        # pass numerical date if the request allows it, pass month as a text
         if cams_dict['month_names'] is False:
             request["date"] = f"{current_cams_date.strftime('%Y-%m-%d')}/{next_cams_date.strftime('%Y-%m-%d')}"
         else:
@@ -440,7 +440,7 @@ class Cams:
             # iterate throught the resolutions
             for resolution in self.download_instance.resolution:
                 # get the resolution for the cams dataset
-                correct_resolution = cams_dict["resolution"] if type(cams_dict["resolution"]) == str else cams_dict["resolution"][level]
+                correct_resolution = cams_dict["resolution"][level] if type(cams_dict["resolution"]) == dict else cams_dict["resolution"]
                 
                 # check if the resolution is the correct one for the dataset
                 if resolution != correct_resolution:
@@ -467,23 +467,13 @@ class Cams:
                 current_cams_date = cams_start_date
                 while current_cams_date <= cams_end_date:
 
-                    # add one day or one month depending if it is forecast or analysis
-                    if cams_dict['forecast'] is False:
-                        next_cams_date = current_cams_date.replace(day=1) + relativedelta(months=1) - timedelta(days=1)
-                        next_cams_date = cams_end_date if next_cams_date > cams_end_date else next_cams_date
-                    else:
-                        next_cams_date =  current_cams_date
+                    # add one month
+                    next_cams_date = current_cams_date.replace(day=1) + relativedelta(months=1) - timedelta(days=1)
+                    next_cams_date = cams_end_date if next_cams_date > cams_end_date else next_cams_date
 
                     # create dictionary to do the request
                     request = self.create_request(cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, exp_id)
 
-                    # get filename depending whether it is a download for the whole month or just a day
-                    date_format = '%Y%m' if cams_dict['forecast'] is False else '%Y%m%d'
-                    
-                    # get final path
-                    file_name = f"{species}_{current_cams_date.strftime(date_format)}.nc"
-                    final_path = join(final_dir, file_name)
-                    
                     # create temporal dir to store the middle zip file with its directories
                     os.makedirs(temp_dir, exist_ok=True)
 
@@ -493,12 +483,11 @@ class Cams:
                     # print the request
                     self.print_request(cams_dict['dataset'], request)
 
-                    # get last downloaded file in case there was a keyboard interrupt
-                    self.download_instance.latest_nc_file_path = final_path
+                    # change last downloaded file so in case there was a keyboard interrupt not remove the last file
+                    self.download_instance.latest_nc_file_path = "/dummy/path/to/file"
 
                     # make the request
                     try:
-                        self.download_instance.logger.info(f"Downloading {final_path}") # TODO change message
                         client.retrieve(dataset, request, target=temp_path)
                     except requests.exceptions.HTTPError as err:
                         # invalid credential on .cdsapirc
@@ -533,9 +522,35 @@ class Cams:
                         zip_file_name = zip_ref.namelist()[0]
                         zip_ref.extractall(temp_dir)
 
-                    # format the cams files and move them to the corresponding folder
-                    self.format_data(join(temp_dir,zip_file_name), final_path, species, prefix, 
-                                     domain, resolution, final_path, cams_species, url)
+                    # iterate through the different days of the month if forecast
+                    if "file_format" in cams_dict:
+                        all_dates = [current_cams_date + timedelta(days=i) for i in range((next_cams_date - current_cams_date).days + 1)]
+                    else:
+                        all_dates = [current_cams_date]
+
+                    for date in all_dates:
+
+                        # get the file format
+                        if "file_format" in cams_dict:
+                            zip_file_name = cams_dict["file_format"].replace("yyyy", f"{date.year:04d}") \
+                            .replace("mm", f"{date.month:02d}") \
+                            .replace("dd", f"{date.day:02d}")
+                        
+                        input_file = join(temp_dir,zip_file_name)
+
+                        # get filename depending whether it is a download for the whole month or just a day
+                        date_format = '%Y%m' if cams_dict['forecast'] is False else '%Y%m%d'
+                        
+                        # get final path
+                        file_name = f"{species}_{date.strftime(date_format)}.nc"
+                        final_path = join(final_dir, file_name)
+                    
+                        # format the cams files and move them to the corresponding folder
+                        self.format_data(input_file, final_path, species, prefix, 
+                                        domain, resolution, final_path, cams_species, url)
+                        
+                        # change the file to remove to the last downloaded
+                        self.download_instance.latest_nc_file_path = final_path
 
                     # add one day to the date
                     current_cams_date = next_cams_date + timedelta(days=1)    

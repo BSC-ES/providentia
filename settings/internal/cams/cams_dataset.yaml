@@ -94,6 +94,7 @@ cams_forecast:
     data_format: netcdf_zip
     calendar: standard
     stream: false
+    file_format: ENS_FORECAST_yyyy-mm-dd.nc
   global:
     dataset: cams-global-atmospheric-composition-forecasts
     resolution: 
