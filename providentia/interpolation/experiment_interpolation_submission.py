@@ -3,6 +3,7 @@ import glob
 import multiprocessing
 import os
 import psutil
+from queue import Empty
 import random
 import subprocess
 import sys
@@ -878,24 +879,18 @@ class SubmitInterpolation(object):
         # print finalised output to console if in library mode
         self.stdout_to_console()
 
-    def run_command(self, commands):
-
-        time.sleep(random.uniform(0, 0.5))
-
-        arguments_list = commands.strip().split()
-        if self.machine == 'nord4':
-            arguments_list.insert(0, 'nord3_singu_es')
-        result = subprocess.run(arguments_list, capture_output=True, text=True)
-        if result.returncode != 0:
-            error = result.stderr
-            if error == '':
-                error = 'Unknown error'
-            print(f"Error in submission using the following args {result.args[3:-1]}: {error}")
-
     def submit_job_multiprocessing(self):
+        """Submit interpolation jobs using multiprocessing pool."""
 
-        #self.mem_per_worker_gb, self.mem_frac_limit, self.cpu_frac_limit = 1.0, 0.9, 0.9
+        # set resource usage parameters for estimating safe number of pool workers 
+        self.per_worker_mem_gb=0.5
+        self.per_worker_cpu_fraction=1.0/self.n_cpus
+        self.per_worker_swap_gb=0.1
+        self.cpu_fraction_limit=0.9 
+        self.mem_fraction_limit=0.9
+        self.swap_fraction_limit=0.9
 
+        # set run commands
         self.commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(
             self.working_directory, argument) for argument in self.arguments]
 
@@ -903,29 +898,39 @@ class SubmitInterpolation(object):
         # avoid having to kill other processes locally
         if self.machine == 'local':
             # use value passed through --cores in terminal
-            if self.cores_explicit:
+            if (self.cores_explicit):
                 n_cpus = self.n_cpus
                 msg = f'Using {n_cpus} CPUs.'
-            # use default value not passed through --cores (available cpus by 2)
+            # otherwise estimate the number of safe pool workers
             else:
-                n_cpus = None
-                #n_cpus = max(1, int(self.n_cpus * 0.50))
-                #msg = f'Using {n_cpus} out of {self.n_cpus} available CPUs to'
-                #msg += ' ensure that other processes keep running. \nIf you encounter any problems'
-                #msg += ' consider reducing the number of CPUS by running Providentia using'
-                #msg += ' --cores (./bin/providentia --cores=2).'
+                n_cpus = self.guess_pool_workers()
+                msg = f'Using {n_cpus} out of {self.n_cpus} available CPUs to'
+                msg += ' ensure that other processes keep running. \nIf you encounter any problems'
+                msg += ' consider reducing the number of CPUS by running Providentia using'
+                msg += ' --cores (./bin/providentia --cores=2).'
         else:
             n_cpus = self.n_cpus
             msg = f'Using {n_cpus} CPUs.'
-        #print(msg)
+        print(msg)
+
+        # cap number of cpus to not be larger than number of tasks
+        if n_cpus > len(self.commands):
+            old_n_cpus = copy.deepcopy(n_cpus)
+            n_cpus = len(self.commands)
+            msg = f'Capping {old_n_cpus} CPUs to {n_cpus} since there are only {n_cpus} tasks to process.'
 
         # print current output to console if in library mode
         self.stdout_to_console()
 
         # launch interpolation
-        self.adaptive_dynamic_pool_fraction(n_cpus)
-        #with multiprocessing.Pool(processes=n_cpus) as pool:
-        #    pool.map(self.run_command, self.commands)
+        # if have no swap memory, or have just 1 cpu, run in serial without multiprocessing
+        if n_cpus == 1:
+            for cmd in self.commands:
+                self.run_command(cmd)
+        # otherwise, use multiprocessing pool
+        else:
+            with multiprocessing.Pool(n_cpus) as pool:
+                pool.map(self.resource_safe_job, self.commands)
 
         # stop timer
         total_time = (time.time()-self.start)/60.
@@ -963,129 +968,108 @@ class SubmitInterpolation(object):
         # print finalised output to console if in library mode
         self.stdout_to_console()
 
-
-    def adaptive_dynamic_pool_fraction(self,
-            n_cpus=None,
-            mem_fraction=0.7,
-            cpu_fraction=0.5,
-            min_mem_gb_per_worker=1.5,
-            check_interval=3.0,
-            max_reduction=0.5,
-            recovery_rate=0.1,
-            stagger_range=(0.0, 1.0)  # seconds for per-job stagger
-        ):
+    def guess_pool_workers(self):
         """
-        Run a multiprocessing pool with adaptive CPU/memory scaling
-        and queue-based staggered job execution to prevent spikes.
+        Estimate a safe number of pool workers considering expected job resource usage.
         """
+        
+        # --- CPU constraint ---
+        total_cores = psutil.cpu_count(logical=False) or 1
+        cpu_now = psutil.cpu_percent(interval=None) / 100.0
+        max_workers_cpu = max(1, int((self.cpu_fraction_limit - cpu_now) / self.per_worker_cpu_fraction))
 
-        total_mem_gb = psutil.virtual_memory().total / (1024 ** 3)
-        safe_mem_gb = total_mem_gb * mem_fraction
-        available_mem_gb = psutil.virtual_memory().available / (1024 ** 3)
+        # --- Memory constraint ---
+        vm = psutil.virtual_memory()
+        used_mem_gb = (vm.total - vm.available) / (1024**3)
+        available_mem_gb = vm.available / (1024**3)
+        
+        # --- Swap adjustment ---
+        swap = psutil.swap_memory()
+        swap_total_gb = swap.total / (1024**3)
+        swap_used_gb = swap_total_gb * swap.percent / 100
+        swap_allowed_gb = swap_total_gb * self.swap_fraction_limit - swap_used_gb
 
-        # Use physical cores
-        physical_cores = psutil.cpu_count(logical=False) or 1
-
-        # OS-specific safe swap fraction
+        # Adjust memory fraction if swap is tight
+        # Each worker may use per_worker_mem_gb RAM + per_worker_swap_gb swap
+        # Reduce allowed memory fraction so we don't exceed swap limit
         if self.operating_system == 'Mac':
-            swap_safe_fraction = 0.95
-        elif self.operating_system == "Linux":
-            swap_safe_fraction = 0.8
-        elif self.operating_system == "Windows":
-            swap_safe_fraction = 0.9
-
-        # Initial estimate of workers
-        if n_cpus is None:
-            max_workers_by_mem = int(available_mem_gb / min_mem_gb_per_worker)
-            max_workers_by_cpu = max(1, int(physical_cores * cpu_fraction))
-            n_workers = min(max_workers_by_mem, max_workers_by_cpu)
+            effective_mem_fraction = self.mem_fraction_limit
         else:
-            n_workers = n_cpus
+            if swap_allowed_gb < self.per_worker_swap_gb:
+                # Very tight swap: reduce memory fraction aggressively
+                effective_mem_fraction = 0.5 * self.mem_fraction_limit
+            else:
+                # Reduce memory fraction proportionally
+                extra_swap_ratio = (self.per_worker_swap_gb * max_workers_cpu) / swap_allowed_gb
+                effective_mem_fraction = max(0.1, self.mem_fraction_limit * (1 - min(extra_swap_ratio, 0.5)))
 
-        print(f"[INIT] n_workers={n_workers} (physical_cores={physical_cores}, safe_mem={safe_mem_gb:.2f} GB)")
+        max_mem_gb = effective_mem_fraction * (vm.total / (1024**3)) - used_mem_gb
+        max_workers_mem = max(1, int(max_mem_gb / self.per_worker_mem_gb))
+        
+        # --- Combine constraints ---
+        # if have no swap memory then only use 1 worker
+        if swap_total_gb == 0:
+            n_workers = 1
+        # otherwise use the minimum of all constraints
+        else:
+            n_workers = min(max_workers_cpu, max_workers_mem, total_cores)
+        
+        # --- Summary print ---
+        print("=== Safe Pool Worker Estimation ===")
+        print(f"CPU: {cpu_now*100:.1f}% used / limit fraction: {self.cpu_fraction_limit}, max workers: {max_workers_cpu}")
+        print(f"Memory: {used_mem_gb:.2f} GB used / {vm.total / (1024**3):.2f} GB total")
+        print(f"Memory fraction limit: {self.mem_fraction_limit} -> effective: {effective_mem_fraction:.2f}, max workers: {max_workers_mem}")
+        print(f"Swap: {swap_used_gb:.2f} GB used / {swap_total_gb:.2f} GB total")
+        print(f"Swap fraction limit: {self.swap_fraction_limit}, swap allowed for pool: {swap_allowed_gb:.2f} GB")
+        print(f"Total physical cores: {total_cores}")
+        print(f"=== Suggested safe pool size: {n_workers} workers ===\n")
 
-        # --- Prepare job queue ---
-        job_queue = multiprocessing.Queue()
-        for cmd in self.commands:
-            job_queue.put(cmd)
+        return max(1, n_workers)
 
-        # --- Start worker processes ---
-        processes = []
-        for _ in range(n_workers):
-            p = multiprocessing.Process(target=self.worker_job, args=(cpu_fraction, mem_fraction, swap_safe_fraction, check_interval, stagger_range, job_queue,))
-            p.start()
-            processes.append(p)
+    def resource_safe_job(self, cmd, check_interval=1.0, stagger_range=(0.0, 5.0)):
+        """Wait until system resources are below thresholds, then run the job."""
 
-        # --- Adaptive monitoring ---
-        while any(p.is_alive() for p in processes):
-            cpu = psutil.cpu_percent(interval=0.5) / 100.0
+        print(f"[JOB INIT] Preparing to run: {cmd}", flush=True)
+
+        while True:
+            cpu = psutil.cpu_percent(interval=None) / 100.0
             mem = psutil.virtual_memory().percent / 100.0
             swap = psutil.swap_memory().percent / 100.0
 
-            # Apply adaptive scaling
-            cpu_over = cpu / cpu_fraction
-            mem_over = mem / mem_fraction
             if self.operating_system == "Mac":
-                overload = max(cpu_over, mem_over)
+                overload = max(cpu / self.cpu_fraction_limit, mem / self.mem_fraction_limit)
             else:
-                swap_over = swap / swap_safe_fraction
-                overload = max(cpu_over, mem_over, swap_over)
+                overload = max(cpu / self.cpu_fraction_limit, mem / self.mem_fraction_limit, swap / self.swap_fraction_limit)
 
-            if overload > 1.0:
-                # Reduce workers proportionally to overload
-                reduction_ratio = min((overload - 1.0) * 0.8, max_reduction)
-                new_n_workers = max(1, int(n_workers * (1 - reduction_ratio)))
-                reason = f"↓ Reduce by {reduction_ratio*100:.0f}% (CPU={cpu:.2f}, MEM={mem:.2f}, SWAP={swap:.2f})"
+            # Print current usage
+            print(f"[RESOURCE CHECK] CPU: {cpu*100:.1f}% / {self.cpu_fraction_limit*100:.0f}% | "
+                f"MEM: {mem*100:.1f}% / {self.mem_fraction_limit*100:.0f}% | "
+                f"SWAP: {swap*100:.1f}% / {self.swap_fraction_limit*100:.0f}% | "
+                f"{'Waiting...' if overload>1 else 'Safe to run!'}", flush=True)
 
-            elif cpu < cpu_fraction * 0.8 and mem < mem_fraction * 0.8:
-                # Increase workers gradually, at least +1
-                new_n_workers = min(max(n_workers + 1, int(n_workers * (1 + recovery_rate))), physical_cores)
-                reason = f"↑ Recover {recovery_rate*100:.0f}% (CPU={cpu:.2f}, MEM={mem:.2f}, SWAP={swap:.2f})"
-
-            else:
-                new_n_workers = n_workers
-                reason = f"Stable (CPU={cpu:.2f}, MEM={mem:.2f}, SWAP={swap:.2f})"
-
-            print(f"[ADAPT] {reason} → {new_n_workers} workers")
-            n_workers = new_n_workers
-            time.sleep(check_interval)
-
-
-        # Wait for all workers to finish
-        for p in processes:
-            p.join()
-
-        print("[POOL] All jobs completed.")
-
-
-    def worker_job(self, cpu_fraction, mem_fraction, swap_safe_fraction, check_interval, stagger_range, queue):
-        while not queue.empty():
-            try:
-                cmd = queue.get_nowait()
-            except Exception:
+            if overload <= 1.0:
                 break
 
-            # --- Wait for safe CPU/memory/swap ---
-            while True:
-                cpu = psutil.cpu_percent(interval=0.5) / 100.0
-                mem = psutil.virtual_memory().percent / 100.0
-                swap = psutil.swap_memory().percent / 100.0
+            time.sleep(check_interval)  # Wait and retry
 
-                if self.operating_system == "Mac":
-                    overload = max(cpu / cpu_fraction, mem / mem_fraction)
-                else:
-                    swap_over = swap / swap_safe_fraction
-                    overload = max(cpu / cpu_fraction, mem / mem_fraction, swap_over)
+        # stagger to avoid spikes
+        time.sleep(random.uniform(*stagger_range))
 
-                if overload <= 1.0:
-                    break
-                time.sleep(check_interval)
+        # Run the actual job
+        self.run_command(cmd)
 
-            # --- Optional stagger to smooth spikes ---
-            time.sleep(random.uniform(*stagger_range))
+    def run_command(self, commands):
+        ''' Function to submit interpolation job.'''
 
-            # --- Run command ---
-            self.run_command(cmd)
+        arguments_list = commands.strip().split()
+        if self.machine == 'nord4':
+            arguments_list.insert(0, 'nord3_singu_es')
+        result = subprocess.run(arguments_list, capture_output=True, text=True)
+        if result.returncode != 0:
+            error = result.stderr
+            if error == '':
+                error = 'Unknown error'
+            print(f"Error in submission using the following args {result.args[3:-1]}: {error}", flush=True)
 
     def stdout_to_console(self):
         ''' Function to print stdout to console in library mode'''
