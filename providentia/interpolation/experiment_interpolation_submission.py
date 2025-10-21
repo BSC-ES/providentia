@@ -883,12 +883,12 @@ class SubmitInterpolation(object):
         """Submit interpolation jobs using multiprocessing pool."""
 
         # set resource usage parameters for estimating safe number of pool workers 
-        self.per_worker_mem_gb=0.5
+        self.per_worker_mem_gb=0.75
         self.per_worker_cpu_fraction=1.0/self.n_cpus
         self.per_worker_swap_gb=0.1
-        self.cpu_fraction_limit=0.9 
-        self.mem_fraction_limit=0.9
-        self.swap_fraction_limit=0.9
+        self.cpu_fraction_limit=0.8 
+        self.mem_fraction_limit=0.8
+        self.swap_fraction_limit=0.8
 
         # set run commands
         self.commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(
@@ -981,30 +981,28 @@ class SubmitInterpolation(object):
         # --- Memory constraint ---
         vm = psutil.virtual_memory()
         used_mem_gb = (vm.total - vm.available) / (1024**3)
-        available_mem_gb = vm.available / (1024**3)
-        
+        max_mem_gb = self.mem_fraction_limit * (vm.total / (1024**3) - used_mem_gb)
+        max_workers_mem = max(1, int(max_mem_gb / self.per_worker_mem_gb))
+
         # --- Swap adjustment ---
         swap = psutil.swap_memory()
         swap_total_gb = swap.total / (1024**3)
         swap_used_gb = swap_total_gb * swap.percent / 100
         swap_allowed_gb = swap_total_gb * self.swap_fraction_limit - swap_used_gb
+        # if swap is zero adjust max_workers_mem to be 1
+        if swap_total_gb == 0:
+            max_workers_mem = 1
 
         # Adjust memory fraction if swap is tight
-        # Each worker may use per_worker_mem_gb RAM + per_worker_swap_gb swap
-        # Reduce allowed memory fraction so we don't exceed swap limit
-        if self.operating_system == 'Mac':
-            effective_mem_fraction = self.mem_fraction_limit
-        else:
-            if swap_allowed_gb < self.per_worker_swap_gb:
-                # Very tight swap: reduce memory fraction aggressively
-                effective_mem_fraction = 0.5 * self.mem_fraction_limit
-            else:
-                # Reduce memory fraction proportionally
-                extra_swap_ratio = (self.per_worker_swap_gb * max_workers_cpu) / swap_allowed_gb
-                effective_mem_fraction = max(0.1, self.mem_fraction_limit * (1 - min(extra_swap_ratio, 0.5)))
-
-        max_mem_gb = effective_mem_fraction * (vm.total / (1024**3)) - used_mem_gb
-        max_workers_mem = max(1, int(max_mem_gb / self.per_worker_mem_gb))
+        if self.operating_system != 'Mac':
+            total_swap_needed = self.per_worker_swap_gb * min(max_workers_cpu, max_workers_mem)
+            if total_swap_needed > swap_allowed_gb:
+                # Swap tight — reduce memory fraction proportionally
+                excess_ratio = (total_swap_needed - swap_allowed_gb) / total_swap_needed
+                effective_mem_fraction = self.mem_fraction_limit * (1 - excess_ratio)
+                effective_mem_fraction = max(0.1, effective_mem_fraction)
+                max_mem_gb = effective_mem_fraction * (vm.total / (1024**3) - used_mem_gb)
+                max_workers_mem = max(1, int(max_mem_gb / self.per_worker_mem_gb))
         
         # --- Combine constraints ---
         # if have no swap memory then only use 1 worker
@@ -1018,7 +1016,10 @@ class SubmitInterpolation(object):
         print("=== Safe Pool Worker Estimation ===")
         print(f"CPU: {cpu_now*100:.1f}% used / limit fraction: {self.cpu_fraction_limit}, max workers: {max_workers_cpu}")
         print(f"Memory: {used_mem_gb:.2f} GB used / {vm.total / (1024**3):.2f} GB total")
-        print(f"Memory fraction limit: {self.mem_fraction_limit} -> effective: {effective_mem_fraction:.2f}, max workers: {max_workers_mem}")
+        if 'effective_mem_fraction' in locals():
+            print(f"Memory fraction limit: {self.mem_fraction_limit} -> effective: {effective_mem_fraction:.2f}, max workers: {max_workers_mem}")
+        else:
+            print(f"Memory fraction limit: {self.mem_fraction_limit}, max workers: {max_workers_mem}")
         print(f"Swap: {swap_used_gb:.2f} GB used / {swap_total_gb:.2f} GB total")
         print(f"Swap fraction limit: {self.swap_fraction_limit}, swap allowed for pool: {swap_allowed_gb:.2f} GB")
         print(f"Total physical cores: {total_cores}")
