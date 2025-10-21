@@ -33,7 +33,7 @@ from .statistics import (boxplot_inner_fences, calculate_statistic, group_period
 from .read_aux import drop_nans, get_valid_metadata
 from .plot_aux import (create_statistical_timeseries, get_multispecies_aliases, 
                        get_taylor_diagram_ghelper_info, kde_fft, merge_cells, periodic_labels, 
-                       periodic_xticks, round_decimal_places, temp_axis_dict)
+                       periodic_xticks, round_decimal_places, temp_axis_dict, get_fairmode_RV_exceendance)
 from .plot_formatting import set_axis_title
 from .warnings_prv import show_message
 
@@ -2147,16 +2147,9 @@ class Plotting:
         exc_threshold = fairmode_settings[speci].get('exc_threshold')
         percentile = fairmode_settings[speci].get('percentile')
 
-        # get RV in threshold per units
-        units = self.read_instance.measurement_units[speci]
-        if units in RV and units in exc_threshold:
-            RV = RV[units]
-            exc_threshold = exc_threshold[units]
-        else: 
-            msg = f'RV and exceedance threshold have not been for units {units} in settings/fairmode.yaml. FAIRMODE target plot cannot be calculated.'
-            show_message(self.read_instance, msg)
-            return
-        
+        # get RV and exceedance threshold per units
+        RV, exc_threshold = get_fairmode_RV_exceendance(self.read_instance, speci, RV, exc_threshold)
+            
         # add target
         main_circle = plt.Circle(**plot_characteristics['auxiliar']['circle']['main'])
         relevant_axis.add_patch(main_circle)
@@ -2357,15 +2350,8 @@ class Plotting:
         exc_threshold = fairmode_settings[speci].get('exc_threshold')
         percentile = fairmode_settings[speci].get('percentile')
 
-        # get RV in threshold per units
-        units = self.read_instance.measurement_units[speci]
-        if units in RV and units in exc_threshold:
-            RV = RV[units]
-            exc_threshold = exc_threshold[units]
-        else: 
-            msg = f'RV and exceedance threshold have not been defined for units {units} in settings/fairmode.yaml. FAIRMODE statistic summary plot cannot be calculated.'
-            show_message(self.read_instance, msg)
-            return
+        # get RV and exceedance threshold per units
+        RV, exc_threshold = get_fairmode_RV_exceendance(self.read_instance, speci, RV, exc_threshold)
         
         # get station references
         valid_station_references = get_valid_metadata(self, 'station_reference', 
