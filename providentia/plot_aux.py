@@ -25,6 +25,7 @@ import seaborn as sns
 from providentia.auxiliar import CURRENT_PATH, join
 from .statistics import (calculate_statistic, get_z_statistic_sign, 
                          aggregation)
+from .warnings_prv import show_message
 
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
@@ -735,3 +736,24 @@ def get_hex_code(colour):
         hex_colour = f'#{int(round(rgb_colour[0])):02x}{int(round(rgb_colour[1])):02x}{int(round(rgb_colour[2])):02x}'
 
     return hex_colour
+
+
+def get_fairmode_RV_exceendance(read_instance, speci, RV, exc_threshold):
+    
+    units = read_instance.measurement_units[speci]
+    if units in RV:
+        RV = RV[units]
+    else: 
+        msg = f'RV has not been defined for units {units} in settings/fairmode.yaml. FAIRMODE target plot cannot be calculated.'
+        show_message(read_instance, msg)
+        return
+    
+    if exc_threshold is not None:
+        if units in exc_threshold:
+            exc_threshold = exc_threshold[units]
+        else: 
+            msg = f'Exceedance threshold has not been defined for units {units} in settings/fairmode.yaml. FAIRMODE target plot cannot be calculated.'
+            show_message(read_instance, msg)
+            return
+        
+    return RV, exc_threshold

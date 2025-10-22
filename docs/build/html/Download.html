@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BSC and Zenodo &mdash; Providentia 2.4.0 documentation</title>
+  <title>General &mdash; Providentia 2.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -21,9 +21,7 @@
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="CAMS" href="CAMS-download.html" />
-    <link rel="prev" title="Download" href="download.html" /> 
+    <link rel="search" title="Search" href="search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,30 +43,10 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modes.html">Modes</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Interpolation.html">Interpolation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Report.html">Report</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="download.html">Download</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">BSC and Zenodo</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#types-of-downloads">Types of downloads</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#where-to-download-from">Where to download from</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#download-requirements-summary">Download Requirements Summary</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#fields">Fields</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#env-file">.env file</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="CAMS-download.html">CAMS</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ACTRIS-download.html">ACTRIS</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="Library.html">Library</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Notebook.html">Notebook</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="modes.html">Modes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a></li>
 <li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
@@ -91,11 +69,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="modes.html">Modes</a></li>
-          <li class="breadcrumb-item"><a href="download.html">Download</a></li>
-      <li class="breadcrumb-item active">BSC and Zenodo</li>
+      <li class="breadcrumb-item active">General</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/BSC-Zenodo-download.md.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/Download.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -103,8 +79,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="bsc-and-zenodo">
-<span id="default-download"></span><h1>BSC and Zenodo<a class="headerlink" href="#bsc-and-zenodo" title="Link to this heading"></a></h1>
+  <section id="general">
+<span id="default-download"></span><h1>General<a class="headerlink" href="#general" title="Link to this heading"></a></h1>
 <p>Now it is possible to download data from the HPC machines at BSC and Zenodo directly into your local machine via the download mode. With this, you won’t need to spend time waiting for a job to be allocated for you and the tool interactive features will run smoothly as there will be no x11 forwarding.</p>
 <p>To download data you just need to add <code class="docutils literal notranslate"><span class="pre">--download</span></code> or <code class="docutils literal notranslate"><span class="pre">--dl</span></code> to your command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">download</span>
@@ -279,10 +255,7 @@
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="download.html" class="btn btn-neutral float-left" title="Download" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="CAMS-download.html" class="btn btn-neutral float-right" title="CAMS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
