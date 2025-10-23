@@ -23,7 +23,7 @@ from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import ProvConfiguration, load_conf
 from .read_aux import check_for_ghost
 from .warnings_prv import show_message
-
+from .zenodo import Zenodo
 
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 REMOTE_MACHINE = "storage5"
@@ -32,7 +32,6 @@ REMOTE_MACHINE = "storage5"
 data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
-zenodo_dois = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'zenodo_dois.yaml')))
 
 class Download(object):
     def __init__(self, **kwargs):
@@ -157,6 +156,10 @@ class Download(object):
                         while self.bsc_download.lower() not in ['','y','n']:
                             self.bsc_download = input("\nDo you want to download from the BSC remote machine? (Otherwise, GHOST data will be retrieved from Zenodo) ([y]/n): ")
 
+                    # initialise the Zenodo object if user chose a Zenodo download
+                    if self.bsc_download.lower() not in ['', 'y']:
+                        self.zenodo = Zenodo(self)        
+
                     # get all networks if wildcard is passed
                     if self.network == ["*"]:
                         self.get_all_networks()
@@ -171,7 +174,7 @@ class Download(object):
                     # get the download function 
                     download_fun = (
                     self.download_ghost_network_sftp if self.reading_ghost and self.bsc_download.lower() in ['', 'y']
-                    else self.download_ghost_network_zenodo if self.reading_ghost
+                    else self.zenodo.download_ghost_network_zenodo if self.reading_ghost
                     else self.download_nonghost_network)
                     
                     # download network observations with species and filter_species
@@ -210,8 +213,8 @@ class Download(object):
                     for experiment in self.experiments:
                         # CAMS experiment
                         if experiment.startswith(tuple(cams_options.keys())):
-                            cams = Cams(self)
-                            cams.download_cams_experiment(experiment)
+                            self.cams = Cams(self)
+                            self.cams.download_cams_experiment(experiment)
                         # BSC machines
                         else:
                             download_experiment_fun = self.download_experiment if self.interpolated else self.download_non_interpolated_experiment
@@ -532,7 +535,7 @@ class Download(object):
         
         # if not valid combination of GHOST version and network, next 
         elif self.ghost_version not in self.sftp.listdir(join(self.ghost_remote_obs_path,network)):
-            msg = f"There is no data available in {REMOTE_MACHINE} for {network} network for the current ghost version ({self.ghost_version})."
+            msg = f"There is no data available in {REMOTE_MACHINE} for {network} network for the current GHOST version ({self.ghost_version})."
             
             available_ghost_versions = set(self.sftp.listdir(join(self.ghost_remote_obs_path,network))).intersection(self.possible_ghost_versions)
 
@@ -668,144 +671,6 @@ class Download(object):
                        
             return initial_check_nc_files
 
-    def download_ghost_network_zenodo(self, network, initial_check, files_to_download=None):
-
-        if not initial_check:
-            # print current_network
-            self.logger.info('\n'+'-'*40)
-            self.logger.info(f"\nDownloading GHOST {network} network data from Zenodo...")
-
-        # if first time reading a GHOST network, get current zips urls in zenodo page
-        if not hasattr(self,"zenodo_ghost_available_networks"): 
-            if not self.fetch_zenodo_networks(initial_check):
-                return
-
-        # if not valid network, next
-        if network not in self.zenodo_ghost_available_networks:
-            msg = f"There is no data available in Zenodo for {network} network."
-            show_message(self, msg, deactivate=initial_check)
-            return
-
-        # get url to download the zip file for the current network
-        zip_file_urls = self.zenodo_ghost_available_networks[network]
-
-        # get resolution and/or species combinations
-        # network
-        if not self.resolution and not self.species:
-            res_spec_combinations = [""]
-        # network + resolution 
-        elif not self.species:
-            res_spec_combinations = [f"/{resolution}/" for resolution in self.resolution]
-        # network + species 
-        elif not self.resolution:
-            res_spec_combinations = [f"/{species}.tar.xz"  for species in self.species]   
-        # network + resolution + species 
-        else:
-            res_spec_combinations = [f"/{resolution}/{species}.tar.xz" for species in self.species for resolution in self.resolution]
-
-        # get all the species tar files which fulfill the combination condition
-        res_spec_dir_tail = []
-        with RemoteZip(zip_file_urls) as zip:
-            for combi in res_spec_combinations:
-                res_spec_dir_tail += list(filter(lambda x: combi in x, zip.namelist()))
-            res_spec_dir_tail = list(filter(lambda x: x[-7:] == '.tar.xz', res_spec_dir_tail))
-
-            # warning if network + species + resolution combination is gets no matching results
-            if not res_spec_dir_tail:
-                print_spec = f'{",".join(self.species)} species' if self.species else ""
-                print_res = f'at {",".join(self.resolution)} resolutions' if self.resolution else ""
-                msg = f"There is no data available in Zenodo for {network} network {print_spec} {print_res}"
-                show_message(self, msg, deactivate=initial_check)
-
-            # check if there's any possible combination with user's network, resolution and species
-            else:
-                # initialise list with all the nc files to be downloaded
-                initial_check_nc_files = []
-
-                # print the species, resolution and network combinations that are going to be downloaded
-                if not initial_check:
-                    self.logger.info(f"\n{network} observations to download:")
-                
-                # initialise only possible GHOST version
-                # TODO in the future there will be various versions in zenodo
-                last_ghost_version = '1.5' 
-                
-                for remote_dir_tail in res_spec_dir_tail:
-                    resolution, specie = remote_dir_tail.split("/")[1:]
-                    specie = specie[:-7]
-                    local_dir = join(self.ghost_root,network,last_ghost_version,resolution,specie)
-
-                    #  print the species, resolution and network combinations that are going to be downloaded
-                    if not initial_check:
-                        self.logger.info(f"\n  - {local_dir}")
-
-                    # create temporal dir to store the middle tar file with its directories
-                    temp_dir = join(self.ghost_root,'.temp')
-                    if not os.path.exists(temp_dir):
-                        os.mkdir(temp_dir)
-
-                    zip.extract(remote_dir_tail,temp_dir)
-                    
-                    # get path and the name of the directory of the tar file
-                    tar_path = join(self.ghost_root, network, str(last_ghost_version), *remote_dir_tail.split("/")[1:])
-                    temp_path = join(temp_dir,remote_dir_tail)
-
-                    # extract nc file from tar file
-                    with tarfile.open(temp_path) as tar_file:
-                        # get the nc files that are between the start and end date
-                        tar_names = tar_file.getnames()
-                        valid_nc_file_names = self.get_valid_nc_files_in_date_range(tar_names)
-                        
-                        # warning if network + species + resolution + date range combination gets no matching results                        
-                        if not valid_nc_file_names:
-                            print_spec = f'{",".join(self.species)} species' if self.species else ""
-                            print_res = f'at {",".join(self.resolution)} resolutions' if self.resolution else ""
-                            msg = f"There is no data available in Zenodo from {self.start_date} to {self.end_date} for {network} network {print_spec} {print_res}"
-                            show_message(self, msg, deactivate=initial_check)
-                            continue
-                        # download the valid resolution specie date combinations
-                        else:                 
-                            # create directories if they don't exist
-                            tar_dir = os.path.dirname(tar_path) 
-                            if not os.path.exists(tar_dir):
-                                os.makedirs(tar_dir)
-                            
-                            if not initial_check:
-                                # get the ones that are not already downloaded
-                                valid_nc_file_names = list(filter(lambda x:join(local_dir,x.split('/')[-1]) in files_to_download, valid_nc_file_names))
-                                if not valid_nc_file_names:
-                                    msg = "Files were already downloaded."
-                                    show_message(self, msg, deactivate=initial_check)     
-                                    continue  
-                                
-                            valid_nc_files = list(filter(lambda x:x.name in valid_nc_file_names, tar_file.getmembers()))
-                          
-                            # sort nc_files
-                            valid_nc_files.sort(key = lambda x:x.name)   
-
-                            if not initial_check and not self.logfile:
-                                # print the tqdm bar if output goes to screen   
-                                valid_nc_files_iter = tqdm(valid_nc_files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading files ({len(valid_nc_files)})")
-                            else:
-                                # do not print the bar if it is the initial check
-                                valid_nc_files_iter = valid_nc_files
-
-                            for nc_file in valid_nc_files_iter:
-                                local_path = join(tar_dir,nc_file.name)
-                                if initial_check:
-                                    initial_check_nc_files.append(local_path)
-                                else:
-                                    # get last downloaded file in case there was a keyboard interrupt
-                                    self.latest_nc_file_path = local_path
-
-                                    # extract the file
-                                    tar_file.extract(member = nc_file, path = tar_dir)
-                
-                # remove the temp directory
-                shutil.rmtree(os.path.dirname(os.path.dirname(temp_path)))
-                
-                return initial_check_nc_files             
-                                
     def download_experiment(self, experiment, initial_check, files_to_download=None):
         # check if ssh exists and check if still active, connect if not
         if (self.ssh is None) or (self.ssh.get_transport().is_active()):
@@ -1550,40 +1415,13 @@ class Download(object):
         else:
             msg = "There are no available observations to be copied."
             show_message(self, msg, deactivate=initial_check)
-            
-    def fetch_zenodo_networks(self, initial_check=False):
-
-        # get url for the zenodo GHOST repository 
-        if self.ghost_version not in zenodo_dois:
-            msg = (
-                f"Current GHOST version ({self.ghost_version}) is not available on Zenodo. "
-                f"Please choose one of the available versions: {tuple(zenodo_dois.keys())}."
-            )
-            show_message(self, msg, deactivate=initial_check)
-            return False
-        
-        self.ghost_url = zenodo_dois[self.ghost_version]
-
-        # initialize dictionary to store possible networks
-        self.zenodo_ghost_available_networks = {} 
-
-        response = requests.get(self.ghost_url)
-        
-        # fill network dictionary with its corresponding zip url
-        for line in response.text.split(">"):
-            if '<link rel="alternate" type="application/zip" href=' in line:
-                zip_file_url = line.split('href="')[-1][:-1]
-                zip_network = line.split("/")[-1][:-5]
-                self.zenodo_ghost_available_networks[zip_network] = zip_file_url
-        
-        return True
 
     def get_all_networks(self): 
         if self.reading_ghost:
             if self.bsc_download.lower() in ['', 'y']:
                 self.network = self.ghost_available_networks
             elif not hasattr(self,"zenodo_ghost_available_networks"): 
-                if not self.fetch_zenodo_networks():
+                if not self.zenodo.fetch_zenodo_networks():
                     return
                 self.network = list(self.zenodo_ghost_available_networks.keys())
         else:
@@ -1669,7 +1507,6 @@ class Download(object):
         
         self.logger.info("\nExiting...")
         sys.exit()
-
 
 def main(**kwargs):
     """ Main function when running download function. """
