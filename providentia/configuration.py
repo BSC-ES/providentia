@@ -184,6 +184,16 @@ class ProvConfiguration:
         elif key == 'ghost_version':
             # parse GHOST version
 
+            # get ghost_version list
+            self.read_instance.possible_ghost_versions = os.listdir(join(CURRENT_PATH,'dependencies', 'GHOST_standards'))
+            
+            # exit if GHOST version is not in Providentia
+            if value not in self.read_instance.possible_ghost_versions:
+                available_versions = ', '.join(sorted(self.read_instance.possible_ghost_versions))
+                error = f"Error: '{value}' is not a valid GHOST version. Available versions: {available_versions}"
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+
             # import GHOST standards 
             sys.path = [path for path in sys.path if 'dependencies/GHOST_standards/' not in path]            
             sys.path.insert(1, join(CURRENT_PATH, 'dependencies/GHOST_standards/{}'.format(value)))
@@ -195,9 +205,6 @@ class ProvConfiguration:
             from GHOST_standards import standard_QA_name_to_QA_code
             from GHOST_standards import standard_networks
             from GHOST_standards import standard_temporal_resolutions
-
-            # get ghost_version list
-            self.read_instance.possible_ghost_versions = os.listdir(join(CURRENT_PATH,'dependencies', 'GHOST_standards'))
             
             # get GHOST networks
             self.read_instance.ghost_available_networks = list(standard_networks.keys())
@@ -400,7 +407,7 @@ class ProvConfiguration:
                     # check if all the flags appear in the GHOST_standards of the current version
                     for flag in value.split(","):
                         if flag.strip() not in self.read_instance.standard_data_flag_name_to_data_flag_code:
-                            error = (f"Error: Flag '{flag}' not in this GHOST version ({self.read_instance.ghost_version}).")
+                            error = f"Error: Flag '{flag}' not in this GHOST version ({self.read_instance.ghost_version})."
                             self.read_instance.logger.error(error)
                             sys.exit(1)
                     return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[f.strip()] for f in value.split(",")])
