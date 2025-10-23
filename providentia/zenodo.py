@@ -1,0 +1,182 @@
+import os
+import shutil
+
+import requests
+from remotezip import RemoteZip
+import tarfile
+from tqdm import tqdm
+import yaml 
+
+from .cams import (Cams, cams_options)
+from providentia.auxiliar import CURRENT_PATH, join
+from .warnings_prv import show_message
+
+PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
+
+zenodo_dois = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'zenodo_dois.yaml')))
+
+class Zenodo:
+
+    def __init__(self, download_instance):
+        self.download_instance = download_instance
+
+    def fetch_zenodo_networks(self, initial_check=False):
+        # get url for the zenodo GHOST repository 
+        if self.download_instance.ghost_version not in zenodo_dois:
+            msg = (
+                f"Current GHOST version ({self.download_instance.ghost_version}) is not available on Zenodo. "
+                f"Please choose one of the available versions: {tuple(zenodo_dois.keys())}."
+            )
+            show_message(self.download_instance, msg, deactivate=initial_check)
+            return False
+        
+        # get the url for the current GHOST version
+        url = zenodo_dois[self.download_instance.ghost_version]
+
+        # initialize dictionary to store possible networks
+        self.ghost_available_networks = {} 
+
+        response = requests.get(url)
+        
+        # fill network dictionary with its corresponding zip url
+        for line in response.text.split(">"):
+            if '<link rel="alternate" type="application/zip" href=' in line:
+                print(line)
+                zip_file_url = line.split('href="')[-1][:-1]
+                zip_network = line.split("/")[-1][:-5]
+                self.ghost_available_networks[zip_network] = zip_file_url
+        
+        return True
+
+    def download_ghost_network_zenodo(self, network, initial_check, files_to_download=None):
+        if not initial_check:
+            # print current_network
+            self.download_instance.logger.info('\n'+'-'*40)
+            self.download_instance.logger.info(f"\nDownloading GHOST {network} network data from Zenodo...")
+
+        # if first time reading a GHOST network, get current zips urls in zenodo page
+        if not hasattr(self,"ghost_available_networks"): 
+            if not self.fetch_zenodo_networks(initial_check):
+                return
+
+        # if not valid network, next
+        if network not in self.ghost_available_networks:
+            msg = f"There is no data available in Zenodo for {network} network for the current GHOST version ({self.ghost_version})."
+            show_message(self.download_instance, msg, deactivate=initial_check)
+            return
+
+        # get url to download the zip file for the current network
+        zip_file_urls = self.ghost_available_networks[network]
+
+        # get resolution and/or species combinations
+        # network
+        if not self.download_instance.resolution and not self.download_instance.species:
+            res_spec_combinations = [""]
+        # network + resolution 
+        elif not self.download_instance.species:
+            res_spec_combinations = [f"/{resolution}/" for resolution in self.download_instance.resolution]
+        # network + species 
+        elif not self.download_instance.resolution:
+            res_spec_combinations = [f"/{species}.tar.xz"  for species in self.download_instance.species]   
+        # network + resolution + species 
+        else:
+            res_spec_combinations = [f"/{resolution}/{species}.tar.xz" for species in self.download_instance.species for resolution in self.download_instance.resolution]
+
+        # get all the species tar files which fulfill the combination condition
+        res_spec_dir_tail = []
+        with RemoteZip(zip_file_urls) as zip:
+            for combi in res_spec_combinations:
+                res_spec_dir_tail += list(filter(lambda x: combi in x, zip.namelist()))
+            res_spec_dir_tail = list(filter(lambda x: x[-7:] == '.tar.xz', res_spec_dir_tail))
+
+            # warning if network + species + resolution combination is gets no matching results
+            if not res_spec_dir_tail:
+                print_spec = f'{",".join(self.download_instance.species)} species' if self.download_instance.species else ""
+                print_res = f'at {",".join(self.download_instance.resolution)} resolutions' if self.download_instance.resolution else ""
+                msg = f"There is no data available in Zenodo for {network} network for {print_spec} species at {print_res} resolution"
+                show_message(self.download_instance, msg, deactivate=initial_check)
+
+            # check if there's any possible combination with user's network, resolution and species
+            else:
+                # initialise list with all the nc files to be downloaded
+                initial_check_nc_files = []
+
+                # print the species, resolution and network combinations that are going to be downloaded
+                if not initial_check:
+                    self.download_instance.logger.info(f"\n{network} observations to download:")
+                
+                for remote_dir_tail in res_spec_dir_tail:
+                    resolution, species = remote_dir_tail.split("/")[1:]
+                    species = species[:-7]
+                    local_dir = join(self.download_instance.ghost_root, network, self.download_instance.ghost_version, resolution, species)
+
+                    #  print the species, resolution and network combinations that are going to be downloaded
+                    if not initial_check:
+                        self.download_instance.logger.info(f"\n  - {local_dir}")
+
+                    # create temporal dir to store the middle tar file with its directories
+                    temp_dir = join(self.download_instance.ghost_root,'.temp')
+                    if not os.path.exists(temp_dir):
+                        os.mkdir(temp_dir)
+
+                    zip.extract(remote_dir_tail,temp_dir)
+                    
+                    # get path and the name of the directory of the tar file
+                    tar_path = join(self.download_instance.ghost_root, network, str(self.download_instance.ghost_version), *remote_dir_tail.split("/")[1:])
+                    temp_path = join(temp_dir,remote_dir_tail)
+
+                    # extract nc file from tar file
+                    with tarfile.open(temp_path) as tar_file:
+                        # get the nc files that are between the start and end date
+                        tar_names = tar_file.getnames()
+                        valid_nc_file_names = self.download_instance.get_valid_nc_files_in_date_range(tar_names)
+                        
+                        # warning if network + species + resolution + date range combination gets no matching results                        
+                        if not valid_nc_file_names:
+                            print_spec = f'{",".join(self.download_instance.species)} species' if self.download_instance.species else ""
+                            print_res = f'at {",".join(self.download_instance.resolution)} resolutions' if self.download_instance.resolution else ""
+                            msg = f"There is no data available in Zenodo from {self.download_instance.start_date} to {self.download_instance.end_date} for {network} network for {print_spec} species at {print_res} resolution"
+                            show_message(self.download_instance, msg, deactivate=initial_check)
+                            continue
+                        # download the valid resolution species date combinations
+                        else:                 
+                            # create directories if they don't exist
+                            tar_dir = os.path.dirname(tar_path) 
+                            if not os.path.exists(tar_dir):
+                                os.makedirs(tar_dir)
+                            
+                            if not initial_check:
+                                # get the ones that are not already downloaded
+                                valid_nc_file_names = list(filter(lambda x:join(local_dir,x.split('/')[-1]) in files_to_download, valid_nc_file_names))
+                                if not valid_nc_file_names:
+                                    msg = "Files were already downloaded."
+                                    show_message(self.download_instance, msg, deactivate=initial_check)     
+                                    continue  
+                                
+                            valid_nc_files = list(filter(lambda x:x.name in valid_nc_file_names, tar_file.getmembers()))
+                            
+                            # sort nc_files
+                            valid_nc_files.sort(key = lambda x:x.name)   
+
+                            if not initial_check and not self.download_instance.logfile:
+                                # print the tqdm bar if output goes to screen   
+                                valid_nc_files_iter = tqdm(valid_nc_files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading files ({len(valid_nc_files)})")
+                            else:
+                                # do not print the bar if it is the initial check
+                                valid_nc_files_iter = valid_nc_files
+
+                            for nc_file in valid_nc_files_iter:
+                                local_path = join(tar_dir,nc_file.name)
+                                if initial_check:
+                                    initial_check_nc_files.append(local_path)
+                                else:
+                                    # get last downloaded file in case there was a keyboard interrupt
+                                    self.download_instance.latest_nc_file_path = local_path
+
+                                    # extract the file
+                                    tar_file.extract(member = nc_file, path = tar_dir)
+                
+                # remove the temp directory
+                shutil.rmtree(os.path.dirname(os.path.dirname(temp_path)))
+                
+                return initial_check_nc_files
