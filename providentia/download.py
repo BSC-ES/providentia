@@ -569,9 +569,9 @@ class Download(object):
                                 continue
 
             if valid_available_ghost_versions:
-                msg += f" Please check one of the available versions: {', '.join(sorted(valid_available_ghost_versions))}"
+                msg += f" Please check one of the available versions for the current species, resolution and dates: {', '.join(sorted(valid_available_ghost_versions))}"
             elif available_ghost_versions:
-                msg += " There are no other versions available at the moment with this configuration."
+                msg += " There are no other versions available at the moment for the current species, resolution and dates with this configuration."
             else:
                 msg += " There are no other versions available at the moment."
 
@@ -760,9 +760,9 @@ class Download(object):
                                     continue
                             
             if valid_available_ghost_versions and check_for_ghost(network):
-                msg += f" Please check one of the available versions: {', '.join(sorted(valid_available_ghost_versions))}"
+                msg += f" Please check one of the available versions for the current species, resolution and dates: {', '.join(sorted(valid_available_ghost_versions))}"
             elif available_ghost_versions:
-                msg += " There are no other versions available at the moment with this configuration."
+                msg += " There are no other versions available at the moment for the current species, resolution and dates with this configuration."
             else:
                 msg += " There are no other versions available at the moment."
 
