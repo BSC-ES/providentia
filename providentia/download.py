@@ -8,6 +8,7 @@ from dotenv import dotenv_values
 from getpass import getpass
 import paramiko 
 import requests
+from remotezip import RemoteZip
 import signal
 import subprocess
 import tarfile
@@ -31,6 +32,7 @@ REMOTE_MACHINE = "storage5"
 data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
+zenodo_dois = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'zenodo_dois.yaml')))
 
 class Download(object):
     def __init__(self, **kwargs):
@@ -103,10 +105,6 @@ class Download(object):
 
         # initialize the necessary things in local
         if self.machine == "local":
-
-            # TODO move some of these variables to configuration.py
-            # initialise zenodo url
-            self.ghost_url = 'https://zenodo.org/records/10637450'
 
             # initialise remote hostname
             self.remote_hostname = "transfer2.bsc.es"
@@ -671,9 +669,7 @@ class Download(object):
             return initial_check_nc_files
 
     def download_ghost_network_zenodo(self, network, initial_check, files_to_download=None):
-        # import remotezip
-        from remotezip import RemoteZip
-        
+
         if not initial_check:
             # print current_network
             self.logger.info('\n'+'-'*40)
@@ -681,7 +677,8 @@ class Download(object):
 
         # if first time reading a GHOST network, get current zips urls in zenodo page
         if not hasattr(self,"zenodo_ghost_available_networks"): 
-            self.fetch_zenodo_networks()
+            if not self.fetch_zenodo_networks(initial_check):
+                return
 
         # if not valid network, next
         if network not in self.zenodo_ghost_available_networks:
@@ -1554,19 +1551,23 @@ class Download(object):
             msg = "There are no available observations to be copied."
             show_message(self, msg, deactivate=initial_check)
             
-    def fetch_zenodo_networks(self):
-        # Get urls from zenodo to get GHOST zip files url
+    def fetch_zenodo_networks(self, initial_check=False):
+
+        # get url for the zenodo GHOST repository 
+        if self.ghost_version not in zenodo_dois:
+            msg = (
+                f"Current GHOST version ({self.ghost_version}) is not available on Zenodo. "
+                f"Please choose one of the available versions: {tuple(zenodo_dois.keys())}."
+            )
+            show_message(self, msg, deactivate=initial_check)
+            return False
+        
+        self.ghost_url = zenodo_dois[self.ghost_version]
 
         # initialize dictionary to store possible networks
         self.zenodo_ghost_available_networks = {} 
 
         response = requests.get(self.ghost_url)
-
-        # Check if the request was successful (status code 200)
-        if response.status_code != 200:
-            error = f'Failed to retrieve the webpage. Status code: {response.status_code}'
-            self.logger.error(error)
-            sys.exit(1)
         
         # fill network dictionary with its corresponding zip url
         for line in response.text.split(">"):
@@ -1574,13 +1575,16 @@ class Download(object):
                 zip_file_url = line.split('href="')[-1][:-1]
                 zip_network = line.split("/")[-1][:-5]
                 self.zenodo_ghost_available_networks[zip_network] = zip_file_url
+        
+        return True
 
     def get_all_networks(self): 
         if self.reading_ghost:
             if self.bsc_download.lower() in ['', 'y']:
                 self.network = self.ghost_available_networks
             elif not hasattr(self,"zenodo_ghost_available_networks"): 
-                self.fetch_zenodo_networks()
+                if not self.fetch_zenodo_networks():
+                    return
                 self.network = list(self.zenodo_ghost_available_networks.keys())
         else:
             self.network = self.nonghost_available_networks
