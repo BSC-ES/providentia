@@ -396,7 +396,7 @@ class NavigationToolbar(NavigationToolbar2QT):
 
         # generate file trees if GHOST version has changed
         if current_ghost_version != self.read_instance.ghost_version:
-            generate_file_trees(self.read_instance, force=True)
+            generate_file_trees(self.read_instance)
         
         # update species, experiments, qa & flags
         self.read_instance.config_bar_initialisation = True
