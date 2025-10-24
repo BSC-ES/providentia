@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CAMS &mdash; Providentia 2.4.0 documentation</title>
+  <title>Atmosphere Data Store &mdash; Providentia 2.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -56,8 +56,10 @@
 <li class="toctree-l3"><a class="reference internal" href="download.html#general">General</a></li>
 <li class="toctree-l3"><a class="reference internal" href="BSC-download.html">BSC</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Zenodo-download.html">Zenodo</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">CAMS</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#available-datasets">Available datasets</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Atmosphere Data Store</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#available-cams-datasets">Available CAMS datasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#how-to-enable-atmosphere-data-store-download">How to Enable Atmosphere Data Store Download</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#account-setup-and-access-configuration">Account Setup and Access Configuration</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cams-european-air-quality-forecasts">1. CAMS European Air Quality Forecasts</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cams-global-atmospheric-composition-forecasts">2. CAMS Global Atmospheric Composition Forecasts</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cams-european-air-quality-reanalyses">3. CAMS European Air Quality Reanalyses</a></li>
@@ -96,7 +98,7 @@
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="modes.html">Modes</a></li>
           <li class="breadcrumb-item"><a href="download.html">Download</a></li>
-      <li class="breadcrumb-item active">CAMS</li>
+      <li class="breadcrumb-item active">Atmosphere Data Store</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/CAMS-download.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -106,12 +108,13 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="cams">
-<h1>CAMS<a class="headerlink" href="#cams" title="Link to this heading"></a></h1>
-<p>Providentia’s download mode supports downloading model output data provided by CAMS from the <strong>Atmosphere Data Store</strong>:</p>
+  <section id="atmosphere-data-store">
+<h1>Atmosphere Data Store<a class="headerlink" href="#atmosphere-data-store" title="Link to this heading"></a></h1>
+<p>Providentia’s download mode supports downloading model output data provided by <strong>CAMS</strong> from the <strong>Atmosphere Data Store</strong>:</p>
 <p><a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets">https://ads.atmosphere.copernicus.eu/datasets</a></p>
-<section id="available-datasets">
-<h2>Available datasets<a class="headerlink" href="#available-datasets" title="Link to this heading"></a></h2>
+<p>An ECMWF account is required to download the files. For a tutorial on how to create and set up your account, see the <a class="reference internal" href="#account_setup_and_access_configuration"><span class="xref myst">Account Setup and Access Configuration</span></a> section.</p>
+<section id="available-cams-datasets">
+<h2>Available CAMS datasets<a class="headerlink" href="#available-cams-datasets" title="Link to this heading"></a></h2>
 <p>Currently, four CAMS datasets are available for download:</p>
 <ol class="arabic simple">
 <li><p><a class="reference internal" href="#cams-european-air-quality-forecasts"><strong>CAMS European Air Quality Forecasts</strong></a></p></li>
@@ -119,6 +122,74 @@
 <li><p><a class="reference internal" href="#cams-european-air-quality-reanalyses"><strong>CAMS European Air Quality Reanalyses</strong></a></p></li>
 <li><p><a class="reference internal" href="#cams-global-reanalysis-eac4"><strong>CAMS Global Reanalysis (EAC4)</strong></a></p></li>
 </ol>
+</section>
+<section id="how-to-enable-atmosphere-data-store-download">
+<h2>How to Enable Atmosphere Data Store Download<a class="headerlink" href="#how-to-enable-atmosphere-data-store-download" title="Link to this heading"></a></h2>
+<p>To download CAMS data from the Atmosphere Data Store, include one of the following model names along with the domain. For details about available models, streams, and specific resolutions, see the corresponding sections below:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cams_analysis_&lt;model&gt;-regional</span></code> — <a class="reference internal" href="#cams-european-air-quality-forecasts">CAMS European Air Quality Forecasts</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cams_forecast_&lt;model&gt;-regional</span></code> — <a class="reference internal" href="#cams-european-air-quality-forecasts">CAMS European Air Quality Forecasts</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cams_forecast-global</span></code> — <a class="reference internal" href="#cams-global-atmospheric-composition-forecasts">CAMS Global Atmospheric Composition Forecasts</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cams_reanalysis_&lt;model&gt;_&lt;stream&gt;-regional</span></code> — <a class="reference internal" href="#cams-european-air-quality-reanalyses">CAMS European Air Quality Reanalyses</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cams_reanalysis-global</span></code> — <a class="reference internal" href="#cams-global-reanalysis-eac4">CAMS Global Reanalysis (EAC4)</a></p></li>
+</ul>
+<p>Once you have selected the dataset and specified the experiment and domain, make sure to set:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
+<p>or</p>
+<p>Answer <code class="docutils literal notranslate"><span class="pre">n</span></code> to the prompt:
+<em>“Experiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n):”</em></p>
+</section>
+<section id="account-setup-and-access-configuration">
+<h2>Account Setup and Access Configuration<a class="headerlink" href="#account-setup-and-access-configuration" title="Link to this heading"></a></h2>
+<section id="create-an-ecmwf-account">
+<h3>1. Create an ECMWF Account<a class="headerlink" href="#create-an-ecmwf-account" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>If you already have an ECMWF account, you can skip this subsection and go to <a class="reference internal" href="#prepare-the-configuration-file"><span class="xref myst">Prepare the Configuration File</span></a>.</p>
+</div></blockquote>
+<p>Go to the <a class="reference external" href="https://ads.atmosphere.copernicus.eu/">Atmosphere Data Store page</a> and click <strong>Login / Register</strong> at the top right corner.</p>
+<p><img alt="Atmosphere Data Store Page" src="_images/CAMS_Atmospher_Data_Store_Page.png" /></p>
+<p>Then, click <strong>Register new user</strong> and create a new account.</p>
+<p><img alt="ECMWF Registration Page" src="_images/CAMS_ECMWF_Registration_Page.png" /></p>
+<p>Check your confirmation email, accept the <strong>Terms and Conditions</strong>, and fill in the required information to activate your account.</p>
+<p><img alt="Terms and Conditions" src="_images/CAMS_Terms_and_Conditions.png" /></p>
+</section>
+<section id="accept-dataset-terms">
+<h3>2. Accept Dataset Terms<a class="headerlink" href="#accept-dataset-terms" title="Link to this heading"></a></h3>
+<p>Navigate to the download page of the dataset you want to download. For example <a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets/cams-europe-air-quality-forecasts?tab=download">this</a> one.</p>
+<blockquote>
+<div><p>You only need to do this once to any dataset, it will apply to all datasets.</p>
+</div></blockquote>
+<p>Scroll down to <strong>Terms of Use</strong> and accept the <strong>CC-BY license</strong>.</p>
+<p><img alt="CC-BY License" src="_images/CAMS_CC-BY_License.png" /></p>
+</section>
+<section id="prepare-the-configuration-file">
+<h3>3. Prepare the Configuration File<a class="headerlink" href="#prepare-the-configuration-file" title="Link to this heading"></a></h3>
+<p>Before downloading, prepare your configuration file.  It’s recommended to first read <strong><a class="reference internal" href="#how-to-enable-atmosphere-data-store-download">How to Enable Atmosphere Data Store Download</a></strong>.</p>
+<p>or</p>
+<p>You can use any of the preconfigured sections in <code class="docutils literal notranslate"><span class="pre">configurations/cams_dl.conf</span></code>. For example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./bin/providentia<span class="w"> </span>--config<span class="o">=</span>cams_dl.conf<span class="w"> </span>--section<span class="o">=</span>cams_analysis_ensemble-regional<span class="w"> </span>--dl
+</pre></div>
+</div>
+</section>
+<section id="api-configuration">
+<h3>4. API Configuration<a class="headerlink" href="#api-configuration" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>If you had the <code class="docutils literal notranslate"><span class="pre">~/.cdsapirc</span></code> already configured on your computer, you can skip this section.</p>
+</div></blockquote>
+<p>Once you run the command, the following message will appear:</p>
+<p><em>“’.cdsapirc’ file not found. Creating it at /home/example/.cdsapirc. Do you agree? ([y]/n)”</em></p>
+<p>Answer <code class="docutils literal notranslate"><span class="pre">y</span></code> to the prompt.</p>
+<p>Next, you will be asked for your personal access token:</p>
+<p><em>“Enter your personal access token, which you can find at <a class="reference external" href="https://ads.atmosphere.copernicus.eu/profile">https://ads.atmosphere.copernicus.eu/profile</a> after login:”</em></p>
+<p>Go to the link specified in the prompt, scroll down to <strong>API Key</strong>, and copy it.</p>
+<p><img alt="API Key" src="_images/CAMS_API_Key.png" /></p>
+<p>Paste your API key on the prompt. Providentia will automatically create the <code class="docutils literal notranslate"><span class="pre">~/.cdsapirc</span></code> file.</p>
+<blockquote>
+<div><p>If the API key is incorrect, Providentia will remove the file. You can then run Providentia again and enter the correct API key.</p>
+</div></blockquote>
+</section>
 </section>
 <section id="cams-european-air-quality-forecasts">
 <h2>1. CAMS European Air Quality Forecasts<a class="headerlink" href="#cams-european-air-quality-forecasts" title="Link to this heading"></a></h2>
