@@ -4,7 +4,7 @@ Providentia's download mode supports downloading model output data provided by *
 
 [https://ads.atmosphere.copernicus.eu/datasets](https://ads.atmosphere.copernicus.eu/datasets)
 
-An ECMWF account is required to download the files. For a tutorial on how to create and set up your account, see the [Account Setup and Access Configuration](account_setup_and_access_configuration) section.
+An ECMWF account is required to download the files. For a tutorial on how to create and set up your account, see the [Account Setup and Access Configuration](#account-setup-and-access-configurationn) section.
 
 ## Available CAMS datasets
 
@@ -34,6 +34,7 @@ interpolated = False
 or
 
 Answer `n` to the prompt:
+
 _"Experiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n):"_
 
 ## Account Setup and Access Configuration
@@ -96,6 +97,8 @@ Go to the link specified in the prompt, scroll down to **API Key**, and copy it.
 Paste your API key on the prompt. Providentia will automatically create the `~/.cdsapirc` file.
 
 > If the API key is incorrect, Providentia will remove the file. You can then run Providentia again and enter the correct API key.
+
+**Congratulations! You are now ready to start downloading CAMS data from the Atmosphere Data Store using Providentia.**
 
 ## 1. CAMS European Air Quality Forecasts
 
