@@ -1,6 +1,6 @@
 # CAMS
 
-Providentia's download mode supports downloading experiment data from **Atmosphere Data Store** datasets provided by CAMS:
+Providentia's download mode supports downloading model output data provided by CAMS from the **Atmosphere Data Store**:
 
 [https://ads.atmosphere.copernicus.eu/datasets](https://ads.atmosphere.copernicus.eu/datasets)
 
@@ -24,12 +24,12 @@ Using this dataset you can either download:
 
 This dataset contains multi-level data.
 
-This dataset provides hourly data only. You must set `resolution = hourly` in your configuration file; otherwise, the download will not work.
+Only hourly data is available in this dataset. You must set `resolution = hourly` in your configuration file; otherwise, the download will not work.
 
 ### Mandatory fields for regional analysis data
 
 ```ini
-experiment = cams_analysis_<model>
+experiments = cams_analysis_<model>
 domain = regional
 resolution = hourly
 ```
@@ -37,7 +37,7 @@ resolution = hourly
 ### Mandatory fields for regional forecast data
 
 ```ini
-experiment = cams_forecast_<model>
+experiments = cams_forecast_<model>
 domain = regional
 resolution = hourly
 ```
@@ -65,25 +65,25 @@ Use the following model names (same as in the API):
 
 These are the available species:
 
-* `ammonia`
-* `carbon_monoxide`
-* `dust`
-* `formaldehyde`
-* `glyoxal`
-* `nitrogen_dioxide`
-* `nitrogen_monoxide`
-* `non_methane_vocs`
-* `ozone`
-* `particulate_matter_10um`
-* `particulate_matter_2.5um`
-* `pm10_sea_salt_dry`
-* `pm2.5_ammonium`
-* `pm2.5_nitrate`
-* `pm2.5_sulphate`
-* `sulphur_dioxide`
-* `total_elementary_carbon`
+* `pm10`
+* `pm10du`
+* `pm10so4ss`
+* `pm2p5`
+* `pm2p5ec`
+* `pm2p5nh4`
+* `pm2p5no3`
+* `pm2p5so4`
+* `sconcco`
+* `sconcglyox`
+* `sconchcho`
+* `sconcnh3`
+* `sconcnmvoc`
+* `sconcno`
+* `sconcno2`
+* `sconco3`
+* `sconcso2`
 
-> Providentia can only read species in GHOST format. The mapping is provided in the [GHOST–CAMS species mapping](#ghostcams-species-mapping) section.
+> Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the [CAMS-GHOST species mapping](#cams-ghost-species-mapping) section.
 
 ### Assumptions
 
@@ -181,12 +181,12 @@ Using this dataset you can download **Global Forecast data**.
 
 This dataset contains both single-level and multi-level data.
 
-This dataset provides hourly and 3hourly data. In your configuration file, you must set `resolution = hourly` or `resolution = 3hourly`, depending on whether the data is single-level or multi-level. Otherwise, the download will fail.
+hourly and 3hourly data is available in this dataset. In your configuration file, you must set `resolution = hourly` or `resolution = 3hourly`, depending on whether the data is single-level or multi-level. Otherwise, the download will fail.
 
 ### Mandatory fields for global forecast single-level data
 
 ```ini
-experiment = cams_forecast
+experiments = cams_forecast
 domain = global
 resolution = hourly
 ```
@@ -194,7 +194,7 @@ resolution = hourly
 ### Mandatory fields for global forecast multi-level data
 
 ```ini
-experiment = cams_forecast
+experiments = cams_forecast
 domain = global
 resolution = 3hourly
 ```
@@ -205,65 +205,65 @@ Whether the data is single or multi depends on the selected species. These are t
 
 #### Single-level:
 
-* `2m_dewpoint_temperature`
-* `2m_temperature`
-* `asymmetry_factor_1020nm`
-* `asymmetry_factor_440nm`
-* `cloud_base_height`
-* `dust_aerosol_optical_depth_550nm`
-* `mean_sea_level_pressure`
-* `particulate_matter_10um`
-* `particulate_matter_1um`
-* `particulate_matter_2.5um`
-* `relative_humidity`
-* `sea_surface_temperature`
-* `single_scattering_albedo_1020nm`
-* `single_scattering_albedo_440nm`
-* `single_scattering_albedo_550nm`
-* `snow_depth`
-* `surface_pressure`
-* `total_absorption_aerosol_optical_depth_1020nm`
-* `total_absorption_aerosol_optical_depth_440nm`
-* `total_absorption_aerosol_optical_depth_550nm`
-* `total_aerosol_optical_depth_1020nm`
-* `total_aerosol_optical_depth_380nm`
-* `total_aerosol_optical_depth_440nm`
-* `total_aerosol_optical_depth_500nm`
-* `total_aerosol_optical_depth_550nm`
-* `total_fine_mode_aerosol_optical_depth_500nm`
-* `total_precipitation`
-* `visibility`
+* `absod1020aero`
+* `absod440aero`
+* `absod550aero`
+* `acprec`
+* `asy1020aero`
+* `asy440aero`
+* `cldbot`
+* `od1020aero`
+* `od380aero`
+* `od440aero`
+* `od500aero`
+* `od500aerofine`
+* `od550aero`
+* `od550du`
+* `pm1`
+* `pm10`
+* `pm2p5`
+* `pshltr`
+* `rh2`
+* `sca1020aero`
+* `sca440aero`
+* `sca550aero`
+* `si`
+* `slp`
+* `sst`
+* `t2`
+* `td2`
+* `vdist`
 
 #### Multi-level:
 
-* `ammonia`
-* `ammonium`
-* `attenuated_backscatter_due_to_aerosol_532nm_from_ground`
-* `carbon_monoxide`
-* `ethane`
-* `ethanol`
-* `ethene`
-* `formaldehyde`
-* `fraction_of_cloud_cover`
-* `glyoxal`
-* `hydrogen_chloride`
-* `hydrogen_fluoride`
-* `isoprene`
-* `lead`
-* `methane`
-* `methane_sulfonic_acid`
-* `nitrate`
-* `nitric_acid`
-* `nitrogen_dioxide`
-* `nitrogen_monoxide`
-* `ozone`
-* `peroxyacetyl_nitrate`
-* `propane`
-* `propene`
-* `sulphate_aerosol_mixing_ratio`
-* `sulphur_dioxide`
+* `cfracmax`
+* `lbsco532`
+* `sconcc2h4`
+* `sconcc2h6`
+* `sconcc3h6`
+* `sconcc3h8`
+* `sconcch4`
+* `sconcco`
+* `sconcetoh`
+* `sconcglyox`
+* `sconchcho`
+* `sconchcl`
+* `sconchf`
+* `sconchno3`
+* `sconcisop`
+* `sconcmsa`
+* `sconcnh3`
+* `sconcnh4`
+* `sconcno`
+* `sconcno2`
+* `sconcno3`
+* `sconco3`
+* `sconcpan`
+* `sconcpb`
+* `sconcso2`
+* `sconcso4`
 
-> Providentia can only read species in GHOST format. The mapping is provided in the [GHOST–CAMS species mapping](#ghostcams-species-mapping) section.
+> Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the [CAMS-GHOST species mapping](#cams-ghost-species-mapping) section.
 
 ### Assumptions
 
@@ -345,12 +345,12 @@ Using this dataset you can download **Regional Reanalysis data**.
 
 This dataset contains multi-level data.
 
-This dataset provides hourly data only. You must set `resolution = hourly` in your configuration file; otherwise, the download will not work.
+Only hourly data is available in this dataset. You must set `resolution = hourly` in your configuration file; otherwise, the download will not work.
 
 ### Mandatory fields for regional reanalysis data
 
 ```ini
-experiment = cams_reanalysis_<model>_<stream>
+experiments = cams_reanalysis_<model>_<stream>
 domain = regional
 resolution = hourly
 ```
@@ -385,22 +385,22 @@ There is two available streams for the regional reanalysis dataset:
 
 These are the available species:
 
-* `ammonia`
-* `carbon_monoxide`
-* `dust`
-* `formaldehyde`
-* `glyoxal`
-* `nitrogen_dioxide`
-* `nitrogen_monoxide`
-* `non_methane_vocs`
-* `ozone`
-* `particulate_matter_10um`
-* `particulate_matter_2.5um`
-* `pm10_sea_salt_dry`
-* `sulphur_dioxide`
-* `total_elementary_carbon`
+* `pm10`
+* `pm10du`
+* `pm10so4ss`
+* `pm2p5`
+* `pm2p5ec`
+* `sconcco`
+* `sconcglyox`
+* `sconchcho`
+* `sconcnh3`
+* `sconcnmvoc`
+* `sconcno`
+* `sconcno2`
+* `sconco3`
+* `sconcso2`
 
-> Providentia can only read species in GHOST format. The mapping is provided in the [GHOST–CAMS species mapping](#ghostcams-species-mapping) section.
+> Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the [CAMS-GHOST species mapping](#cams-ghost-species-mapping) section.
 
 ### Assumptions
 
@@ -470,12 +470,12 @@ Using this dataset you can download **Global Reanalysis data**.
 
 This dataset contains both single-level and multi-level data.
 
-This dataset provides 3hourly data only. You must set `resolution = 3hourly` in your configuration file; otherwise, the download will not work.
+Only 3hourly data is available in this dataset. You must set `resolution = 3hourly` in your configuration file; otherwise, the download will not work.
 
 ### Mandatory fields for regional reanalysis data
 
 ```ini
-experiment = cams_reanalysis
+experiments = cams_reanalysis
 domain = global
 resolution = 3hourly
 ```
@@ -501,29 +501,29 @@ Whether the data is single or multi depends on the selected species. These are t
 
 #### Multi-level:
 
-* `ammonia`
-* `ammonium`
-* `carbon_monoxide`
-* `ethane`
-* `ethanol`
-* `ethene`
-* `formaldehyde`
-* `fraction_of_cloud_cover`
-* `isoprene`
-* `lead`
-* `methane_sulfonic_acid`
-* `nitrate`
-* `nitric_acid`
-* `nitrogen_dioxide`
-* `nitrogen_monoxide`
-* `ozone`
-* `peroxyacetyl_nitrate`
-* `propane`
-* `propene`
-* `sulphate_aerosol_mixing_ratio`
-* `sulphur_dioxide`
+* `cfracmax`
+* `sconcc2h4`
+* `sconcc2h6`
+* `sconcc3h6`
+* `sconcc3h8`
+* `sconcco`
+* `sconcetoh`
+* `sconchcho`
+* `sconchno3`
+* `sconcisop`
+* `sconcmsa`
+* `sconcnh3`
+* `sconcnh4`
+* `sconcno`
+* `sconcno2`
+* `sconcno3`
+* `sconco3`
+* `sconcpan`
+* `sconcpb`
+* `sconcso2`
+* `sconcso4`
 
-> Providentia can only read species in GHOST format. The mapping is provided in the [GHOST–CAMS species mapping](#ghostcams-species-mapping) section.
+> Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the [CAMS-GHOST species mapping](#cams-ghost-species-mapping) section.
 
 ### Assumptions
 
@@ -589,70 +589,70 @@ request = {
 }
 ```
 
-## GHOST–CAMS species mapping
+## CAMS-GHOST species mapping
 
-Here is the mapping between GHOST variable names and CAMS species:
+Here is the mapping between CAMS variables and GHOST species names:
 
 ```
-absod1020aero: total_absorption_aerosol_optical_depth_1020nm
-absod440aero: total_absorption_aerosol_optical_depth_440nm
-absod550aero: total_absorption_aerosol_optical_depth_550nm
-acprec: total_precipitation
-asy1020aero: asymmetry_factor_1020nm
-asy440aero: asymmetry_factor_440nm
-cfracmax: fraction_of_cloud_cover
-cldbot: cloud_base_height
-lbsco532: attenuated_backscatter_due_to_aerosol_532nm_from_ground
-od1020aero: total_aerosol_optical_depth_1020nm
-od380aero: total_aerosol_optical_depth_380nm
-od440aero: total_aerosol_optical_depth_440nm
-od500aero: total_aerosol_optical_depth_500nm
-od500aerofine: total_fine_mode_aerosol_optical_depth_500nm
-od550aero: total_aerosol_optical_depth_550nm
-od550du: dust_aerosol_optical_depth_550nm
-pm1: particulate_matter_1um
-pm10: particulate_matter_10um
-pm10du: dust
-pm10so4ss: pm10_sea_salt_dry
-pm2p5: particulate_matter_2.5um
-pm2p5ec: total_elementary_carbon
-pm2p5nh4: pm2.5_ammonium
-pm2p5no3: pm2.5_nitrate
-pm2p5so4: pm2.5_sulphate
-pshltr: surface_pressure
-rh2: relative_humidity
-sca1020aero: single_scattering_albedo_1020nm
-sca440aero: single_scattering_albedo_440nm
-sca550aero: single_scattering_albedo_550nm
-sconcc2h4: ethene
-sconcc2h6: ethane
-sconcc3h6: propene
-sconcc3h8: propane
-sconcch4: methane
-sconcco: carbon_monoxide
-sconcetoh: ethanol
-sconcglyox: glyoxal
-sconchcho: formaldehyde
-sconchcl: hydrogen_chloride
-sconchf: hydrogen_fluoride
-sconchno3: nitric_acid
-sconcisop: isoprene
-sconcmsa: methane_sulfonic_acid
-sconcnh3: ammonia
-sconcnh4: ammonium
-sconcnmvoc: non_methane_vocs
-sconcno: nitrogen_monoxide
-sconcno2: nitrogen_dioxide
-sconcno3: nitrate
-sconco3: ozone
-sconcpan: peroxyacetyl_nitrate
-sconcpb: lead
-sconcso2: sulphur_dioxide
-sconcso4: sulphate_aerosol_mixing_ratio
-si: snow_depth
-slp: mean_sea_level_pressure
-sst: sea_surface_temperature
-t2: 2m_temperature
-td2: 2m_dewpoint_temperature
-vdist: visibility
+2m_dewpoint_temperature: td2
+2m_temperature: t2
+ammonia: sconcnh3
+ammonium: sconcnh4
+asymmetry_factor_1020nm: asy1020aero
+asymmetry_factor_440nm: asy440aero
+attenuated_backscatter_due_to_aerosol_532nm_from_ground: lbsco532
+carbon_monoxide: sconcco
+cloud_base_height: cldbot
+dust: pm10du
+dust_aerosol_optical_depth_550nm: od550du
+ethane: sconcc2h6
+ethanol: sconcetoh
+ethene: sconcc2h4
+formaldehyde: sconchcho
+fraction_of_cloud_cover: cfracmax
+glyoxal: sconcglyox
+hydrogen_chloride: sconchcl
+hydrogen_fluoride: sconchf
+isoprene: sconcisop
+lead: sconcpb
+mean_sea_level_pressure: slp
+methane: sconcch4
+methane_sulfonic_acid: sconcmsa
+nitrate: sconcno3
+nitric_acid: sconchno3
+nitrogen_dioxide: sconcno2
+nitrogen_monoxide: sconcno
+non_methane_vocs: sconcnmvoc
+ozone: sconco3
+particulate_matter_10um: pm10
+particulate_matter_1um: pm1
+particulate_matter_2.5um: pm2p5
+peroxyacetyl_nitrate: sconcpan
+pm10_sea_salt_dry: pm10so4ss
+pm2.5_ammonium: pm2p5nh4
+pm2.5_nitrate: pm2p5no3
+pm2.5_sulphate: pm2p5so4
+propane: sconcc3h8
+propene: sconcc3h6
+relative_humidity: rh2
+sea_surface_temperature: sst
+single_scattering_albedo_1020nm: sca1020aero
+single_scattering_albedo_440nm: sca440aero
+single_scattering_albedo_550nm: sca550aero
+snow_depth: si
+sulphate_aerosol_mixing_ratio: sconcso4
+sulphur_dioxide: sconcso2
+surface_pressure: pshltr
+total_absorption_aerosol_optical_depth_1020nm: absod1020aero
+total_absorption_aerosol_optical_depth_440nm: absod440aero
+total_absorption_aerosol_optical_depth_550nm: absod550aero
+total_aerosol_optical_depth_1020nm: od1020aero
+total_aerosol_optical_depth_380nm: od380aero
+total_aerosol_optical_depth_440nm: od440aero
+total_aerosol_optical_depth_500nm: od500aero
+total_aerosol_optical_depth_550nm: od550aero
+total_elementary_carbon: pm2p5ec
+total_fine_mode_aerosol_optical_depth_500nm: od500aerofine
+total_precipitation: acprec
+visibility: vdist
 ```
