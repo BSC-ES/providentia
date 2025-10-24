@@ -41,7 +41,6 @@ class Zenodo:
         # fill network dictionary with its corresponding zip url
         for line in response.text.split(">"):
             if '<link rel="alternate" type="application/zip" href=' in line:
-                print(line)
                 zip_file_url = line.split('href="')[-1][:-1]
                 zip_network = line.split("/")[-1][:-5]
                 self.ghost_available_networks[zip_network] = zip_file_url
@@ -61,7 +60,7 @@ class Zenodo:
 
         # if not valid network, next
         if network not in self.ghost_available_networks:
-            msg = f"There is no data available in Zenodo for {network} network for the current GHOST version ({self.ghost_version})."
+            msg = f"There is no data available in Zenodo for {network} network for the current GHOST version ({self.download_instance.ghost_version})."
             show_message(self.download_instance, msg, deactivate=initial_check)
             return
 
