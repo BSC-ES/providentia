@@ -1109,6 +1109,14 @@ class ProvConfiguration:
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.species = default
 
+        # chech resolution
+        # if not interpolation or download, get first resolution in list
+        if (',' in self.read_instance.resolution) and (self.read_instance.mode not in ['interpolation', 'download']):
+            default = self.read_instance.resolution.split(',')[0]
+            msg = "Resolution (resolution) contains multiple values. Using '{}' as default.".format(default)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            self.read_instance.resolution = default
+            
         # if number of networks and species is not the same,
         # and len of one of network or species == 1,
         # then duplicate respestive network/species
