@@ -166,14 +166,14 @@ class Cams:
 
     def create_cdsapirc(self, cdsapirc_path):      
         # ask the user whether they want to create the file in the home directory
-        create_file = input(f"'.cdsapirc' file not found. Creating it at {cdsapirc_path}. Do you agree? ([y]/n) ").lower()
+        create_file = input(f"\n'.cdsapirc' file not found. Creating it at {cdsapirc_path}. Do you agree? ([y]/n) ").lower()
         while create_file not in ['','y','n']:
-            create_file = input(f"'.cdsapirc' file not found. Creating it at {cdsapirc_path}. Do you agree? ([y]/n) ").lower()
+            create_file = input(f"\n'.cdsapirc' file not found. Creating it at {cdsapirc_path}. Do you agree? ([y]/n) ").lower()
 
         # create file if user agreed with it
         if create_file in ['', 'y']: 
             # ask the user for the personal access token
-            personal_access_token = input("Enter your personal access token, which you can find at https://cds.climate.copernicus.eu/how-to-api: ")
+            personal_access_token = input("\nEnter your personal access token, which you can find at https://ads.atmosphere.copernicus.eu/profile after login: ")
             # create the .cdsapirc file with the user's acces token
             with open(cdsapirc_path, "w") as f:
                 f.write("url: https://ads.atmosphere.copernicus.eu/api\n")
