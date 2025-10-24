@@ -97,11 +97,13 @@ These are the available networks for version **1.5.1**:
 
 ## Explore Network Contents
 
-To see the available data for each network, open the **Files** dropdown and click **Preview** on the network you’re interested in.
+To view the available data for each network, visit the Zenodo page for one of the versions, you can find the links in [this](#available-ghost-versions) section.
+
+Open the **Files** dropdown and click **Preview** on the network you’re interested in.
 
 ![Zenodo Preview](./uploads/Zenodo_preview.png "Zenodo Preview")
   
-The **first-level directories** correspond to the *resolution*, and the **second-level directories** correspond to the *species*.
+Once this is done, open the dropdown named after the network. The **first-level directories** correspond to the *resolution*, and the **second-level directories** correspond to the *species*.
 
 ![Zenodo File Structure](./uploads/Zenodo_File_Structure.png "Zenodo File Structure")
 
