@@ -62,7 +62,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#cams-global-atmospheric-composition-forecasts">2. CAMS Global Atmospheric Composition Forecasts</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cams-european-air-quality-reanalyses">3. CAMS European Air Quality Reanalyses</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#cams-global-reanalysis-eac4">4. CAMS Global Reanalysis (EAC4)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#ghostcams-species-mapping">GHOST–CAMS species mapping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cams-ghost-species-mapping">CAMS-GHOST species mapping</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="ACTRIS-download.html">ACTRIS</a></li>
@@ -108,7 +108,7 @@
              
   <section id="cams">
 <h1>CAMS<a class="headerlink" href="#cams" title="Link to this heading"></a></h1>
-<p>Providentia’s download mode supports downloading experiment data from <strong>Atmosphere Data Store</strong> datasets provided by CAMS:</p>
+<p>Providentia’s download mode supports downloading model output data provided by CAMS from the <strong>Atmosphere Data Store</strong>:</p>
 <p><a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets">https://ads.atmosphere.copernicus.eu/datasets</a></p>
 <section id="available-datasets">
 <h2>Available datasets<a class="headerlink" href="#available-datasets" title="Link to this heading"></a></h2>
@@ -129,10 +129,10 @@
 <li><p><strong>Regional Forecast data</strong></p></li>
 </ul>
 <p>This dataset contains multi-level data.</p>
-<p>This dataset provides hourly data only. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> in your configuration file; otherwise, the download will not work.</p>
+<p>Only hourly data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> in your configuration file; otherwise, the download will not work.</p>
 <section id="mandatory-fields-for-regional-analysis-data">
 <h3>Mandatory fields for regional analysis data<a class="headerlink" href="#mandatory-fields-for-regional-analysis-data" title="Link to this heading"></a></h3>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_analysis_&lt;model&gt;</span>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_analysis_&lt;model&gt;</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
 </pre></div>
@@ -140,7 +140,7 @@
 </section>
 <section id="mandatory-fields-for-regional-forecast-data">
 <h3>Mandatory fields for regional forecast data<a class="headerlink" href="#mandatory-fields-for-regional-forecast-data" title="Link to this heading"></a></h3>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast_&lt;model&gt;</span>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast_&lt;model&gt;</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
 </pre></div>
@@ -171,26 +171,26 @@
 <h3>Available variables (Species)<a class="headerlink" href="#available-variables-species" title="Link to this heading"></a></h3>
 <p>These are the available species:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ammonia</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">carbon_monoxide</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">dust</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">formaldehyde</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">glyoxal</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nitrogen_dioxide</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nitrogen_monoxide</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">non_methane_vocs</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ozone</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">particulate_matter_10um</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">particulate_matter_2.5um</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pm10_sea_salt_dry</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pm2.5_ammonium</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pm2.5_nitrate</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pm2.5_sulphate</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">sulphur_dioxide</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">total_elementary_carbon</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm10</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm10du</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm10so4ss</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm2p5</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm2p5ec</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm2p5nh4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm2p5no3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm2p5so4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcco</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcglyox</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconchcho</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcnh3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcnmvoc</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconco3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcso2</span></code></p></li>
 </ul>
 <blockquote>
-<div><p>Providentia can only read species in GHOST format. The mapping is provided in the <a class="reference internal" href="#ghostcams-species-mapping">GHOST–CAMS species mapping</a> section.</p>
+<div><p>Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the <a class="reference internal" href="#cams-ghost-species-mapping">CAMS-GHOST species mapping</a> section.</p>
 </div></blockquote>
 </section>
 <section id="assumptions">
@@ -288,10 +288,10 @@
 <p><a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets/cams-global-atmospheric-composition-forecasts?tab=overview">Dataset Link</a></p>
 <p>Using this dataset you can download <strong>Global Forecast data</strong>.</p>
 <p>This dataset contains both single-level and multi-level data.</p>
-<p>This dataset provides hourly and 3hourly data. In your configuration file, you must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> or <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">3hourly</span></code>, depending on whether the data is single-level or multi-level. Otherwise, the download will fail.</p>
+<p>hourly and 3hourly data is available in this dataset. In your configuration file, you must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> or <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">3hourly</span></code>, depending on whether the data is single-level or multi-level. Otherwise, the download will fail.</p>
 <section id="mandatory-fields-for-global-forecast-single-level-data">
 <h3>Mandatory fields for global forecast single-level data<a class="headerlink" href="#mandatory-fields-for-global-forecast-single-level-data" title="Link to this heading"></a></h3>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
 </pre></div>
@@ -299,7 +299,7 @@
 </section>
 <section id="mandatory-fields-for-global-forecast-multi-level-data">
 <h3>Mandatory fields for global forecast multi-level data<a class="headerlink" href="#mandatory-fields-for-global-forecast-multi-level-data" title="Link to this heading"></a></h3>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3hourly</span>
 </pre></div>
@@ -311,68 +311,68 @@
 <section id="single-level">
 <h4>Single-level:<a class="headerlink" href="#single-level" title="Link to this heading"></a></h4>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">2m_dewpoint_temperature</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">2m_temperature</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">asymmetry_factor_1020nm</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">asymmetry_factor_440nm</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">cloud_base_height</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">dust_aerosol_optical_depth_550nm</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">mean_sea_level_pressure</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">particulate_matter_10um</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">particulate_matter_1um</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">particulate_matter_2.5um</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">relative_humidity</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">sea_surface_temperature</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">single_scattering_albedo_1020nm</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">single_scattering_albedo_440nm</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">single_scattering_albedo_550nm</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">snow_depth</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">surface_pressure</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">total_absorption_aerosol_optical_depth_1020nm</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">total_absorption_aerosol_optical_depth_440nm</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">total_absorption_aerosol_optical_depth_550nm</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">total_aerosol_optical_depth_1020nm</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">total_aerosol_optical_depth_380nm</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">total_aerosol_optical_depth_440nm</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">total_aerosol_optical_depth_500nm</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">total_aerosol_optical_depth_550nm</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">total_fine_mode_aerosol_optical_depth_500nm</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">total_precipitation</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">visibility</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">absod1020aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">absod440aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">absod550aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">acprec</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">asy1020aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">asy440aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cldbot</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">od1020aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">od380aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">od440aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">od500aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">od500aerofine</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">od550aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">od550du</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm10</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm2p5</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pshltr</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rh2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sca1020aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sca440aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sca550aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">si</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">slp</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sst</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">t2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">td2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vdist</span></code></p></li>
 </ul>
 </section>
 <section id="multi-level">
 <h4>Multi-level:<a class="headerlink" href="#multi-level" title="Link to this heading"></a></h4>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ammonia</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ammonium</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">attenuated_backscatter_due_to_aerosol_532nm_from_ground</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">carbon_monoxide</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ethane</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ethanol</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ethene</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">formaldehyde</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">fraction_of_cloud_cover</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">glyoxal</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">hydrogen_chloride</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">hydrogen_fluoride</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">isoprene</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">lead</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">methane</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">methane_sulfonic_acid</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nitrate</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nitric_acid</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nitrogen_dioxide</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nitrogen_monoxide</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ozone</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">peroxyacetyl_nitrate</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">propane</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">propene</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">sulphate_aerosol_mixing_ratio</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">sulphur_dioxide</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cfracmax</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lbsco532</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcc2h4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcc2h6</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcc3h6</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcc3h8</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcch4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcco</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcetoh</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcglyox</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconchcho</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconchcl</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconchf</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconchno3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcisop</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcmsa</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcnh3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcnh4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconco3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcpan</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcpb</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcso2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcso4</span></code></p></li>
 </ul>
 <blockquote>
-<div><p>Providentia can only read species in GHOST format. The mapping is provided in the <a class="reference internal" href="#ghostcams-species-mapping">GHOST–CAMS species mapping</a> section.</p>
+<div><p>Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the <a class="reference internal" href="#cams-ghost-species-mapping">CAMS-GHOST species mapping</a> section.</p>
 </div></blockquote>
 </section>
 </section>
@@ -458,10 +458,10 @@
 <p><a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets/cams-europe-air-quality-reanalyses?tab=overview">Dataset Link</a></p>
 <p>Using this dataset you can download <strong>Regional Reanalysis data</strong>.</p>
 <p>This dataset contains multi-level data.</p>
-<p>This dataset provides hourly data only. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> in your configuration file; otherwise, the download will not work.</p>
+<p>Only hourly data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> in your configuration file; otherwise, the download will not work.</p>
 <section id="mandatory-fields-for-regional-reanalysis-data">
 <h3>Mandatory fields for regional reanalysis data<a class="headerlink" href="#mandatory-fields-for-regional-reanalysis-data" title="Link to this heading"></a></h3>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis_&lt;model&gt;_&lt;stream&gt;</span>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis_&lt;model&gt;_&lt;stream&gt;</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
 </pre></div>
@@ -500,23 +500,23 @@
 <h3>Available variables (Species)<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
 <p>These are the available species:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ammonia</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">carbon_monoxide</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">dust</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">formaldehyde</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">glyoxal</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nitrogen_dioxide</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nitrogen_monoxide</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">non_methane_vocs</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ozone</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">particulate_matter_10um</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">particulate_matter_2.5um</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pm10_sea_salt_dry</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">sulphur_dioxide</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">total_elementary_carbon</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm10</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm10du</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm10so4ss</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm2p5</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm2p5ec</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcco</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcglyox</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconchcho</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcnh3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcnmvoc</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconco3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcso2</span></code></p></li>
 </ul>
 <blockquote>
-<div><p>Providentia can only read species in GHOST format. The mapping is provided in the <a class="reference internal" href="#ghostcams-species-mapping">GHOST–CAMS species mapping</a> section.</p>
+<div><p>Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the <a class="reference internal" href="#cams-ghost-species-mapping">CAMS-GHOST species mapping</a> section.</p>
 </div></blockquote>
 </section>
 <section id="id6">
@@ -586,10 +586,10 @@
 <p><a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets/cams-global-reanalysis-eac4?tab=overview">Dataset Link</a></p>
 <p>Using this dataset you can download <strong>Global Reanalysis data</strong>.</p>
 <p>This dataset contains both single-level and multi-level data.</p>
-<p>This dataset provides 3hourly data only. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">3hourly</span></code> in your configuration file; otherwise, the download will not work.</p>
+<p>Only 3hourly data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">3hourly</span></code> in your configuration file; otherwise, the download will not work.</p>
 <section id="id8">
 <h3>Mandatory fields for regional reanalysis data<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis</span>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3hourly</span>
 </pre></div>
@@ -618,30 +618,30 @@
 <section id="id11">
 <h4>Multi-level:<a class="headerlink" href="#id11" title="Link to this heading"></a></h4>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">ammonia</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ammonium</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">carbon_monoxide</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ethane</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ethanol</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ethene</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">formaldehyde</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">fraction_of_cloud_cover</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">isoprene</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">lead</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">methane_sulfonic_acid</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nitrate</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nitric_acid</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nitrogen_dioxide</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nitrogen_monoxide</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ozone</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">peroxyacetyl_nitrate</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">propane</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">propene</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">sulphate_aerosol_mixing_ratio</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">sulphur_dioxide</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cfracmax</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcc2h4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcc2h6</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcc3h6</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcc3h8</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcco</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcetoh</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconchcho</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconchno3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcisop</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcmsa</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcnh3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcnh4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconco3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcpan</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcpb</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcso2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcso4</span></code></p></li>
 </ul>
 <blockquote>
-<div><p>Providentia can only read species in GHOST format. The mapping is provided in the <a class="reference internal" href="#ghostcams-species-mapping">GHOST–CAMS species mapping</a> section.</p>
+<div><p>Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the <a class="reference internal" href="#cams-ghost-species-mapping">CAMS-GHOST species mapping</a> section.</p>
 </div></blockquote>
 </section>
 </section>
@@ -714,70 +714,70 @@
 </section>
 </section>
 </section>
-<section id="ghostcams-species-mapping">
-<h2>GHOST–CAMS species mapping<a class="headerlink" href="#ghostcams-species-mapping" title="Link to this heading"></a></h2>
-<p>Here is the mapping between GHOST variable names and CAMS species:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">absod1020aero</span><span class="p">:</span> <span class="n">total_absorption_aerosol_optical_depth_1020nm</span>
-<span class="n">absod440aero</span><span class="p">:</span> <span class="n">total_absorption_aerosol_optical_depth_440nm</span>
-<span class="n">absod550aero</span><span class="p">:</span> <span class="n">total_absorption_aerosol_optical_depth_550nm</span>
-<span class="n">acprec</span><span class="p">:</span> <span class="n">total_precipitation</span>
-<span class="n">asy1020aero</span><span class="p">:</span> <span class="n">asymmetry_factor_1020nm</span>
-<span class="n">asy440aero</span><span class="p">:</span> <span class="n">asymmetry_factor_440nm</span>
-<span class="n">cfracmax</span><span class="p">:</span> <span class="n">fraction_of_cloud_cover</span>
-<span class="n">cldbot</span><span class="p">:</span> <span class="n">cloud_base_height</span>
-<span class="n">lbsco532</span><span class="p">:</span> <span class="n">attenuated_backscatter_due_to_aerosol_532nm_from_ground</span>
-<span class="n">od1020aero</span><span class="p">:</span> <span class="n">total_aerosol_optical_depth_1020nm</span>
-<span class="n">od380aero</span><span class="p">:</span> <span class="n">total_aerosol_optical_depth_380nm</span>
-<span class="n">od440aero</span><span class="p">:</span> <span class="n">total_aerosol_optical_depth_440nm</span>
-<span class="n">od500aero</span><span class="p">:</span> <span class="n">total_aerosol_optical_depth_500nm</span>
-<span class="n">od500aerofine</span><span class="p">:</span> <span class="n">total_fine_mode_aerosol_optical_depth_500nm</span>
-<span class="n">od550aero</span><span class="p">:</span> <span class="n">total_aerosol_optical_depth_550nm</span>
-<span class="n">od550du</span><span class="p">:</span> <span class="n">dust_aerosol_optical_depth_550nm</span>
-<span class="n">pm1</span><span class="p">:</span> <span class="n">particulate_matter_1um</span>
-<span class="n">pm10</span><span class="p">:</span> <span class="n">particulate_matter_10um</span>
-<span class="n">pm10du</span><span class="p">:</span> <span class="n">dust</span>
-<span class="n">pm10so4ss</span><span class="p">:</span> <span class="n">pm10_sea_salt_dry</span>
-<span class="n">pm2p5</span><span class="p">:</span> <span class="n">particulate_matter_2</span><span class="mf">.5</span><span class="n">um</span>
-<span class="n">pm2p5ec</span><span class="p">:</span> <span class="n">total_elementary_carbon</span>
-<span class="n">pm2p5nh4</span><span class="p">:</span> <span class="n">pm2</span><span class="mf">.5</span><span class="n">_ammonium</span>
-<span class="n">pm2p5no3</span><span class="p">:</span> <span class="n">pm2</span><span class="mf">.5</span><span class="n">_nitrate</span>
-<span class="n">pm2p5so4</span><span class="p">:</span> <span class="n">pm2</span><span class="mf">.5</span><span class="n">_sulphate</span>
-<span class="n">pshltr</span><span class="p">:</span> <span class="n">surface_pressure</span>
-<span class="n">rh2</span><span class="p">:</span> <span class="n">relative_humidity</span>
-<span class="n">sca1020aero</span><span class="p">:</span> <span class="n">single_scattering_albedo_1020nm</span>
-<span class="n">sca440aero</span><span class="p">:</span> <span class="n">single_scattering_albedo_440nm</span>
-<span class="n">sca550aero</span><span class="p">:</span> <span class="n">single_scattering_albedo_550nm</span>
-<span class="n">sconcc2h4</span><span class="p">:</span> <span class="n">ethene</span>
-<span class="n">sconcc2h6</span><span class="p">:</span> <span class="n">ethane</span>
-<span class="n">sconcc3h6</span><span class="p">:</span> <span class="n">propene</span>
-<span class="n">sconcc3h8</span><span class="p">:</span> <span class="n">propane</span>
-<span class="n">sconcch4</span><span class="p">:</span> <span class="n">methane</span>
-<span class="n">sconcco</span><span class="p">:</span> <span class="n">carbon_monoxide</span>
-<span class="n">sconcetoh</span><span class="p">:</span> <span class="n">ethanol</span>
-<span class="n">sconcglyox</span><span class="p">:</span> <span class="n">glyoxal</span>
-<span class="n">sconchcho</span><span class="p">:</span> <span class="n">formaldehyde</span>
-<span class="n">sconchcl</span><span class="p">:</span> <span class="n">hydrogen_chloride</span>
-<span class="n">sconchf</span><span class="p">:</span> <span class="n">hydrogen_fluoride</span>
-<span class="n">sconchno3</span><span class="p">:</span> <span class="n">nitric_acid</span>
-<span class="n">sconcisop</span><span class="p">:</span> <span class="n">isoprene</span>
-<span class="n">sconcmsa</span><span class="p">:</span> <span class="n">methane_sulfonic_acid</span>
-<span class="n">sconcnh3</span><span class="p">:</span> <span class="n">ammonia</span>
-<span class="n">sconcnh4</span><span class="p">:</span> <span class="n">ammonium</span>
-<span class="n">sconcnmvoc</span><span class="p">:</span> <span class="n">non_methane_vocs</span>
-<span class="n">sconcno</span><span class="p">:</span> <span class="n">nitrogen_monoxide</span>
-<span class="n">sconcno2</span><span class="p">:</span> <span class="n">nitrogen_dioxide</span>
-<span class="n">sconcno3</span><span class="p">:</span> <span class="n">nitrate</span>
-<span class="n">sconco3</span><span class="p">:</span> <span class="n">ozone</span>
-<span class="n">sconcpan</span><span class="p">:</span> <span class="n">peroxyacetyl_nitrate</span>
-<span class="n">sconcpb</span><span class="p">:</span> <span class="n">lead</span>
-<span class="n">sconcso2</span><span class="p">:</span> <span class="n">sulphur_dioxide</span>
-<span class="n">sconcso4</span><span class="p">:</span> <span class="n">sulphate_aerosol_mixing_ratio</span>
-<span class="n">si</span><span class="p">:</span> <span class="n">snow_depth</span>
-<span class="n">slp</span><span class="p">:</span> <span class="n">mean_sea_level_pressure</span>
-<span class="n">sst</span><span class="p">:</span> <span class="n">sea_surface_temperature</span>
-<span class="n">t2</span><span class="p">:</span> <span class="mi">2</span><span class="n">m_temperature</span>
-<span class="n">td2</span><span class="p">:</span> <span class="mi">2</span><span class="n">m_dewpoint_temperature</span>
-<span class="n">vdist</span><span class="p">:</span> <span class="n">visibility</span>
+<section id="cams-ghost-species-mapping">
+<h2>CAMS-GHOST species mapping<a class="headerlink" href="#cams-ghost-species-mapping" title="Link to this heading"></a></h2>
+<p>Here is the mapping between CAMS variables and GHOST species names:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2</span><span class="n">m_dewpoint_temperature</span><span class="p">:</span> <span class="n">td2</span>
+<span class="mi">2</span><span class="n">m_temperature</span><span class="p">:</span> <span class="n">t2</span>
+<span class="n">ammonia</span><span class="p">:</span> <span class="n">sconcnh3</span>
+<span class="n">ammonium</span><span class="p">:</span> <span class="n">sconcnh4</span>
+<span class="n">asymmetry_factor_1020nm</span><span class="p">:</span> <span class="n">asy1020aero</span>
+<span class="n">asymmetry_factor_440nm</span><span class="p">:</span> <span class="n">asy440aero</span>
+<span class="n">attenuated_backscatter_due_to_aerosol_532nm_from_ground</span><span class="p">:</span> <span class="n">lbsco532</span>
+<span class="n">carbon_monoxide</span><span class="p">:</span> <span class="n">sconcco</span>
+<span class="n">cloud_base_height</span><span class="p">:</span> <span class="n">cldbot</span>
+<span class="n">dust</span><span class="p">:</span> <span class="n">pm10du</span>
+<span class="n">dust_aerosol_optical_depth_550nm</span><span class="p">:</span> <span class="n">od550du</span>
+<span class="n">ethane</span><span class="p">:</span> <span class="n">sconcc2h6</span>
+<span class="n">ethanol</span><span class="p">:</span> <span class="n">sconcetoh</span>
+<span class="n">ethene</span><span class="p">:</span> <span class="n">sconcc2h4</span>
+<span class="n">formaldehyde</span><span class="p">:</span> <span class="n">sconchcho</span>
+<span class="n">fraction_of_cloud_cover</span><span class="p">:</span> <span class="n">cfracmax</span>
+<span class="n">glyoxal</span><span class="p">:</span> <span class="n">sconcglyox</span>
+<span class="n">hydrogen_chloride</span><span class="p">:</span> <span class="n">sconchcl</span>
+<span class="n">hydrogen_fluoride</span><span class="p">:</span> <span class="n">sconchf</span>
+<span class="n">isoprene</span><span class="p">:</span> <span class="n">sconcisop</span>
+<span class="n">lead</span><span class="p">:</span> <span class="n">sconcpb</span>
+<span class="n">mean_sea_level_pressure</span><span class="p">:</span> <span class="n">slp</span>
+<span class="n">methane</span><span class="p">:</span> <span class="n">sconcch4</span>
+<span class="n">methane_sulfonic_acid</span><span class="p">:</span> <span class="n">sconcmsa</span>
+<span class="n">nitrate</span><span class="p">:</span> <span class="n">sconcno3</span>
+<span class="n">nitric_acid</span><span class="p">:</span> <span class="n">sconchno3</span>
+<span class="n">nitrogen_dioxide</span><span class="p">:</span> <span class="n">sconcno2</span>
+<span class="n">nitrogen_monoxide</span><span class="p">:</span> <span class="n">sconcno</span>
+<span class="n">non_methane_vocs</span><span class="p">:</span> <span class="n">sconcnmvoc</span>
+<span class="n">ozone</span><span class="p">:</span> <span class="n">sconco3</span>
+<span class="n">particulate_matter_10um</span><span class="p">:</span> <span class="n">pm10</span>
+<span class="n">particulate_matter_1um</span><span class="p">:</span> <span class="n">pm1</span>
+<span class="n">particulate_matter_2</span><span class="mf">.5</span><span class="n">um</span><span class="p">:</span> <span class="n">pm2p5</span>
+<span class="n">peroxyacetyl_nitrate</span><span class="p">:</span> <span class="n">sconcpan</span>
+<span class="n">pm10_sea_salt_dry</span><span class="p">:</span> <span class="n">pm10so4ss</span>
+<span class="n">pm2</span><span class="mf">.5</span><span class="n">_ammonium</span><span class="p">:</span> <span class="n">pm2p5nh4</span>
+<span class="n">pm2</span><span class="mf">.5</span><span class="n">_nitrate</span><span class="p">:</span> <span class="n">pm2p5no3</span>
+<span class="n">pm2</span><span class="mf">.5</span><span class="n">_sulphate</span><span class="p">:</span> <span class="n">pm2p5so4</span>
+<span class="n">propane</span><span class="p">:</span> <span class="n">sconcc3h8</span>
+<span class="n">propene</span><span class="p">:</span> <span class="n">sconcc3h6</span>
+<span class="n">relative_humidity</span><span class="p">:</span> <span class="n">rh2</span>
+<span class="n">sea_surface_temperature</span><span class="p">:</span> <span class="n">sst</span>
+<span class="n">single_scattering_albedo_1020nm</span><span class="p">:</span> <span class="n">sca1020aero</span>
+<span class="n">single_scattering_albedo_440nm</span><span class="p">:</span> <span class="n">sca440aero</span>
+<span class="n">single_scattering_albedo_550nm</span><span class="p">:</span> <span class="n">sca550aero</span>
+<span class="n">snow_depth</span><span class="p">:</span> <span class="n">si</span>
+<span class="n">sulphate_aerosol_mixing_ratio</span><span class="p">:</span> <span class="n">sconcso4</span>
+<span class="n">sulphur_dioxide</span><span class="p">:</span> <span class="n">sconcso2</span>
+<span class="n">surface_pressure</span><span class="p">:</span> <span class="n">pshltr</span>
+<span class="n">total_absorption_aerosol_optical_depth_1020nm</span><span class="p">:</span> <span class="n">absod1020aero</span>
+<span class="n">total_absorption_aerosol_optical_depth_440nm</span><span class="p">:</span> <span class="n">absod440aero</span>
+<span class="n">total_absorption_aerosol_optical_depth_550nm</span><span class="p">:</span> <span class="n">absod550aero</span>
+<span class="n">total_aerosol_optical_depth_1020nm</span><span class="p">:</span> <span class="n">od1020aero</span>
+<span class="n">total_aerosol_optical_depth_380nm</span><span class="p">:</span> <span class="n">od380aero</span>
+<span class="n">total_aerosol_optical_depth_440nm</span><span class="p">:</span> <span class="n">od440aero</span>
+<span class="n">total_aerosol_optical_depth_500nm</span><span class="p">:</span> <span class="n">od500aero</span>
+<span class="n">total_aerosol_optical_depth_550nm</span><span class="p">:</span> <span class="n">od550aero</span>
+<span class="n">total_elementary_carbon</span><span class="p">:</span> <span class="n">pm2p5ec</span>
+<span class="n">total_fine_mode_aerosol_optical_depth_500nm</span><span class="p">:</span> <span class="n">od500aerofine</span>
+<span class="n">total_precipitation</span><span class="p">:</span> <span class="n">acprec</span>
+<span class="n">visibility</span><span class="p">:</span> <span class="n">vdist</span>
 </pre></div>
 </div>
 </section>
