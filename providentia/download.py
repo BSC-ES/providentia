@@ -156,9 +156,9 @@ class Download(object):
                         while self.bsc_download.lower() not in ['','y','n']:
                             self.bsc_download = input("\nDo you want to download from the BSC remote machine? (Otherwise, GHOST data will be retrieved from Zenodo) ([y]/n): ")
 
-                    # initialise the Zenodo object if user chose a Zenodo download
-                    if self.bsc_download.lower() not in ['', 'y']:
-                        self.zenodo = Zenodo(self)        
+                        # initialise the Zenodo object if user chose a Zenodo download
+                        if self.bsc_download.lower() not in ['', 'y']:
+                            self.zenodo = Zenodo(self)        
 
                     # get all networks if wildcard is passed
                     if self.network == ["*"]:
