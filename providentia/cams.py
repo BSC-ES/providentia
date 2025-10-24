@@ -43,12 +43,12 @@ class Cams:
         
         # send HTTP GET request and get the text
         try:
-            response = requests.get(url, timeout=10)
+            response = requests.get(url, timeout=20)
             response.raise_for_status()
             r = response.text
         except requests.exceptions.ReadTimeout:
             minstart, maxend = datetime.strptime("19990101", "%Y%m%d"), datetime.now()
-            msg = f"Request timed out when accessing {url}. Using {minstart.strftime('%Y-%m-%d')} and {maxend.strftime('%Y-%m-%d')} as minimum and maximum dates."
+            msg = f"Request timed out when accessing {url}. Using default period: {minstart.strftime('%Y-%m-%d')} and {maxend.strftime('%Y-%m-%d')} as minimum and maximum dates."
             show_message(self.download_instance, msg, print=True)
             return minstart, maxend       
         
@@ -366,6 +366,59 @@ class Cams:
         output_file.close()
         input_file.close()           
 
+    def split_nc_file(self, input_file_name, all_dates, cams_dict, temp_dir, prefix, domain):
+
+        # get file formatting 
+        cams_providentia_map = cams_formatting[prefix][domain]
+
+        # read the input netcdf file
+        input_filepath = join(temp_dir,input_file_name)
+        input_file = Dataset(input_filepath, 'r')
+
+        # loop through the possible dates
+        for i, date in enumerate(all_dates):
+            # create a new file for each slice
+            output_file_name = cams_dict["file_format"].replace("yyyy", f"{date.year:04d}") \
+                            .replace("mm", f"{date.month:02d}") \
+                            .replace("dd", f"{date.day:02d}")
+            output_filepath = join(temp_dir,output_file_name)
+            output_file = Dataset(output_filepath, 'w', format='NETCDF4')
+
+            # copy all the dimensions to the new file, leave forecas_reference_time as one
+            for dim in ['forecast_period', 'model_level', 'latitude', 'longitude']:
+                output_file.createDimension(dim, input_file.dimensions[dim].size)  
+            output_file.createDimension('forecast_reference_time', 1)  
+
+            # create the variable in the new dataset and assign it the slice
+            output_var = output_file.createVariable('forecast_reference_time', input_file['forecast_reference_time'].datatype, input_file['forecast_reference_time'].dimensions)
+            output_var[:] = input_file['forecast_reference_time'][i]
+
+            # copy all other variables from the original dataset
+            for input_var_name in input_file.variables:
+                # skip forecast_reference_time
+                if input_var_name == 'forecast_reference_time': 
+                    continue
+                input_var = input_file[input_var_name]
+                # create the same variable in the new file
+                output_var = output_file.createVariable(input_var_name, input_var.datatype, input_var.dimensions)
+
+                # copy attributes
+                output_var.setncatts({attr: input_var.getncattr(attr) for attr in input_var.ncattrs()})
+                
+                # copy data, get the specific dimensions depending on the variable
+                if input_var_name == 'valid_time': 
+                    output_var[:] = input_var[i,:]
+                elif input_var_name not in cams_providentia_map:
+                    output_var[:] = input_var[:, i, :, :, :]
+                else:
+                    output_var[:] = input_var[:]
+
+            # close new dataset
+            output_file.close()
+
+        # close original dataset
+        input_file.close()   
+
     def download_cams_experiment(self, experiment): 
         # print current_experiment
         self.download_instance.logger.info('\n'+'-'*40)
@@ -528,6 +581,11 @@ class Cams:
                     else:
                         all_dates = [current_cams_date]
 
+                    # split the forecast file
+                    if cams_dict["split"] is True:
+                        self.split_nc_file(zip_file_name, all_dates, cams_dict, temp_dir, prefix, domain)
+                        
+                    # iterate through all dates to format each of the day files
                     for date in all_dates:
 
                         # get the file format
@@ -536,7 +594,7 @@ class Cams:
                             .replace("mm", f"{date.month:02d}") \
                             .replace("dd", f"{date.day:02d}")
                         
-                        input_file = join(temp_dir,zip_file_name)
+                        input_filepath = join(temp_dir,zip_file_name)
 
                         # get filename depending whether it is a download for the whole month or just a day
                         date_format = '%Y%m' if cams_dict['forecast'] is False else '%Y%m%d'
@@ -546,7 +604,7 @@ class Cams:
                         final_path = join(final_dir, file_name)
                     
                         # format the cams files and move them to the corresponding folder
-                        self.format_data(input_file, final_path, species, prefix, 
+                        self.format_data(input_filepath, final_path, species, prefix, 
                                         domain, resolution, final_path, cams_species, url)
                         
                         # change the file to remove to the last downloaded
