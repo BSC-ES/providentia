@@ -1102,7 +1102,7 @@ class ProvConfiguration:
             default = self.default_values['species']
             msg = "Species (species) was not defined in the configuration file. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.species = eval(default) if default.startswith("self.") else default
+            self.read_instance.species = eval(default) if default[0].startswith("self.") else default
 
         # if number of networks and species is not the same,
         # and len of one of network or species == 1,

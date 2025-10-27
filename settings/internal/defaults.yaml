@@ -56,7 +56,8 @@ library:
     - allmembers
 interpolation:
   network: self.read_instance.ghost_available_networks
-  species: self.read_instance.available_species
+  species: 
+    - self.read_instance.available_species
   resolution:
     - hourly
     - hourly_instantaneous
