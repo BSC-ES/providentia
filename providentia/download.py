@@ -106,7 +106,7 @@ class Download(object):
         if self.machine == "local":
 
             # initialise remote hostname
-            self.remote_hostname = "transfer2.bsc.es"
+            self.remote_hostname = "transfer1.bsc.es"
 
             # initialise ssh 
             self.ssh = None
@@ -259,9 +259,6 @@ class Download(object):
 
         # get public remote machine public key and add it to ssh object
         _, output = subprocess.getstatusoutput(f"ssh-keyscan -t ed25519 {self.remote_hostname}")
-
-        ed25519_key = output.split()[-1].encode()
-        key = paramiko.Ed25519Key(data=decodebytes(ed25519_key))
         
         # encode the output public key if possible
         try:
