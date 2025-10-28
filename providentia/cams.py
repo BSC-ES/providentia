@@ -9,6 +9,7 @@ import numpy as np
 import re
 import requests
 import shutil
+from tqdm import tqdm
 import yaml
 import zipfile 
 
@@ -274,7 +275,7 @@ class Cams:
 
     def format_data(self, input_filepath, output_filepath, species, prefix, domain, resolution, final_path, cams_species, url): 
 
-        self.download_instance.logger.info(f"Formatting {final_path}\n") 
+        self.download_instance.logger.info(f"Formatting {final_path}") 
 
         # get file formatting 
         cams_providentia_map = cams_formatting[prefix][domain]
@@ -366,17 +367,25 @@ class Cams:
         output_file.close()
         input_file.close()           
 
-    def split_nc_file(self, input_file_name, all_dates, cams_dict, temp_dir, prefix, domain):
+    def split_nc_file(self, input_file_name, all_dates, cams_dict, temp_dir, prefix, domain, level):
 
         # get file formatting 
         cams_providentia_map = cams_formatting[prefix][domain]
 
         # read the input netcdf file
-        input_filepath = join(temp_dir,input_file_name)
+        input_filepath = join(temp_dir, input_file_name)
         input_file = Dataset(input_filepath, 'r')
 
+        # set available dimensions
+        available_dimensions = ['forecast_period', 'latitude', 'longitude']
+        if level == 'multi':
+            available_dimensions.append('model_level')
+        
+        # create tqdm iterator
+        all_dates_iter = tqdm(all_dates, bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"Splitting {input_file_name} file ({len(all_dates)})")
+
         # loop through the possible dates
-        for i, date in enumerate(all_dates):
+        for i, date in enumerate(all_dates_iter):
             # create a new file for each slice
             output_file_name = cams_dict["file_format"].replace("yyyy", f"{date.year:04d}") \
                             .replace("mm", f"{date.month:02d}") \
@@ -385,7 +394,7 @@ class Cams:
             output_file = Dataset(output_filepath, 'w', format='NETCDF4')
 
             # copy all the dimensions to the new file, leave forecas_reference_time as one
-            for dim in ['forecast_period', 'model_level', 'latitude', 'longitude']:
+            for dim in available_dimensions:
                 output_file.createDimension(dim, input_file.dimensions[dim].size)  
             output_file.createDimension('forecast_reference_time', 1)  
 
@@ -409,12 +418,17 @@ class Cams:
                 if input_var_name == 'valid_time': 
                     output_var[:] = input_var[i,:]
                 elif input_var_name not in cams_providentia_map:
-                    output_var[:] = input_var[:, i, :, :, :]
+                    if level == 'multi':
+                        output_var[:] = input_var[:, i, :, :, :]
+                    else:
+                        output_var[:] = input_var[:, i, :, :]
                 else:
                     output_var[:] = input_var[:]
 
             # close new dataset
             output_file.close()
+
+        self.download_instance.logger.info('')
 
         # close original dataset
         input_file.close()   
@@ -583,7 +597,7 @@ class Cams:
 
                     # split the forecast file
                     if cams_dict["split"] is True:
-                        self.split_nc_file(zip_file_name, all_dates, cams_dict, temp_dir, prefix, domain)
+                        self.split_nc_file(zip_file_name, all_dates, cams_dict, temp_dir, prefix, domain, level)
                         
                     # iterate through all dates to format each of the day files
                     for date in all_dates:
@@ -609,6 +623,8 @@ class Cams:
                         
                         # change the file to remove to the last downloaded
                         self.download_instance.latest_nc_file_path = final_path
+
+                    self.download_instance.logger.info('')
 
                     # add one day to the date
                     current_cams_date = next_cams_date + timedelta(days=1)    
