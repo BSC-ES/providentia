@@ -186,13 +186,6 @@ class ProvConfiguration:
 
             # get ghost_version list
             self.read_instance.possible_ghost_versions = os.listdir(join(CURRENT_PATH,'dependencies', 'GHOST_standards'))
-            
-            # exit if GHOST version is not in Providentia
-            if str(value) not in self.read_instance.possible_ghost_versions:
-                available_versions = ', '.join(sorted(self.read_instance.possible_ghost_versions))
-                error = f"Error: '{value}' is not a valid GHOST version. Available versions: {available_versions}"
-                self.read_instance.logger.error(error)
-                sys.exit(1)
 
             # import GHOST standards 
             sys.path = [path for path in sys.path if 'dependencies/GHOST_standards/' not in path]            
