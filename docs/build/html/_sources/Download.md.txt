@@ -22,23 +22,23 @@ The download mode fetches all the content specified in your configuration file a
 ## Types of downloads
 There are currently four types of downloads available:
 
-1. **Download of Network from HPC Machines:**
+1. **Download of network from HPC Machines:**
    - Downloads ghost and non-ghost networks from the storage5 machine (or mn5 if storage5 is down).
    - Saves them within the `ghost_root` and `nonghost_root` paths specified in `settings/data_paths.yaml`.
    - **How to get this type of download:** Answer `y` to the _Do you want to download from BSC remote machine?_ question or change the `BSC_DL_CHOICE` value to `y`.
 
-2. **Download of Network from Zenodo:**
+2. **Download of network from Zenodo:**
    - Downloads networks from the [GHOST Zenodo webpage](https://zenodo.org/records/10637450).
    - No need for a BSC HPC machine account, as the download is from the internet.
    - To download a network, use the network name exactly as it appears in the zip file. For example, use `EBAS-COLOSSAL_tursk` instead of `EBAS`.
    - **How to get this type of download:** Answer `n` to the _Do you want to download from BSC remote machine?_ question or change the `BSC_DL_CHOICE` value to `n`.
 
-3. **Download of Interpolated Experiments:**
+3. **Download of interpolated Experiments:**
    - Downloads interpolated experiments from the storage5 machine (or mn5 if storage5 is down).
    - Saves them in the `exp_root` paths specified in `settings/data_paths.yaml`.
    - **How to get this type of download:** Set the `interpolated` field in the configuration file to `True` or don't even set it since that is the default.
 
-4. **Download of Non-interpolated Experiments:**
+4. **Download of non-interpolated Experiments:**
    - For local downloads:
        - Downloads non-interpolated experiments from the storage5 machine (or mn5 if storage5 is down).
        - The preferred path is specified in `interp_experiments.yaml`. If the experiment is not listed or no path or experiment domain is found, the system will look in the `exp_to_interp_root` path specified in `settings/data_paths.yaml`.
@@ -60,7 +60,7 @@ As for today download mode is available:
 - **In storage5/nord4** for:
     1. Download of Non-interpolated Experiment (copy from esarchive to gpfs).
 
-## Download Requirements Summary
+## Download requirements summary
 
 The table below summarizes the basic requirements to download data from BSC:
 

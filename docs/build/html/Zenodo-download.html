@@ -22,8 +22,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Atmosphere Data Store" href="CAMS-download.html" />
-    <link rel="prev" title="BSC" href="BSC-download.html" /> 
+    <link rel="next" title="Atmosphere Data Store" href="CAMS.html" />
+    <link rel="prev" title="Barcelona Supercomputing Center" href="BSC-download.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -54,16 +54,16 @@
 <li class="toctree-l2"><a class="reference internal" href="Report.html">Report</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="download.html">Download</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="download.html#general">General</a></li>
-<li class="toctree-l3"><a class="reference internal" href="BSC-download.html">BSC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="BSC-download.html">Barcelona Supercomputing Center</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Zenodo</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#available-ghost-versions">Available GHOST Versions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#how-to-enable-zenodo-download">How to Enable Zenodo Download</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#available-networks">Available Networks</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#explore-network-contents">Explore Network Contents</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#example-configuration-file">Example Configuration File</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#available-ghost-versions">Available GHOST versions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#how-to-enable-zenodo-download">How to enable Zenodo download</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#available-networks">Available networks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#explore-network-contents">Explore network contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example-configuration-file">Example configuration file</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="CAMS-download.html">Atmosphere Data Store</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CAMS.html">Atmosphere Data Store</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ACTRIS-download.html">ACTRIS</a></li>
 </ul>
 </li>
@@ -110,7 +110,7 @@
 <p>Providentia’s download mode supports downloading <strong>GHOST</strong> observational data from <strong>Zenodo</strong>.</p>
 <p>No Zenodo account is required to download the files.</p>
 <section id="available-ghost-versions">
-<h2>Available GHOST Versions<a class="headerlink" href="#available-ghost-versions" title="Link to this heading"></a></h2>
+<h2>Available GHOST versions<a class="headerlink" href="#available-ghost-versions" title="Link to this heading"></a></h2>
 <p>Currently, two versions of GHOST uploaded on Zenodo are available for download:</p>
 <ul class="simple">
 <li><p><strong><a class="reference external" href="https://zenodo.org/records/10637450">1.5</a></strong></p></li>
@@ -118,12 +118,12 @@
 </ul>
 </section>
 <section id="how-to-enable-zenodo-download">
-<h2>How to Enable Zenodo Download<a class="headerlink" href="#how-to-enable-zenodo-download" title="Link to this heading"></a></h2>
+<h2>How to enable Zenodo download<a class="headerlink" href="#how-to-enable-zenodo-download" title="Link to this heading"></a></h2>
 <p>Answer <code class="docutils literal notranslate"><span class="pre">n</span></code> to the prompt:<br />
 <em>“Do you want to download from the BSC remote machine? (Otherwise, GHOST data will be retrieved from Zenodo)”</em></p>
 </section>
 <section id="available-networks">
-<h2>Available Networks<a class="headerlink" href="#available-networks" title="Link to this heading"></a></h2>
+<h2>Available networks<a class="headerlink" href="#available-networks" title="Link to this heading"></a></h2>
 <p>To download a network, use the <strong>network name exactly as it appears</strong> in the list on the page (scroll down to see). For example, use <code class="docutils literal notranslate"><span class="pre">EBAS-COLOSSAL_tursk</span></code> instead of <code class="docutils literal notranslate"><span class="pre">EBAS</span></code>.</p>
 <section id="version-1-5">
 <h3>Version 1.5<a class="headerlink" href="#version-1-5" title="Link to this heading"></a></h3>
@@ -205,7 +205,7 @@
 </section>
 </section>
 <section id="explore-network-contents">
-<h2>Explore Network Contents<a class="headerlink" href="#explore-network-contents" title="Link to this heading"></a></h2>
+<h2>Explore network contents<a class="headerlink" href="#explore-network-contents" title="Link to this heading"></a></h2>
 <p>To view the available data for each network, visit the Zenodo page for one of the versions, you can find the links in <a class="reference internal" href="#available-ghost-versions">this</a> section.</p>
 <p>Open the <strong>Files</strong> dropdown and click <strong>Preview</strong> on the network you’re interested in.</p>
 <p><img alt="Zenodo Preview" src="_images/Zenodo_preview.png" /></p>
@@ -213,7 +213,7 @@
 <p><img alt="Zenodo File Structure" src="_images/Zenodo_File_Structure.png" /></p>
 </section>
 <section id="example-configuration-file">
-<h2>Example Configuration File<a class="headerlink" href="#example-configuration-file" title="Link to this heading"></a></h2>
+<h2>Example configuration file<a class="headerlink" href="#example-configuration-file" title="Link to this heading"></a></h2>
 <p>For the example shown above, the corresponding configuration file is as follows:</p>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[zenodo-AERONET_v3_lev1.5]</span><span class="w"> </span>
 <span class="na">ghost_version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">1.5</span>
@@ -231,8 +231,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="BSC-download.html" class="btn btn-neutral float-left" title="BSC" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="CAMS-download.html" class="btn btn-neutral float-right" title="Atmosphere Data Store" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="BSC-download.html" class="btn btn-neutral float-left" title="Barcelona Supercomputing Center" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="CAMS.html" class="btn btn-neutral float-right" title="Atmosphere Data Store" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
