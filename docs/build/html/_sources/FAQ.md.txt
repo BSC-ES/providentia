@@ -6,7 +6,7 @@ If you encounter any error, please check the FAQ. For other problems, you can cr
 
 For some particular cases, it can happen that when the application is launched, the graphics of the tools appear weird, as if magnified, like in the following picture:
 
-![prv_magnified](uploads/3b2efbf5ef08bb03bd9e98753a16750b/prv_magnified.png)
+![prv_magnified](uploads/prv_magnified.png)
 
 The solution to this issue is running the command `export QT_AUTO_SCREEN_SCALE_FACTOR=0` before you launch the application. So, you need to execute something like the following:
 

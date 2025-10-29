@@ -7,6 +7,7 @@ This page can be used by developers to better understand certain parts of the co
 - [Upload to PyPI](#upload-to-pypi)
 - [Check that all reports are created](#check-that-all-reports-are-created)
 - [Run Providentia inside Docker container](#run-providentia-inside-docker-container)
+- [Create the docs for the first time and upload to readthedocs](#create-the-docs-for-the-first-time-and-upload-to-readthedocs)
 - [Generate the docs](#generate-the-docs)
 - [Create providentia-env_v3.0.0 in MN5](#create-providentia-env_v300-in-mn5)
 - [Create local environment](#create-local-environment)
@@ -284,12 +285,83 @@ This will open a "session" inside our container, from which we can run Provident
 
 Prior to that you should update the paths to the volumes (/data, /home/avilanov/software/Providentia, /home/avilanov/software/providentia-interpolation), used to access the data and repositories that are found in your local machine (outside the Docker container). The changes you do to your local files will be automatically reflected in the container.
 
-## Generate the docs
+## Create the docs for the first time and upload to readthedocs
 
-First edit the .md files under docs/source, then navigate to docs and simply run:
+Install `myst-parser==3.0.1`, `Sphinx==7.2.6` and `Sphinx-rtd-theme==2.0.0` in your environment and the modules to your `requirements.txt` file.
+
+```
+conda activate providentia-env_v3.0.0
+pip install myst-parser==3.0.1 Sphinx==7.2.6 Sphinx-rtd-theme==2.0.0
+```
+
+Create a folder called docs inside your repository and do:
 ```
 cd docs
+sphinx-quickstart
+```
+
+This will ask you a few questions (we answered with yes to the question of whether we want to separate source and build folders) and a `conf.py` file will be generated in the `docs/source` folder. You can edit the configuration file. In our case, we add some extensions and plugins:
+
+```
+# -- General configuration ---------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
+
+extensions = ["myst_parser", "sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc", "sphinx_rtd_theme"]
+templates_path = ['_templates']
+exclude_patterns = []
+myst_heading_anchors = 2
+
+# -- Options for HTML output -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+
+html_theme = 'sphinx_rtd_theme'
+html_static_path = ['_static']
+html_css_files = [
+    'css/custom.css',
+]
+```
+
+Add your markdown files to `docs/source` and add the filenames to `index.rst` in order to show their contents. Then run:
+
+```
+make clean
+make html
+```
+
+Here you might get some errors related to the format of your .md files, fix them and run the commands again. This will generate the HTML files, you can open them from the browser to make sure they look correct.
+
+Now create an account and project in https://app.readthedocs.org/, and associate it with your project, which must be open source. To show the documentation, you will need to generate the file .readthedocs.yaml in your repository. Ours looks like this:
+
+```
+# Read the Docs configuration file
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+# Required
+version: 2
+
+# Set the OS, Python version, and other tools you might need
+build:
+  os: ubuntu-24.04
+  tools:
+    python: "mambaforge-22.9"
+
+# Build documentation in the "docs/" directory with Sphinx
+sphinx:
+   configuration: docs/source/conf.py
+
+# Create environment
+conda:
+  environment: environment.yaml
+```
+
+Trigger a build from your latest commit containing this file and you should be ready to go.
+
+## Generate the docs
+
+Edit the files under `docs/source``, then navigate to docs and simply run:
+```
 conda activate providentia-env_v3.0.0
+cd docs
 make clean
 make html
 ```
