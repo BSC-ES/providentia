@@ -22,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="BSC" href="BSC-download.html" />
+    <link rel="next" title="Barcelona Supercomputing Center" href="BSC-download.html" />
     <link rel="prev" title="Report" href="Report.html" /> 
 </head>
 
@@ -56,14 +56,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#general">General</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#types-of-downloads">Types of downloads</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#where-to-download-from">Where to download from</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#download-requirements-summary">Download Requirements Summary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#download-requirements-summary">Download requirements summary</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#fields">Fields</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#env-file">.env file</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="BSC-download.html">BSC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="BSC-download.html">Barcelona Supercomputing Center</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Zenodo-download.html">Zenodo</a></li>
-<li class="toctree-l3"><a class="reference internal" href="CAMS-download.html">Atmosphere Data Store</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CAMS.html">Atmosphere Data Store</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ACTRIS-download.html">ACTRIS</a></li>
 </ul>
 </li>
@@ -123,14 +123,14 @@
 <h3>Types of downloads<a class="headerlink" href="#types-of-downloads" title="Link to this heading"></a></h3>
 <p>There are currently four types of downloads available:</p>
 <ol class="arabic simple">
-<li><p><strong>Download of Network from HPC Machines:</strong></p>
+<li><p><strong>Download of network from HPC Machines:</strong></p>
 <ul class="simple">
 <li><p>Downloads ghost and non-ghost networks from the storage5 machine (or mn5 if storage5 is down).</p></li>
 <li><p>Saves them within the <code class="docutils literal notranslate"><span class="pre">ghost_root</span></code> and <code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code> paths specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
 <li><p><strong>How to get this type of download:</strong> Answer <code class="docutils literal notranslate"><span class="pre">y</span></code> to the <em>Do you want to download from BSC remote machine?</em> question or change the <code class="docutils literal notranslate"><span class="pre">BSC_DL_CHOICE</span></code> value to <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p></li>
 </ul>
 </li>
-<li><p><strong>Download of Network from Zenodo:</strong></p>
+<li><p><strong>Download of network from Zenodo:</strong></p>
 <ul class="simple">
 <li><p>Downloads networks from the <a class="reference external" href="https://zenodo.org/records/10637450">GHOST Zenodo webpage</a>.</p></li>
 <li><p>No need for a BSC HPC machine account, as the download is from the internet.</p></li>
@@ -138,14 +138,14 @@
 <li><p><strong>How to get this type of download:</strong> Answer <code class="docutils literal notranslate"><span class="pre">n</span></code> to the <em>Do you want to download from BSC remote machine?</em> question or change the <code class="docutils literal notranslate"><span class="pre">BSC_DL_CHOICE</span></code> value to <code class="docutils literal notranslate"><span class="pre">n</span></code>.</p></li>
 </ul>
 </li>
-<li><p><strong>Download of Interpolated Experiments:</strong></p>
+<li><p><strong>Download of interpolated Experiments:</strong></p>
 <ul class="simple">
 <li><p>Downloads interpolated experiments from the storage5 machine (or mn5 if storage5 is down).</p></li>
 <li><p>Saves them in the <code class="docutils literal notranslate"><span class="pre">exp_root</span></code> paths specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
 <li><p><strong>How to get this type of download:</strong> Set the <code class="docutils literal notranslate"><span class="pre">interpolated</span></code> field in the configuration file to <code class="docutils literal notranslate"><span class="pre">True</span></code> or don’t even set it since that is the default.</p></li>
 </ul>
 </li>
-<li><p><strong>Download of Non-interpolated Experiments:</strong></p>
+<li><p><strong>Download of non-interpolated Experiments:</strong></p>
 <ul class="simple">
 <li><p>For local downloads:</p>
 <ul>
@@ -185,7 +185,7 @@
 </ul>
 </section>
 <section id="download-requirements-summary">
-<h3>Download Requirements Summary<a class="headerlink" href="#download-requirements-summary" title="Link to this heading"></a></h3>
+<h3>Download requirements summary<a class="headerlink" href="#download-requirements-summary" title="Link to this heading"></a></h3>
 <p>The table below summarizes the basic requirements to download data from BSC:</p>
 <table class="docutils align-default">
 <thead>
@@ -280,24 +280,18 @@
 </section>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="BSC-download.html">BSC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BSC-download.html">Barcelona Supercomputing Center</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Zenodo-download.html">Zenodo</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Zenodo-download.html#available-ghost-versions">Available GHOST Versions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Zenodo-download.html#how-to-enable-zenodo-download">How to Enable Zenodo Download</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Zenodo-download.html#available-networks">Available Networks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Zenodo-download.html#explore-network-contents">Explore Network Contents</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Zenodo-download.html#example-configuration-file">Example Configuration File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Zenodo-download.html#available-ghost-versions">Available GHOST versions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Zenodo-download.html#how-to-enable-zenodo-download">How to enable Zenodo download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Zenodo-download.html#available-networks">Available networks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Zenodo-download.html#explore-network-contents">Explore network contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Zenodo-download.html#example-configuration-file">Example configuration file</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="CAMS-download.html">Atmosphere Data Store</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="CAMS-download.html#available-cams-datasets">Available CAMS datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CAMS-download.html#how-to-enable-atmosphere-data-store-download">How to Enable Atmosphere Data Store Download</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CAMS-download.html#account-setup-and-access-configuration">Account Setup and Access Configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CAMS-download.html#cams-european-air-quality-forecasts">1. CAMS European Air Quality Forecasts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CAMS-download.html#cams-global-atmospheric-composition-forecasts">2. CAMS Global Atmospheric Composition Forecasts</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CAMS-download.html#cams-european-air-quality-reanalyses">3. CAMS European Air Quality Reanalyses</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CAMS-download.html#cams-global-reanalysis-eac4">4. CAMS Global Reanalysis (EAC4)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CAMS-download.html#cams-ghost-species-mapping">CAMS-GHOST species mapping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CAMS.html">Atmosphere Data Store</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ADS.html">Account setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CAMS-download.html">Data download</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ACTRIS-download.html">ACTRIS</a><ul>
@@ -315,7 +309,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Report.html" class="btn btn-neutral float-left" title="Report" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="BSC-download.html" class="btn btn-neutral float-right" title="BSC" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="BSC-download.html" class="btn btn-neutral float-right" title="Barcelona Supercomputing Center" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

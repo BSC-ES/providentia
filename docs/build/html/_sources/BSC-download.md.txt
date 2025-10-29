@@ -1,1 +1,1 @@
-# BSC
+# Barcelona Supercomputing Center

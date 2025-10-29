@@ -4,18 +4,18 @@ Providentia's download mode supports downloading **GHOST** observational data fr
 
 No Zenodo account is required to download the files.
 
-## Available GHOST Versions
+## Available GHOST versions
 
 Currently, two versions of GHOST uploaded on Zenodo are available for download:
 
 - **[1.5](https://zenodo.org/records/10637450)**
 - **[1.5.1](https://zenodo.org/records/15075961)**
    
-## How to Enable Zenodo Download
+## How to enable Zenodo download
 Answer `n` to the prompt:  
 _"Do you want to download from the BSC remote machine? (Otherwise, GHOST data will be retrieved from Zenodo)"_
 
-## Available Networks
+## Available networks
 
 To download a network, use the **network name exactly as it appears** in the list on the page (scroll down to see). For example, use `EBAS-COLOSSAL_tursk` instead of `EBAS`.
 
@@ -95,7 +95,7 @@ These are the available networks for version **1.5.1**:
 * `US_NADP_NTN`
 * `WMO_WDCPC`
 
-## Explore Network Contents
+## Explore network contents
 
 To view the available data for each network, visit the Zenodo page for one of the versions, you can find the links in [this](#available-ghost-versions) section.
 
@@ -107,7 +107,7 @@ Once this is done, open the dropdown named after the network. The **first-level 
 
 ![Zenodo File Structure](./uploads/Zenodo_File_Structure.png "Zenodo File Structure")
 
-## Example Configuration File
+## Example configuration file
 
 For the example shown above, the corresponding configuration file is as follows:
 

@@ -202,7 +202,7 @@ All the fields of representativity, with their default values can be found in [R
 
 #### Period
 
-![period](uploads/0ca0fad45a51b463d8452909998874b2/period.png)
+![period](uploads/period.png)
 
 The period filters give the option to Keep (K) or Remove (R) specific observations according to period criteria. 
 
