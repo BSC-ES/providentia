@@ -141,7 +141,7 @@ All the QA and flags have an associated name and number to them. Their number ca
 
 #### QA
 
-![qa](uploads/d6cb417b506a80b6c1497688cdaacb57/qa.png)
+![qa](uploads/qa.png)
 
 The QA window contains contains a menu where you can select the quality assurance flags that you want to filter by. Providentia has a default set of these flags selected according to the species you select to load. However, users can select more filters, remove them all, or define their own. Following we summarize how you can perform these actions using your configuration file.
 
@@ -171,7 +171,7 @@ All the options to set the QA flags can be found in [Data flags and QA names and
 
 #### Flags
 
-![flags](uploads/c9d183a87924a53743f49443a3b44ba1/flags.png)
+![flags](uploads/flags.png)
 
 Exactly the same principles apply in the case of flags. The only difference is that there is no default set of flags selected. Actually, the default set is empty. For example, for the following flags, if you want to select Preliminary Data.
 
@@ -190,7 +190,7 @@ All the options to set the data flags can be found in [Data flags and QA names a
 
 #### Representativity bounds
 
-![representativity](uploads/26ae38c3997ae6e6b4a8b3a2bc75d70c/representativity.png)
+![representativity](uploads/representativity.png)
 
 For the case of the representativity fields, the way to define them is to write the name of the field in the same way as it appears in Providentia and assign to it the value you want. For example, if you want the hourly native representativity percent to be 20%, then you would define it as in the example below. In the same way you can define all of the filters of the representativity menu.
 
@@ -222,7 +222,7 @@ period = keep: Daytime
 
 #### Metadata
 
-![meta](uploads/dd594f8fec0cacfc5152b5fdc478dc4d/meta.png)
+![meta](uploads/meta.png)
 
 The metadata filters that we find below the META menu can be classified into two categories:
 - Fields that accept a range of values, with a lower bound and an upper bound
@@ -232,7 +232,7 @@ The metadata filters that we find below the META menu can be classified into two
 
 The sub-menu of Station Position is a good example of fields that have lower/upper bounds:
 
-![image](uploads/059876303e4f1b2c741fc349c59eabef/image.png)
+![image](uploads/bounds.png)
 
 For defining a field that accepts a range of value in this format, then you should write the name of the variable and then write the values of lower bound and upper bound separated by a comma: **variable = lower, upper**. In the example below we define the variables latitude and longitude:
 
@@ -247,7 +247,7 @@ The same principle applies for all the fields under the META window that have a 
 Joly-Peuch_classification_code = 1,6
 ``` 
 
-![image](uploads/fc7214ebcf0186ac111109c7eadaef6e/image.png)
+![image](uploads/classifications.png)
 
 ##### Fields with keep/remove options
 

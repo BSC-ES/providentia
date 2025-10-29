@@ -100,7 +100,7 @@
 <p>Multispecies filtering refers to the ability to filter the currently selected species by the values of another species, which can be given by the current network or by an external one.</p>
 <p>In the reports created to study the dust in the atmosphere it is common practice to filter the optical depth by the Angstrom exponent to know which values are associated with dust. For instance, we can use the values of the Angstrom exponent above 0.6 to filter the AOD.</p>
 <p>If we take a look at the timeseries for one station, we can see what this actually means:</p>
-<p><img alt="Screenshot_from_2024-05-31_15-36-58" src="_images/Screenshot_from_2024-05-31_15-36-58.jpg" /></p>
+<p><img alt="multispecies-filtering" src="_images/multispecies-filtering.jpg" /></p>
 <p>It can be observed that there are less data points for the AOD after the filtering is applied and the removal of those happens when the Angstrom exponent is higher than 0.6.</p>
 <p>This can easily be done by using the <code class="docutils literal notranslate"><span class="pre">MULTI</span></code> menu in the dashboard or by defining the <code class="docutils literal notranslate"><span class="pre">filter_species</span></code> variable in our configuration files. The equivalent of this in the reports:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">All</span><span class="p">]</span>

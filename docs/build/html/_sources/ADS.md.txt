@@ -7,15 +7,15 @@
 
 Go to the [Atmosphere Data Store page](https://ads.atmosphere.copernicus.eu/) and click **Login / Register** at the top right corner.
 
-![Atmosphere Data Store Page](./uploads/CAMS_Atmospher_Data_Store_Page.png "Atmosphere Data Store Page")
+![Atmosphere Data Store Page](uploads/CAMS_Atmospher_Data_Store_Page.png "Atmosphere Data Store Page")
 
 Then, click **Register new user** and create a new account.  
 
-![ECMWF Registration Page](./uploads/CAMS_ECMWF_Registration_Page.png "ECMWF Registration Page")
+![ECMWF Registration Page](uploads/CAMS_ECMWF_Registration_Page.png "ECMWF Registration Page")
 
 Check your confirmation email, accept the **Terms and Conditions**, and fill in the required information to activate your account.  
 
-![Terms and Conditions](./uploads/CAMS_Terms_and_Conditions.png "Terms and Conditions")
+![Terms and Conditions](uploads/CAMS_Terms_and_Conditions.png "Terms and Conditions")
 
 ## 2. Accept Dataset Terms
 
@@ -25,7 +25,7 @@ Navigate to the download page of the dataset you want to download. For example [
 
 Scroll down to **Terms of Use** and accept the **CC-BY license**.  
 
-![CC-BY License](./uploads/CAMS_CC-BY_License.png "CC-BY License")
+![CC-BY License](uploads/CAMS_CC-BY_License.png "CC-BY License")
 
 ## 3. Prepare the Configuration File
 Before downloading, prepare your configuration file.  It’s recommended to first read **[How to Enable Atmosphere Data Store Download](#how-to-enable-ads-download)**.  
@@ -54,7 +54,7 @@ _"Enter your personal access token, which you can find at [https://ads.atmospher
 
 Go to the link specified in the prompt, scroll down to **API Key**, and copy it.
 
-![API Key](./uploads/CAMS_API_Key.png "API Key")
+![API Key](uploads/CAMS_API_Key.png "API Key")
 
 Paste your API key on the prompt. Providentia will automatically create the `~/.cdsapirc` file.
 

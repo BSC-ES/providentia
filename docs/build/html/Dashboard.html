@@ -140,9 +140,9 @@ After reading the data, the map appears showing the available stations that corr
 <section id="example">
 <h4>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h4>
 <p>In the following image, we can see the output for Providentia where we compare the experiment cams61_camsra_ph2-eu-000 with actual observations for ozone. We load the observations and experiment data over 2018 and we select <em>Intersect</em>, so that the stations within the experiment’s domain are automatically selected.</p>
-<p><img alt="Screenshot_from_2024-01-10_12-59-23" src="_images/Screenshot_from_2024-01-10_12-59-23.png" /></p>
+<p><img alt="intersect" src="_images/intersect.png" /></p>
 <p>In the figure above we see that the data were loaded and plotted. However, there might some data gaps in the observations or in the experiments. This might result in an inaccurate analysis. By selecting <strong>Colocate</strong>, Providentia will apply the temporal intersection of data points that exist in both the network and experiment datasets. The result of the previous example would be:</p>
-<p><img alt="Screenshot_from_2024-01-10_12-59-37" src="_images/Screenshot_from_2024-01-10_12-59-37.png" /></p>
+<p><img alt="colocate" src="_images/colocate.png" /></p>
 </section>
 </section>
 <section id="filters">
@@ -153,7 +153,7 @@ After reading the data, the map appears showing the available stations that corr
 <p><code class="docutils literal notranslate"><span class="pre">NOTE:</span> <span class="pre">In</span> <span class="pre">Data</span> <span class="pre">Selection</span> <span class="pre">→</span> <span class="pre">QA</span> <span class="pre">if</span> <span class="pre">the</span> <span class="pre">user</span> <span class="pre">selects</span> <span class="pre">the</span> <span class="pre">option</span> <span class="pre">of</span> <span class="pre">*Extreme</span> <span class="pre">Data*,</span> <span class="pre">then</span> <span class="pre">the</span> <span class="pre">extremes</span> <span class="pre">values</span> <span class="pre">will</span> <span class="pre">be</span> <span class="pre">filtered</span> <span class="pre">out</span> <span class="pre">either</span> <span class="pre">way.</span></code></p>
 <section id="rep">
 <h5>% REP<a class="headerlink" href="#rep" title="Link to this heading"></a></h5>
-<p><img alt="representativity" src="_images/representativity1.png" /></p>
+<p><img alt="representativity" src="_images/representativity-2.png" /></p>
 <p>This option refers to the minimum acceptable percentages of data across the data that is not NaN. All stations which do not meet this minimum requirement will be screened out.</p>
 </section>
 <section id="period">
@@ -163,7 +163,7 @@ After reading the data, the map appears showing the available stations that corr
 </section>
 <section id="meta">
 <h5>META<a class="headerlink" href="#meta" title="Link to this heading"></a></h5>
-<p><img alt="meta" src="_images/meta1.png" /></p>
+<p><img alt="meta" src="_images/meta.png" /></p>
 <p>The pop-up menu of <strong>Meta</strong> contains a number of metadata types for the user to filter by. As there are many options, there have been separated into five categories.</p>
 <p>Each category provides a plethora of options. The user can filter by latitude, longitude, altitude. Or filter by area classification (rural, urban, etc), land use, emission source, etc. The options are numerous, explore!</p>
 </section>
@@ -223,14 +223,14 @@ After reading the data, the map appears showing the available stations that corr
 <li><p>In the case that you want to export data, then you can export them either in a <strong>NetCDF</strong> (.*nc) file format, or as a <strong>Numpy file</strong> (.*npz). For more information around the exported data, go to the wiki page <a class="reference internal" href="Saved-file-formats.html"><span class="doc std std-doc">Saved file formats</span></a></p></li>
 <li><p>In the case that you want to export only the configuration, then you need to select <strong>Configuration</strong>.</p></li>
 </ul>
-<p><img alt="image__2_" src="_images/image__2_.jpg" /></p>
+<p><img alt="Export conf" src="_images/export-conf.jpg" /></p>
 </section>
 <section id="loading-a-configuration-file">
 <span id="id2"></span><h4>Loading a configuration file<a class="headerlink" href="#loading-a-configuration-file" title="Link to this heading"></a></h4>
 <p>Providentia has the option to load a configuration file that you have either written from scratch, or that you had exported during a past evaluation.</p>
 <p>Loading a configuration file means that the tool will reset the options you have at that moment, and use the configuration with the new variables and filters.</p>
 <p>If there is more than one section or subsection, users will be asked to choose which one they want to load.</p>
-<p><img alt="image__1_" src="_images/image__1_.jpg" />a</p>
+<p><img alt="Load conf" src="_images/load-conf.jpg" /></p>
 </section>
 </section>
 </section>
