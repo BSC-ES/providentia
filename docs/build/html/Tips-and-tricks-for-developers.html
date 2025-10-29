@@ -359,7 +359,7 @@ done
 </section>
 <section id="create-the-docs-for-the-first-time-and-upload-to-readthedocs">
 <h2>Create the docs for the first time and upload to readthedocs<a class="headerlink" href="#create-the-docs-for-the-first-time-and-upload-to-readthedocs" title="Link to this heading"></a></h2>
-<p>Install <code class="docutils literal notranslate"><span class="pre">myst-parser==3.0.1</span></code>, <code class="docutils literal notranslate"><span class="pre">Sphinx==7.2.6</span></code> and <code class="docutils literal notranslate"><span class="pre">Sphinx-rtd-theme==2.0.0</span></code> in your environment and the modules to your <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file.</p>
+<p>Install <code class="docutils literal notranslate"><span class="pre">myst-parser==3.0.1</span></code>, <code class="docutils literal notranslate"><span class="pre">Sphinx==7.2.6</span></code> and <code class="docutils literal notranslate"><span class="pre">Sphinx-rtd-theme==2.0.0</span></code> in your environment and add the modules to your <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">providentia</span><span class="o">-</span><span class="n">env_v3</span><span class="mf">.0.0</span>
 <span class="n">pip</span> <span class="n">install</span> <span class="n">myst</span><span class="o">-</span><span class="n">parser</span><span class="o">==</span><span class="mf">3.0.1</span> <span class="n">Sphinx</span><span class="o">==</span><span class="mf">7.2.6</span> <span class="n">Sphinx</span><span class="o">-</span><span class="n">rtd</span><span class="o">-</span><span class="n">theme</span><span class="o">==</span><span class="mf">2.0.0</span>
 </pre></div>
@@ -369,7 +369,7 @@ done
 <span class="n">sphinx</span><span class="o">-</span><span class="n">quickstart</span>
 </pre></div>
 </div>
-<p>This will ask you a few questions (we answered with yes to the question of whether we want to separate source and build folders) and a <code class="docutils literal notranslate"><span class="pre">conf.py</span></code> file will be generated in the <code class="docutils literal notranslate"><span class="pre">docs/source</span></code> folder. You can edit the configuration file. In our case, we add some extensions and plugins:</p>
+<p>This will ask you a few questions (we answered with yes to the question of whether we want to separate source and build folders) and a <code class="docutils literal notranslate"><span class="pre">conf.py</span></code> file together with other files will be generated in the <code class="docutils literal notranslate"><span class="pre">docs/source</span></code> folder. You can edit the configuration file. In our case, we added some extensions and plugins:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># -- General configuration ---------------------------------------------------</span>
 <span class="c1"># https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration</span>
 
@@ -394,7 +394,7 @@ done
 </pre></div>
 </div>
 <p>Here you might get some errors related to the format of your .md files, fix them and run the commands again. This will generate the HTML files, you can open them from the browser to make sure they look correct.</p>
-<p>Now create an account and project in https://app.readthedocs.org/, and associate it with your project, which must be open source. To show the documentation, you will need to generate the file .readthedocs.yaml in your repository. Ours looks like this:</p>
+<p>Now create an account and project in https://app.readthedocs.org/, and associate it with your project, which must be open source. To show the documentation, you will need to create the file .readthedocs.yaml in your repository. Ours looks like this:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read the Docs configuration file</span>
 <span class="c1"># See https://docs.readthedocs.io/en/stable/config-file/v2.html for details</span>
 

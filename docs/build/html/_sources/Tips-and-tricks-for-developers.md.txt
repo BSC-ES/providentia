@@ -287,7 +287,7 @@ Prior to that you should update the paths to the volumes (/data, /home/avilanov/
 
 ## Create the docs for the first time and upload to readthedocs
 
-Install `myst-parser==3.0.1`, `Sphinx==7.2.6` and `Sphinx-rtd-theme==2.0.0` in your environment and the modules to your `requirements.txt` file.
+Install `myst-parser==3.0.1`, `Sphinx==7.2.6` and `Sphinx-rtd-theme==2.0.0` in your environment and add the modules to your `requirements.txt` file.
 
 ```
 conda activate providentia-env_v3.0.0
@@ -300,7 +300,7 @@ cd docs
 sphinx-quickstart
 ```
 
-This will ask you a few questions (we answered with yes to the question of whether we want to separate source and build folders) and a `conf.py` file will be generated in the `docs/source` folder. You can edit the configuration file. In our case, we add some extensions and plugins:
+This will ask you a few questions (we answered with yes to the question of whether we want to separate source and build folders) and a `conf.py` file together with other files will be generated in the `docs/source` folder. You can edit the configuration file. In our case, we added some extensions and plugins:
 
 ```
 # -- General configuration ---------------------------------------------------
@@ -330,7 +330,7 @@ make html
 
 Here you might get some errors related to the format of your .md files, fix them and run the commands again. This will generate the HTML files, you can open them from the browser to make sure they look correct.
 
-Now create an account and project in https://app.readthedocs.org/, and associate it with your project, which must be open source. To show the documentation, you will need to generate the file .readthedocs.yaml in your repository. Ours looks like this:
+Now create an account and project in https://app.readthedocs.org/, and associate it with your project, which must be open source. To show the documentation, you will need to create the file .readthedocs.yaml in your repository. Ours looks like this:
 
 ```
 # Read the Docs configuration file
