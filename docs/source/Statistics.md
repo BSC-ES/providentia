@@ -17,13 +17,13 @@ In the versions of Providentia prior to 2.2.0, the mode was always Spatial|Tempo
 
 ### Dimensional reduction by statistical mode
 
-![statistical-modes-1](uploads/a6ea272f0ba06c03ac8256b141c2fd4e/statistical-modes-1.png)
+![statistical-modes-1](uploads/statistical-modes-1.png)
 
 ### Dimensional reduction by statistical mode and plot type
 
 For some plot types the full dimensional reduction is not possible, e.g map. Therefore, they are locked in certain reduction configurations. This is illustrated per plot type:
 
-![statistical-modes-2](uploads/8f1e1a4aa4e3254965066811d4499ec6/statistical-modes-2.png)
+![statistical-modes-2](uploads/statistical-modes-2.png)
 
 In both the dashboard and reports, the statistical modes and aggregation statistics can be set.
 

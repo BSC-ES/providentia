@@ -124,7 +124,7 @@
   <section id="plot-types-and-options">
 <h1>Plot types and options<a class="headerlink" href="#plot-types-and-options" title="Link to this heading"></a></h1>
 <p>This page is only useful to those who want to create their own reports. Users can choose which plots these reports will have, as you will see below.</p>
-<p><img alt="Screenshot_from_2025-02-12_17-17-38" src="_images/Screenshot_from_2025-02-12_17-17-38.png" /></p>
+<p><img alt="plot-options-types" src="_images/plot-options-types.png" /></p>
 <section id="plot-types">
 <h2>Plot types<a class="headerlink" href="#plot-types" title="Link to this heading"></a></h2>
 <p>The standard plot types consist of: maps (<code class="docutils literal notranslate"><span class="pre">map</span></code>), metadata summary (<code class="docutils literal notranslate"><span class="pre">metadata</span></code>), timeseries (<code class="docutils literal notranslate"><span class="pre">timeseries</span></code>), periodic plots (<code class="docutils literal notranslate"><span class="pre">periodic</span></code>), periodic violin plots (<code class="docutils literal notranslate"><span class="pre">periodic-violin</span></code>), box plots (<code class="docutils literal notranslate"><span class="pre">boxplot</span></code>), distribution plots (<code class="docutils literal notranslate"><span class="pre">distribution</span></code>), scatter plots (<code class="docutils literal notranslate"><span class="pre">scatter</span></code>), heat maps (<code class="docutils literal notranslate"><span class="pre">heatmap</span></code>), tables that give one stat per subsection per experiment (<code class="docutils literal notranslate"><span class="pre">table</span></code>), tables that give multiple stats per experiment (<code class="docutils literal notranslate"><span class="pre">statsummary</span></code>), Taylor Diagrams (<code class="docutils literal notranslate"><span class="pre">taylor</span></code>), and FAIRMODE plots (<code class="docutils literal notranslate"><span class="pre">fairmode-target</span></code> and <code class="docutils literal notranslate"><span class="pre">fairmode-statsummary</span></code>).</p>
@@ -194,42 +194,42 @@
 <section id="only-show-observations-obs">
 <h3>Only show observations (<code class="docutils literal notranslate"><span class="pre">_obs</span></code>)<a class="headerlink" href="#only-show-observations-obs" title="Link to this heading"></a></h3>
 <p>The extension <code class="docutils literal notranslate"><span class="pre">_obs</span></code> allows users to only show observations in their plots.</p>
-<p><img alt="Screenshot_from_2022-10-04_16-13-50" src="_images/Screenshot_from_2022-10-04_16-13-50.jpg" /></p>
+<p><img alt="obs" src="_images/obs.jpg" /></p>
 </section>
 <section id="split-the-plots-by-label-individual">
 <h3>Split the plots by label (<code class="docutils literal notranslate"><span class="pre">_individual</span></code>)<a class="headerlink" href="#split-the-plots-by-label-individual" title="Link to this heading"></a></h3>
 <p>The extension <code class="docutils literal notranslate"><span class="pre">_individual</span></code> allows users to disaggregate the plots and see the plots by experiments, individually. This can help to visualise the results in a clear way when multiple experiments have been selected.</p>
-<p><img alt="Screenshot_from_2022-10-04_16-13-53" src="_images/Screenshot_from_2022-10-04_16-13-53.jpg" /></p>
+<p><img alt="individual" src="_images/individual.jpg" /></p>
 </section>
 <section id="add-annotations-annotate">
 <h3>Add annotations (<code class="docutils literal notranslate"><span class="pre">_annotate</span></code>)<a class="headerlink" href="#add-annotations-annotate" title="Link to this heading"></a></h3>
 <p>If the configuration option <code class="docutils literal notranslate"><span class="pre">_annotate</span></code> is added, a box will be created on the plots to show several statistical data. The style and position of this box, as well as the statistics, can be defined by the user in <code class="docutils literal notranslate"><span class="pre">plot_characteristics.yaml</span></code> under <code class="docutils literal notranslate"><span class="pre">settings</span></code> by changing the parameter <code class="docutils literal notranslate"><span class="pre">annotate_stats</span></code>.</p>
-<p><img alt="Screenshot_from_2022-10-04_16-17-04" src="_images/Screenshot_from_2022-10-04_16-17-04.jpg" /></p>
+<p><img alt="annotate" src="_images/annotate.jpg" /></p>
 </section>
 <section id="get-the-bias-of-the-data-bias">
 <h3>Get the bias of the data (<code class="docutils literal notranslate"><span class="pre">_bias</span></code>)<a class="headerlink" href="#get-the-bias-of-the-data-bias" title="Link to this heading"></a></h3>
 <p>Alternatively the plots can be modified to show, rather than the absolute observational vs experiment values, the bias between these pairings. This is done by adding <code class="docutils literal notranslate"><span class="pre">_bias</span></code> to the base plot names, for example: <code class="docutils literal notranslate"><span class="pre">distribution_bias</span></code> or <code class="docutils literal notranslate"><span class="pre">periodic-Max_bias</span></code>.</p>
-<p><img alt="Screenshot_from_2022-10-04_16-10-41" src="_images/Screenshot_from_2022-10-04_16-10-41.jpg" /></p>
+<p><img alt="bias" src="_images/bias.jpg" /></p>
 </section>
 <section id="add-a-smooth-line-to-the-timeseries-smooth">
 <h3>Add a smooth line to the timeseries (<code class="docutils literal notranslate"><span class="pre">_smooth</span></code>)<a class="headerlink" href="#add-a-smooth-line-to-the-timeseries-smooth" title="Link to this heading"></a></h3>
 <p>Adding the option <code class="docutils literal notranslate"><span class="pre">_smooth</span></code> to the <code class="docutils literal notranslate"><span class="pre">timeseries</span></code> plot will plot a smooth line over the timeseries.</p>
-<p><img alt="Screenshot_from_2022-10-04_16-17-13" src="_images/Screenshot_from_2022-10-04_16-17-13.jpg" /></p>
+<p><img alt="smooth" src="_images/smooth.jpg" /></p>
 </section>
 <section id="add-a-regression-line-to-the-scatter-plot-regression">
 <h3>Add a regression line to the scatter plot (<code class="docutils literal notranslate"><span class="pre">_regression</span></code>)<a class="headerlink" href="#add-a-regression-line-to-the-scatter-plot-regression" title="Link to this heading"></a></h3>
 <p>Adding the option <code class="docutils literal notranslate"><span class="pre">_regression</span></code> will plot the linear regression between observations and experiment.</p>
-<p><img alt="Screenshot_from_2022-10-04_16-17-08" src="_images/Screenshot_from_2022-10-04_16-17-08.jpg" /></p>
+<p><img alt="regression" src="_images/regression.jpg" /></p>
 </section>
 <section id="make-the-scale-logarithmic-logx-logy">
 <h3>Make the scale logarithmic (<code class="docutils literal notranslate"><span class="pre">_logx</span></code> / <code class="docutils literal notranslate"><span class="pre">_logy</span></code>)<a class="headerlink" href="#make-the-scale-logarithmic-logx-logy" title="Link to this heading"></a></h3>
 <p>Adding the options <code class="docutils literal notranslate"><span class="pre">_logx</span></code> or <code class="docutils literal notranslate"><span class="pre">_logy</span></code> will set the desired axis to be logarithmically scaled.</p>
-<p><img alt="Screenshot_from_2022-10-04_16-17-10" src="_images/Screenshot_from_2022-10-04_16-17-10.jpg" /></p>
+<p><img alt="logs" src="_images/logs.jpg" /></p>
 </section>
 <section id="get-plot-by-more-than-one-network-species-multispecies">
 <h3>Get plot by more than one network species (<code class="docutils literal notranslate"><span class="pre">_multispecies</span></code>)<a class="headerlink" href="#get-plot-by-more-than-one-network-species-multispecies" title="Link to this heading"></a></h3>
 <p>Incorporate all read species in the plot type.</p>
-<p><img alt="Screenshot_from_2022-10-04_16-14-01" src="_images/Screenshot_from_2022-10-04_16-14-01.jpg" /></p>
+<p><img alt="multispecies" src="_images/multispecies.jpg" /></p>
 </section>
 <section id="hide-points-and-only-show-regression-smooth-lines-hidedata">
 <h3>Hide points and only show regression / smooth lines (<code class="docutils literal notranslate"><span class="pre">_hidedata</span></code>)<a class="headerlink" href="#hide-points-and-only-show-regression-smooth-lines-hidedata" title="Link to this heading"></a></h3>
@@ -244,7 +244,7 @@
 <section id="add-threshold-line-threshold">
 <h3>Add threshold line (<code class="docutils literal notranslate"><span class="pre">_threshold</span></code>)<a class="headerlink" href="#add-threshold-line-threshold" title="Link to this heading"></a></h3>
 <p>Adding <code class="docutils literal notranslate"><span class="pre">_threshold</span></code> will add a line indicating the exceedances.</p>
-<p><img alt="Screenshot_from_2025-02-12_16-51-00" src="_images/Screenshot_from_2025-02-12_16-51-00.png" /></p>
+<p><img alt="threshold" src="_images/threshold.png" /></p>
 </section>
 </section>
 </section>
