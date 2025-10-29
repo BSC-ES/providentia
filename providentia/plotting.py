@@ -1148,11 +1148,9 @@ class Plotting:
                         #PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data_obs)
                         #PDF_obs_sampled = PDF_fit.evaluate(x_grid)
 
-                        if PDF_obs_sampled is None:
-                            msg = 'The kernel bandwidth is 0 for {}. '.format(data_label)
-                            msg += 'The distribution plot will be created and not include data for this label. '
-                            msg += 'To change the bandwith, we recommend increasing the number of '
-                            msg += 'pdf_min_samples in the plot characteristics settings files.'
+                        if isinstance(PDF_obs_sampled, str):
+                            msg = PDF_obs_sampled
+                            msg += f'The distribution plot will be created and not include data for this label ({data_label}). '
                             show_message(self.read_instance, msg)
                             continue
 
@@ -1173,11 +1171,9 @@ class Plotting:
                     continue
                 # calculate PDF
                 PDF_model_sampled = kde_fft(kde_data_model, xgrid=x_grid)
-                if PDF_model_sampled is None:
-                    msg = 'The kernel bandwidth is 0 for {}. '.format(data_label)
-                    msg += 'The distribution plot will be created and not include data for this label. '
-                    msg += 'To change the bandwith, we recommend increasing the number of '
-                    msg += 'pdf_min_samples in the plot characteristics settings files.'
+                if isinstance(PDF_model_sampled, str):
+                    msg = PDF_model_sampled
+                    msg += f'The distribution plot will be created and not include data for this label ({data_label}). '
                     show_message(self.read_instance, msg)
                     continue
     
@@ -1243,11 +1239,9 @@ class Plotting:
                         continue
                     else:
                         PDF_sampled = kde_fft(kde_data, xgrid=x_grid)
-                        if PDF_sampled is None:
-                            msg = 'The kernel bandwidth is 0 for {}. '.format(data_label)
-                            msg += 'The distribution plot will be created and not include data for this label. '
-                            msg += 'To change the bandwith, we recommend increasing the number of '
-                            msg += 'pdf_min_samples in the plot characteristics settings files.'
+                        if isinstance(PDF_sampled, str):
+                            msg = PDF_sampled
+                            msg += f'The distribution plot will be created and not include data for this label ({data_label}). '
                             show_message(self.read_instance, msg)
                             continue
                         
