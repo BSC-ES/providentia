@@ -65,7 +65,7 @@ This option refers to the minimum acceptable percentages of data across the data
 
 ##### PERIOD
 
-![period](uploads/c68f01ad1ee67853635af9675746eb9b/period.png)
+![period](uploads/period.png)
 
 The pop-up menu of **Period** allows the user to select data periods by either using the options *keep* (**K**) or *remove* (**R**). If a user wishes, for example, to keep only the data that correspond to Daytime, then he/she can select to keep option under the *K* column, close the window and click **FILTER**. 
 
