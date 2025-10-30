@@ -921,7 +921,7 @@ class Actris:
                 value = [float(val) if val != b'' else np.nan for val in value]
             elif key in ['altitude', 'sampling_height']:
                 value = [float(val.decode('utf-8').replace('m', '').strip()) 
-                        if val != b'' else np.nan for val in value]
+                        if val != b'' and val != b'nan' else 0 for val in value]
             else:
                 value = [val.decode('utf-8', errors="replace") for val in value]
             combined_ds[key] = xr.Variable(data=value, dims=('station'))
@@ -935,7 +935,7 @@ class Actris:
         if ('altitude' in combined_ds.keys()) and ('sampling_height' in combined_ds.keys()):
             value = combined_ds['altitude'].values + combined_ds['sampling_height'].values
             combined_ds['measurement_altitude'] = xr.Variable(data=value, dims=('station'))
-
+  
         # add units for lat and lon
         # TODO: Check attrs geospatial_lat_units and geospatial_lon_units
         combined_ds.latitude.attrs['units'] = 'degrees_north'
