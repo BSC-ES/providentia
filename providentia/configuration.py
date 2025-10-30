@@ -1063,9 +1063,39 @@ class ProvConfiguration:
     def check_validity(self, deactivate_warning=False):
         """ Check validity of set variables after parsing. """
 
+        # accept the word framework as network for ACTRIS
+        if self.read_instance.framework and not self.read_instance.network:
+            if self.read_instance.framework == 'actris/actris':
+                self.read_instance.network = [self.read_instance.framework]
+            else:
+                error = f'Error: Framework {self.read_instance.framework} not accepted. '
+                error += 'The only one that is accepted is "actris/actris".'
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+        elif self.read_instance.framework and self.read_instance.network:
+            error = f'Error: You cannot define the framework and network at the same time, drop one.'
+            self.read_instance.logger.error(error)
+            sys.exit(1)
+
         # check if species is valid
         if self.read_instance.species:
-            for speci in self.read_instance.species:
+            species = copy.deepcopy(self.read_instance.species)
+            for speci in species:
+                # If ACTRIS in network or framework, map speci name to BSC convention
+                if 'actris/actris' in self.read_instance.network:
+                    # load ACTRIS mapping files
+                    ghost_actris_variables = yaml.safe_load(open(join(
+                        PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'ghost_actris_variables.yaml')))
+                    if speci in ghost_actris_variables.values():
+                        result = [speci_bsc for speci_bsc, speci_actris in ghost_actris_variables.items() if speci_actris == speci]
+                        if len(result) == 1:
+                            idx = self.read_instance.species.index(speci)
+                            self.read_instance.species[idx] = result[0]
+                            speci = result[0]
+                        else:
+                            error = f'Error: ACTRIS species "{speci}" cannot be mapped. Replace {speci} by one of {result}.'
+                            self.read_instance.logger.error(error)
+                            sys.exit(1)
                 if ('*' not in speci) and (speci not in self.read_instance.parameter_dictionary):
                     error = f'Error: species "{speci}" not valid.'
                     self.read_instance.logger.error(error)
