@@ -17,27 +17,27 @@ Providentia can be used in a variety of ways:
 
 Below you will find the recorded videos of the last training sessions, as well as the presentations:
 
-* 18/02/2025: [Presentation](uploads/20250218_Providentia_Training_Session.pdf) and [video](https://www.youtube.com/watch?v=5PUX9KfaI0w)
+* 18/02/2025: [Presentation](uploads/presentations/20250218_Providentia_Training_Session.pdf) and [video](https://www.youtube.com/watch?v=5PUX9KfaI0w)
 
-* 16/10/2023: [Presentation](uploads/20231016_Providentia_Training_Session.pdf) and [video](https://youtu.be/G-L2VohxSz8?si=8qrMDHvhmP6i-QTX)
+* 16/10/2023: [Presentation](uploads/presentations/20231016_Providentia_Training_Session.pdf) and [video](https://youtu.be/G-L2VohxSz8?si=8qrMDHvhmP6i-QTX)
 
-* 29/09/2022: [Presentation](uploads/20220929_Providentia_Training_Session.pdf) and [video](https://youtu.be/jijPmbvCYgo)
+* 29/09/2022: [Presentation](uploads/presentations/20220929_Providentia_Training_Session.pdf) and [video](https://youtu.be/jijPmbvCYgo)
 
-* 22/09/2022: [Presentation](uploads/20220922_Providentia_Training_Session.pdf) and [video](https://youtu.be/Mz6KFAvEtKA)
+* 22/09/2022: [Presentation](uploads/presentations/20220922_Providentia_Training_Session.pdf) and [video](https://youtu.be/Mz6KFAvEtKA)
 
-* 24/03/2021: [Presentation](uploads/20220422_Providentia_Training_Session.pdf) and [video](https://www.youtube.com/watch?v=Pu_kXjHM1nw)
+* 24/03/2021: [Presentation](uploads/presentations/20220422_Providentia_Training_Session.pdf) and [video](https://www.youtube.com/watch?v=Pu_kXjHM1nw)
 
 ### User meetings
 
 Below you will find the presentation of the last user meetings:
 
-* 28/08/2024: [Presentation](uploads/20240828_Providentia_User_Meeting.pdf) and [video](https://www.youtube.com/watch?v=TCgAFlwRYZk)
+* 28/08/2024: [Presentation](uploads/presentations/20240828_Providentia_User_Meeting.pdf) and [video](https://www.youtube.com/watch?v=TCgAFlwRYZk)
 
-* 07/02/2024: [Presentation](uploads/20240207_Providentia_User_Meeting.pdf) and [video](https://www.youtube.com/watch?v=sQrILt4udOU)
+* 07/02/2024: [Presentation](uploads/presentations/20240207_Providentia_User_Meeting.pdf) and [video](https://www.youtube.com/watch?v=sQrILt4udOU)
 
-* 03/08/2023: [Presentation](uploads/20230803_Providentia_User_Meeting.pdf) and [video](https://www.youtube.com/watch?v=2cJbp772pu0)
+* 03/08/2023: [Presentation](uploads/presentations/20230803_Providentia_User_Meeting.pdf) and [video](https://www.youtube.com/watch?v=2cJbp772pu0)
 
-* 23/03/2023: [Presentation](uploads/20230323_Providentia_User_Meeting.pdf)
+* 23/03/2023: [Presentation](uploads/presentations/20230323_Providentia_User_Meeting.pdf)
 
 ## Contact persons
 
