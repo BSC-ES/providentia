@@ -133,8 +133,8 @@ These are the available temporal resolutions:
 
 ```ini
 [ACTRIS]
-network = actris/actris
-species = sconco3
+framework = actris/actris
+species = ozone mass concentration
 resolution = hourly
 start_date = 20180101
 end_date = 20190101
