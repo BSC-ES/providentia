@@ -127,18 +127,13 @@ class Download(object):
                     setattr(self, k, self.provconf.parse_parameter(k, val))
             
             # now all variables have been parsed, check validity of those, throwing errors where necessary
-            self.provconf.check_validity(deactivate_warning=True)
+            self.provconf.check_validity()
 
             # from here generate control if user stopped execution
             signal.signal(signal.SIGINT, self.sighandler)
             
             # only the local download iterates through the networks
             if self.machine in "local":
-                # if networks is none and is not the non interpolated mode, raise error
-                if not self.network and self.interpolated is True:
-                    error = "Error: No networks were passed."
-                    self.logger.error(error)
-                    sys.exit(1)
 
                 # networks
                 if self.network:
@@ -799,17 +794,19 @@ class Download(object):
             
             # get all the nc files in the date range
             for remote_dir in res_spec_dir:
-                if not initial_check:
-                    local_path = remote_dir.split('/',7)[-1]
-                    if self.ghost_version in ["1.2", "1.3", "1.3.1"]:
-                        self.logger.info(f"\n  - {join(self.exp_root,self.ghost_version,'-'.join(local_path.split('/')[1:4]),*local_path.split('/')[4:])}, source: {remote_dir} ({REMOTE_MACHINE})")
-                    else:
-                        self.logger.info(f"\n  - {join(self.exp_root,local_path)}, source: {remote_dir} ({REMOTE_MACHINE})")
-            
+                
+                # get network, species and resolution
                 network = remote_dir.split('/')[-1]
                 species = remote_dir.split('/')[-2]
                 resolution = remote_dir.split('/')[-3]
-                
+
+                # get local directory 
+                local_dir = join(self.exp_root,self.ghost_version,experiment_new,resolution,species,network)
+
+                # print source and destination  
+                if not initial_check:
+                    self.logger.info(f"\n  - {local_dir}, source: {remote_dir} ({REMOTE_MACHINE})")
+            
                 # get nc files if directory is found
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
@@ -829,8 +826,6 @@ class Download(object):
 
                 # download the valid resolution specie date combinations
                 else:
-                    # create local directory (always with experiments on the new format)
-                    local_dir = join(self.exp_root,self.ghost_version,experiment_new,resolution,species,network)
                     
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
@@ -1024,9 +1019,6 @@ class Download(object):
             
             # get all the nc files in the date range
             for remote_dir in res_spec_dir:
-                if not initial_check:
-                    local_path = remote_dir.split('/', 6)[-1]
-                    self.logger.info(f"\n  - {join(self.exp_to_interp_root,local_path)}, source: {remote_dir} ({REMOTE_MACHINE})")
                          
                 # get nc files
                 nc_files = self.sftp.listdir(remote_dir)
@@ -1063,8 +1055,8 @@ class Download(object):
                         elif format == (0, 3):
                             nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
 
+                        # unknown format
                         else:
-                            # TODO delete this in the future
                             error = f"It is not possible to download this nc file type yet. Please, contact the developers. Files to download: {nc_files}"
                             self.logger.error(error)
                             sys.exit(1)
@@ -1078,6 +1070,16 @@ class Download(object):
                         # filter the nc files to only get the ones that have the correct species and stats
                         nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == ensemble, nc_files))
                 
+                # add ensemble-stats directory if it is an ensemble member
+                if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
+                    local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,species)
+                else:
+                    local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+ensemble)
+
+                # print source and destination
+                if not initial_check:
+                    self.logger.info(f"\n  - {local_dir}, source: {remote_dir} ({REMOTE_MACHINE})")
+                    
                 # if there is no options with the ensemble, tell the user
                 if nc_files == []:
                     msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble} ensemble."
@@ -1095,12 +1097,6 @@ class Download(object):
 
                 # download the valid resolution specie date combinations
                 else:
-                    # create local directory 
-                    # if it is an ensemble member
-                    if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
-                        local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,species)
-                    else:
-                        local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+ensemble)
                     
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
