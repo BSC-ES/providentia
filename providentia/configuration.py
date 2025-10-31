@@ -69,7 +69,7 @@ class ProvConfiguration:
         if hasattr(self.read_instance, 'logger') is False:
             self.switch_logging()
 
-    def parse_parameter(self, key, value, deactivate_warning=False):
+    def parse_parameter(self, key, value):
         """ Parse a parameter. """
         
         # make sure we don't pass strings instead of booleans for true and false
@@ -77,17 +77,12 @@ class ProvConfiguration:
             value = True
         elif value == 'false':
             value = False
-
-        # when the value is default then it is as if it was a blank value
-        if value == 'default':
-            return self.var_defaults[key]
         
         # the wildcard '*' is not valid in report-related modes
         elif value == '*' and self.read_instance.mode in ['dashboard', 'report', 'library']:
             error = f"Error: The wildcard ('*') in the '{key}' parameter is not allowed for the '{self.read_instance.mode}' mode."
             self.read_instance.logger.error(error)
             sys.exit(1)
-
 
         # parse config file name
         if key == 'conf':
@@ -664,14 +659,22 @@ class ProvConfiguration:
         config_ensemble = copy.deepcopy(self.read_instance.ensemble)
         config_forecast = copy.deepcopy(self.read_instance.forecast)
 
-        # if there's experiments, ask the user whether they want interpolated or non-interpolated
-        if self.read_instance.interpolated is None and (self.read_instance.experiments and self.read_instance.mode == 'download'):
-            interpolated = input("\nExperiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
-            while interpolated.lower() not in ['','y','n']:
-                interpolated = input("\nExperiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
+        if self.read_instance.experiments and self.read_instance.mode == 'download':
 
-            # set the interpolated parameter  
-            self.read_instance.interpolated = interpolated.lower() in ['','y']
+            # set experiment to be non-interpolated if there is no network
+            if not self.read_instance.network:
+                self.read_instance.interpolated = False
+                msg = "Experiments detected but no network specified, proceeding to download non-interpolated experiment experiments."
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+
+            # if there's experiments, ask the user whether they want interpolated or non-interpolated
+            if self.read_instance.interpolated is None:
+                interpolated = input("\nExperiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
+                while interpolated.lower() not in ['','y','n']:
+                    interpolated = input("\nExperiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
+
+                # set the interpolated parameter  
+                self.read_instance.interpolated = interpolated.lower() in ['','y']
 
         # get function for checking formating of experiment for current mode
         # if the current mode is interpolation or the experiment wanted to be downloaded is not interpolated
@@ -1121,18 +1124,31 @@ class ProvConfiguration:
           
         # check have network information 
         if not self.read_instance.network and 'network' in self.default_values:
+            msg = "Network (network) was not defined in the configuration file. "
             default = self.default_values['network']
-            msg = "Network (network) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.network = eval(default) if default.startswith("self.") else default
+            if default:
+                if default:
+                    msg += "Using '{}' as default.".format(default)
+                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                    self.read_instance.network = eval(default) if default.startswith("self.") else default
+            else:
+                msg += f"It is mandatory for the '{self.read_instance.mode}' mode."
+                self.read_instance.logger.error(f"Error: {msg}")
+                sys.exit(1)
 
         # check have species information
         # in download mode is allowed to not pass any species, so continue
         if not self.read_instance.species and 'species' in self.default_values:
+            msg = "Species (species) was not defined in the configuration file. "
             default = self.default_values['species']
-            msg = "Species (species) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.species = eval(default) if default[0].startswith("self.") else default
+            if default:
+                msg += "Using '{}' as default.".format(default)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                self.read_instance.species = eval(default) if default[0].startswith("self.") else default
+            else:
+                msg += f"It is mandatory for the '{self.read_instance.mode}' mode."
+                self.read_instance.logger.error(f"Error: {msg}")
+                sys.exit(1)
 
         # check resolution
         # if not interpolation or download, get first resolution in list
@@ -1195,10 +1211,16 @@ class ProvConfiguration:
         # check have resolution information
         # if report, throw message, stating are using default instead
         if not self.read_instance.resolution and 'resolution' in self.default_values:
+            msg = "Resolution (resolution) was not defined in the configuration file. "
             default = self.default_values['resolution']
-            msg = "Resolution (resolution) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.resolution = default
+            if default:
+                msg += "Using '{}' as default.".format(default)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                self.read_instance.resolution = default
+            else:
+                msg += f"It is mandatory for the '{self.read_instance.mode}' mode."
+                self.read_instance.logger.error(f"Error: {msg}")
+                sys.exit(1)
 
         # set active resolution, resampling_resolution when set, otherwise resolution
         if self.read_instance.resampling_resolution != 'None':
@@ -1208,10 +1230,16 @@ class ProvConfiguration:
 
         # if report, throw message, stating are using default instead
         if not self.read_instance.start_date and 'start_date' in self.default_values:
+            msg = "Start date (start_date) was not defined in the configuration file. "
             default = self.default_values['start_date']
-            msg = "Start date (start_date) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.start_date = default
+            if default:
+                msg = "Using '{}' as default.".format(default)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                self.read_instance.start_date = default
+            else:
+                msg += f"It is mandatory for the '{self.read_instance.mode}' mode."
+                self.read_instance.logger.error(f"Error: {msg}")
+                sys.exit(1)
         else:
             len_start_date = len(self.read_instance.start_date)
             if self.read_instance.mode == 'interpolation':
@@ -1237,10 +1265,16 @@ class ProvConfiguration:
 
         # if report, throw message, stating are using default instead
         if not self.read_instance.end_date and 'end_date' in self.default_values:
+            msg = "End date (end_date) was not defined in the configuration file. "
             default = self.default_values['end_date']
-            msg = "End date (end_date) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.end_date = default
+            if default:
+                msg += "Using '{}' as default.".format(default)
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+                self.read_instance.end_date = default
+            else:
+                msg += f"It is mandatory for the '{self.read_instance.mode}' mode."
+                self.read_instance.logger.error(f"Error: {msg}")
+                sys.exit(1)
         else:
             len_end_date = len(self.read_instance.end_date)
             if self.read_instance.mode == 'interpolation':

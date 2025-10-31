@@ -1,10 +1,9 @@
 dashboard:
-  network: EBAS
+  network:
   species:
-    - sconco3
-  resolution: hourly
-  start_date: 20180101
-  end_date: 20190101
+  resolution:
+  start_date:
+  end_date:
   statistic_mode: Temporal|Spatial
   statistic_aggregation:
     Temporal|Spatial: Median
@@ -21,12 +20,11 @@ dashboard:
   ensemble:
     - allmembers
 report:
-  network: EBAS
+  network:
   species:
-    - sconco3
-  resolution: hourly
-  start_date: 20180101
-  end_date: 20190101
+  resolution:
+  start_date:
+  end_date:
   statistic_mode: Temporal|Spatial
   statistic_aggregation:
     Temporal|Spatial: Median
@@ -38,12 +36,11 @@ report:
   ensemble:
     - allmembers
 library:
-  network: EBAS
+  network:
   species:
-    - sconco3
-  resolution: hourly
-  start_date: 20180101
-  end_date: 20190101
+  resolution:
+  start_date:
+  end_date:
   statistic_mode: Temporal|Spatial
   statistic_aggregation:
     Temporal|Spatial: Median
@@ -56,7 +53,7 @@ library:
     - allmembers
 interpolation:
   network: self.read_instance.ghost_available_networks
-  species: 
+  species:
     - self.read_instance.available_species
   resolution:
     - hourly
@@ -69,7 +66,6 @@ interpolation:
     - 000
   interp_n_neighbours: 4
 download:
-  network: EBAS
   start_date: 20180101
   end_date: 20190101
   ensemble:
