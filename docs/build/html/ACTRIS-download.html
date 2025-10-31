@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Library" href="Library.html" />
-    <link rel="prev" title="CAMS" href="CAMS-download.html" /> 
+    <link rel="prev" title="Data download" href="CAMS-download.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -53,8 +53,10 @@
 <li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Report.html">Report</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="download.html">Download</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="BSC-Zenodo-download.html">BSC and Zenodo</a></li>
-<li class="toctree-l3"><a class="reference internal" href="CAMS-download.html">CAMS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="download.html#general">General</a></li>
+<li class="toctree-l3"><a class="reference internal" href="BSC-download.html">Barcelona Supercomputing Center</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Zenodo-download.html">Zenodo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CAMS.html">Atmosphere Data Store</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">ACTRIS</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#available-datasets">Available datasets</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#example-configuration-file">Example configuration file</a></li>
@@ -218,9 +220,7 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">deposition</span> <span class="pre">vanadium</span> <span class="pre">mass</span> <span class="pre">flux</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">deposition</span> <span class="pre">zinc</span> <span class="pre">mass</span> <span class="pre">flux</span></code></p></li>
 </ul>
-<blockquote>
-<div><p>Providentia can only read species in GHOST format. The mapping is provided in the <a class="reference internal" href="#ghostactris-species-mapping">GHOST–ACTIRS species mapping</a> section.</p>
-</div></blockquote>
+<p>Providentia can understand the ACTRIS vocabulary for some species and an error will be thrown for those who can be mapped to multiple GHOST species (e.g. aerosol particle optical depth). The mapping is provided in the <a class="reference internal" href="#ghostactris-species-mapping">GHOST–ACTRIS species mapping</a> section.</p>
 </section>
 <section id="available-resolutions">
 <h3>Available resolutions<a class="headerlink" href="#available-resolutions" title="Link to this heading"></a></h3>
@@ -236,8 +236,8 @@
 <section id="example-configuration-file">
 <h2>Example configuration file<a class="headerlink" href="#example-configuration-file" title="Link to this heading"></a></h2>
 <div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[ACTRIS]</span>
-<span class="na">network</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">actris/actris</span>
-<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sconco3</span>
+<span class="na">framework</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">actris/actris</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">ozone mass concentration</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
 <span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20180101</span>
 <span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20190101</span>
@@ -247,50 +247,50 @@
 </section>
 <section id="ghostactris-species-mapping">
 <h2>GHOST–ACTRIS species mapping<a class="headerlink" href="#ghostactris-species-mapping" title="Link to this heading"></a></h2>
-<p>Here is the mapping between GHOST variable names and the ACTRIS vocabulary:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">absco370</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span>
-<span class="n">absco467</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span>
-<span class="n">absco470</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span>
-<span class="n">absco520</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span>
-<span class="n">absco522</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span>
-<span class="n">absco525</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span>
-<span class="n">absco528</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span>
-<span class="n">absco530</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span>
-<span class="n">absco550</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span>
-<span class="n">absco565</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span>
-<span class="n">absco590</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span>
-<span class="n">absco637</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span>
-<span class="n">absco652</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span>
-<span class="n">absco660</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span>
-<span class="n">absco670</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span>
-<span class="n">absco880</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span>
-<span class="n">absco950</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span>
+<p>Here is the mapping between GHOST variable names and the ACTRIS vocabulary. The species that have an asterisk at the end can only be passed to the configuration file using the BSC conventions (name to the left).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">absco370</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">absco467</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">absco470</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">absco520</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">absco522</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">absco525</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">absco528</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">absco530</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">absco550</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">absco565</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">absco590</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">absco637</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">absco652</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">absco660</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">absco670</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">absco880</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">absco950</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">absorption</span> <span class="n">coefficient</span><span class="o">*</span>
 <span class="n">acprec</span><span class="p">:</span> <span class="n">precipitation</span> <span class="n">depth</span>
-<span class="n">lbsco450</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span>
-<span class="n">lbsco520</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span>
-<span class="n">lbsco525</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span>
-<span class="n">lbsco530</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span>
-<span class="n">lbsco532</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span>
-<span class="n">lbsco550</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span>
-<span class="n">lbsco635</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span>
-<span class="n">lbsco700</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span>
-<span class="n">lbsco850</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span>
-<span class="n">lsco450</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span>
-<span class="n">lsco520</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span>
-<span class="n">lsco525</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span>
-<span class="n">lsco530</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span>
-<span class="n">lsco532</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span>
-<span class="n">lsco550</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span>
-<span class="n">lsco635</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span>
-<span class="n">lsco700</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span>
-<span class="n">lsco850</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span>
-<span class="n">od1020aero</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">optical</span> <span class="n">depth</span>
-<span class="n">od380aero</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">optical</span> <span class="n">depth</span>
-<span class="n">od440aero</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">optical</span> <span class="n">depth</span>
-<span class="n">od500aero</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">optical</span> <span class="n">depth</span>
-<span class="n">od550aero</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">optical</span> <span class="n">depth</span>
-<span class="n">od675aero</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">optical</span> <span class="n">depth</span>
-<span class="n">od870aero</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">optical</span> <span class="n">depth</span>
+<span class="n">lbsco450</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">lbsco520</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">lbsco525</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">lbsco530</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">lbsco532</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">lbsco550</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">lbsco635</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">lbsco700</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">lbsco850</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">hemispheric</span> <span class="n">backscatter</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">lsco450</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">lsco520</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">lsco525</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">lsco530</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">lsco532</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">lsco550</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">lsco635</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">lsco700</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">lsco850</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">light</span> <span class="n">scattering</span> <span class="n">coefficient</span><span class="o">*</span>
+<span class="n">od1020aero</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">optical</span> <span class="n">depth</span><span class="o">*</span>
+<span class="n">od380aero</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">optical</span> <span class="n">depth</span><span class="o">*</span>
+<span class="n">od440aero</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">optical</span> <span class="n">depth</span><span class="o">*</span>
+<span class="n">od500aero</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">optical</span> <span class="n">depth</span><span class="o">*</span>
+<span class="n">od550aero</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">optical</span> <span class="n">depth</span><span class="o">*</span>
+<span class="n">od675aero</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">optical</span> <span class="n">depth</span><span class="o">*</span>
+<span class="n">od870aero</span><span class="p">:</span> <span class="n">aerosol</span> <span class="n">particle</span> <span class="n">optical</span> <span class="n">depth</span><span class="o">*</span>
 <span class="n">precal</span><span class="p">:</span> <span class="n">precipitation</span> <span class="n">aluminium</span> <span class="n">mass</span> <span class="n">concentration</span>
 <span class="n">precas</span><span class="p">:</span> <span class="n">precipitation</span> <span class="n">arsenic</span> <span class="n">mass</span> <span class="n">concentration</span>
 <span class="n">precca</span><span class="p">:</span> <span class="n">precipitation</span> <span class="n">calcium</span> <span class="n">mass</span> <span class="n">concentration</span>
@@ -400,7 +400,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="CAMS-download.html" class="btn btn-neutral float-left" title="CAMS" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="CAMS-download.html" class="btn btn-neutral float-left" title="Data download" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Library.html" class="btn btn-neutral float-right" title="Library" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

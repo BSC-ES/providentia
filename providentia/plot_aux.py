@@ -25,6 +25,7 @@ import seaborn as sns
 from providentia.auxiliar import CURRENT_PATH, join
 from .statistics import (calculate_statistic, get_z_statistic_sign, 
                          aggregation)
+from .warnings_prv import show_message
 
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
@@ -336,7 +337,8 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
     else:
         weights = np.squeeze(np.asarray(weights))
         if weights.size != x.size:
-            raise ValueError('Input weights must be an array of the same size as xin!')
+            error = 'Input weights must be an array of the same size as xin. '
+            return error
 
     # Optimize gridsize ------------------------------------------------------
     # Make grid and discretize the data and round it to the next power of 2
@@ -362,7 +364,11 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
     # Next, make a histogram of x
     # Exploit a sparse coo_matrix avoiding np.histogram due to excessive
     # memory usage with many points
-    grid = coo_matrix((weights, xyi), shape=(nx, 1)).toarray()
+    try:
+        grid = coo_matrix((weights, xyi), shape=(nx, 1)).toarray()
+    except ValueError:
+        error = 'Too many zeros. '
+        return error
 
     # Kernel Preliminary Calculations ---------------------------------------
     std_x = np.std(xyi[0])
@@ -379,7 +385,10 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
 
     # If bandwidth is 0, skip plot for current data label
     if kern_nx == 0:
-        return None
+        error = 'The kernel bandwidth is 0.  '
+        error += 'To change the bandwith, we recommend increasing the number of '
+        error += 'pdf_min_samples in the plot characteristics settings files. '
+        return error
     
     # Then evaluate the gaussian function on the kernel grid
     kernel = np.reshape(gaussian(kern_nx, bw_factor * std_x), (kern_nx, 1))
@@ -735,3 +744,24 @@ def get_hex_code(colour):
         hex_colour = f'#{int(round(rgb_colour[0])):02x}{int(round(rgb_colour[1])):02x}{int(round(rgb_colour[2])):02x}'
 
     return hex_colour
+
+
+def get_fairmode_RV_exceendance(read_instance, speci, RV, exc_threshold):
+    
+    units = read_instance.measurement_units[speci]
+    if units in RV:
+        RV = RV[units]
+    else: 
+        msg = f'RV has not been defined for units {units} in settings/fairmode.yaml. FAIRMODE target plot cannot be calculated.'
+        show_message(read_instance, msg)
+        return
+    
+    if exc_threshold is not None:
+        if units in exc_threshold:
+            exc_threshold = exc_threshold[units]
+        else: 
+            msg = f'Exceedance threshold has not been defined for units {units} in settings/fairmode.yaml. FAIRMODE target plot cannot be calculated.'
+            show_message(read_instance, msg)
+            return
+        
+    return RV, exc_threshold

@@ -679,6 +679,8 @@ def export_configuration(prv, cname, separator="||"):
     # add each variable to be writen out if: not a variable that should not be written, if value not default value, 
     # not already written out, not None or empty str, and not empty list/dict
     for var, default_val in merged_defaults.items():
+        if var in ['dashboard', 'report', 'library', 'download', 'interpolation']:
+            continue
         default_val = str(copy.deepcopy(default_val))
         current_val = str(copy.deepcopy(getattr(prv, var)))
         if ((var not in merged_defaults['non_writing_vars']) & (current_val != default_val) & 

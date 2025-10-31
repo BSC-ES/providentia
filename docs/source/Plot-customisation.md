@@ -94,32 +94,32 @@ In the case a threshold is set for a specific component, and per network-compone
 
 The style of the plots can be edited by clicking on the burger menus and changing the settings.
 
-![menu](uploads/da0d2d3ea1533c9796c04f523fe4b405/menu.png)
+![menu](uploads/menu.png)
 
 ### Legend picking
 
 Clicking on the legend labels will remove or add data to each of the plots. If the label appears in bold, the data will be visible. If not, it will disappear.
 
-![legend-picking](uploads/a086b5a2dbaa85c5225283a3a7748bc2/legend-picking.png)
+![legend-picking](uploads/legend-picking.png)
 
 ### Changing the statistics
 
 The statistics in the `statsummary` can be updated from the burger menu.
 
-![statsummary-stats](uploads/9d8e2ffed938715b6214140d43396e03/statsummary-stats.png)
+![statsummary-stats](uploads/statsummary-stats.png)
 
 This can also be applied in the `timeseries` plot by selecting the chunk statistic and temporal resolution.
 
-![timeseries-stats](uploads/d47bf10f90f072bb6ae5c5173296f94e/timeseries-stats.jpg)
+![timeseries-stats](uploads/timeseries-stats.jpg)
 
 ### Information on hover
 
 Most plots show information when hovering over them. Take a look for instance at the distribution plot:
 
-![distribution-hover](uploads/6dba75dae832578194f9f412bb8f27a7/distribution-hover.png)
+![distribution-hover](uploads/distribution-hover.png)
 
 ### Smoothing
 
 It is possible to add a smoothing line to the timeseries plot and make the points disappear. In order to achieve this, you will need to increase the smooth window, which by default is 0 and bring the marker size down to 0. You can also use the plot option `hidedata` to hide the points. 
 
-![timeseries-smooth](uploads/aaeed1a0fa2bdc9d957c28f59df5db09/timeseries-smooth.png)
+![timeseries-smooth](uploads/timeseries-smooth.png)

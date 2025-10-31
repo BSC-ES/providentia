@@ -59,6 +59,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#upload-to-pypi">Upload to PyPI</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#check-that-all-reports-are-created">Check that all reports are created</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#run-providentia-inside-docker-container">Run Providentia inside Docker container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-the-docs-for-the-first-time-and-upload-to-readthedocs">Create the docs for the first time and upload to readthedocs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#generate-the-docs">Generate the docs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#create-providentia-env-v3-0-0-in-mn5">Create providentia-env_v3.0.0 in MN5</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#create-local-environment">Create local environment</a></li>
@@ -105,6 +106,7 @@
 <li><p><a class="reference internal" href="#upload-to-pypi">Upload to PyPI</a></p></li>
 <li><p><a class="reference internal" href="#check-that-all-reports-are-created">Check that all reports are created</a></p></li>
 <li><p><a class="reference internal" href="#run-providentia-inside-docker-container">Run Providentia inside Docker container</a></p></li>
+<li><p><a class="reference internal" href="#create-the-docs-for-the-first-time-and-upload-to-readthedocs">Create the docs for the first time and upload to readthedocs</a></p></li>
 <li><p><a class="reference internal" href="#generate-the-docs">Generate the docs</a></p></li>
 <li><p><a class="reference internal" href="#create-providentia-env-v3-0-0-in-mn5">Create providentia-env_v3.0.0 in MN5</a></p></li>
 <li><p><a class="reference internal" href="#create-local-environment">Create local environment</a></p></li>
@@ -355,11 +357,72 @@ done
 <p>This will open a “session” inside our container, from which we can run Providentia.</p>
 <p>Prior to that you should update the paths to the volumes (/data, /home/avilanov/software/Providentia, /home/avilanov/software/providentia-interpolation), used to access the data and repositories that are found in your local machine (outside the Docker container). The changes you do to your local files will be automatically reflected in the container.</p>
 </section>
+<section id="create-the-docs-for-the-first-time-and-upload-to-readthedocs">
+<h2>Create the docs for the first time and upload to readthedocs<a class="headerlink" href="#create-the-docs-for-the-first-time-and-upload-to-readthedocs" title="Link to this heading"></a></h2>
+<p>Install <code class="docutils literal notranslate"><span class="pre">myst-parser==3.0.1</span></code>, <code class="docutils literal notranslate"><span class="pre">Sphinx==7.2.6</span></code> and <code class="docutils literal notranslate"><span class="pre">Sphinx-rtd-theme==2.0.0</span></code> in your environment and add the modules to your <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">providentia</span><span class="o">-</span><span class="n">env_v3</span><span class="mf">.0.0</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="n">myst</span><span class="o">-</span><span class="n">parser</span><span class="o">==</span><span class="mf">3.0.1</span> <span class="n">Sphinx</span><span class="o">==</span><span class="mf">7.2.6</span> <span class="n">Sphinx</span><span class="o">-</span><span class="n">rtd</span><span class="o">-</span><span class="n">theme</span><span class="o">==</span><span class="mf">2.0.0</span>
+</pre></div>
+</div>
+<p>Create a folder called docs inside your repository and do:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">docs</span>
+<span class="n">sphinx</span><span class="o">-</span><span class="n">quickstart</span>
+</pre></div>
+</div>
+<p>This will ask you a few questions (we answered with yes to the question of whether we want to separate source and build folders) and a <code class="docutils literal notranslate"><span class="pre">conf.py</span></code> file together with other files will be generated in the <code class="docutils literal notranslate"><span class="pre">docs/source</span></code> folder. You can edit the configuration file. In our case, we added some extensions and plugins:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># -- General configuration ---------------------------------------------------</span>
+<span class="c1"># https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration</span>
+
+<span class="n">extensions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;myst_parser&quot;</span><span class="p">,</span> <span class="s2">&quot;sphinx.ext.todo&quot;</span><span class="p">,</span> <span class="s2">&quot;sphinx.ext.viewcode&quot;</span><span class="p">,</span> <span class="s2">&quot;sphinx.ext.autodoc&quot;</span><span class="p">,</span> <span class="s2">&quot;sphinx_rtd_theme&quot;</span><span class="p">]</span>
+<span class="n">templates_path</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;_templates&#39;</span><span class="p">]</span>
+<span class="n">exclude_patterns</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">myst_heading_anchors</span> <span class="o">=</span> <span class="mi">2</span>
+
+<span class="c1"># -- Options for HTML output -------------------------------------------------</span>
+<span class="c1"># https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output</span>
+
+<span class="n">html_theme</span> <span class="o">=</span> <span class="s1">&#39;sphinx_rtd_theme&#39;</span>
+<span class="n">html_static_path</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;_static&#39;</span><span class="p">]</span>
+<span class="n">html_css_files</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;css/custom.css&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Add your markdown files to <code class="docutils literal notranslate"><span class="pre">docs/source</span></code> and add the filenames to <code class="docutils literal notranslate"><span class="pre">index.rst</span></code> in order to show their contents. Then run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">clean</span>
+<span class="n">make</span> <span class="n">html</span>
+</pre></div>
+</div>
+<p>Here you might get some errors related to the format of your .md files, fix them and run the commands again. This will generate the HTML files, you can open them from the browser to make sure they look correct.</p>
+<p>Now create an account and project in https://app.readthedocs.org/, and associate it with your project, which must be open source. To show the documentation, you will need to create the file .readthedocs.yaml in your repository. Ours looks like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read the Docs configuration file</span>
+<span class="c1"># See https://docs.readthedocs.io/en/stable/config-file/v2.html for details</span>
+
+<span class="c1"># Required</span>
+<span class="n">version</span><span class="p">:</span> <span class="mi">2</span>
+
+<span class="c1"># Set the OS, Python version, and other tools you might need</span>
+<span class="n">build</span><span class="p">:</span>
+  <span class="n">os</span><span class="p">:</span> <span class="n">ubuntu</span><span class="o">-</span><span class="mf">24.04</span>
+  <span class="n">tools</span><span class="p">:</span>
+    <span class="n">python</span><span class="p">:</span> <span class="s2">&quot;mambaforge-22.9&quot;</span>
+
+<span class="c1"># Build documentation in the &quot;docs/&quot; directory with Sphinx</span>
+<span class="n">sphinx</span><span class="p">:</span>
+   <span class="n">configuration</span><span class="p">:</span> <span class="n">docs</span><span class="o">/</span><span class="n">source</span><span class="o">/</span><span class="n">conf</span><span class="o">.</span><span class="n">py</span>
+
+<span class="c1"># Create environment</span>
+<span class="n">conda</span><span class="p">:</span>
+  <span class="n">environment</span><span class="p">:</span> <span class="n">environment</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+<p>Trigger a build from your latest commit containing this file and you should be ready to go.</p>
+</section>
 <section id="generate-the-docs">
 <h2>Generate the docs<a class="headerlink" href="#generate-the-docs" title="Link to this heading"></a></h2>
-<p>First edit the .md files under docs/source, then navigate to docs and simply run:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">docs</span>
-<span class="n">conda</span> <span class="n">activate</span> <span class="n">providentia</span><span class="o">-</span><span class="n">env_v3</span><span class="mf">.0.0</span>
+<p>Edit the files under `docs/source``, then navigate to docs and simply run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">providentia</span><span class="o">-</span><span class="n">env_v3</span><span class="mf">.0.0</span>
+<span class="n">cd</span> <span class="n">docs</span>
 <span class="n">make</span> <span class="n">clean</span>
 <span class="n">make</span> <span class="n">html</span>
 </pre></div>

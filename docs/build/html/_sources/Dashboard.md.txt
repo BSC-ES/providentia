@@ -13,7 +13,7 @@ There are several available options to perform the analysis. The header of the w
 - Resampling
 - Site Selection
 
-![providentia](uploads/8ee58f0d52d98cdfe0bb173a7aa7f4fd/providentia.png)
+![providentia](uploads/providentia.png)
 
 ### Data Selection
 Under this section, there are four drop-down menus. The first option that the user should fill is the data provider (e.g., EIONET, EBAS, etc.). Then, the further three menus will show the available options that correspond to the selected provider and refer to specific variables and data frequency (hourly, daily, monthly, etc.).
@@ -43,11 +43,11 @@ The drop-down menu of the available networks shows the names of the networks tha
 
 In the following image, we can see the output for Providentia where we compare the experiment cams61_camsra_ph2-eu-000 with actual observations for ozone. We load the observations and experiment data over 2018 and we select *Intersect*, so that the stations within the experiment's domain are automatically selected.
 
-![Screenshot_from_2024-01-10_12-59-23](uploads/3f9c3a70fffb9df0554fb9729a3fafa7/Screenshot_from_2024-01-10_12-59-23.png)
+![intersect](uploads/intersect.png)
 
 In the figure above we see that the data were loaded and plotted. However, there might some data gaps in the observations or in the experiments. This might result in an inaccurate analysis. By selecting **Colocate**, Providentia will apply the temporal intersection of data points that exist in both the network and experiment datasets. The result of the previous example would be:
 
-![Screenshot_from_2024-01-10_12-59-37](uploads/24d8f56ad55097e1c33cb550474aa224/Screenshot_from_2024-01-10_12-59-37.png)
+![colocate](uploads/colocate.png)
 
 ### Filters
 
@@ -59,19 +59,19 @@ Any data that is above/below these limits will be set as NaN. These are automati
 
 ##### % REP
 
-![representativity](uploads/5585713ee6a6fe39c0e6862c51caea00/representativity.png)
+![representativity](uploads/representativity-2.png)
 
 This option refers to the minimum acceptable percentages of data across the data that is not NaN. All stations which do not meet this minimum requirement will be screened out.
 
 ##### PERIOD
 
-![period](uploads/c68f01ad1ee67853635af9675746eb9b/period.png)
+![period](uploads/period.png)
 
 The pop-up menu of **Period** allows the user to select data periods by either using the options *keep* (**K**) or *remove* (**R**). If a user wishes, for example, to keep only the data that correspond to Daytime, then he/she can select to keep option under the *K* column, close the window and click **FILTER**. 
 
 ##### META
 
-![meta](uploads/237275e23801cbaea31a3e7a2e3590ea/meta.png)
+![meta](uploads/meta.png)
 
 The pop-up menu of **Meta** contains a number of metadata types for the user to filter by. As there are many options, there have been separated into five categories.
 
@@ -113,7 +113,7 @@ Under this section there are three options:
 
 Under the main option fields, there is a toolbox that gives users several options.
 
-![toolbox](uploads/71515df11b82e9de66a47bec669bef62/toolbox.png)
+![toolbox](uploads/toolbox.png)
 
 In order from left to right, these are:
 
@@ -134,7 +134,7 @@ If you click on the export button, a pop-up window will appear to ask you where 
 - In the case that you want to export data, then you can export them either in a **NetCDF** (.*nc) file format, or as a **Numpy file** (.*npz). For more information around the exported data, go to the wiki page [Saved file formats](Saved-file-formats)
 - In the case that you want to export only the configuration, then you need to select **Configuration**.
 
-![image__2_](uploads/4a2f194e376881d8851de8be6d888334/image__2_.jpg)
+![Export conf](uploads/export-conf.jpg)
 
 (loading-a-configuration-file)=
 #### Loading a configuration file
@@ -145,4 +145,4 @@ Loading a configuration file means that the tool will reset the options you have
 
 If there is more than one section or subsection, users will be asked to choose which one they want to load.
 
-![image__1_](uploads/f247999d3083d5daa62157f67f5a6568/image__1_.jpg)a
+![Load conf](uploads/load-conf.jpg)

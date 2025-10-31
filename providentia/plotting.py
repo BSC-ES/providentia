@@ -33,7 +33,7 @@ from .statistics import (boxplot_inner_fences, calculate_statistic, group_period
 from .read_aux import drop_nans, get_valid_metadata
 from .plot_aux import (create_statistical_timeseries, get_multispecies_aliases, 
                        get_taylor_diagram_ghelper_info, kde_fft, merge_cells, periodic_labels, 
-                       periodic_xticks, round_decimal_places, temp_axis_dict)
+                       periodic_xticks, round_decimal_places, temp_axis_dict, get_fairmode_RV_exceendance)
 from .plot_formatting import set_axis_title
 from .warnings_prv import show_message
 
@@ -1148,11 +1148,9 @@ class Plotting:
                         #PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data_obs)
                         #PDF_obs_sampled = PDF_fit.evaluate(x_grid)
 
-                        if PDF_obs_sampled is None:
-                            msg = 'The kernel bandwidth is 0 for {}. '.format(data_label)
-                            msg += 'The distribution plot will be created and not include data for this label. '
-                            msg += 'To change the bandwith, we recommend increasing the number of '
-                            msg += 'pdf_min_samples in the plot characteristics settings files.'
+                        if isinstance(PDF_obs_sampled, str):
+                            msg = PDF_obs_sampled
+                            msg += f'The distribution plot will be created and not include data for this label ({data_label}). '
                             show_message(self.read_instance, msg)
                             continue
 
@@ -1173,11 +1171,9 @@ class Plotting:
                     continue
                 # calculate PDF
                 PDF_model_sampled = kde_fft(kde_data_model, xgrid=x_grid)
-                if PDF_model_sampled is None:
-                    msg = 'The kernel bandwidth is 0 for {}. '.format(data_label)
-                    msg += 'The distribution plot will be created and not include data for this label. '
-                    msg += 'To change the bandwith, we recommend increasing the number of '
-                    msg += 'pdf_min_samples in the plot characteristics settings files.'
+                if isinstance(PDF_model_sampled, str):
+                    msg = PDF_model_sampled
+                    msg += f'The distribution plot will be created and not include data for this label ({data_label}). '
                     show_message(self.read_instance, msg)
                     continue
     
@@ -1243,11 +1239,9 @@ class Plotting:
                         continue
                     else:
                         PDF_sampled = kde_fft(kde_data, xgrid=x_grid)
-                        if PDF_sampled is None:
-                            msg = 'The kernel bandwidth is 0 for {}. '.format(data_label)
-                            msg += 'The distribution plot will be created and not include data for this label. '
-                            msg += 'To change the bandwith, we recommend increasing the number of '
-                            msg += 'pdf_min_samples in the plot characteristics settings files.'
+                        if isinstance(PDF_sampled, str):
+                            msg = PDF_sampled
+                            msg += f'The distribution plot will be created and not include data for this label ({data_label}). '
                             show_message(self.read_instance, msg)
                             continue
                         
@@ -2145,7 +2139,11 @@ class Plotting:
         beta = fairmode_settings[speci].get('beta')
         coverage = fairmode_settings[speci].get('coverage')
         exc_threshold = fairmode_settings[speci].get('exc_threshold')
+        percentile = fairmode_settings[speci].get('percentile')
 
+        # get RV and exceedance threshold per units
+        RV, exc_threshold = get_fairmode_RV_exceendance(self.read_instance, speci, RV, exc_threshold)
+            
         # add target
         main_circle = plt.Circle(**plot_characteristics['auxiliar']['circle']['main'])
         relevant_axis.add_patch(main_circle)
@@ -2230,10 +2228,10 @@ class Plotting:
 
                 st_observations_data = observations_data[station_idx, :]
                 st_experiment_data = experiment_data[station_idx, :]
-                
+      
                 x, y, mqi = ExpBias.calculate_fairmode_stats(
                     st_observations_data, st_experiment_data, 
-                    u_95r_RV, RV, alpha, beta, exc_threshold, 'target')
+                    u_95r_RV, RV, alpha, beta, exc_threshold, percentile, 'target')
 
                 x_points.append(x)
                 y_points.append(y)
@@ -2330,7 +2328,7 @@ class Plotting:
         # skip making plot if there is no valid data
         # library and report modes are already handling this in advance
         if (self.read_instance.mode not in ['report', 'library']) and (not any(valid_station_idxs)):
-            msg = 'No valid data to create FAIRMODE target plot after filtering by coverage.'
+            msg = 'No valid data to create FAIRMODE statistic summary plot after filtering by coverage.'
             show_message(self.read_instance, msg)
             self.read_instance.handle_layout_update('None', sender=self.canvas_instance.get_plot_type_position('fairmode-statsummary'))
             return
@@ -2344,7 +2342,11 @@ class Plotting:
         alpha = fairmode_settings[speci].get('alpha')
         beta = fairmode_settings[speci].get('beta')
         exc_threshold = fairmode_settings[speci].get('exc_threshold')
-      
+        percentile = fairmode_settings[speci].get('percentile')
+
+        # get RV and exceedance threshold per units
+        RV, exc_threshold = get_fairmode_RV_exceendance(self.read_instance, speci, RV, exc_threshold)
+        
         # get station references
         valid_station_references = get_valid_metadata(self, 'station_reference', 
                                                       valid_station_idxs, networkspeci)
@@ -2373,11 +2375,11 @@ class Plotting:
 
                 st_observations_data = observations_data[station_idx, :]
                 st_experiment_data = experiment_data[station_idx, :]
-                
+
                 mean, exc, t_bias, t_R, t_sd, h_perc = ExpBias.calculate_fairmode_stats(
                     st_observations_data, st_experiment_data, 
-                    u_95r_RV, RV, alpha, beta, exc_threshold, 'summary')
-                
+                    u_95r_RV, RV, alpha, beta, exc_threshold, percentile, 'summary')
+
                 means.append(mean)
                 exceedances.append(exc)
                 t_biases.append(t_bias)

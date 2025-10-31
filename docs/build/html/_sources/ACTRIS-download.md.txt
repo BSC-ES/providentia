@@ -118,7 +118,7 @@ These are the available species:
 * `deposition vanadium mass flux`
 * `deposition zinc mass flux`
 
-> Providentia can only read species in GHOST format. The mapping is provided in the [GHOST–ACTIRS species mapping](#ghostactris-species-mapping) section.
+Providentia can understand the ACTRIS vocabulary for some species and an error will be thrown for those who can be mapped to multiple GHOST species (e.g. aerosol particle optical depth). The mapping is provided in the [GHOST–ACTRIS species mapping](#ghostactris-species-mapping) section.
 
 ### Available resolutions
 
@@ -133,8 +133,8 @@ These are the available temporal resolutions:
 
 ```ini
 [ACTRIS]
-network = actris/actris
-species = sconco3
+framework = actris/actris
+species = ozone mass concentration
 resolution = hourly
 start_date = 20180101
 end_date = 20190101
@@ -143,52 +143,52 @@ observations_data_label = Ozone Mass Concentration
 
 ## GHOST–ACTRIS species mapping
 
-Here is the mapping between GHOST variable names and the ACTRIS vocabulary:
+Here is the mapping between GHOST variable names and the ACTRIS vocabulary. The species that have an asterisk at the end can only be passed to the configuration file using the BSC conventions (name to the left).
 
 ```
-absco370: aerosol particle light absorption coefficient
-absco467: aerosol particle light absorption coefficient
-absco470: aerosol particle light absorption coefficient
-absco520: aerosol particle light absorption coefficient
-absco522: aerosol particle light absorption coefficient
-absco525: aerosol particle light absorption coefficient
-absco528: aerosol particle light absorption coefficient
-absco530: aerosol particle light absorption coefficient
-absco550: aerosol particle light absorption coefficient
-absco565: aerosol particle light absorption coefficient
-absco590: aerosol particle light absorption coefficient
-absco637: aerosol particle light absorption coefficient
-absco652: aerosol particle light absorption coefficient
-absco660: aerosol particle light absorption coefficient
-absco670: aerosol particle light absorption coefficient
-absco880: aerosol particle light absorption coefficient
-absco950: aerosol particle light absorption coefficient
+absco370: aerosol particle light absorption coefficient*
+absco467: aerosol particle light absorption coefficient*
+absco470: aerosol particle light absorption coefficient*
+absco520: aerosol particle light absorption coefficient*
+absco522: aerosol particle light absorption coefficient*
+absco525: aerosol particle light absorption coefficient*
+absco528: aerosol particle light absorption coefficient*
+absco530: aerosol particle light absorption coefficient*
+absco550: aerosol particle light absorption coefficient*
+absco565: aerosol particle light absorption coefficient*
+absco590: aerosol particle light absorption coefficient*
+absco637: aerosol particle light absorption coefficient*
+absco652: aerosol particle light absorption coefficient*
+absco660: aerosol particle light absorption coefficient*
+absco670: aerosol particle light absorption coefficient*
+absco880: aerosol particle light absorption coefficient*
+absco950: aerosol particle light absorption coefficient*
 acprec: precipitation depth
-lbsco450: aerosol particle light hemispheric backscatter coefficient
-lbsco520: aerosol particle light hemispheric backscatter coefficient
-lbsco525: aerosol particle light hemispheric backscatter coefficient
-lbsco530: aerosol particle light hemispheric backscatter coefficient
-lbsco532: aerosol particle light hemispheric backscatter coefficient
-lbsco550: aerosol particle light hemispheric backscatter coefficient
-lbsco635: aerosol particle light hemispheric backscatter coefficient
-lbsco700: aerosol particle light hemispheric backscatter coefficient
-lbsco850: aerosol particle light hemispheric backscatter coefficient
-lsco450: aerosol particle light scattering coefficient
-lsco520: aerosol particle light scattering coefficient
-lsco525: aerosol particle light scattering coefficient
-lsco530: aerosol particle light scattering coefficient
-lsco532: aerosol particle light scattering coefficient
-lsco550: aerosol particle light scattering coefficient
-lsco635: aerosol particle light scattering coefficient
-lsco700: aerosol particle light scattering coefficient
-lsco850: aerosol particle light scattering coefficient
-od1020aero: aerosol particle optical depth
-od380aero: aerosol particle optical depth
-od440aero: aerosol particle optical depth
-od500aero: aerosol particle optical depth
-od550aero: aerosol particle optical depth
-od675aero: aerosol particle optical depth
-od870aero: aerosol particle optical depth
+lbsco450: aerosol particle light hemispheric backscatter coefficient*
+lbsco520: aerosol particle light hemispheric backscatter coefficient*
+lbsco525: aerosol particle light hemispheric backscatter coefficient*
+lbsco530: aerosol particle light hemispheric backscatter coefficient*
+lbsco532: aerosol particle light hemispheric backscatter coefficient*
+lbsco550: aerosol particle light hemispheric backscatter coefficient*
+lbsco635: aerosol particle light hemispheric backscatter coefficient*
+lbsco700: aerosol particle light hemispheric backscatter coefficient*
+lbsco850: aerosol particle light hemispheric backscatter coefficient*
+lsco450: aerosol particle light scattering coefficient*
+lsco520: aerosol particle light scattering coefficient*
+lsco525: aerosol particle light scattering coefficient*
+lsco530: aerosol particle light scattering coefficient*
+lsco532: aerosol particle light scattering coefficient*
+lsco550: aerosol particle light scattering coefficient*
+lsco635: aerosol particle light scattering coefficient*
+lsco700: aerosol particle light scattering coefficient*
+lsco850: aerosol particle light scattering coefficient*
+od1020aero: aerosol particle optical depth*
+od380aero: aerosol particle optical depth*
+od440aero: aerosol particle optical depth*
+od500aero: aerosol particle optical depth*
+od550aero: aerosol particle optical depth*
+od675aero: aerosol particle optical depth*
+od870aero: aerosol particle optical depth*
 precal: precipitation aluminium mass concentration
 precas: precipitation arsenic mass concentration
 precca: precipitation calcium mass concentration

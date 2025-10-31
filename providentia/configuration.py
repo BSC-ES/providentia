@@ -57,7 +57,7 @@ class ProvConfiguration:
         mode = list(set(modes)&set(kwargs))
         self.read_instance.mode = mode[0] if mode else 'dashboard'
 
-        # if variable is given by command line, set that value, otherwise set as default value 
+        # if variable is given by command line, set that value, otherwise set as default value
         for k, val in self.var_defaults.items():
             val = kwargs.get(k, val)
             setattr(self.read_instance, k, self.parse_parameter(k, val))
@@ -194,6 +194,9 @@ class ProvConfiguration:
         elif key == 'ghost_version':
             # parse GHOST version
 
+            # get ghost_version list
+            self.read_instance.possible_ghost_versions = os.listdir(join(CURRENT_PATH,'dependencies', 'GHOST_standards'))
+
             # import GHOST standards 
             sys.path = [path for path in sys.path if 'dependencies/GHOST_standards/' not in path]            
             sys.path.insert(1, join(CURRENT_PATH, 'dependencies/GHOST_standards/{}'.format(value)))
@@ -205,9 +208,6 @@ class ProvConfiguration:
             from GHOST_standards import standard_QA_name_to_QA_code
             from GHOST_standards import standard_networks
             from GHOST_standards import standard_temporal_resolutions
-
-            # get ghost_version list
-            self.read_instance.possible_ghost_versions = os.listdir(join(CURRENT_PATH,'dependencies', 'GHOST_standards'))
             
             # get GHOST networks
             self.read_instance.ghost_available_networks = list(standard_networks.keys())
@@ -410,7 +410,7 @@ class ProvConfiguration:
                     # check if all the flags appear in the GHOST_standards of the current version
                     for flag in value.split(","):
                         if flag.strip() not in self.read_instance.standard_data_flag_name_to_data_flag_code:
-                            error = (f"Error: Flag '{flag}' not in this GHOST version ({self.read_instance.ghost_version}).")
+                            error = f"Error: Flag '{flag}' not in this GHOST version ({self.read_instance.ghost_version})."
                             self.read_instance.logger.error(error)
                             sys.exit(1)
                     return sorted([self.read_instance.standard_data_flag_name_to_data_flag_code[f.strip()] for f in value.split(",")])
@@ -1067,9 +1067,39 @@ class ProvConfiguration:
     def check_validity(self, deactivate_warning=False):
         """ Check validity of set variables after parsing. """
 
+        # accept the word framework as network for ACTRIS
+        if self.read_instance.framework and not self.read_instance.network:
+            if self.read_instance.framework == 'actris/actris':
+                self.read_instance.network = [self.read_instance.framework]
+            else:
+                error = f'Error: Framework {self.read_instance.framework} not accepted. '
+                error += 'The only one that is accepted is "actris/actris".'
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+        elif self.read_instance.framework and self.read_instance.network:
+            error = f'Error: You cannot define the framework and network at the same time, drop one.'
+            self.read_instance.logger.error(error)
+            sys.exit(1)
+
         # check if species is valid
         if self.read_instance.species:
-            for speci in self.read_instance.species:
+            species = copy.deepcopy(self.read_instance.species)
+            for speci in species:
+                # If ACTRIS in network or framework, map speci name to BSC convention
+                if 'actris/actris' in self.read_instance.network:
+                    # load ACTRIS mapping files
+                    ghost_actris_variables = yaml.safe_load(open(join(
+                        PROVIDENTIA_ROOT, 'settings', 'internal', 'actris', 'ghost_actris_variables.yaml')))
+                    if speci in ghost_actris_variables.values():
+                        result = [speci_bsc for speci_bsc, speci_actris in ghost_actris_variables.items() if speci_actris == speci]
+                        if len(result) == 1:
+                            idx = self.read_instance.species.index(speci)
+                            self.read_instance.species[idx] = result[0]
+                            speci = result[0]
+                        else:
+                            error = f'Error: ACTRIS species "{speci}" cannot be mapped. Replace {speci} by one of {result}.'
+                            self.read_instance.logger.error(error)
+                            sys.exit(1)
                 if ('*' not in speci) and (speci not in self.read_instance.parameter_dictionary):
                     error = f'Error: species "{speci}" not valid.'
                     self.read_instance.logger.error(error)
@@ -1104,6 +1134,14 @@ class ProvConfiguration:
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.species = eval(default) if default[0].startswith("self.") else default
 
+        # check resolution
+        # if not interpolation or download, get first resolution in list
+        if (',' in self.read_instance.resolution) and (self.read_instance.mode not in ['interpolation', 'download']):
+            default = self.read_instance.resolution.split(',')[0]
+            msg = "Resolution (resolution) contains multiple values. Using '{}' as default.".format(default)
+            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+            self.read_instance.resolution = default
+            
         # if number of networks and species is not the same,
         # and len of one of network or species == 1,
         # then duplicate respestive network/species

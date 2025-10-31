@@ -963,7 +963,7 @@ def valid_date(date_text):
         return False
 
 
-def generate_file_trees(instance, force=False):
+def generate_file_trees(instance):
     """ Generate file trees. Force if we want to remove depedency on the machine.
     """
     
@@ -982,20 +982,37 @@ def generate_file_trees(instance, force=False):
         gft = True
 
     # generate file trees
-    if gft or force:
-        instance.logger.info('Generating file trees...')
-        instance.all_observation_data = get_ghost_observational_tree(instance)
-        if instance.nonghost_root is not None:
-            nonghost_observation_data = get_nonghost_observational_tree(instance)
+    ghost_filetree_path = join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(instance.ghost_version)) 
+    nonghost_filetree_path = join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json') 
+
+    # generate file trees for ghost
+    if gft or (not os.path.exists(ghost_filetree_path)):
+        if not os.path.exists(ghost_filetree_path):
+            instance.logger.info(f'Generating file tree {ghost_filetree_path}...')
+        else:
+            instance.logger.info(f'Updating file tree {ghost_filetree_path}...')
+        instance.all_observation_data = get_ghost_observational_tree(instance) 
     # load file trees
     else:
+        instance.logger.info(f'Loading file tree {ghost_filetree_path}...')
         try:
             instance.all_observation_data = json.load(open(join(PROVIDENTIA_ROOT, 'settings/internal/ghost_filetree_{}.json'.format(instance.ghost_version)))) 
         except FileNotFoundError as file_error:
             error = "Error: Trying to load 'settings/internal/ghost_filetree_{}.json' but file does not exist. Run with the flag '--gft' to generate this file.".format(instance.ghost_version)
             instance.logger.error(error)
             sys.exit(1)
-        if instance.nonghost_root is not None:
+
+    if instance.nonghost_root is not None:
+        # generate file trees for nonghost
+        if gft or (not os.path.exists(nonghost_filetree_path)):
+            if not os.path.exists(nonghost_filetree_path):
+                instance.logger.info(f'Generating file tree {nonghost_filetree_path}...')
+            else:
+                instance.logger.info(f'Updating file tree {nonghost_filetree_path}...')
+            nonghost_observation_data = get_nonghost_observational_tree(instance)
+        # load file trees
+        else:
+            instance.logger.info(f'Loading file tree {nonghost_filetree_path}...')
             try:
                 nonghost_observation_data = json.load(open(join(PROVIDENTIA_ROOT, 'settings/internal/nonghost_filetree.json')))
             except FileNotFoundError as file_error:
@@ -1003,8 +1020,7 @@ def generate_file_trees(instance, force=False):
                 instance.logger.error(error)
                 sys.exit(1)
 
-    # merge GHOST and non-GHOST filetrees
-    if instance.nonghost_root is not None:
+        # merge GHOST and non-GHOST filetrees
         instance.all_observation_data = {**instance.all_observation_data, **nonghost_observation_data}
 
 

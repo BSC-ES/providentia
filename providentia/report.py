@@ -149,12 +149,7 @@ class Report:
             
             # if first section or GHOST version has changed
             if (section_ind == 0) or (current_ghost_version != self.ghost_version):
-                # if GHOST version has changed, generate file trees always (independently of the machine)
-                if (current_ghost_version != self.ghost_version):
-                    generate_file_trees(self, force=True)
-                # if it hasn't and we are in the first section, generate if needed
-                else:
-                    generate_file_trees(self)
+                generate_file_trees(self)
 
                 # initialise DataReader class
                 self.datareader = DataReader(self)

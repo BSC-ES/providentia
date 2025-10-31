@@ -6,7 +6,7 @@ In the reports created to study the dust in the atmosphere it is common practice
 
 If we take a look at the timeseries for one station, we can see what this actually means:
 
-![Screenshot_from_2024-05-31_15-36-58](uploads/13bebc222ff48088a3b9c88c16bb04d1/Screenshot_from_2024-05-31_15-36-58.jpg)
+![multispecies-filtering](uploads/multispecies-filtering.jpg)
 
 It can be observed that there are less data points for the AOD after the filtering is applied and the removal of those happens when the Angstrom exponent is higher than 0.6.
 
@@ -23,7 +23,7 @@ spatial_colocation = True
 
 would be in the dashboard:
 
-![multi](uploads/1d3005278c4a9d0de760a54c2f33cc51/multi.png)
+![multi](uploads/multi.png)
 
 `NOTE: Spatial colocation must be turned on in order to apply multispecies filtering. In the dashboard, it is active by default.`
 

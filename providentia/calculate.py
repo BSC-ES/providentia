@@ -551,7 +551,7 @@ class ExpBias(object):
             return ((exp_max - obs_max) / obs_max) * 100.0
 
     @staticmethod
-    def calculate_fairmode_stats(obs, exp, u_95r_RV, RV, alpha, beta, exc_threshold, plot, type='assessment'):
+    def calculate_fairmode_stats(obs, exp, u_95r_RV, RV, alpha, beta, exc_threshold, percentile, plot, type='assessment'):
         """ Calculate FAIRMODE statistics
             See here: https://fairmode.jrc.ec.europa.eu/document/fairmode/WG1/Guidance_MQO_Bench_vs3.3_20220519.pdf
 
@@ -571,6 +571,8 @@ class ExpBias(object):
             Proportionality coefficient
         exc_threshold : int
             Threshold used to calculate the exceedances
+        percentile : float
+            Percentile
         plot : str
             Differenciates between fairmode target and statsummary
         """
@@ -625,8 +627,8 @@ class ExpBias(object):
                 mean = Stats.calculate_mean(obs)
                 
                 # calculate Observation and Experiment Percentile
-                obs_perc = Stats.calculate_percentile(obs)
-                exp_perc = Stats.calculate_percentile(exp)
+                obs_perc = Stats.calculate_percentile(obs, percentile=percentile)
+                exp_perc = Stats.calculate_percentile(exp, percentile=percentile)
 
                 # calculate Temporal Statistic for Bias
                 t_bias = bias / (beta * rms_u)
@@ -639,10 +641,10 @@ class ExpBias(object):
 
                 # calculate Uncertainty
                 U = u_95r_RV * np.sqrt((1 - alpha ** 2) * obs_perc ** 2 + alpha ** 2 * RV ** 2)
-                
+
                 # calculate High Percentile
                 h_perc = np.abs(exp_perc - obs_perc) / (beta * U)
-                
+
                 return mean, exc, t_bias, t_R, t_sd, h_perc
 
         else:

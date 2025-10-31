@@ -2,7 +2,7 @@
 
 This page is only useful to those who want to create their own reports. Users can choose which plots these reports will have, as you will see below.
 
-![Screenshot_from_2025-02-12_17-17-38](uploads/7b86bb624cf19186c7fbed228e5486c6/Screenshot_from_2025-02-12_17-17-38.png)
+![plot-options-types](uploads/plot-options-types.png)
 
 ## Plot types
 
@@ -16,59 +16,59 @@ For the `metadata` plot the metadata displayed is set to a default list of metad
 
 ### Map (`map`)
 
-![Map](uploads/c09bd5457c62747147ceed0eae681c66/Map.png)
+![Map](uploads/Map.png)
 
 ### Metadata (`metadata`)
 
-![Metadata](uploads/4b70f94292b6bb60c03942b00dbe4aa0/Metadata.png)
+![Metadata](uploads/Metadata.png)
 
 ### Timeseries (`timeseries`)
 
-![Timeseries](uploads/616c4d754acb3ea71db03d7a2c2c03fe/Timeseries.png)
+![Timeseries](uploads/Timeseries.png)
 
 ### Periodic (`periodic`)
 
-![Periodic](uploads/14e16fa930ff86811775d2c6ca3b3810/Periodic.png)
+![Periodic](uploads/Periodic.png)
 
 ### Periodic violin (`periodic-violin`)
 
-![Periodic-violin](uploads/40d4e1088919f36b8e860227a8e2e306/Periodic-violin.png)
+![Periodic-violin](uploads/Periodic-violin.png)
 
 ### Boxplot (`boxplot`)
 
-![Boxplot](uploads/d84ef502fe31b9fa3a0770e058b9158e/Boxplot.png)
+![Boxplot](uploads/Boxplot.png)
 
 ### Distribution (`distribution`)
 
-![Distribution](uploads/2ad285ec3f4e142208c4d087a4df6c06/Distribution.png)
+![Distribution](uploads/Distribution.png)
 
 ### Scatter plot (`scatter`)
 
-![Scatter](uploads/aa8bd0c96f7fc8e1dc8f285210c98cbd/Scatter.png)
+![Scatter](uploads/Scatter.png)
 
 ### Heatmap (`heatmap`)
 
-![Heatmap](uploads/a2fe2f27d53c2e5e1a32eeed9b07ec56/Heatmap.png)
+![Heatmap](uploads/Heatmap.png)
 
 ### Table (`table`)
 
-![Table](uploads/58bdc6481b7bbbdac66f53fa5c43b576/Table.png)
+![Table](uploads/Table.png)
 
 ### Statistics summary (`statsummary`)
 
-![Statsummary](uploads/88448c8e7dd9ef8515c03d5363df00da/Statsummary.png)
+![Statsummary](uploads/Statsummary.png)
 
 ### Taylor diagram (`taylor`)
 
-![taylor](uploads/cd19c29c0d2c39a202a993bbd2ed8e58/taylor.png)
+![taylor](uploads/taylor.png)
 
 ### FAIRMODE target (`fairmode-target`)
 
-![fairmode-target](uploads/08e92dddacc60ce427fb4a38a68143d9/fairmode-target.png)
+![fairmode-target](uploads/fairmode-target.png)
 
 ### FAIRMODE statistics summary (`fairmode-statsummary`)
 
-![fairmode-statsummary](uploads/72e1c4c7d6e180ff880eaa8c34ac2645/fairmode-statsummary.png)
+![fairmode-statsummary](uploads/fairmode-statsummary.png)
 
 ## Plot options
 
@@ -78,64 +78,64 @@ It is possible to create advanced plots by adding one or more of the following w
 
 The extension `_obs` allows users to only show observations in their plots.
 
-![Screenshot_from_2022-10-04_16-13-50](uploads/316de7338fe068ef9913e6474f20258f/Screenshot_from_2022-10-04_16-13-50.jpg)
+![obs](uploads/obs.jpg)
 
 ### Split the plots by label (`_individual`)
 
 The extension `_individual` allows users to disaggregate the plots and see the plots by experiments, individually. This can help to visualise the results in a clear way when multiple experiments have been selected.
 
-![Screenshot_from_2022-10-04_16-13-53](uploads/42a70a0027d4397555345d9a73202d29/Screenshot_from_2022-10-04_16-13-53.jpg)
+![individual](uploads/individual.jpg)
 
 ### Add annotations (`_annotate`)
 
 If the configuration option `_annotate` is added, a box will be created on the plots to show several statistical data. The style and position of this box, as well as the statistics, can be defined by the user in `plot_characteristics.yaml` under `settings` by changing the parameter `annotate_stats`.
 
-![Screenshot_from_2022-10-04_16-17-04](uploads/906536e687e29f3e8a4ccf760485d884/Screenshot_from_2022-10-04_16-17-04.jpg)
+![annotate](uploads/annotate.jpg)
 
 ### Get the bias of the data (`_bias`)
 
 Alternatively the plots can be modified to show, rather than the absolute observational vs experiment values, the bias between these pairings. This is done by adding `_bias` to the base plot names, for example: `distribution_bias` or `periodic-Max_bias`.
 
-![Screenshot_from_2022-10-04_16-10-41](uploads/f54cd53c29707eb80c5ec05e853d187d/Screenshot_from_2022-10-04_16-10-41.jpg)
+![bias](uploads/bias.jpg)
 
 ### Add a smooth line to the timeseries (`_smooth`)
 
 Adding the option `_smooth` to the `timeseries` plot will plot a smooth line over the timeseries.
 
-![Screenshot_from_2022-10-04_16-17-13](uploads/a4bb25564231b55545a4878fb2da8fba/Screenshot_from_2022-10-04_16-17-13.jpg)
+![smooth](uploads/smooth.jpg)
 
 ### Add a regression line to the scatter plot (`_regression`)
 
 Adding the option `_regression` will plot the linear regression between observations and experiment.
 
-![Screenshot_from_2022-10-04_16-17-08](uploads/d12382d6634b7ba63b7a2c04ca49cabe/Screenshot_from_2022-10-04_16-17-08.jpg)
+![regression](uploads/regression.jpg)
 
 ### Make the scale logarithmic (`_logx` / `_logy`)
 
 Adding the options `_logx` or `_logy` will set the desired axis to be logarithmically scaled. 
 
-![Screenshot_from_2022-10-04_16-17-10](uploads/23248ef58007c22ab1021878cae710e5/Screenshot_from_2022-10-04_16-17-10.jpg)
+![logs](uploads/logs.jpg)
 
 ### Get plot by more than one network species (`_multispecies`)
 
 Incorporate all read species in the plot type. 
 
-![Screenshot_from_2022-10-04_16-14-01](uploads/2e4902e7d1be1d79db47b5818c7288a2/Screenshot_from_2022-10-04_16-14-01.jpg)
+![multispecies](uploads/multispecies.jpg)
 
 ### Hide points and only show regression / smooth lines (`_hidedata`)
 
 The option `_hidedata` needs to be accompanied by `_smooth` in the `timeseries` plot and by `_regression` in the `scatter` plot.
 
-![hidedata](uploads/341d06f77cebecffc9802d0190c0de91/hidedata.png)
+![hidedata](uploads/hidedata.png)
 
 ### Show the model grid in the maps (`_domain`)
 
 Adding `_domain` will add the model grid on top of the map.
 
-![domain](uploads/4dd8180f18b54e2a3c6d4e0e39827d0c/domain.png)
+![domain](uploads/domain.png)
 
 ### Add threshold line (`_threshold`)
 
 Adding `_threshold` will add a line indicating the exceedances.
 
-![Screenshot_from_2025-02-12_16-51-00](uploads/938911dbdd8f3cb9956bf759d0398219/Screenshot_from_2025-02-12_16-51-00.png)
+![threshold](uploads/threshold.png)

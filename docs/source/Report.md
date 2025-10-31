@@ -23,7 +23,7 @@ report_type = new_plots
 
 ## Cover page
 
-![cover_page](uploads/20bc03eed5f13d480848fbc3980c3c43/cover_page.jpg)
+![cover_page](uploads/cover_page.jpg)
 
 The cover page can be customised by editing the parameters under header in `settings/plot_characteristics.yaml` file. The most interesting ones are these:
 
