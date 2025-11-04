@@ -252,12 +252,6 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--interp_spinup_timesteps",
                                      dest="interp_spinup_timesteps",
                                      help="number of timesteps to skip for spinup at start of each experiment file")
-            self.parser.add_argument("--interp_experiment_downsampling",
-                                     dest="interp_experiment_downsampling",
-                                     help="statistic to use for downsampling the experiment data")
-            self.parser.add_argument("--interp_experiment_upsampling",
-                                     dest="interp_experiment_upsampling",
-                                     help="set how the upsampling of experiment data should be done")
             self.parser.add_argument("--logfile",
                                      dest="logfile",
                                      action='store_true',

@@ -82,8 +82,7 @@ class ExperimentInterpolation(object):
             submission_file_txt = f.read().split()
 
         # get configuration variables from the management_logs
-        for variable_key in ["ghost_version", "forecast", "interp_spinup_timesteps", 
-                             "interp_experiment_downsampling", "interp_experiment_upsampling", 
+        for variable_key in ["ghost_version", "forecast", "interp_spinup_timesteps",
                              "interp_n_neighbours", "interp_reverse_vertical_orientation", 
                              "exp_root", "ghost_root", "exp_to_interp_root", 
                              "nonghost_root"]:
