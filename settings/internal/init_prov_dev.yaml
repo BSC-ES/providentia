@@ -25,6 +25,7 @@
   "cpus_per_task": 12,
   "cores_explicit": False,
   "network": [],
+  "observation": [],
   "framework": [],
   "species": [],
   "resolution": [],
@@ -33,6 +34,9 @@
   "observations_data_label": "observations",
   "alias_flag": False,
   "experiments": [],
+  "experiment": [],
+  "model": [],
+  "models": [],
   "alias": [],
   "exp_ids": [], # TODO remove if changed
   "domain": null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
