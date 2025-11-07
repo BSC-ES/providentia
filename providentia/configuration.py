@@ -1307,11 +1307,7 @@ class ProvConfiguration:
         if MACHINE == "local":
             for path in [self.read_instance.nonghost_root, self.read_instance.ghost_root, self.read_instance.exp_root, self.read_instance.exp_to_interp_root]:
                 if not os.path.exists(path):
-                    try:
-                        os.makedirs(path)
-                    except PermissionError as error:
-                        os.system(f"sudo mkdir -p {path}")
-                        os.system(f"sudo chmod o+w {path}")
+                    os.makedirs(path)
 
         # set expID, domain, ensemble, forecast from experiment name
         self.decompose_experiments(deactivate_warning)
