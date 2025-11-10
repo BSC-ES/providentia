@@ -1082,14 +1082,18 @@ class ProvConfiguration:
             elif self.read_instance.observation:
                 self.read_instance.network = [self.read_instance.observation]
 
-        # # accept only experiments, experiment, model or models, avoiding multiple values
-        # if [self.read_instance.experiments, self.read_instance.experiment, self.read_instance.model, self.read_instance.models].count(True) > 1:
-        #     error = f'Error: You cannot define the experiments, experiment, model and/or model at the same time, choose one.'
-        #     self.read_instance.logger.error(error)
-        #     sys.exit(1)
-        # else:
-        #     # TODO: Add conditions
-        #     pass
+        # accept only experiments, experiment, model or models, avoiding multiple values
+        if [self.read_instance.experiments, self.read_instance.experiment, self.read_instance.model, self.read_instance.models].count(True) > 1:
+            error = f'Error: You cannot define the experiments, experiment, model and/or model at the same time, choose one.'
+            self.read_instance.logger.error(error)
+            sys.exit(1)
+        else:
+            if self.read_instance.experiment:
+                self.read_instance.experiments = self.read_instance.experiment
+            elif self.read_instance.model:
+                self.read_instance.experiments = self.read_instance.model
+            elif self.read_instance.models:
+                self.read_instance.experiments = self.read_instance.models
 
         # check if species is valid
         if self.read_instance.species:
