@@ -1134,11 +1134,11 @@ class Providentia:
 
         # initialise default configuration variables
         # modified by passed arguments, if given
-        provconf = ProvConfiguration(self, **kwargs)
+        self.provconf = ProvConfiguration(self, **kwargs)
 
         # for any passed arguments not in default Providentia variables, now set them to self
         for kwarg in kwargs:
-            if kwarg not in provconf.var_defaults:
+            if kwarg not in self.provconf.var_defaults:
                 setattr(self, kwarg, kwargs[kwarg])
 
         # update variables to set from config file
@@ -1194,7 +1194,7 @@ class Providentia:
         self.section_opts = self.sub_opts[self.section]
         for k, val in self.section_opts.items():
             if k not in kwargs:
-                setattr(self, k, provconf.parse_parameter(k, val))
+                setattr(self, k, self.provconf.parse_parameter(k, val))
 
         # parse subsection
         # if subsection name is provided, try and use that
@@ -1240,10 +1240,10 @@ class Providentia:
             # update subsection variables
             for k, val in self.subsection_opts.items():
                 if k not in kwargs:
-                    setattr(self, k, provconf.parse_parameter(k, val))
+                    setattr(self, k, self.provconf.parse_parameter(k, val))
 
         # now all variables have been parsed, check validity of those, throwing errors where necessary
-        provconf.check_validity()
+        self.provconf.check_validity()
 
         return True
 
@@ -1481,7 +1481,10 @@ class Providentia:
             finally:
                 # reset stdout
                 sys.stdout = orig_stdout
-                
+
+        # reuse logger
+        self.provconf.switch_logging()
+
     def report(self, **kwargs):
         """ Wrapper function for initialising Report class"""
 
