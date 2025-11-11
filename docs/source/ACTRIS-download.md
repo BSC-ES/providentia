@@ -42,7 +42,6 @@ These are the available species:
 * `precipitation zinc mass concentration`
 * `air pressure`
 * `aerosol particle aluminium mass concentration`
-* `acetaldehyde mass concentration`
 * `aerosol particle arsenic mass concentration`
 * `gas and particle benzo(a)pyrene mass concentration`
 * `aerosol particle benzo(a)pyrene mass concentration`
@@ -70,15 +69,10 @@ These are the available species:
 * `aerosol particle copper mass concentration`
 * `aerosol particle mineral dust mass concentration`
 * `aerosol particle elemental carbon mass concentration`
-* `ethanol mass concentration`
 * `aerosol particle iron mass concentration`
-* `glyoxal mass concentration`
 * `formaldehyde mass concentration`
 * `hydrochloric acid mass concentration`
 * `aerosol particle mercury mass concentration`
-* `gaseous elemental mercury mass concentration`
-* `gaseous mercury oxides mass concentration`
-* `gaseous elemental mercury and mercury oxides mass concentration`
 * `nitric acid mass concentration`
 * `isoprene amount fraction`
 * `aerosol particle potassium mass concentration`
@@ -214,7 +208,6 @@ precv: precipitation vanadium mass concentration
 preczn: precipitation zinc mass concentration
 pshltr: air pressure
 sconcal: aerosol particle aluminium mass concentration
-sconcald2: acetaldehyde mass concentration
 sconcas: aerosol particle arsenic mass concentration
 sconcbap: gas and particle benzo(a)pyrene mass concentration
 sconcbappm: aerosol particle benzo(a)pyrene mass concentration
@@ -242,15 +235,10 @@ sconccr: aerosol particle chromium mass concentration
 sconccu: aerosol particle copper mass concentration
 sconcdu: aerosol particle mineral dust mass concentration
 sconcec: aerosol particle elemental carbon mass concentration
-sconcetoh: ethanol mass concentration
 sconcfe: aerosol particle iron mass concentration
-sconcglyox: glyoxal mass concentration
 sconchcho: formaldehyde mass concentration
 sconchcl: hydrochloric acid mass concentration
 sconchg: aerosol particle mercury mass concentration
-sconchggem: gaseous elemental mercury mass concentration
-sconchggom: gaseous mercury oxides mass concentration
-sconchgtgm: gaseous elemental mercury and mercury oxides mass concentration
 sconchno3: nitric acid mass concentration
 sconcisop: isoprene amount fraction
 sconck: aerosol particle potassium mass concentration

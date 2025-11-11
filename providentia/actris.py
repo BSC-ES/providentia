@@ -47,7 +47,7 @@ class Actris:
         self.download_instance = download_instance
         self.resolution = resolution
 
-    def get_files_per_var(self, var):
+    def get_files_per_var(self, base_url, var):
         """Get all files available in ACTRIS server per variable
 
         Parameters
@@ -62,7 +62,6 @@ class Actris:
         """
 
         files_per_var = {}
-        base_url = "https://prod-actris-md.nilu.no/metadata/content"
 
         if var not in files_per_var:
             files_per_var[var] = {}
@@ -429,6 +428,9 @@ class Actris:
             Dictionary with details per file
         """
 
+        if len(files) == 0:
+            return
+
         files_info = {}
         tqdm_iter = tqdm(files, bar_format='{l_bar}{bar}|{n_fmt}/{total_fmt}',
                         desc=f"Creating information file")
@@ -585,7 +587,7 @@ class Actris:
             if len(urls) > 1:
                 url = self.select_station_file(urls, files_info)
                 if url is None:
-                    return station, local_errors, local_warnings
+                    return url, station, local_errors, local_warnings
             else:
                 url = urls[0]
 
@@ -595,11 +597,11 @@ class Actris:
             possible_vars, possible_var = self.get_var_in_file(ds, var, actris_parameter, ebas_component)
             if possible_var is None:
                 local_errors = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}.'
-                return station, local_errors, local_warnings
+                return url, station, local_errors, local_warnings
 
         except Exception as error:
             local_errors = f'Opening file: {error}.'
-            return station, local_errors, local_warnings
+            return url, station, local_errors, local_warnings
     
         # remove time duplicates if any (keep first)
         ds = ds.sel(time=~ds['time'].to_index().duplicated())
@@ -608,7 +610,7 @@ class Actris:
         ds = ds.sel(time=slice(target_start_date, target_end_date))
         if ds.time.size == 0:
             local_warnings += f'No data available after filtering by time.'
-            return station, local_errors, local_warnings
+            return url, station, local_errors, local_warnings
 
         # rename qc dimension
         ds = ds.rename_dims({f'{possible_var}_qc_flags': 'N_flag_codes'})
@@ -646,7 +648,7 @@ class Actris:
 
             if not found_wavelength:
                 local_warnings += f'Data at {wavelength}nm could not be found. Existing wavelengths: {existing_wavelengths}. '
-                return station, local_errors, local_warnings
+                return url, station, local_errors, local_warnings
 
         # remove artifact and fraction (sconcoc)
         # TODO: Discuss this
@@ -663,13 +665,13 @@ class Actris:
         # avoid datasets that do not have defined units
         if 'ebas_unit' not in da_var.attrs:
             local_errors = f'No units were defined.'
-            return station, local_errors, local_warnings
+            return url, station, local_errors, local_warnings
 
         # avoid datasets that do not have the same units as in variable mapping
         if da_var.attrs['ebas_unit'] != variable_mapping[actris_parameter]['units']:
             local_errors = f"Units {da_var.attrs['ebas_unit']} do not match those in variable mapping "
             local_errors += f"dictionary ({variable_mapping[actris_parameter]['units']})."
-            return station, local_errors, local_warnings
+            return url, station, local_errors, local_warnings
 
         # remove all attributes except units
         da_var_attrs = copy.deepcopy(da_var.attrs)
@@ -682,7 +684,7 @@ class Actris:
                 "time", "N_flag_codes")
         except:
             local_errors = "Flag data could not be transposed."
-            return station, local_errors, local_warnings
+            return url, station, local_errors, local_warnings
 
         # rename variable to BSC standards
         station_ds = da_var.to_dataset(name=var)
@@ -698,7 +700,7 @@ class Actris:
             station_ds, var, ghost_version, standard_time_pairs, vfunc)
         if np.isnan(station_averaged_data).all():
             local_warnings += 'No data after temporal averaging.'
-            return station, local_errors, local_warnings
+            return url, station, local_errors, local_warnings
 
         data_np = np.frombuffer(shared_memory_vars['data'], dtype=np.float32).reshape(data_shape)
         flag_np = np.frombuffer(shared_memory_vars['flag'], dtype=np.float32).reshape(flag_shape)
@@ -720,7 +722,7 @@ class Actris:
                 val = str(np.nan)
             metadata_np[ghost_key][i] = val.encode('utf-8')
 
-        return station, local_errors, local_warnings
+        return url, station, local_errors, local_warnings
 
     def init_shared_vars_read_data(self, shared_data, shared_flag_data, shared_qa_data, shared_metadata, data_shape):
         # multiprocessing.RawArray does not support NaN initialisation and initialised to zeros
@@ -830,27 +832,27 @@ class Actris:
             initializer=self.init_shared_vars_read_data,
             initargs=(shared_data, shared_flag_data, shared_qa_data, shared_metadata, data_shape)
         )
-        for station, error, warning in tqdm(
+        for url, station, error, warning in tqdm(
                 pool.imap(self.read_data, args_list),
                 total=len(args_list),
-                desc="Reading data",
+                desc="    Processing station data",
                 bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt}'
             ):
             if error:
-                errors.append(f'{station} - Error: {error}')
+                errors.append(f'{url} ({station}): {error}')
             if warning:
-                warnings.append(f'{station} - Warning: {warning}')
+                warnings.append(f'{url} ({station}): {warning}')
 
         # print errors and warnings if any
         if errors:
-            self.download_instance.logger.info("=== ERRORS ===")
+            self.download_instance.logger.info("    === ERRORS ===")
             for e in errors:
-                self.download_instance.logger.info(e)
+                self.download_instance.logger.info(f"    {e}")
 
         if warnings:
-            self.download_instance.logger.info("=== WARNINGS ===")
+            self.download_instance.logger.info("    === WARNINGS ===")
             for w in warnings:
-                self.download_instance.logger.info(w)
+                self.download_instance.logger.info(f"    {w}")
                 
         pool.close()
         
@@ -859,7 +861,7 @@ class Actris:
 
         if (len(errors) + len(warnings)) == len(args_list):
             self.download_instance.logger.info('All datasets have thrown an error or warning, aborting.')
-            return None, None
+            return
 
         # get combined data and metadata after read
         averaged_data = np.frombuffer(shared_data, dtype=np.float32).reshape(data_shape)
@@ -1019,22 +1021,25 @@ class Actris:
                 continue 
             
             # get files info path
-            path = self.get_files_path(var)
+            info_path = self.get_files_path(var)
 
+            # define NILU path
+            base_url = "https://prod-actris-md.nilu.no/metadata/content"
+            
             # if file does not exist
-            if not os.path.isfile(path):
+            if not os.path.isfile(info_path):
                 # get files information
-                self.download_instance.logger.info(f'\nFile containing information of the files available in Thredds for {var} ({path}) does not exist, creating.')
-                combined_data = self.get_files_per_var(var)
+                self.download_instance.logger.info(f'\nFile containing information of the files available in Thredds for {var} ({info_path}) does not exist, creating.')
+                combined_data = self.get_files_per_var(base_url, var)
                 all_files = combined_data[var]['files']
-                files_info = self.get_files_info(all_files, var, path)
+                files_info = self.get_files_info(all_files, var, info_path)
                     
             # if file exists
             else:
                 # ask if user wants to update file information from NILU Thredds
                 if self.download_instance.origin_update_choice not in ['y','n']:
                     while self.download_instance.origin_update_choice not in ['y','n']:
-                        self.download_instance.origin_update_choice = input(f"\nFile containing information of the files available in Thredds for {var} ({path}) already exists. Do you want to update it (y/n)? ").lower() 
+                        self.download_instance.origin_update_choice = input(f"\nFile containing information of the files available in Thredds for {var} ({info_path}) already exists. Do you want to update it (y/n)? ").lower() 
                     # ask if user wants to remember the decision
                     remind_txt = None
                     while remind_txt not in ['y','n']:
@@ -1045,19 +1050,21 @@ class Actris:
                             f.write(f"ORIGIN_UPDATE={self.download_instance.origin_update_choice}\n")
                 if self.download_instance.origin_update_choice == 'n':
                     # get files information
-                    files_info = yaml.safe_load(open(join(CURRENT_PATH, path)))
+                    files_info = yaml.safe_load(open(join(CURRENT_PATH, info_path)))
                     files_info = {k: v for k, v in files_info.items() if k.strip() and v}
                 else:
                     # get files information
-                    combined_data = self.get_files_per_var(var)
+                    combined_data = self.get_files_per_var(base_url, var)
                     all_files = combined_data[var]['files']
-                    files_info = self.get_files_info(all_files, var, path)
+                    files_info = self.get_files_info(all_files, var, info_path)
             
             # go to next variable if no data is found
             if files_info is not None:
                 if len(files_info) == 0:
+                    print(f'Warning: No files found for {var}.')
                     continue
             else:
+                print(f'Warning: No files found for {var}.')
                 continue
 
             # get wavelength
@@ -1074,7 +1081,10 @@ class Actris:
                 wavelength = None
 
             # filter files by resolution and dates
-            self.download_instance.logger.info('Filtering files by resolution and dates...')
+            self.download_instance.logger.info('\n'+'-'*40)
+            self.download_instance.logger.info(f"\nDownloading ACTRIS framework data from EBAS DOI...")
+            path = join(self.download_instance.nonghost_root, f'actris/actris/{self.resolution}/{var}')
+            self.download_instance.logger.info(f"\n  - {path}, source: {base_url}/{ghost_actris_variables[var]}")
             files = {}
             for file, attributes in files_info.items():
                 if attributes["resolution"] == self.resolution:
@@ -1109,17 +1119,18 @@ class Actris:
                     continue
                 # end = time.time()
                 # elapsed_minutes = (end - start) / 60
-                # instance.logger.info(f"Time to read data: {elapsed_minutes:.2f} minutes")
+                # self.download_instance.logger.info(f"Time to read data: {elapsed_minutes:.2f} minutes")
 
                 # save data per year and month
-                path = join(self.download_instance.nonghost_root, f'actris/actris/{self.resolution}/{var}')
                 if not os.path.isdir(path):
                     os.makedirs(path, exist_ok=True)
-                saved_files = 0
+
+                valid_nc_files = []
                 for year, ds_year in combined_ds.groupby('time.year'):
                     for month, ds_month in ds_year.groupby('time.month'):
-                        filename = f"{path}/{var}_{year}{month:02d}.nc"
-                        if filename in files_to_download:
+                        filename = f"{var}_{year}{month:02d}.nc"
+                        filepath = f"{path}/{filename}"
+                        if filepath in files_to_download:
                             combined_ds_yearmonth = combined_ds.sel(time=f"{year}-{month:02d}")
 
                             # add title to attrs
@@ -1144,32 +1155,34 @@ class Actris:
                             # current_n_stations = len(combined_ds_yearmonth.station)
                             # n_stations_diff = previous_n_stations - current_n_stations
                             # if n_stations_diff > 0:
-                            #     instance.logger.info(f'Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
+                            #     self.download_instance.logger.info(f'Data for {n_stations_diff} stations was removed because all data was NaN during {month}-{year}.')
                             
                             # add acknowledgements
                             dois = ', '.join(x for x in combined_ds_yearmonth.doi.values if x not in ('', '[', ']'))
                             combined_ds_yearmonth.attrs['acknowledgements'] = f'This data is compiled by measurements from these DOI: {dois}'
 
                             # remove file if it exists
-                            if os.path.isfile(filename):
-                                os.system("rm {}".format(filename))
+                            if os.path.isfile(filepath):
+                                os.system("rm {}".format(filepath))
 
                             # do not save if empty
                             if len(combined_ds_yearmonth[var].values) == 0:
                                 continue
 
                             # get last downloaded file in case there was a keyboard interrupt
-                            self.download_instance.latest_nc_file_path = filename
+                            self.download_instance.latest_nc_file_path = filepath
 
                             # save file
-                            combined_ds_yearmonth.to_netcdf(filename)
+                            combined_ds_yearmonth.to_netcdf(filepath)
 
                             # change permissions
-                            os.system("chmod 777 {}".format(filename))
-                            self.download_instance.logger.info(f"Saved: {filename}")
-                            saved_files += 1
-                            
-                self.download_instance.logger.info(f'Total number of saved files: {saved_files}')
+                            os.system("chmod 777 {}".format(filepath))
+                            valid_nc_files.append(filename)
+                
+                # print download of valid files
+                valid_nc_files_iter = tqdm(valid_nc_files,bar_format= '{l_bar}{bar}|{n_fmt}/{total_fmt}',desc=f"    Downloading files ({len(valid_nc_files)})")
+                for filename in valid_nc_files_iter:
+                    pass
 
             else:
-                self.download_instance.logger.info(f'No files were found at {self.resolution} resolution for {var}')
+                self.download_instance.logger.info(f'No files were found at {self.resolution} resolution for {var}. You can check what is available at {path}.')
