@@ -583,24 +583,24 @@ class Actris:
         local_warnings = ""
 
         # open files
-        try:
-            if len(urls) > 1:
+        if len(urls) > 1:
+            try:
                 url = self.select_station_file(urls, files_info)
                 if url is None:
-                    return url, station, local_errors, local_warnings
-            else:
-                url = urls[0]
+                    local_warnings = f"No station file is valid."
+                    return urls, station, local_errors, local_warnings
+            except Exception as error:
+                local_errors = f'Opening files: {error}.'
+                return urls, station, local_errors, local_warnings
+        else:
+            url = urls[0]
 
-            nc = Dataset(url, mode='r')
-            ds = xr.open_dataset(xr.backends.NetCDF4DataStore(nc))
+        nc = Dataset(url, mode='r')
+        ds = xr.open_dataset(xr.backends.NetCDF4DataStore(nc))
 
-            possible_vars, possible_var = self.get_var_in_file(ds, var, actris_parameter, ebas_component)
-            if possible_var is None:
-                local_errors = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}.'
-                return url, station, local_errors, local_warnings
-
-        except Exception as error:
-            local_errors = f'Opening file: {error}.'
+        possible_vars, possible_var = self.get_var_in_file(ds, var, actris_parameter, ebas_component)
+        if possible_var is None:
+            local_errors = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}.'
             return url, station, local_errors, local_warnings
     
         # remove time duplicates if any (keep first)
