@@ -71,6 +71,8 @@
 
     #"debug": ["timeseries-NStations-hourly","timeseries-NStations-daily","timeseries-MDA8-daily","timeseries-MDA8-monthly","fairmode-target","fairmode-statsummary"]
 
-    "debug": ["map-Mean"]
+    "actris_test": ["map-Mean", "timeseries"],
+
+    "debug": ["map-Mean", "timeseries"]
 
 }
