@@ -227,7 +227,7 @@ class ProvConfiguration:
 
             return str(value)
 
-        elif key == 'network':
+        elif key in ['network', 'observation', 'framework']:
             # parse network
 
             if isinstance(value, str):
@@ -465,7 +465,7 @@ class ProvConfiguration:
                 else:
                     return [value.strip().lower()]
             
-        elif key == 'experiments':
+        elif key in ['experiments', 'experiment', 'model', 'models']:
             # parse experiments
 
             if isinstance(value, str):
@@ -1063,19 +1063,37 @@ class ProvConfiguration:
     def check_validity(self, deactivate_warning=False):
         """ Check validity of set variables after parsing. """
 
-        # accept the word framework as network for ACTRIS
-        if self.read_instance.framework and not self.read_instance.network:
-            if self.read_instance.framework == 'actris/actris':
-                self.read_instance.network = [self.read_instance.framework]
-            else:
-                error = f'Error: Framework {self.read_instance.framework} not accepted. '
-                error += 'The only one that is accepted is "actris/actris".'
-                self.read_instance.logger.error(error)
-                sys.exit(1)
-        elif self.read_instance.framework and self.read_instance.network:
-            error = f'Error: You cannot define the framework and network at the same time, drop one.'
+        # accept only framework, network or observation, avoiding multiple values
+        if [self.read_instance.framework, self.read_instance.network, self.read_instance.observation].count(True) > 1:
+            error = f'Error: You cannot define the framework, observations and/or network at the same time, choose one.'
             self.read_instance.logger.error(error)
             sys.exit(1)
+        else:
+            # accept the word framework as network for ACTRIS
+            if self.read_instance.framework:
+                if self.read_instance.framework == ['actris/actris']:
+                    self.read_instance.network = self.read_instance.framework
+                else:
+                    error = f'Error: Framework {self.read_instance.framework} not accepted. '
+                    error += 'The only one that is accepted is "actris/actris".'
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
+            # pass observation as network
+            elif self.read_instance.observation:
+                self.read_instance.network = [self.read_instance.observation]
+
+        # accept only experiments, experiment, model or models, avoiding multiple values
+        if [self.read_instance.experiments, self.read_instance.experiment, self.read_instance.model, self.read_instance.models].count(True) > 1:
+            error = f'Error: You cannot define the experiments, experiment, model and/or model at the same time, choose one.'
+            self.read_instance.logger.error(error)
+            sys.exit(1)
+        else:
+            if self.read_instance.experiment:
+                self.read_instance.experiments = self.read_instance.experiment
+            elif self.read_instance.model:
+                self.read_instance.experiments = self.read_instance.model
+            elif self.read_instance.models:
+                self.read_instance.experiments = self.read_instance.models
 
         # check if species is valid
         if self.read_instance.species:

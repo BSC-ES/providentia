@@ -769,9 +769,6 @@ class SubmitInterpolation(object):
         # time start of interpolation jobs
         interpolation_start = time.time()
 
-        # print current output to console if in library mode
-        self.stdout_to_console()
-
         # submit slurm script
         submit_complete = False
         while submit_complete == False:
@@ -880,9 +877,6 @@ class SubmitInterpolation(object):
             if len(not_finished_tasks) > 0:
                 print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
 
-        # print finalised output to console if in library mode
-        self.stdout_to_console()
-    
     def run_command(self, commands):
         arguments_list = commands.strip().split()
         if self.machine == 'nord4':
@@ -914,9 +908,6 @@ class SubmitInterpolation(object):
             n_cpus = self.n_cpus
             msg = f'Using {n_cpus} CPUs.'
         print(msg)
-
-        # print current output to console if in library mode
-        self.stdout_to_console()
 
         # launch interpolation
         commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(
@@ -956,30 +947,7 @@ class SubmitInterpolation(object):
                 print('THE FOLLOWING INTERPOLATION TASKS FAILED: {}'.format(failed_tasks))
             if len(not_finished_tasks) > 0:
                 print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
-    
-        # print finalised output to console if in library mode
-        self.stdout_to_console()
 
-    def stdout_to_console(self):
-        ''' Function to print stdout to console in library mode'''
-
-        # library mode?
-        if self.mode == 'library':
-            #flush stdout
-            sys.stdout.flush()
-            #get current stdout
-            current_stdout = sys.stdout
-            #restore stdout to console
-            sys.stdout = sys.__stdout__
-            #open management logfile and print contents
-            with open(join(PROVIDENTIA_ROOT, 'logs', 'interpolation', 'management_logs', f'{self.slurm_job_id}.out'), 'r') as f:
-                for line_ii, line in enumerate(f):
-                    #only print line if not previously printed
-                    if line_ii > self.current_line:
-                        print(line.rstrip('\n'))
-                        self.current_line = line_ii 
-            #restore stdout to file
-            sys.stdout = current_stdout
 
 def main(**kwargs):
 
