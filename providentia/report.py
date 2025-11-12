@@ -837,6 +837,12 @@ class Report:
                 self.subsection_opts = {k: (self.section_opts[k] if k in self.fixed_section_vars else val) 
                                         for (k, val) in self.subsection_opts.items()}
 
+                # if have forecast active then save current experiment variable in memory as may need to set it if no-reading data 
+                if len(self.forecast) != 0:
+                    forecast_experiments = copy.deepcopy(self.experiments)  
+                else:
+                    forecast_experiments = None
+
                 # reinitialise default configuration variables
                 # modified by commandline arguments, if given
                 provconf = ProvConfiguration(self, **self.commandline_arguments)
@@ -862,6 +868,10 @@ class Report:
                 # re-read data
                 self.datareader.read_setup(['reset'])
             else:
+                # if not re-reading data and forecast active, then overwrite experiments variable
+                if forecast_experiments is not None:
+                    self.experiments = forecast_experiments
+
                 # update fields available for filtering
                 init_representativity(self)
                 update_representativity_fields(self)

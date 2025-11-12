@@ -69,10 +69,11 @@
 
     "het_chem": ["periodic-Mean"],
 
-    #"debug": ["timeseries-NStations-hourly","timeseries-NStations-daily","timeseries-MDA8-daily","timeseries-MDA8-monthly","fairmode-target","fairmode-statsummary"]
-
     "actris_test": ["map-Mean", "timeseries"],
 
-    "debug": ["map-Mean", "timeseries"]
+    "cams2_82_bis": ["metadata", "statsummary", "statsummary_multispecies_bias", "map-r", "map-MFB", "map-MFE", "timeseries_smooth", "timeseries_bias_smooth", "distribution", 
+                     "scatter_annotate"],
+
+    "debug": ["statsummary", 'statsummary_bias']
 
 }

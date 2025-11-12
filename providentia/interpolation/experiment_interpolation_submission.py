@@ -1,13 +1,16 @@
 import copy
 import glob
+import multiprocessing
 import os
-import yaml
+import psutil
+from queue import Empty
 import random
 import subprocess
 import sys
 import time
+import yaml
+
 import numpy as np
-import multiprocessing
 
 from providentia.auxiliar import CURRENT_PATH, join
 
@@ -877,29 +880,34 @@ class SubmitInterpolation(object):
             if len(not_finished_tasks) > 0:
                 print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
 
-    def run_command(self, commands):
-        arguments_list = commands.strip().split()
-        if self.machine == 'nord4':
-            arguments_list.insert(0, 'nord3_singu_es')
-        result = subprocess.run(arguments_list, capture_output=True, text=True)
-        if result.returncode != 0:
-            error = result.stderr
-            if error == '':
-                error = 'Unknown error'
-            print(f"Error in submission using the following args {result.args[3:-1]}: {error}")
+        # print finalised output to console if in library mode
+        self.stdout_to_console()
 
     def submit_job_multiprocessing(self):
+        """Submit interpolation jobs using multiprocessing pool."""
+
+        # set resource usage parameters for estimating safe number of pool workers 
+        self.per_worker_mem_gb=0.75
+        self.per_worker_cpu_fraction=1.0/self.n_cpus
+        self.per_worker_swap_gb=0.1
+        self.cpu_fraction_limit=0.75 
+        self.mem_fraction_limit=0.75
+        self.swap_fraction_limit=0.75
+
+        # set run commands
+        self.commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(
+            self.working_directory, argument) for argument in self.arguments]
 
         # if n_cpus hasn't been defined, use 1 or half of the available CPUS to 
         # avoid having to kill other processes locally
         if self.machine == 'local':
             # use value passed through --cores in terminal
-            if self.cores_explicit:
+            if (self.cores_explicit):
                 n_cpus = self.n_cpus
                 msg = f'Using {n_cpus} CPUs.'
-            # use default value not passed through --cores (available cpus by 2)
+            # otherwise estimate the number of safe pool workers
             else:
-                n_cpus = max(1, int(self.n_cpus * 0.50))
+                n_cpus = self.guess_pool_workers()
                 msg = f'Using {n_cpus} out of {self.n_cpus} available CPUs to'
                 msg += ' ensure that other processes keep running. \nIf you encounter any problems'
                 msg += ' consider reducing the number of CPUS by running Providentia using'
@@ -909,11 +917,24 @@ class SubmitInterpolation(object):
             msg = f'Using {n_cpus} CPUs.'
         print(msg)
 
+        # cap number of cpus to not be larger than number of tasks
+        if n_cpus > len(self.commands):
+            old_n_cpus = copy.deepcopy(n_cpus)
+            n_cpus = len(self.commands)
+            msg = f'Capping {old_n_cpus} CPUs to {n_cpus} since there are only {n_cpus} tasks to process.'
+
+        # print current output to console if in library mode
+        self.stdout_to_console()
+
         # launch interpolation
-        commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(
-            self.working_directory, argument) for argument in self.arguments]
-        with multiprocessing.Pool(processes=n_cpus) as pool:
-            pool.map(self.run_command, commands)
+        # if have no swap memory, or have just 1 cpu, run in serial without multiprocessing
+        if n_cpus == 1:
+            for cmd in self.commands:
+                self.run_command(cmd)
+        # otherwise, use multiprocessing pool
+        else:
+            with multiprocessing.Pool(n_cpus) as pool:
+                pool.map(self.resource_safe_job, self.commands)
 
         # stop timer
         total_time = (time.time()-self.start)/60.
@@ -948,6 +969,131 @@ class SubmitInterpolation(object):
             if len(not_finished_tasks) > 0:
                 print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
 
+    def guess_pool_workers(self):
+        """
+        Estimate a safe number of pool workers considering expected job resource usage.
+        """
+        
+        # --- CPU constraint ---
+        total_cores = psutil.cpu_count(logical=False) or 1
+        cpu_now = psutil.cpu_percent(interval=None) / 100.0
+        max_workers_cpu = max(1, int((self.cpu_fraction_limit - cpu_now) / self.per_worker_cpu_fraction))
+
+        # --- Memory constraint ---
+        vm = psutil.virtual_memory()
+        used_mem_gb = (vm.total - vm.available) / (1024**3)
+        max_mem_gb = self.mem_fraction_limit * (vm.total / (1024**3) - used_mem_gb)
+        max_workers_mem = max(1, int(max_mem_gb / self.per_worker_mem_gb))
+
+        # --- Swap adjustment ---
+        swap = psutil.swap_memory()
+        swap_total_gb = swap.total / (1024**3)
+        swap_used_gb = swap_total_gb * swap.percent / 100
+        swap_allowed_gb = swap_total_gb * self.swap_fraction_limit - swap_used_gb
+        # if swap is zero adjust max_workers_mem to be 1
+        if swap_total_gb == 0:
+            max_workers_mem = 1
+
+        # Adjust memory fraction if swap is tight
+        if self.operating_system != 'Mac':
+            total_swap_needed = self.per_worker_swap_gb * min(max_workers_cpu, max_workers_mem)
+            if total_swap_needed > swap_allowed_gb:
+                # Swap tight — reduce memory fraction proportionally
+                excess_ratio = (total_swap_needed - swap_allowed_gb) / total_swap_needed
+                effective_mem_fraction = self.mem_fraction_limit * (1 - excess_ratio)
+                effective_mem_fraction = max(0.1, effective_mem_fraction)
+                max_mem_gb = effective_mem_fraction * (vm.total / (1024**3) - used_mem_gb)
+                max_workers_mem = max(1, int(max_mem_gb / self.per_worker_mem_gb))
+        
+        # --- Combine constraints ---
+        # if have no swap memory then only use 1 worker
+        if swap_total_gb == 0:
+            n_workers = 1
+        # otherwise use the minimum of all constraints
+        else:
+            n_workers = min(max_workers_cpu, max_workers_mem, total_cores)
+        
+        # --- Summary print for debugging
+        #print("=== Safe Pool Worker Estimation ===")
+        #print(f"CPU: {cpu_now*100:.1f}% used / limit fraction: {self.cpu_fraction_limit}, max workers: {max_workers_cpu}")
+        #print(f"Memory: {used_mem_gb:.2f} GB used / {vm.total / (1024**3):.2f} GB total")
+        #if 'effective_mem_fraction' in locals():
+        #    print(f"Memory fraction limit: {self.mem_fraction_limit} -> effective: {effective_mem_fraction:.2f}, max workers: {max_workers_mem}")
+        #else:
+        #    print(f"Memory fraction limit: {self.mem_fraction_limit}, max workers: {max_workers_mem}")
+        #print(f"Swap: {swap_used_gb:.2f} GB used / {swap_total_gb:.2f} GB total")
+        #print(f"Swap fraction limit: {self.swap_fraction_limit}, swap allowed for pool: {swap_allowed_gb:.2f} GB")
+        #print(f"Total physical cores: {total_cores}")
+        #print(f"=== Suggested safe pool size: {n_workers} workers ===\n")
+
+        return max(1, n_workers)
+
+    def resource_safe_job(self, cmd, check_interval=1.0, stagger_range=(0.0, 5.0)):
+        """Wait until system resources are below thresholds, then run the job."""
+
+        # print for debugging
+        #print(f"[JOB INIT] Preparing to run: {cmd}", flush=True)
+
+        while True:
+            cpu = psutil.cpu_percent(interval=None) / 100.0
+            mem = psutil.virtual_memory().percent / 100.0
+            swap = psutil.swap_memory().percent / 100.0
+
+            if self.operating_system == "Mac":
+                overload = max(cpu / self.cpu_fraction_limit, mem / self.mem_fraction_limit)
+            else:
+                overload = max(cpu / self.cpu_fraction_limit, mem / self.mem_fraction_limit, swap / self.swap_fraction_limit)
+
+            # print for debugging
+            #print(f"[RESOURCE CHECK] CPU: {cpu*100:.1f}% / {self.cpu_fraction_limit*100:.0f}% | "
+            #    f"MEM: {mem*100:.1f}% / {self.mem_fraction_limit*100:.0f}% | "
+            #    f"SWAP: {swap*100:.1f}% / {self.swap_fraction_limit*100:.0f}% | "
+            #    f"{'Waiting...' if overload>1 else 'Safe to run!'}", flush=True)
+
+            if overload <= 1.0:
+                break
+
+            time.sleep(check_interval)  # Wait and retry
+
+        # stagger to avoid spikes
+        time.sleep(random.uniform(*stagger_range))
+
+        # Run the actual job
+        self.run_command(cmd)
+
+    def run_command(self, commands):
+        ''' Function to submit interpolation job.'''
+
+        arguments_list = commands.strip().split()
+        if self.machine == 'nord4':
+            arguments_list.insert(0, 'nord3_singu_es')
+        result = subprocess.run(arguments_list, capture_output=True, text=True)
+        if result.returncode != 0:
+            error = result.stderr
+            if error == '':
+                error = 'Unknown error'
+            print(f"Error in submission using the following args {result.args[3:-1]}: {error}", flush=True)
+
+    def stdout_to_console(self):
+        ''' Function to print stdout to console in library mode'''
+
+        #library mode?
+        if self.library:
+            #flush stdout
+            sys.stdout.flush()
+            #get current stdout
+            current_stdout = sys.stdout
+            #restore stdout to console
+            sys.stdout = sys.__stdout__
+            #open management logfile and print contents
+            with open(join(PROVIDENTIA_ROOT, 'logs', 'interpolation', 'management_logs', f'{self.slurm_job_id}.out'), 'r') as f:
+                for line_ii, line in enumerate(f):
+                    #only print line if not previously printed
+                    if line_ii > self.current_line:
+                        print(line.rstrip('\n'))
+                        self.current_line = line_ii 
+            #restore stdout to file
+            sys.stdout = current_stdout
 
 def main(**kwargs):
 
