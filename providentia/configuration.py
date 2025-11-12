@@ -84,6 +84,12 @@ class ProvConfiguration:
             self.read_instance.logger.error(error)
             sys.exit(1)
 
+        # throw an error if default keyword is passed
+        elif value == 'default':
+            error = f"Error: The 'default' keyword in the '{key}' parameter is no longer allowed. Remove it to use the default value."
+            self.read_instance.logger.error(error)
+            sys.exit(1)
+
         # parse config file name
         if key == 'conf':
             if value != '':
@@ -663,7 +669,7 @@ class ProvConfiguration:
             # set experiment to be non-interpolated if there is no network
             if not self.read_instance.network:
                 self.read_instance.interpolated = False
-                msg = "Experiments detected but no network specified, proceeding to download non-interpolated experiment experiments."
+                msg = "Experiments detected but no network specified, proceeding to download non-interpolated model output."
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
             # if there's experiments, ask the user whether they want interpolated or non-interpolated
