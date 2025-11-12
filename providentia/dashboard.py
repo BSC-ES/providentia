@@ -29,7 +29,7 @@ from .dashboard_elements import set_formatting
 from .fields_menus import (init_experiments, init_flags, init_qa, update_qa, init_metadata, init_multispecies, init_period, init_representativity,
                            metadata_conf, multispecies_conf, representativity_conf, period_conf, 
                            update_representativity_fields, update_period_fields, update_metadata_fields)
-from .plot_aux import get_taylor_diagram_ghelper
+from .plot_aux import get_taylor_diagram_ghelper, update_plotting_parameters
 from .plot_formatting import format_axis
 from .pop_up_window import PopUpWindow
 from .read import DataReader
@@ -1307,51 +1307,62 @@ class Dashboard(QtWidgets.QWidget):
 
         # otherwise update from the experiment-forecast pop-up window
         else:        
+            # update experiments to keep previously selected experiments if available
             self.experiments = {exp:self.previous_experiments[exp] if exp in self.previous_experiments else exp 
-                                for exp in self.experiments_menu['experiments']['keep_selected']}
-            #update experiments for selected forecast options
-            new_experiments = {}
-            self.forecast = []
-            for experiment_raw, experiment in self.experiments.items():
-                # initialise forecast_indices_per_data_label to empty dict for experiment
-                self.forecast_indices_per_data_label[self.networkspeci][experiment] = {}
-                # get available and selected forecast options
-                available_forecast_options = self.experiments_menu['experiments']['forecast'][experiment][0]
-                selected_forecast_options = self.experiments_menu['experiments']['forecast'][experiment][1]
-                available_forecast_days = [day.split('day')[-1].strip() for day in self.experiments_menu['experiments']['forecast_days'][experiment][0]]
-                selected_forecast_days = [day.split('day')[-1].strip() for day in self.experiments_menu['experiments']['forecast_days'][experiment][1]]
-                # set boolean if no forecast days are selected then by default take all
-                if len(selected_forecast_days) == 0:
-                    take_all_forecast_days = True
-                else:
-                    take_all_forecast_days = False
-                # if selected forecast options is empty, then simply set experiment as standard 
-                if len(selected_forecast_options) == 0:
-                    new_experiments[experiment_raw] = experiment
-                # otherwise modify experiment to combine with forecast option
-                else:
-                    # iterate through selected forecast options for experiment
-                    for selected_forecast_option in selected_forecast_options:
-                        # zip through available forecast indices and days for experiment
-                        for forecast_index, forecast_day in zip(self.available_forecast_indices_per_data_label[self.networkspeci][experiment], available_forecast_days):
-                            # if the forecast day has been selected or want to take all forecast day, the proceed
-                            if (forecast_day in selected_forecast_days) or (take_all_forecast_days):
-                                # modify experiment to include forecast option and forecast day
-                                new_experiment = '{}-{}{}'.format(experiment, selected_forecast_option, forecast_day)
-                                new_experiment_raw = '{}-{}{}'.format(experiment_raw, selected_forecast_option, forecast_day)
-                                new_experiments[new_experiment_raw] = new_experiment
-                                # update forecast and forecast index for experiment
-                                self.forecast_indices_per_data_label[self.networkspeci][experiment][new_experiment] = forecast_index
-                                # are taking all forecast days, if so do not attach day to forecast var
-                                if (take_all_forecast_days) or (len(selected_forecast_days) == len(self.available_forecast_indices_per_data_label[self.networkspeci][experiment])):
-                                    forecast_var = '{}'.format(selected_forecast_option)
-                                # otherwise atatch forecast day
-                                else:
-                                    forecast_var = '{}{}'.format(selected_forecast_option, forecast_day)
-                                if forecast_var not in self.forecast:
-                                    self.forecast.append(forecast_var)
+                                   for exp in self.experiments_menu['experiments']['keep_selected']}
 
-            self.experiments = copy.deepcopy(new_experiments)    
+            # if have experiments but no information in pop-up window, it is because data has been already loaded from a .conf, skip over section therefore
+            if (len(self.experiments) > 0) & (len(self.experiments_menu['experiments']['forecast']) > 0):
+
+                #update experiments for selected forecast options
+                new_experiments = {}
+                self.forecast = []
+                for experiment_raw, experiment in self.experiments.items():
+                    # if experiment not in forecast pop-up window, then it is not a forecast experiment, so simply add to new_experiments and continue
+                    if experiment not in self.experiments_menu['experiments']['forecast']:
+                        new_experiments[experiment_raw] = experiment
+                        continue 
+                    
+                    # initialise forecast_indices_per_data_label to empty dict for experiment
+                    self.forecast_indices_per_data_label[self.networkspeci][experiment] = {}
+                    # get available and selected forecast options
+                    available_forecast_options = self.experiments_menu['experiments']['forecast'][experiment][0]
+                    selected_forecast_options = self.experiments_menu['experiments']['forecast'][experiment][1]
+                    available_forecast_days = [day.split('day')[-1].strip() for day in self.experiments_menu['experiments']['forecast_days'][experiment][0]]
+                    selected_forecast_days = [day.split('day')[-1].strip() for day in self.experiments_menu['experiments']['forecast_days'][experiment][1]]
+                    # set boolean if no forecast days are selected then by default take all
+                    if len(selected_forecast_days) == 0:
+                        take_all_forecast_days = True
+                    else:
+                        take_all_forecast_days = False
+                    # if selected forecast options is empty, then simply set experiment as standard 
+                    if len(selected_forecast_options) == 0:
+                        new_experiments[experiment_raw] = experiment
+                    # otherwise modify experiment to combine with forecast option
+                    else:
+                        # iterate through selected forecast options for experiment
+                        for selected_forecast_option in selected_forecast_options:
+                            # zip through available forecast indices and days for experiment
+                            for forecast_index, forecast_day in zip(self.available_forecast_indices_per_data_label[self.networkspeci][experiment], available_forecast_days):
+                                # if the forecast day has been selected or want to take all forecast day, the proceed
+                                if (forecast_day in selected_forecast_days) or (take_all_forecast_days):
+                                    # modify experiment to include forecast option and forecast day
+                                    new_experiment = '{}-{}{}'.format(experiment, selected_forecast_option, forecast_day)
+                                    new_experiment_raw = '{}-{}{}'.format(experiment_raw, selected_forecast_option, forecast_day)
+                                    new_experiments[new_experiment_raw] = new_experiment
+                                    # update forecast and forecast index for experiment
+                                    self.forecast_indices_per_data_label[self.networkspeci][experiment][new_experiment] = forecast_index
+                                    # are taking all forecast days, if so do not attach day to forecast var
+                                    if (take_all_forecast_days) or (len(selected_forecast_days) == len(self.available_forecast_indices_per_data_label[self.networkspeci][experiment])):
+                                        forecast_var = '{}'.format(selected_forecast_option)
+                                    # otherwise attach forecast day
+                                    else:
+                                        forecast_var = '{}{}'.format(selected_forecast_option, forecast_day)
+                                    if forecast_var not in self.forecast:
+                                        self.forecast.append(forecast_var)
+
+                self.experiments = copy.deepcopy(new_experiments)    
+            
             self.data_labels = [self.observations_data_label] + list(self.experiments.values())
             self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
 
@@ -1443,8 +1454,38 @@ class Dashboard(QtWidgets.QWidget):
             if len(experiments_to_read) > 0:
                 read_operations.append('read_exp')
 
-        # has date range changed?
-        if len(read_operations) > 0:
+        # do not have read operations?
+        if len(read_operations) == 0:
+
+            # if have no read operations and have some forecast data, then need to do a little work to ensure data labels and experiments are correctly set
+            if len(self.forecast) > 0:
+
+                new_experiments = {}
+                data_labels_to_remove = []
+
+                for experiment, alias in self.experiments.items():
+                    if ('-daily' in experiment) or ('-combined' in experiment):
+                        if '-daily' in experiment:
+                            new_experiment = '{}-daily'.format(experiment.split('-daily')[0])
+                            new_alias = '{}-daily'.format(alias.split('-daily')[0])
+                        elif '-combined' in experiment:
+                            new_experiment = '{}-combined'.format(experiment.split('-combined')[0])
+                            new_alias = '{}-combined'.format(alias.split('-combined')[0])
+                        if new_experiment not in new_experiments: 
+                            new_experiments[new_experiment] = new_alias
+                        data_labels_to_remove.append(alias)
+                    else:
+                        # Keep experiments without '-daily' or '-combined' unchanged
+                        new_experiments[experiment] = alias
+                
+                self.experiments = dict(new_experiments)
+                self.data_labels = [self.observations_data_label] + list(self.experiments.values())
+                self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
+                update_plotting_parameters(self, data_labels_to_add=self.experiments.values(), 
+                                            data_labels_to_remove=data_labels_to_remove)
+
+        # have read operations?
+        else:
             
             # if reading/cutting observations then cover canvas to do updates gracefully
             if ('reset' in read_operations) or ('cut_left' in read_operations) or ('cut_right' in read_operations) or\
