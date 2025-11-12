@@ -544,19 +544,8 @@ class Dashboard(QtWidgets.QWidget):
             # read and filter
             self.handle_data_selection_update()
 
-            # set fields available for filtering
+            # update multispecies menu from conf
             multispecies_conf(self)
-            #representativity_conf(self)
-            #period_conf(self)
-            #metadata_conf(self)
-            #print('DASHBOARD INIT CONF/FILTER')
-            #self.mpl_canvas.handle_data_filter_update()
-
-            # for non-GHOST, we call update_metadata_fields after filtering to remove the stations that have
-            # 0 valid measurements, to do this we need to have valid_station_inds, which is obtained 
-            # after filtering
-            #if not self.reading_ghost:
-            #    update_metadata_fields(self)
 
             # reset from_conf variable to False after reading and filtering is complete
             self.from_conf = False
@@ -687,6 +676,7 @@ class Dashboard(QtWidgets.QWidget):
             self.selected_periodic_statistic_mode = copy.deepcopy(self.periodic_statistic_mode)
             self.selected_timeseries_statistic_aggregation = copy.deepcopy(self.timeseries_statistic_aggregation)
             self.selected_filter_species = copy.deepcopy(self.filter_species)
+            self.selected_networkspeci = '{}|{}'.format(self.selected_network, self.selected_species)
 
             # set initial filter species in widgets as empty dictionaries
             self.selected_widget_network = dict()
@@ -774,6 +764,9 @@ class Dashboard(QtWidgets.QWidget):
         else:
             self.selected_species = self.cb_species.currentText()
 
+        #update networkspecies field
+        self.selected_networkspeci = '{}|{}'.format(self.selected_network, self.selected_species)
+
         # update statistic mode field
         available_statistic_modes = ['Flattened', 'Spatial|Temporal', 'Temporal|Spatial']
         self.cb_statistic_mode.addItems(available_statistic_modes)
@@ -840,10 +833,32 @@ class Dashboard(QtWidgets.QWidget):
                                                                 if previous_selected_experiment in
                                                                 self.experiments_menu['experiments']['map_vars']]
 
-        
-        n_forecast_days = self.datareader.check_forecast(data_labels=self.experiments_menu['experiments']['keep_selected'], 
-                                                         networkspecies=['{}|{}'.format(self.selected_network, self.selected_species)], 
-                                                         dashboard_interactive=True)
+        # set selected experiments
+        all_experiments = {exp:self.experiments[exp] if exp in self.experiments else exp
+                           for exp in self.experiments_menu['experiments']['map_vars']}
+        selected_experiments = {exp:self.experiments[exp] if exp in self.experiments else exp
+                                for exp in self.experiments_menu['experiments']['keep_selected']}
+
+        # set selected data labels
+        all_data_labels = [self.observations_data_label] + list(all_experiments.values())
+        all_data_labels_raw = [self.observations_data_label] + list(all_experiments.keys())
+        selected_data_labels = [self.observations_data_label] + list(selected_experiments.values())
+        selected_data_labels_raw = [self.observations_data_label] + list(selected_experiments.keys())
+
+        # check N available forecast days for experiment
+        self.datareader.check_forecast(data_labels=all_data_labels, data_labels_raw=all_data_labels_raw,
+                                       networkspecies=[self.selected_networkspeci])
+
+        # update forecast indices and data labels based on selected forecast data 
+        selected_data_labels, selected_data_labels_raw, selected_experiments = self.datareader.update_forecast_indices(data_labels=all_data_labels, data_labels_raw=all_data_labels_raw,
+                                                                                                                       selected_data_labels=selected_data_labels, selected_data_labels_raw=selected_data_labels_raw,
+                                                                                                                       networkspecies=[self.selected_networkspeci])
+    
+        # if are loading from a .conf file then set data labels and experiments
+        if self.from_conf:
+            self.data_labels = copy.deepcopy(selected_data_labels)
+            self.data_labels_raw = copy.deepcopy(selected_data_labels_raw)
+            self.experiments = copy.deepcopy(selected_experiments)
 
         # update default qa
         default_qa = get_default_qa(self, self.selected_species)
@@ -1246,7 +1261,7 @@ class Dashboard(QtWidgets.QWidget):
         self.mpl_canvas.previous_plot_options = copy.deepcopy(self.mpl_canvas.current_plot_options) 
         # if previous data labels contain daily or combined forecast data, then ensure data labels, experiments and plotting params
         # refer to the data labels per day, not the summary label
-        if (np.any([True for data_label in self.data_labels if '-daily' in data_label])) or (np.any([True for data_label in self.data_labels if '-combined' in data_label])):
+        if ((np.any([True for data_label in self.data_labels if '-daily' in data_label])) or (np.any([True for data_label in self.data_labels if '-combined' in data_label]))) & (not self.from_conf):
             self.previous_experiments = self.original_experiments
             self.previous_data_labels = self.original_data_labels
             self.previous_data_labels_raw = self.original_data_labels_raw
@@ -1255,6 +1270,7 @@ class Dashboard(QtWidgets.QWidget):
             self.previous_experiments = self.experiments
             self.previous_data_labels = self.data_labels
             self.previous_data_labels_raw = self.data_labels_raw
+        
         # set new active variables as selected variables from menu
         self.start_date = int(self.le_start_date.text())
         self.end_date = int(self.le_end_date.text())
@@ -1273,105 +1289,47 @@ class Dashboard(QtWidgets.QWidget):
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
         self.networkspeci = self.networkspecies[0]
         self.filter_species = copy.deepcopy(self.selected_filter_species)
-
-        print(self.experiments)
-
-        # if are loading from a conf file pass through check for forecast dimension (if available)
-        if self.from_conf:
-            #self.data_labels = [self.observations_data_label] + list(self.experiments.values())
-            #self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
-            #self.datareader.check_forecast()
-
-            # update options selected on experiments pop-up
-            for experiment in self.experiments:
-                base_experiment = experiment.split('-daily')[0].split('-combined')[0].split('-day')[0]
-                forecast_extension = experiment.split('-')[-1]
-                if 'combined' in forecast_extension:
-                    selected_forecast_vars = ['combined']
-                    disabled_forecast_vars = ['daily','day']
-                elif 'daily' in forecast_extension:
-                    selected_forecast_vars = ['daily']
-                    disabled_forecast_vars = ['combined','day']
-                elif 'day' in forecast_extension:
-                    selected_forecast_vars = ['day']
-                    disabled_forecast_vars = ['combined','daily']
+        # if are not loading from conf then get data labels, experiments and forecast indices
+        if not self.from_conf:
+            experiments = {exp:self.previous_experiments[exp] if exp in self.previous_experiments else exp 
+                        for exp in self.experiments_menu['experiments']['keep_selected']}
+            data_labels = [self.observations_data_label] + list(experiments.values())
+            data_labels_raw = [self.observations_data_label] + list(experiments.keys())
+            self.forecast = []
+            for experiment_raw, experiment in experiments.items():
+                # get available and selected forecast options
+                available_forecast_options = self.experiments_menu['experiments']['forecast'][experiment][0]
+                selected_forecast_options = self.experiments_menu['experiments']['forecast'][experiment][1]
+                available_forecast_days = [day.split('day')[-1].strip() for day in self.experiments_menu['experiments']['forecast_days'][experiment][0]]
+                selected_forecast_days = [day.split('day')[-1].strip() for day in self.experiments_menu['experiments']['forecast_days'][experiment][1]]
+                # set boolean if no forecast days are selected then by default take all
+                if len(selected_forecast_days) == 0:
+                    take_all_forecast_days = True
                 else:
-                    continue
-
-                available_forecast_indices = self.available_forecast_indices_per_data_label[self.networkspeci][base_experiment]
-                selected_forecast_index = self.forecast_indices_per_data_label[self.networkspeci][base_experiment][experiment]
-        
-                available_forecast_vars = ['combined','daily','day']
-
-                available_forecast_day_vars = ['day {}'.format(forecast_index+1) for forecast_index in available_forecast_indices]
-                selected_forecast_day_var = 'day {}'.format(selected_forecast_index+1)
-
-                if base_experiment not in self.experiments_menu['experiments']['forecast']:
-                    self.experiments_menu['experiments']['forecast'][base_experiment] = [available_forecast_vars, selected_forecast_vars, disabled_forecast_vars]
-                    self.experiments_menu['experiments']['forecast_days'][base_experiment] = [available_forecast_day_vars, []]
-                self.experiments_menu['experiments']['forecast_days'][base_experiment][1].append(selected_forecast_day_var)
-
-        # otherwise update from the experiment-forecast pop-up window
-        else:        
-            # update experiments to keep previously selected experiments if available
-            self.experiments = {exp:self.previous_experiments[exp] if exp in self.previous_experiments else exp 
-                                   for exp in self.experiments_menu['experiments']['keep_selected']}
-
-            # if have experiments but no information in pop-up window, it is because data has been already loaded from a .conf, skip over section therefore
-            if (len(self.experiments) > 0) & (len(self.experiments_menu['experiments']['forecast']) > 0):
-
-                #update experiments for selected forecast options
-                new_experiments = {}
-                self.forecast = []
-                for experiment_raw, experiment in self.experiments.items():
-                    # if experiment not in forecast pop-up window, then it is not a forecast experiment, so simply add to new_experiments and continue
-                    if experiment not in self.experiments_menu['experiments']['forecast']:
-                        new_experiments[experiment_raw] = experiment
-                        continue 
-                    
-                    # initialise forecast_indices_per_data_label to empty dict for experiment
-                    self.forecast_indices_per_data_label[self.networkspeci][experiment] = {}
-                    # get available and selected forecast options
-                    available_forecast_options = self.experiments_menu['experiments']['forecast'][experiment][0]
-                    selected_forecast_options = self.experiments_menu['experiments']['forecast'][experiment][1]
-                    available_forecast_days = [day.split('day')[-1].strip() for day in self.experiments_menu['experiments']['forecast_days'][experiment][0]]
-                    selected_forecast_days = [day.split('day')[-1].strip() for day in self.experiments_menu['experiments']['forecast_days'][experiment][1]]
-                    # set boolean if no forecast days are selected then by default take all
-                    if len(selected_forecast_days) == 0:
-                        take_all_forecast_days = True
-                    else:
-                        take_all_forecast_days = False
-                    # if selected forecast options is empty, then simply set experiment as standard 
-                    if len(selected_forecast_options) == 0:
-                        new_experiments[experiment_raw] = experiment
-                    # otherwise modify experiment to combine with forecast option
-                    else:
-                        # iterate through selected forecast options for experiment
-                        for selected_forecast_option in selected_forecast_options:
-                            # zip through available forecast indices and days for experiment
-                            for forecast_index, forecast_day in zip(self.available_forecast_indices_per_data_label[self.networkspeci][experiment], available_forecast_days):
-                                # if the forecast day has been selected or want to take all forecast day, the proceed
-                                if (forecast_day in selected_forecast_days) or (take_all_forecast_days):
-                                    # modify experiment to include forecast option and forecast day
-                                    new_experiment = '{}-{}{}'.format(experiment, selected_forecast_option, forecast_day)
-                                    new_experiment_raw = '{}-{}{}'.format(experiment_raw, selected_forecast_option, forecast_day)
-                                    new_experiments[new_experiment_raw] = new_experiment
-                                    # update forecast and forecast index for experiment
-                                    self.forecast_indices_per_data_label[self.networkspeci][experiment][new_experiment] = forecast_index
-                                    # are taking all forecast days, if so do not attach day to forecast var
-                                    if (take_all_forecast_days) or (len(selected_forecast_days) == len(self.available_forecast_indices_per_data_label[self.networkspeci][experiment])):
-                                        forecast_var = '{}'.format(selected_forecast_option)
-                                    # otherwise attach forecast day
-                                    else:
-                                        forecast_var = '{}{}'.format(selected_forecast_option, forecast_day)
-                                    if forecast_var not in self.forecast:
-                                        self.forecast.append(forecast_var)
-
-                self.experiments = copy.deepcopy(new_experiments)    
+                    take_all_forecast_days = False
             
-            self.data_labels = [self.observations_data_label] + list(self.experiments.values())
-            self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
+                # otherwise modify experiment to combine with forecast option
+                if len(selected_forecast_options) > 0:
+                    # iterate through selected forecast options for experiment
+                    for selected_forecast_option in selected_forecast_options:
+                        # zip through available forecast indices and days for experiment
+                        for forecast_day in available_forecast_days:
+                            # if the forecast day has been selected or want to take all forecast day, the proceed
+                            if (forecast_day in selected_forecast_days) or (take_all_forecast_days):
 
+                                # are taking all forecast days, if so do not attach day to forecast var
+                                if (take_all_forecast_days) or (len(selected_forecast_days) == self.forecast_days_per_data_label[self.networkspeci][experiment]):
+                                    forecast_var = '{}'.format(selected_forecast_option)
+                                # otherwise attach forecast day
+                                else:
+                                    forecast_var = '{}{}'.format(selected_forecast_option, forecast_day)
+                                if forecast_var not in self.forecast:
+                                    self.forecast.append(forecast_var)
+        
+            # update forecast indices and data labels based on selected forecast data 
+            self.data_labels, self.data_labels_raw, self.experiments = self.datareader.update_forecast_indices(data_labels=data_labels, data_labels_raw=data_labels_raw,
+                                                                                                               networkspecies=[self.networkspeci])
+    
         # remove bias plot options if have no experiments loaded
         if len(self.data_labels) == 1:
             for plot_type in self.mpl_canvas.all_plots:
@@ -1460,49 +1418,8 @@ class Dashboard(QtWidgets.QWidget):
             if len(experiments_to_read) > 0:
                 read_operations.append('read_exp')
 
-        # do not have read operations?
-        if len(read_operations) == 0:
-
-            print('NO READ')
-
-            # if have no read operations and have some forecast data, then need to do a little work to ensure data labels and experiments are correctly set
-            if len(self.forecast) > 0:
-
-                new_experiments = {}
-                data_labels_to_remove = []
-                data_labels_to_add = []
-
-                for experiment, alias in self.experiments.items():
-                    if ('-daily' in experiment) or ('-combined' in experiment):
-                        if '-daily' in experiment:
-                            new_experiment = '{}-daily'.format(experiment.split('-daily')[0])
-                            new_alias = '{}-daily'.format(alias.split('-daily')[0])
-                        elif '-combined' in experiment:
-                            new_experiment = '{}-combined'.format(experiment.split('-combined')[0])
-                            new_alias = '{}-combined'.format(alias.split('-combined')[0])
-                        if new_experiment not in new_experiments: 
-                            new_experiments[new_experiment] = new_alias
-                        data_labels_to_remove.append(alias)
-                        data_labels_to_add.append(new_alias)
-                    else:
-                        # Keep experiments without '-daily' or '-combined' unchanged
-                        new_experiments[experiment] = alias
-                
-                print('UPDATE PP: DASHBOARD/FORECAST')
-                self.experiments = dict(new_experiments)
-                self.data_labels = [self.observations_data_label] + list(self.experiments.values())
-                self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
-
-                # check if need to add or remove updated data labels from plotting parameters
-                data_labels_to_remove = [exp for exp in data_labels_to_remove if exp in list(self.plotting_params.keys())]
-                data_labels_to_add = [exp for exp in data_labels_to_add if exp not in list(self.plotting_params.keys())]
-                update_plotting_parameters(self, data_labels_to_add=data_labels_to_add, 
-                                           data_labels_to_remove=data_labels_to_remove)
-
         # have read operations?
-        else:
-            
-            print('READ')
+        if len(read_operations) > 0:
 
             # if reading/cutting observations then cover canvas to do updates gracefully
             if ('reset' in read_operations) or ('cut_left' in read_operations) or ('cut_right' in read_operations) or\
@@ -1551,7 +1468,6 @@ class Dashboard(QtWidgets.QWidget):
             self.mpl_canvas.update_resampling_statistics()
 
             # run function to update filter
-            print('FILTER: DASHBOARD/READ')
             self.mpl_canvas.handle_data_filter_update()
 
             # for non-GHOST, we call update_metadata_fields after filtering to remove the stations that have
@@ -1636,7 +1552,6 @@ class Dashboard(QtWidgets.QWidget):
         self.le_maximum_value.setText(str(species_upper_limit))
         
         # unfilter data
-        print('FILTER: DASHBOARD/RESET')
         self.mpl_canvas.handle_data_filter_update()
         
         # for non-GHOST, we call update_metadata_fields after filtering to remove the stations that have

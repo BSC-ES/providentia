@@ -164,14 +164,6 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
     :param daily_forecast: Boolean indicating whether daily forecast adjustments are needed
     """
 
-    if hasattr(instance, 'plotting_params'):
-        print('PLOTTING PARAMS BEFORE:', instance.plotting_params.keys(), 'DATA LABELS:', instance.data_labels)
-    print('DATA LABELS BEFORE:', instance.data_labels)
-    if data_labels_to_remove is not None:
-        print('PLOTTING PARAMS REMOVING:', data_labels_to_remove)
-    if data_labels_to_add is not None:
-        print('PLOTTING PARAMS ADDING:', data_labels_to_add)
-
     # Reset plotting parameters if no labels to add or remove are specified
     if (data_labels_to_add is None) & (data_labels_to_remove is None):
         instance.plotting_params = {}        
@@ -256,9 +248,6 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
                 instance.plotting_params[instance.observations_data_label]['zorder'] + experiment_ind
             # Update count of experiments
             experiment_ind += 1
-
-    print('PLOTTING PARAMS AFTER:', instance.plotting_params.keys())
-    print('DATA LABELS AFTER:', instance.data_labels)
 
 
 def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott', xgrid=None):

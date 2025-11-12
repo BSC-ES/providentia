@@ -488,6 +488,7 @@ class PopUpWindow(QtWidgets.QWidget):
                             
                             #gather all forecast options, selected options and disabled options
                             var_to_check = menu_current_type['map_vars'][label_ii]
+
                             # only proceed if have previously intialised
                             if var_to_check in menu_current_type['forecast']:
                                 all_forecast_vars = menu_current_type['forecast'][var_to_check][0]
@@ -1026,68 +1027,86 @@ class PopUpWindow(QtWidgets.QWidget):
                 (networkspeci not in self.read_instance.selected_filter_species.keys())):
                 del self.read_instance.qa_per_species[speci]
 
-    def handle_forecast_option_generation(self, event):
-        """ Function to handle generation of forecast options in experiments tab, when an experiment is selected."""
+    def handle_experiment_checked(self, event):
+        """ 
+        Function to handle generation and display of forecast options 
+        in the experiments tab when an experiment checkbox is (un)checked.
+        """
 
-        # get widget line
+        # Get the source widget that triggered the event (the checkbox)
         event_source = self.sender()
+
+        # Extract the numeric index from the checkbox object name (e.g., 'experiment_2' → 2)
         label_ii = int(event_source.objectName().split('_')[1])
-        # get experiment
+
+        # Retrieve the experiment name corresponding to this index
         experiment = self.menu_current['experiments']['map_vars'][label_ii]
-        # get networkspeci
+
+        # Build a combined key for network and species (used for accessing forecast data)
         networkspeci = '{}|{}'.format(self.read_instance.selected_network, self.read_instance.selected_species)
 
-        # if experiment is checked, check if the experiment is a forecast experiment,
-        # and if so populate the combobox  
+        # --- CASE 1: Experiment is checked ---
         if event_source.isChecked():
-            # if do not have forecast options for experiment, need to generate them
-            #if experiment not in self.menu_current['experiments']['forecast']:
-            evaluate_forecast = False
-            if networkspeci not in self.read_instance.available_forecast_indices_per_data_label:
-                evaluate_forecast = True
-            elif experiment not in self.read_instance.available_forecast_indices_per_data_label[networkspeci]:
-                evaluate_forecast = True
 
-            if evaluate_forecast:
+            # Check if this experiment has forecast options defined
+            if experiment in self.menu_current['experiments']['forecast']:
 
-                # check N available forecast days for experiment
-                n_forecast_days = self.read_instance.datareader.check_forecast(data_labels=[experiment], networkspecies=[networkspeci], 
-                                                                               dashboard_interactive=True)
+                # Get all available forecast variable options and forecast day options
+                all_forecast_vars = self.menu_current['experiments']['forecast'][experiment][0]
+                all_forecast_day_vars = self.menu_current['experiments']['forecast_days'][experiment][0]
 
-                # set available forecast vars
-                if n_forecast_days > 0:
-                    all_forecast_vars = ['combined','daily','day']
-                else:
-                    all_forecast_vars = []
+                # Retrieve the QStandardItemModel for the forecast combobox (checkbox list)
+                forecast_model = self.page_memory['experiments']['forecast'][label_ii].model()
 
-                # set all available forecast day vars
-                all_forecast_day_vars = ['day {}'.format(forecast_day+1) for forecast_day in range(n_forecast_days)]
+                # Extract the current items from the combobox model
+                forecast_vars = [
+                    forecast_model.data(forecast_model.index(i, 0))
+                    for i in range(forecast_model.rowCount())
+                ]
 
-                # save forecast options in menu_current and page_memory
-                self.menu_current['experiments']['forecast'][experiment] = [all_forecast_vars, [], []]
-                self.page_memory['experiments']['forecast'][label_ii].addItems(all_forecast_vars)
-                self.page_memory['experiments']['forecast'][label_ii].model().setObjectName('forecastcheckboxes_' + str(label_ii))
-                self.page_memory['experiments']['forecast'][label_ii].model().dataChanged.connect(self.forecast_option_checked)
+                # If the combobox doesn’t already contain the correct items, populate it
+                if all_forecast_vars != forecast_vars:
+                    self.page_memory['experiments']['forecast'][label_ii].addItems(all_forecast_vars)
 
-                # add available forecast days for forecast option
-                self.menu_current['experiments']['forecast_days'][experiment] = [all_forecast_day_vars, []]
-                self.page_memory['experiments']['forecast_days'][label_ii].addItems(all_forecast_day_vars)
+                    # Set an identifiable name for the model (useful for debugging or tracking)
+                    forecast_model.setObjectName('forecastcheckboxes_' + str(label_ii))
 
-            # show forecast options and forecast days (if available)
-            if len(self.menu_current['experiments']['forecast'][experiment][0]) > 0:
-                # show forecast options
-                self.page_memory['experiments']['forecast'][label_ii].show()
-                for forecast_ii, forecast_var in enumerate(self.menu_current['experiments']['forecast'][experiment][0]):
-                    item = self.page_memory['experiments']['forecast'][label_ii].model().item(forecast_ii, 0)
-                    if item.checkState() == QtCore.Qt.Checked:
-                        # show forecast days
-                        self.page_memory['experiments']['forecast_days'][label_ii].show()
-                        break
+                    # Connect dataChanged signal to the handler for checking/unchecking forecast options
+                    forecast_model.dataChanged.connect(self.forecast_option_checked)
 
-        # else if experiment is not checked, hide forecast options and forecast days
+                # --- Add available forecast days (secondary combobox) ---
+                forecast_day_model = self.page_memory['experiments']['forecast_days'][label_ii].model()
+
+                # Extract the current forecast day items
+                forecast_day_vars = [
+                    forecast_day_model.data(forecast_day_model.index(i, 0))
+                    for i in range(forecast_day_model.rowCount())
+                ]
+
+                # If the forecast days differ from the expected ones, populate them
+                if all_forecast_day_vars != forecast_day_vars:
+                    self.page_memory['experiments']['forecast_days'][label_ii].addItems(all_forecast_day_vars)
+
+                # --- Display the forecast option widgets ---
+                if len(all_forecast_vars) > 0:
+                    # Show the forecast options combobox
+                    self.page_memory['experiments']['forecast'][label_ii].show()
+
+                    # Iterate through forecast variables and check their state
+                    for forecast_ii, forecast_var in enumerate(all_forecast_vars):
+                        item = self.page_memory['experiments']['forecast'][label_ii].model().item(forecast_ii, 0)
+
+                        # If any forecast option is already checked, show forecast days as well
+                        if item.checkState() == QtCore.Qt.Checked:
+                            self.page_memory['experiments']['forecast_days'][label_ii].show()
+                            break
+
+        # --- CASE 2: Experiment is unchecked ---
         else:
+            # Hide both forecast options and forecast day widgets
             self.page_memory['experiments']['forecast'][label_ii].hide()
             self.page_memory['experiments']['forecast_days'][label_ii].hide()
+
 
     def forecast_option_checked(self, event):
         """ Function to handle generation of forecast day options in experiments tab, when a forecast option is selected.
