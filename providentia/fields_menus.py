@@ -494,7 +494,7 @@ def multispecies_conf(instance):
     """ Function used when loading from a configuration file. 
         Sets defined multispecies filtering variables, rest of variables are set to default. 
 
-        :param instance: Instance of class Report or Dashboard
+        :param instance: Instance of class Dashboard
         :type instance: object
     """
 
