@@ -47,8 +47,7 @@ class Download(object):
         self.prv_user = env.get("PRV_USER")
         self.prv_password = env.get("PRV_PWD")
 
-        # get user preference over GHOST download, overwrite and origin update (ACTRIS)
-        self.overwrite_choice = env.get("OVERWRITE")
+        # get origin update (ACTRIS)
         self.origin_update_choice = env.get("ORIGIN_UPDATE")
 
         # set timeout limit
@@ -361,21 +360,15 @@ class Download(object):
             # if there was any file downloaded before the execution    
             if downloaded_before_execution_files:
                 # make the user choose between overwriting or not overwriting
-                if self.overwrite_choice not in ['y','n']:
+                if not isinstance(self.dl_overwrite, bool):
                     # ask if user wants to overwrite
-                    while self.overwrite_choice not in ['y','n','']:
-                        self.overwrite_choice = input("\nThere are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)? ").lower() 
-                    # ask if user wants to remember the decision
-                    remind_txt = None
-                    while remind_txt not in ['y','n','']:
-                        remind_txt = input("\nDo you want to remember your decision for future downloads ([y]/n)? ").lower() 
-                    # save the decision
-                    if remind_txt in ['y','']:
-                        with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
-                            f.write(f"OVERWRITE=y\n")
-                # if user wants to overwrite then add the the files that were 
-                # downloaded before the execution as if they were never downloaded
-                if self.overwrite_choice in ['y','']:
+                    overwrite_choice = None
+                    while overwrite_choice not in ['y','n','']:
+                        overwrite_choice = input("\nThere are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)? ").lower() 
+                    self.dl_overwrite = overwrite_choice != 'n'
+
+                # if user wants to overwrite then add the files downloaded before the execution as if they were never downloaded
+                if self.dl_overwrite:
                     not_downloaded_files += downloaded_before_execution_files
                 # change overwritten files boolean to True to indicate that some files were ignored
                 else:
