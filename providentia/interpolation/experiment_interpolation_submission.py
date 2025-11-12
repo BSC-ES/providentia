@@ -886,9 +886,9 @@ class SubmitInterpolation(object):
         self.per_worker_mem_gb=0.75
         self.per_worker_cpu_fraction=1.0/self.n_cpus
         self.per_worker_swap_gb=0.1
-        self.cpu_fraction_limit=0.8 
-        self.mem_fraction_limit=0.8
-        self.swap_fraction_limit=0.8
+        self.cpu_fraction_limit=0.75 
+        self.mem_fraction_limit=0.75
+        self.swap_fraction_limit=0.75
 
         # set run commands
         self.commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(
@@ -1012,25 +1012,26 @@ class SubmitInterpolation(object):
         else:
             n_workers = min(max_workers_cpu, max_workers_mem, total_cores)
         
-        # --- Summary print ---
-        print("=== Safe Pool Worker Estimation ===")
-        print(f"CPU: {cpu_now*100:.1f}% used / limit fraction: {self.cpu_fraction_limit}, max workers: {max_workers_cpu}")
-        print(f"Memory: {used_mem_gb:.2f} GB used / {vm.total / (1024**3):.2f} GB total")
-        if 'effective_mem_fraction' in locals():
-            print(f"Memory fraction limit: {self.mem_fraction_limit} -> effective: {effective_mem_fraction:.2f}, max workers: {max_workers_mem}")
-        else:
-            print(f"Memory fraction limit: {self.mem_fraction_limit}, max workers: {max_workers_mem}")
-        print(f"Swap: {swap_used_gb:.2f} GB used / {swap_total_gb:.2f} GB total")
-        print(f"Swap fraction limit: {self.swap_fraction_limit}, swap allowed for pool: {swap_allowed_gb:.2f} GB")
-        print(f"Total physical cores: {total_cores}")
-        print(f"=== Suggested safe pool size: {n_workers} workers ===\n")
+        # --- Summary print for debugging
+        #print("=== Safe Pool Worker Estimation ===")
+        #print(f"CPU: {cpu_now*100:.1f}% used / limit fraction: {self.cpu_fraction_limit}, max workers: {max_workers_cpu}")
+        #print(f"Memory: {used_mem_gb:.2f} GB used / {vm.total / (1024**3):.2f} GB total")
+        #if 'effective_mem_fraction' in locals():
+        #    print(f"Memory fraction limit: {self.mem_fraction_limit} -> effective: {effective_mem_fraction:.2f}, max workers: {max_workers_mem}")
+        #else:
+        #    print(f"Memory fraction limit: {self.mem_fraction_limit}, max workers: {max_workers_mem}")
+        #print(f"Swap: {swap_used_gb:.2f} GB used / {swap_total_gb:.2f} GB total")
+        #print(f"Swap fraction limit: {self.swap_fraction_limit}, swap allowed for pool: {swap_allowed_gb:.2f} GB")
+        #print(f"Total physical cores: {total_cores}")
+        #print(f"=== Suggested safe pool size: {n_workers} workers ===\n")
 
         return max(1, n_workers)
 
     def resource_safe_job(self, cmd, check_interval=1.0, stagger_range=(0.0, 5.0)):
         """Wait until system resources are below thresholds, then run the job."""
 
-        print(f"[JOB INIT] Preparing to run: {cmd}", flush=True)
+        # print for debugging
+        #print(f"[JOB INIT] Preparing to run: {cmd}", flush=True)
 
         while True:
             cpu = psutil.cpu_percent(interval=None) / 100.0
@@ -1042,11 +1043,11 @@ class SubmitInterpolation(object):
             else:
                 overload = max(cpu / self.cpu_fraction_limit, mem / self.mem_fraction_limit, swap / self.swap_fraction_limit)
 
-            # Print current usage
-            print(f"[RESOURCE CHECK] CPU: {cpu*100:.1f}% / {self.cpu_fraction_limit*100:.0f}% | "
-                f"MEM: {mem*100:.1f}% / {self.mem_fraction_limit*100:.0f}% | "
-                f"SWAP: {swap*100:.1f}% / {self.swap_fraction_limit*100:.0f}% | "
-                f"{'Waiting...' if overload>1 else 'Safe to run!'}", flush=True)
+            # print for debugging
+            #print(f"[RESOURCE CHECK] CPU: {cpu*100:.1f}% / {self.cpu_fraction_limit*100:.0f}% | "
+            #    f"MEM: {mem*100:.1f}% / {self.mem_fraction_limit*100:.0f}% | "
+            #    f"SWAP: {swap*100:.1f}% / {self.swap_fraction_limit*100:.0f}% | "
+            #    f"{'Waiting...' if overload>1 else 'Safe to run!'}", flush=True)
 
             if overload <= 1.0:
                 break
