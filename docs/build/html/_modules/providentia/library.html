@@ -1238,11 +1238,11 @@
 
         <span class="c1"># initialise default configuration variables</span>
         <span class="c1"># modified by passed arguments, if given</span>
-        <span class="n">provconf</span> <span class="o">=</span> <span class="n">ProvConfiguration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">provconf</span> <span class="o">=</span> <span class="n">ProvConfiguration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># for any passed arguments not in default Providentia variables, now set them to self</span>
         <span class="k">for</span> <span class="n">kwarg</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">kwarg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">provconf</span><span class="o">.</span><span class="n">var_defaults</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kwarg</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">provconf</span><span class="o">.</span><span class="n">var_defaults</span><span class="p">:</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwarg</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">kwarg</span><span class="p">])</span>
 
         <span class="c1"># update variables to set from config file</span>
@@ -1298,7 +1298,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">section_opts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_opts</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">section</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_opts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">provconf</span><span class="o">.</span><span class="n">parse_parameter</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">provconf</span><span class="o">.</span><span class="n">parse_parameter</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
 
         <span class="c1"># parse subsection</span>
         <span class="c1"># if subsection name is provided, try and use that</span>
@@ -1344,10 +1344,10 @@
             <span class="c1"># update subsection variables</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsection_opts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-                    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">provconf</span><span class="o">.</span><span class="n">parse_parameter</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">provconf</span><span class="o">.</span><span class="n">parse_parameter</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
 
         <span class="c1"># now all variables have been parsed, check validity of those, throwing errors where necessary</span>
-        <span class="n">provconf</span><span class="o">.</span><span class="n">check_validity</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">provconf</span><span class="o">.</span><span class="n">check_validity</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="kc">True</span>
 
@@ -1607,9 +1607,12 @@
                 <span class="n">interpolation</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="o">**</span><span class="n">parent_kwargs</span><span class="p">)</span>
             <span class="k">finally</span><span class="p">:</span>
                 <span class="c1"># reset stdout</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">orig_stdout</span></div>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">orig_stdout</span>
 
-                
+        <span class="c1"># reuse logger</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">provconf</span><span class="o">.</span><span class="n">switch_logging</span><span class="p">()</span></div>
+
+
 <div class="viewcode-block" id="Providentia.report">
 <a class="viewcode-back" href="../../reference.html#providentia.library.Providentia.report">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
