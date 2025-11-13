@@ -1263,6 +1263,10 @@ class Dashboard(QtWidgets.QWidget):
         # if previous data labels contain daily or combined forecast data, then ensure data labels, experiments and plotting params
         # refer to the data labels per day, not the summary label
         if ((np.any([True for data_label in self.data_labels if '-daily' in data_label])) or (np.any([True for data_label in self.data_labels if '-combined' in data_label]))) & (not self.from_conf):
+            self.previous_experiments_summary = self.experiments
+            self.previous_data_labels_summary = self.data_labels
+            self.previous_data_labels_raw_summary = self.data_labels_raw
+            self.plotting_params_summary = copy.deepcopy(self.plotting_params)
             self.previous_experiments = self.original_experiments
             self.previous_data_labels = self.original_data_labels
             self.previous_data_labels_raw = self.original_data_labels_raw
@@ -1419,8 +1423,19 @@ class Dashboard(QtWidgets.QWidget):
             if len(experiments_to_read) > 0:
                 read_operations.append('read_exp')
 
+        # have no read operations?
+        if len(read_operations) == 0:
+
+            # if have daily or combined forecast active and have no read operations, 
+            # then revert data labels, experiments and plotting params to how they were before as will not entering filter  
+            if ((np.any([True for data_label in self.data_labels if '-daily' in data_label])) or (np.any([True for data_label in self.data_labels if '-combined' in data_label]))) & (not self.from_conf):
+                self.experiments = self.previous_experiments_summary
+                self.data_labels = self.previous_data_labels_summary
+                self.data_labels_raw = self.previous_data_labels_raw_summary
+                self.plotting_params = self.plotting_params_summary
+
         # have read operations?
-        if len(read_operations) > 0:
+        elif len(read_operations) > 0:
 
             # if reading/cutting observations then cover canvas to do updates gracefully
             if ('reset' in read_operations) or ('cut_left' in read_operations) or ('cut_right' in read_operations) or\

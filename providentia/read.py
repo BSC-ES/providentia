@@ -773,6 +773,7 @@ class DataReader:
         # if have more than 1 networkspecies (including filter networkspecies), and spatial_colocation is active,
         # then spatially colocate stations across species
         if (len((self.read_instance.networkspecies + self.read_instance.filter_networkspecies)) > 1) & (self.read_instance.spatial_colocation):
+            
             # get intersecting station indices across species (handle both GHOST and non-GHOST cases)
             self.sc = SpatialColocation(self.read_instance)
 
@@ -985,8 +986,8 @@ class DataReader:
             data_labels_to_add = []
             data_labels_raw_to_add = []
 
-            # reset experiments pop-up menu options if not in report/library mode
-            if (not self.read_instance.report) & (not self.read_instance.library):
+            # reset experiments pop-up menu options if in dashboard mode
+            if self.read_instance.mode not in ['report', 'library']:
                 self.read_instance.experiments_menu['experiments']['forecast'] = {}
                 self.read_instance.experiments_menu['experiments']['forecast_days'] = {}
 
@@ -1099,8 +1100,8 @@ class DataReader:
         Updates the forecast menu options for a given dataset and forecast configuration.
         """
 
-        # Only proceed if we are not currently in a report or library context
-        if (not self.read_instance.report) & (not self.read_instance.library):
+        # Only proceed if are in dashboard mode
+        if self.read_instance.mode not in ['report', 'library']:
             
             # Case 1: No forecast days are available
             if n_forecast_days == 0:
