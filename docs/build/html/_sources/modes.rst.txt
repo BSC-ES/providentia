@@ -8,6 +8,6 @@ Modes
    Interpolation.md
    Dashboard.md
    Report.md
-   download.rst
+   Download-mode.rst
    Library.md
    Notebook.md
