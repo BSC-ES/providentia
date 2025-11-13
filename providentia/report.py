@@ -822,6 +822,9 @@ class Report:
             if self.subsection not in self.stats_station:
                 self.stats_station[self.subsection] = {}
 
+            # initialise forecast experiments as None
+            forecast_experiments = None
+
             # update the conf options for defined subsection
             if len(self.child_subsection_names) > 0:
 
@@ -840,8 +843,6 @@ class Report:
                 # if have forecast active then save current experiment variable in memory as may need to set it if no-reading data 
                 if len(self.forecast) != 0:
                     forecast_experiments = copy.deepcopy(self.experiments)  
-                else:
-                    forecast_experiments = None
 
                 # reinitialise default configuration variables
                 # modified by commandline arguments, if given
