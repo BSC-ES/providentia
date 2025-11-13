@@ -480,8 +480,8 @@ class PopUpWindow(QtWidgets.QWidget):
                             var_to_check = menu_current_type['map_vars'][label_ii]
                             if var_to_check in menu_current_type[element]:
                                 self.page_memory[menu_type][element][label_ii].setCheckState(QtCore.Qt.Checked)
-                            # connect checkbox to handle forecast option generation
-                            self.page_memory[menu_type][element][label_ii].stateChanged.connect(self.handle_forecast_option_generation)
+                            # connect checkbox to handle experiment being checked
+                            self.page_memory[menu_type][element][label_ii].stateChanged.connect(self.handle_experiment_checked)
 
                         # update forecast options combobox back to previously available and selected values
                         elif element == 'forecast':

@@ -1078,7 +1078,7 @@ class SubmitInterpolation(object):
         ''' Function to print stdout to console in library mode'''
 
         #library mode?
-        if self.library:
+        if self.mode == 'library':
             #flush stdout
             sys.stdout.flush()
             #get current stdout

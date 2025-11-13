@@ -1,8 +1,8 @@
-µg/m3: µg/m3
+µg/m3: ug m-3
 Pa : Pa  
 (0 - 1) : unitless
 '~' : unitless
-kg kg**-1 : mol mol-1
+kg kg**-1 : kg kg-1
 m : m
 m of water equivalent : m
 K : K
