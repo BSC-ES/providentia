@@ -35,7 +35,7 @@ species_list=(
     # "sconcbap" 
     # "sconcbappm" 
     # "sconcbc" 
-    # "sconcc" # Artifacts
+    # "sconcc"
     # "sconcc10h16" # No data
     # "sconcc2h4"
     # "sconcc2h6" 
@@ -57,7 +57,7 @@ species_list=(
     # "sconccr" 
     # "sconccu" 
     # "sconcdu" 
-    # "sconcec" # Artifacts
+    # "sconcec"
     # "sconcfe" 
     # "sconchcho" 
     # "sconchcl" 
@@ -79,7 +79,7 @@ species_list=(
     # "sconcno2" 
     # "sconcno3" 
     # "sconco3" 
-    # "sconcoc" # Artifacts
+    # "sconcoc"
     # "sconcoxyl" 
     # "sconcpb" 
     # "sconcse" 

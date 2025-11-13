@@ -650,15 +650,6 @@ class Actris:
                 local_warnings += f'Data at {wavelength}nm could not be found. Existing wavelengths: {existing_wavelengths}. '
                 return url, station, local_errors, local_warnings
 
-        # remove artifact and fraction (sconcoc)
-        # TODO: Discuss this
-        if 'Artifact' in list(ds.coords):
-            local_warnings += f'Taking data from first artifact dimension (Artifact={ds.Artifact.values[0]}). '
-            ds = ds.isel(Artifact=0, drop=True)
-        if 'Fraction' in list(ds.coords):
-            local_warnings += f'Taking data from first fraction dimension (Fraction={ds.Fraction.values[0]}). '
-            ds = ds.isel(Fraction=0, drop=True)
-
         # read variable
         da_var = ds[possible_var]
 
