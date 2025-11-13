@@ -215,7 +215,7 @@ class ProvConfiguration:
             self.read_instance.available_species = list(self.read_instance.parameter_dictionary.keys())
             
             # get standard metadata dictionary
-            self.read_instance.standard_metadata = get_standard_metadata({'standard_units': ''})
+            self.read_instance.standard_metadata = get_standard_metadata({'standard_units':'', 'units_quantity':''})
             
             # create list of GHOST metadata variables to read
             self.read_instance.ghost_metadata_vars_to_read = [key for key in self.read_instance.standard_metadata.keys() if
