@@ -81,14 +81,23 @@ class ExperimentInterpolation(object):
         with open(submission_file, 'r') as f:
             submission_file_txt = f.read().split()
 
+        # join unclosed lists together in 1 element
+        submission_file_txt_joined=[]; cur=''; n=0
+        for t in submission_file_txt:
+            cur += (' ' + t if cur else t)
+            n += t.count('[') - t.count(']')
+            if n == 0:
+                submission_file_txt_joined.append(cur)
+                cur = ''
+
         # get configuration variables from the management_logs
         for variable_key in ["ghost_version", "forecast", "interp_spinup_timesteps", 
                              "interp_experiment_downsampling", "interp_experiment_upsampling", 
                              "interp_n_neighbours", "interp_reverse_vertical_orientation", 
                              "exp_root", "ghost_root", "exp_to_interp_root", 
                              "nonghost_root"]:
-            variable_val_idx = submission_file_txt.index(variable_key+":")+1
-            variable_val = submission_file_txt[variable_val_idx]
+            variable_val_idx = submission_file_txt_joined.index(variable_key+":")+1
+            variable_val = submission_file_txt_joined[variable_val_idx]
             # make sure some variables are correct types
             if variable_key in ["interp_reverse_vertical_orientation", "forecast"]:
                 setattr(self, variable_key, ast.literal_eval(variable_val))
