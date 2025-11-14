@@ -25,12 +25,11 @@ jobs:
       run: |
         conda run -n providentia-env_v3.0.0 coverage run -m pytest tests
         conda run -n providentia-env_v3.0.0 coverage report -i -m
-    - name: Generate coverage badge
-      run: conda run -n providentia-env_v3.0.0 coverage-badge > coverage.svg
-    - name: Update coverage badge
-      uses: stefanzweifel/git-auto-commit-action@v7
+        conda run -n providentia-env_v3.0.0 coverage xml -o coverage.xml
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
       with:
-        commit_message: "Update coverage badge"
-        commit_user_name: "github-actions[bot]"
-        commit_user_email: "github-actions[bot]@users.noreply.github.com"
-        file_pattern: "coverage.svg"
+        fail_ci_if_error: true
+        flags: pytest
+        verbose: true
+        token: ${{ secrets.CODECOV_TOKEN }}
