@@ -273,7 +273,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
     if $active_env; then
         if $notebook; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-            echo "Starting jupyter session."
+            echo "Starting Jupyter session."
             echo "Check 'notebook.out' for information on how to connect to session."
             
             if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
@@ -317,7 +317,7 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
     echo "INFO: Running on ${BSC_MACHINE}..."
     if $notebook; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-        echo "Starting notebook jupyter session."
+        echo "Starting notebook Jupyter session."
         echo "Check 'notebook.out' for information on how to connect to session."
         eval "${load_command}"
         if [[ "${constraint}" == "lowmem" ]]; then
@@ -379,7 +379,7 @@ elif [ "${ip}" == "84.88.185.48" ]; then
     echo "INFO: Running on the hub..."
     eval "${load_command}"
     if $notebook; then
-        echo "Starting jupyter session."
+        echo "Starting Jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}
         jupyter-lab
 
@@ -410,7 +410,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
     if $active_env; then
         if $notebook; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-            echo "Starting jupyter session."
+            echo "Starting Jupyter session."
             echo "Check 'notebook.out' for information on how to connect to session."
             
             if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
@@ -473,7 +473,7 @@ elif [ "${BSC_MACHINE}" == "grace" ]; then
     if $active_env; then
         if $notebook; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-            echo "Starting jupyter session."
+            echo "Starting Jupyter session."
             echo "Check 'notebook.out' for information on how to connect to session."
             
             if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
@@ -544,7 +544,7 @@ elif [ "${ip}" == "84.88.185.205" ]; then
     fi  
 
     if $notebook; then
-        echo "Starting jupyter session."
+        echo "Starting Jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}
         jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
     elif $interpolation; then
@@ -603,7 +603,7 @@ else
     fi
 
     if $notebook; then
-        echo "Starting jupyter session."
+        echo "Starting Jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}
         jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
     elif $interpolation; then

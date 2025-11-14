@@ -1359,7 +1359,7 @@ class DataReader:
                                             self.read_instance.logger,
                                             default_qa_active, filter_read, 
                                             network, forecast_indices))
-  
+
             returned_data = pool.map(read_netcdf_data, tuple_arguments)
 
             pool.close()
