@@ -12,12 +12,15 @@ echo "    [-m|--mem MEMORY (only valid on P9, default=20Gb)]"
 echo "    [--constraint CONSTRAINT (default=medmem)]"
 }
 
-getopt --test 2> /dev/null
-if [[ $? -ne 4 ]]; then
-    echo "GNU's enhanced getopt is required to run this script"
-    echo "You can usually find this in the util-linux package"
-    echo "On MacOS/OS X see homebrew's package: http://brewformulas.org/Gnu-getopt"
-    echo "For anyone else, build from source: http://frodo.looijaard.name/project/getopt"
+# check we are using GNU getopt
+out=$(getopt -T)
+if (( $? != 4 )) && [[ -n $out ]]; then
+    echo "GNU getopt is required to run Providentia."
+    echo "On MacOS this can be installed using Homebrew: brew install gnu-getopt"
+    echo "If Homebrew is not installed, see here: https://brew.sh"
+    echo "On other platforms it should be built from source: https://frodo.looijaard.name/project/getopt"
+    echo "After installation, a line to pass the location of the gnu-getopt executable to the PATH must be added to your .zshrc (Mac) or .bashrc (Linux) file."
+    echo 'For example: export PATH="/opt/homebrew/opt/gnu-getopt/bin:$PATH"'
     exit 1
 fi
 
