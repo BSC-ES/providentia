@@ -1,5 +1,5 @@
 [![CI](https://github.com/BSC-ES/providentia/actions/workflows/pytest.yaml/badge.svg?key_text=CI&key_width=30)]([https://github.com/BSC-ES/providentia/actions](https://github.com/BSC-ES/providentia/actions/workflows/pytest.yaml))
-[![Coverage](https://github.com/BSC-ES/providentia/blob/master/coverage.svg?key_text=Coverage)](https://github.com/BSC-ES/providentia/actions)
+[![Coverage](https://img.shields.io/codecov/c/github/BSC-ES/providentia.svg)](https://github.com/BSC-ES/providentia/actions)
 
 # About
 
