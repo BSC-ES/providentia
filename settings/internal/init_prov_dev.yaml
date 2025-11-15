@@ -88,7 +88,7 @@
   "interp_multiprocessing": False,
   "interp_spinup_timesteps": 0,
   "interp_experiment_downsampling": "mean",
-  "interp_experiment_upsampling": null,
+  "interp_experiment_upsampling": "fill",
   "logfile": False,
   "fixed_section_vars":
     [

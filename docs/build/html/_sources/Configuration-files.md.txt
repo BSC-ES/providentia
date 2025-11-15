@@ -92,7 +92,7 @@ It is **mandatory** to define sections to launch Providentia. Their names must b
 | interp_n_neighbours | ✗ | The number of nearest neighbours to use in the interpolation of experiment output to observational stations. If not set, this defaults to `4`.|
 | interp_spinup_timesteps | ✗ | Needs to be a number|
 | interp_experiment_downsampling | ✗ | mean or median|
-| interp_experiment_upsampling | ✗ | None, fill or gaps|
+| interp_experiment_upsampling | ✗ | fill, interpolate, or gaps|
 | interp_multiprocessing | ✗ | Use multiprocessing instead of greasy to interpolate in HPC machines. |
   
 Defining a list of experiments is optional since the user might only want to check the observations data.

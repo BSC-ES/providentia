@@ -245,7 +245,7 @@ class Providentia:
             self.logger.info(f'Resetting data filters to when class was initialised, loading {self.subsection} subsection filters.')
         else:
             self.logger.info(f'Resetting all data filters.')
-   
+
         # initialise structures to store fields        
         init_representativity(self)
         init_period(self)
@@ -269,7 +269,7 @@ class Providentia:
             representativity_conf(self)
             period_conf(self)
             metadata_conf(self)
-            
+
         # re-filter 
         self.apply_filter()
 
@@ -1132,6 +1132,13 @@ class Providentia:
     def set_config(self, **kwargs):
         """ Wrapper method to set configuration variables. """
 
+        # if have forecast active then save current experiment variable in memory as will want to set it again 
+        # after resetting configuration variables, as are not re-reading 
+        forecast_experiments = None
+        if hasattr(self, 'forecast'): 
+            if len(self.forecast) != 0:
+                forecast_experiments = copy.deepcopy(self.experiments)
+            
         # initialise default configuration variables
         # modified by passed arguments, if given
         self.provconf = ProvConfiguration(self, **kwargs)
@@ -1237,6 +1244,7 @@ class Providentia:
             # ensure all fixed section variables defined in subsection have same value as current section variables
             self.subsection_opts = {k: (self.section_opts[k] if k in self.fixed_section_vars else val) 
                                     for (k, val) in self.subsection_opts.items()}
+            
             # update subsection variables
             for k, val in self.subsection_opts.items():
                 if k not in kwargs:
@@ -1244,6 +1252,10 @@ class Providentia:
 
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         self.provconf.check_validity()
+
+        # overwrite experiments variable if forecast active
+        if forecast_experiments is not None:
+            self.experiments = forecast_experiments
 
         return True
 

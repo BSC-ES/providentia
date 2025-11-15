@@ -164,6 +164,9 @@
     "actris/actris": {
         "hourly": {
             "gas": {
+                "sconcno2": [
+                    "202306"
+                ],
                 "sconco3": [
                     "201801",
                     "201802",
