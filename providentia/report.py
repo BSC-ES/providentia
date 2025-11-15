@@ -840,7 +840,7 @@ class Report:
                 self.subsection_opts = {k: (self.section_opts[k] if k in self.fixed_section_vars else val) 
                                         for (k, val) in self.subsection_opts.items()}
 
-                # if have forecast active then save current experiment variable in memory as may need to set it if no-reading data 
+                # if have forecast active then save current experiment variable in memory as may need to set it if not re-reading data 
                 if len(self.forecast) != 0:
                     forecast_experiments = copy.deepcopy(self.experiments)  
 

@@ -680,14 +680,37 @@ class ExperimentInterpolation(object):
             conv_obj = unit_converter.convert_units(self.mod_speci_units, obs_speci_units, 1.0, species=speci_chemical_formula, input_quantity=model_quantity, output_quantity=obs_quantity) 
             self.conversion_factor = conv_obj.conversion_factor
 
+    def get_resampling_direction(self):
+        """ Determine resampling direction. """
+
+        freq_map = {
+            "hourly": 1,
+            "hourly_instantaneous": 1,
+            "3hourly": 3,
+            "3hourly_instantaneous": 3,
+            "6hourly": 6,
+            "6hourly_instantaneous": 6,
+            "daily": 24,
+            "monthly": 24 * 30}
+
+        in_freq = freq_map[self.model_temporal_resolution]
+        out_freq = freq_map[self.temporal_resolution_to_output]
+
+        # input resolution finer than output resolution (downsampling)
+        if in_freq < out_freq:
+            return "downsampling"
+        # input resolution coarser than output resolution (upsampling)
+        elif in_freq > out_freq:
+            return "upsampling"
+        # no resampling
+        else:
+            return
+        
     def get_monthly_model_data(self):
         """ Read all relevant model data in yearmonth into memory. """
 
-        # temporal resolution to output is coarser than model resolution, therefore will need to modify temporal 
-        # resolution and perform resampling?
-        resampling = False
-        if self.temporal_resolution_to_output != self.model_temporal_resolution: 
-            resampling = True
+        # determine resampling direction (upsampling, downsampling or None)
+        resampling_direction = self.get_resampling_direction()
 
         # get number of days in month processing
         self.days_in_month = monthrange(int(self.year),int(self.month))[1]
@@ -971,10 +994,21 @@ class ExperimentInterpolation(object):
                         xr_data = xr_data.assign_coords(longitude=self.x).sortby('longitude')
                         xr_data = xr_data.assign_coords(latitude=self.y).sortby('latitude')
 
-                    # do resampling (taking mean) to coarser temporal resolution if neccessary
-                    if resampling:
-                        xr_data = xr_data.resample(time=self.temporal_resolution_to_output_code).mean()     
-                    
+                    # do resampling
+                    if resampling_direction:
+                        if resampling_direction == 'downsampling':
+                            if self.interp_experiment_downsampling == 'mean':
+                                xr_data = xr_data.resample(time=self.temporal_resolution_to_output_code).mean()   
+                            elif self.interp_experiment_downsampling == 'median':
+                                xr_data = xr_data.resample(time=self.temporal_resolution_to_output_code).median()   
+                        elif resampling_direction == 'upsampling':
+                            if self.interp_experiment_upsampling == 'fill':
+                                xr_data = xr_data.resample(time=self.temporal_resolution_to_output_code).ffill() 
+                            elif self.interp_experiment_upsampling == 'interpolate':
+                                xr_data = xr_data.resample(time=self.temporal_resolution_to_output_code).interpolate("linear") 
+                            elif self.interp_experiment_upsampling == 'gaps':
+                                xr_data = xr_data.resample(time=self.temporal_resolution_to_output_code).asfreq()
+
                     # get indices in yearmonth to fill with read data
                     inds_to_fill = np.isin(self.yearmonth_dt, xr_data.time.values)
                     if not any(inds_to_fill):

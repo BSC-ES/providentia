@@ -1318,7 +1318,7 @@ class ProvConfiguration:
         if self.read_instance.mode == 'interpolation' and self.read_instance.interp_experiment_upsampling:
             if self.read_instance.interp_experiment_upsampling not in ['fill','gaps']:
                 default = default_values['interp_experiment_upsampling']
-                error = "Error: interp_experiment_upsampling must be 'mean' or 'median'. Using '{}' as default.".format(default)
+                error = "Error: interp_experiment_upsampling must be 'fill' or 'gaps'. Using '{}' as default.".format(default)
                 self.read_instance.logger.error(error) 
 
         # create empty directories for the observations and experiments

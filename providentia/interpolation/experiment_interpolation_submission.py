@@ -210,33 +210,37 @@ class SubmitInterpolation(object):
 
                     experiment_species_ensemblestat = []
 
-                    # only keep available temporal resolutions which are equal or finer in resolution to that 
-                    # wanted to output
-                    # in case temporal_resolution_to_output is instantaneous, but this not available in model, 
-                    # attempt to take non-instantaneous resolution 
-                    # in case temporal_resolution_to_output is non-instantaneous, but this not available in model, 
-                    # attempt to take instantaneous resolution
+                    # get priority resolutions to look for in model files based on output resolution
+                    # look for same resolution first, then prioritise finer resolutions
+                    # if output resolution is non-instantaneous, prioritise non-instanstaneous resolutions first,
+                    # then instanstaneous
+                    # if output resolution is instantaneous, prioritise instanstaneous resolutions first,
+                    # then non-instanstaneous
 
                     if temporal_resolution_to_output == 'hourly':
-                        resolutions_to_keep = ['hourly', 'hourly_instantaneous']
+                        resolutions_to_keep = ['hourly', '3hourly', '6hourly', 'daily', 'monthly',
+                                               'hourly_instantaneous', '3hourly_instantaneous', '6hourly_instantaneous']
                     elif temporal_resolution_to_output == 'hourly_instantaneous':
-                        resolutions_to_keep = ['hourly_instantaneous', 'hourly']
+                        resolutions_to_keep = ['hourly_instantaneous', '3hourly_instantaneous', '6hourly_instantaneous',
+                                               'hourly', '3hourly', '6hourly', 'daily', 'monthly']
                     elif temporal_resolution_to_output == '3hourly':
-                        resolutions_to_keep = ['3hourly','hourly', '3hourly_instantaneous', 'hourly_instantaneous']
+                        resolutions_to_keep = ['3hourly', 'hourly', '6hourly', 'daily', 'monthly',
+                                               '3hourly_instantaneous', 'hourly_instantaneous', '6hourly_instantaneous']
                     elif temporal_resolution_to_output == '3hourly_instantaneous':
-                        resolutions_to_keep = ['3hourly_instantaneous', 'hourly_instantaneous', '3hourly', 'hourly']
+                        resolutions_to_keep = ['3hourly_instantaneous', 'hourly_instantaneous', '6hourly_instantaneous',
+                                               '3hourly', 'hourly', '6hourly', 'daily', 'monthly']
                     elif temporal_resolution_to_output == '6hourly':  
-                        resolutions_to_keep = ['6hourly', '3hourly', 'hourly', '6hourly_instantaneous',
-                                            '3hourly_instantaneous', 'hourly_instantaneous']
+                        resolutions_to_keep = ['6hourly', 'hourly', '3hourly', 'daily', 'monthly',
+                                               '6hourly_instantaneous', 'hourly_instantaneous', '3hourly_instantaneous']
                     elif temporal_resolution_to_output == '6hourly_instantaneous':
-                        resolutions_to_keep = ['6hourly_instantaneous', '3hourly_instantaneous', 'hourly_instantaneous',
-                                            '6hourly', '3hourly', 'hourly']
+                        resolutions_to_keep = ['6hourly_instantaneous', 'hourly_instantaneous', '3hourly_instantaneous',
+                                               '6hourly', 'hourly', '3hourly', 'daily', 'monthly']
                     elif temporal_resolution_to_output == 'daily':
-                        resolutions_to_keep = ['daily', '6hourly', '3hourly', 'hourly', '6hourly_instantaneous',
-                                            '3hourly_instantaneous', 'hourly_instantaneous']
+                        resolutions_to_keep = ['daily', 'hourly', '3hourly', '6hourly', 'monthly',
+                                               'hourly_instantaneous', '3hourly_instantaneous', '6hourly_instantaneous']
                     elif temporal_resolution_to_output == 'monthly':
-                        resolutions_to_keep = ['monthly', 'daily', '6hourly', '3hourly', 'hourly', 
-                                            '6hourly_instantaneous', '3hourly_instantaneous', 'hourly_instantaneous']
+                        resolutions_to_keep = ['monthly', 'hourly', '3hourly', '6hourly', 'daily',
+                                               'hourly_instantaneous', '3hourly_instantaneous', '6hourly_instantaneous']
                     
                     # iterate through resolutions_to_keep until find one for which have speci_to_process (or mapped speci)
                     have_valid_resolution = False
