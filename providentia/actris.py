@@ -608,14 +608,18 @@ class Actris:
                     local_warnings = f"No station file is valid."
                     return urls, station, local_errors, local_warnings
             except Exception as error:
-                local_errors = f'Opening files: {error}.'
+                local_errors = f'Selecting station file: {error}.'
                 return urls, station, local_errors, local_warnings
         else:
             url = urls[0]
 
-        nc = Dataset(url, mode='r')
-        ds = xr.open_dataset(xr.backends.NetCDF4DataStore(nc))
-
+        try:
+            nc = Dataset(url, mode='r')
+            ds = xr.open_dataset(xr.backends.NetCDF4DataStore(nc))
+        except Exception as error:
+            local_errors = f'Opening file: {error}.'
+            return url, station, local_errors, local_warnings
+        
         possible_vars, possible_var = self.get_var_in_file(ds, var, actris_parameter, ebas_component)
         if possible_var is None:
             local_errors = f'No variable name matches for {possible_vars}. Existing keys: {list(ds.data_vars)}.'
@@ -952,8 +956,8 @@ class Actris:
         # wait for worker processes to terminate before continuing
         pool.join()
 
-        if (len(errors) + len(warnings)) == len(args_list):
-            self.download_instance.logger.info('All datasets have thrown an error or warning, aborting.')
+        if len(errors) == len(args_list):
+            self.download_instance.logger.info('All datasets have thrown an error, aborting.')
             return
 
         # get combined data and metadata after read
