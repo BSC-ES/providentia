@@ -997,7 +997,7 @@ class Actris:
             
             # check if variable name is available
             if var not in ghost_actris_variables.keys():
-                self.download_instance.logger.info(f'Data for {var} cannot be downloaded')
+                self.download_instance.logger.info(f"Data for {var} cannot be downloaded because it was not mapped in 'settings/internal/actris/ghost_actris_variables.yaml'.")
                 continue
             else:
                 actris_parameter = ghost_actris_variables[var]
