@@ -571,6 +571,24 @@ class Actris:
 
         return url
 
+    def str_to_nan(self, val):
+        """Detect strings that only contain commas
+
+        Parameters
+        ----------
+        val : str
+            Metadata value
+
+        Returns
+        -------
+        bool
+            Whether string contains only commas or not
+        """
+        stripped = val.replace(" ", "")
+        if stripped and all(c == "," for c in stripped):
+            return True
+        return False
+
     def read_data(self, args):
 
         (i, station, urls, data_shape, flag_shape, qa_shape,
@@ -701,23 +719,78 @@ class Actris:
         flag_np[i, :, :] = station_flag_data
         qa_np[i, :, :] = station_qa_data
 
+        # get metadata from DOI in API if possible
+        doi = ds.attrs['doi']
+        metadata = self.get_metadata(doi)
+        if len(metadata) == 0:
+            local_warnings += f"Metadata cannot be read from DOI {doi} in API, reading from attributes..."
+        else:
+            facility_metadata = metadata[0]['md_data_identification']['facility']
+            specific_metadata = metadata[0]['md_actris_specific']
+            contact_metadata = metadata[0]['md_metadata']['contact'][0]
+            contact_identification = metadata[0]['md_identification']['contact'][0]
+
         # save metadata
         metadata_np = {}
-        for ghost_key, ebas_key in metadata_dict.items():
+        for ghost_key, actris_key in metadata_dict.items():
+
             metadata_np[ghost_key] = np.frombuffer(shared_memory_vars['metadata'][ghost_key], dtype='S75').reshape(metadata_shape)
-            if ebas_key in da_var_attrs.keys():
-                val = da_var_attrs[ebas_key]
-            elif ebas_key in ds.attrs.keys():
-                val = ds.attrs[ebas_key]
-            else:
+
+            actris_api_key = actris_key['API']
+            actris_attr_key = actris_key['attributes']
+
+            # search in API first
+            val = None
+            if len(metadata) > 0:
+                if actris_api_key in facility_metadata.keys() and len(actris_api_key) > 0:
+                    val = facility_metadata[actris_api_key]
+                elif actris_api_key in specific_metadata.keys() and len(actris_api_key) > 0:
+                    val = specific_metadata[actris_api_key]
+                elif ghost_key in ['contact_email_address', 'contact_institution', 'contact_name']:
+                    if ghost_key == 'contact_name':
+                        val = f"{contact_metadata['first_name']} {contact_metadata['last_name']}" 
+                    elif len(actris_api_key) > 0:
+                        val = contact_metadata[actris_api_key]
+                elif ghost_key in ['principal_investigator_email_address', 
+                                   'principal_investigator_institution',
+                                   'principal_investigator_name']:
+                    if ghost_key == 'principal_investigator_name':
+                        val = f"{contact_identification['first_name']} {contact_identification['last_name']}"
+                    elif len(actris_api_key) > 0:
+                        val = contact_identification[actris_api_key]
+            
+            # search in attributes if it does not exist in API
+            if val is None and len(actris_attr_key) > 0:
+                if actris_attr_key in da_var_attrs.keys():
+                    val = da_var_attrs[actris_attr_key]
+                elif actris_attr_key in ds.attrs.keys():
+                    val = ds.attrs[actris_attr_key]
+              
+            # if not found, make nan
+            if val is None:
                 val = str(np.nan)
+            # convert lists into strings
+            elif isinstance(val, list):
+                val = ", ".join(val).lstrip(", ")
+            # if it is a string made out of commas, make nan
+            elif isinstance(val, str) and self.str_to_nan(val):
+                val = str(np.nan)
+            # keep everything as string
+            elif not isinstance(val, str):
+                val = str(val)
+
+            # remove all leading character ,
+            val = val.lstrip(", ")
+
             metadata_np[ghost_key][i] = val.encode('utf-8')
 
         return url, station, local_errors, local_warnings
 
-    def init_shared_vars_read_data(self, shared_data, shared_flag_data, shared_qa_data, shared_metadata, data_shape):
+    def init_shared_vars_read_data(self, shared_data, shared_flag_data, shared_qa_data, shared_metadata, 
+                                   data_shape):
         # multiprocessing.RawArray does not support NaN initialisation and initialised to zeros
-        # replace 0 by nan before reading data so that if there are any errors we can later drop the stations
+        # replace 0 by nan before reading data so that if there are any errors we can later 
+        # drop the stations
         shared_data = np.frombuffer(shared_data, dtype=np.float32).reshape(data_shape)
         shared_data[:] = np.nan
         shared_memory_vars['data'] = shared_data
@@ -734,7 +807,35 @@ class Actris:
             return flags_dict['000']["GHOST_decreed_validity"][0]
         else:
             return flags_dict[str(int(flag))]["GHOST_decreed_validity"][0]
+
+    def get_metadata(self, doi):
+        """Get metadata dictionary from DOI
+
+        Parameters
+        ----------
+        doi : str
+            NILU's DOI
+
+        Returns
+        -------
+        dict
+            Metadata dictionary
+        """
+
+        url = "https://prod-actris-md2.nilu.no/metadata/pid"
+
+        headers = {
+        "accept": "application/json",
+        "Content-Type": "application/json"
+        }
         
+        data = {"pid": doi}
+
+        response = requests.post(url, headers=headers, json=data)
+        metadata = response.json()
+        
+        return metadata
+
     def get_data(self, files, var, actris_parameter, target_start_date, target_end_date, files_info):
         """Read variable and metadata data standarising dimensions
 
@@ -803,7 +904,8 @@ class Actris:
         shared_qa_data = multiprocessing.RawArray(ctypes.c_float, int(np.prod(qa_shape)))
         shared_metadata = {}
         for ghost_key in metadata_dict.keys():
-            shared_metadata[ghost_key] = multiprocessing.RawArray(ctypes.c_char, int(np.prod(metadata_shape)*75))
+            shared_metadata[ghost_key] = multiprocessing.RawArray(ctypes.c_char, int(np.prod(
+                metadata_shape)*75))
 
         # read data and metadata in parallel
         errors = []
@@ -836,12 +938,12 @@ class Actris:
 
         # print errors and warnings if any
         if errors:
-            self.download_instance.logger.info("    === ERRORS ===")
+            self.download_instance.logger.info(f"    === ERRORS ({len(errors)}) ===")
             for e in errors:
                 self.download_instance.logger.info(f"    {e}")
 
         if warnings:
-            self.download_instance.logger.info("    === WARNINGS ===")
+            self.download_instance.logger.info(f"    === WARNINGS ({len(warnings)}) ===")
             for w in warnings:
                 self.download_instance.logger.info(f"    {w}")
                 
@@ -860,7 +962,8 @@ class Actris:
         averaged_qa_data = np.frombuffer(shared_qa_data, dtype=np.float32).reshape(qa_shape)
         metadata = {}
         for ghost_key in metadata_dict.keys():
-            metadata[ghost_key] = np.frombuffer(shared_metadata[ghost_key], dtype='S75').reshape(metadata_shape)
+            metadata[ghost_key] = np.frombuffer(shared_metadata[ghost_key], dtype='S75').reshape(
+                metadata_shape)
 
         # create dataset with averaged data
         units = variable_mapping[actris_parameter]['units']
@@ -921,7 +1024,7 @@ class Actris:
         
         # add country
         value = [pycountry.countries.get(alpha_2=val[0:2]).name if val else np.nan 
-                 for val in combined_ds['station_reference'].values]
+                 for val in combined_ds['country'].values]
         combined_ds['country'] = xr.Variable(data=value, dims=('station'))
 
         # calculate measurement_altitude if altitude and sampling_height exist
