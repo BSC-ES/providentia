@@ -352,7 +352,6 @@ def read_netcdf_data(tuple_arguments):
     if (data_label == observations_data_label) & (not filter_read):
         return file_metadata
 
-
 def read_netcdf_metadata(tuple_arguments):
 
     """ Function that handles reading of observational basic metadata from a netCDF"""
