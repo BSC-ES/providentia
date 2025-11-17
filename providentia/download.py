@@ -369,14 +369,6 @@ class Download(object):
                     # ask if user wants to overwrite
                     while self.overwrite_choice not in ['y','n']:
                         self.overwrite_choice = input("\nThere are some files that were already downloaded in a previous download, do you want to overwrite them (y/n)? ").lower() 
-                    # ask if user wants to remember the decision
-                    remind_txt = None
-                    while remind_txt not in ['y','n']:
-                        remind_txt = input("\nDo you want to remember your decision for future downloads (y/n)? ").lower() 
-                    # save the decision
-                    if remind_txt == 'y':
-                        with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
-                            f.write(f"OVERWRITE={self.overwrite_choice}\n")
                 # if user wants to overwrite then add the the files that were 
                 # downloaded before the execution as if they were never download
                 if self.overwrite_choice == 'y':
