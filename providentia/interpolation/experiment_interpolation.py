@@ -31,7 +31,7 @@ from aux_interp import (check_for_ghost, findMiddle, check_directory_existence, 
                         get_model_to_aeronet_bin_transform_factor)
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[2]))
-from providentia.auxiliar import CURRENT_PATH, join, get_machine
+from providentia.auxiliar import CURRENT_PATH, join, get_machine, get_conversion_factor, get_standard_parameters_by_speci
 
 # set current MACHINE
 MACHINE = get_machine()
@@ -105,15 +105,7 @@ class ExperimentInterpolation(object):
                 setattr(self, variable_key, variable_val)
 
         # import GHOST standards
-        sys.path.insert(1, join(PROVIDENTIA_ROOT, 'providentia/dependencies/GHOST_standards/{}'.format(self.ghost_version)))
-        from GHOST_standards import standard_parameters
-        self.standard_parameters = standard_parameters
-        
-        # get cut of standard parameters for original speci to process
-        for standard_parameter in self.standard_parameters.keys():
-            if self.standard_parameters[standard_parameter]['bsc_parameter_name'] == self.original_speci_to_process:
-                self.standard_parameter_speci = self.standard_parameters[standard_parameter]
-                break
+        self.standard_parameter_speci = get_standard_parameters_by_speci(self.original_speci_to_process, self.ghost_version)
         
         # get GHOST lower/upper limits for variable
         self.GHOST_speci_lower_limit = self.standard_parameter_speci['extreme_lower_limit']
@@ -625,60 +617,6 @@ class ExperimentInterpolation(object):
 
         # close the nc file
         obs_nc_root.close()
-
-    def get_conversion_factor(self):
-        """ Get conversion factor between observations and experiment data. """
-
-        # get observation species units   
-        obs_speci_units = self.obs_units
-
-        # if units are unitless, then no need for conversion (i.e. conversion factor = 1.0)   
-        if (obs_speci_units == 'unitless') or (obs_speci_units == '-') or (obs_speci_units == '1'):
-            self.conversion_factor = 1.0
-            return
-        
-        # determine chemical formula of species 
-        if 'chemical_formula_charge' in list(self.standard_parameter_speci.keys()):
-            speci_chemical_formula = self.standard_parameter_speci['chemical_formula_charge']
-        else:
-            speci_chemical_formula = self.standard_parameter_speci['chemical_formula']
-
-        # get observational quantity for conversion
-        if 'units_quantity' in list(self.standard_parameter_speci.keys()):
-            obs_quantity = self.standard_parameter_speci['units_quantity']
-        else:
-            conv_obj = unit_converter.convert_units(obs_speci_units, obs_speci_units, 1, species=speci_chemical_formula)
-            obs_quantity = conv_obj.output_quantity
-
-        # get model quantity for conversion
-        conv_obj = unit_converter.convert_units(self.mod_speci_units, self.mod_speci_units, 1, species=speci_chemical_formula)
-        model_quantity = conv_obj.output_quantity
-
-        # unit converter module does not produce conversion factor for temperature, but both observational and model 
-        # units should be Kelvin (i.e. conversion factor = 1.0) 
-        # if model not in K then return error
-        if obs_quantity == 'temperature': 
-            if self.mod_speci_units == 'K':
-                self.conversion_factor = 1.0
-                return
-            else:
-                self.log_file_str += "Experiment units should be 'K', but are set as '{}'".format(self.mod_speci_units)
-                create_output_logfile(1, self.log_file_str)
-
-        # observations and model quantities not equal (convert to observational units, standard_temperature=293.15, 
-        # standard_pressure=1013.25)
-        if obs_quantity != model_quantity:     
-            
-            # convert units
-            input_units = {'temperature':'K', 'pressure':'hPa', 'molar_mass':'kg mol-1', model_quantity:self.mod_speci_units}
-            input_values = {'temperature':293.15, 'pressure':1013.25, 'molar_mass':unit_converter.get_molecular_mass(speci_chemical_formula), model_quantity:1.0}
-            conv_obj = unit_converter.convert_units(input_units, obs_speci_units, input_values, species=speci_chemical_formula, input_quantity=model_quantity, output_quantity=obs_quantity)
-            self.conversion_factor = conv_obj.conversion_factor
-        
-        # same quantity conversion
-        else:
-            conv_obj = unit_converter.convert_units(self.mod_speci_units, obs_speci_units, 1.0, species=speci_chemical_formula, input_quantity=model_quantity, output_quantity=obs_quantity) 
-            self.conversion_factor = conv_obj.conversion_factor
 
     def get_monthly_model_data(self):
         """ Read all relevant model data in yearmonth into memory. """
@@ -1366,7 +1304,10 @@ if __name__ == "__main__":
         EI.get_observational_objects()
 
         # get unit conversion factor between observations and experiment data
-        EI.get_conversion_factor()
+        EI.conversion_factor = get_conversion_factor(EI.mod_speci_units, EI.obs_units, EI.standard_parameter_speci)
+        if isinstance(EI.conversion_factor, str):
+            EI.log_file_str += EI.conversion_factor
+            create_output_logfile(1, EI.log_file_str)
 
         # read relevant monthly model data into memory
         EI.get_monthly_model_data()

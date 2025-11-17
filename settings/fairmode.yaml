@@ -1,59 +1,45 @@
 {
   "sconco3": {
     "u_95r_RV": 0.18, 
-    "RV": {
-      "nmol mol-1": 60.12,
-      "ug m-3": 120
-    },
+    "RV": 120,
     "alpha": 0.79,
     "percentile": 92.9,
     "beta": 2,
     "coverage": 75,
-    "exc_threshold": {
-      "nmol mol-1": 60.12,
-      "ug m-3": 120
-    },
-    "title": "Surface ozone 8h moving average daily maximum"
+    "exc_threshold": 120,
+    "title": "Surface ozone 8h moving average daily maximum",
+    "units": "ug m-3"
   },
   "sconcno2": {
     "u_95r_RV": 0.42, 
-    "RV": {
-      "nmol mol-1": 104.55,
-      "ug m-3": 200
-    },
+    "RV": 200,
     "alpha": 0.20,
     "percentile": 99.8,
     "beta": 2,
     "coverage": 75,
-    "exc_threshold": {
-      "nmol mol-1": 104.55,
-      "ug m-3": 200
-    },
-    "title": "Surface nitrogen dioxide hourly mean"
+    "exc_threshold": 200,
+    "title": "Surface nitrogen dioxide hourly mean",
+    "units": "ug m-3"
   },
   "pm2p5": {
     "u_95r_RV": 0.63, 
-    "RV": {
-      "ug m-3": 25
-    },
+    "RV": 25,
     "alpha": 0.50,
     "percentile": 90.1,
     "beta": 2,
     "coverage": 75,
-    "title": "Surface PM2.5 aerosol daily mean"
+    "title": "Surface PM2.5 aerosol daily mean",
+    "units": "ug m-3"
   },
   "pm10": {
     "u_95r_RV": 0.49, 
-    "RV": {
-      "ug m-3": 50
-    },
+    "RV": 50,
     "alpha": 0.25,
     "percentile": 90.1,
     "beta": 2,
     "coverage": 75,
-    "exc_threshold":  {
-      "ug m-3": 50
-    },
-    "title": "Surface PM10 aerosol daily mean"
+    "exc_threshold": 50,
+    "title": "Surface PM10 aerosol daily mean",
+    "units": "ug m-3"
   }
 }

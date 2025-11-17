@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 import scipy.stats as st
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, get_conversion_factor, get_standard_parameters_by_speci
 from .calculate import Stats, ExpBias
 from .read_aux import (get_frequency_code, get_chunk_size,
                        get_periodic_nonrelevant_temporal_resolutions, get_periodic_relevant_temporal_resolutions)
@@ -126,7 +126,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
                                                             order='F')
 
                 # aggregate across the time dimension, after this shape is (24, label, station, fct)
-                data_array_forecast_agg = aggregation(data_array_forecast_grouped_rs, read_instance.timeseries_statistic_aggregation, axis=-2)
+                data_array_forecast_agg = aggregation(read_instance, read_instance, read_instance, read_instance, read_instance, read_instance, data_array_forecast_grouped_rs, read_instance.timeseries_statistic_aggregation, axis=-2)
 
                 # move per hour dimension from first to second last
                 data_array_forecast_agg = data_array_forecast_agg.transpose(1, 2, 0, 3)
@@ -873,7 +873,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
             # if stat is exceedances then add threshold value (if available)  
             if base_zstat == 'Exceedances':
-                function_arguments['threshold'] = exceedance_lim(networkspeci)
+                function_arguments['threshold'] = exceedance_lim(read_instance, networkspeci)
 
             # need to do the aggregation inside function for the calculation of NStations and MDA8
             # this is due to handling excepetions in how these are calculated across modes
@@ -994,7 +994,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
                 # if stat is exceedances then add threshold value (if available)  
                 if base_zstat == 'Exceedances':
-                    function_arguments_a['threshold'] = exceedance_lim(networkspeci)
+                    function_arguments_a['threshold'] = exceedance_lim(read_instance, networkspeci)
 
                 # need to do the aggregation inside function for the calculation of NStations and MDA8
                 # this is due to handling excepetions in how these are calculated across modes
@@ -1638,7 +1638,7 @@ def aggregation(data_array, statistic_aggregation, axis=0):
 
     return aggregated_data
 
-def exceedance_lim(networkspeci):
+def exceedance_lim(read_instance, networkspeci):
     """ Return the exceedance limit depending on the species input. 
         If species doesn't have a reported limit, returns np.NaN.
 
@@ -1655,11 +1655,27 @@ def exceedance_lim(networkspeci):
 
     exceedance_limits = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/exceedances.yaml')))
     if networkspeci in exceedance_limits:
-        return exceedance_limits[networkspeci]
+        limit = exceedance_limits[networkspeci]['value']
+        initial_units = exceedance_limits[networkspeci]['units']
     elif speci in exceedance_limits:
-        return exceedance_limits[speci]
+        limit = exceedance_limits[speci]['value']
+        initial_units = exceedance_limits[speci]['units']
     else:
-        return np.NaN
+        limit = np.NaN
+    
+    if limit is not np.NaN:
+        # get output units
+        standard_parameter_speci = get_standard_parameters_by_speci(speci, read_instance.ghost_version)
+        final_units = read_instance.measurement_units[speci]
+
+        # convert units using conversion factor
+        conversion_factor = get_conversion_factor(initial_units, final_units, standard_parameter_speci)
+        if isinstance(conversion_factor, str):
+            read_instance.logger.error(conversion_factor)
+            sys.exit(1)
+        limit *= conversion_factor
+
+    return limit
 
 
 def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels):
@@ -1673,6 +1689,7 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels)
 
     # temporally colocate data (if active)
     if read_instance.temporal_colocation:
+        print(read_instance.temporal_colocation_nans.keys())
         data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
 
     # get data cut for relevant stations

@@ -208,7 +208,7 @@ def threshold(read_instance, canvas_instance, relevant_axis, networkspeci, base_
         :type plot_characteristics: dict
     """
     # get exceendance value
-    threshold = exceedance_lim(networkspeci)
+    threshold = exceedance_lim(read_instance, networkspeci)
 
     # draw vertical line
     if base_plot_type in ['timeseries', 'scatter', 'periodic', 'periodic-violin', 'boxplot']:

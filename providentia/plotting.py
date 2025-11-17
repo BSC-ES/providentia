@@ -2140,9 +2140,10 @@ class Plotting:
         coverage = fairmode_settings[speci].get('coverage')
         exc_threshold = fairmode_settings[speci].get('exc_threshold')
         percentile = fairmode_settings[speci].get('percentile')
+        units = fairmode_settings[speci].get('units')
 
         # get RV and exceedance threshold per units
-        RV, exc_threshold = get_fairmode_RV_exceendance(self.read_instance, speci, RV, exc_threshold)
+        RV, exc_threshold = get_fairmode_RV_exceendance(self.read_instance, speci, RV, exc_threshold, units)
             
         # add target
         main_circle = plt.Circle(**plot_characteristics['auxiliar']['circle']['main'])
@@ -2343,9 +2344,10 @@ class Plotting:
         beta = fairmode_settings[speci].get('beta')
         exc_threshold = fairmode_settings[speci].get('exc_threshold')
         percentile = fairmode_settings[speci].get('percentile')
+        units = fairmode_settings[speci].get('units')
 
         # get RV and exceedance threshold per units
-        RV, exc_threshold = get_fairmode_RV_exceendance(self.read_instance, speci, RV, exc_threshold)
+        RV, exc_threshold = get_fairmode_RV_exceendance(self.read_instance, speci, RV, exc_threshold, units)
         
         # get station references
         valid_station_references = get_valid_metadata(self, 'station_reference', 

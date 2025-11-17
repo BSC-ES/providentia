@@ -88,11 +88,11 @@ species_list=(
     # "sconcv"
     # "sconczn" 
     # "t2" 
-     "wetal" # Review station selection -> Same station with different months, but one gets selected, no plots
+    # "wetal" # Review station selection -> Same station with different months, but one gets selected
     # "wetas" 
     # "wetbap" 
     # "wetcd" 
-    # "wetcobalt" # Review station selection -> Same station with different months, but one gets selected, no plots
+     "wetcobalt" # Review station selection -> Same station with different months, but one gets selected
     # "wetcr"
     # "wetcu" 
     # "wetfe" # Review

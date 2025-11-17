@@ -130,11 +130,7 @@ class SubmitInterpolation(object):
         else:
             self.qos = 'bsc_es'
 
-        # import unit converter
-        sys.path.append(join(PROVIDENTIA_ROOT, 'providentia', 'dependencies','unit-converter'))
-        import unit_converter
-
-        #initialise current line number for printing output
+        # initialise current line number for printing output
         self.current_line = -1
 
     def gather_arguments(self):
