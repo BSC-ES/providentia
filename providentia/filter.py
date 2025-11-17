@@ -11,7 +11,7 @@ import time
 import numpy as np
 import pandas as pd
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, get_conversion_factor, get_standard_parameters_by_speci
 from .calculate import Stats, ExpBias
 from .configuration import split_options
 from .plot_aux import update_plotting_parameters
@@ -165,6 +165,17 @@ class DataFilter:
                 msg = 'Data limit fields must be numeric.'
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
                 return
+
+            # convert units of bounds from standard to actual before filtering
+            standard_parameter_speci = get_standard_parameters_by_speci(speci, self.read_instance.ghost_version)
+            initial_units = standard_parameter_speci['standard_units']
+            final_units = self.read_instance.measurement_units[speci]
+            conversion_factor = get_conversion_factor(initial_units, final_units, standard_parameter_speci)
+            if isinstance(conversion_factor, str):
+                self.read_instance.logger.error(conversion_factor)
+                sys.exit(1)
+            lower_bound *= conversion_factor
+            upper_bound *= conversion_factor
 
             # filter all observational/experiment data out of bounds of lower/upper limits
             inds_out_of_bounds = np.logical_or(self.read_instance.data_in_memory_filtered[networkspeci][:,:,:] < lower_bound,
@@ -555,7 +566,7 @@ class DataFilter:
 
                     # if stat is exceedances then add threshold value (if available)  
                     if base_zstat == 'Exceedances':
-                        function_arguments['threshold'] = exceedance_lim(networkspeci)
+                        function_arguments['threshold'] = exceedance_lim(self.read_instance, networkspeci)
 
                     # get list of statistic limits specific for speci (if wanted)
                     if speci_specific_limits:

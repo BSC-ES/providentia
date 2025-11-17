@@ -22,7 +22,7 @@ from scipy.signal.windows import gaussian
 from scipy.sparse import coo_matrix
 import seaborn as sns
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, get_conversion_factor, get_standard_parameters_by_speci
 from .statistics import (calculate_statistic, get_z_statistic_sign, 
                          aggregation)
 from .warnings_prv import show_message
@@ -746,22 +746,39 @@ def get_hex_code(colour):
     return hex_colour
 
 
-def get_fairmode_RV_exceendance(read_instance, speci, RV, exc_threshold):
-    
-    units = read_instance.measurement_units[speci]
-    if units in RV:
-        RV = RV[units]
-    else: 
-        msg = f'RV has not been defined for units {units} in settings/fairmode.yaml. FAIRMODE target plot cannot be calculated.'
-        show_message(read_instance, msg)
-        return
-    
-    if exc_threshold is not None:
-        if units in exc_threshold:
-            exc_threshold = exc_threshold[units]
-        else: 
-            msg = f'Exceedance threshold has not been defined for units {units} in settings/fairmode.yaml. FAIRMODE target plot cannot be calculated.'
-            show_message(read_instance, msg)
-            return
+def get_fairmode_RV_exceendance(read_instance, speci, RV, exc_threshold, units):
+    """ Convert standard GHOST units of RV and exceedances to actual ones
+
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard or Report
+    speci : str
+        Speci to plot
+    RV : float
+        Reference value
+    exc_threshold : float
+        Exceedance threshold
+
+    Returns
+    -------
+    float
+        Reference value in GHOST units
+    float
+        Exceedance threshold in GHOST units
+    """
+
+    # get input and output units
+    standard_parameter_speci = get_standard_parameters_by_speci(speci, read_instance.ghost_version)
+    initial_units = units
+    final_units = read_instance.measurement_units[speci]
+
+    # convert units using conversion factor
+    conversion_factor = get_conversion_factor(initial_units, final_units, standard_parameter_speci) 
+    if isinstance(conversion_factor, str):
+        read_instance.logger.error(conversion_factor)
+        sys.exit(1)
+    RV *= conversion_factor
+    exc_threshold *= conversion_factor
         
     return RV, exc_threshold
