@@ -1689,7 +1689,6 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels)
 
     # temporally colocate data (if active)
     if read_instance.temporal_colocation:
-        print(read_instance.temporal_colocation_nans.keys())
         data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
 
     # get data cut for relevant stations
