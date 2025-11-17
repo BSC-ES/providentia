@@ -1,26 +1,119 @@
-WMO_region: ebas_station_wmo_region
-altitude: ebas_station_altitude
-associated_networks: naming_authority
-contact_email_address: creator_email
-contact_institution: creator_institution
-contact_name: creator_name
-data_level: ebas_data_level
-data_licence: license
-land_use: ebas_station_land_use
-latitude: ebas_station_latitude
-longitude: ebas_station_longitude
-measurement_methodology: ebas_method_ref
-measuring_instrument_inlet_information: ebas_inlet_description
-measuring_instrument_name: ebas_instrument_name
-measuring_instrument_sampling_type: ebas_instrument_type
-network: naming_authority
-principal_investigator_email_address: creator_email
-principal_investigator_institution: creator_institution
-principal_investigator_name: creator_name
-sampling_height: ebas_measurement_height
-station_name: ebas_station_name
-station_reference: ebas_station_code
-station_timezone: timezone
-doi: doi # Not in GHOST
-license: license # Not in GHOST
-citation: citation  # Not in GHOST
+WMO_region:
+  API: "wmo_region"
+  attributes: "ebas_station_wmo_region"
+
+altitude:
+  API: "alt"
+  attributes: "ebas_station_altitude"
+
+country:
+  API: "country_code"
+  attributes: "ebas_station_code"
+
+associated_networks:
+  API: ""
+  attributes: "naming_authority"
+
+contact_email_address:
+  API: "email"
+  attributes: "creator_email"
+
+contact_institution:
+  API: "organisation_name"
+  attributes: "creator_institution"
+
+contact_name:
+  API: ""
+  attributes: "creator_name"
+
+data_level:
+  API: ""
+  attributes: "ebas_data_level"
+
+data_licence:
+  API: ""
+  attributes: "license"
+
+land_use:
+  API: ""
+  attributes: "ebas_station_land_use"
+
+latitude:
+  API: "lat"
+  attributes: "ebas_station_latitude"
+
+longitude:
+  API: "lon"
+  attributes: "ebas_station_longitude"
+
+measurement_methodology:
+  API: ""
+  attributes: "ebas_method_ref"
+
+measuring_instrument_inlet_information:
+  API: ""
+  attributes: "ebas_inlet_description"
+
+measuring_instrument_name:
+  API: "instrument_model"
+  attributes: "ebas_instrument_name"
+
+measuring_instrument_sampling_type:
+  API: "instrument_type"
+  attributes: "ebas_instrument_type"
+
+network:
+  API: ""
+  attributes: "naming_authority"
+
+principal_investigator_email_address:
+  API: "email"
+  attributes: "creator_email"
+
+principal_investigator_institution:
+  API: "organisation_name"
+  attributes: "creator_institution"
+
+principal_investigator_name:
+  API: ""
+  attributes: "creator_name"
+
+sampling_height:
+  API: ""
+  attributes: "ebas_measurement_height"
+
+station_name:
+  API: "name"
+  attributes: "ebas_station_name"
+
+station_reference:
+  API: ""
+  attributes: "ebas_station_code"
+
+station_timezone:
+  API: ""
+  attributes: "timezone"
+
+doi:
+  API: ""
+  attributes: "doi"
+
+license:
+  API: ""
+  attributes: "license"
+
+citation:
+  API: ""
+  attributes: "citation"
+
+actris_national_facility:
+  API: "actris_national_facility"
+  attributes: ""
+
+matrix:
+  API: "matrix"
+  attributes: ""
+
+framework:
+  API: "program_affiliation"
+  attributes: ""
