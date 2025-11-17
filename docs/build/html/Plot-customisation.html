@@ -180,10 +180,14 @@
 <section id="calculating-exceedances">
 <h3>Calculating exceedances<a class="headerlink" href="#calculating-exceedances" title="Link to this heading"></a></h3>
 <p>In Providentia the <code class="docutils literal notranslate"><span class="pre">exceedances</span></code> statistic is available in the list of available statistics. How it is currently implemented is simplistic, but users can simply state a threshold/limit value per component or network-component pair, and each instance where values exceed this limit will be counted. Therefore the <code class="docutils literal notranslate"><span class="pre">exceedances</span></code> statistic simply gives the number of instances above the threshold. The threshold values can be set in the file <code class="docutils literal notranslate"><span class="pre">settings/exceedances.yaml</span></code> per component, or network-component pair, as so:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;sconco3&quot;</span><span class="p">:</span> <span class="mf">90.21</span><span class="p">,</span> 
- <span class="s2">&quot;sconcno2&quot;</span><span class="p">:</span> <span class="mf">106.38</span><span class="p">,</span>
- <span class="s2">&quot;EBAS|sconco3&quot;</span><span class="p">:</span> <span class="mf">109.77</span><span class="p">,</span>
- <span class="s2">&quot;EBAS|sconcno2&quot;</span><span class="p">:</span> <span class="mf">88.88</span><span class="p">}</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sconco3</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;nmol mol-1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">30.07</span> 
+<span class="p">},</span>
+<span class="n">EBAS</span><span class="o">|</span><span class="n">sconcno2</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;nmol mol-1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">5.23</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>In the case a threshold is set for a specific component, and per network-component, then the threshold for network-component is taken preferentially.</p>

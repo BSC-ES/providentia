@@ -81,12 +81,16 @@ remove_extreme_stations=CAMS
 In Providentia the `exceedances` statistic is available in the list of available statistics. How it is currently implemented is simplistic, but users can simply state a threshold/limit value per component or network-component pair, and each instance where values exceed this limit will be counted. Therefore the `exceedances` statistic simply gives the number of instances above the threshold. The threshold values can be set in the file `settings/exceedances.yaml` per component, or network-component pair, as so: 
 
 ```
-{"sconco3": 90.21, 
- "sconcno2": 106.38,
- "EBAS|sconco3": 109.77,
- "EBAS|sconcno2": 88.88}
+sconco3: {
+    "units": "nmol mol-1",
+    "value": 30.07 
+},
+EBAS|sconcno2: {
+    "units": "nmol mol-1",
+    "value": 5.23
+}
 ```
-In the case a threshold is set for a specific component, and per network-component, then the threshold for network-component is taken preferentially.   
+In the case a threshold is set for a specific component, and per network-component, then the threshold for network-component is taken preferentially.
 
 ## Editing the plot style in the dashboard
 
