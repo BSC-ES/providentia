@@ -1176,4 +1176,4 @@ class Actris:
                     pass
 
             else:
-                self.download_instance.logger.info(f'No files were found at {self.resolution} resolution for {var}. You can check what is available at {path}.')
+                self.download_instance.logger.info(f'No files were found at {self.resolution} resolution for {var}. You can check what is available at {info_path}.')
