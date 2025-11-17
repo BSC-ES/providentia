@@ -101,11 +101,11 @@ species_list=(
     # "wetpb" 
     # "wetv" 
     # "wetzn",
-    # "sconcald2", # GHOST version >= 1.5.2
-    "sconcetoh", # GHOST version >= 1.5.2
-    # "sconcglyox", # GHOST version >= 1.5.2
-    # "sconchggem", # GHOST version >= 1.5.2
-    # "sconchggom", # GHOST version >= 1.5.2
+    # "sconcald2" # GHOST version >= 1.5.2
+    # "sconcetoh" # GHOST version >= 1.5.2
+    # "sconcglyox" # GHOST version >= 1.5.2
+     "sconchggem" # GHOST version >= 1.5.2
+    # "sconchggom" # GHOST version >= 1.5.2
     # "sconchgtgm" # GHOST version >= 1.5.2
 )
 
