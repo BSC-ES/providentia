@@ -66,6 +66,7 @@ precv: precipitation vanadium mass concentration
 preczn: precipitation zinc mass concentration
 pshltr: air pressure
 sconcal: aerosol particle aluminium mass concentration
+sconcald2: acetaldehyde mass concentration
 sconcas: aerosol particle arsenic mass concentration
 sconcbap: gas and particle benzo(a)pyrene mass concentration
 sconcbappm: aerosol particle benzo(a)pyrene mass concentration
@@ -93,10 +94,15 @@ sconccr: aerosol particle chromium mass concentration
 sconccu: aerosol particle copper mass concentration
 sconcdu: aerosol particle mineral dust mass concentration
 sconcec: aerosol particle elemental carbon mass concentration
+sconcetoh: ethanol mass concentration
 sconcfe: aerosol particle iron mass concentration
+sconcglyox: glyoxal mass concentration
 sconchcho: formaldehyde mass concentration
 sconchcl: hydrochloric acid mass concentration
 sconchg: aerosol particle mercury mass concentration
+sconchggem: gaseous elemental mercury mass concentration
+sconchggom: gaseous mercury oxides mass concentration
+sconchgtgm: gaseous elemental mercury and mercury oxides mass concentration
 sconchno3: nitric acid mass concentration
 sconcisop: isoprene amount fraction
 sconck: aerosol particle potassium mass concentration
