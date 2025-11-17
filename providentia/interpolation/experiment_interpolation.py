@@ -618,19 +618,42 @@ class ExperimentInterpolation(object):
         # close the nc file
         obs_nc_root.close()
 
+    def get_resampling_direction(self):
+        """ Determine resampling direction. """
+
+        freq_map = {
+            "hourly": 1,
+            "hourly_instantaneous": 1,
+            "3hourly": 3,
+            "3hourly_instantaneous": 3,
+            "6hourly": 6,
+            "6hourly_instantaneous": 6,
+            "daily": 24,
+            "monthly": 24 * 30}
+
+        in_freq = freq_map[self.model_temporal_resolution]
+        out_freq = freq_map[self.temporal_resolution_to_output]
+
+        # input resolution finer than output resolution (downsampling)
+        if in_freq < out_freq:
+            return "downsampling"
+        # input resolution coarser than output resolution (upsampling)
+        elif in_freq > out_freq:
+            return "upsampling"
+        # no resampling
+        else:
+            return
+        
     def get_monthly_model_data(self):
         """ Read all relevant model data in yearmonth into memory. """
 
-        # temporal resolution to output is coarser than model resolution, therefore will need to modify temporal 
-        # resolution and perform resampling?
-        resampling = False
-        if self.temporal_resolution_to_output != self.model_temporal_resolution: 
-            resampling = True
+        # determine resampling direction (upsampling, downsampling or None)
+        resampling_direction = self.get_resampling_direction()
 
         # get number of days in month processing
         self.days_in_month = monthrange(int(self.year),int(self.month))[1]
         
-        # create monthly time/dy variables
+        # create monthly datetime array at resolution to output
         start_month_dt = datetime.datetime(year=int(self.year), month=int(self.month), day=1, hour=0, minute=0)
         end_month_dt = start_month_dt + relativedelta.relativedelta(months=1)
         if self.temporal_resolution_to_output in ['hourly', 'hourly_instantaneous']:
@@ -909,10 +932,41 @@ class ExperimentInterpolation(object):
                         xr_data = xr_data.assign_coords(longitude=self.x).sortby('longitude')
                         xr_data = xr_data.assign_coords(latitude=self.y).sortby('latitude')
 
-                    # do resampling (taking mean) to coarser temporal resolution if neccessary
-                    if resampling:
-                        xr_data = xr_data.resample(time=self.temporal_resolution_to_output_code).mean()     
-                    
+                    # do resampling
+                    if resampling_direction:
+                        # downsampling (finer to coarser)
+                        if resampling_direction == 'downsampling':
+                        
+                            # mean
+                            if self.interp_experiment_downsampling == 'mean':
+                                xr_data = xr_data.resample(time=self.temporal_resolution_to_output_code).mean()   
+                        
+                            # median
+                            elif self.interp_experiment_downsampling == 'median':
+                                xr_data = xr_data.resample(time=self.temporal_resolution_to_output_code).median()   
+                        
+                        # upsampling (coarser to finer)
+                        elif resampling_direction == 'upsampling':
+
+                            # convert original data frequency code to pandas offset
+                            offset = pd.tseries.frequencies.to_offset(pd.infer_freq(xr_data.time.to_index()))
+                            
+                            # extend the last timestamp to cover the full final period
+                            start_time = pd.Timestamp(xr_data.time.values[0])
+                            last_time = pd.Timestamp(xr_data.time.values[-1])
+                            end_extended = last_time + offset - pd.Timedelta(seconds=1)
+                            
+                            # create new continuous index at frequency to output
+                            new_index = pd.date_range(start=start_time, end=end_extended, freq=self.temporal_resolution_to_output_code)
+    
+                            # fill gaps (repeating values between measurements)
+                            if self.interp_experiment_upsampling == 'fill':
+                                xr_data = xr_data.reindex(time=new_index, method="ffill")
+                        
+                            # leave gaps (setting nans between measurements)
+                            elif self.interp_experiment_upsampling == 'gaps':
+                                xr_data = xr_data.reindex(time=new_index)
+
                     # get indices in yearmonth to fill with read data
                     inds_to_fill = np.isin(self.yearmonth_dt, xr_data.time.values)
                     if not any(inds_to_fill):
