@@ -130,6 +130,38 @@
           },
         },
     },
+    "doi":
+    {
+      "report":
+        {
+          "orientation": "portrait",
+          "figure": {},
+          "keys":
+            {
+              "fontsize": 7,
+              "va": "bottom",
+              "color": {
+                "dark_mode": "#93f3e5",
+                "light_mode": "#213970",
+              },
+              "x": 0.10
+            },
+          "values":
+            {
+              "fontsize": 7,
+              "va": "bottom",
+              "color": {
+                "dark_mode": "white",
+                "light_mode": "black",
+              },
+              "x": 0.35
+            },
+          "spacing": 0.025,
+          "title_spacing": 0.04,
+          "y_end": 0.9,
+          "chunk_size": 30
+        },
+    },
   "legend":
     {
       "remove_spines": ["top", "right", "left", "bottom"],

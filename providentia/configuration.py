@@ -217,6 +217,31 @@ class ProvConfiguration:
             # get standard metadata dictionary
             self.read_instance.standard_metadata = get_standard_metadata({'standard_units':'', 'units_quantity':''})
             
+            # add ACTRIS variables to standard metadata
+            self.read_instance.standard_metadata.update(
+                {'doi': {'value': [], 
+                         'standard_name': 'DOI', 
+                         'long_name': 'Digital identifier of an object',   
+                         'units': 'unitless', 
+                         'units_quantity': 'unitless', 
+                         'data_type': object, 
+                         'string_format': 'short', 
+                         'metadata_type': 'STATION MISCELLANEOUS', 
+                         'identifiers': {'DOI':''}, 
+                         'description': 'Digital identifier of an object.'},
+                 'actris_national_facility': {'value': [], 
+                                              'standard_name': 'ACTRIS national facility', 
+                                              'long_name': 'Digital identifier of an object',   
+                                              'units': 'unitless', 
+                                              'units_quantity': 'unitless', 
+                                              'data_type': object, 
+                                              'string_format': 'short', 
+                                              'metadata_type': 'STATION MISCELLANEOUS', 
+                                              'identifiers': {'ACTRIS national facility':''}, 
+                                              'description': 'ACTRIS national facility.'}
+                }
+            )
+
             # create list of GHOST metadata variables to read
             self.read_instance.ghost_metadata_vars_to_read = [key for key in self.read_instance.standard_metadata.keys() if
                                                               pd.isnull(self.read_instance.standard_metadata[key]['metadata_type']) == False]

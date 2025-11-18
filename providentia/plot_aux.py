@@ -678,7 +678,7 @@ def create_statistical_timeseries(read_instance, canvas_instance, chunk_stat, ch
 
 
 def reorder_pdf_pages(read_instance, input_pdf, output_pdf, summary_multispecies_pages, 
-                      station_multispecies_pages, paradigm_break_page):
+                      station_multispecies_pages, paradigm_break_page, doi_pdf, reports_doi_path_temp):
     """ Reorder PDF pages so that multispecies plots appear before other plots.
 
     :param input_pdf: Path to original PDF
@@ -726,6 +726,13 @@ def reorder_pdf_pages(read_instance, input_pdf, output_pdf, summary_multispecies
     for page_number in page_order:
         output_pdf_file.add_page(input_pdf_file.pages[page_number])
 
+    # Add DOI pages at the end
+    if doi_pdf is not None:
+        input_doi_pdf = PdfReader(open(reports_doi_path_temp, "rb"))
+        for page_number in range(len(input_doi_pdf.pages)):
+            output_pdf_file.add_page(input_doi_pdf.pages[page_number])
+        os.system("rm {}".format(reports_doi_path_temp))
+     
     # Write the rearranged pages to a new PDF file
     read_instance.logger.info(f'Writing {output_pdf}')
     with open(output_pdf, "wb") as outputStream:

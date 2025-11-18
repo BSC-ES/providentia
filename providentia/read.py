@@ -745,6 +745,16 @@ class DataReader:
                     if 'station_type' in ncdf_root.variables:
                         self.read_instance.nonghost_metadata_vars_to_read.append('station_classification') 
 
+                # check if DOI (ACTRIS) is available in files (if not already added)
+                if 'doi' not in self.read_instance.nonghost_metadata_vars_to_read:
+                    if 'doi' in ncdf_root.variables:
+                        self.read_instance.nonghost_metadata_vars_to_read.append('doi') 
+
+                # check if national facility (ACTRIS) is available in files (if not already added)
+                if 'actris_national_facility' not in self.read_instance.nonghost_metadata_vars_to_read:
+                    if 'actris_national_facility' in ncdf_root.variables:
+                        self.read_instance.nonghost_metadata_vars_to_read.append('actris_national_facility') 
+
                 # close first relevant file
                 ncdf_root.close()
             
