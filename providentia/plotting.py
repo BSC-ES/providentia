@@ -11,7 +11,9 @@ import cartopy.crs as ccrs
 from datetime import datetime
 # from KDEpy import FFTKDE
 from itertools import groupby
+import math
 import matplotlib
+from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.image as mpimg
 import matplotlib.lines as mlines
 from matplotlib.lines import Line2D
@@ -535,6 +537,107 @@ class Plotting:
         # save and close
         pdf.savefig(fig)
         plt.close(fig)
+
+    def make_doi_pdf(self, plot_characteristics, reports_doi_path_temp):
+        """Create temporary PDF with DOIs per station reference to be added after reordering pages
+
+        Parameters
+        ----------
+        plot_characteristics : dict
+            Plot characteristics
+        reports_doi_path_temp : str
+            PDF temporary path
+
+        Returns
+        -------
+        PdfPages
+            PDF
+        """
+
+        with PdfPages(reports_doi_path_temp) as pdf:
+
+            for key in ['keys', 'values']:
+                plot_characteristics[key]['color'] = plot_characteristics[key]['color']['light_mode']
+
+            # Get DOI per station
+            for networkspeci in self.read_instance.networkspecies:
+                reference_data = self.canvas_instance.selected_station_metadata[networkspeci]['station_reference']
+                doi_data = self.canvas_instance.selected_station_metadata[networkspeci]['doi']
+                visible_items = []
+                extra_rows = 0
+                for station_reference, station_doi in zip(reference_data, doi_data):
+                    # Show DOIs only if station reference is consistent across time
+                    unique_station_references = list(np.unique(station_reference[~pd.isna(station_reference)]))
+                    if len(unique_station_references) > 1:
+                        error = f'Error: Station references change with time ({unique_station_references}), cannot create page with DOIs.'
+                        self.read_instance.logger.error(error)
+                        return None
+                    # Get DOIs per station reference
+                    unique_station_dois = list(np.unique(station_doi[~pd.isna(station_doi)]))
+                    if len(unique_station_dois) > 1:
+                        extra_rows += len(unique_station_dois) -1
+                    visible_items.append((unique_station_references, unique_station_dois))
+                
+                # Get plot characteristics
+                title_spacing = plot_characteristics['title_spacing']
+                spacing = plot_characteristics['spacing']
+                chunk_size = plot_characteristics['chunk_size']
+
+                # If there are extra rows, chunk size needs to be lower to see all DOIs in a page
+                if extra_rows > 2:
+                    msg = f'Warning: Some stations have multiple DOIs, lower chunk size in plot_characteristics.yaml (current: {chunk_size}).'
+                    self.read_instance.logger.info(msg)
+                
+                # Create figure
+                dpi = self.canvas_instance.dpi
+                bg_img = [1414, 2000]
+                fig_width, fig_height = bg_img[0] / dpi, bg_img[1] / dpi
+
+                # Create a page for every 30 stations 
+                num_pages = math.ceil(len(visible_items) / chunk_size)
+                for page_idx in range(num_pages):
+                    y = plot_characteristics['y_end']
+                    fig = plt.figure(figsize=(fig_width, fig_height), dpi=dpi)
+                    ax = fig.add_axes([0, 0, 1, 1])
+                    ax.axis('off')
+
+                    # Page title
+                    fig.text(y=y, s=f"List of DOIs - {networkspeci} - Page {page_idx+1} / {num_pages}", 
+                             fontweight='bold', **plot_characteristics['keys'])
+                    y -= title_spacing
+
+                    # Slice visible_items for this page
+                    start = page_idx * chunk_size
+                    end = start + chunk_size
+                    page_items = visible_items[start:end]
+                    
+                    # Show station (key) and DOI data (value)
+                    for stations, dois in page_items:
+                        # Save starting y of this block
+                        block_y = y
+
+                        # Write stations
+                        y = block_y
+                        for i, station in enumerate(stations):
+                            fig.text(y=y, s=station, **plot_characteristics['keys'])
+                            if i < len(stations) - 1:
+                                y -= spacing
+
+                        # Write DOIs
+                        y = block_y
+                        for j, doi in enumerate(dois):
+                            fig.text(y=y, s=doi, **plot_characteristics['values'])
+                            if j < len(dois) - 1:
+                                y -= spacing
+
+                        # After finishing block, lower y once
+                        y = min(y, block_y) - spacing
+                    
+                    # Save page to PDF
+                    pdf.savefig(fig)
+                    plt.close(fig)
+
+        return pdf
 
     def make_metadata(self, relevant_axis, networkspeci, data_labels, plot_characteristics, plot_options):
         """ Make metadata summary plot.

@@ -297,6 +297,7 @@ class Report:
 
         # create 'temp' reports path for first writing to before finalising (for compression) 
         reports_path_temp = '{}_temp.pdf'.format(reports_path.split('.pdf')[0])
+        reports_doi_path_temp = '{}_doi_temp.pdf'.format(reports_path.split('.pdf')[0])
 
         # open new PDF file
         with PdfPages(reports_path_temp) as pdf:
@@ -534,8 +535,16 @@ class Report:
             if not hasattr(self, 'paradigm_break_page'):
                 pdf_file = PdfReader(open(reports_path, "rb"))
                 self.paradigm_break_page = len(pdf_file.pages)
+
+            # make page with DOIs
+            doi_pdf = None
+            if 'actris/actris' in self.network:
+                self.plotting.set_plot_characteristics(['doi'])
+                doi_pdf = self.plotting.make_doi_pdf(self.plot_characteristics['doi'], reports_doi_path_temp)
+            
             reorder_pdf_pages(self, reports_path, reports_path, self.summary_multispecies_pages, 
-                              self.station_multispecies_pages, self.paradigm_break_page)
+                              self.station_multispecies_pages, self.paradigm_break_page, doi_pdf, 
+                              reports_doi_path_temp)
 
     def setup_plot_geometry(self, plotting_paradigm, networkspeci, have_setup_multispecies):
         """ Setup plotting geometry for summary or station specific plots, per network/species. """
