@@ -86,7 +86,7 @@ class ProvConfiguration:
 
         # throw an error if default keyword is passed
         elif value == 'default':
-            error = f"Error: The 'default' keyword in the '{key}' parameter is no longer allowed. Remove it to use the default value."
+            error = f"Error: The 'default' keyword in the '{key}' parameter is no longer allowed. Remove the entire field to use the default value."
             self.read_instance.logger.error(error)
             sys.exit(1)
 
@@ -668,22 +668,22 @@ class ProvConfiguration:
 
             # set experiment to be non-interpolated if there is no network
             if not self.read_instance.network:
-                self.read_instance.interpolated = False
+                self.read_instance.dl_interpolated = False
                 msg = "Experiments detected but no network specified, proceeding to download non-interpolated model output."
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
             # if there's experiments, ask the user whether they want interpolated or non-interpolated
-            if self.read_instance.interpolated is None:
-                interpolated = input("\nExperiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
-                while interpolated.lower() not in ['','y','n']:
-                    interpolated = input("\nExperiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
+            if self.read_instance.dl_interpolated is None:
+                interpolated = None
+                while interpolated not in ['','y','n']:
+                    interpolated = input("\nModel data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded) ([y]/n): ").lower()
 
                 # set the interpolated parameter  
-                self.read_instance.interpolated = interpolated.lower() in ['','y']
+                self.read_instance.dl_interpolated = interpolated in ['','y']
 
         # get function for checking formating of experiment for current mode
         # if the current mode is interpolation or the experiment wanted to be downloaded is not interpolated
-        if self.read_instance.mode == 'interpolation' or (self.read_instance.mode == 'download' and self.read_instance.interpolated is False):
+        if self.read_instance.mode == 'interpolation' or (self.read_instance.mode == 'download' and self.read_instance.dl_interpolated is False):
             check_experiment_func = self.check_experiment_interpolation
         elif self.read_instance.mode == 'download':
             check_experiment_func = self.check_experiment_download
@@ -1324,7 +1324,7 @@ class ProvConfiguration:
         self.decompose_experiments(deactivate_warning)
 
         # before checking the experiment check that the remote download has the interpolated tag as False, if not exit
-        if self.read_instance.mode == 'download' and MACHINE in ["storage5", "nord3v2", "nord4"] and self.read_instance.interpolated is True:
+        if self.read_instance.mode == 'download' and MACHINE in ["storage5", "nord3v2", "nord4"] and self.read_instance.dl_interpolated is True:
             error = F"Error: Nothing from the {self.read_instance.section} section was copied to gpfs, change the interpolated field to 'False'."
             self.read_instance.logger.error(error)
             sys.exit(1)

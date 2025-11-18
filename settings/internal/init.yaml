@@ -76,7 +76,7 @@
   "dl_ghost_source": null,
   "dl_interpolated": null,
   "dl_mode": "",
-  "all_network_type": "",
+  "network_type": "",
   "interp_n_neighbours": null,
   "interp_reverse_vertical_orientation": False,
   "interp_chunk_size": 16,

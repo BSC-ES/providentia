@@ -167,7 +167,7 @@ class Cams:
 
     def create_cdsapirc(self, cdsapirc_path):      
         # ask the user whether they want to create the file in the home directory
-        create_file = input(f"\n'.cdsapirc' file not found. Creating it at {cdsapirc_path}. Do you agree? ([y]/n) ").lower()
+        create_file = None
         while create_file not in ['','y','n']:
             create_file = input(f"\n'.cdsapirc' file not found. Creating it at {cdsapirc_path}. Do you agree? ([y]/n) ").lower()
 

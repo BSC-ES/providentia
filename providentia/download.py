@@ -133,26 +133,57 @@ class Download(object):
             
             # only the local download iterates through the networks
             if self.machine in "local":
-
+                
+                # select what to download
+                if self.network and self.experiments and not self.dl_mode:
+                    self.dl_mode = None
+                    while self.dl_mode not in ["both", "obs", "model"]:
+                        self.dl_mode = input("\nWhich type of data do you want to download? Observational, modelled or both? ([both]/obs/mod): ").lower()
+                        self.dl_mode = "both" if self.dl_mode == "" else self.dl_mode
+                        
                 # networks
                 if self.network:
 
                     if self.network == ["*"]:
-                        # get user input to know which kind of network wants
-                        download_source = input("\nDo you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n): ")
-                        while download_source.lower() not in ['','y','n']:
-                            download_source = input("\nDo you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n): ")
-                        self.reading_ghost = download_source.lower() in ['','y']
+                        if not self.network_type:
+                            # get user input to know which kind of network wants
+                            while True:
+                                download_source = input("\nDo you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n): ").lower()
+                                if download_source in ['','y','n']:
+                                    break
+                            
+                            # get the boolean value from the answer of the user
+                            self.reading_ghost = download_source in ['','y']
+                        else:
+                            # exit if the value is neither bsc or zenodo
+                            if self.network_type.lower() in ['ghost', 'non-ghost']:
+                                error = f"Error: Invalid 'dl_ghost_source': '{self.dl_ghost_source}'. Expected True or False."
+                                self.logger.error(error)
+                                sys.exit(1)
+
+                            self.reading_ghost = self.network_type.lower() == 'ghost'                     
 
                     # if there are GHOST networks, ask the user whether they want to download it from zenodo or HPC machines
                     if self.reading_ghost:
-                        # ask whether the user wants to download from the zenodo or bsc machine
-                        self.bsc_download = input("\nDo you want to download from the BSC remote machine? (Otherwise, GHOST data will be retrieved from Zenodo) ([y]/n): ")
-                        while self.bsc_download.lower() not in ['','y','n']:
-                            self.bsc_download = input("\nDo you want to download from the BSC remote machine? (Otherwise, GHOST data will be retrieved from Zenodo) ([y]/n): ")
+                        if not self.dl_ghost_source:
+                            # ask whether the user wants to download from the zenodo or bsc machine
+                            while True: 
+                                dl_ghost_source = input("\nDo you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo) ([y]/n): ").lower()
+                                if dl_ghost_source in ['','y','n']:
+                                    break
+
+                            self.dl_ghost_source = 'bsc' if dl_ghost_source in ['', 'y'] else 'zenodo'
+                        else:
+                            # exit if the value is neither bsc or zenodo
+                            if self.dl_ghost_source.lower() not in ['bsc', 'zenodo']:
+                                error = f"Error: Invalid 'dl_ghost_source': '{self.dl_ghost_source}'. Expected 'bsc' or 'zenodo'."
+                                self.logger.error(error)
+                                sys.exit(1)
+
+                            self.dl_ghost_source = self.dl_ghost_source.lower()
 
                         # initialise the Zenodo object if user chose a Zenodo download
-                        if self.bsc_download.lower() not in ['', 'y']:
+                        if self.dl_ghost_source == 'zenodo':
                             self.zenodo = Zenodo(self)        
 
                     # get all networks if wildcard is passed
@@ -168,7 +199,7 @@ class Download(object):
 
                     # get the download function 
                     download_fun = (
-                    self.download_ghost_network_sftp if self.reading_ghost and self.bsc_download.lower() in ['', 'y']
+                    self.download_ghost_network_sftp if self.reading_ghost and self.dl_ghost_source == 'bsc'
                     else self.zenodo.download_ghost_network_zenodo if self.reading_ghost
                     else self.download_nonghost_network)
                     
@@ -212,7 +243,7 @@ class Download(object):
                             self.cams.download_cams_experiment(experiment)
                         # BSC machines
                         else:
-                            download_experiment_fun = self.download_experiment if self.interpolated else self.download_non_interpolated_experiment
+                            download_experiment_fun = self.download_experiment if self.dl_interpolated else self.download_non_interpolated_experiment
                     
                             # iterate the experiments download
                             for experiment in self.experiments.keys():
@@ -331,12 +362,12 @@ class Download(object):
         # if pwd or user changed, ask if user wants to remember credentials
         if (prv_user is not None) or (prv_password is not None):
             # ask user if they want their credentials saved
-            remind_txt = input("\nRemember credentials ([y]/n)? ")
-            while remind_txt.lower() not in ['y','n']:
-                remind_txt = input("\nRemember credentials ([y]/n)? ")
+            remind_txt = None
+            while remind_txt not in ['y','n']:
+                remind_txt = input("\nRemember credentials ([y]/n)? ").lower()
             
             # create .env with the input user and/or password
-            if remind_txt.lower() == 'y':
+            if remind_txt == 'y':
                 with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
                     if prv_user is not None:
                         f.write(f"PRV_USER={self.prv_user}\n")
@@ -362,10 +393,13 @@ class Download(object):
                 # make the user choose between overwriting or not overwriting
                 if not isinstance(self.dl_overwrite, bool):
                     # ask if user wants to overwrite
-                    overwrite_choice = None
-                    while overwrite_choice not in ['y','n','']:
-                        overwrite_choice = input("\nThere are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)? ").lower() 
-                    self.dl_overwrite = overwrite_choice != 'n'
+                    while True:
+                        dl_overwrite = input("\nThere are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)? ").lower() 
+                        if dl_overwrite in ['y','n','']:
+                            break
+                    
+                    # get the boolean value
+                    self.dl_overwrite = dl_overwrite  != 'n'
 
                 # if user wants to overwrite then add the files downloaded before the execution as if they were never downloaded
                 if self.dl_overwrite:
@@ -894,7 +928,7 @@ class Download(object):
             exp_dir_functional_list = []    
             for exp_dir in experiment_dict["paths"]:
                 # esarchive in transfer5 is located inside gpfs
-                if "/esarchive/" == exp_dir[:11]:
+                if "/esarchive/" == exp_dir[:11] and self.remote_hostname.startswith('transfer'):
                     exp_dir = join("/gpfs/archive/bsc32/",exp_dir[1:])
                 # check if directory exists in the remote machine
                 try:
@@ -1405,7 +1439,7 @@ class Download(object):
 
     def get_all_networks(self): 
         if self.reading_ghost:
-            if self.bsc_download.lower() in ['', 'y']:
+            if self.dl_ghost_source == 'bsc':
                 self.network = self.ghost_available_networks
             elif not hasattr(self,"zenodo_ghost_available_networks"): 
                 if not self.zenodo.fetch_zenodo_networks():
@@ -1416,7 +1450,7 @@ class Download(object):
     
     def get_all_experiments(self):
         # download all interpolated experiments
-        if self.interpolated is True:
+        if self.dl_interpolated is True:
             # check if ssh exists and check if still active, connect if not
             if (self.ssh is None) or (self.ssh.get_transport().is_active()):
                 self.connect()  

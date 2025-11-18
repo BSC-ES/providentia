@@ -246,8 +246,8 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--dl_mode",
                                      dest="dl_mode",
                                      help="confirms the download of observations, models or both")
-            self.parser.add_argument("--all_network_type",
-                                     dest="all_network_type",
+            self.parser.add_argument("--network_type",
+                                     dest="network_type",
                                      help="accompanied with the wildcard in observations indicates whether to use all GHOST, non-GHOST or both observations")
             self.parser.add_argument("--interp_n_neighbours",
                                      dest="interp_n_neighbours",
