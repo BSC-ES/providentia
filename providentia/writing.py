@@ -247,6 +247,32 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
         # get some key variables for speci
         parameter_details = parameter_dictionary[speci]
         metadata_format_dict = get_standard_metadata(parameter_details)
+
+        # add ACTRIS variables to standard metadata
+        metadata_format_dict.update(
+            {'doi': {'value': [], 
+                        'standard_name': 'DOI', 
+                        'long_name': 'Digital identifier of an object',   
+                        'units': 'unitless', 
+                        'units_quantity': 'unitless', 
+                        'data_type': object, 
+                        'string_format': 'short', 
+                        'metadata_type': 'STATION MISCELLANEOUS', 
+                        'identifiers': {'DOI':''}, 
+                        'description': 'Digital identifier of an object.'},
+                'actris_national_facility': {'value': [], 
+                                            'standard_name': 'ACTRIS national facility', 
+                                            'long_name': 'Digital identifier of an object',   
+                                            'units': 'unitless', 
+                                            'units_quantity': 'unitless', 
+                                            'data_type': object, 
+                                            'string_format': 'short', 
+                                            'metadata_type': 'STATION MISCELLANEOUS', 
+                                            'identifiers': {'ACTRIS national facility':''}, 
+                                            'description': 'ACTRIS national facility.'}
+            }
+        )
+        
         data_format_dict = get_standard_data(parameter_details)
        
         # get data array
