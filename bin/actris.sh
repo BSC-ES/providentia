@@ -114,6 +114,6 @@ cd /home/avilanov/software/providentia
 # Run for each species
 for species in "${species_list[@]}"; do
     echo "Running for species: $species"
-    ./bin/providentia --conf=test_actris.conf --species="\"$species\"" --dl
-    ./bin/providentia --conf=test_actris.conf --species="\"$species\"" --report
+    ./bin/providentia --conf=tests_actris.conf --species="\"$species\"" --dl
+    ./bin/providentia --conf=tests_actris.conf --species="\"$species\"" --report
 done
