@@ -69,9 +69,10 @@ class Canvas(FigureCanvas):
         self.plot_characteristics_templates = self.read_instance.plot_characteristics_templates
         self.plot_characteristics = {}
 
-        # add general plot characteristics to self
+        # add general plot characteristics to self (if not passed via command line)
         for k, val in self.plot_characteristics_templates['general'].items():
-            setattr(self, k, val)
+            if k not in self.read_instance.commandline_arguments:
+                setattr(self, k, val)
 
         # initialise some key vars
         self.filter_data = None

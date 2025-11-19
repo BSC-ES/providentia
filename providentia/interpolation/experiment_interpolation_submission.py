@@ -30,7 +30,10 @@ mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'inter
 class SubmitInterpolation(object):
     """ Class that handles the interpolation submission. """
 
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
+
+        # update self with command line arguments
+        self.commandline_arguments = copy.deepcopy(kwargs)
 
         # start timer
         self.start = time.time()
@@ -43,7 +46,7 @@ class SubmitInterpolation(object):
         self.interpolation_log_dir = join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs')
 
         # initialize commandline arguments, if given
-        provconf = ProvConfiguration(self, **kwargs)
+        provconf = ProvConfiguration(self, **self.commandline_arguments)
 
         print('\n')
 
@@ -67,8 +70,8 @@ class SubmitInterpolation(object):
             sys.exit(error)
 
         # get section args
-        if "section" in kwargs:
-            section = kwargs["section"]
+        if "section" in self.commandline_arguments:
+            section = self.commandline_arguments["section"]
             if section in self.parent_section_names:
                 self.current_config = self.sub_opts[section]
             else:
@@ -94,10 +97,11 @@ class SubmitInterpolation(object):
         # dictionary that stores utilized interpolation variables
         self.interpolation_variables = {}
 
-        # update variables from defined config file
+        # update variables from defined config file (if not passed via command line)
         if self.current_config:
             for k, val in sorted(self.current_config.items()):
-                setattr(self, k, provconf.parse_parameter(k, val))
+                if k not in self.commandline_arguments:
+                    setattr(self, k, provconf.parse_parameter(k, val))
 
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         provconf.check_validity()
