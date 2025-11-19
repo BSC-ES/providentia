@@ -134,31 +134,43 @@ class Download(object):
             # only the local download iterates through the networks
             if self.machine in "local":
                 
-                valid_modes = ["both", "obs", "mod"]
+                # check for what to download if there's both networks and model output
+                if self.network and self.experiments:
 
-                # validate and format correctly dl_mode
-                if self.dl_mode:
-                    mode = str(self.dl_mode).lower()
-                    if mode not in valid_modes:
-                        error = f"Error: Invalid 'dl_mode': '{self.dl_mode}'. Expected 'both', 'obs' or 'mod'."
-                        self.logger.error(error)
-                        sys.exit(1)
-                    self.dl_mode = mode
+                    valid_modes = ["both", "obs", "mod"]
+                    
+                    # validate and format correctly dl_mode
+                    if self.dl_mode:
+                        mode = str(self.dl_mode).lower()
+                        if mode not in valid_modes:
+                            error = f"Error: Invalid 'dl_mode': '{self.dl_mode}'. Expected 'both', 'obs' or 'mod'."
+                            self.logger.error(error)
+                            sys.exit(1)
+                        self.dl_mode = mode
 
-                # if not provided, ask user interactively
-                else:
-                    while True:
-                        user_input = input("\nWhich type of data do you want to download? Observational, modelled or both? ([both]/obs/mod): ").lower()
+                    # if not provided, ask user interactively
+                    else:
+                        while True:
+                            user_input = input("\nWhich type of data do you want to download? Observational, modelled or both? ([both]/obs/mod): ").lower()
 
-                        self.dl_mode = user_input or "both"
-                        if self.dl_mode in valid_modes:
-                            break
+                            self.dl_mode = user_input or "both"
+                            if self.dl_mode in valid_modes:
+                                break
                         
                 # networks
                 if self.network and self.dl_mode != 'mod':
 
                     if self.network == ["*"]:
-                        if not self.network_type:
+                        if self.network_type:
+                            # exit if the value is neither bsc or zenodo
+                            network_type = str(self.network_type).lower()
+                            if network_type not in ['ghost', 'non-ghost']:
+                                error = f"Error: Invalid 'network_type': '{self.network_type}'. Expected 'ghost' or 'non-ghost'."
+                                self.logger.error(error)
+                                sys.exit(1)
+
+                            self.reading_ghost = network_type == 'ghost'  
+                        else:
                             # get user input to know which kind of network wants
                             while True:
                                 download_source = input("\nDo you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n): ").lower()
@@ -167,14 +179,6 @@ class Download(object):
                             
                             # get the boolean value from the answer of the user
                             self.reading_ghost = download_source in ['','y']
-                        else:
-                            # exit if the value is neither bsc or zenodo
-                            if self.network_type.lower() in ['ghost', 'non-ghost']:
-                                error = f"Error: Invalid 'dl_ghost_source': '{self.dl_ghost_source}'. Expected True or False."
-                                self.logger.error(error)
-                                sys.exit(1)
-
-                            self.reading_ghost = self.network_type.lower() == 'ghost'                     
 
                     # if there are GHOST networks, ask the user whether they want to download it from zenodo or HPC machines
                     if self.reading_ghost:
