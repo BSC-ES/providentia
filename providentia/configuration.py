@@ -1217,10 +1217,16 @@ class ProvConfiguration:
         for network_ii, network in enumerate(self.read_instance.network):
             if network_ii == 0:
                 self.read_instance.reading_ghost = check_for_ghost(network)
+                self.read_instance.reading_actris = network == 'actris/actris'
             else:
                 is_ghost = check_for_ghost(network)
+                is_actris = network == 'actris/actris'
                 if is_ghost != self.read_instance.reading_ghost:
                     error = 'Error: "network" must be all GHOST or non-GHOST.'
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
+                if is_actris != self.read_instance.reading_actris:
+                    error = 'Error: If actris/actris in "network", all must be ACTRIS.'
                     self.read_instance.logger.error(error)
                     sys.exit(1)
                 self.read_instance.reading_ghost = is_ghost
