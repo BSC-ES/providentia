@@ -22,8 +22,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Modes" href="modes.html" />
-    <link rel="prev" title="Home" href="home.html" /> 
+    <link rel="next" title="Modes" href="Modes.html" />
+    <link rel="prev" title="Home" href="Home.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,7 +46,7 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Home.html">Home</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#cloning-the-project">Cloning the project</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#running-the-tool-the-first-time">Running the tool the first time</a></li>
@@ -55,16 +55,16 @@
 <li class="toctree-l2"><a class="reference internal" href="#generating-a-report">Generating a report</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-providentia-backend-functions">Using Providentia backend functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#interpolating-your-model-data-to-observations">Interpolating your model data to observations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#redirecting-log-output-to-a-file">Redirecting log output to a file</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="modes.html">Modes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a></li>
-<li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modes.html">Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Topics-in-depth.html">Topics in depth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Running-on-HPC.html">Running on HPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Evolution.html">Evolution</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
 </ul>
 
         </div>
@@ -111,7 +111,7 @@
 </pre></div>
 </div>
 <p>If the dashboard opens, it worked!</p>
-<p>If it didn’t and it is because conda is missing, you can follow the steps on <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html">this page</a> to install it. If you encountered any other problem, feel free to <a class="reference internal" href="home.html"><span class="doc std std-doc">contact us</span></a>.</p>
+<p>If it didn’t and it is because conda is missing, you can follow the steps on <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html">this page</a> to install it. If you encountered any other problem, feel free to <a class="reference internal" href="Home.html"><span class="doc std std-doc">contact us</span></a>.</p>
 <p>By default, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total memory. This can be modified as desired using the bash options. You can check the available options with:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">usage</span>
 </pre></div>
@@ -163,14 +163,6 @@
 </pre></div>
 </div>
 <p>More details can be found in the <a class="reference internal" href="Interpolation.html"><span class="doc std std-doc">interpolation section</span></a>.</p>
-</section>
-<section id="redirecting-log-output-to-a-file">
-<h2>Redirecting log output to a file<a class="headerlink" href="#redirecting-log-output-to-a-file" title="Link to this heading"></a></h2>
-<p>Providentia allows saving its output to a log file using the <code class="docutils literal notranslate"><span class="pre">--logfile</span></code> option:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./bin/providentia<span class="w"> </span>--logfile<span class="w"> </span>&lt;filename&gt;
-</pre></div>
-</div>
-<p>More details <a class="reference internal" href="Redirecting-output-to-a-file.html"><span class="doc std std-doc">here</span></a>.</p>
 <p>Enjoy!</p>
 </section>
 </section>
@@ -179,8 +171,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="home.html" class="btn btn-neutral float-left" title="Home" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="modes.html" class="btn btn-neutral float-right" title="Modes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Home.html" class="btn btn-neutral float-left" title="Home" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Modes.html" class="btn btn-neutral float-right" title="Modes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

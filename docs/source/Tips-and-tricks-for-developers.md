@@ -2,7 +2,7 @@
 
 This page can be used by developers to better understand certain parts of the code:
 
-- [Migrate from Gitlab to Github](#migration)
+- [Migrate from Gitlab to Github](#migrate-from-gitlab-to-github)
 - [Run tests](#run-tests)
 - [Upload to PyPI](#upload-to-pypi)
 - [Check that all reports are created](#check-that-all-reports-are-created)
@@ -13,7 +13,7 @@ This page can be used by developers to better understand certain parts of the co
 - [Create local environment](#create-local-environment)
 - [Memory Profiling Code](#memory-profiling-code)
 
-## Migration
+## Migrate from Gitlab to Github
 
 Things to do in advance:
 

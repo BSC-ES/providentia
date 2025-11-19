@@ -43,15 +43,16 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Home.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modes.html">Modes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../topics-in-depth.html">Topics in depth</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../other-topics.html">Other topics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Modes.html">Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Topics-in-depth.html">Topics in depth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Running-on-HPC.html">Running on HPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Evolution.html">Evolution</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Meet-the-team.html">Meet the team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
 </ul>
 
         </div>
@@ -134,7 +135,7 @@
     <span class="n">jupyter_session</span> <span class="o">=</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="Providentia">
-<a class="viewcode-back" href="../../reference.html#providentia.library.Providentia">[docs]</a>
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Providentia</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Class for Providentia Library mode&quot;&quot;&quot;</span>
 
@@ -175,7 +176,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">datareader</span><span class="o">.</span><span class="n">read_setup</span><span class="p">([</span><span class="s1">&#39;reset&#39;</span><span class="p">])</span>
 
 <div class="viewcode-block" id="Providentia.apply_filter">
-<a class="viewcode-back" href="../../reference.html#providentia.library.Providentia.apply_filter">[docs]</a>
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.apply_filter">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; method to apply filters to data. &quot;&quot;&quot;</span>
 
@@ -305,7 +306,7 @@
             <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
         
 <div class="viewcode-block" id="Providentia.filter_station">
-<a class="viewcode-back" href="../../reference.html#providentia.library.Providentia.filter_station">[docs]</a>
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.filter_station">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">filter_station</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">station</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to filter specific station/s.</span>
 
@@ -324,7 +325,7 @@
 
 
 <div class="viewcode-block" id="Providentia.reset">
-<a class="viewcode-back" href="../../reference.html#providentia.library.Providentia.reset">[docs]</a>
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.reset">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initialise</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to reset filter data.</span>
 
@@ -378,7 +379,7 @@
 
 
 <div class="viewcode-block" id="Providentia.plot">
-<a class="viewcode-back" href="../../reference.html#providentia.library.Providentia.plot">[docs]</a>
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">labelb</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
              <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">set_obs_legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">map_extent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
              <span class="n">hidedata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">multispecies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">regression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
@@ -1104,7 +1105,7 @@
 
 
 <div class="viewcode-block" id="Providentia.colourbar">
-<a class="viewcode-back" href="../../reference.html#providentia.library.Providentia.colourbar">[docs]</a>
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.colourbar">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">colourbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">plot_ax</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">speci</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to make colourbar.</span>
 
@@ -1131,7 +1132,7 @@
 
     
 <div class="viewcode-block" id="Providentia.legend">
-<a class="viewcode-back" href="../../reference.html#providentia.library.Providentia.legend">[docs]</a>
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.legend">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">legend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">set_obs</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to make legend.</span>
 
@@ -1160,7 +1161,7 @@
 
 
 <div class="viewcode-block" id="Providentia.statistic">
-<a class="viewcode-back" href="../../reference.html#providentia.library.Providentia.statistic">[docs]</a>
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.statistic">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">statistic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">labelb</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">per_station</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chunk</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to calculate statistic/s.</span>
 
@@ -1364,7 +1365,7 @@
         <span class="k">return</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="Providentia.print_config">
-<a class="viewcode-back" href="../../reference.html#providentia.library.Providentia.print_config">[docs]</a>
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.print_config">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">print_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Print selected config file to console.</span>
 
@@ -1400,7 +1401,7 @@
         <span class="k">return</span> <span class="s1">&#39;&#39;</span>
 
 <div class="viewcode-block" id="Providentia.save">
-<a class="viewcode-back" href="../../reference.html#providentia.library.Providentia.save">[docs]</a>
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.save">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;nc&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to save current data/ metadata in memory.</span>
 
@@ -1431,7 +1432,7 @@
 
 
 <div class="viewcode-block" id="Providentia.data">
-<a class="viewcode-back" href="../../reference.html#providentia.library.Providentia.data">[docs]</a>
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;nc&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method return data / metadata in specific format.</span>
 
@@ -1476,7 +1477,7 @@
 
 
 <div class="viewcode-block" id="Providentia.variable">
-<a class="viewcode-back" href="../../reference.html#providentia.library.Providentia.variable">[docs]</a>
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.variable">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to return specific data / metadata variable.</span>
 
@@ -1508,7 +1509,7 @@
 
 
 <div class="viewcode-block" id="Providentia.load">
-<a class="viewcode-back" href="../../reference.html#providentia.library.Providentia.load">[docs]</a>
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.load">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="c1"># generate file trees if needed</span>
@@ -1562,7 +1563,7 @@
 
     
 <div class="viewcode-block" id="Providentia.download">
-<a class="viewcode-back" href="../../reference.html#providentia.library.Providentia.download">[docs]</a>
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.download">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper function for initialising Download class&quot;&quot;&quot;</span>
         
@@ -1576,7 +1577,7 @@
 
 
 <div class="viewcode-block" id="Providentia.dashboard">
-<a class="viewcode-back" href="../../reference.html#providentia.library.Providentia.dashboard">[docs]</a>
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.dashboard">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">dashboard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper function for initialising Dashboard class&quot;&quot;&quot;</span>
 
@@ -1589,7 +1590,7 @@
 
 
 <div class="viewcode-block" id="Providentia.interpolate">
-<a class="viewcode-back" href="../../reference.html#providentia.library.Providentia.interpolate">[docs]</a>
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.interpolate">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">interpolate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper function for initialising Interpolation class&quot;&quot;&quot;</span>
         
@@ -1626,7 +1627,7 @@
 
 
 <div class="viewcode-block" id="Providentia.report">
-<a class="viewcode-back" href="../../reference.html#providentia.library.Providentia.report">[docs]</a>
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.report">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper function for initialising Report class&quot;&quot;&quot;</span>
 
