@@ -363,7 +363,8 @@ def read_netcdf_metadata(tuple_arguments):
     ncdf_root = Dataset(relevant_file)
 
     # set metadata variables to read
-    metadata_vars_to_read = ['station_reference', 'longitude', 'latitude', 'station_name', 'measurement_altitude']
+    metadata_vars_to_read = ['station_reference', 'longitude', 'latitude', 'station_name', 
+                             'measurement_altitude', 'doi', 'actris_national_facility']
     metadata_read = []
 
     # iterate though metadata variables to read
@@ -426,10 +427,10 @@ def read_netcdf_metadata(tuple_arguments):
                 else:
                     meta_val = []
 
-            # measurement altitude
-            elif meta_var == 'measurement_altitude':
-                if "measurement_altitude" in ncdf_root.variables:
-                    meta_val = ncdf_root['measurement_altitude'][non_nan_station_indices]
+            # measurement altitude, doi, actris national facility
+            elif meta_var in ['measurement_altitude', 'doi', 'actris_national_facility']:
+                if meta_var in ncdf_root.variables:
+                    meta_val = ncdf_root[meta_var][non_nan_station_indices]
                 else:
                     meta_val = []
 
