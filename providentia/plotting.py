@@ -558,9 +558,22 @@ class Plotting:
 
             for key in ['keys', 'values']:
                 plot_characteristics[key]['color'] = plot_characteristics[key]['color']['light_mode']
-
+                
+            # Get plot characteristics
+            title_spacing = plot_characteristics['title_spacing']
+            spacing = plot_characteristics['spacing']
+            chunk_size = plot_characteristics['chunk_size']
+                
+            # Set figure dimensions
+            dpi = self.canvas_instance.dpi
+            bg_img = [1414, 2000]
+            fig_width, fig_height = bg_img[0] / dpi, bg_img[1] / dpi
+        
             # Get DOI per station
             for networkspeci in self.read_instance.networkspecies:
+                # DOI pages can only be created for ACTRIS
+                if networkspeci.split('|')[0] != 'actris/actris':
+                    continue
                 reference_data = self.canvas_instance.selected_station_metadata[networkspeci]['station_reference']
                 doi_data = self.canvas_instance.selected_station_metadata[networkspeci]['doi']
                 visible_items = []
@@ -577,21 +590,11 @@ class Plotting:
                     if len(unique_station_dois) > 1:
                         extra_rows += len(unique_station_dois) -1
                     visible_items.append((unique_station_references, unique_station_dois))
-                
-                # Get plot characteristics
-                title_spacing = plot_characteristics['title_spacing']
-                spacing = plot_characteristics['spacing']
-                chunk_size = plot_characteristics['chunk_size']
 
                 # If there are extra rows, chunk size needs to be lower to see all DOIs in a page
                 if extra_rows > 2:
                     msg = f'Warning: Some stations have multiple DOIs, lower chunk size in plot_characteristics.yaml (current: {chunk_size}).'
                     self.read_instance.logger.info(msg)
-                
-                # Create figure
-                dpi = self.canvas_instance.dpi
-                bg_img = [1414, 2000]
-                fig_width, fig_height = bg_img[0] / dpi, bg_img[1] / dpi
 
                 # Create a page for every 30 stations 
                 num_pages = math.ceil(len(visible_items) / chunk_size)
