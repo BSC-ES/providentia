@@ -1,4 +1,4 @@
-# Notebook
+# Launching notebooks
 
 As the library mode allows the importing of Providentia as a module, it follows that Providentia can therefore also be used in a Jupyter notebook. This type of interactive working is growing ever more popular, and thus it is important that Providentia can adapt to this type of operation.
 

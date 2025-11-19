@@ -18,7 +18,7 @@ Namely, these are:
 | clean | Removes log files. | |
 | logfile | Redirects output to a file. More info in the [wiki page](Redirecting-output-to-a-file). | |
 | debug | Start [debug mode](Running-the-tool-on-debug). | |
-| notebook | Open a Jupyter notebook to [use Providentia as a library](Notebook). | |
+| notebook | Open a Jupyter notebook to [use Providentia as a library](Launching-notebooks). | |
 | conf | Configuration file path. | |
 | config | Configuration file path. | |
 | config_dir | Path to all configuration files. | |

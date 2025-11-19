@@ -9,5 +9,4 @@ Modes
    Dashboard.md
    Report.md
    Download-mode.rst
-   Library.md
-   Notebook.md
+   Library-mode.rst
