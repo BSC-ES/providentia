@@ -134,15 +134,28 @@ class Download(object):
             # only the local download iterates through the networks
             if self.machine in "local":
                 
-                # select what to download
-                if self.network and self.experiments and not self.dl_mode:
-                    self.dl_mode = None
-                    while self.dl_mode not in ["both", "obs", "model"]:
-                        self.dl_mode = input("\nWhich type of data do you want to download? Observational, modelled or both? ([both]/obs/mod): ").lower()
-                        self.dl_mode = "both" if self.dl_mode == "" else self.dl_mode
+                valid_modes = ["both", "obs", "mod"]
+
+                # validate and format correctly dl_mode
+                if self.dl_mode:
+                    mode = str(self.dl_mode).lower()
+                    if mode not in valid_modes:
+                        error = f"Error: Invalid 'dl_mode': '{self.dl_mode}'. Expected 'both', 'obs' or 'mod'."
+                        self.logger.error(error)
+                        sys.exit(1)
+                    self.dl_mode = mode
+
+                # if not provided, ask user interactively
+                else:
+                    while True:
+                        user_input = input("\nWhich type of data do you want to download? Observational, modelled or both? ([both]/obs/mod): ").lower()
+
+                        self.dl_mode = user_input or "both"
+                        if self.dl_mode in valid_modes:
+                            break
                         
                 # networks
-                if self.network:
+                if self.network and self.dl_mode != 'mod':
 
                     if self.network == ["*"]:
                         if not self.network_type:
@@ -175,7 +188,7 @@ class Download(object):
                             self.dl_ghost_source = 'bsc' if dl_ghost_source in ['', 'y'] else 'zenodo'
                         else:
                             # exit if the value is neither bsc or zenodo
-                            if self.dl_ghost_source.lower() not in ['bsc', 'zenodo']:
+                            if str(self.dl_ghost_source).lower() not in ['bsc', 'zenodo']:
                                 error = f"Error: Invalid 'dl_ghost_source': '{self.dl_ghost_source}'. Expected 'bsc' or 'zenodo'."
                                 self.logger.error(error)
                                 sys.exit(1)
@@ -229,7 +242,7 @@ class Download(object):
             if self.experiments == {'*' : '*'}:
                 self.get_all_experiments()
 
-            if self.experiments:
+            if self.experiments and self.dl_mode != 'obs':
                 # remote machine experiment download
                 if self.machine in ["storage5", "nord3v2", "nord4"]:
                     # get function to download experiment depending on the configuration file field

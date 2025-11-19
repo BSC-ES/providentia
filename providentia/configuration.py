@@ -673,11 +673,11 @@ class ProvConfiguration:
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
             # if there's experiments, ask the user whether they want interpolated or non-interpolated
-            if self.read_instance.dl_interpolated is None:
-                interpolated = None
-                while interpolated not in ['','y','n']:
+            if not isinstance(self.read_instance.dl_interpolated, bool):
+                while True:
                     interpolated = input("\nModel data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded) ([y]/n): ").lower()
-
+                    if interpolated in ['','y','n']:
+                        break
                 # set the interpolated parameter  
                 self.read_instance.dl_interpolated = interpolated in ['','y']
 
