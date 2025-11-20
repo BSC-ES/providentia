@@ -1568,6 +1568,13 @@
             "hspace": 0.25
           }
         },
+      "tests": {
+        "figsize": [13, 7],
+        "main_gs": {
+            "height_ratios": [5, 1], 
+            "hspace": 0.25
+          }
+      }
     },
   "heatmap":
     {
@@ -1715,7 +1722,7 @@
         },
       "tests":
         {
-                    "plot_options": ["annotate", "bias", "multispecies"],
+          "plot_options": ["annotate", "bias", "multispecies"],
           "figsize": [13, 7],
           "cb": { "position": [0.05, 0.00, 0.9, 0.05] },
           "xticklabels": { "rotation": 0, "fontsize": 16 },
