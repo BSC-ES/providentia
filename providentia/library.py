@@ -420,6 +420,12 @@ class Providentia:
         else:
             zstat = None
 
+        # check if data was loaded
+        if not hasattr(self, 'networkspecies'):
+            msg = 'Data was not loaded, use load() first.'
+            show_message(self, msg)
+            return
+
         # get networkspeci to plot (for non-multispecies plots), taking first one preferentially
         if len(self.networkspecies) > 0:
             networkspeci = self.networkspecies[0]
@@ -565,12 +571,13 @@ class Providentia:
             fig = plt.figure(figsize=self.plot_characteristics[plot_type]['figsize'])
 
         # create axes
+        main_gs = gridspec.GridSpec(2, 1, **self.plot_characteristics[plot_type]['main_gs'])
         if base_plot_type == 'map':
-            ax = fig.add_subplot(111, projection=self.plotcrs)
+            ax = fig.add_subplot(main_gs[0], projection=self.plotcrs)
         elif base_plot_type == 'taylor':            
             reference_stddev = 7.5
             ghelper = get_taylor_diagram_ghelper(reference_stddev, self.plot_characteristics[plot_type])
-            ax = fig.add_subplot(111, axes_class=fa.FloatingAxes, grid_helper=ghelper)
+            ax = fig.add_subplot(main_gs[0], axes_class=fa.FloatingAxes, grid_helper=ghelper)
         elif base_plot_type == "fairmode-statsummary":
             # get current species
             speci = networkspeci.split('|')[1]
@@ -580,10 +587,11 @@ class Providentia:
             nrows = 8 if speci in ["sconco3", "sconcno2", "pm10"] else 7
 
             # create gridspec and add it to a list
-            gs = gridspec.GridSpec(nrows, ncols, **self.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
+            gs =  gridspec.GridSpecFromSubplotSpec(nrows, ncols, subplot_spec=main_gs[0],
+                                                   **self.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
             ax = [fig.add_subplot(gs[i, j]) for i in range(nrows) for j in range(ncols)]
         else:
-            ax = fig.add_subplot(111)
+            ax = fig.add_subplot(main_gs[0])
 
         if base_plot_type in ['periodic', 'periodic-violin']:
             gs = gridspec.GridSpecFromSubplotSpec(100, 100, subplot_spec=ax.get_subplotspec())
@@ -942,7 +950,7 @@ class Providentia:
         if base_plot_type == 'scatter':
             harmonise_xy_lims_paradigm(self, self, relevant_ax, base_plot_type, 
                                         self.plot_characteristics[plot_type], plot_options, relim=True)
-        elif base_plot_type not in ['legend', 'metadata', 'map', 'taylor', 'fairmode-target', 'fairmode-statsummary']:
+        elif base_plot_type not in ['legend', 'metadata', 'map', 'taylor', 'fairmode-statsummary']:
             harmonise_xy_lims_paradigm(self, self, relevant_ax, base_plot_type, 
                                         self.plot_characteristics[plot_type], plot_options, relim=True, 
                                         autoscale=True)
@@ -962,26 +970,9 @@ class Providentia:
 
                 if valid_legend:
                     legend_handles = self.legend(plot_type, data_labels=data_labels, set_obs=set_obs_legend)
-                    if base_plot_type in ['periodic', 'periodic-violin']:
-                        try:
-                            ax_to_plot = self.plot_characteristics[plot_type]['legend']['handles']['ax']
-                        except:
-                            msg = "axis to plot legend on not defined for plot type in plot_characteristics.yaml, or passed via 'format' argument.\nTaking first available axis."
-                            show_message(self, msg)
-                            ax_to_plot = self.periodic_relevant_temporal_resolutions[0]
-                        if ax_to_plot not in self.periodic_relevant_temporal_resolutions:
-                            msg = "defined axis to plot legend on not available for data resolution of read data.\nInstead, taking first available axis."
-                            show_message(self, msg)
-                            ax_to_plot = self.periodic_relevant_temporal_resolutions[0]
-                        relevant_ax[ax_to_plot].legend(**legend_handles)
-                    else:
-                        if base_plot_type == 'fairmode-target':
-                            msg = "Data labels legend cannot be plotted, create standalone legend using plot('legend')"
-                            show_message(self, msg)
-                        elif base_plot_type == 'fairmode-statsummary':
-                            relevant_ax[3].legend(**legend_handles)
-                        else:
-                            relevant_ax.legend(**legend_handles)
+                    legend_ax = fig.add_subplot(main_gs[1])
+                    legend_ax.axis("off")
+                    legend_ax.legend(**legend_handles)
 
         # make colourbar (embedded on plot axis)
         if 'cb' in self.plot_characteristics[plot_type]:

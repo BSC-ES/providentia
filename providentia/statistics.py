@@ -769,22 +769,28 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 station_inds = canvas_instance.station_inds[networkspeci]
 
             elif map:
+                if read_instance.temporal_colocation:
+                    inds = read_instance.valid_station_inds_temporal_colocation[networkspeci]
+                else:
+                    inds = read_instance.valid_station_inds[networkspeci]
                 # if have just data_labels_a, station indices are simply those relevant for data_labels_a
                 if len(data_labels_b) == 0:
-                    if read_instance.temporal_colocation:
-                        station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][data_labels_a[0]]
-                    else:
-                        station_inds = read_instance.valid_station_inds[networkspeci][data_labels_a[0]]
+                    if data_labels_a[0] not in inds:
+                        error = f'Data label {data_labels_a[0]} not in array. Options: {list(inds.keys())}'
+                        read_instance.logger.error(error)
+                        sys.exit(1)
+                    station_inds = inds[data_labels_a[0]]
                 # elif have data_labels_b, get intersection of data_labels_a and data_labels_b valid station indices
                 else:
-                    if read_instance.temporal_colocation:
-                        station_inds = \
-                            np.intersect1d(read_instance.valid_station_inds_temporal_colocation[networkspeci][data_labels_a[0]],
-                                           read_instance.valid_station_inds_temporal_colocation[networkspeci][data_labels_b[0]])
-                    else:
-                        station_inds = \
-                            np.intersect1d(read_instance.valid_station_inds[networkspeci][data_labels_a[0]],
-                                           read_instance.valid_station_inds[networkspeci][data_labels_b[0]])
+                    if data_labels_a[0] not in inds:
+                        error = f'Data label {data_labels_a[0]} not in array. Options: {list(inds.keys())}'
+                        read_instance.logger.error(error)
+                        sys.exit(1)
+                    if data_labels_b[0] not in inds:
+                        error = f'Data label {data_labels_b[0]} not in array. Options: {list(inds.keys())}'
+                        read_instance.logger.error(error)
+                        sys.exit(1)
+                    station_inds = np.intersect1d(inds[data_labels_a[0]], inds[data_labels_b[0]])
 
             # check if valid station data
             # if not return
