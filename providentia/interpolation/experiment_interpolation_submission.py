@@ -42,7 +42,7 @@ class SubmitInterpolation(object):
         # initialize commandline arguments, if given
         provconf = ProvConfiguration(self, **kwargs)
 
-        print('\n')
+        print()
 
         # update variables from config file
         if self.config != '':  

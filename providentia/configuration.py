@@ -86,7 +86,7 @@ class ProvConfiguration:
 
         # throw an error if default keyword is passed
         elif value == 'default':
-            error = f"Error: The 'default' keyword in the '{key}' parameter is no longer allowed. Remove the entire field to use the default value."
+            error = f"Error: 'default' was detected in '{key}'. 'default' is no longer an allowed keyword."
             self.read_instance.logger.error(error)
             sys.exit(1)
 
@@ -647,12 +647,6 @@ class ProvConfiguration:
     def decompose_experiments(self, deactivate_warning):
         """ Get experiment components (experiment-domain-ensemble-forecast) and fill the class variables with their value."""
 
-        # make sure there are experiments for interpolation mode
-        if (self.read_instance.mode == 'interpolation') and (len(self.read_instance.experiments) == 0):
-            error = 'Error: No experiments were provided in the configuration file.'
-            self.read_instance.logger.error(error)
-            sys.exit(1)
-
         # get separated experiment parts list
         split_experiments = [exp.split("-") for exp in self.read_instance.experiments]
 
@@ -663,6 +657,10 @@ class ProvConfiguration:
         config_domain = copy.deepcopy(self.read_instance.domain) 
         config_ensemble = copy.deepcopy(self.read_instance.ensemble)
         config_forecast = copy.deepcopy(self.read_instance.forecast)
+
+        # ignore the experiments if user wants to download observations
+        if self.read_instance.dl_mode == 'obs':
+            return
 
         if self.read_instance.experiments and self.read_instance.mode == 'download':
 
@@ -1127,7 +1125,7 @@ class ProvConfiguration:
                 field_name:fields-set(self.var_defaults) 
                 for field_name, fields in self.read_instance.fields_per_section.items()}
           
-        # check have network information 
+        # check network 
         if not self.read_instance.network and 'network' in self.default_values:
             msg = "Network (network) was not defined in the configuration file. "
             default = self.default_values['network']
@@ -1141,8 +1139,7 @@ class ProvConfiguration:
                 self.read_instance.logger.error(f"Error: {msg}")
                 sys.exit(1)
 
-        # check have species information
-        # in download mode is allowed to not pass any species, so continue
+        # check species
         if not self.read_instance.species and 'species' in self.default_values:
             msg = "Species (species) was not defined in the configuration file. "
             default = self.default_values['species']
@@ -1213,8 +1210,7 @@ class ProvConfiguration:
             self.read_instance.networkspeci = '{}|{}'.format(self.read_instance.network[0],
                                                             self.read_instance.species[0]) 
 
-        # check have resolution information
-        # if report, throw message, stating are using default instead
+        # check resolution
         if not self.read_instance.resolution and 'resolution' in self.default_values:
             msg = "Resolution (resolution) was not defined in the configuration file. "
             default = self.default_values['resolution']
@@ -1320,6 +1316,34 @@ class ProvConfiguration:
                         os.system(f"sudo mkdir -p {path}")
                         os.system(f"sudo chmod o+w {path}")
 
+        # make sure there are experiments for interpolation mode
+        if not self.read_instance.experiments and 'experiments' in self.default_values:
+            error = f"Error: Experiments (experiments) was not defined in the configuration file. It is mandatory for the '{self.read_instance.mode}' mode."
+            self.read_instance.logger.error(error)
+            sys.exit(1)
+
+        # check for what to download if there's both networks and model output
+        if self.read_instance.network and self.read_instance.experiments and self.read_instance.mode == 'download':
+            valid_modes = ["both", "obs", "mod"]
+            
+            # validate and format correctly dl_mode
+            if self.read_instance.dl_mode:
+                mode = str(self.read_instance.dl_mode).lower()
+                if mode not in valid_modes:
+                    error = f"Error: Invalid 'dl_mode': '{self.read_instance.dl_mode}'. Expected 'both', 'obs' or 'mod'."
+                    self.logger.error(error)
+                    sys.exit(1)
+                self.read_instance.dl_mode = mode
+
+            # if not provided, ask user interactively
+            else:
+                while True:
+                    user_input = input("\nWhich type of data do you want to download? Observational, modelled or both? ([both]/obs/mod): ").lower()
+
+                    self.read_instance.dl_mode = user_input or "both"
+                    if self.read_instance.dl_mode in valid_modes:
+                        break
+                        
         # set expID, domain, ensemble, forecast from experiment name
         self.decompose_experiments(deactivate_warning)
 
