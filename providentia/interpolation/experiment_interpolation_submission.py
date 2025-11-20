@@ -1,5 +1,6 @@
 import copy
 import glob
+import math
 import multiprocessing
 import os
 import psutil
@@ -10,6 +11,7 @@ import sys
 import time
 import yaml
 
+from netCDF4 import Dataset
 import numpy as np
 
 from providentia.auxiliar import CURRENT_PATH, join
@@ -163,7 +165,7 @@ class SubmitInterpolation(object):
             exp_files_dates = []
 
             # initialize experiment search variables
-            exp_dir = None
+            self.exp_dir = None
             msg = ""
 
             # get experiment type and specific directories
@@ -175,7 +177,7 @@ class SubmitInterpolation(object):
                         for temp_exp_dir in experiment_dict["paths"]:
                             temp_exp_dir = join(temp_exp_dir, experiment_to_process)
                             if os.path.exists(temp_exp_dir):
-                                exp_dir = temp_exp_dir
+                                self.exp_dir = temp_exp_dir
                                 break
                         break
                     # for local machines, break to get experiment_type
@@ -183,7 +185,7 @@ class SubmitInterpolation(object):
                         break
                 
             # if local machine or if not exp_dir, get directory from data_paths
-            if exp_dir is None: 
+            if self.exp_dir is None: 
                 
                 if self.machine != "local":
                     msg = f"The experiment '{experiment_to_process}' is in none of the experiment paths defined in settings/interp_experiments.yaml."
@@ -191,7 +193,7 @@ class SubmitInterpolation(object):
 
                 exp_to_interp_path = join(self.exp_to_interp_root, experiment_to_process)
                 if os.path.exists(exp_to_interp_path):
-                    exp_dir = exp_to_interp_path
+                    self.exp_dir = exp_to_interp_path
                 else:
                     msg = f"The experiment '{experiment_to_process}' is not in {self.exp_to_interp_root}."
                     print(msg)
@@ -246,19 +248,19 @@ class SubmitInterpolation(object):
                     have_valid_resolution = False
                     for model_temporal_resolution in resolutions_to_keep:
                         # test if have directory for current speci_to_process
-                        if os.path.isdir("{}/{}/{}/{}".format(exp_dir, grid_type, model_temporal_resolution, speci_to_process)):
+                        if os.path.isdir("{}/{}/{}/{}".format(self.exp_dir, grid_type, model_temporal_resolution, speci_to_process)):
                             have_valid_resolution = True
                             break
 
                         # test if have speci directory in ensemble-stats
-                        elif os.path.isdir("{}/{}/{}/ensemble-stats".format(exp_dir, grid_type, model_temporal_resolution)):
+                        elif os.path.isdir("{}/{}/{}/ensemble-stats".format(self.exp_dir, grid_type, model_temporal_resolution)):
                             
                             # get all ensemble-stats species
                             experiment_species_ensemblestat = list(np.unique([name.split('_')[0] 
                                                                 for name in os.listdir("{}/{}/{}/ensemble-stats".format(
-                                                                    exp_dir,grid_type,model_temporal_resolution)) 
+                                                                    self.exp_dir,grid_type,model_temporal_resolution)) 
                                                                     if os.path.isdir("{}/{}/{}/ensemble-stats/{}".format(
-                                                                        exp_dir,grid_type,model_temporal_resolution,name))]))
+                                                                        self.exp_dir,grid_type,model_temporal_resolution,name))]))
                             
                             # test if have speci_to_process in experiment_species_ensemblestat
                             if speci_to_process in experiment_species_ensemblestat:
@@ -306,7 +308,7 @@ class SubmitInterpolation(object):
                                 # if it can be then check then if the variable to map to exists for the experiment/grid_type/resolution 
                                 # (these can be multiple, list order sets the priority)
                                 for speci_to_map in mapping_species[speci_to_process]:
-                                    if os.path.isdir("{}/{}/{}/{}".format(exp_dir, grid_type, model_temporal_resolution, speci_to_map)):
+                                    if os.path.isdir("{}/{}/{}/{}".format(self.exp_dir, grid_type, model_temporal_resolution, speci_to_map)):
 
                                         # if have a binned size distribution variable to map, first check if bin radius is within model's bin extents
                                         # if not, do not process species
@@ -369,13 +371,13 @@ class SubmitInterpolation(object):
                             if not ensemble_member:
                                 ensemble_stat = True
                                 exp_path = '{}/{}/{}/ensemble-stats/{}_{}/{}*{}.nc'.format(
-                                        exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
+                                        self.exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
                                         ensemble, speci_to_process, ensemble)
                                 exp_files_all = np.sort(glob.glob(exp_path))
                             else:
                                 ensemble_stat = False
                                 exp_path = '{}/{}/{}/{}/{}*.nc'.format(
-                                        exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
+                                        self.exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
                                         speci_to_process)
                                 exp_files_all = np.sort(glob.glob(exp_path))    
                                 
@@ -891,12 +893,12 @@ class SubmitInterpolation(object):
         """Submit interpolation jobs using multiprocessing pool."""
 
         # set resource usage parameters for estimating safe number of pool workers 
-        self.per_worker_mem_gb=2.0
-        self.per_worker_cpu_fraction=1.0/self.n_cpus
-        self.per_worker_swap_gb=0.1
-        self.cpu_fraction_limit=0.75 
-        self.mem_fraction_limit=0.75
-        self.swap_fraction_limit=0.75
+        self.per_worker_mem_gb = self.guess_memory_per_worker()
+        self.per_worker_cpu_fraction = 1.0/self.n_cpus
+        self.per_worker_swap_gb = self.per_worker_mem_gb * 0.05 
+        self.cpu_fraction_limit = 0.8 
+        self.mem_fraction_limit = 0.8
+        self.swap_fraction_limit = 0.8
 
         # set run commands
         self.commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(
@@ -972,6 +974,87 @@ class SubmitInterpolation(object):
                 print('THE FOLLOWING INTERPOLATION TASKS FAILED: {}'.format(failed_tasks))
             if len(not_finished_tasks) > 0:
                 print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
+
+    def guess_memory_per_worker(self):
+        """
+        Estimate the memory usage that each worker will use.
+        Goes through each file to be read and gets the memory that will be consusmed, 
+        and then takes the max to be conservative.
+        """
+
+        # initialise max worker gb as 0
+        max_worker_mem_gb = 0
+
+        # iterate through arguments
+        for argument in self.arguments:
+
+            # initialise worker memory gb as 0
+            worker_mem_gb = 0
+
+            argument = argument.split(' ')
+            prov_exp_code = argument[0]
+            model_temporal_resolution = argument[1]
+            speci_to_process = argument[2]
+            yearmonth = argument[5]
+            experiment_to_process, grid_type, ensemble = prov_exp_code.split('-')
+            ensemble_member = ensemble.isdigit()
+
+            # get relevant model files
+            if ensemble_member:
+                all_model_files = np.sort(glob.glob('{}/{}/{}/{}/{}*{}*.nc'\
+                                                    .format(self.exp_dir, grid_type,
+                                                            model_temporal_resolution,
+                                                            speci_to_process, speci_to_process, yearmonth)))
+
+                # drop all analysis files ending with '_an.nc' which are not in ensemble-stats
+                all_model_files = [f for f in all_model_files if '_an.nc' not in f] 
+
+                # isolate model files to be only those associated with relevant ensemble
+                model_files = np.sort([f for f in all_model_files if '{}-{}_'.format(
+                                    speci_to_process,ensemble) in f])
+                
+                # if the number of remaining model files is 0, this is because the files
+                # do not contain an ensemble member number, therefore take all model files
+                if len(model_files) == 0:
+                    model_files = all_model_files
+        
+            else:            
+                model_files = np.sort(glob.glob('{}/{}/{}/ensemble-stats/{}_{}/{}*{}*{}.nc'\
+                                                    .format(self.exp_dir, grid_type,
+                                                            model_temporal_resolution,
+                                                            speci_to_process, ensemble, 
+                                                            speci_to_process, yearmonth, ensemble)))
+
+            # iterate through all files for 1 worker and add memory together
+            for model_file in model_files:
+
+                # open framework of .nc file
+                with Dataset(model_file, "r") as nc:
+
+                    # get required variable
+                    var = nc.variables[speci_to_process]
+
+                    # dimension lengths
+                    dims = [nc.dimensions[d].size for d in var.dimensions]
+
+                    # total number of elements
+                    n_elements = math.prod(dims)
+
+                    # bytes per element (float32=4, float64=8, int16=2, etc.)
+                    dtype_size = np.dtype(var.dtype).itemsize
+
+                    # convert to GB
+                    size_gb = (n_elements * dtype_size) / (1024**3)
+
+                    # add size to worker gb
+                    worker_mem_gb += size_gb
+
+            # if worker mem gb is greater than current max then overwrite it
+            if worker_mem_gb > max_worker_mem_gb:
+                max_worker_mem_gb = copy.deepcopy(worker_mem_gb)
+
+        return max_worker_mem_gb
+                
 
     def guess_pool_workers(self):
         """
