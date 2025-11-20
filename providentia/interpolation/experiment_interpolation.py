@@ -42,10 +42,6 @@ PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 # load the defined experiments paths and agrupations jsons
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 
-# add unit-converter submodule to python load path
-sys.path.append(join(PROVIDENTIA_ROOT,'providentia','dependencies','unit-converter'))
-import unit_converter
-
 class ExperimentInterpolation(object):
     """ Class which handles interpolation of experiment data to surface observations. """
 
