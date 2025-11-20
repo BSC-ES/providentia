@@ -205,13 +205,13 @@ def read_netcdf_data(tuple_arguments):
                 if len(qa) > 0:
                     # screen out observations which are associated with any of the selected qa flags
                     species_data[np.isin(ncdf_root['qa'][current_file_station_indices, valid_file_time_indices, :], 
-                                        qa).any(axis=2)] = np.NaN
+                                        qa).any(axis=2)] = np.nan
                 
             # if some data provider flags selected then screen observations
             if len(flags) > 0:
                 # screen out observations which are associated with any of the selected data provider flags
                 species_data[np.isin(ncdf_root['flag'][current_file_station_indices, valid_file_time_indices, :], 
-                                    flags).any(axis=2)] = np.NaN
+                                    flags).any(axis=2)] = np.nan
 
         # write filtered species data to shared file data
         data_in_memory[data_labels.index(observations_data_label), full_array_station_indices[:, np.newaxis], 
@@ -219,7 +219,7 @@ def read_netcdf_data(tuple_arguments):
 
         # get file metadata
         if not filter_read:
-            file_metadata = np.full((len(station_references), 1), np.NaN, dtype=metadata_dtype)
+            file_metadata = np.full((len(station_references), 1), np.nan, dtype=metadata_dtype)
             for meta_var in metadata_vars_to_read:
                 # do extra work for non-GHOST data 
                 if not reading_ghost:
@@ -339,7 +339,7 @@ def read_netcdf_data(tuple_arguments):
                 data_label_forecast = data_label
 
             # mask out fill values for parameter field
-            relevant_data[relevant_data.mask] = np.NaN
+            relevant_data[relevant_data.mask] = np.nan
 
             # put data in array
             data_in_memory[data_labels.index(data_label_forecast), full_array_station_indices[:, np.newaxis], 

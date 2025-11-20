@@ -1223,7 +1223,7 @@ class Plotting:
 
         # if violin plot setup arrays for saving data
         if violin_resolution is not None:
-            PDFs_sampled = np.full((len(cut_data_labels), len(self.canvas_instance.periodic_xticks[violin_resolution]), int(n_samples)), np.NaN, dtype=np.float32)
+            PDFs_sampled = np.full((len(cut_data_labels), len(self.canvas_instance.periodic_xticks[violin_resolution]), int(n_samples)), np.nan, dtype=np.float32)
 
         # iterate through data labels
         for data_label_ii, data_label in enumerate(cut_data_labels):
@@ -2088,7 +2088,7 @@ class Plotting:
         stats_calc = calculate_statistic(self.read_instance, self.canvas_instance, networkspeci, zstat, 
                                          [self.read_instance.observations_data_label]*len(data_labels_sans_obs), 
                                          data_labels_sans_obs)
-        stats_calc = np.insert(stats_calc, obs_index, np.NaN)
+        stats_calc = np.insert(stats_calc, obs_index, np.nan)
         stats_dict[zstat] = stats_calc
         
         # get maximum stddev in dataframe (if not defined)
@@ -2285,7 +2285,7 @@ class Plotting:
             valid_station_classifications = get_valid_metadata(self, f'{classification_type}_classification', 
                                                                valid_station_idxs, networkspeci)
         except:
-            valid_station_classifications = np.full(len(valid_station_references), np.NaN, dtype=np.float32)
+            valid_station_classifications = np.full(len(valid_station_references), np.nan, dtype=np.float32)
             self.read_instance.logger.info(f'Data for {classification_type}_classification is not available and will not be shown in the legend')
 
         # get number of stations

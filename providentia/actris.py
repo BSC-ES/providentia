@@ -1113,7 +1113,7 @@ class Actris:
             initial_check_nc_files = self.get_files_to_download(target_start_date, target_end_date, var)
             files_to_download = self.download_instance.select_files_to_download(initial_check_nc_files)
             if not files_to_download:
-                msg = f"\nFiles were already downloaded for {var} at {self.resolution} "
+                msg = f"Files were already downloaded for {var} at {self.resolution} "
                 msg += f"resolution between {target_start_date} and {target_end_date}."
                 show_message(self.download_instance, msg, deactivate=False)     
                 continue 

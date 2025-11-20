@@ -180,7 +180,7 @@ class DataFilter:
             # filter all observational/experiment data out of bounds of lower/upper limits
             inds_out_of_bounds = np.logical_or(self.read_instance.data_in_memory_filtered[networkspeci][:,:,:] < lower_bound,
                                                self.read_instance.data_in_memory_filtered[networkspeci][:,:,:] > upper_bound)
-            self.read_instance.data_in_memory_filtered[networkspeci][inds_out_of_bounds] = np.NaN
+            self.read_instance.data_in_memory_filtered[networkspeci][inds_out_of_bounds] = np.nan
 
     def filter_by_period(self):
         """ Filter data for selected periods (keeping or removing data, as defined). """
@@ -216,7 +216,7 @@ class DataFilter:
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
                         inds_to_screen = np.isin(data_array[networkspeci][day_night_index,:,:], day_night_codes_to_keep, invert=True)
-                        self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
+                        self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.nan
 
             weekday_weekend_codes_to_keep = []
             if 'Weekday' in keeps:
@@ -229,7 +229,7 @@ class DataFilter:
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
                         inds_to_screen = np.isin(data_array[networkspeci][weekday_weekend_index,:,:], weekday_weekend_codes_to_keep, invert=True)
-                        self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
+                        self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.nan
 
             season_codes_to_keep = []
             if 'Spring' in keeps:
@@ -246,7 +246,7 @@ class DataFilter:
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
                         inds_to_screen = np.isin(data_array[networkspeci][season_index,:,:], season_codes_to_keep, invert=True)
-                        self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
+                        self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.nan
 
         if len(removes) > 0:
             day_night_codes_to_remove = []
@@ -260,7 +260,7 @@ class DataFilter:
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
                         inds_to_screen = np.isin(data_array[networkspeci][day_night_index,:,:], day_night_codes_to_remove)
-                        self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
+                        self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.nan
 
             weekday_weekend_codes_to_remove = []
             if 'Weekday' in removes:
@@ -273,7 +273,7 @@ class DataFilter:
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
                         inds_to_screen = np.isin(data_array[networkspeci][weekday_weekend_index,:,:], weekday_weekend_codes_to_remove)
-                        self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
+                        self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.nan
 
             season_codes_to_remove = []
             if 'Spring' in removes:
@@ -290,7 +290,7 @@ class DataFilter:
                     # iterate through network / species  
                     for networkspeci in self.read_instance.networkspecies:
                         inds_to_screen = np.isin(data_array[networkspeci][season_index,:,:], season_codes_to_remove)
-                        self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.NaN
+                        self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.nan
 
     def filter_by_data_availability(self):
         """ Function which filters data by selected data availability variables. """
@@ -331,13 +331,13 @@ class DataFilter:
                             # bound is < 100?:
                             if data_availability_lower_bounds[var_ii] < 100:
                                 inds_to_screen = data_array[networkspeci][var_index,:,:] > data_availability_lower_bounds[var_ii]
-                                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_screen] = np.NaN
+                                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_screen] = np.nan
                         # data representativity variable?
                         else:
                             # bound is > 0?
                             if data_availability_lower_bounds[var_ii] > 0:
                                 inds_to_screen = data_array[networkspeci][var_index,:,:] < data_availability_lower_bounds[var_ii]
-                                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_screen] = np.NaN
+                                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_screen] = np.nan
 
         # filter observations and experiment data by non-native percentage data availability variables 
         # (calculated on the fly)
@@ -384,7 +384,7 @@ class DataFilter:
                             data_availability_percent = Stats.calculate_data_avail_fraction(
                                 self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,period_inds[0]:period_inds[-1]+1])
                             inds_to_screen = np.where(data_availability_percent < data_availability_lower_bounds[var_ii])[0]
-                            self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,inds_to_screen[:,np.newaxis],period_inds[np.newaxis,:]] = np.NaN
+                            self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,inds_to_screen[:,np.newaxis],period_inds[np.newaxis,:]] = np.nan
 
     def filter_by_metadata(self):
         """ Filter data by selected metadata. """
@@ -417,7 +417,7 @@ class DataFilter:
                         invalid_keep = np.repeat(
                             np.isin(self.read_instance.metadata_in_memory[networkspeci][meta_var][:, :], current_keep, invert=True), 
                                     self.read_instance.N_inds_per_yearmonth, axis=1)
-                        self.read_instance.data_in_memory_filtered[networkspeci][:,invalid_keep] = np.NaN
+                        self.read_instance.data_in_memory_filtered[networkspeci][:,invalid_keep] = np.nan
                 
                     # if any of the remove checkboxes have been selected, filter out data by these selected fields
                     current_remove = self.read_instance.metadata_menu[metadata_type][meta_var]['checkboxes'][
@@ -426,7 +426,7 @@ class DataFilter:
                         invalid_remove = np.repeat(
                             np.isin(self.read_instance.metadata_in_memory[networkspeci][meta_var][:, :], current_remove),
                                     self.read_instance.N_inds_per_yearmonth, axis=1)
-                        self.read_instance.data_in_memory_filtered[networkspeci][:,invalid_remove] = np.NaN
+                        self.read_instance.data_in_memory_filtered[networkspeci][:,invalid_remove] = np.nan
             
             # handle numeric metadata
             else:
@@ -453,7 +453,7 @@ class DataFilter:
                                 if current_lower >= lower_default: 
                                     invalid_below = np.repeat(self.read_instance.metadata_in_memory[networkspeci][meta_var][:, :] < current_lower, 
                                                               self.read_instance.N_inds_per_yearmonth, axis=1)
-                                    self.read_instance.data_in_memory_filtered[networkspeci][:,invalid_below] = np.NaN
+                                    self.read_instance.data_in_memory_filtered[networkspeci][:,invalid_below] = np.nan
 
                             # if current upper < than the maximum extent, then filter out
                             # data with metadata > current upper value (if this is numeric)
@@ -464,12 +464,12 @@ class DataFilter:
                                 if current_upper <= upper_default: 
                                     invalid_above = np.repeat(self.read_instance.metadata_in_memory[networkspeci][meta_var][:, :] > current_upper, 
                                                               self.read_instance.N_inds_per_yearmonth, axis=1)
-                                    self.read_instance.data_in_memory_filtered[networkspeci][:,invalid_above] = np.NaN
+                                    self.read_instance.data_in_memory_filtered[networkspeci][:,invalid_above] = np.nan
 
                             # remove nans
                             invalid_nan = np.repeat(pd.isnull(self.read_instance.metadata_in_memory[networkspeci][meta_var][:, :]), 
                                                     self.read_instance.N_inds_per_yearmonth, axis=1)
-                            self.read_instance.data_in_memory_filtered[networkspeci][:,invalid_nan] = np.NaN
+                            self.read_instance.data_in_memory_filtered[networkspeci][:,invalid_nan] = np.nan
 
     def validate_values(self, meta_var):
         """ Validate that field inserted by user is float. """
@@ -588,10 +588,10 @@ class DataFilter:
                         data_array_a = self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:]
                         calc_stat = np.array(getattr(Stats, stats_dict['function'])(data_array_a, **function_arguments))
                         non_finite_stat = ~np.isfinite(calc_stat)
-                        self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,non_finite_stat,:] = np.NaN
+                        self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,non_finite_stat,:] = np.nan
                         for specific_stat_argument in specific_stat_arguments:
                             invalid_stations = ast.literal_eval('calc_stat{}'.format(specific_stat_argument))
-                            self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,invalid_stations,:] = np.NaN
+                            self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,invalid_stations,:] = np.nan
                     # calculate basic bias stats and expbias stats
                     else:
                         for data_label in self.read_instance.data_labels:
@@ -609,10 +609,10 @@ class DataFilter:
                                 elif z_statistic_type == 'expbias':
                                     calc_stat = np.array(getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':data_array_a,'exp':data_array_b}}))
                                 non_finite_stat = ~np.isfinite(calc_stat)
-                                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,non_finite_stat,:] = np.NaN
+                                self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,non_finite_stat,:] = np.nan
                                 for specific_stat_argument in specific_stat_arguments:
                                     invalid_stations = eval('calc_stat{}'.format(specific_stat_argument))
-                                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,invalid_stations,:] = np.NaN
+                                    self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,invalid_stations,:] = np.nan
                                     
     def apply_calibration_factor(self):
         """ Apply calibration factor to add or subtract a number to the experiments, 
@@ -863,7 +863,7 @@ class DataFilter:
                         np.arange(len(station_data_availability_number), dtype=np.int32)[station_data_availability_number > 1]
                      
                     # get colocated obs data array if have temporal colocation is active
-                    obs_data[self.read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+                    obs_data[self.read_instance.temporal_colocation_nans[networkspeci]] = np.nan
 
                     # get absolute data availability number per station in observational data array
                     if obs_data.size == 0:
@@ -901,7 +901,7 @@ class DataFilter:
                     
                     # get colocated experimental data array (first subset by valid observational stations)
                     exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),:,:])
-                    exp_data[self.read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+                    exp_data[self.read_instance.temporal_colocation_nans[networkspeci]] = np.nan
                     exp_data = exp_data[valid_station_inds,:]
 
                     # get absolute data availability number per station in experiment data array

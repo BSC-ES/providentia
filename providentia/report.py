@@ -1348,7 +1348,7 @@ class Report:
                 if data_label in self.selected_station_data_labels[networkspeci]:
                     # if relevant stat is expbias stat, then ensure temporal colocation is active
                     if (base_plot_type == 'statsummary') and (stat in self.expbias_stats) and ((not self.temporal_colocation) or (len(self.data_labels) == 1)):
-                        data_to_add = np.NaN
+                        data_to_add = np.nan
                     # otherwise calculate statistic
                     else:
                         if z_statistic_sign == 'bias':
@@ -1356,7 +1356,7 @@ class Report:
                         else:
                             data_to_add = calculate_statistic(self, self, networkspeci, zstat, [data_label], [])
                 else:
-                    data_to_add = np.NaN
+                    data_to_add = np.nan
                 
                 # add data to dicts
                 if plotting_paradigm == 'summary':
@@ -1835,7 +1835,7 @@ class Report:
                         stats_per_data_label = []
                         for data_label in data_labels:
                             # initialise stat with nan
-                            stat_to_append = np.NaN
+                            stat_to_append = np.nan
                             # update stat
                             if networkspeci in stats_to_plot[subsection]:
                                 if plotting_paradigm == 'summary':
@@ -1878,7 +1878,7 @@ class Report:
                             stats_per_data_label = []
                             for stat in stats:
                                 # initialise stat as nan
-                                stat_to_append = np.NaN
+                                stat_to_append = np.nan
                                 # update stat
                                 if networkspeci in stats_to_plot[subsection]:
                                     if plotting_paradigm == 'summary':
