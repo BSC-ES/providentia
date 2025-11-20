@@ -13,7 +13,7 @@ from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, get_standard_units, get_standard_parameters_by_speci
 from .fields_menus import (init_representativity, init_period, init_metadata,
                            update_representativity_fields, update_period_fields, update_metadata_fields,
                            representativity_conf, period_conf, metadata_conf)
@@ -280,24 +280,17 @@ class DataReader:
             # update measurement units for all species (take standard units for each speci from parameter dictionary)
             # non-GHOST
             if not self.read_instance.reading_ghost:
-                # import unit converter
-                sys.path.insert(1, join(CURRENT_PATH, 'dependencies/unit-converter'))
-                import unit_converter
 
                 # convert non-GHOST units to standard format
                 nonghost_standard_units = {}
                 for speci in self.read_instance.nonghost_units.keys():
                     input_units = self.read_instance.nonghost_units[speci]
-                    if input_units not in ['-', 'unitless']:
-                        output_units = copy.deepcopy(input_units)
-                        if 'chemical_formula_charge' in list(self.read_instance.parameter_dictionary[speci].keys()):
-                            formula = self.read_instance.parameter_dictionary[speci]['chemical_formula_charge']
-                        else:
-                            formula = self.read_instance.parameter_dictionary[speci]['chemical_formula']
-                        conv_obj = unit_converter.convert_units(input_units, output_units, 1, species=formula)
-                        nonghost_standard_units[speci] = conv_obj.output_standard_units
-                    else:
-                        nonghost_standard_units[speci] = 'unitless'
+                    standard_parameter_speci = get_standard_parameters_by_speci(speci, self.read_instance.ghost_version)
+                    standard_input_units = get_standard_units(input_units, standard_parameter_speci)
+                    if 'Error:' in standard_input_units:
+                        self.read_instance.logger.error(standard_input_units)
+                        sys.exit(1)
+                    nonghost_standard_units[speci] = standard_input_units
                 self.read_instance.measurement_units = {speci.split('|')[1]:nonghost_standard_units[speci.split('|')[1]] 
                                                         for speci in self.read_instance.networkspecies}
             # GHOST

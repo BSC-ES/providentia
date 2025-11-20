@@ -126,7 +126,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
                                                             order='F')
 
                 # aggregate across the time dimension, after this shape is (24, label, station, fct)
-                data_array_forecast_agg = aggregation(read_instance, read_instance, read_instance, read_instance, read_instance, read_instance, data_array_forecast_grouped_rs, read_instance.timeseries_statistic_aggregation, axis=-2)
+                data_array_forecast_agg = aggregation(data_array_forecast_grouped_rs, read_instance.timeseries_statistic_aggregation, axis=-2)
 
                 # move per hour dimension from first to second last
                 data_array_forecast_agg = data_array_forecast_agg.transpose(1, 2, 0, 3)
