@@ -162,7 +162,7 @@ def plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
         generated_output = pd.DataFrame(data)
 
         # save data, uncomment if we want to update it
-        path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_annotations.csv'
+        path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{plot_type}_annotations.csv'
         if GENERATE_OUTPUT:
             generated_output.to_csv(path, index=False)
 
