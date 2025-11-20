@@ -76,7 +76,7 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
             data_array = copy.deepcopy(prv.data_in_memory_filtered[networkspeci])
             
             # apply NaNs for temporal colocation
-            data_array[:, prv.temporal_colocation_nans[networkspeci]] = np.NaN
+            data_array[:, prv.temporal_colocation_nans[networkspeci]] = np.nan
 
             # cut data array for valid station inds
             data_array = np.take(data_array, valid_station_inds, axis=1)
@@ -286,7 +286,7 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
             data_array = copy.deepcopy(prv.data_in_memory_filtered[networkspeci])
             
             # apply NaNs for temporal colocation
-            data_array[:, prv.temporal_colocation_nans[networkspeci]] = np.NaN
+            data_array[:, prv.temporal_colocation_nans[networkspeci]] = np.nan
 
             # cut data array for valid station inds
             data_array = np.take(data_array, valid_station_inds, axis=1)

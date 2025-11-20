@@ -698,7 +698,7 @@ class Providentia:
                             if dl in self.selected_station_data_labels[ns]:
                                 # if relevant stat is expbias stat, then ensure temporal colocation is active
                                 if (base_plot_type == 'statsummary') and (stp in self.expbias_stats) and ((not self.temporal_colocation) or (len(self.data_labels) == 1)):
-                                    stats_per_data_label.append(np.NaN)
+                                    stats_per_data_label.append(np.nan)
                                 # otherwise calculate statistic
                                 else:
                                     if z_statistic_sign == 'bias':
@@ -706,7 +706,7 @@ class Providentia:
                                     else:
                                         stats_per_data_label.append(calculate_statistic(self, self, ns, zstat, [dl], []))
                             else:
-                                stats_per_data_label.append(np.NaN)
+                                stats_per_data_label.append(np.nan)
 
                         # get floats instead of arrays with 1 element each and save
                         stats_per_data_label = [stat_per_data_label[0] 
@@ -766,7 +766,7 @@ class Providentia:
                             else:
                                 stat_per_data_labels.append(calculate_statistic(self, self, ns, zstat, [dl], []))
                         else:
-                            stat_per_data_labels.append(np.NaN)
+                            stat_per_data_labels.append(np.nan)
 
                     # get floats instead of arrays with 1 element each and save
                     stat_per_data_labels = [stat_per_data_label[0] 

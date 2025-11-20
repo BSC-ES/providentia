@@ -1537,7 +1537,7 @@ class convert_units:
 def get_molecular_mass(molecule):
     ''' Get molecular mass of a specific molecule in kg mol-1. '''
 
-    # if molecule is empty string then return molecular mass as np.NaN
+    # if molecule is empty string then return molecular mass as np.nan
     if molecule == '':
         return np.nan
 
@@ -1575,7 +1575,7 @@ def get_molecular_mass(molecule):
 def get_N_atoms(molecule, element):
     ''' Get integer number of atoms of a desired element in a molecule. '''
 
-    # if molecule or element is empty string then return number of atoms as np.NaN
+    # if molecule or element is empty string then return number of atoms as np.nan
     if (molecule == '') or (element == ''):
         return np.nan
 
@@ -1591,7 +1591,7 @@ def get_N_atoms(molecule, element):
 def get_valence(molecule):
     ''' Get valence of a desired molecule. '''
 
-    # if molecule is empty string then return valence as np.NaN
+    # if molecule is empty string then return valence as np.nan
     if molecule == '':
         return np.nan
 

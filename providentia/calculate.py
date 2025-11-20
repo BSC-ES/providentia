@@ -15,12 +15,12 @@ import scipy
 
 def nansumwrapper(data, **kwargs):
     """ np.nansum returns 0 when all NaNs are encountered,
-        as opposed to np.NaN, which is inconsistent with the other
+        as opposed to np.nan, which is inconsistent with the other
         Nan functions. This is a wrapper function to make operation 
         consistent.
     """
     if np.isnan(data).all():
-        return np.full(data.shape[:data.ndim-1], np.NaN, dtype=np.float32)
+        return np.full(data.shape[:data.ndim-1], np.nan, dtype=np.float32)
     else:
         return np.nansum(data, **kwargs)
 
@@ -36,7 +36,7 @@ class Stats(object):
             :rtype: numpy.float64
         """
         if data.size == 0:
-            return np.NaN
+            return np.nan
         else:
             return np.nanmean(data, axis=-1)
 
@@ -50,7 +50,7 @@ class Stats(object):
             :rtype: numpy.float64
         """
         if data.size == 0:
-            return np.NaN
+            return np.nan
         else:
             return np.nanmedian(data, axis=-1)
 
@@ -66,7 +66,7 @@ class Stats(object):
             :rtype: numpy.float64
         """
         if data.size == 0:
-            return np.NaN
+            return np.nan
         else:
             return np.nanpercentile(data, percentile, axis=-1, method='nearest')
 
@@ -80,7 +80,7 @@ class Stats(object):
             :rtype: numpy.float64
         """
         if data.size == 0:
-            return np.NaN
+            return np.nan
         else:
             return np.nanstd(data, axis=-1)
 
@@ -94,7 +94,7 @@ class Stats(object):
             :rtype: numpy.float64
         """
         if data.size == 0:
-            return np.NaN
+            return np.nan
         else:
             return np.nanvar(data, axis=-1)
 
@@ -108,7 +108,7 @@ class Stats(object):
             :rtype: numpy.float64
         """
         if len(data) == 0:
-            return np.NaN
+            return np.nan
         else:
             return np.nanmin(data,axis=-1)
 
@@ -122,7 +122,7 @@ class Stats(object):
             :rtype: numpy.float64
         """
         if len(data) == 0:
-            return np.NaN
+            return np.nan
         else:
             return np.nanmax(data,axis=-1)
 
@@ -149,7 +149,7 @@ class Stats(object):
             Shape matches data[..., 0] (i.e. everything except time axis).
         """
         if data.size == 0:
-            return np.NaN
+            return np.nan
 
         # Count valid values
         valid_counts = np.count_nonzero(~np.isnan(data), axis=-1)
@@ -172,7 +172,7 @@ class Stats(object):
                                   periodic_statistic_mode=None, periodic_statistic_aggregation=None):
         """ Calculate number of stations."""
         if data.size == 0:
-            return np.NaN
+            return np.nan
         else:
 
             # if array is 5d are reading daily forecast data, so make neccesary adjustments to calculation
@@ -212,7 +212,7 @@ class Stats(object):
             (i.e. number of total data measurements not equal to NaN).
         """
         if data.size == 0:
-            return np.NaN
+            return np.nan
         else:
             return np.count_nonzero(~np.isnan(data), axis=-1).astype('float32')
 
@@ -222,7 +222,7 @@ class Stats(object):
             (i.e. number of measurements exceeding a set threshold).
         """
         if data.size == 0:
-            return np.NaN
+            return np.nan
         else:
             n_exceed = nansumwrapper(data > threshold, axis=-1).astype('float32')
             return n_exceed
@@ -233,7 +233,7 @@ class Stats(object):
         """ Calculate MDA8 (daily maximum 8 hour average) 
         """
         if data.size == 0:
-            return np.NaN
+            return np.nan
         else:
 
             #calculate MDA8
@@ -259,7 +259,7 @@ class Stats(object):
     @staticmethod
     def calculate_rms_u(data, u_95r_RV, RV, alpha):
         if data.size == 0:
-            return np.NaN
+            return np.nan
         else:
             rms_u = u_95r_RV * np.sqrt(
                 (1 - alpha ** 2) * (Stats.calculate_mean(data) ** 2 
@@ -288,7 +288,7 @@ class ExpBias(object):
             International Journal of Climatology.
         """
         if obs.size == 0:
-            return np.NaN
+            return np.nan
         else:
             return 1.0 - nansumwrapper(np.abs(exp - obs), axis=-1) / \
                    nansumwrapper(np.abs(obs - np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)), axis=-1) 
@@ -311,7 +311,7 @@ class ExpBias(object):
             Journal of Climatology.
         """
         if obs.size == 0:
-            return np.NaN
+            return np.nan
         else:
             lhs = nansumwrapper(np.abs(exp - obs), axis=-1)
             rhs = 2.0 * nansumwrapper(np.abs(obs - np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)), axis=-1)
@@ -330,7 +330,7 @@ class ExpBias(object):
             This statistic is equivalent to the 'Mean_bias' when temporal_colocation is active.
         """
         if obs.size == 0:
-            return np.NaN
+            return np.nan
         else:
             mb = np.nanmean(exp - obs, axis=-1)
 
@@ -359,7 +359,7 @@ class ExpBias(object):
             and normalised form as normalised mean gross error (NMGE) and normalised mean absolute error (NMAE).
         """
         if obs.size == 0:
-            return np.NaN
+            return np.nan
         else:
             me = np.nanmean(np.abs(exp - obs), axis=-1)
 
@@ -384,11 +384,11 @@ class ExpBias(object):
             (i.e. the bias, 𝑀𝑖 − 𝑂𝑖) is normalised (divided) by the observed value (𝑂𝑖).
         """
         if obs.size == 0:
-            return np.NaN
+            return np.nan
         else:
             # to avoid ZeroDivisionError, replace all obs of 0 with NaN
             obs_nan = copy.deepcopy(obs)
-            obs_nan[obs_nan == 0.0] = np.NaN
+            obs_nan[obs_nan == 0.0] = np.nan
             mnb = np.nanmean((exp - obs_nan) / obs_nan, axis=-1) * 100.0
             return mnb
 
@@ -401,11 +401,11 @@ class ExpBias(object):
             Otherwise known as mean normalised absolute error (MNAE).
         """
         if obs.size == 0:
-            return np.NaN
+            return np.nan
         else:
             # to avoid ZeroDivisionError, replace all obs of 0 with NaN
             obs_nan = copy.deepcopy(obs)
-            obs_nan[obs_nan == 0.0] = np.NaN
+            obs_nan[obs_nan == 0.0] = np.nan
             mne = np.nanmean((np.abs(exp - obs_nan)) / obs_nan, axis=-1) * 100.0
             return mne
     
@@ -424,12 +424,12 @@ class ExpBias(object):
             Otherwise known as fractional bias (FB) or modified normalized mean bias (MNMB).
         """
         if obs.size == 0:
-            return np.NaN
+            return np.nan
         else:
             lhs = exp - obs
             rhs = (exp + obs) / 2.0
             # to avoid ZeroDivisionError, replace all rhs values of 0 with NaN
-            rhs[rhs == 0.0] = np.NaN
+            rhs[rhs == 0.0] = np.nan
             mfb = np.nanmean(lhs / rhs, axis=-1) * 100.0
             return mfb
 
@@ -440,12 +440,12 @@ class ExpBias(object):
             or mean absolute fractional bias (MAFB).
         """
         if obs.size == 0:
-            return np.NaN
+            return np.nan
         else:
             lhs = np.abs(exp - obs)
             rhs = (exp + obs) / 2.0
             # to avoid ZeroDivisionError, replace all rhs values of 0 with NaN
-            rhs[rhs == 0.0] = np.NaN
+            rhs[rhs == 0.0] = np.nan
             mfe = np.nanmean(lhs / rhs, axis=-1) * 100.0
             return mfe
 
@@ -457,7 +457,7 @@ class ExpBias(object):
         """
 
         if obs.size == 0:
-            return np.NaN
+            return np.nan
         else:
             rmse = np.sqrt(np.nanmean((exp - obs) ** 2, axis=-1))
 
@@ -477,7 +477,7 @@ class ExpBias(object):
     @staticmethod
     def calculate_crmse(obs, exp):
         if obs.size == 0:
-            return np.NaN
+            return np.nan
         else:
             crmse = np.sqrt(
                 np.mean(((exp - np.mean(exp)) - (obs - np.mean(obs))) ** 2)
@@ -496,15 +496,15 @@ class ExpBias(object):
         """
 
         if obs.size == 0:
-            return np.NaN
+            return np.nan
         else:
             mean_obs = np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)
             std_obs = np.expand_dims(np.nanstd(obs, axis=-1), axis=-1)
             mean_exp = np.expand_dims(np.nanmean(exp, axis=-1), axis=-1)
             std_exp = np.expand_dims(np.nanstd(exp, axis=-1), axis=-1)
             # to avoid ZeroDivisionError, replace all stds of 0 with NaN
-            std_obs[std_obs == 0.0] = np.NaN
-            std_exp[std_exp == 0.0] = np.NaN
+            std_obs[std_obs == 0.0] = np.nan
+            std_exp[std_exp == 0.0] = np.nan
             standard_score_obs = (obs - mean_obs) / std_obs
             standard_score_exp = (exp - mean_exp) / std_exp
             standard_score_mult = standard_score_obs * standard_score_exp
@@ -519,7 +519,7 @@ class ExpBias(object):
             the r squared equals the square of the Pearson correlation coefficient.
         """
         if obs.size == 0:
-            return np.NaN
+            return np.nan
         else:
             return ExpBias.calculate_r(obs, exp) ** 2
 
@@ -529,11 +529,11 @@ class ExpBias(object):
             a factor of two of observed values (FAC2)
         """
         if obs.size == 0:
-            return np.NaN
+            return np.nan
         else:
             # to avoid ZeroDivisionError, replace all obs of 0 with NaN
             obs_nan = copy.deepcopy(obs)
-            obs_nan[obs_nan == 0.0] = np.NaN
+            obs_nan[obs_nan == 0.0] = np.nan
             frac = exp / obs_nan
             n = np.count_nonzero(~np.isnan(frac), axis=-1)
             return (100.0 / n) * nansumwrapper(((frac >= 0.5) & (frac <= 2.0)), axis=-1)
@@ -544,7 +544,7 @@ class ExpBias(object):
             See here: https://gitlab.com/polyphemus/atmopy/-/blob/master/stat/measure.py.
         """
         if obs.size == 0:
-            return np.NaN
+            return np.nan
         else:
             obs_max = np.nanmax(obs, axis=-1)
             exp_max = np.nanmax(exp, axis=-1)
@@ -649,7 +649,7 @@ class ExpBias(object):
 
         else:
             if plot == 'target':
-                return np.NaN, np.NaN, np.NaN
+                return np.nan, np.nan, np.nan
             elif plot == 'summary':
-                return np.NaN, np.NaN, np.NaN, np.NaN, np.NaN, np.NaN
+                return np.nan, np.nan, np.nan, np.nan, np.nan, np.nan
         

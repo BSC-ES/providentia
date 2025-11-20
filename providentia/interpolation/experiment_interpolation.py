@@ -774,9 +774,9 @@ class ExperimentInterpolation(object):
         # create array for storing daily monthly model data
         # if have forecast data, then have an extra dimension for the number of forecast days
         if self.forecast:
-            self.monthly_model_data = np.full((len(self.yearmonth_time), self.forecast_days, self.y_N, self.x_N), np.NaN, dtype=np.float32)
+            self.monthly_model_data = np.full((len(self.yearmonth_time), self.forecast_days, self.y_N, self.x_N), np.nan, dtype=np.float32)
         else:
-            self.monthly_model_data = np.full((len(self.yearmonth_time), self.y_N, self.x_N), np.NaN, dtype=np.float32)
+            self.monthly_model_data = np.full((len(self.yearmonth_time), self.y_N, self.x_N), np.nan, dtype=np.float32)
 
         # if have mapped size distribution variable: 
         # -- get aeronet bin radius for original variable 
@@ -910,7 +910,7 @@ class ExperimentInterpolation(object):
                     read_data = read_data * self.conversion_factor
                     
                     # set any model values outside GHOST extreme limits for variable to be NaN
-                    read_data[(read_data < self.GHOST_speci_lower_limit) | (read_data > self.GHOST_speci_upper_limit)] = np.NaN 
+                    read_data[(read_data < self.GHOST_speci_lower_limit) | (read_data > self.GHOST_speci_upper_limit)] = np.nan 
 
                     # create xarray for resampling
                     xr_data = xr.DataArray(dims=("time","latitude","longitude"),
@@ -1234,9 +1234,9 @@ class ExperimentInterpolation(object):
                 station_weights = self.inverse_dists[ii,:]
                 if np.all(station_weights == 0):
                     if self.forecast:
-                        interp_vals = np.full((len(self.yearmonth_time), self.forecast_days), np.NaN, dtype=np.float32)
+                        interp_vals = np.full((len(self.yearmonth_time), self.forecast_days), np.nan, dtype=np.float32)
                     else:
-                        interp_vals = np.full(len(self.yearmonth_time), np.NaN, dtype=np.float32)
+                        interp_vals = np.full(len(self.yearmonth_time), np.nan, dtype=np.float32)
                 else:
                     # get reciprocal model data at N nearest neighbours to observational station 
                     if self.forecast:
