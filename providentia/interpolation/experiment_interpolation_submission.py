@@ -891,7 +891,7 @@ class SubmitInterpolation(object):
         """Submit interpolation jobs using multiprocessing pool."""
 
         # set resource usage parameters for estimating safe number of pool workers 
-        self.per_worker_mem_gb=0.75
+        self.per_worker_mem_gb=2.0
         self.per_worker_cpu_fraction=1.0/self.n_cpus
         self.per_worker_swap_gb=0.1
         self.cpu_fraction_limit=0.75 
