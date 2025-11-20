@@ -46,7 +46,9 @@ def suppress_warnings():
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_timeseries(inst, statistic_mode, network_type):
     plot(inst, statistic_mode, network_type, 'timeseries', ['annotate', 'smooth'])
-
+    plot(inst, statistic_mode, network_type, 'timeseries-r2-monthly', ['annotate', 'smooth'])
+    plot(inst, statistic_mode, network_type, 'timeseries-r-annual', ['annotate', 'smooth'])
+    plot(inst, statistic_mode, network_type, 'timeseries-Mean-daily', ['annotate', 'smooth'])
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_distribution(inst, statistic_mode, network_type):
@@ -67,6 +69,7 @@ def test_make_map(inst, statistic_mode, network_type):
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
 def test_make_taylor(inst, statistic_mode, network_type):
     plot(inst, statistic_mode, network_type, 'taylor-r', ['annotate'])
+    plot(inst, statistic_mode, network_type, 'taylor-r2', ['annotate'])
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
@@ -104,3 +107,8 @@ def test_make_fairmode_target(inst, statistic_mode, network_type):
 @pytest.mark.parametrize("inst, statistic_mode, network_type", [possibilities[2]])
 def test_make_fairmode_statsummary(inst, statistic_mode, network_type):
     plot(inst, statistic_mode, network_type, 'fairmode-statsummary')
+
+
+@pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
+def test_make_fairmode_statsummary(inst, statistic_mode, network_type):
+    plot(inst, statistic_mode, network_type, 'boxplot')
