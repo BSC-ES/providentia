@@ -59,6 +59,10 @@ class Dashboard(QtWidgets.QWidget):
         # allow access to methods of parent class QtWidgets.QWidget
         super(Dashboard, self).__init__()
 
+        # update self with command line arguments
+        self.commandline_arguments = copy.deepcopy(kwargs)
+        self.commandline_arguments['dashboard'] = True
+
         # load statistical yamls
         self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
         self.expbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
@@ -70,11 +74,9 @@ class Dashboard(QtWidgets.QWidget):
         self.delay = True
         self.delayed_warnings = []
 
-        kwargs['dashboard'] = True
-
         # initialise default configuration variables
         # modified by commandline arguments, if given
-        self.provconf = ProvConfiguration(self, **kwargs)
+        self.provconf = ProvConfiguration(self, **self.commandline_arguments)
 
         # update variables from config file (if available)
         self.from_conf = False
@@ -90,15 +92,15 @@ class Dashboard(QtWidgets.QWidget):
                     read_conf = True
 
             if read_conf:
-                if 'section' in kwargs:
+                if 'section' in self.commandline_arguments:
                     # config and section defined 
                     load_conf(self, fpath=self.config)
-                    if kwargs['section'] in self.all_sections:
+                    if self.commandline_arguments['section'] in self.all_sections:
                         self.from_conf = True
-                        self.current_config = self.sub_opts[kwargs['section']]
-                        self.section = kwargs['section']
+                        self.current_config = self.sub_opts[self.commandline_arguments['section']]
+                        self.section = self.commandline_arguments['section']
                     else:
-                        msg = 'Error: The section specified in the command line ({0}) does not exist.'.format(kwargs['section'])
+                        msg = 'Error: The section specified in the command line ({0}) does not exist.'.format(self.commandline_arguments['section'])
                         msg += '\nTip: For subsections, add the name of the parent section followed by an interpunct (·) '
                         msg += 'before the subsection name (e.g. SECTIONA·Spain). Available: {0}'.format(self.all_sections)
                         self.logger.error(msg)
@@ -142,10 +144,11 @@ class Dashboard(QtWidgets.QWidget):
         self.previous_calibration_factor = {}
         self.calibration_factor = {}
 
-        # update variables from defined config file
+        # update variables from defined config file (if not passed via command line)
         if self.current_config:
             for k, val in self.current_config.items():
-                setattr(self, k, self.provconf.parse_parameter(k, val))
+                if k not in self.commandline_arguments:
+                    setattr(self, k, self.provconf.parse_parameter(k, val))
 
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         self.provconf.check_validity()
@@ -185,7 +188,7 @@ class Dashboard(QtWidgets.QWidget):
                 OrderedDict(sorted(self.expbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
 
         # initialise UI
-        self.init_ui(**kwargs)
+        self.init_ui()
 
         # setup callback events upon resizing/moving of Providentia window
         self.resized.connect(self.get_geometry)
@@ -322,7 +325,7 @@ class Dashboard(QtWidgets.QWidget):
               
                     break
 
-    def init_ui(self, **kwargs):
+    def init_ui(self):
         """ Initialise user interface. """
 
         self.logger.info("Starting Providentia dashboard...")

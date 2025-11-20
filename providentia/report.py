@@ -45,6 +45,9 @@ class Report:
 
     def __init__(self, **kwargs):
 
+        # update self with command line arguments
+        self.commandline_arguments = copy.deepcopy(kwargs)
+
         # load statistical yamls
         self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
         self.expbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
@@ -54,10 +57,7 @@ class Report:
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
-        provconf = ProvConfiguration(self, **kwargs)
-
-        # update self with command line arguments
-        self.commandline_arguments = copy.deepcopy(kwargs)
+        provconf = ProvConfiguration(self, **self.commandline_arguments)
 
         self.logger.info("Creating a Providentia Report...")
 
@@ -143,10 +143,11 @@ class Report:
             # get GHOST version before reading configuration file section parameters
             current_ghost_version = self.ghost_version 
 
-            # update self with section variables
+            # update self with section variables (if not passed via command line)
             for k, val in self.section_opts.items():
-                setattr(self, k, provconf.parse_parameter(k, val))
-            
+                if k not in self.commandline_arguments:
+                    setattr(self, k, provconf.parse_parameter(k, val))
+
             # if first section or GHOST version has changed
             if (section_ind == 0) or (current_ghost_version != self.ghost_version):
                 generate_file_trees(self)
@@ -164,9 +165,10 @@ class Report:
             # initialise Plotting class
             self.plotting = Plotting(read_instance=self, canvas_instance=self)
 
-            # add general plot characteristics to self
+            # add general plot characteristics to self (if not passed via command line)
             for k, val in self.plot_characteristics_templates['general'].items():
-                setattr(self, k, val)
+                if k not in self.commandline_arguments:
+                    setattr(self, k, val)
 
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             provconf.check_validity()
@@ -842,6 +844,10 @@ class Report:
                 read_species = copy.deepcopy(self.species)
                 read_networkspecies = copy.deepcopy(self.networkspecies)
 
+                # if have forecast active then save current experiment variable in memory as may need to set it if not re-reading data 
+                if len(self.forecast) != 0:
+                    forecast_experiments = copy.deepcopy(self.experiments)  
+
                 # get subsection variables
                 self.subsection_opts = self.sub_opts[self.subsection]
 
@@ -849,26 +855,22 @@ class Report:
                 self.subsection_opts = {k: (self.section_opts[k] if k in self.fixed_section_vars else val) 
                                         for (k, val) in self.subsection_opts.items()}
 
-                # if have forecast active then save current experiment variable in memory as may need to set it if not re-reading data 
-                if len(self.forecast) != 0:
-                    forecast_experiments = copy.deepcopy(self.experiments)  
-
                 # reinitialise default configuration variables
                 # modified by commandline arguments, if given
                 provconf = ProvConfiguration(self, **self.commandline_arguments)
 
-                # update subsection variables
+                # update subsection variables (if not passed via command line)
                 for k, val in self.subsection_opts.items():
-                    value = provconf.parse_parameter(k, val, deactivate_warning=True)
-                    # keep only the species that were available when we read the parent section data
-                    if k == 'species':
-                        value = [speci for speci in value if speci in read_species]
-                    elif k == 'networkspecies':
-                        value = [speci for speci in value if speci in read_networkspecies]
-                    setattr(self, k, value)
+                    if k not in self.commandline_arguments:
+                        value = provconf.parse_parameter(k, val, deactivate_warning=True)
+                        setattr(self, k, value)
 
                 # now all variables have been parsed, check validity of those, throwing errors where necessary
                 provconf.check_validity(deactivate_warning=True)
+
+                # keep only the species that were available when we read the parent section data
+                self.species = read_species
+                self.networkspecies = read_networkspecies
 
             # determine if need to re-read data (qa, flags, filter_species or calibration factor have changed)
             if (np.array_equal(self.qa, self.previous_qa) == False) or (
