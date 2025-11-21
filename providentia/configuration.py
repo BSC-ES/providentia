@@ -30,6 +30,7 @@ multispecies_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'inter
 mapping_species = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 modes = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'modes.yaml')))
+wildcard = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'wildcard.yaml')))
 
 # set current MACHINE
 MACHINE = get_machine()
@@ -79,7 +80,7 @@ class ProvConfiguration:
             value = False
         
         # the wildcard '*' is not valid in report-related modes
-        elif value == '*' and self.read_instance.mode in ['dashboard', 'report', 'library']:
+        elif value == '*' and key not in wildcard[self.read_instance.mode]:
             error = f"Error: The wildcard ('*') in the '{key}' parameter is not allowed for the '{self.read_instance.mode}' mode."
             self.read_instance.logger.error(error)
             sys.exit(1)
@@ -1124,33 +1125,21 @@ class ProvConfiguration:
             self.read_instance.non_default_fields_per_section = {
                 field_name:fields-set(self.var_defaults) 
                 for field_name, fields in self.read_instance.fields_per_section.items()}
-          
-        # check network 
-        if not self.read_instance.network and 'network' in self.default_values:
-            msg = "Network (network) was not defined in the configuration file. "
-            default = self.default_values['network']
-            if default:
-                if default:
-                    msg += "Using '{}' as default.".format(default)
-                    show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                    self.read_instance.network = eval(default) if default.startswith("self.") else default
-            else:
-                msg += f"It is mandatory for the '{self.read_instance.mode}' mode."
-                self.read_instance.logger.error(f"Error: {msg}")
-                sys.exit(1)
-
-        # check species
-        if not self.read_instance.species and 'species' in self.default_values:
-            msg = "Species (species) was not defined in the configuration file. "
-            default = self.default_values['species']
-            if default:
-                msg += "Using '{}' as default.".format(default)
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                self.read_instance.species = eval(default) if default[0].startswith("self.") else default
-            else:
-                msg += f"It is mandatory for the '{self.read_instance.mode}' mode."
-                self.read_instance.logger.error(f"Error: {msg}")
-                sys.exit(1)
+        
+        # assign defaults
+        for field, value in self.default_values.items():
+            # set the defined defaults
+            if not getattr(self.read_instance, field):
+                if value:
+                    setattr(self.read_instance, field, value)
+                else:
+                    error = f"Error: '{field}' was not defined in the configuration file. It is mandatory for the '{self.read_instance.mode}' mode."
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
+            
+            # ensure that statistic aggregation matches with the statistic_mode
+            elif field == 'statistic_aggregation' and self.read_instance.statistic_mode != 'Flattened':
+                setattr(self.read_instance, field, value)
 
         # check resolution
         # if not interpolation or download, get first resolution in list
@@ -1210,101 +1199,28 @@ class ProvConfiguration:
             self.read_instance.networkspeci = '{}|{}'.format(self.read_instance.network[0],
                                                             self.read_instance.species[0]) 
 
-        # check resolution
-        if not self.read_instance.resolution and 'resolution' in self.default_values:
-            msg = "Resolution (resolution) was not defined in the configuration file. "
-            default = self.default_values['resolution']
-            if default:
-                msg += "Using '{}' as default.".format(default)
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                self.read_instance.resolution = default
-            else:
-                msg += f"It is mandatory for the '{self.read_instance.mode}' mode."
-                self.read_instance.logger.error(f"Error: {msg}")
-                sys.exit(1)
-
         # set active resolution, resampling_resolution when set, otherwise resolution
         if self.read_instance.resampling_resolution != 'None':
             self.read_instance.active_resolution = self.read_instance.resampling_resolution
         else:
             self.read_instance.active_resolution = self.read_instance.resolution
 
-        # if report, throw message, stating are using default instead
-        if not self.read_instance.start_date and 'start_date' in self.default_values:
-            msg = "Start date (start_date) was not defined in the configuration file. "
-            default = self.default_values['start_date']
-            if default:
-                msg = "Using '{}' as default.".format(default)
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                self.read_instance.start_date = default
+        # check start and end_date format
+        for date_var_name in ['start_end', 'end_date']:
+            date_var = getattr(self.read_instance, date_var_name)
+            if date_var == '*':
+                pass
+            # YYYYMMDD
+            elif date_var == 8 and self.read_instance.mode == 'interpolation':
+                    self.read_instance.end_date = date_var[:-2] 
+            # YYYYMM
+            elif date_var == 6 and self.read_instance.mode != 'interpolation':
+                    self.read_instance.end_date = date_var + "01" 
+            # throw error if format is not valid
             else:
-                msg += f"It is mandatory for the '{self.read_instance.mode}' mode."
-                self.read_instance.logger.error(f"Error: {msg}")
+                error = f"Error: Invalid value or format for '{date_var_name}': '{date_var}'."
+                self.read_instance.logger.error(error)
                 sys.exit(1)
-        else:
-            len_start_date = len(self.read_instance.start_date)
-            if self.read_instance.mode == 'interpolation':
-                if len_start_date != 6:
-                    if len_start_date == 8:
-                        self.read_instance.start_date = self.read_instance.start_date[:-2]
-                        msg = "Start date (start_date) was defined as YYYYMMDD, changing it to YYYYMM. Using '{}'.".format(self.read_instance.start_date)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                    else:
-                        error = "Error: Format of Start date (start_date) not correct, please change it to YYYYMM."
-                        self.read_instance.logger.error(error)
-                        sys.exit(1)
-            else:
-                if len_start_date != 8:
-                    if len_start_date == 6:
-                        self.read_instance.start_date = self.read_instance.start_date + "01"
-                        msg = "Start date (start_date) was defined as YYYYMM, changing it to YYYYMMDD. Using '{}'.".format(self.read_instance.start_date)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                    else:
-                        error = "Error: The format of Start date (start_date) is not correct, please change it to YYYYMMDD."
-                        self.read_instance.logger.error(error)
-                        sys.exit(1)
-
-        # if report, throw message, stating are using default instead
-        if not self.read_instance.end_date and 'end_date' in self.default_values:
-            msg = "End date (end_date) was not defined in the configuration file. "
-            default = self.default_values['end_date']
-            if default:
-                msg += "Using '{}' as default.".format(default)
-                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                self.read_instance.end_date = default
-            else:
-                msg += f"It is mandatory for the '{self.read_instance.mode}' mode."
-                self.read_instance.logger.error(f"Error: {msg}")
-                sys.exit(1)
-        else:
-            len_end_date = len(self.read_instance.end_date)
-            if self.read_instance.mode == 'interpolation':
-                if len_end_date != 6:
-                    if len_end_date == 8:
-                        self.read_instance.end_date = self.read_instance.end_date[:-2]
-                        msg = "End Date (end_date) was defined as YYYYMMDD, changing it to YYYYMM. Using '{}'.".format(self.read_instance.end_date)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                    else:
-                        error = "Error: Format of End Date (end_date) not correct, please change it to YYYYMM."
-                        self.read_instance.logger.error(error)
-                        sys.exit(1)
-            else:
-                if len_end_date != 8:
-                    if len_end_date == 6:
-                        self.read_instance.end_date = self.read_instance.end_date + "01"
-                        msg = "End Date (end_date) was defined as YYYYMM, changing it to YYYYMMDD. Using '{}'.".format(self.read_instance.end_date)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                    else:
-                        error = "Error: The format of End Date (end_date) is not correct, please change it to YYYYMMDD."
-                        self.read_instance.logger.error(error)
-                        sys.exit(1)
-
-        # check have interp_n_neighbours information
-        if not self.read_instance.interp_n_neighbours and 'interp_n_neighbours' in self.default_values:
-            default = self.default_values['interp_n_neighbours']
-            msg = "Number of neighbours (interp_n_neighbours) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.interp_n_neighbours = default
 
         # create empty directories for the observations and experiments
         if MACHINE == "local":
@@ -1382,37 +1298,6 @@ class ProvConfiguration:
             # replace calibration factors by new dictionary
             self.read_instance.calibration_factor = calibration_factor_dict
 
-        # check have statistic_mode information
-        if not self.read_instance.statistic_mode and 'statistic_mode' in self.default_values:
-            default = self.default_values['statistic_mode']
-            self.read_instance.statistic_mode = default
-
-        # check have statistic_aggregation information and ensure that it matches with the statistic_mode
-        if 'statistic_aggregation' in self.default_values and \
-                not (self.read_instance.statistic_aggregation or self.read_instance.statistic_mode == 'Flattened'):  
-            default = self.default_values['statistic_aggregation'][self.read_instance.statistic_mode]
-            self.read_instance.statistic_aggregation = default
-
-        # check have periodic_statistic_mode information
-        if not self.read_instance.periodic_statistic_mode and 'periodic_statistic_mode' in self.default_values:
-            default = self.default_values['periodic_statistic_mode']
-            self.read_instance.periodic_statistic_mode = default
-
-        # check have periodic_statistic_aggregation information
-        if not self.read_instance.periodic_statistic_aggregation and 'periodic_statistic_aggregation' in self.default_values:
-            default = self.default_values['periodic_statistic_aggregation']
-            self.read_instance.periodic_statistic_aggregation = default
-
-        # check have timeseries_statistic_aggregation information
-        if not self.read_instance.timeseries_statistic_aggregation and 'timeseries_statistic_aggregation' in self.default_values:
-            default = self.default_values['timeseries_statistic_aggregation']
-            self.read_instance.timeseries_statistic_aggregation = default
-
-        # check have correct active_dashboard_plots information, 
-        # should have 4 plots if non-empty, throw error if using dashboard if not
-        if not self.read_instance.active_dashboard_plots and 'active_dashboard_plots' in self.default_values:
-            default = self.default_values['active_dashboard_plots']
-            self.read_instance.active_dashboard_plots = default
 
         if len(self.read_instance.active_dashboard_plots) != 4 and 'active_dashboard_plots' in self.default_values:
             error = 'Error: there must be 4 "active_dashboard_plots"'

@@ -52,21 +52,19 @@ library:
   ensemble:
     - allmembers
 interpolation:
-  network: self.read_instance.ghost_available_networks
+  network:
   species:
-    - self.read_instance.available_species
   resolution:
-    - hourly
-    - hourly_instantaneous
-    - daily
-    - monthly
-  start_date: 201801
-  end_date: 201901
+  start_date:
+  end_date:
+  experiments:
   ensemble:
     - 000
   interp_n_neighbours: 4
 download:
-  start_date: 20180101
-  end_date: 20190101
+  species:
+  resolution:
+  start_date:
+  end_date:
   ensemble:
     - 000
