@@ -43,12 +43,88 @@ def suppress_warnings():
         warnings.simplefilter("ignore", category=RuntimeWarning)
         yield
 
-
+# Can only filter by period for GHOST network
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities[0:3])
 def test_apply_period(inst, statistic_mode, network_type):
     inst.load()
+
+    # Filter by keeping Daytime
     inst.filter('period', keep='Daytime')
-    check_filter_data(inst, statistic_mode, network_type, filter='period')
+    check_filter_data(inst, statistic_mode, network_type, filter='keep_Daytime')
+
+    # Filter by keeping Nighttime
+    inst.reset(initialise=True)
+    inst.filter('period', keep='Nighttime')
+    check_filter_data(inst, statistic_mode, network_type, filter='keep_Nighttime')
+
+    # Filter by removing Daytime
+    inst.filter('period', remove='Daytime')
+    check_filter_data(inst, statistic_mode, network_type, filter='remove_Daytime')
+
+    # Filter by removing Nighttime
+    inst.reset(initialise=True)
+    inst.filter('period', remove='Nighttime')
+    check_filter_data(inst, statistic_mode, network_type, filter='remove_Nighttime')
+
+    # Filter by keeping Weekday
+    inst.reset(initialise=True)
+    inst.filter('period', keep='Weekday')
+    check_filter_data(inst, statistic_mode, network_type, filter='keep_Weekday')
+
+    # Filter by removing Weekday
+    inst.reset(initialise=True)
+    inst.filter('period', remove='Weekday')
+    check_filter_data(inst, statistic_mode, network_type, filter='remove_Weekday')
+
+    # Filter by keeping Weekend
+    inst.reset(initialise=True)
+    inst.filter('period', keep='Weekend')
+    check_filter_data(inst, statistic_mode, network_type, filter='keep_Weekend')
+
+    # Filter by removing Weekend
+    inst.reset(initialise=True)
+    inst.filter('period', remove='Weekend')
+    check_filter_data(inst, statistic_mode, network_type, filter='remove_Weekend')
+
+    # Filter by keeping Spring
+    inst.reset(initialise=True)
+    inst.filter('period', keep='Spring')
+    check_filter_data(inst, statistic_mode, network_type, filter='keep_Spring')
+
+    # Filter by removing Spring
+    inst.reset(initialise=True)
+    inst.filter('period', remove='Spring')
+    check_filter_data(inst, statistic_mode, network_type, filter='remove_Spring')
+
+    # Filter by keeping Summer
+    inst.reset(initialise=True)
+    inst.filter('period', keep='Summer')
+    check_filter_data(inst, statistic_mode, network_type, filter='keep_Summer')
+
+    # Filter by removing Summer
+    inst.reset(initialise=True)
+    inst.filter('period', remove='Summer')
+    check_filter_data(inst, statistic_mode, network_type, filter='remove_Summer')
+
+    # Filter by keeping Autumn
+    inst.reset(initialise=True)
+    inst.filter('period', keep='Autumn')
+    check_filter_data(inst, statistic_mode, network_type, filter='keep_Autumn')
+
+    # Filter by removing Autumn
+    inst.reset(initialise=True)
+    inst.filter('period', remove='Autumn')
+    check_filter_data(inst, statistic_mode, network_type, filter='remove_Autumn')
+
+    # Filter by keeping Winter
+    inst.reset(initialise=True)
+    inst.filter('period', keep='Winter')
+    check_filter_data(inst, statistic_mode, network_type, filter='keep_Winter')
+
+    # Filter by removing Winter
+    inst.reset(initialise=True)
+    inst.filter('period', remove='Winter')
+    check_filter_data(inst, statistic_mode, network_type, filter='remove_Winter')
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
@@ -63,20 +139,26 @@ def test_apply_representativity(inst, statistic_mode, network_type):
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
-def test_apply_bounds(inst, statistic_mode, network_type):
+def test_apply_coords(inst, statistic_mode, network_type):
     inst.load()
     inst.filter('latitude', lower=50, upper=60)
-    check_filter_data(inst, statistic_mode, network_type, filter='bounds')
+    inst.filter('longitude', lower=10, upper=12)
+    check_filter_data(inst, statistic_mode, network_type, filter='coords')
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities)
-def test_apply_metadata(inst, statistic_mode, network_type):
+def test_apply_station_reference(inst, statistic_mode, network_type):
     inst.load()
     if network_type == 'ghost':
         value = ['AT0034G_UVP']
     else:
         value = ['Barcelona']
+    
+    # Filter by keeping station reference
     inst.filter('station_reference', keep=value)
-    check_filter_data(inst, statistic_mode, network_type, filter='keep')
+    check_filter_data(inst, statistic_mode, network_type, filter='keep_station_reference')
+
+    # Filter by removing station reference
+    inst.reset(initialise=True)
     inst.filter('station_reference', remove=value)
-    check_filter_data(inst, statistic_mode, network_type, filter='remove')
+    check_filter_data(inst, statistic_mode, network_type, filter='remove_station_reference')

@@ -173,11 +173,14 @@ def plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
 
 def check_filter_data(inst, statistic_mode, network_type, filter):
 
-    orig_path = f'tests/reference/{network_type}/{statistic_mode}/data/data.npy'
-    filter_path = f'tests/reference/{network_type}/{statistic_mode}/data/data_{filter}.npy'
-
     # Check filtered data
+    filter_path = f'tests/reference/{network_type}/{statistic_mode}/data/data_{filter}.npy'
     read_data(inst, filter_path)
+
+    # Reset filter and check original data
+    inst.reset(initialise=True)
+    orig_path = f'tests/reference/{network_type}/{statistic_mode}/data/data.npy'
+    read_data(inst, orig_path)
 
     # Check filtered data is different from original data
     orig_output = np.load(orig_path, allow_pickle=True)
@@ -186,7 +189,3 @@ def check_filter_data(inst, statistic_mode, network_type, filter):
         assert (not np.allclose(orig_output, filter_output, equal_nan=True))
     except ValueError as e:
         assert True
-    
-    # Reset filter and check original data
-    inst.reset(initialise=True)
-    read_data(inst, orig_path)
