@@ -97,14 +97,14 @@ def test_make_scatter(inst, statistic_mode, network_type):
     plot(inst, statistic_mode, network_type, 'scatter', ['regression'])
 
 
-# FAIRMODE target plot cannot be created for od5050aero
-@pytest.mark.parametrize("inst, statistic_mode, network_type", [possibilities[2]])
+# FAIRMODE target plot cannot be created for od550aero
+@pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities[0:3])
 def test_make_fairmode_target(inst, statistic_mode, network_type):
     plot(inst, statistic_mode, network_type, 'fairmode-target')
 
 
-# FAIRMODE statsummary plot cannot be created for od5050aero
-@pytest.mark.parametrize("inst, statistic_mode, network_type", [possibilities[2]])
+# FAIRMODE statsummary plot cannot be created for od550aero
+@pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities[0:3])
 def test_make_fairmode_statsummary(inst, statistic_mode, network_type):
     plot(inst, statistic_mode, network_type, 'fairmode-statsummary')
 
