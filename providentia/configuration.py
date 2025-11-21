@@ -1413,12 +1413,6 @@ class ProvConfiguration:
         if not self.read_instance.active_dashboard_plots and 'active_dashboard_plots' in self.default_values:
             default = self.default_values['active_dashboard_plots']
             self.read_instance.active_dashboard_plots = default
-        # TODO: For Taylor diagrams, remove this piece of code when we stop using Matplotlib 3.3
-        elif Version(matplotlib.__version__) < Version("3.8"):
-                if 'taylor' in self.read_instance.active_dashboard_plots:
-                    error = 'It is not possible to create Taylor diagrams yet, please remove from settings/report_plots.yaml.'
-                    self.read_instance.logger.error(error)
-                    sys.exit(1)
 
         if len(self.read_instance.active_dashboard_plots) != 4 and 'active_dashboard_plots' in self.default_values:
             error = 'Error: there must be 4 "active_dashboard_plots"'
