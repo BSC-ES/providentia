@@ -180,7 +180,7 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
 
         for unique_base_data_label in unique_base_data_labels:
             if unique_base_data_label == instance.observations_data_label:
-                # Observations do not require grid edges
+                # Observations do not require grid edges, but initialise plotting params dict
                 instance.plotting_params[unique_base_data_label] = {}
             else:
                 # Stop if all data labels have been processed
@@ -189,26 +189,62 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
                 for valid_networkspeci in instance.networkspecies:
                     if len(processed_data_labels) == len(data_labels_to_add):
                         break
-                    if daily_forecast:
-                        # For daily forecast, copy grid edge info from removed labels
-                        for data_label in data_labels_to_add:
-                            relevant_inds = [ii for ii, data_label_to_remove in enumerate(data_labels_to_remove) if data_label in data_label_to_remove]
-                            instance.plotting_params[data_label] = {}
-                            instance.plotting_params[data_label]['grid_edge_longitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_longitude'] 
-                            instance.plotting_params[data_label]['grid_edge_latitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_latitude'] 
-                            processed_data_labels.append(data_label)
-                    elif unique_base_data_label in instance.files_to_read[valid_networkspeci]:
-                        # Open NetCDF file to extract grid edges
+                    
+                    # read grid edge longitudes and latitudes if needed
+                    if (not daily_forecast) & (unique_base_data_label in instance.files_to_read[valid_networkspeci]):
+                        # Open netCDF file to extract grid edges
                         exp_nc_root = Dataset(instance.files_to_read[valid_networkspeci][unique_base_data_label][0])
-                        for data_label in data_labels_to_add:
-                            if data_label not in processed_data_labels:
-                                base_data_label = data_label.split('-day')[0].split('-daily')[0].split('-combined')[0]
-                                if base_data_label == unique_base_data_label:
-                                    instance.plotting_params[data_label] = {}
-                                    instance.plotting_params[data_label]['grid_edge_longitude'] = exp_nc_root['grid_edge_longitude'][:]
-                                    instance.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
-                                    processed_data_labels.append(data_label)
-                        exp_nc_root.close()  # Close NetCDF file
+                        grid_edge_longitude = exp_nc_root['grid_edge_longitude'][:]
+                        grid_edge_latitude = exp_nc_root['grid_edge_latitude'][:]
+                        # Close netCDF file
+                        exp_nc_root.close() 
+
+                    # iterate through data labels to add
+                    for data_label in data_labels_to_add:
+
+                        base_data_label = data_label.split('-day')[0].split('-daily')[0].split('-combined')[0]
+
+                        if (base_data_label == unique_base_data_label) & (data_label not in processed_data_labels):
+
+                            # initialise plotting params dict for data label to add
+                            instance.plotting_params[data_label] = {}
+
+                            # For daily forecast, copy grid edge info from removed labels
+                            if daily_forecast:
+                                
+                                relevant_inds = [ii for ii, data_label_to_remove in enumerate(data_labels_to_remove) if data_label in data_label_to_remove]
+                                instance.plotting_params[data_label]['grid_edge_longitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_longitude'] 
+                                instance.plotting_params[data_label]['grid_edge_latitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_latitude'] 
+                                processed_data_labels.append(data_label)
+                            
+                            # otherwise open netCDF file to extract grid edges
+                            elif unique_base_data_label in instance.files_to_read[valid_networkspeci]:
+                                
+                                instance.plotting_params[data_label]['grid_edge_longitude'] = grid_edge_longitude
+                                instance.plotting_params[data_label]['grid_edge_latitude'] = grid_edge_latitude
+                                processed_data_labels.append(data_label)
+                        
+                    # if daily_forecast:
+                    #     # For daily forecast, copy grid edge info from removed labels
+                    #     for data_label in data_labels_to_add:
+                    #         relevant_inds = [ii for ii, data_label_to_remove in enumerate(data_labels_to_remove) if data_label in data_label_to_remove]
+                    #         instance.plotting_params[data_label] = {}
+                    #         instance.plotting_params[data_label]['grid_edge_longitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_longitude'] 
+                    #         instance.plotting_params[data_label]['grid_edge_latitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_latitude'] 
+                    #         processed_data_labels.append(data_label)
+                    # elif unique_base_data_label in instance.files_to_read[valid_networkspeci]:
+                    #     # Open NetCDF file to extract grid edges
+                    #     exp_nc_root = Dataset(instance.files_to_read[valid_networkspeci][unique_base_data_label][0])
+                    #     for data_label in data_labels_to_add:
+                    #         if data_label not in processed_data_labels:
+                    #             base_data_label = data_label.split('-day')[0].split('-daily')[0].split('-combined')[0]
+                    #             if base_data_label == unique_base_data_label:
+                    #                 instance.plotting_params[data_label] = {}
+                    #                 instance.plotting_params[data_label]['grid_edge_longitude'] = exp_nc_root['grid_edge_longitude'][:]
+                    #                 instance.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
+                    #                 processed_data_labels.append(data_label)
+                    #     # Close NetCDF file
+                    #     exp_nc_root.close()  
 
     # Remove plotting parameters for labels marked for removal
     if data_labels_to_remove is not None:

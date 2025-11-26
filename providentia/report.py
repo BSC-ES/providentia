@@ -877,6 +877,10 @@ class Report:
                 np.array_equal(self.flags, self.previous_flags) == False) or (
                 str(dict(sorted(self.filter_species.items()))) != str(dict(sorted(self.previous_filter_species.items())))) or (
                 str(dict(sorted(self.calibration_factor.items()))) != str(dict(sorted(self.previous_calibration_factor.items())))):
+                # reset data labels and experiments for forecast cases
+                self.data_labels = self.original_data_labels
+                self.data_labels_raw = self.original_data_labels_raw
+                self.experiments = self.original_experiments
                 # re-read data
                 self.datareader.read_setup(['reset'])
             else:
@@ -941,11 +945,11 @@ class Report:
             # make station specific plots?
             if self.report_stations and self.station_plots_to_make:      
 
-               # set variable to inform when have made 1 set of networkspecies plots for stations
-               self.made_networkspeci_station_plots = False        
+                # set variable to inform when have made 1 set of networkspecies plots for stations
+                self.made_networkspeci_station_plots = False        
 
-               # iterate through networkspecies
-               for networkspeci in self.networkspecies:
+                # iterate through networkspecies
+                for networkspeci in self.networkspecies:
 
                     # make plots per station
                     self.make_station_plots(networkspeci, station_plots_to_make)
@@ -963,6 +967,11 @@ class Report:
     def make_summary_plots(self, networkspeci, summary_plots_to_make):
         """ Function which makes all of summary plots for a specific subsection/networkspeci. """
 
+
+        # setup plotting geometry for summary plots per networkspeci (for all subsections)
+        if (not self.summary_plot_geometry_setup) & (self.do_plot_geometry_setup):
+            self.setup_plot_geometry('summary', networkspeci, self.made_networkspeci_summary_plots)
+
         # get valid station inds for networkspeci 
         if self.temporal_colocation:
             self.relevant_station_inds = self.valid_station_inds_temporal_colocation[networkspeci][self.observations_data_label]
@@ -971,10 +980,6 @@ class Report:
 
         # get N stations for networkspeci
         self.n_stations = len(self.relevant_station_inds)
-
-        # check if we have multispecies plots
-        have_multispecies = np.any([True if 'multispecies' in plot_type else False 
-                                    for plot_type in summary_plots_to_make])
         
         # if have 0 relevant stations, continue to next networkspeci
         if self.n_stations == 0:
@@ -986,6 +991,7 @@ class Report:
         if networkspeci not in self.stats_summary[self.subsection]:
             self.stats_summary[self.subsection][networkspeci] = {}
 
+        # get selected station data across all networkspecies for current section (if have not yet)
         if not self.made_networkspeci_summary_plots:
             
             # get selected station data
@@ -1001,21 +1007,11 @@ class Report:
                 if self.selected_station_stddev_max[ns] > self.stddev_max_summary[ns]:
                     self.stddev_max_summary[ns] = copy.deepcopy(self.selected_station_stddev_max[ns])
 
-        multispecies_pass = False
-
-        # setup plotting geometry for summary plots per networkspeci (for all subsections)
-        if (not self.summary_plot_geometry_setup) & (self.do_plot_geometry_setup):
-            self.setup_plot_geometry('summary', networkspeci, self.made_networkspeci_summary_plots)
-
-        # if have no valid data across data labels (no observations or experiments), then continue to next networkspeci
-        # unless it is the last subsection
+        # if have no valid data across data labels (no observations or experiments), then set flag
         if not self.selected_station_data[networkspeci]: 
-            # do not stop if there is any multispecies plot and we are in last subsection
-            # if last subsection has data for 0 stations, it would not create them
-            if (have_multispecies) and (self.subsection == self.subsections[-1]):
-                multispecies_pass = True
-            else:
-                return
+            have_nodata = True
+        else:
+            have_nodata = False
   
         # iterate through plots to make
         for plot_type in summary_plots_to_make:
@@ -1032,6 +1028,29 @@ class Report:
             # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
             plot_options = plot_type.split('_')[1:]
 
+            # check if plot type if a dataframe
+            plot_type_df = self.get_plot_type_df(base_plot_type)
+
+            # do not make plot, if plot type is not a dataframe or multispecies, and have no data
+            if (not plot_type_df) & ('multispecies' not in plot_options) & (have_nodata):
+                continue
+
+            # update dictionary to store statistical information if plot type is a dataframe
+            if plot_type_df:
+                self.update_stats_tables('summary', base_plot_type, plot_type, zstat, networkspeci, plot_options)
+                # do not make plot until last subsection
+                if (self.subsection != self.subsections[-1]):
+                    continue
+
+            # for multispecies plots, continue in certain scenarios
+            if ('multispecies' in plot_options):
+                # for non-dataframe type plots, only plot in first subsection
+                if (not plot_type_df) & (self.made_networkspeci_summary_plots):
+                    continue
+                # for dataframe plot types, only plot in last subsection and last networkspecies
+                elif (plot_type_df) & (networkspeci != self.networkspecies[-1]):
+                    continue
+
             # for timeseries chunking
             chunk_stat = None
             chunk_resolution = None
@@ -1040,30 +1059,6 @@ class Report:
                     # get chunk statistic and resolution
                     chunk_stat = copy.deepcopy(zstat)
                     chunk_resolution = plot_type.split('-')[2].split('_')[0]
-
-            # do not make plot if there is no data and it is not multispecies
-            if (multispecies_pass) and ('multispecies' not in plot_options):
-                continue
-
-            # set variable to know if we need to create plot in last subsection
-            plot_type_df = self.get_plot_type_df(base_plot_type)
-
-            # update nested dictionary to store statistical information
-            if plot_type_df:
-                self.update_stats_tables('summary', base_plot_type, plot_type, zstat, networkspeci, plot_options)
-                # do not make plot until last subsection (multispecies or not) if we need a dataframe
-                if (self.subsection != self.subsections[-1]):
-                    continue
-
-            # do not make multispecies plots
-            if ('multispecies' in plot_options):
-                # unless we are in first instance (boxplot)
-                if (not plot_type_df) and (self.made_networkspeci_summary_plots):
-                    continue
-                # until last subsection (table, heatmap, statsummary)
-                elif (plot_type_df) and ((self.subsection != self.subsections[-1]) 
-                                          or (networkspeci != self.networkspecies[-1])):
-                    continue
 
             self.logger.info('Making summary {0}'.format(plot_type))
 
@@ -1106,6 +1101,10 @@ class Report:
     def make_station_plots(self, networkspeci, station_plots_to_make):
         """ Function which makes all of station plots for a specific subsection/networkspeci. """
 
+        # setup plotting geometry for station plots per networkspeci (for one subsection)
+        if self.do_plot_geometry_setup:
+            self.setup_plot_geometry('station', networkspeci, self.made_networkspeci_station_plots)
+
         # get valid station inds for networkspeci 
         if self.temporal_colocation:
             self.relevant_station_inds = self.valid_station_inds_temporal_colocation[networkspeci][self.observations_data_label]
@@ -1115,19 +1114,9 @@ class Report:
         # get N stations for networkspeci
         self.n_stations = len(self.relevant_station_inds)
 
-        # check if we have multispecies plots
-        have_multispecies = np.any([True if 'multispecies' in plot_type else False 
-                                    for plot_type in station_plots_to_make])
-
         # if have 0 relevant stations, continue to next networkspeci
         if self.n_stations == 0:
             self.logger.info('No valid stations for {}, {}. Not making station plots'.format(networkspeci, self.subsection))
-            # do not stop if there is any multispecies plot and we are in last subsection
-            # if last subsection has data for 0 stations, it would not create them
-            if (have_multispecies) and (networkspeci == self.networkspecies[-1]):
-                pass 
-            else:
-                return
         else:
             self.logger.info('Making {}, {} station plots'.format(networkspeci, self.subsection)) 
         
@@ -1135,13 +1124,10 @@ class Report:
         if networkspeci not in self.stats_station:
             self.stats_station[self.subsection][networkspeci] = {}
 
-        # setup plotting geometry for station plots per networkspeci (for one subsection)
-        if self.do_plot_geometry_setup:
-            self.setup_plot_geometry('station', networkspeci, self.made_networkspeci_station_plots)
-
         # initialise station ind as -1
         self.station_ind = -1
 
+        # iterate through stations
         for i, relevant_station_ind in enumerate(self.relevant_station_inds):
             
             # gather some information about current station
@@ -1151,7 +1137,7 @@ class Report:
             self.current_station_name = self.station_names[networkspeci][relevant_station_ind]
             self.current_station_reference = self.station_references[networkspeci][relevant_station_ind]
 
-            # get selected station data 
+            # get selected station data for specific networkspeci and current section
             get_selected_station_data(read_instance=self, canvas_instance=self, 
                                       networkspecies=[networkspeci], 
                                       station_index=relevant_station_ind, 
@@ -1159,16 +1145,11 @@ class Report:
                                       data_range_max=self.data_range_max_station,
                                       stddev_max=self.stddev_max_station)
 
-            multispecies_pass = False
-
-            # if have no valid data across data labels (no observations or experiments), then continue to next station
-            if not self.selected_station_data[networkspeci]:
-                # do not stop if there is any multispecies plot and we are in last subsection
-                # if last subsection has data for 0 stations, it would not create them
-                if (have_multispecies) and (networkspeci == self.networkspecies[-1]):
-                    multispecies_pass = True
-                else:
-                    continue
+            # if have no valid data across data labels (no observations or experiments), then set flag
+            if not self.selected_station_data[networkspeci]: 
+                have_nodata = True
+            else:
+                have_nodata = False
             
             # update data range min/maxes for station paradigm
             if self.selected_station_data_min[networkspeci] < self.data_range_min_station[networkspeci]:
@@ -1193,46 +1174,36 @@ class Report:
                 # get options defined to configure plot (e.g. bias, individual, annotate, etc.)
                 plot_options = plot_type.split('_')[1:]
 
-                # for timeseries chunking
-                chunk_stat = None
-                chunk_resolution = None
-                if base_plot_type == 'timeseries':
-                    if zstat:
-                        # get chunk statistic and resolution
-                        chunk_stat = copy.deepcopy(zstat)
-                        chunk_resolution = plot_type.split('-')[2].split('_')[0]
+                # check if plot type if a dataframe
+                plot_type_df = self.get_plot_type_df(base_plot_type)
 
-                # do not make plot if there is no data and it is not multispecies
-                if (multispecies_pass) and ('multispecies' not in plot_options):
+                # do not make plot, if plot type is not a dataframe or multispecies, and have no data
+                if (not plot_type_df) & ('multispecies' not in plot_options) & (have_nodata):
                     continue
 
-                # set variable to know if we need to create plot in last subsection
-                plot_type_df = self.get_plot_type_df(base_plot_type)
-                
                 # remove station measurement method code from references for GHOST data
                 # if this has not already been removed
-                if (('multispecies' in plot_options) and (self.reading_ghost) 
-                    and ('_' in self.current_station_reference)):
+                if ('multispecies' in plot_options) & (self.reading_ghost) & ('_' in self.current_station_reference):
                     self.current_station_reference = '_'.join(self.current_station_reference.split("_")[:-1])
 
-                # collect statistics in dictionaries
+                # update dictionary to store statistical information if plot type is a dataframe
                 if plot_type_df:
-
-                    # do not update dictionary for multispecies plots if spatial colocation is turned off
-                    if ('multispecies' in plot_options) and (not self.spatial_colocation):
-                        continue
-                    
-                    # update nested dictionary to store statistical information
                     self.update_stats_tables('station', base_plot_type, plot_type, zstat, networkspeci, plot_options)
-                    
-                    # only plot last subsection and last networkspecies for multispecies
-                    if ('multispecies' in plot_options) and (networkspeci != self.networkspecies[-1]):
+
+                # for multispecies plots, continue in certain scenarios
+                if ('multispecies' in plot_options):
+                    # spatial colocation needs to be turned on for multispecies station plots 
+                    if not self.spatial_colocation:
                         continue
-                    
-                # multispecies (non dataframe multispecies plots)
-                if ('multispecies' in plot_options) and (not plot_type_df):
-                    # do plot if we are in first instance and spatial colocation is active
-                    if (not self.made_networkspeci_station_plots) & (self.spatial_colocation):
+                    # for non-dataframe plot types, only plot in first subsection
+                    elif (not plot_type_df) & (self.made_networkspeci_station_plots):
+                        continue
+                    # for dataframe plot types, only plot in last subsection and last networkspecies
+                    elif (plot_type_df) & (networkspeci != self.networkspecies[-1]):
+                        continue
+
+                    # get selected station data for non-dataframe type plots across all networkspecies
+                    if not plot_type_df:
                         get_selected_station_data(read_instance=self, canvas_instance=self, 
                                                   networkspecies=self.networkspecies, 
                                                   station_index=relevant_station_ind, 
@@ -1248,8 +1219,15 @@ class Report:
                                 self.data_range_max_station[ns] = copy.deepcopy(self.selected_station_data_max[ns])
                             if self.selected_station_stddev_max[ns] > self.stddev_max_station[ns]:
                                 self.stddev_max_station[ns] = copy.deepcopy(self.selected_station_stddev_max[ns])
-                    else:
-                        continue
+
+                # for timeseries chunking
+                chunk_stat = None
+                chunk_resolution = None
+                if base_plot_type == 'timeseries':
+                    if zstat:
+                        # get chunk statistic and resolution
+                        chunk_stat = copy.deepcopy(zstat)
+                        chunk_resolution = plot_type.split('-')[2].split('_')[0]
 
                 self.logger.info('Making station {2} for {3} ({0}/{1})'.format(i+1, 
                                                                     len(self.relevant_station_inds),
@@ -1384,9 +1362,26 @@ class Report:
         else:
             base_plot_type = plot_type.split('_')[0] 
 
+        # set variable to know if we need to create plot for dataframes in last subsection
+        plot_type_df = self.get_plot_type_df(base_plot_type)
+
         # get all data_labels for selected_station_data
         # if multispecies plot then ensure have data_labels from across all networkspecies
-        if 'multispecies' in plot_options: 
+        if plot_type_df:
+
+            if base_plot_type in ['heatmap', 'table']:                
+                if z_statistic_sign == 'bias':
+                    data_labels = list(self.experiments.values())
+                else:
+                    data_labels = [self.observations_data_label] + list(self.experiments.values())
+
+            elif base_plot_type == 'statsummary':
+                if 'bias' in plot_options:
+                    data_labels = list(self.experiments.values())
+                else:
+                    data_labels = [self.observations_data_label] + list(self.experiments.values())
+
+        elif 'multispecies' in plot_options: 
             data_labels = []
             for ns in self.selected_station_data:
                 data_labels.extend(self.selected_station_data_labels[ns])
@@ -1397,10 +1392,14 @@ class Report:
 
         # if have no valid data labels then return 
         if len(data_labels) == 0:
+            msg = "Cannot make plot as have no valid data. Not making plot."
+            show_message(self, msg)
             return plot_indices
 
-        # if are making bias plot, and have no valid experiment data then cannot make plot type
-        if (('bias' in plot_options) or (z_statistic_sign == 'bias')) & (len(data_labels) < 2):
+        # if are making bias plot, and have no valid model data then cannot make plot type
+        if (('bias' in plot_options) or (z_statistic_sign == 'bias')) & (len(data_labels) < 2) & (not plot_type_df):
+            msg = "Cannot make a bias plot with no model data. Not making plot."
+            show_message(self, msg)
             return plot_indices
 
         # do not make plot if bias and threshold plots are in plot options
@@ -1432,7 +1431,8 @@ class Report:
 
         # get data labels without observations
         data_labels_sans_obs = copy.deepcopy(data_labels)
-        data_labels_sans_obs.remove(self.observations_data_label)
+        if self.observations_data_label in data_labels_sans_obs:
+            data_labels_sans_obs.remove(self.observations_data_label)
 
         # determine if have some data to plot
         plot_validity = False
@@ -1441,7 +1441,9 @@ class Report:
             data_labels_to_test = copy.deepcopy(data_labels_sans_obs)
         else:
             data_labels_to_test = copy.deepcopy(data_labels)
-        if 'multispecies' in plot_options:
+        if plot_type_df:
+            plot_validity = True
+        elif 'multispecies' in plot_options:
             for ns in self.selected_station_data:
                 for data_label in data_labels_to_test:
                     if data_label in self.selected_station_data_labels[ns]:
@@ -1545,7 +1547,7 @@ class Report:
 
         # other plots (1 plot per subsection with multiple data arrays for summary paradigm, 1 plot per subsection per station for station paradigm)
         elif base_plot_type not in ['heatmap', 'table', 'statsummary']:
-            
+
             # if making individual plots, iterate through data labels one at a time, otherwise pass all data labels 
             # together
             if 'individual' in plot_options:
@@ -1817,12 +1819,6 @@ class Report:
                 networkspecies = [networkspeci]
 
             if base_plot_type in ['heatmap', 'table']:
-                
-                # get data labels (based on statistic type)
-                if z_statistic_sign == 'bias':
-                    data_labels = list(self.experiments.values())
-                else:
-                    data_labels = [self.observations_data_label] + list(self.experiments.values())
 
                 # create empty dataframe with networkspecies and subsections
                 index = pd.MultiIndex.from_product([networkspecies, self.subsections],
@@ -1861,16 +1857,14 @@ class Report:
                 # get stats
                 if 'bias' in plot_options:
                     stats = self.plot_characteristics[plot_type]['experiment_bias']
-                    data_labels = list(self.experiments.values())
                 else:
                     stats = self.plot_characteristics[plot_type]['basic']
-                    data_labels = [self.observations_data_label] + list(self.experiments.values())
 
                 # create empty dataframe with networkspecies and subsections
                 index = pd.MultiIndex.from_product([self.networkspecies, self.subsections, data_labels],
                                                     names=["networkspecies", "subsections", "labels"])
                 stats_df = pd.DataFrame(np.nan, index=index, columns=stats, dtype=np.float64)
-                
+
                 # convert stats_summary and stats_station dicts to dataframes
                 for subsection in subsections:
                     for networkspeci in networkspecies:
@@ -1924,6 +1918,12 @@ class Report:
                 # turn axis on
                 relevant_axis.axis('on')
                 relevant_axis.set_visible(True)
+
+            # if have no data then do not make plot
+            else:
+                msg = f'{plot_type} cannot be created because there is no available data.'
+                show_message(self, msg)
+                return plot_indices
 
             # set axis title
             if relevant_axis.get_title() == '':
