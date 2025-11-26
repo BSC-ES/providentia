@@ -366,14 +366,21 @@ make clean
 make html
 ```
 
+## Create providentia-env_v3.0.0-nord4 in Nord4
+
+```
+conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0-nord4 -y python=3.11.5 -c conda-forge --override-channels
+conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0-nord4
+conda install -c conda-forge cartopy jupyterlab ghostscript dask --override-channels
+pip install -r requirements.txt
+```
+
 ## Create providentia-env_v3.0.0 in MN5
 
 ```
 conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0 -y python=3.11.5 -c conda-forge --override-channels
 conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0
-conda install -c conda-forge cartopy --override-channels
-conda install -c conda-forge jupyterlab --override-channels
-conda install -c conda-forge ghostscript --override-channels
+conda install -c conda-forge cartopy jupyterlab ghostscript dask --override-channels
 pip install -r requirements.txt
 ```
 
@@ -384,10 +391,7 @@ In order to test modules with pip, you need to create an environment. Once activ
 ```
 conda create -n providentia-env_v3.0.0 python=3.11.5 -c conda-forge --override-channels
 conda activate providentia-env_v3.0.0
-conda install -c conda-forge cartopy --override-channels
-conda install -c conda-forge jupyterlab --override-channels
-conda install -c conda-forge ghostscript --override-channels
-conda install -c conda-forge dask --override-channels
+conda install -c conda-forge cartopy jupyterlab ghostscript dask --override-channels
 pip install -r requirements.txt
 ```
 
