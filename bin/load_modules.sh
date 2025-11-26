@@ -13,7 +13,7 @@ elif [ "${BSC_MACHINE}" = "nord4" ]; then
     module load intel/2021.4 impi/2017.4
     module load greasy/2.2.4
     module load mkl/2017.4 netcdf/4.4.1.1 udunits/2.2.28 gsl/2.7
-    module load nco/5.1.3-foss-2019b
+    module load NCO/5.1.0-foss-2020b
     module load singularity
 
 # Nord3v2
