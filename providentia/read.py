@@ -174,6 +174,12 @@ class DataReader:
             # check if any of the experiment data has a forecast dimension to handle 
             # only for report / library modes as dashboard handled previously
             if self.read_instance.mode in ['report', 'library']:
+
+                self.read_instance.original_data_labels = copy.deepcopy(self.read_instance.data_labels)
+                self.read_instance.original_data_labels_raw = copy.deepcopy(self.read_instance.data_labels_raw)
+                self.read_instance.original_experiments = copy.deepcopy(self.read_instance.experiments)
+                #self.read_instance.original_plotting_params = copy.deepcopy(self.read_instance.plotting_params)
+
                 self.check_forecast(yearmonths_to_read=yearmonths_to_read)
                 self.read_instance.data_labels, self.read_instance.data_labels_raw, self.read_instance.experiments = self.update_forecast_indices()
 
@@ -573,7 +579,7 @@ class DataReader:
 
         # if have reading daily or combined forecast data, make original copy of data labels, experiments and plotting params, 
         # as will be modified later and may need restoring
-        if (self.read_instance.daily_forecast) or (self.read_instance.combined_forecast):
+        if ((self.read_instance.daily_forecast) or (self.read_instance.combined_forecast)) & (self.read_instance.mode not in ['report', 'library']):
             self.read_instance.original_data_labels = copy.deepcopy(self.read_instance.data_labels)
             self.read_instance.original_data_labels_raw = copy.deepcopy(self.read_instance.data_labels_raw)
             self.read_instance.original_experiments = copy.deepcopy(self.read_instance.experiments)
@@ -869,6 +875,7 @@ class DataReader:
                         file_root = \
                             '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
                                                         data_label_raw, self.read_instance.resolution, speci, network, speci)
+
                     try:
                         available_yearmonths = self.read_instance.available_experiment_data[network][self.read_instance.resolution][speci][data_label_raw]
                     except KeyError:
@@ -1001,6 +1008,9 @@ class DataReader:
                 if data_label == self.read_instance.observations_data_label:
                      continue
                 self.read_instance.forecast_indices_per_data_label[networkspeci][data_label] = {}
+                # if do not have forecast days for data label, data does not exist for data label, so continue
+                if data_label not in self.read_instance.forecast_days_per_data_label[networkspeci]:
+                    continue
                 # get number of forecast days for this label
                 n_forecast_days = self.read_instance.forecast_days_per_data_label[networkspeci][data_label]
                 # if no forecast days available, just update the menu with empty entry
@@ -1096,7 +1106,6 @@ class DataReader:
 
         # return updated data label lists and experiment mapping
         return new_data_labels, new_data_labels_raw, new_experiments
-
 
     def update_forecast_menu(self, networkspeci, data_label, new_data_label, n_forecast_days, wanted_forecast_day):
         """
