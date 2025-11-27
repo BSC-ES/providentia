@@ -60,6 +60,8 @@ interpolation:
   experiments:
   ensemble:
     - 000
+  interp_experiment_downsampling: mean
+  interp_experiment_upsampling: fill
   interp_n_neighbours: 4
 download:
   species:

@@ -1187,11 +1187,13 @@ class ProvConfiguration:
                 for field_name, fields in self.read_instance.fields_per_section.items()}
         
         # assign defaults
-        for field, value in self.default_values.items():
+        for field, default in self.default_values.items():
+            current_value = getattr(self.read_instance, field)
+
             # set the defined defaults
-            if not getattr(self.read_instance, field):
-                if value:
-                    setattr(self.read_instance, field, value)
+            if not current_value:
+                if default:
+                    setattr(self.read_instance, field, default)
                 else:
                     error = f"Error: '{field}' was not defined in the configuration file. It is mandatory for the '{self.read_instance.mode}' mode."
                     self.read_instance.logger.error(error)
@@ -1199,7 +1201,14 @@ class ProvConfiguration:
             
             # ensure that statistic aggregation matches with the statistic_mode
             elif field == 'statistic_aggregation' and self.read_instance.statistic_mode != 'Flattened':
-                setattr(self.read_instance, field, value)
+                setattr(self.read_instance, field, default)
+
+            # check downsampling and upsampling
+            elif field == 'interp_experiment_downsampling' and current_value not in ['mean', 'median']:
+                setattr(self.read_instance, field, default)
+                
+            elif field == 'interp_experiment_upsampling' and current_value not in ['fill', 'gaps']:
+                setattr(self.read_instance, field, default)
 
         # check resolution
         # if not interpolation or download, get first resolution in list
