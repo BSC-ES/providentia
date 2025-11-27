@@ -620,6 +620,8 @@ class ProvConfiguration:
                     return [plot.strip() for plot in value.split(',')]
                 else:
                     return [value.strip()]
+            elif isinstance(value, tuple):
+                return [str(val) for val in value]
 
         elif key == 'resampling_resolution':
             # parse resampling resolution
