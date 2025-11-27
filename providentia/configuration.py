@@ -1088,6 +1088,23 @@ class ProvConfiguration:
             self.read_instance.logger.error(error)
             sys.exit(1)
 
+        # check and format the start and end date
+        dates = ['start_date', 'end_date']
+        
+        for date_str in dates:
+            date = getattr(self.read_instance, date_str)
+
+            if date == '*':
+                pass
+            elif len(date) == 8:
+                if self.read_instance.mode == 'interpolation':
+                    setattr(self.read_instance, date_str, date[:-2])               
+            elif len(date) == 6:       
+                if self.read_instance.mode != 'interpolation':
+                    setattr(self.read_instance, date_str, date + "01")     
+            else:
+                error = f"Error: The format of {date_str} is not correct, please change it to YYYYMMDD."
+                            
         # check if species is valid
         if self.read_instance.species:
             species = copy.deepcopy(self.read_instance.species)
