@@ -1,4 +1,5 @@
 import os
+import sys
 import numpy as np
 import socket
 import time
@@ -162,3 +163,160 @@ class Tee:
     def flush(self):
         for s in self.streams:
             s.flush()
+
+
+def get_standard_parameters_by_speci(speci, ghost_version):
+    """ Get GHOST standard parameters dictionary
+
+    Parameters
+    ----------
+    speci : str
+        Speci to plot
+    ghost_version : str
+        GHOST version
+
+    Returns
+    -------
+    dict
+        GHOST standard parameters dictionary
+    """
+
+    sys.path.insert(1, join(CURRENT_PATH, 'dependencies/GHOST_standards/{}'.format(ghost_version)))
+    from GHOST_standards import standard_parameters
+    standard_parameters = standard_parameters
+    
+    # get cut of standard parameters for original speci to process
+    for standard_parameter in standard_parameters.keys():
+        if standard_parameters[standard_parameter]['bsc_parameter_name'] == speci:
+            return standard_parameters[standard_parameter]
+
+
+def unit_conversion(initial_units, final_units, standard_parameter_speci):
+    """ Use unit_converter class to return conversion object from initial to final units.
+
+    Parameters
+    ----------
+    initial_units : str
+        Input units
+    final_units : str
+        Output units
+    standard_parameter_speci : dict
+        GHOST standard parameters dictionary
+
+    Returns
+    -------
+    obj, str
+        Conversion object or error
+    """
+
+    # import unit converter
+    sys.path.insert(1, join(CURRENT_PATH, 'dependencies/unit-converter'))
+    import unit_converter
+
+    # if units are unitless, then no need for conversion (i.e. conversion factor = 1.0)   
+    if (final_units == 'unitless') or (final_units == '-') or (final_units == '1'):
+        return type('convert_units', (object,), {'conversion_factor':1.0, 'output_standard_units':'unitless'})
+    
+    # determine chemical formula of species 
+    if 'chemical_formula_charge' in list(standard_parameter_speci.keys()):
+        speci_chemical_formula = standard_parameter_speci['chemical_formula_charge']
+    else:
+        speci_chemical_formula = standard_parameter_speci['chemical_formula']
+
+    # get input (model) quantity for conversion
+    if ('units_quantity' in list(standard_parameter_speci.keys())) and (initial_units == standard_parameter_speci['standard_units']):
+        initial_quantity = standard_parameter_speci['units_quantity']
+    else:
+        conv_obj = unit_converter.convert_units(initial_units, initial_units, 1, 
+                                                species=speci_chemical_formula)
+        initial_quantity = conv_obj.output_quantity
+
+    # get output (observational) quantity for conversion
+    if ('units_quantity' in list(standard_parameter_speci.keys())) and (final_units == standard_parameter_speci['standard_units']):
+        final_quantity = standard_parameter_speci['units_quantity']
+    else:
+        conv_obj = unit_converter.convert_units(final_units, final_units, 1, 
+                                                species=speci_chemical_formula)
+        final_quantity = conv_obj.output_quantity
+
+    # unit converter module does not produce conversion factor for temperature, 
+    # but both input and output units should be Kelvin (i.e. conversion factor = 1.0) 
+    # if input not in K then return error
+    if final_quantity == 'temperature': 
+        if initial_units == 'K':
+            return type('convert_units', (object,), {'conversion_factor':1.0, 'output_standard_units':'K'})
+        else:
+            error = "Error: Experiment units should be 'K', but are set as '{}'".format(initial_units)
+            return error
+
+    # initial and final quantities not equal (convert to observational units, 
+    # standard_temperature=293.15, standard_pressure=1013.25)
+    if initial_quantity != final_quantity:     
+        
+        # convert units
+        input_units = {'temperature': 'K', 
+                       'pressure': 'hPa', 
+                       'molar_mass': 'kg mol-1', 
+                       initial_quantity: initial_units}
+        input_values = {'temperature': 293.15, 
+                        'pressure': 1013.25, 
+                        'molar_mass': unit_converter.get_molecular_mass(speci_chemical_formula), 
+                        initial_quantity: 1.0}
+        conv_obj = unit_converter.convert_units(input_units, final_units, input_values, 
+                                                species=speci_chemical_formula, 
+                                                input_quantity=initial_quantity, 
+                                                output_quantity=final_quantity)
+    
+    # same quantity conversion
+    else:
+        conv_obj = unit_converter.convert_units(initial_units, final_units, 1.0, 
+                                                species=speci_chemical_formula, 
+                                                input_quantity=initial_quantity, 
+                                                output_quantity=final_quantity) 
+    
+    # return conversion object
+    return conv_obj
+
+
+def get_conversion_factor(initial_units, final_units, standard_parameter_speci):
+    """ Get conversion factor to convert from initial to final units.
+        Convenience wrapper for unit_conversion function.
+
+    Parameters
+    ----------
+    initial_units : str
+        Input units
+    final_units : str
+        Output units
+    standard_parameter_speci : dict
+        GHOST standard parameters dictionary
+
+    Returns
+    -------
+    float, str
+        Conversion factor or error
+    """
+
+    conv_obj = unit_conversion(initial_units, final_units, standard_parameter_speci)
+    return conv_obj.conversion_factor
+
+
+def get_standard_units(initial_units, standard_parameter_speci):
+    """ Get Standarsised units for given initial units.
+        Convenience wrapper for unit_conversion function.
+
+    Parameters
+    ----------
+    initial_units : str
+        Input units
+    standard_parameter_speci : dict
+        GHOST standard parameters dictionary
+
+    Returns
+    -------
+    str
+        Output standard units or error
+    """
+    
+    conv_obj = unit_conversion(initial_units, initial_units, standard_parameter_speci)
+    return conv_obj.output_standard_units

@@ -31,7 +31,7 @@ from aux_interp import (check_for_ghost, findMiddle, check_directory_existence, 
                         get_model_to_aeronet_bin_transform_factor)
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[2]))
-from providentia.auxiliar import CURRENT_PATH, join, get_machine
+from providentia.auxiliar import CURRENT_PATH, join, get_machine, get_conversion_factor, get_standard_parameters_by_speci
 
 # set current MACHINE
 MACHINE = get_machine()
@@ -41,10 +41,6 @@ PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
 # load the defined experiments paths and agrupations jsons
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
-
-# add unit-converter submodule to python load path
-sys.path.append(join(PROVIDENTIA_ROOT,'providentia','dependencies','unit-converter'))
-import unit_converter
 
 class ExperimentInterpolation(object):
     """ Class which handles interpolation of experiment data to surface observations. """
@@ -81,13 +77,22 @@ class ExperimentInterpolation(object):
         with open(submission_file, 'r') as f:
             submission_file_txt = f.read().split()
 
+        # join unclosed lists together in 1 element
+        submission_file_txt_joined=[]; cur=''; n=0
+        for t in submission_file_txt:
+            cur += (' ' + t if cur else t)
+            n += t.count('[') - t.count(']')
+            if n == 0:
+                submission_file_txt_joined.append(cur)
+                cur = ''
+
         # get configuration variables from the management_logs
         for variable_key in ["ghost_version", "forecast", "interp_spinup_timesteps",
                              "interp_n_neighbours", "interp_reverse_vertical_orientation", 
                              "exp_root", "ghost_root", "exp_to_interp_root", 
                              "nonghost_root"]:
-            variable_val_idx = submission_file_txt.index(variable_key+":")+1
-            variable_val = submission_file_txt[variable_val_idx]
+            variable_val_idx = submission_file_txt_joined.index(variable_key+":")+1
+            variable_val = submission_file_txt_joined[variable_val_idx]
             # make sure some variables are correct types
             if variable_key in ["interp_reverse_vertical_orientation", "forecast"]:
                 setattr(self, variable_key, ast.literal_eval(variable_val))
@@ -95,15 +100,7 @@ class ExperimentInterpolation(object):
                 setattr(self, variable_key, variable_val)
 
         # import GHOST standards
-        sys.path.insert(1, join(PROVIDENTIA_ROOT, 'providentia/dependencies/GHOST_standards/{}'.format(self.ghost_version)))
-        from GHOST_standards import standard_parameters
-        self.standard_parameters = standard_parameters
-        
-        # get cut of standard parameters for original speci to process
-        for standard_parameter in self.standard_parameters.keys():
-            if self.standard_parameters[standard_parameter]['bsc_parameter_name'] == self.original_speci_to_process:
-                self.standard_parameter_speci = self.standard_parameters[standard_parameter]
-                break
+        self.standard_parameter_speci = get_standard_parameters_by_speci(self.original_speci_to_process, self.ghost_version)
         
         # get GHOST lower/upper limits for variable
         self.GHOST_speci_lower_limit = self.standard_parameter_speci['extreme_lower_limit']
@@ -616,84 +613,42 @@ class ExperimentInterpolation(object):
         # close the nc file
         obs_nc_root.close()
 
-    def get_conversion_factor(self):
-        """ Get conversion factor between observations and experiment data. """
+    def get_resampling_direction(self):
+        """ Determine resampling direction. """
 
-        # get units conversion factor between model and observations (go from model to observational units)    
-        obs_speci_units = self.obs_units
+        freq_map = {
+            "hourly": 1,
+            "hourly_instantaneous": 1,
+            "3hourly": 3,
+            "3hourly_instantaneous": 3,
+            "6hourly": 6,
+            "6hourly_instantaneous": 6,
+            "daily": 24,
+            "monthly": 24 * 30}
 
-        # if units are unitless, then no need for conversion (i.e. conversion factor = 1.0)   
-        if (obs_speci_units == 'unitless') or (obs_speci_units == '-') or (obs_speci_units == '1'):
-            self.conversion_factor = 1.0
-            return
+        in_freq = freq_map[self.model_temporal_resolution]
+        out_freq = freq_map[self.temporal_resolution_to_output]
 
-        # unit converter module does not produce conversion factor for temperature, but both observational and model 
-        # units should be Kelvin (i.e. conversion factor = 1.0) 
-        # if model not in K then return error
-        elif obs_speci_units == 'K': 
-            if self.mod_speci_units == 'K':
-                self.conversion_factor = 1.0
-                return
-            else:
-                self.log_file_str += "Experiment units should be 'K', but are set as '{}'".format(self.mod_speci_units)
-                create_output_logfile(1, self.log_file_str)
-
-        # unit converter module does not produce conversion factor for angular degrees, but both observational and model 
-        # units should be in angular degrees (i.e. conversion factor = 1.0) 
-        # if model not in K then return error
-        elif obs_speci_units == 'angular degrees': 
-            if ((self.mod_speci_units.lower() == 'angular degrees') or (self.mod_speci_units.lower() == 'degrees') 
-                or (self.mod_speci_units.lower() == '°')):
-                self.conversion_factor = 1.0
-                return
-            else:
-                self.log_file_str += "Experiment units should be 'angular degrees', but are set as '{}'".format(
-                    self.mod_speci_units)
-                create_output_logfile(1, self.log_file_str)
-    
-        # determine chemical formula of species 
-        speci_chemical_formula = self.standard_parameter_speci['chemical_formula']
-
-        # otherwise check if the unit quantities are equal
-        conv_obj = unit_converter.convert_units(obs_speci_units, obs_speci_units, 1, 
-                                                measured_species=speci_chemical_formula)
-        obs_quantity = conv_obj.output_represented_quantity
-        conv_obj = unit_converter.convert_units(self.mod_speci_units, self.mod_speci_units, 1, 
-                                                measured_species=speci_chemical_formula)
-        model_quantity = conv_obj.output_represented_quantity
-
-        # observations and model quantities not equal (convert to observational units, standard_temperature=293.15, 
-        # standard_pressure=1013.25)
-        if obs_quantity != model_quantity:
-            # if cannot determine chemical formula of species, then terminate process
-            if speci_chemical_formula == '':
-                self.log_file_str += 'Cannot determine speci chemical formula needed for unit conversion. Terminating process.'
-                create_output_logfile(1, self.log_file_str)            
-            input_units = {'temperature':'K', 'pressure':'hPa', 'molar_mass':'kg mol-1', model_quantity:self.mod_speci_units}
-            input_values = {'temperature':293.15, 'pressure':1013.25, 'molar_mass':unit_converter.get_molecular_mass(speci_chemical_formula), 
-                                                                                                                     model_quantity:1.0}
-            conv_obj = unit_converter.convert_units(input_units, obs_speci_units, input_values, 
-                                                    conversion_input_quantity=model_quantity,
-                                                    measured_species=speci_chemical_formula)
-            self.conversion_factor = conv_obj.conversion_factor
+        # input resolution finer than output resolution (downsampling)
+        if in_freq < out_freq:
+            return "downsampling"
+        # input resolution coarser than output resolution (upsampling)
+        elif in_freq > out_freq:
+            return "upsampling"
+        # no resampling
         else:
-            conv_obj = unit_converter.convert_units(self.mod_speci_units, obs_speci_units, 1.0, 
-                                                    measured_species=speci_chemical_formula) 
-            self.conversion_factor = conv_obj.conversion_factor
-
+            return
+        
     def get_monthly_model_data(self):
         """ Read all relevant model data in yearmonth into memory. """
 
-        # temporal resolution to output is coarser than model resolution, therefore will need to modify temporal 
-        # resolution and perform resampling?
-        resampling = False
-        if self.temporal_resolution_to_output != self.model_temporal_resolution: 
-            resampling = True
+        # determine resampling direction (upsampling, downsampling or None)
+        resampling_direction = self.get_resampling_direction()
 
         # get number of days in month processing
         self.days_in_month = monthrange(int(self.year),int(self.month))[1]
         
-        # create monthly time/dy variables
+        # create monthly datetime array at resolution to output
         start_month_dt = datetime.datetime(year=int(self.year), month=int(self.month), day=1, hour=0, minute=0)
         end_month_dt = start_month_dt + relativedelta.relativedelta(months=1)
         if self.temporal_resolution_to_output in ['hourly', 'hourly_instantaneous']:
@@ -818,9 +773,9 @@ class ExperimentInterpolation(object):
         # create array for storing daily monthly model data
         # if have forecast data, then have an extra dimension for the number of forecast days
         if self.forecast:
-            self.monthly_model_data = np.full((len(self.yearmonth_time), self.forecast_days, self.y_N, self.x_N), np.NaN, dtype=np.float32)
+            self.monthly_model_data = np.full((len(self.yearmonth_time), self.forecast_days, self.y_N, self.x_N), np.nan, dtype=np.float32)
         else:
-            self.monthly_model_data = np.full((len(self.yearmonth_time), self.y_N, self.x_N), np.NaN, dtype=np.float32)
+            self.monthly_model_data = np.full((len(self.yearmonth_time), self.y_N, self.x_N), np.nan, dtype=np.float32)
 
         # if have mapped size distribution variable: 
         # -- get aeronet bin radius for original variable 
@@ -954,7 +909,7 @@ class ExperimentInterpolation(object):
                     read_data = read_data * self.conversion_factor
                     
                     # set any model values outside GHOST extreme limits for variable to be NaN
-                    read_data[(read_data < self.GHOST_speci_lower_limit) | (read_data > self.GHOST_speci_upper_limit)] = np.NaN 
+                    read_data[(read_data < self.GHOST_speci_lower_limit) | (read_data > self.GHOST_speci_upper_limit)] = np.nan 
 
                     # create xarray for resampling
                     xr_data = xr.DataArray(dims=("time","latitude","longitude"),
@@ -972,10 +927,41 @@ class ExperimentInterpolation(object):
                         xr_data = xr_data.assign_coords(longitude=self.x).sortby('longitude')
                         xr_data = xr_data.assign_coords(latitude=self.y).sortby('latitude')
 
-                    # do resampling (taking mean) to coarser temporal resolution if neccessary
-                    if resampling:
-                        xr_data = xr_data.resample(time=self.temporal_resolution_to_output_code).mean()     
-                    
+                    # do resampling
+                    if resampling_direction:
+                        # downsampling (finer to coarser)
+                        if resampling_direction == 'downsampling':
+                        
+                            # mean
+                            if self.interp_experiment_downsampling == 'mean':
+                                xr_data = xr_data.resample(time=self.temporal_resolution_to_output_code).mean()   
+                        
+                            # median
+                            elif self.interp_experiment_downsampling == 'median':
+                                xr_data = xr_data.resample(time=self.temporal_resolution_to_output_code).median()   
+                        
+                        # upsampling (coarser to finer)
+                        elif resampling_direction == 'upsampling':
+
+                            # convert original data frequency code to pandas offset
+                            offset = pd.tseries.frequencies.to_offset(pd.infer_freq(xr_data.time.to_index()))
+                            
+                            # extend the last timestamp to cover the full final period
+                            start_time = pd.Timestamp(xr_data.time.values[0])
+                            last_time = pd.Timestamp(xr_data.time.values[-1])
+                            end_extended = last_time + offset - pd.Timedelta(seconds=1)
+                            
+                            # create new continuous index at frequency to output
+                            new_index = pd.date_range(start=start_time, end=end_extended, freq=self.temporal_resolution_to_output_code)
+    
+                            # fill gaps (repeating values between measurements)
+                            if self.interp_experiment_upsampling == 'fill':
+                                xr_data = xr_data.reindex(time=new_index, method="ffill")
+                        
+                            # leave gaps (setting nans between measurements)
+                            elif self.interp_experiment_upsampling == 'gaps':
+                                xr_data = xr_data.reindex(time=new_index)
+
                     # get indices in yearmonth to fill with read data
                     inds_to_fill = np.isin(self.yearmonth_dt, xr_data.time.values)
                     if not any(inds_to_fill):
@@ -1247,9 +1233,9 @@ class ExperimentInterpolation(object):
                 station_weights = self.inverse_dists[ii,:]
                 if np.all(station_weights == 0):
                     if self.forecast:
-                        interp_vals = np.full((len(self.yearmonth_time), self.forecast_days), np.NaN, dtype=np.float32)
+                        interp_vals = np.full((len(self.yearmonth_time), self.forecast_days), np.nan, dtype=np.float32)
                     else:
-                        interp_vals = np.full(len(self.yearmonth_time), np.NaN, dtype=np.float32)
+                        interp_vals = np.full(len(self.yearmonth_time), np.nan, dtype=np.float32)
                 else:
                     # get reciprocal model data at N nearest neighbours to observational station 
                     if self.forecast:
@@ -1367,7 +1353,10 @@ if __name__ == "__main__":
         EI.get_observational_objects()
 
         # get unit conversion factor between observations and experiment data
-        EI.get_conversion_factor()
+        EI.conversion_factor = get_conversion_factor(EI.mod_speci_units, EI.obs_units, EI.standard_parameter_speci)
+        if isinstance(EI.conversion_factor, str):
+            EI.log_file_str += EI.conversion_factor
+            create_output_logfile(1, EI.log_file_str)
 
         # read relevant monthly model data into memory
         EI.get_monthly_model_data()

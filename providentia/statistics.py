@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 import scipy.stats as st
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, get_conversion_factor, get_standard_parameters_by_speci
 from .calculate import Stats, ExpBias
 from .read_aux import (get_frequency_code, get_chunk_size,
                        get_periodic_nonrelevant_temporal_resolutions, get_periodic_relevant_temporal_resolutions)
@@ -86,7 +86,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
 
         # temporally colocate data array
         if read_instance.temporal_colocation:
-            data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+            data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.nan
         
         # get selected station indices
         canvas_instance.station_inds[networkspeci] = get_station_inds(read_instance, canvas_instance, networkspeci, station_index)
@@ -769,22 +769,28 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 station_inds = canvas_instance.station_inds[networkspeci]
 
             elif map:
+                if read_instance.temporal_colocation:
+                    inds = read_instance.valid_station_inds_temporal_colocation[networkspeci]
+                else:
+                    inds = read_instance.valid_station_inds[networkspeci]
                 # if have just data_labels_a, station indices are simply those relevant for data_labels_a
                 if len(data_labels_b) == 0:
-                    if read_instance.temporal_colocation:
-                        station_inds = read_instance.valid_station_inds_temporal_colocation[networkspeci][data_labels_a[0]]
-                    else:
-                        station_inds = read_instance.valid_station_inds[networkspeci][data_labels_a[0]]
+                    if data_labels_a[0] not in inds:
+                        error = f'Data label {data_labels_a[0]} not in array. Options: {list(inds.keys())}'
+                        read_instance.logger.error(error)
+                        sys.exit(1)
+                    station_inds = inds[data_labels_a[0]]
                 # elif have data_labels_b, get intersection of data_labels_a and data_labels_b valid station indices
                 else:
-                    if read_instance.temporal_colocation:
-                        station_inds = \
-                            np.intersect1d(read_instance.valid_station_inds_temporal_colocation[networkspeci][data_labels_a[0]],
-                                           read_instance.valid_station_inds_temporal_colocation[networkspeci][data_labels_b[0]])
-                    else:
-                        station_inds = \
-                            np.intersect1d(read_instance.valid_station_inds[networkspeci][data_labels_a[0]],
-                                           read_instance.valid_station_inds[networkspeci][data_labels_b[0]])
+                    if data_labels_a[0] not in inds:
+                        error = f'Data label {data_labels_a[0]} not in array. Options: {list(inds.keys())}'
+                        read_instance.logger.error(error)
+                        sys.exit(1)
+                    if data_labels_b[0] not in inds:
+                        error = f'Data label {data_labels_b[0]} not in array. Options: {list(inds.keys())}'
+                        read_instance.logger.error(error)
+                        sys.exit(1)
+                    station_inds = np.intersect1d(inds[data_labels_a[0]], inds[data_labels_b[0]])
 
             # check if valid station data
             # if not return
@@ -802,7 +808,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
             # temporally colocate data (if active)
             if read_instance.temporal_colocation:
-                data_array_a[:, read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+                data_array_a[:, read_instance.temporal_colocation_nans[networkspeci]] = np.nan
                 
             # get data cut for relevant stations
             data_array_a = data_array_a[:,station_inds,:]
@@ -822,7 +828,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
         # if need to mask data, then do so
         if mask is not None:
-            data_array_a[mask[data_label_a_indices]] = np.NaN
+            data_array_a[mask[data_label_a_indices]] = np.nan
 
         # if need to reshape forecast data, then do so
         if forecast_type == 'daily':
@@ -873,7 +879,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
             # if stat is exceedances then add threshold value (if available)  
             if base_zstat == 'Exceedances':
-                function_arguments['threshold'] = exceedance_lim(networkspeci)
+                function_arguments['threshold'] = exceedance_lim(read_instance, networkspeci)
 
             # need to do the aggregation inside function for the calculation of NStations and MDA8
             # this is due to handling excepetions in how these are calculated across modes
@@ -939,7 +945,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
                 # temporally colocate data (if active)
                 if read_instance.temporal_colocation:
-                    data_array_b[:, read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+                    data_array_b[:, read_instance.temporal_colocation_nans[networkspeci]] = np.nan
                     
                 # get data cut for relevant stations
                 data_array_b = data_array_b[:,station_inds,:]
@@ -956,7 +962,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                     data_array_b = canvas_instance.selected_station_data[networkspeci]['active_mode'][data_label_b_indices]
             # if need to mask data, then do so
             if mask is not None:
-                data_array_b[mask[data_label_b_indices]] = np.NaN
+                data_array_b[mask[data_label_b_indices]] = np.nan
 
             # if need to reshape forecast data, then do so
             if forecast_type == 'daily':
@@ -994,7 +1000,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
                 # if stat is exceedances then add threshold value (if available)  
                 if base_zstat == 'Exceedances':
-                    function_arguments_a['threshold'] = exceedance_lim(networkspeci)
+                    function_arguments_a['threshold'] = exceedance_lim(read_instance, networkspeci)
 
                 # need to do the aggregation inside function for the calculation of NStations and MDA8
                 # this is due to handling excepetions in how these are calculated across modes
@@ -1069,9 +1075,9 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                             return z_statistic
                     else: 
                         if (period is not None) or (chunk_resolution is not None): 
-                            stats_calc[zstat] = np.full((len(data_array_b),len(data_labels_b)), np.NaN)
+                            stats_calc[zstat] = np.full((len(data_array_b),len(data_labels_b)), np.nan)
                         else:
-                            stats_calc[zstat] = np.full((len(data_labels_b)), np.NaN)
+                            stats_calc[zstat] = np.full((len(data_labels_b)), np.nan)
                         continue
 
                 # load default selected z statistic arguments for passing to statistical function
@@ -1105,7 +1111,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
         # if any calculated statistics are infinite, then set them to be NaNs 
         finite_boolean = np.isfinite(z_statistic)
-        z_statistic[~finite_boolean] = np.NaN
+        z_statistic[~finite_boolean] = np.nan
 
         # reshape forecast data
         if forecast_type == 'daily':
@@ -1175,7 +1181,7 @@ def get_axes_vminmax(axs):
         plotted_max = np.nanmax(ax_max)
         return plotted_min, plotted_max
     else:
-        return np.NaN, np.NaN
+        return np.nan, np.nan
 
 def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, plot_characteristics, speci, 
                               only_label=False):
@@ -1638,9 +1644,9 @@ def aggregation(data_array, statistic_aggregation, axis=0):
 
     return aggregated_data
 
-def exceedance_lim(networkspeci):
+def exceedance_lim(read_instance, networkspeci):
     """ Return the exceedance limit depending on the species input. 
-        If species doesn't have a reported limit, returns np.NaN.
+        If species doesn't have a reported limit, returns np.nan.
 
         Try to get limit for specific networkspeci first, and then species.
 
@@ -1655,11 +1661,27 @@ def exceedance_lim(networkspeci):
 
     exceedance_limits = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/exceedances.yaml')))
     if networkspeci in exceedance_limits:
-        return exceedance_limits[networkspeci]
+        limit = exceedance_limits[networkspeci]['value']
+        initial_units = exceedance_limits[networkspeci]['units']
     elif speci in exceedance_limits:
-        return exceedance_limits[speci]
+        limit = exceedance_limits[speci]['value']
+        initial_units = exceedance_limits[speci]['units']
     else:
-        return np.NaN
+        limit = np.nan
+    
+    if limit is not np.nan:
+        # get output units
+        standard_parameter_speci = get_standard_parameters_by_speci(speci, read_instance.ghost_version)
+        final_units = read_instance.measurement_units[speci]
+
+        # convert units using conversion factor
+        conversion_factor = get_conversion_factor(initial_units, final_units, standard_parameter_speci)
+        if isinstance(conversion_factor, str):
+            read_instance.logger.error(conversion_factor)
+            sys.exit(1)
+        limit *= conversion_factor
+
+    return limit
 
 
 def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels):
@@ -1673,7 +1695,7 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels)
 
     # temporally colocate data (if active)
     if read_instance.temporal_colocation:
-        data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.NaN
+        data_array[:, read_instance.temporal_colocation_nans[networkspeci]] = np.nan
 
     # get data cut for relevant stations
     data_array = data_array[:,canvas_instance.station_inds[networkspeci],:]
@@ -1696,7 +1718,7 @@ def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels)
 
         # convert days with less than 75% coverage to nan
         days_to_nan_expanded = np.repeat(days_to_nan, 24, axis=-1)
-        data_array[days_to_nan_expanded] = np.NaN
+        data_array[days_to_nan_expanded] = np.nan
 
     # get indices of valid stations
     obs_representativity = Stats.calculate_data_avail_fraction(data_array[0, :, :])

@@ -46,10 +46,10 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Home.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modes.html">Modes</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="topics-in-depth.html">Topics in depth</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Modes.html">Modes</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="Topics-in-depth.html">Topics in depth</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Configuration-files.html">Configuration files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Plot-types-and-options.html">Plot types and options</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Plot customisation</a><ul>
@@ -74,11 +74,12 @@
 <li class="toctree-l2"><a class="reference internal" href="Statistics.html">Statistics</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="other-topics.html">Other topics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="reference.html">Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Running-on-HPC.html">Running on HPC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Evolution.html">Evolution</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
 </ul>
 
         </div>
@@ -95,7 +96,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="topics-in-depth.html">Topics in depth</a></li>
+          <li class="breadcrumb-item"><a href="Topics-in-depth.html">Topics in depth</a></li>
       <li class="breadcrumb-item active">Plot customisation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/Plot-customisation.md.txt" rel="nofollow"> View page source</a>
@@ -180,10 +181,14 @@
 <section id="calculating-exceedances">
 <h3>Calculating exceedances<a class="headerlink" href="#calculating-exceedances" title="Link to this heading"></a></h3>
 <p>In Providentia the <code class="docutils literal notranslate"><span class="pre">exceedances</span></code> statistic is available in the list of available statistics. How it is currently implemented is simplistic, but users can simply state a threshold/limit value per component or network-component pair, and each instance where values exceed this limit will be counted. Therefore the <code class="docutils literal notranslate"><span class="pre">exceedances</span></code> statistic simply gives the number of instances above the threshold. The threshold values can be set in the file <code class="docutils literal notranslate"><span class="pre">settings/exceedances.yaml</span></code> per component, or network-component pair, as so:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;sconco3&quot;</span><span class="p">:</span> <span class="mf">90.21</span><span class="p">,</span> 
- <span class="s2">&quot;sconcno2&quot;</span><span class="p">:</span> <span class="mf">106.38</span><span class="p">,</span>
- <span class="s2">&quot;EBAS|sconco3&quot;</span><span class="p">:</span> <span class="mf">109.77</span><span class="p">,</span>
- <span class="s2">&quot;EBAS|sconcno2&quot;</span><span class="p">:</span> <span class="mf">88.88</span><span class="p">}</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sconco3</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;nmol mol-1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">30.07</span> 
+<span class="p">},</span>
+<span class="n">EBAS</span><span class="o">|</span><span class="n">sconcno2</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;nmol mol-1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">5.23</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>In the case a threshold is set for a specific component, and per network-component, then the threshold for network-component is taken preferentially.</p>

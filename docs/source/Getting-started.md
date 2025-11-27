@@ -26,7 +26,7 @@ Before running the tool, we suggest checking if conda is installed on your machi
 
 If the dashboard opens, it worked!
 
-If it didn't and it is because conda is missing, you can follow the steps on [this page](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) to install it. If you encountered any other problem, feel free to [contact us](home).
+If it didn't and it is because conda is missing, you can follow the steps on [this page](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) to install it. If you encountered any other problem, feel free to [contact us](Home).
 
 By default, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total memory. This can be modified as desired using the bash options. You can check the available options with:
 
@@ -91,15 +91,5 @@ Using a [configuration file](Configuration-files), you can start interpolating y
 ```
 
 More details can be found in the [interpolation section](Interpolation).
-
-## Redirecting log output to a file  
-
-Providentia allows saving its output to a log file using the `--logfile` option:  
-
-```bash
-./bin/providentia --logfile <filename>
-```
-
-More details [here](Redirecting-output-to-a-file).
 
 Enjoy!

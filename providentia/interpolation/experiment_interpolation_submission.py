@@ -1,13 +1,18 @@
 import copy
 import glob
+import math
+import multiprocessing
 import os
-import yaml
+import psutil
+from queue import Empty
 import random
 import subprocess
 import sys
 import time
+import yaml
+
+from netCDF4 import Dataset
 import numpy as np
-import multiprocessing
 
 from providentia.auxiliar import CURRENT_PATH, join
 
@@ -27,7 +32,10 @@ mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'inter
 class SubmitInterpolation(object):
     """ Class that handles the interpolation submission. """
 
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
+
+        # update self with command line arguments
+        self.commandline_arguments = copy.deepcopy(kwargs)
 
         # start timer
         self.start = time.time()
@@ -40,7 +48,7 @@ class SubmitInterpolation(object):
         self.interpolation_log_dir = join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs')
 
         # initialize commandline arguments, if given
-        provconf = ProvConfiguration(self, **kwargs)
+        provconf = ProvConfiguration(self, **self.commandline_arguments)
 
         print()
 
@@ -64,8 +72,8 @@ class SubmitInterpolation(object):
             sys.exit(error)
 
         # get section args
-        if "section" in kwargs:
-            section = kwargs["section"]
+        if "section" in self.commandline_arguments:
+            section = self.commandline_arguments["section"]
             if section in self.parent_section_names:
                 self.current_config = self.sub_opts[section]
             else:
@@ -91,10 +99,11 @@ class SubmitInterpolation(object):
         # dictionary that stores utilized interpolation variables
         self.interpolation_variables = {}
 
-        # update variables from defined config file
+        # update variables from defined config file (if not passed via command line)
         if self.current_config:
             for k, val in sorted(self.current_config.items()):
-                setattr(self, k, provconf.parse_parameter(k, val))
+                if k not in self.commandline_arguments:
+                    setattr(self, k, provconf.parse_parameter(k, val))
 
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         provconf.check_validity()
@@ -126,11 +135,7 @@ class SubmitInterpolation(object):
         else:
             self.qos = 'bsc_es'
 
-        # import unit converter
-        sys.path.append(join(PROVIDENTIA_ROOT, 'providentia', 'dependencies','unit-converter'))
-        import unit_converter
-
-        #initialise current line number for printing output
+        # initialise current line number for printing output
         self.current_line = -1
 
     def gather_arguments(self):
@@ -159,7 +164,7 @@ class SubmitInterpolation(object):
             exp_files_dates = []
 
             # initialize experiment search variables
-            exp_dir = None
+            self.exp_dir = None
             msg = ""
 
             # get experiment type and specific directories
@@ -171,7 +176,7 @@ class SubmitInterpolation(object):
                         for temp_exp_dir in experiment_dict["paths"]:
                             temp_exp_dir = join(temp_exp_dir, experiment_to_process)
                             if os.path.exists(temp_exp_dir):
-                                exp_dir = temp_exp_dir
+                                self.exp_dir = temp_exp_dir
                                 break
                         break
                     # for local machines, break to get experiment_type
@@ -179,7 +184,7 @@ class SubmitInterpolation(object):
                         break
                 
             # if local machine or if not exp_dir, get directory from data_paths
-            if exp_dir is None: 
+            if self.exp_dir is None: 
                 
                 if self.machine != "local":
                     msg = f"The experiment '{experiment_to_process}' is in none of the experiment paths defined in settings/interp_experiments.yaml."
@@ -187,7 +192,7 @@ class SubmitInterpolation(object):
 
                 exp_to_interp_path = join(self.exp_to_interp_root, experiment_to_process)
                 if os.path.exists(exp_to_interp_path):
-                    exp_dir = exp_to_interp_path
+                    self.exp_dir = exp_to_interp_path
                 else:
                     msg = f"The experiment '{experiment_to_process}' is not in {self.exp_to_interp_root}."
                     print(msg)
@@ -206,51 +211,55 @@ class SubmitInterpolation(object):
 
                     experiment_species_ensemblestat = []
 
-                    # only keep available temporal resolutions which are equal or finer in resolution to that 
-                    # wanted to output
-                    # in case temporal_resolution_to_output is instantaneous, but this not available in model, 
-                    # attempt to take non-instantaneous resolution 
-                    # in case temporal_resolution_to_output is non-instantaneous, but this not available in model, 
-                    # attempt to take instantaneous resolution
+                    # get priority resolutions to look for in model files based on output resolution
+                    # look for same resolution first, then prioritise finer resolutions
+                    # if output resolution is non-instantaneous, prioritise non-instanstaneous resolutions first,
+                    # then instanstaneous
+                    # if output resolution is instantaneous, prioritise instanstaneous resolutions first,
+                    # then non-instanstaneous
 
                     if temporal_resolution_to_output == 'hourly':
-                        resolutions_to_keep = ['hourly', 'hourly_instantaneous']
+                        resolutions_to_keep = ['hourly', '3hourly', '6hourly', 'daily', 'monthly',
+                                               'hourly_instantaneous', '3hourly_instantaneous', '6hourly_instantaneous']
                     elif temporal_resolution_to_output == 'hourly_instantaneous':
-                        resolutions_to_keep = ['hourly_instantaneous', 'hourly']
+                        resolutions_to_keep = ['hourly_instantaneous', '3hourly_instantaneous', '6hourly_instantaneous',
+                                               'hourly', '3hourly', '6hourly', 'daily', 'monthly']
                     elif temporal_resolution_to_output == '3hourly':
-                        resolutions_to_keep = ['3hourly','hourly', '3hourly_instantaneous', 'hourly_instantaneous']
+                        resolutions_to_keep = ['3hourly', 'hourly', '6hourly', 'daily', 'monthly',
+                                               '3hourly_instantaneous', 'hourly_instantaneous', '6hourly_instantaneous']
                     elif temporal_resolution_to_output == '3hourly_instantaneous':
-                        resolutions_to_keep = ['3hourly_instantaneous', 'hourly_instantaneous', '3hourly', 'hourly']
+                        resolutions_to_keep = ['3hourly_instantaneous', 'hourly_instantaneous', '6hourly_instantaneous',
+                                               '3hourly', 'hourly', '6hourly', 'daily', 'monthly']
                     elif temporal_resolution_to_output == '6hourly':  
-                        resolutions_to_keep = ['6hourly', '3hourly', 'hourly', '6hourly_instantaneous',
-                                            '3hourly_instantaneous', 'hourly_instantaneous']
+                        resolutions_to_keep = ['6hourly', 'hourly', '3hourly', 'daily', 'monthly',
+                                               '6hourly_instantaneous', 'hourly_instantaneous', '3hourly_instantaneous']
                     elif temporal_resolution_to_output == '6hourly_instantaneous':
-                        resolutions_to_keep = ['6hourly_instantaneous', '3hourly_instantaneous', 'hourly_instantaneous',
-                                            '6hourly', '3hourly', 'hourly']
+                        resolutions_to_keep = ['6hourly_instantaneous', 'hourly_instantaneous', '3hourly_instantaneous',
+                                               '6hourly', 'hourly', '3hourly', 'daily', 'monthly']
                     elif temporal_resolution_to_output == 'daily':
-                        resolutions_to_keep = ['daily', '6hourly', '3hourly', 'hourly', '6hourly_instantaneous',
-                                            '3hourly_instantaneous', 'hourly_instantaneous']
+                        resolutions_to_keep = ['daily', 'hourly', '3hourly', '6hourly', 'monthly',
+                                               'hourly_instantaneous', '3hourly_instantaneous', '6hourly_instantaneous']
                     elif temporal_resolution_to_output == 'monthly':
-                        resolutions_to_keep = ['monthly', 'daily', '6hourly', '3hourly', 'hourly', 
-                                            '6hourly_instantaneous', '3hourly_instantaneous', 'hourly_instantaneous']
+                        resolutions_to_keep = ['monthly', 'hourly', '3hourly', '6hourly', 'daily',
+                                               'hourly_instantaneous', '3hourly_instantaneous', '6hourly_instantaneous']
                     
                     # iterate through resolutions_to_keep until find one for which have speci_to_process (or mapped speci)
                     have_valid_resolution = False
                     for model_temporal_resolution in resolutions_to_keep:
                         # test if have directory for current speci_to_process
-                        if os.path.isdir("{}/{}/{}/{}".format(exp_dir, grid_type, model_temporal_resolution, speci_to_process)):
+                        if os.path.isdir("{}/{}/{}/{}".format(self.exp_dir, grid_type, model_temporal_resolution, speci_to_process)):
                             have_valid_resolution = True
                             break
 
                         # test if have speci directory in ensemble-stats
-                        elif os.path.isdir("{}/{}/{}/ensemble-stats".format(exp_dir, grid_type, model_temporal_resolution)):
+                        elif os.path.isdir("{}/{}/{}/ensemble-stats".format(self.exp_dir, grid_type, model_temporal_resolution)):
                             
                             # get all ensemble-stats species
                             experiment_species_ensemblestat = list(np.unique([name.split('_')[0] 
                                                                 for name in os.listdir("{}/{}/{}/ensemble-stats".format(
-                                                                    exp_dir,grid_type,model_temporal_resolution)) 
+                                                                    self.exp_dir,grid_type,model_temporal_resolution)) 
                                                                     if os.path.isdir("{}/{}/{}/ensemble-stats/{}".format(
-                                                                        exp_dir,grid_type,model_temporal_resolution,name))]))
+                                                                        self.exp_dir,grid_type,model_temporal_resolution,name))]))
                             
                             # test if have speci_to_process in experiment_species_ensemblestat
                             if speci_to_process in experiment_species_ensemblestat:
@@ -298,7 +307,7 @@ class SubmitInterpolation(object):
                                 # if it can be then check then if the variable to map to exists for the experiment/grid_type/resolution 
                                 # (these can be multiple, list order sets the priority)
                                 for speci_to_map in mapping_species[speci_to_process]:
-                                    if os.path.isdir("{}/{}/{}/{}".format(exp_dir, grid_type, model_temporal_resolution, speci_to_map)):
+                                    if os.path.isdir("{}/{}/{}/{}".format(self.exp_dir, grid_type, model_temporal_resolution, speci_to_map)):
 
                                         # if have a binned size distribution variable to map, first check if bin radius is within model's bin extents
                                         # if not, do not process species
@@ -361,13 +370,13 @@ class SubmitInterpolation(object):
                             if not ensemble_member:
                                 ensemble_stat = True
                                 exp_path = '{}/{}/{}/ensemble-stats/{}_{}/{}*{}.nc'.format(
-                                        exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
+                                        self.exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
                                         ensemble, speci_to_process, ensemble)
                                 exp_files_all = np.sort(glob.glob(exp_path))
                             else:
                                 ensemble_stat = False
                                 exp_path = '{}/{}/{}/{}/{}*.nc'.format(
-                                        exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
+                                        self.exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
                                         speci_to_process)
                                 exp_files_all = np.sort(glob.glob(exp_path))    
                                 
@@ -768,9 +777,6 @@ class SubmitInterpolation(object):
         # time start of interpolation jobs
         interpolation_start = time.time()
 
-        # print current output to console if in library mode
-        self.stdout_to_console()
-
         # submit slurm script
         submit_complete = False
         while submit_complete == False:
@@ -881,30 +887,32 @@ class SubmitInterpolation(object):
 
         # print finalised output to console if in library mode
         self.stdout_to_console()
-    
-    def run_command(self, commands):
-        arguments_list = commands.strip().split()
-        if self.machine == 'nord4':
-            arguments_list.insert(0, 'nord3_singu_es')
-        result = subprocess.run(arguments_list, capture_output=True, text=True)
-        if result.returncode != 0:
-            error = result.stderr
-            if error == '':
-                error = 'Unknown error'
-            print(f"Error in submission using the following args {result.args[3:-1]}: {error}")
 
     def submit_job_multiprocessing(self):
+        """Submit interpolation jobs using multiprocessing pool."""
+
+        # set resource usage parameters for estimating safe number of pool workers 
+        self.per_worker_mem_gb = self.guess_memory_per_worker()
+        self.per_worker_cpu_fraction = 1.0/self.n_cpus
+        self.per_worker_swap_gb = self.per_worker_mem_gb * 0.05 
+        self.cpu_fraction_limit = 0.8 
+        self.mem_fraction_limit = 0.8
+        self.swap_fraction_limit = 0.8
+
+        # set run commands
+        self.commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(
+            self.working_directory, argument) for argument in self.arguments]
 
         # if n_cpus hasn't been defined, use 1 or half of the available CPUS to 
         # avoid having to kill other processes locally
         if self.machine == 'local':
             # use value passed through --cores in terminal
-            if self.cores_explicit:
+            if (self.cores_explicit):
                 n_cpus = self.n_cpus
                 msg = f'Using {n_cpus} CPUs.'
-            # use default value not passed through --cores (available cpus by 2)
+            # otherwise estimate the number of safe pool workers
             else:
-                n_cpus = max(1, int(self.n_cpus * 0.50))
+                n_cpus = self.guess_pool_workers()
                 msg = f'Using {n_cpus} out of {self.n_cpus} available CPUs to'
                 msg += ' ensure that other processes keep running. \nIf you encounter any problems'
                 msg += ' consider reducing the number of CPUS by running Providentia using'
@@ -914,14 +922,24 @@ class SubmitInterpolation(object):
             msg = f'Using {n_cpus} CPUs.'
         print(msg)
 
+        # cap number of cpus to not be larger than number of tasks
+        if n_cpus > len(self.commands):
+            old_n_cpus = copy.deepcopy(n_cpus)
+            n_cpus = len(self.commands)
+            msg = f'Capping {old_n_cpus} CPUs to {n_cpus} since there are only {n_cpus} tasks to process.'
+
         # print current output to console if in library mode
         self.stdout_to_console()
 
         # launch interpolation
-        commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(
-            self.working_directory, argument) for argument in self.arguments]
-        with multiprocessing.Pool(processes=n_cpus) as pool:
-            pool.map(self.run_command, commands)
+        # if have no swap memory, or have just 1 cpu, run in serial without multiprocessing
+        if n_cpus == 1:
+            for cmd in self.commands:
+                self.run_command(cmd)
+        # otherwise, use multiprocessing pool
+        else:
+            with multiprocessing.Pool(n_cpus) as pool:
+                pool.map(self.resource_safe_job, self.commands)
 
         # stop timer
         total_time = (time.time()-self.start)/60.
@@ -955,14 +973,197 @@ class SubmitInterpolation(object):
                 print('THE FOLLOWING INTERPOLATION TASKS FAILED: {}'.format(failed_tasks))
             if len(not_finished_tasks) > 0:
                 print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
-    
-        # print finalised output to console if in library mode
-        self.stdout_to_console()
+
+    def guess_memory_per_worker(self):
+        """
+        Estimate the memory usage that each worker will use.
+        Goes through each file to be read and gets the memory that will be consusmed, 
+        and then takes the max to be conservative.
+        """
+
+        # initialise max worker gb as 0
+        max_worker_mem_gb = 0
+
+        # iterate through arguments
+        for argument in self.arguments:
+
+            # initialise worker memory gb as 0
+            worker_mem_gb = 0
+
+            argument = argument.split(' ')
+            prov_exp_code = argument[0]
+            model_temporal_resolution = argument[1]
+            speci_to_process = argument[2]
+            yearmonth = argument[5]
+            experiment_to_process, grid_type, ensemble = prov_exp_code.split('-')
+            ensemble_member = ensemble.isdigit()
+
+            # get relevant model files
+            if ensemble_member:
+                all_model_files = np.sort(glob.glob('{}/{}/{}/{}/{}*{}*.nc'\
+                                                    .format(self.exp_dir, grid_type,
+                                                            model_temporal_resolution,
+                                                            speci_to_process, speci_to_process, yearmonth)))
+
+                # drop all analysis files ending with '_an.nc' which are not in ensemble-stats
+                all_model_files = [f for f in all_model_files if '_an.nc' not in f] 
+
+                # isolate model files to be only those associated with relevant ensemble
+                model_files = np.sort([f for f in all_model_files if '{}-{}_'.format(
+                                    speci_to_process,ensemble) in f])
+                
+                # if the number of remaining model files is 0, this is because the files
+                # do not contain an ensemble member number, therefore take all model files
+                if len(model_files) == 0:
+                    model_files = all_model_files
+        
+            else:            
+                model_files = np.sort(glob.glob('{}/{}/{}/ensemble-stats/{}_{}/{}*{}*{}.nc'\
+                                                    .format(self.exp_dir, grid_type,
+                                                            model_temporal_resolution,
+                                                            speci_to_process, ensemble, 
+                                                            speci_to_process, yearmonth, ensemble)))
+
+            # iterate through all files for 1 worker and add memory together
+            for model_file in model_files:
+
+                # open framework of .nc file
+                with Dataset(model_file, "r") as nc:
+
+                    # get required variable
+                    var = nc.variables[speci_to_process]
+
+                    # dimension lengths
+                    dims = [nc.dimensions[d].size for d in var.dimensions]
+
+                    # total number of elements
+                    n_elements = math.prod(dims)
+
+                    # bytes per element (float32=4, float64=8, int16=2, etc.)
+                    dtype_size = np.dtype(var.dtype).itemsize
+
+                    # convert to GB
+                    size_gb = (n_elements * dtype_size) / (1024**3)
+
+                    # add size to worker gb
+                    worker_mem_gb += size_gb
+
+            # if worker mem gb is greater than current max then overwrite it
+            if worker_mem_gb > max_worker_mem_gb:
+                max_worker_mem_gb = copy.deepcopy(worker_mem_gb)
+
+        return max_worker_mem_gb
+                
+
+    def guess_pool_workers(self):
+        """
+        Estimate a safe number of pool workers considering expected job resource usage.
+        """
+        
+        # --- CPU constraint ---
+        total_cores = psutil.cpu_count(logical=False) or 1
+        cpu_now = psutil.cpu_percent(interval=None) / 100.0
+        max_workers_cpu = max(1, int((self.cpu_fraction_limit - cpu_now) / self.per_worker_cpu_fraction))
+
+        # --- Memory constraint ---
+        vm = psutil.virtual_memory()
+        used_mem_gb = (vm.total - vm.available) / (1024**3)
+        max_mem_gb = self.mem_fraction_limit * (vm.total / (1024**3) - used_mem_gb)
+        max_workers_mem = max(1, int(max_mem_gb / self.per_worker_mem_gb))
+
+        # --- Swap adjustment ---
+        swap = psutil.swap_memory()
+        swap_total_gb = swap.total / (1024**3)
+        swap_used_gb = swap_total_gb * swap.percent / 100
+        swap_allowed_gb = swap_total_gb * self.swap_fraction_limit - swap_used_gb
+        # if swap is zero adjust max_workers_mem to be 1
+        if swap_total_gb == 0:
+            max_workers_mem = 1
+
+        # Adjust memory fraction if swap is tight
+        if self.operating_system != 'Mac':
+            total_swap_needed = self.per_worker_swap_gb * min(max_workers_cpu, max_workers_mem)
+            if total_swap_needed > swap_allowed_gb:
+                # Swap tight — reduce memory fraction proportionally
+                excess_ratio = (total_swap_needed - swap_allowed_gb) / total_swap_needed
+                effective_mem_fraction = self.mem_fraction_limit * (1 - excess_ratio)
+                effective_mem_fraction = max(0.1, effective_mem_fraction)
+                max_mem_gb = effective_mem_fraction * (vm.total / (1024**3) - used_mem_gb)
+                max_workers_mem = max(1, int(max_mem_gb / self.per_worker_mem_gb))
+        
+        # --- Combine constraints ---
+        # if have no swap memory then only use 1 worker
+        if swap_total_gb == 0:
+            n_workers = 1
+        # otherwise use the minimum of all constraints
+        else:
+            n_workers = min(max_workers_cpu, max_workers_mem, total_cores)
+        
+        # --- Summary print for debugging
+        #print("=== Safe Pool Worker Estimation ===")
+        #print(f"CPU: {cpu_now*100:.1f}% used / limit fraction: {self.cpu_fraction_limit}, max workers: {max_workers_cpu}")
+        #print(f"Memory: {used_mem_gb:.2f} GB used / {vm.total / (1024**3):.2f} GB total")
+        #if 'effective_mem_fraction' in locals():
+        #    print(f"Memory fraction limit: {self.mem_fraction_limit} -> effective: {effective_mem_fraction:.2f}, max workers: {max_workers_mem}")
+        #else:
+        #    print(f"Memory fraction limit: {self.mem_fraction_limit}, max workers: {max_workers_mem}")
+        #print(f"Swap: {swap_used_gb:.2f} GB used / {swap_total_gb:.2f} GB total")
+        #print(f"Swap fraction limit: {self.swap_fraction_limit}, swap allowed for pool: {swap_allowed_gb:.2f} GB")
+        #print(f"Total physical cores: {total_cores}")
+        #print(f"=== Suggested safe pool size: {n_workers} workers ===\n")
+
+        return max(1, n_workers)
+
+    def resource_safe_job(self, cmd, check_interval=1.0, stagger_range=(0.0, 5.0)):
+        """Wait until system resources are below thresholds, then run the job."""
+
+        # print for debugging
+        #print(f"[JOB INIT] Preparing to run: {cmd}", flush=True)
+
+        while True:
+            cpu = psutil.cpu_percent(interval=None) / 100.0
+            mem = psutil.virtual_memory().percent / 100.0
+            swap = psutil.swap_memory().percent / 100.0
+
+            if self.operating_system == "Mac":
+                overload = max(cpu / self.cpu_fraction_limit, mem / self.mem_fraction_limit)
+            else:
+                overload = max(cpu / self.cpu_fraction_limit, mem / self.mem_fraction_limit, swap / self.swap_fraction_limit)
+
+            # print for debugging
+            #print(f"[RESOURCE CHECK] CPU: {cpu*100:.1f}% / {self.cpu_fraction_limit*100:.0f}% | "
+            #    f"MEM: {mem*100:.1f}% / {self.mem_fraction_limit*100:.0f}% | "
+            #    f"SWAP: {swap*100:.1f}% / {self.swap_fraction_limit*100:.0f}% | "
+            #    f"{'Waiting...' if overload>1 else 'Safe to run!'}", flush=True)
+
+            if overload <= 1.0:
+                break
+
+            time.sleep(check_interval)  # Wait and retry
+
+        # stagger to avoid spikes
+        time.sleep(random.uniform(*stagger_range))
+
+        # Run the actual job
+        self.run_command(cmd)
+
+    def run_command(self, commands):
+        ''' Function to submit interpolation job.'''
+
+        arguments_list = commands.strip().split()
+        if self.machine == 'nord4':
+            arguments_list.insert(0, 'nord3_singu_es')
+        result = subprocess.run(arguments_list, capture_output=True, text=True)
+        if result.returncode != 0:
+            error = result.stderr
+            if error == '':
+                error = 'Unknown error'
+            print(f"Error in submission using the following args {result.args[3:-1]}: {error}", flush=True)
 
     def stdout_to_console(self):
         ''' Function to print stdout to console in library mode'''
 
-        # library mode?
+        #library mode?
         if self.mode == 'library':
             #flush stdout
             sys.stdout.flush()

@@ -93,9 +93,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--cores-explicit",
                                      dest="cores_explicit",
                                      help="define if cores has been passed through command line")       
-            self.parser.add_argument("--network",
+            self.parser.add_argument("--network", "--observation", "--framework",
                                      dest="network",
-                                     help="define network to load (e.g. 'EBAS', 'EEA_AQ_eReporting'")
+                                     help="define observations to load (e.g. 'EBAS', 'EEA_AQ_eReporting'")
             self.parser.add_argument("--species",
                                      dest="species",
                                      help="define species to load (e.g. 'sconco3', 'pm10'")
@@ -111,9 +111,9 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--observations_data_label",
                                      dest="observations_data_label",
                                      help="alias for observations data label")
-            self.parser.add_argument("--experiments",
+            self.parser.add_argument("--experiments", "--experiment", "--model", "--models",
                                      dest="experiments",
-                                     help="experiments to read")
+                                     help="models to read")
             self.parser.add_argument("--domain",
                                      dest="domain",
                                      help="domain of the experiment")

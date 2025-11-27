@@ -20,6 +20,7 @@
   "cpus_per_task": 12,
   "cores_explicit": False,
   "network": [],
+  "observation": [],
   "framework": [],
   "species": [],
   "resolution": [],
@@ -28,6 +29,9 @@
   "observations_data_label": "observations",
   "alias_flag": False,
   "experiments": [],
+  "experiment": [],
+  "model": [],
+  "models": [],
   "alias": [],
   "exp_ids": [], # TODO remove if changed
   "domain": null, #interpolation TODO think if i need one separate option for this one, since it is already in experiment
@@ -84,7 +88,7 @@
   "interp_multiprocessing": False,
   "interp_spinup_timesteps": 0,
   "interp_experiment_downsampling": "mean",
-  "interp_experiment_upsampling": null,
+  "interp_experiment_upsampling": "fill",
   "logfile": False,
   "fixed_section_vars":
     [

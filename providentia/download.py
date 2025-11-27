@@ -37,6 +37,9 @@ mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'inter
 class Download(object):
     def __init__(self, **kwargs):
 
+        # update self with command line arguments
+        self.commandline_arguments = copy.deepcopy(kwargs)
+
         # get providentia start time
         self.prov_start_time = time.time()
 
@@ -55,7 +58,7 @@ class Download(object):
 
         # initialise default configuration variables
         # modified by commandline arguments, if given
-        self.provconf = ProvConfiguration(self, **kwargs)
+        self.provconf = ProvConfiguration(self, **self.commandline_arguments)
 
         self.logger.info("Starting Providentia download...")
 
@@ -72,12 +75,12 @@ class Download(object):
                 load_conf(self, self.config)
                 self.from_conf = True
                 # get the section in case it was passed on the command line                
-                if 'section' in kwargs:
+                if 'section' in self.commandline_arguments:
                     # config and section defined 
-                    if kwargs['section'] in self.all_sections:
-                        self.sections = [kwargs['section']]
+                    if self.commandline_arguments['section'] in self.all_sections:
+                        self.sections = [self.commandline_arguments['section']]
                     else:
-                        msg = 'Error: The section specified in the command line ({0}) does not exist.'.format(kwargs['section'])
+                        msg = 'Error: The section specified in the command line ({0}) does not exist.'.format(self.commandline_arguments['section'])
                         msg += '\nTip: For subsections, add the name of the parent section followed by an interpunct (·) '
                         msg += 'before the subsection name (e.g. SECTIONA·Spain). Available: {0}'.format(self.all_sections)
                         self.logger.error(msg)
@@ -114,15 +117,15 @@ class Download(object):
             # initialise boolean thath indicates whether remote machine changed 
             self.switched_remote = False
 
-    def run(self, **kwargs):
+    def run(self):
         for section_ind, section in enumerate(self.sections):
             # update for new section parameters
             self.section = section
             self.section_opts = self.sub_opts[self.section]
 
-            # update self with section variables
+            # update self with section variables (if not passed via command line)
             for k, val in self.section_opts.items():
-                if k not in kwargs:
+                if k not in self.commandline_arguments:
                     setattr(self, k, self.provconf.parse_parameter(k, val))
             
             # now all variables have been parsed, check validity of those, throwing errors where necessary
@@ -1550,4 +1553,4 @@ def main(**kwargs):
     """ Main function when running download function. """
 
     download = Download(**kwargs)
-    download.run(**kwargs)
+    download.run()

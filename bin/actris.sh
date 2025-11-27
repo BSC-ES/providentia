@@ -1,27 +1,119 @@
 #!/bin/bash
 
 species_list=(
-    "absco370" "absco467" "absco470" "absco520" "absco522" "absco525" "absco528" "absco530" "absco550" "absco565"
-    "absco590" "absco637" "absco652" "absco660" "absco670" "absco880" "absco950" "acprec"
-    "lbsco450" "lbsco520" "lbsco525" "lbsco530" "lbsco532" "lbsco550" "lbsco635" "lbsco700" "lbsco850"
-    "lsco450" "lsco520" "lsco525" "lsco530" "lsco532" "lsco550" "lsco635" "lsco700" "lsco850"
-    "od1020aero" "od380aero" "od440aero" "od500aero" "od550aero" "od675aero" "od870aero"
-    "precal" "precas" "precca" "preccd" "preccl" "preccobalt" "preccr" "preccu" "precfe" "prechg"
-    "preck" "precmg" "precmn" "precmsa" "precna" "precnh4" "precni" "precno3" "precpb" "precse" "precso4" "precv" "preczn"
-    "pshltr" "sconcal" "sconcald2" "sconcas" "sconcbap" "sconcbappm" "sconcbc" "sconcc" "sconcc10h16" "sconcc2h4"
-    "sconcc2h6" "sconcc3h6" "sconcc3h8" "sconcc4h6" "sconcc4h8" "sconcc5h12" "sconcc6h14" "sconcc6h6" "sconcc7h8" "sconcc9h12"
-    "sconcca" "sconccd" "sconcch4" "sconccl" "sconcco" "sconccobalt" "sconccr" "sconccu" "sconcdu" "sconcec" "sconcetoh"
-    "sconcfe" "sconcglyox" "sconchcho" "sconchcl" "sconchg" "sconchggem" "sconchggom" "sconchgtgm" "sconchno3" "sconcisop"
-    "sconck" "sconcmg" "sconcmn" "sconcmpxyl" "sconcmsa" "sconcmxyl" "sconcna" "sconcnh3" "sconcnh4" "sconcnh4no3"
-    "sconcni" "sconcno2" "sconcno3" "sconco3" "sconcoc" "sconcoxyl" "sconcpb" "sconcse" "sconcso2" "sconcso4" "sconcv"
-    "sconczn" "t2" "wetal" "wetas" "wetbap" "wetcd" "wetcobalt" "wetcr" "wetcu" "wetfe" "wethg" "wetmn" "wetpb" "wetv" 
-    "wetzn"
+    # "absco370"
+    # "acprec"
+    # "lbsco450" 
+    # "lsco450"
+    # "od500aero"
+    # "precal" 
+    # "precas" 
+    # "precca" 
+    # "preccd" 
+    # "preccl" 
+    # "preccobalt" 
+    # "preccr" 
+    # "preccu" 
+    # "precfe" 
+    # "prechg"
+    # "preck" 
+    # "precmg"
+    # "precmn" 
+    # "precmsa" # No data
+    # "precna"
+    # "precnh4" 
+    # "precni" 
+    # "precno3" 
+    # "precpb" 
+    # "precse" # No data
+    # "precso4" 
+    # "precv" 
+    # "preczn"
+    # "pshltr" 
+    # "sconcal"
+    # "sconcas"
+    # "sconcbap" 
+    # "sconcbappm" 
+    # "sconcbc" 
+    # "sconcc"
+    # "sconcc10h16" # No data
+    # "sconcc2h4"
+    # "sconcc2h6" 
+    # "sconcc3h6" 
+    # "sconcc3h8" 
+    # "sconcc4h6" 
+    # "sconcc4h8" 
+    # "sconcc5h12" 
+    # "sconcc6h14" 
+    # "sconcc6h6" 
+    # "sconcc7h8" # No data
+    # "sconcc9h12"
+    # "sconcca" 
+    # "sconccd" 
+    # "sconcch4" 
+    # "sconccl" 
+    # "sconcco" # Tower inlet height
+    # "sconccobalt" 
+    # "sconccr" 
+    # "sconccu" 
+    # "sconcdu" 
+    # "sconcec"
+    # "sconcfe" 
+    # "sconchcho" 
+    # "sconchcl" 
+    # "sconchg" 
+    # "sconchgtgm" 
+    # "sconchno3" 
+    # "sconcisop"
+    # "sconck" 
+    # "sconcmg" 
+    # "sconcmn" 
+    # "sconcmpxyl" # Error with API
+    # "sconcmsa" # No data
+    # "sconcmxyl" # No data
+    # "sconcna" 
+    # "sconcnh3" 
+    # "sconcnh4" 
+    # "sconcnh4no3"
+    # "sconcni" 
+    # "sconcno2" 
+    # "sconcno3" 
+    # "sconco3" 
+    # "sconcoc"
+    # "sconcoxyl" 
+    # "sconcpb" 
+    # "sconcse" 
+    # "sconcso2" 
+    # "sconcso4" 
+    # "sconcv"
+    # "sconczn" 
+    # "t2" 
+    # "wetal" # Review station selection -> Same station with different months, but one gets selected
+    # "wetas" 
+    # "wetbap" 
+    # "wetcd" 
+    # "wetcobalt" # Review station selection -> Same station with different months, but one gets selected
+    # "wetcr"
+    # "wetcu" 
+    # "wetfe" # Review station selection -> Same station with different months, but one gets selected
+    # "wethg" # Review station selection -> Same station with different months, but one gets selected
+    # "wetmn" # Review station selection -> Same station with different months, but one gets selected
+    # "wetpb" 
+    # "wetv" 
+    # "wetzn",
+    # "sconcald2" # GHOST version >= 1.6
+    # "sconcetoh" # GHOST version >= 1.6
+    # "sconcglyox" # GHOST version >= 1.6
+    # "sconchggem" # GHOST version >= 1.6
+    # "sconchggom" # GHOST version >= 1.6
+     "sconchgtgm" # GHOST version >= 1.6
 )
 
-cd /home/avilanov/software/Providentia
+cd /home/avilanov/software/providentia
 
 # Run for each species
 for species in "${species_list[@]}"; do
     echo "Running for species: $species"
-    ./bin/providentia --conf=actris.conf --species="$species --dl"
+    ./bin/providentia --conf=tests_actris.conf --species="\"$species\"" --dl
+    ./bin/providentia --conf=tests_actris.conf --species="\"$species\"" --report
 done

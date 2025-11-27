@@ -5,12 +5,13 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   home.md
+   Home.md
    Getting-started.md
-   modes.rst
-   topics-in-depth.rst
-   other-topics.rst
-   reference.rst
+   Modes.rst
+   Topics-in-depth.rst
+   Running-on-HPC.rst
+   Other-topics.rst
    Evolution.md
-   Tips-and-tricks-for-developers.md
    FAQ.md
+   Meet-the-team.md
+   Tips-and-tricks-for-developers.md

@@ -76,7 +76,7 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
             data_array = copy.deepcopy(prv.data_in_memory_filtered[networkspeci])
             
             # apply NaNs for temporal colocation
-            data_array[:, prv.temporal_colocation_nans[networkspeci]] = np.NaN
+            data_array[:, prv.temporal_colocation_nans[networkspeci]] = np.nan
 
             # cut data array for valid station inds
             data_array = np.take(data_array, valid_station_inds, axis=1)
@@ -247,6 +247,32 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
         # get some key variables for speci
         parameter_details = parameter_dictionary[speci]
         metadata_format_dict = get_standard_metadata(parameter_details)
+
+        # add ACTRIS variables to standard metadata
+        metadata_format_dict.update(
+            {'doi': {'value': [], 
+                        'standard_name': 'DOI', 
+                        'long_name': 'Digital identifier of an object',   
+                        'units': 'unitless', 
+                        'units_quantity': 'unitless', 
+                        'data_type': object, 
+                        'string_format': 'short', 
+                        'metadata_type': 'STATION MISCELLANEOUS', 
+                        'identifiers': {'DOI':''}, 
+                        'description': 'Digital identifier of an object.'},
+                'actris_national_facility': {'value': [], 
+                                            'standard_name': 'ACTRIS national facility', 
+                                            'long_name': 'Digital identifier of an object',   
+                                            'units': 'unitless', 
+                                            'units_quantity': 'unitless', 
+                                            'data_type': object, 
+                                            'string_format': 'short', 
+                                            'metadata_type': 'STATION MISCELLANEOUS', 
+                                            'identifiers': {'ACTRIS national facility':''}, 
+                                            'description': 'ACTRIS national facility.'}
+            }
+        )
+        
         data_format_dict = get_standard_data(parameter_details)
        
         # get data array
@@ -260,7 +286,7 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
             data_array = copy.deepcopy(prv.data_in_memory_filtered[networkspeci])
             
             # apply NaNs for temporal colocation
-            data_array[:, prv.temporal_colocation_nans[networkspeci]] = np.NaN
+            data_array[:, prv.temporal_colocation_nans[networkspeci]] = np.nan
 
             # cut data array for valid station inds
             data_array = np.take(data_array, valid_station_inds, axis=1)

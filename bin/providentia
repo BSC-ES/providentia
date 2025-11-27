@@ -12,12 +12,15 @@ echo "    [-m|--mem MEMORY (only valid on P9, default=20Gb)]"
 echo "    [--constraint CONSTRAINT (default=medmem)]"
 }
 
-getopt --test 2> /dev/null
-if [[ $? -ne 4 ]]; then
-    echo "GNU's enhanced getopt is required to run this script"
-    echo "You can usually find this in the util-linux package"
-    echo "On MacOS/OS X see homebrew's package: http://brewformulas.org/Gnu-getopt"
-    echo "For anyone else, build from source: http://frodo.looijaard.name/project/getopt"
+# check we are using GNU getopt
+out=$(getopt -T)
+if (( $? != 4 )) && [[ -n $out ]]; then
+    echo "GNU getopt is required to run Providentia."
+    echo "On MacOS this can be installed using Homebrew: brew install gnu-getopt"
+    echo "If Homebrew is not installed, see here: https://brew.sh"
+    echo "On other platforms it should be built from source: https://frodo.looijaard.name/project/getopt"
+    echo "After installation, a line to pass the location of the gnu-getopt executable to the PATH must be added to your .zshrc (Mac) or .bashrc (Linux) file."
+    echo 'For example: export PATH="/opt/homebrew/opt/gnu-getopt/bin:$PATH"'
     exit 1
 fi
 
@@ -63,7 +66,7 @@ IFS=$'\n\t'
 # An option followed by double colons '::' means that its argument is optional.
 # See `man getopt'.
 SHORT=uc:t:J:q:m:V
-LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,clean,section:,ghost_version:,conf:,config:,config_dir:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,exp_to_interp_root:,generate_file_tree,gft,disable_file_tree,dft,report,reports,offline,download,dl,interpolation,interp,interpolate,notebook,nb,jupyter,slurm_job_id:,network:,species:,resolution:,start_date:,end_date:,observations_data_label:,experiments:,domain:,ensemble:,forecast:,qa:,flags:,add_qa:,subtract_qa:,add_flags:,subtract_flags:,temporal_colocation:,spatial_colocation:,spatial_colocation_tolerance:,spatial_colocation_station_reference:,spatial_colocation_station_name:,spatial_colocation_longitude_latitude:,spatial_colocation_measurement_altitude:,spatial_colocation_validation:,spatial_colocation_validation_tolerance:,map_extent:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,harmonise_summary:,harmonise_stations:,active_dashboard_plots:,resampling_resolution:,statistic_mode:,statistic_aggregation:,periodic_statistic_mode:,periodic_statistic_aggregation:,timeseries_statistic_aggregation:,plot_characteristics_filename:,dl_overwrite:,dl_ghost_source:,dl_interpolated:,dl_mode:,network_type:,interp_multiprocessing:,interp_n_neighbours:,interp_reverse_vertical_orientation:,interp_chunk_size:,interp_job_array_limit:,interp_spinup_timesteps:,interp_experiment_downsampling:,interp_experiment_upsampling:,logfile::
+LONG=usage,cores:,time:,jobname:,queue:,mem:,constraint:,help,version,debug,clean,section:,ghost_version:,conf:,config:,config_dir:,cartopy_data_dir:,ghost_root:,nonghost_root:,exp_root:,exp_to_interp_root:,generate_file_tree,gft,disable_file_tree,dft,report,reports,offline,download,dl,interpolation,interp,interpolate,notebook,nb,jupyter,slurm_job_id:,network:,framework:,observation:,species:,resolution:,start_date:,end_date:,observations_data_label:,experiments:,experiment:,model:,models:,domain:,ensemble:,forecast:,qa:,flags:,add_qa:,subtract_qa:,add_flags:,subtract_flags:,temporal_colocation:,spatial_colocation:,spatial_colocation_tolerance:,spatial_colocation_station_reference:,spatial_colocation_station_name:,spatial_colocation_longitude_latitude:,spatial_colocation_measurement_altitude:,spatial_colocation_validation:,spatial_colocation_validation_tolerance:,map_extent:,filter_species:,calibration_factor:,lower_bound:,upper_bound:,remove_extreme_stations:,report_type:,report_summary:,report_stations:,report_title:,report_filename:,harmonise_summary:,harmonise_stations:,active_dashboard_plots:,resampling_resolution:,statistic_mode:,statistic_aggregation:,periodic_statistic_mode:,periodic_statistic_aggregation:,timeseries_statistic_aggregation:,plot_characteristics_filename:,dl_overwrite:,dl_ghost_source:,dl_interpolated:,dl_mode:,network_type:,interp_multiprocessing:,interp_n_neighbours:,interp_reverse_vertical_orientation:,interp_chunk_size:,interp_job_array_limit:,interp_spinup_timesteps:,z:,interp_experiment_upsampling:,logfile::
 
 # parse arguments
 PARSED=$(getopt --options ${SHORT} \
@@ -293,7 +296,7 @@ if [ "${BSC_MACHINE}" == "mn5" ]; then
     if $active_env; then
         if $notebook; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-            echo "Starting jupyter session."
+            echo "Starting Jupyter session."
             echo "Check 'notebook.out' for information on how to connect to session."
             
             if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
@@ -337,7 +340,7 @@ elif [ "${BSC_MACHINE}" == "nord3v2" ] || [ "${BSC_MACHINE}" = "amd" ]; then
     echo "INFO: Running on ${BSC_MACHINE}..."
     if $notebook; then
         echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-        echo "Starting notebook jupyter session."
+        echo "Starting notebook Jupyter session."
         echo "Check 'notebook.out' for information on how to connect to session."
         eval "${load_command}"
         if [[ "${constraint}" == "lowmem" ]]; then
@@ -399,7 +402,7 @@ elif [ "${ip}" == "84.88.185.48" ]; then
     echo "INFO: Running on the hub..."
     eval "${load_command}"
     if $notebook; then
-        echo "Starting jupyter session."
+        echo "Starting Jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}
         jupyter-lab
 
@@ -413,15 +416,15 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
 
     # load modules from conda environment
     active_env=false
-    module load Miniconda3/23.9.0-0
+    module load Miniconda3/24.7.1-0
     eval "$(conda shell.bash hook)"
     conda config --set env_prompt '($(basename {default_env})) '
     if ! { conda config --show-sources | grep '/gpfs/projects/bsc32/repository/apps/conda_envs/'; } >/dev/null 2>&1; then
         conda config --append envs_dirs /gpfs/projects/bsc32/repository/apps/conda_envs/
     fi
-    if { conda env list | grep 'providentia-env_v3.0.0'; } >/dev/null 2>&1; then 
-        echo "Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0..."
-        conda activate providentia-env_v3.0.0
+    if { conda env list | grep 'providentia-env_v3.0.0-nord4'; } >/dev/null 2>&1; then 
+        echo "Activating conda environment in /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0-nord4..."
+        conda activate providentia-env_v3.0.0-nord4
         active_env=true
     else 
         echo "Environment not found in /gpfs/projects/bsc32/repository/apps/conda_envs/"
@@ -430,7 +433,7 @@ elif [ "${BSC_MACHINE}" == "nord4" ]; then
     if $active_env; then
         if $notebook; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-            echo "Starting jupyter session."
+            echo "Starting Jupyter session."
             echo "Check 'notebook.out' for information on how to connect to session."
             
             if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
@@ -493,7 +496,7 @@ elif [ "${BSC_MACHINE}" == "grace" ]; then
     if $active_env; then
         if $notebook; then
             echo "OPTIONS: cores: ${cores}, jobname: ${jobname}, queue: ${queue}, constraint: ${constraint}"
-            echo "Starting jupyter session."
+            echo "Starting Jupyter session."
             echo "Check 'notebook.out' for information on how to connect to session."
             
             if [[ "${constraint}" == "lowmem" ||  "${constraint}" == "medmem" ]]; then
@@ -564,7 +567,7 @@ elif [ "${ip}" == "84.88.185.205" ]; then
     fi  
 
     if $notebook; then
-        echo "Starting jupyter session."
+        echo "Starting Jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}
         jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
     elif $interpolation; then
@@ -614,16 +617,25 @@ else
         sudo apt-get update && sudo apt-get install -y nco
     fi
 
-    # if are using Mac then create a Providentia executable (if does not already exist)
-    if [[ "${OS}" == "Mac" ]] ; then
-        python_exe=$(eval "which python")
-        if [[ ! -f bin/Mac/Providentia ]]; then
-            cp "${python_exe}" bin/Mac/Providentia
+    # if are using Mac then create a Providentia executable
+    if [[ "${OS}" == "Mac" ]]; then
+        python_exe=$(which python)
+        target="bin/Mac/Providentia"
+
+        # create a new executable if it does not exist yet
+        if [[ ! -f "$target" ]]; then
+            cp "$python_exe" "$target"
+        # if it exists check if it is the same executable as previous
+        else
+            # if not, then overwrite it
+            if ! cmp -s "$python_exe" "$target"; then
+                cp "$python_exe" "$target"
+            fi
         fi
     fi
 
     if $notebook; then
-        echo "Starting jupyter session."
+        echo "Starting Jupyter session."
         export PYTHONPATH=$(pwd):${PYTHONPATH}
         jupyter-lab --port 8888 --ip 0.0.0.0 --allow-root
     elif $interpolation; then

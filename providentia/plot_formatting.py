@@ -898,7 +898,7 @@ def get_data_lims(ax, lim, plot_options):
 
     # get min/max across line artists
     if len(lines) == 0:
-        return np.NaN, np.NaN
+        return np.nan, np.nan
     else:
         lower_lim = np.nanmin(lines)
         upper_lim = np.nanmax(lines)

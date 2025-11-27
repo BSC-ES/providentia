@@ -76,9 +76,9 @@ def plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
 
         # save data, uncomment if we want to update it
         if 'bias' in plot_options:
-            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_bias_values.csv'
+            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{plot_type}_bias_values.csv'
         else:
-            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_values.csv'
+            path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{plot_type}_values.csv'
         if GENERATE_OUTPUT:
             generated_output.to_csv(path, index=False)
 
@@ -88,11 +88,15 @@ def plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
         assert assert_frame_equal(generated_output, expected_output) is None
 
     elif base_plot_type in ['timeseries', 'distribution', 'periodic', 'scatter', 
-                            'periodic-violin', 'fairmode-target', 'fairmode-statsummary']:
+                            'periodic-violin', 'fairmode-target', 'fairmode-statsummary',
+                            'taylor', 'boxplot']:
 
-        # iterate through plotted lines
         for axis_i, axis in enumerate(fig.axes):
-            for line_i, line in enumerate(axis.lines):
+            if base_plot_type == 'taylor':
+                lines = axis.parasites[0].lines
+            else:
+                lines = axis.lines
+            for line_i, line in enumerate(lines):
 
                 # extract data from each line
                 data = []
@@ -104,7 +108,7 @@ def plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
                 generated_output = pd.DataFrame(data)
 
                 # save data, uncomment if we want to update it
-                path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_{axis_i}_{line_i}.csv'
+                path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{plot_type}_{axis_i}_{line_i}.csv'
                 if GENERATE_OUTPUT:
                     generated_output.to_csv(path, index=False)
 
@@ -134,7 +138,7 @@ def plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
         generated_output = pd.DataFrame(data)
 
         # save data, uncomment if we want to update it
-        path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_values.csv'
+        path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{plot_type}_values.csv'
         if GENERATE_OUTPUT:
             generated_output.to_csv(path, index=False)
 
@@ -158,7 +162,7 @@ def plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
         generated_output = pd.DataFrame(data)
 
         # save data, uncomment if we want to update it
-        path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{base_plot_type}_annotations.csv'
+        path = f'tests/reference/{network_type}/{statistic_mode}/{base_plot_type}/{plot_type}_annotations.csv'
         if GENERATE_OUTPUT:
             generated_output.to_csv(path, index=False)
 
@@ -169,11 +173,14 @@ def plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
 
 def check_filter_data(inst, statistic_mode, network_type, filter):
 
-    orig_path = f'tests/reference/{network_type}/{statistic_mode}/data/data.npy'
-    filter_path = f'tests/reference/{network_type}/{statistic_mode}/data/data_{filter}.npy'
-
     # Check filtered data
+    filter_path = f'tests/reference/{network_type}/{statistic_mode}/data/data_{filter}.npy'
     read_data(inst, filter_path)
+
+    # Reset filter and check original data
+    inst.reset(initialise=True)
+    orig_path = f'tests/reference/{network_type}/{statistic_mode}/data/data.npy'
+    read_data(inst, orig_path)
 
     # Check filtered data is different from original data
     orig_output = np.load(orig_path, allow_pickle=True)
@@ -182,7 +189,3 @@ def check_filter_data(inst, statistic_mode, network_type, filter):
         assert (not np.allclose(orig_output, filter_output, equal_nan=True))
     except ValueError as e:
         assert True
-    
-    # Reset filter and check original data
-    inst.reset(initialise=True)
-    read_data(inst, orig_path)

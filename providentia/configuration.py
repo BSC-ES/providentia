@@ -227,8 +227,33 @@ class ProvConfiguration:
             self.read_instance.available_species = list(self.read_instance.parameter_dictionary.keys())
             
             # get standard metadata dictionary
-            self.read_instance.standard_metadata = get_standard_metadata({'standard_units': ''})
+            self.read_instance.standard_metadata = get_standard_metadata({'standard_units':'', 'units_quantity':''})
             
+            # add ACTRIS variables to standard metadata
+            self.read_instance.standard_metadata.update(
+                {'doi': {'value': [], 
+                         'standard_name': 'DOI', 
+                         'long_name': 'Digital identifier of an object',   
+                         'units': 'unitless', 
+                         'units_quantity': 'unitless', 
+                         'data_type': object, 
+                         'string_format': 'short', 
+                         'metadata_type': 'STATION MISCELLANEOUS', 
+                         'identifiers': {'DOI':''}, 
+                         'description': 'Digital identifier of an object.'},
+                 'actris_national_facility': {'value': [], 
+                                              'standard_name': 'ACTRIS national facility', 
+                                              'long_name': 'Digital identifier of an object',   
+                                              'units': 'unitless', 
+                                              'units_quantity': 'unitless', 
+                                              'data_type': object, 
+                                              'string_format': 'short', 
+                                              'metadata_type': 'STATION MISCELLANEOUS', 
+                                              'identifiers': {'ACTRIS national facility':''}, 
+                                              'description': 'ACTRIS national facility.'}
+                }
+            )
+
             # create list of GHOST metadata variables to read
             self.read_instance.ghost_metadata_vars_to_read = [key for key in self.read_instance.standard_metadata.keys() if
                                                               pd.isnull(self.read_instance.standard_metadata[key]['metadata_type']) == False]
@@ -239,7 +264,7 @@ class ProvConfiguration:
 
             return str(value)
 
-        elif key == 'network':
+        elif key in ['network', 'observation', 'framework']:
             # parse network
 
             if isinstance(value, str):
@@ -477,7 +502,7 @@ class ProvConfiguration:
                 else:
                     return [value.strip().lower()]
             
-        elif key == 'experiments':
+        elif key in ['experiments', 'experiment', 'model', 'models']:
             # parse experiments
 
             if isinstance(value, str):
@@ -1074,19 +1099,37 @@ class ProvConfiguration:
     def check_validity(self, deactivate_warning=False):
         """ Check validity of set variables after parsing. """
 
-        # accept the word framework as network for ACTRIS
-        if self.read_instance.framework and not self.read_instance.network:
-            if self.read_instance.framework == 'actris/actris':
-                self.read_instance.network = [self.read_instance.framework]
-            else:
-                error = f'Error: Framework {self.read_instance.framework} not accepted. '
-                error += 'The only one that is accepted is "actris/actris".'
-                self.read_instance.logger.error(error)
-                sys.exit(1)
-        elif self.read_instance.framework and self.read_instance.network:
-            error = f'Error: You cannot define the framework and network at the same time, drop one.'
+        # accept only framework, network or observation, avoiding multiple values
+        if [self.read_instance.framework, self.read_instance.network, self.read_instance.observation].count(True) > 1:
+            error = f'Error: You cannot define the framework, observations and/or network at the same time, choose one.'
             self.read_instance.logger.error(error)
             sys.exit(1)
+        else:
+            # accept the word framework as network for ACTRIS
+            if self.read_instance.framework:
+                if self.read_instance.framework == ['actris/actris']:
+                    self.read_instance.network = self.read_instance.framework
+                else:
+                    error = f'Error: Framework {self.read_instance.framework} not accepted. '
+                    error += 'The only one that is accepted is "actris/actris".'
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
+            # pass observation as network
+            elif self.read_instance.observation:
+                self.read_instance.network = [self.read_instance.observation]
+
+        # accept only experiments, experiment, model or models, avoiding multiple values
+        if [self.read_instance.experiments, self.read_instance.experiment, self.read_instance.model, self.read_instance.models].count(True) > 1:
+            error = f'Error: You cannot define the experiments, experiment, model and/or model at the same time, choose one.'
+            self.read_instance.logger.error(error)
+            sys.exit(1)
+        else:
+            if self.read_instance.experiment:
+                self.read_instance.experiments = self.read_instance.experiment
+            elif self.read_instance.model:
+                self.read_instance.experiments = self.read_instance.model
+            elif self.read_instance.models:
+                self.read_instance.experiments = self.read_instance.models
 
         # check and format the start and end date
         dates = ['start_date', 'end_date']
@@ -1193,10 +1236,16 @@ class ProvConfiguration:
         for network_ii, network in enumerate(self.read_instance.network):
             if network_ii == 0:
                 self.read_instance.reading_ghost = check_for_ghost(network)
+                self.read_instance.reading_actris = network == 'actris/actris'
             else:
                 is_ghost = check_for_ghost(network)
+                is_actris = network == 'actris/actris'
                 if is_ghost != self.read_instance.reading_ghost:
                     error = 'Error: "network" must be all GHOST or non-GHOST.'
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
+                if is_actris != self.read_instance.reading_actris:
+                    error = 'Error: If actris/actris in "network", all must be ACTRIS.'
                     self.read_instance.logger.error(error)
                     sys.exit(1)
                 self.read_instance.reading_ghost = is_ghost
@@ -1243,11 +1292,7 @@ class ProvConfiguration:
         if MACHINE == "local":
             for path in [self.read_instance.nonghost_root, self.read_instance.ghost_root, self.read_instance.exp_root, self.read_instance.exp_to_interp_root]:
                 if not os.path.exists(path):
-                    try:
-                        os.makedirs(path)
-                    except PermissionError as error:
-                        os.system(f"sudo mkdir -p {path}")
-                        os.system(f"sudo chmod o+w {path}")
+                    os.makedirs(path)
 
         # make sure there are experiments for interpolation mode
         if not self.read_instance.experiments and 'experiments' in self.default_values:

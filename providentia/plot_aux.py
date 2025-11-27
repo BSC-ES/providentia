@@ -22,7 +22,7 @@ from scipy.signal.windows import gaussian
 from scipy.sparse import coo_matrix
 import seaborn as sns
 
-from providentia.auxiliar import CURRENT_PATH, join
+from providentia.auxiliar import CURRENT_PATH, join, get_conversion_factor, get_standard_parameters_by_speci
 from .statistics import (calculate_statistic, get_z_statistic_sign, 
                          aggregation)
 from .warnings_prv import show_message
@@ -180,7 +180,7 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
 
         for unique_base_data_label in unique_base_data_labels:
             if unique_base_data_label == instance.observations_data_label:
-                # Observations do not require grid edges
+                # Observations do not require grid edges, but initialise plotting params dict
                 instance.plotting_params[unique_base_data_label] = {}
             else:
                 # Stop if all data labels have been processed
@@ -189,26 +189,62 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
                 for valid_networkspeci in instance.networkspecies:
                     if len(processed_data_labels) == len(data_labels_to_add):
                         break
-                    if daily_forecast:
-                        # For daily forecast, copy grid edge info from removed labels
-                        for data_label in data_labels_to_add:
-                            relevant_inds = [ii for ii, data_label_to_remove in enumerate(data_labels_to_remove) if data_label in data_label_to_remove]
-                            instance.plotting_params[data_label] = {}
-                            instance.plotting_params[data_label]['grid_edge_longitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_longitude'] 
-                            instance.plotting_params[data_label]['grid_edge_latitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_latitude'] 
-                            processed_data_labels.append(data_label)
-                    elif unique_base_data_label in instance.files_to_read[valid_networkspeci]:
-                        # Open NetCDF file to extract grid edges
+                    
+                    # read grid edge longitudes and latitudes if needed
+                    if (not daily_forecast) & (unique_base_data_label in instance.files_to_read[valid_networkspeci]):
+                        # Open netCDF file to extract grid edges
                         exp_nc_root = Dataset(instance.files_to_read[valid_networkspeci][unique_base_data_label][0])
-                        for data_label in data_labels_to_add:
-                            if data_label not in processed_data_labels:
-                                base_data_label = data_label.split('-day')[0].split('-daily')[0].split('-combined')[0]
-                                if base_data_label == unique_base_data_label:
-                                    instance.plotting_params[data_label] = {}
-                                    instance.plotting_params[data_label]['grid_edge_longitude'] = exp_nc_root['grid_edge_longitude'][:]
-                                    instance.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
-                                    processed_data_labels.append(data_label)
-                        exp_nc_root.close()  # Close NetCDF file
+                        grid_edge_longitude = exp_nc_root['grid_edge_longitude'][:]
+                        grid_edge_latitude = exp_nc_root['grid_edge_latitude'][:]
+                        # Close netCDF file
+                        exp_nc_root.close() 
+
+                    # iterate through data labels to add
+                    for data_label in data_labels_to_add:
+
+                        base_data_label = data_label.split('-day')[0].split('-daily')[0].split('-combined')[0]
+
+                        if (base_data_label == unique_base_data_label) & (data_label not in processed_data_labels):
+
+                            # initialise plotting params dict for data label to add
+                            instance.plotting_params[data_label] = {}
+
+                            # For daily forecast, copy grid edge info from removed labels
+                            if daily_forecast:
+                                
+                                relevant_inds = [ii for ii, data_label_to_remove in enumerate(data_labels_to_remove) if data_label in data_label_to_remove]
+                                instance.plotting_params[data_label]['grid_edge_longitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_longitude'] 
+                                instance.plotting_params[data_label]['grid_edge_latitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_latitude'] 
+                                processed_data_labels.append(data_label)
+                            
+                            # otherwise open netCDF file to extract grid edges
+                            elif unique_base_data_label in instance.files_to_read[valid_networkspeci]:
+                                
+                                instance.plotting_params[data_label]['grid_edge_longitude'] = grid_edge_longitude
+                                instance.plotting_params[data_label]['grid_edge_latitude'] = grid_edge_latitude
+                                processed_data_labels.append(data_label)
+                        
+                    # if daily_forecast:
+                    #     # For daily forecast, copy grid edge info from removed labels
+                    #     for data_label in data_labels_to_add:
+                    #         relevant_inds = [ii for ii, data_label_to_remove in enumerate(data_labels_to_remove) if data_label in data_label_to_remove]
+                    #         instance.plotting_params[data_label] = {}
+                    #         instance.plotting_params[data_label]['grid_edge_longitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_longitude'] 
+                    #         instance.plotting_params[data_label]['grid_edge_latitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_latitude'] 
+                    #         processed_data_labels.append(data_label)
+                    # elif unique_base_data_label in instance.files_to_read[valid_networkspeci]:
+                    #     # Open NetCDF file to extract grid edges
+                    #     exp_nc_root = Dataset(instance.files_to_read[valid_networkspeci][unique_base_data_label][0])
+                    #     for data_label in data_labels_to_add:
+                    #         if data_label not in processed_data_labels:
+                    #             base_data_label = data_label.split('-day')[0].split('-daily')[0].split('-combined')[0]
+                    #             if base_data_label == unique_base_data_label:
+                    #                 instance.plotting_params[data_label] = {}
+                    #                 instance.plotting_params[data_label]['grid_edge_longitude'] = exp_nc_root['grid_edge_longitude'][:]
+                    #                 instance.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
+                    #                 processed_data_labels.append(data_label)
+                    #     # Close NetCDF file
+                    #     exp_nc_root.close()  
 
     # Remove plotting parameters for labels marked for removal
     if data_labels_to_remove is not None:
@@ -672,13 +708,13 @@ def create_statistical_timeseries(read_instance, canvas_instance, chunk_stat, ch
 
     for chunk_date_idx, chunk_date in enumerate(chunk_dates):
         for label_idx, data_label in enumerate(cut_data_labels):
-            timeseries_data.loc[chunk_date, data_label] = stats_calc[chunk_date_idx][label_idx]
+            timeseries_data.loc[chunk_date, data_label] = np.float32(stats_calc[chunk_date_idx][label_idx])
     
     return timeseries_data
 
 
 def reorder_pdf_pages(read_instance, input_pdf, output_pdf, summary_multispecies_pages, 
-                      station_multispecies_pages, paradigm_break_page):
+                      station_multispecies_pages, paradigm_break_page, doi_pdf, reports_doi_path_temp):
     """ Reorder PDF pages so that multispecies plots appear before other plots.
 
     :param input_pdf: Path to original PDF
@@ -726,6 +762,13 @@ def reorder_pdf_pages(read_instance, input_pdf, output_pdf, summary_multispecies
     for page_number in page_order:
         output_pdf_file.add_page(input_pdf_file.pages[page_number])
 
+    # Add DOI pages at the end
+    if doi_pdf is not None:
+        input_doi_pdf = PdfReader(open(reports_doi_path_temp, "rb"))
+        for page_number in range(len(input_doi_pdf.pages)):
+            output_pdf_file.add_page(input_doi_pdf.pages[page_number])
+        os.system("rm {}".format(reports_doi_path_temp))
+     
     # Write the rearranged pages to a new PDF file
     read_instance.logger.info(f'Writing {output_pdf}')
     with open(output_pdf, "wb") as outputStream:
@@ -746,22 +789,39 @@ def get_hex_code(colour):
     return hex_colour
 
 
-def get_fairmode_RV_exceendance(read_instance, speci, RV, exc_threshold):
-    
-    units = read_instance.measurement_units[speci]
-    if units in RV:
-        RV = RV[units]
-    else: 
-        msg = f'RV has not been defined for units {units} in settings/fairmode.yaml. FAIRMODE target plot cannot be calculated.'
-        show_message(read_instance, msg)
-        return
-    
-    if exc_threshold is not None:
-        if units in exc_threshold:
-            exc_threshold = exc_threshold[units]
-        else: 
-            msg = f'Exceedance threshold has not been defined for units {units} in settings/fairmode.yaml. FAIRMODE target plot cannot be calculated.'
-            show_message(read_instance, msg)
-            return
+def get_fairmode_RV_exceendance(read_instance, speci, RV, exc_threshold, units):
+    """ Convert standard GHOST units of RV and exceedances to actual ones
+
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard or Report
+    speci : str
+        Speci to plot
+    RV : float
+        Reference value
+    exc_threshold : float
+        Exceedance threshold
+
+    Returns
+    -------
+    float
+        Reference value in GHOST units
+    float
+        Exceedance threshold in GHOST units
+    """
+
+    # get input and output units
+    standard_parameter_speci = get_standard_parameters_by_speci(speci, read_instance.ghost_version)
+    initial_units = units
+    final_units = read_instance.measurement_units[speci]
+
+    # convert units using conversion factor
+    conversion_factor = get_conversion_factor(initial_units, final_units, standard_parameter_speci) 
+    if isinstance(conversion_factor, str):
+        read_instance.logger.error(conversion_factor)
+        sys.exit(1)
+    RV *= conversion_factor
+    exc_threshold *= conversion_factor
         
     return RV, exc_threshold
