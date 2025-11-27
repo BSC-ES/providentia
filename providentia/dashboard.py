@@ -253,7 +253,10 @@ class Dashboard(QtWidgets.QWidget):
                     plot_type = plot_type.replace('-','_')
 
                 # proceed once have objects for plot type
-                if plot_type == menu_plot_type:
+                # if plot type is metadata or None the axes and are initalising the qt element geometry
+                # then as there are no menu buttons for these cases, there are axes formatting issues.
+                # as a workaround set the plot type to be timeseries
+                if (plot_type == menu_plot_type) or ((plot_type in ['metadata','None']) & (menu_plot_type == 'timeseries')):
                     
                     # get position of menu button (set in 1848 x 1016 resolution)
                     x = self.mpl_canvas.plot_characteristics_templates['general']['settings_menu']['position_'
@@ -264,33 +267,35 @@ class Dashboard(QtWidgets.QWidget):
                     # calculate proportional position for different screen resolution
                     x = int((x * canvas_width) / 1848)
                     y = int((y * canvas_height) / 1016)
-                    
-                    # get geometries (old and new)
+
+                    # get button geometries (old and new)
                     old_button_geometry = QtCore.QRect(menu_button.x(), menu_button.y(), 18, 18)
                     new_button_geometry = QtCore.QRect(x, y, 18, 18)
                     
-                    # apply new geometry to menu and save buttons
-                    menu_button.setGeometry(new_button_geometry)
-                    save_button.setGeometry(int(menu_button.x() - ((30 * canvas_width) / 1848)), int(menu_button.y()), 20, 20)
+                    # set menu and save button geometry
+                    if plot_type not in ['metadata','None']:
+                        # apply new geometry to menu and save buttons
+                        menu_button.setGeometry(new_button_geometry)
+                        save_button.setGeometry(int(menu_button.x() - ((30 * canvas_width) / 1848)), int(menu_button.y()), 20, 20)
 
-                    # show buttons if active
-                    if show_buttons:
-                        menu_button.show()
-                        save_button.show()
+                        # show buttons if active
+                        if show_buttons:
+                            menu_button.show()
+                            save_button.show()
 
-                    # apply new geometry to container elements
-                    for sub_element in element:
-                        if isinstance(sub_element, dict):
-                            for sub_sub_element in sub_element.values():
-                                sub_sub_element.setGeometry(sub_sub_element.x() - old_button_geometry.x() + 
-                                                            new_button_geometry.x(), 
-                                                            sub_sub_element.y() - old_button_geometry.y() + 
-                                                            new_button_geometry.y(),
-                                                            sub_sub_element.width(), sub_sub_element.height())
-                        else:
-                            sub_element.setGeometry(sub_element.x() - old_button_geometry.x() + new_button_geometry.x(), 
-                                                    sub_element.y() - old_button_geometry.y() + new_button_geometry.y(),
-                                                    sub_element.width(), sub_element.height())
+                        # apply new geometry to container elements
+                        for sub_element in element:
+                            if isinstance(sub_element, dict):
+                                for sub_sub_element in sub_element.values():
+                                    sub_sub_element.setGeometry(sub_sub_element.x() - old_button_geometry.x() + 
+                                                                new_button_geometry.x(), 
+                                                                sub_sub_element.y() - old_button_geometry.y() + 
+                                                                new_button_geometry.y(),
+                                                                sub_sub_element.width(), sub_sub_element.height())
+                            else:
+                                sub_element.setGeometry(sub_element.x() - old_button_geometry.x() + new_button_geometry.x(), 
+                                                        sub_element.y() - old_button_geometry.y() + new_button_geometry.y(),
+                                                        sub_element.width(), sub_element.height())
 
                     # apply new geometry to layout button and canvas covers (if are resizing)
                     if resize:
@@ -308,8 +313,9 @@ class Dashboard(QtWidgets.QWidget):
                             else:
                                 width_diff = 560
                             height_diff = 1
-                            new_x = int(menu_button.x() - ((width_diff * canvas_width) / 1848))
-                            new_y = int(menu_button.y() + ((height_diff * canvas_height) / 1016))
+                            new_x = int(new_button_geometry.x() - ((width_diff * canvas_width) / 1848))
+                            new_y = int(new_button_geometry.y() + ((height_diff * canvas_height) / 1016))
+
                             cb_position.move(new_x, new_y)
 
                             # apply new geometry to partial canvas covers
@@ -1013,9 +1019,9 @@ class Dashboard(QtWidgets.QWidget):
 
     def handle_layout_update(self, changed_plot_type, sender=None):
         """ Function which handles update of layout. """
-        
+
         if (changed_plot_type != '') & (not self.block_config_bar_handling_updates):
-            
+
             # get event origin source if not given
             if sender is not None:
                 if sender == 2:
@@ -1075,7 +1081,6 @@ class Dashboard(QtWidgets.QWidget):
                         sub_ax.remove()
                 else:
                     ax.remove()
-                self.active_dashboard_plots.remove(previous_plot_type)
 
                 # hide qt elements for previous plot type
                 for menu_button, save_button, element in zip(self.mpl_canvas.menu_buttons, 
@@ -1111,9 +1116,11 @@ class Dashboard(QtWidgets.QWidget):
                         sub_ax.remove()
                 else:
                     ax.remove()
-            # otherwise add plot_type to active_dashboard_plots
-            elif changed_plot_type != 'None': 
-                self.active_dashboard_plots.append(changed_plot_type)
+                self.active_dashboard_plots[self.active_dashboard_plots.index(changed_plot_type)] = 'None'
+            
+            # update active dashboard plots
+            del self.active_dashboard_plots[changed_position-2]
+            self.active_dashboard_plots.insert(changed_position-2, changed_plot_type)
 
             # update plot axis for new plot type
             self.update_plot_axis(self.mpl_canvas, event_source, changed_plot_type)
@@ -1188,6 +1195,7 @@ class Dashboard(QtWidgets.QWidget):
                 inner_gs = canvas_instance.gridspec.new_subplotspec((61, 8), rowspan=38, colspan=24).subgridspec(nrows, ncols,**canvas_instance.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
             elif changed_plot_type != 'None':
                 canvas_instance.plot_axes[changed_plot_type] = canvas_instance.figure.add_subplot(canvas_instance.gridspec.new_subplotspec((60, 4), rowspan=38, colspan=28))
+        
         # position 4 (bottom centre)
         if changed_position == self.cb_position_4 or changed_position == 4:
             if changed_plot_type in ['periodic', 'periodic-violin']:
