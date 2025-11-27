@@ -79,9 +79,13 @@ class ProvConfiguration:
         elif value == 'false':
             value = False
         
-        # the wildcard '*' is not valid in report-related modes
+        # check wildcard '*'
         elif value == '*' and key not in wildcard[self.read_instance.mode]:
             error = f"Error: The wildcard ('*') in the '{key}' parameter is not allowed for the '{self.read_instance.mode}' mode."
+            self.read_instance.logger.error(error)
+            sys.exit(1)
+        elif value != '*' and '*' in str(value).split(','):
+            error = f"Error: The wildcard ('*') in the '{key}' parameter does not allow multiple values."
             self.read_instance.logger.error(error)
             sys.exit(1)
 
@@ -677,7 +681,7 @@ class ProvConfiguration:
         split_experiments = [exp.split("-") for exp in self.read_instance.experiments]
 
         # get default ensemble
-        default_ensemble = [self.default_values["ensemble"]]
+        default_ensemble = self.default_values["ensemble"]
 
         # get original domain, ensemble and forecast as passed in the configuration file
         config_domain = copy.deepcopy(self.read_instance.domain) 
@@ -1190,8 +1194,11 @@ class ProvConfiguration:
         for field, default in self.default_values.items():
             current_value = getattr(self.read_instance, field)
 
+            # skip ensemble so it is done in decompose_experiment
+            if field == 'ensemble':
+                pass
             # set the defined defaults
-            if not current_value:
+            elif not current_value:
                 if default:
                     setattr(self.read_instance, field, default)
                 else:
@@ -1281,15 +1288,17 @@ class ProvConfiguration:
             self.read_instance.active_resolution = self.read_instance.resolution
 
         # check start and end_date format
-        for date_var_name in ['start_end', 'end_date']:
+        for date_var_name in ['start_date', 'end_date']:
             date_var = getattr(self.read_instance, date_var_name)
             if date_var == '*':
                 pass
             # YYYYMMDD
-            elif date_var == 8 and self.read_instance.mode == 'interpolation':
+            elif len(date_var) == 8:
+                if self.read_instance.mode == 'interpolation':
                     self.read_instance.end_date = date_var[:-2] 
             # YYYYMM
-            elif date_var == 6 and self.read_instance.mode != 'interpolation':
+            elif len(date_var) == 6:  
+                if self.read_instance.mode != 'interpolation':
                     self.read_instance.end_date = date_var + "01" 
             # throw error if format is not valid
             else:
@@ -1369,7 +1378,6 @@ class ProvConfiguration:
             # replace calibration factors by new dictionary
             self.read_instance.calibration_factor = calibration_factor_dict
 
-
         if len(self.read_instance.active_dashboard_plots) != 4 and 'active_dashboard_plots' in self.default_values:
             error = 'Error: there must be 4 "active_dashboard_plots"'
             self.read_instance.logger.error(error)
@@ -1387,8 +1395,8 @@ class ProvConfiguration:
         # remove any species for which there exists no data
         new_species = copy.deepcopy(self.read_instance.species)
         for speci_ii, speci in enumerate(self.read_instance.species): 
-            if '*' in speci:
-                # throw mapping error if species not ablet to be mapped
+            if speci != '*' and '*' in speci:
+                # throw mapping error if species not able to be mapped
                 if speci not in multispecies_map:
                     error = f'Error: not able to map species "{speci}".'
                     self.read_instance.logger.error(error)
@@ -1405,8 +1413,8 @@ class ProvConfiguration:
         self.read_instance.species = copy.deepcopy(new_species)
 
         # get species and filter species which are not on the current ghost version
-        invalid_species = set(self.read_instance.species) - set(self.read_instance.available_species)
-        invalid_filter_species = set(map(lambda x:x.split('|')[1], self.read_instance.filter_species)) - set(self.read_instance.available_species)                          
+        invalid_species = set(self.read_instance.species) - set(self.read_instance.available_species) - {'*'}
+        invalid_filter_species = set(map(lambda x:x.split('|')[1], self.read_instance.filter_species)) - set(self.read_instance.available_species) - {'*'}                          
         
         # check species, remove the ones that are not on the ghost version       
         if invalid_species:                                                            

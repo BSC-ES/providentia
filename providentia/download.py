@@ -131,6 +131,18 @@ class Download(object):
             # now all variables have been parsed, check validity of those, throwing errors where necessary
             self.provconf.check_validity()
 
+            # TODO: make it work directly with the asterisk
+            # transform asterisk fields to empty since it was originally coded this way
+            for field in ['species', 'resolution']:
+                if getattr(self, field) == ['*']:
+                    setattr(self, field, '')
+
+            # TODO: remove the filters instead
+            # transform asterisk fields to a low and high date
+            for field, date_num in {'start_date' : '0', 'end_date' : '9'}.items():
+                if getattr(self, field) == '*':
+                    setattr(self, field, date_num * 8)
+            
             # from here generate control if user stopped execution
             signal.signal(signal.SIGINT, self.sighandler)
             
@@ -441,7 +453,6 @@ class Download(object):
             self.logger.info(f"\nDownloading non-GHOST {network} network data from {REMOTE_MACHINE}...")
 
         # if not valid network, check if user put the network on init_prov 
-        # TODO Move to configuration.py
         if network not in self.nonghost_available_networks:
             msg = f"The {network} network could not be found on {join(PROVIDENTIA_ROOT,'settings','available_inputs.yaml')} nonghost_available_networks list."
             msg += "\nPlease, add the network to the list and execute again."
@@ -449,16 +460,14 @@ class Download(object):
             return
         
         # check if nonghost network exists in directory
-        # TODO: Change this to somewhere in configuration, the one up too
         try:
-            self.sftp.stat(join(self.nonghost_remote_obs_path,network))
+            self.sftp.stat(join(self.nonghost_remote_obs_path, network))
         except FileNotFoundError:
             msg = f"There is no data available in {REMOTE_MACHINE} for {network} network."
             show_message(self, msg, deactivate=initial_check)
             return
 
         # check if all resolutions are in init_prov, if not warning and delete the not correct ones
-        # TODO move to configuration.py
         not_available_resolutions = set(self.resolution) - set(self.nonghost_available_resolutions)
         if not_available_resolutions:
             available_resolutions = set(self.resolution) - not_available_resolutions
