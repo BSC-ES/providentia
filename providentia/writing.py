@@ -691,11 +691,8 @@ def export_configuration(prv, cname, separator="||"):
 
     # active dashboard plots 
     if prv.active_dashboard_plots != merged_defaults['active_dashboard_plots']:
+        print(prv.active_dashboard_plots)
         options['section']['active_dashboard_plots'] = ",".join(str(i) for i in prv.active_dashboard_plots)
-
-    # miscellaneous fields that need string joining 
-    #options['section'].update({'map_extent': ",".join(str(i) for i in prv.map_extent),
-    #                           'active_dashboard_plots': ",".join(str(i) for i in prv.active_dashboard_plots)})
 
     # plot_characteristics_filename
     if ((prv.plot_characteristics_filename != join(PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')) &

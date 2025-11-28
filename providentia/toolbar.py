@@ -369,6 +369,9 @@ class NavigationToolbar(NavigationToolbar2QT):
             reads and filters.
         """
 
+        # save current active_dashboard_plots
+        previous_active_dashboard_plots = copy.deepcopy(self.read_instance.active_dashboard_plots)
+
         # delete current active config attributes
         for k in self.read_instance.current_config:
             try:
@@ -394,6 +397,10 @@ class NavigationToolbar(NavigationToolbar2QT):
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         provconf.check_validity()
 
+        # get new active_dashboard_plots and set it in memory to be the previous variable
+        new_active_dashboard_plots = copy.deepcopy(self.read_instance.active_dashboard_plots)
+        self.read_instance.active_dashboard_plots = previous_active_dashboard_plots
+
         # generate file trees if GHOST version has changed
         if current_ghost_version != self.read_instance.ghost_version:
             generate_file_trees(self.read_instance)
@@ -408,6 +415,11 @@ class NavigationToolbar(NavigationToolbar2QT):
 
         # update multispecies menu from conf
         multispecies_conf(self.read_instance)
+
+        # update active dashboard plots
+        for position, (previous_plot_type, new_plot_type) in enumerate(zip(previous_active_dashboard_plots, new_active_dashboard_plots)):
+            if previous_plot_type != new_plot_type:
+                self.read_instance.handle_layout_update(new_plot_type, sender=position+2)
 
         # reset from_conf variable to False after reading and filtering is complete
         self.read_instance.from_conf = False

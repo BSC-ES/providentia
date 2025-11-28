@@ -93,14 +93,10 @@ class Canvas(FigureCanvas):
         self.layout_options = ['None', 'boxplot', 'distribution', 'metadata', 'periodic', 
                                'periodic-violin', 'scatter', 'statsummary', 'timeseries', 'taylor', 
                                'fairmode-target', 'fairmode-statsummary']
-
-        # parse active dashboard plot string        
-        if isinstance(self.read_instance.active_dashboard_plots, str):
-            self.read_instance.active_dashboard_plots = [c.strip() for c in self.read_instance.active_dashboard_plots.split(',')]
         
         # stop running if plot type in active_dashboard_plots does not exist
         for plot_type in self.read_instance.active_dashboard_plots:
-            if plot_type not in self.all_plots:
+            if (plot_type not in self.all_plots + ['None']):
                 error = "Error: Plot type {0} is not an option. ".format(plot_type)
                 error += "The available plots are: {0}.".format(self.all_plots[2:])
                 self.read_instance.logger.error(error)
@@ -150,7 +146,7 @@ class Canvas(FigureCanvas):
         # create rest of plot axes (default: timeseries, statsummary, distribution, periodic)
         # also show plot type buttons
         for position, plot_type in enumerate(self.read_instance.active_dashboard_plots):
-            
+                
             # update plot axis
             self.read_instance.update_plot_axis(self, position + 2, plot_type)
 
@@ -194,8 +190,9 @@ class Canvas(FigureCanvas):
 
         # format axes for map, legend and active_dashboard_plots
         for plot_type in ['map', 'legend'] + self.read_instance.active_dashboard_plots:
-            format_axis(self.read_instance, self, self.plot_axes[plot_type], plot_type, 
-                        self.plot_characteristics[plot_type], map_extent=self.read_instance.map_extent)
+            if plot_type != 'None':
+                format_axis(self.read_instance, self, self.plot_axes[plot_type], plot_type, 
+                            self.plot_characteristics[plot_type], map_extent=self.read_instance.map_extent)
 
         # create covers to hide parts of canvas when updating / plotting
         self.canvas_cover = set_formatting(QtWidgets.QWidget(self), self.read_instance.formatting_dict['canvas_cover'])
@@ -971,7 +968,8 @@ class Canvas(FigureCanvas):
             # cover plotting axes also
             if len(self.relative_selected_station_inds) == 0:      
                 for plot_type in self.read_instance.active_dashboard_plots:
-                    self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
+                    if plot_type != 'None':
+                        self.remove_axis_elements(self.plot_axes[plot_type], plot_type)
                 self.top_right_canvas_cover.show() 
                 self.lower_canvas_cover.show()
 
@@ -984,7 +982,8 @@ class Canvas(FigureCanvas):
                 for plot_type in self.read_instance.active_dashboard_plots:
              
                     # update plot
-                    self.update_associated_active_dashboard_plot(plot_type)
+                    if plot_type != 'None':
+                        self.update_associated_active_dashboard_plot(plot_type)
 
                 # un-hide plotting axes
                 self.top_right_canvas_cover.hide() 
@@ -3552,16 +3551,17 @@ class Canvas(FigureCanvas):
 
         # remove titles
         for key in self.read_instance.active_dashboard_plots:
-            if isinstance(self.plot_axes[key], dict):
-                for relevant_temporal_resolution, sub_ax in self.plot_axes[key].items():
-                    if relevant_temporal_resolution in ['hour']:
-                        sub_ax.set_title(label='', 
-                                         fontsize=self.plot_characteristics[key]['axis_title']['fontsize'],
-                                         loc=self.plot_characteristics[key]['axis_title']['loc'])
-            else:
-                self.plot_axes[key].set_title(label='',
-                                              fontsize=self.plot_characteristics[key]['axis_title']['fontsize'],
-                                              loc=self.plot_characteristics[key]['axis_title']['loc'])
+            if key != 'None':
+                if isinstance(self.plot_axes[key], dict):
+                    for relevant_temporal_resolution, sub_ax in self.plot_axes[key].items():
+                        if relevant_temporal_resolution in ['hour']:
+                            sub_ax.set_title(label='', 
+                                            fontsize=self.plot_characteristics[key]['axis_title']['fontsize'],
+                                            loc=self.plot_characteristics[key]['axis_title']['loc'])
+                else:
+                    self.plot_axes[key].set_title(label='',
+                                                fontsize=self.plot_characteristics[key]['axis_title']['fontsize'],
+                                                loc=self.plot_characteristics[key]['axis_title']['loc'])
        
         # hide colourbar
         if plot_type != 'map':
@@ -3599,12 +3599,13 @@ class Canvas(FigureCanvas):
 
         # add titles
         for key in self.read_instance.active_dashboard_plots:
-            if isinstance(self.plot_axes[key], dict):
-                for relevant_temporal_resolution, sub_ax in self.plot_axes[key].items():
-                    if relevant_temporal_resolution in ['hour']:
-                        sub_ax.set_title(**self.plot_characteristics[key]['axis_title'])
-            else:
-                self.plot_axes[key].set_title(**self.plot_characteristics[key]['axis_title'])
+            if key != 'None':
+                if isinstance(self.plot_axes[key], dict):
+                    for relevant_temporal_resolution, sub_ax in self.plot_axes[key].items():
+                        if relevant_temporal_resolution in ['hour']:
+                            sub_ax.set_title(**self.plot_characteristics[key]['axis_title'])
+                else:
+                    self.plot_axes[key].set_title(**self.plot_characteristics[key]['axis_title'])
 
         # show colourbar
         self.plot_axes['cb'].set_visible(True)
