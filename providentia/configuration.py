@@ -64,7 +64,7 @@ class ProvConfiguration:
             setattr(self.read_instance, k, self.parse_parameter(k, val))
                 
         # set default values of the current mode
-        self.default_values = defaults[self.read_instance.mode]
+        self.read_instance.default_values = defaults[self.read_instance.mode]
 
         # direct output to file/screen
         if hasattr(self.read_instance, 'logger') is False:
@@ -681,7 +681,7 @@ class ProvConfiguration:
         split_experiments = [exp.split("-") for exp in self.read_instance.experiments]
 
         # get default ensemble
-        default_ensemble = self.default_values["ensemble"]
+        default_ensemble = self.read_instance.default_values["ensemble"]
 
         # get original domain, ensemble and forecast as passed in the configuration file
         config_domain = copy.deepcopy(self.read_instance.domain) 
@@ -995,7 +995,7 @@ class ProvConfiguration:
         experiment_exists = False
         msg = ""
 
-        # HPC machines download (copy) and hpc interpolation
+        # HPC machines download (copy) and HPC interpolation
         if self.read_instance.machine != "local":
             # search in interp_experiments
             for experiment_type, experiment_dict in interp_experiments.items():
@@ -1005,7 +1005,7 @@ class ProvConfiguration:
             
             msg += f"Cannot find the experiment ID '{expid}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
 
-            # hpc interpolation
+            # HPC interpolation only
             if experiment_exists is False and self.read_instance.mode == 'interpolation':
                 # search in hpc exp_to_interp_path
                 exp_to_interp_path = join(self.read_instance.exp_to_interp_root, expid)
@@ -1134,24 +1134,7 @@ class ProvConfiguration:
                 self.read_instance.experiments = self.read_instance.model
             elif self.read_instance.models:
                 self.read_instance.experiments = self.read_instance.models
-
-        # check and format the start and end date
-        dates = ['start_date', 'end_date']
-        
-        for date_str in dates:
-            date = getattr(self.read_instance, date_str)
-
-            if date == '*':
-                pass
-            elif len(date) == 8:
-                if self.read_instance.mode == 'interpolation':
-                    setattr(self.read_instance, date_str, date[:-2])               
-            elif len(date) == 6:       
-                if self.read_instance.mode != 'interpolation':
-                    setattr(self.read_instance, date_str, date + "01")     
-            else:
-                error = f"Error: The format of {date_str} is not correct, please change it to YYYYMMDD."
-                            
+                     
         # check if species is valid
         if self.read_instance.species:
             species = copy.deepcopy(self.read_instance.species)
@@ -1191,7 +1174,7 @@ class ProvConfiguration:
                 for field_name, fields in self.read_instance.fields_per_section.items()}
         
         # assign defaults
-        for field, default in self.default_values.items():
+        for field, default in self.read_instance.default_values.items():
             current_value = getattr(self.read_instance, field)
 
             # skip ensemble so it is done in decompose_experiment
@@ -1286,23 +1269,26 @@ class ProvConfiguration:
             self.read_instance.active_resolution = self.read_instance.resampling_resolution
         else:
             self.read_instance.active_resolution = self.read_instance.resolution
+          
+        # check and format start_date and end_date
+        dates = ['start_date', 'end_date']
 
-        # check start and end_date format
-        for date_var_name in ['start_date', 'end_date']:
-            date_var = getattr(self.read_instance, date_var_name)
-            if date_var == '*':
+        for date_var_name in dates:
+            date = getattr(self.read_instance, date_var_name)
+            
+            if date == '*':
                 pass
             # YYYYMMDD
-            elif len(date_var) == 8:
+            elif len(date) == 8:
                 if self.read_instance.mode == 'interpolation':
-                    self.read_instance.end_date = date_var[:-2] 
+                    setattr(self.read_instance, date_var_name, date[:-2])    
             # YYYYMM
-            elif len(date_var) == 6:  
+            elif len(date) == 6:  
                 if self.read_instance.mode != 'interpolation':
-                    self.read_instance.end_date = date_var + "01" 
+                    setattr(self.read_instance, date_var_name, date + "01")     
             # throw error if format is not valid
             else:
-                error = f"Error: Invalid value or format for '{date_var_name}': '{date_var}'."
+                error = f"Error: Invalid value or format for '{date_var_name}': '{date}'."
                 self.read_instance.logger.error(error)
                 sys.exit(1)
 
@@ -1313,7 +1299,7 @@ class ProvConfiguration:
                     os.makedirs(path)
 
         # make sure there are experiments for interpolation mode
-        if not self.read_instance.experiments and 'experiments' in self.default_values:
+        if not self.read_instance.experiments and 'experiments' in self.read_instance.default_values:
             error = f"Error: Experiments (experiments) was not defined in the configuration file. It is mandatory for the '{self.read_instance.mode}' mode."
             self.read_instance.logger.error(error)
             sys.exit(1)
@@ -1378,7 +1364,7 @@ class ProvConfiguration:
             # replace calibration factors by new dictionary
             self.read_instance.calibration_factor = calibration_factor_dict
 
-        if len(self.read_instance.active_dashboard_plots) != 4 and 'active_dashboard_plots' in self.default_values:
+        if len(self.read_instance.active_dashboard_plots) != 4 and 'active_dashboard_plots' in self.read_instance.default_values:
             error = 'Error: there must be 4 "active_dashboard_plots"'
             self.read_instance.logger.error(error)
             sys.exit(1)
