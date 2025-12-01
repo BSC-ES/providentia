@@ -896,9 +896,9 @@ class SubmitInterpolation(object):
         self.per_worker_mem_gb = self.guess_memory_per_worker()
         self.per_worker_cpu_fraction = 1.0/self.n_cpus
         self.per_worker_swap_gb = self.per_worker_mem_gb * 0.05 
-        self.cpu_fraction_limit = 0.8 
-        self.mem_fraction_limit = 0.8
-        self.swap_fraction_limit = 0.8
+        self.cpu_fraction_limit = 0.7 
+        self.mem_fraction_limit = 0.7
+        self.swap_fraction_limit = 0.7
 
         # set run commands
         self.commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(

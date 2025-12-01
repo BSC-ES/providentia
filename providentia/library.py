@@ -77,11 +77,7 @@ class Providentia:
         self.representativity_info = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
 
         # set configuration variables, as well as any other defined variables
-        valid_config = self.set_config(**self.kwargs)
-
-        # if configuration read was not valid then return here
-        if not valid_config:
-            return
+        self.valid_config = self.set_config(**self.kwargs)
 
     def read(self):
         """ Wrapper method to read data. """
@@ -118,6 +114,14 @@ class Providentia:
         :param upper: upper bound to retain data
         :type upper: str, optional
         """
+
+        # check have valid conf and have loaded data
+        valid_config = self.have_valid_config()
+        if not valid_config:
+            return
+        loaded_data = self.loaded_data()
+        if not loaded_data:
+            return
 
         # variable to know if to filter or not
         do_filter = False
@@ -225,6 +229,14 @@ class Providentia:
         :type station: str
         """
         
+        # check have valid conf and have loaded data
+        valid_config = self.have_valid_config()
+        if not valid_config:
+            return
+        loaded_data = self.loaded_data()
+        if not loaded_data:
+            return
+
         if type(station) == 'str':
             stations_to_keep = [station]
         else:
@@ -240,6 +252,14 @@ class Providentia:
         :param initialise: Indicates whether to reset data to initial state when class was initialised 
         :type initialise: boolean, optional
         """
+
+        # check have valid conf and have loaded data
+        valid_config = self.have_valid_config()
+        if not valid_config:
+            return
+        loaded_data = self.loaded_data()
+        if not loaded_data:
+            return
 
         if initialise:
             self.logger.info(f'Resetting data filters to when class was initialised, loading {self.subsection} subsection filters.')
@@ -351,6 +371,14 @@ class Providentia:
         :rtype: list
         """
 
+        # check have valid conf and have loaded data
+        valid_config = self.have_valid_config()
+        if not valid_config:
+            return
+        loaded_data = self.loaded_data()
+        if not loaded_data:
+            return
+
         # close any previously open figures
         plt.close()
 
@@ -449,7 +477,7 @@ class Providentia:
                 
                 # get available chunk timeseries resolutions
                 available_timeseries_chunk_resolutions = get_possible_resampling_resolutions(self.active_resolution,
-                                                                                             daily_forecast=self.daily_forecast)
+                                                                                            daily_forecast=self.daily_forecast)
 
                 # show warning if it is not
                 if chunk_resolution not in available_timeseries_chunk_resolutions:
@@ -588,7 +616,7 @@ class Providentia:
 
             # create gridspec and add it to a list
             gs =  gridspec.GridSpecFromSubplotSpec(nrows, ncols, subplot_spec=main_gs[0],
-                                                   **self.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
+                                                **self.plot_characteristics["fairmode-statsummary"]["gridspec_kw"])
             ax = [fig.add_subplot(gs[i, j]) for i in range(nrows) for j in range(ncols)]
         else:
             ax = fig.add_subplot(main_gs[0])
@@ -618,7 +646,7 @@ class Providentia:
             func = getattr(self.plotting, 'make_{}'.format(base_plot_type.replace('-','_')))
         elif base_plot_type != 'legend':
             func = getattr(self.plotting, 'make_{}'.format(base_plot_type.split('-')[0]))
-         
+        
         # set boolean on whether to plot obs in legend or not, and relevant data labels (data labels plotted)
         if (base_plot_type == 'scatter') or ('bias' in plot_options) or (z_statistic_sign == 'bias'):
             set_obs_legend = False
@@ -660,7 +688,7 @@ class Providentia:
                 map_title = '{}'.format(labelb)
 
             func(relevant_ax, networkspeci, self.plot_characteristics[plot_type], plot_options, zstat=zstat, 
-                 labela=labela, labelb=labelb)
+                labela=labela, labelb=labelb)
         # periodic plot
         elif base_plot_type == 'periodic':
             func(grid_dict, networkspeci, data_labels, self.plot_characteristics[plot_type], plot_options, zstat=zstat)
@@ -728,7 +756,7 @@ class Providentia:
 
             # make plot
             func(relevant_ax, networkspeci, relevant_data_labels, self.plot_characteristics[plot_type], plot_options,
-                 statsummary=True, plotting_paradigm='summary', stats_df=stats_df)     
+                statsummary=True, plotting_paradigm='summary', stats_df=stats_df)     
 
             # re-filter for original subsection
             kwargs['subsection'] = orig_ss
@@ -788,8 +816,8 @@ class Providentia:
 
             # make plot
             func(relevant_ax, networkspeci, relevant_data_labels, 
-                 self.plot_characteristics[plot_type], plot_options, plotting_paradigm='summary', 
-                 stats_df=stats_df)
+                self.plot_characteristics[plot_type], plot_options, plotting_paradigm='summary', 
+                stats_df=stats_df)
 
             # re-filter for original subsection
             kwargs['subsection'] = orig_ss
@@ -802,18 +830,18 @@ class Providentia:
         # make timeseries plot
         elif base_plot_type == 'timeseries':
             func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                 plot_options, chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)
+                plot_options, chunk_stat=chunk_stat, chunk_resolution=chunk_resolution)
         
         # make taylor diagram plot
         elif base_plot_type == 'taylor':
             stddev_max = self.selected_station_stddev_max[networkspeci]
             func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                 plot_options, zstat=zstat, stddev_max=stddev_max)
+                plot_options, zstat=zstat, stddev_max=stddev_max)
             
         # other plots
         elif base_plot_type != 'legend': 
             func(relevant_ax, networkspeci, data_labels, self.plot_characteristics[plot_type], 
-                 plot_options)
+                plot_options)
 
         # get relevant station inds
         if self.temporal_colocation:
@@ -890,16 +918,16 @@ class Providentia:
                     title = self.plot_characteristics[plot_type]['axis_title']['label']
                     if title == '':
                         stat_label = generate_colourbar_detail(self, zstat, 0, 1, self.plot_characteristics[plot_type], 
-                                                               speci, only_label=True)
+                                                            speci, only_label=True)
                         if '[' in stat_label:
                             stat_label = stat_label.split('[')[0].strip()
                         if n_stations == 1:
                             title = '{} for {}, {} ({:.{}f}, {:.{}f})'.format(stat_label, current_station_reference,
-                                                                              current_station_name, 
-                                                                              current_lon,
-                                                                              self.plot_characteristics[plot_type]['round_decimal_places']['title'],
-                                                                              current_lat,
-                                                                              self.plot_characteristics[plot_type]['round_decimal_places']['title'])
+                                                                            current_station_name, 
+                                                                            current_lon,
+                                                                            self.plot_characteristics[plot_type]['round_decimal_places']['title'],
+                                                                            current_lat,
+                                                                            self.plot_characteristics[plot_type]['round_decimal_places']['title'])
                             if base_plot_type == 'map':
                                 title = '{} {}'.format(map_title, title)
 
@@ -917,11 +945,11 @@ class Providentia:
                     if title == '':
                         if n_stations == 1:
                             title = '{}, {} ({:.{}f}, {:.{}f})'.format(current_station_reference,
-                                                                       current_station_name, 
-                                                                       current_lon,
-                                                                       self.plot_characteristics[plot_type]['round_decimal_places']['title'],
-                                                                       current_lat,
-                                                                       self.plot_characteristics[plot_type]['round_decimal_places']['title'])
+                                                                    current_station_name, 
+                                                                    current_lon,
+                                                                    self.plot_characteristics[plot_type]['round_decimal_places']['title'],
+                                                                    current_lat,
+                                                                    self.plot_characteristics[plot_type]['round_decimal_places']['title'])
                         else:
                             title = '{} stations'.format(n_stations)
 
@@ -1068,6 +1096,14 @@ class Providentia:
         :rtype: np.ndarray
         """
 
+        # check have valid conf and have loaded data
+        valid_config = self.have_valid_config()
+        if not valid_config:
+            return
+        loaded_data = self.loaded_data()
+        if not loaded_data:
+            return
+
         # if no specific labels defined then take first data label and give warning
         if (labela == '') & (labelb == ''):
             labela = self.data_labels[0]
@@ -1092,9 +1128,9 @@ class Providentia:
 
         # if only 1 label passed and stat is a bias statistic then throw error
         elif (z_statistic_sign == 'bias') & (labelb == ''):
-              msg = "Calculating a bias statistic, and only 1 label is set. Cannot calculate statistic."
-              show_message(self, msg)
-              return
+            msg = "Calculating a bias statistic, and only 1 label is set. Cannot calculate statistic."
+            show_message(self, msg)
+            return
 
         # if calculating bias stat but temporal_colocation is not active, then throw error
         elif (z_statistic_type == 'expbias') & (not self.temporal_colocation):
@@ -1116,7 +1152,7 @@ class Providentia:
 
         # calculate statistic
         stat = calculate_statistic(self, self, networkspeci, stat, [labela], [labelb], per_station=per_station, 
-                                   period=period, chunk_resolution=chunk)
+                                period=period, chunk_resolution=chunk)
         
         return stat
 
@@ -1259,6 +1295,11 @@ class Providentia:
         :type config: str, optional
         """
 
+        # check have valid conf
+        valid_config = self.have_valid_config()
+        if not valid_config:
+            return
+
         # if conf or config not None, then print that file
         if conf:
             pass
@@ -1292,10 +1333,22 @@ class Providentia:
         :type format: str, optional
         """
 
+        # check have valid conf and have loaded data
+        valid_config = self.have_valid_config()
+        if not valid_config:
+            return
+        loaded_data = self.loaded_data()
+        if not loaded_data:
+            return
+
         # set fname if not provided
         if fname == '':
             date_str = datetime.datetime.today().strftime('%Y%m%d_%H%M')
             fname = join(PROVIDENTIA_ROOT, 'saved_data/PRV_{}'.format(date_str))
+
+        # remove extension if provided in fname
+        if '.' in fname:
+            fname = fname.split('.')[0]
 
         if format in ['conf','config','.conf']:
             fname = '{}.conf'.format(fname)
@@ -1319,6 +1372,14 @@ class Providentia:
         :return: Data
         :rtype: numpy.ndarray
         """
+
+        # check have valid conf and have loaded data
+        valid_config = self.have_valid_config()
+        if not valid_config:
+            return
+        loaded_data = self.loaded_data()
+        if not loaded_data:
+            return
 
         # for non-ghost, update networkspecies name 
         # (e.g. ghost_btx/ghost_btx|sconcc6h6 -> ghost_btx-ghost_btx|sconcc6h6)
@@ -1362,6 +1423,14 @@ class Providentia:
         :rtype: numpy.ndarray
         """
 
+        # check have valid conf and have loaded data
+        valid_config = self.have_valid_config()
+        if not valid_config:
+            return
+        loaded_data = self.loaded_data()
+        if not loaded_data:
+            return
+
         # if variable is undefined then print warning
         if var == '':
             msg = "Variable to read is undefined."
@@ -1383,6 +1452,11 @@ class Providentia:
                 return var_data
 
     def load(self):
+
+        # check have valid conf
+        valid_config = self.have_valid_config()
+        if not valid_config:
+            return
 
         # generate file trees if needed
         generate_file_trees(self)
@@ -1419,7 +1493,7 @@ class Providentia:
 
         # update available experiments for selected fields
         get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
-                              self.network, self.species)
+                            self.network, self.species)
 
         # read data
         self.read()  
@@ -1433,9 +1507,32 @@ class Providentia:
         # set variable to know if data is in intial state or not
         self.initialised = True
     
+    def loaded_data(self):
+        """ Helper method for determining if data has been read"""
+
+        if not hasattr(self, 'data_in_memory'):
+            self.logger.info('Error: Data has not been loaded. Use the load() method')
+            return False
+        else:
+            return True
+        
+    def have_valid_config(self):
+        """ Helper method for determining if a valid .conf file has been read"""
+
+        if not self.valid_config:
+            self.logger.info("Error: A valid configuration file has not been read. Please reinitialise your Providentia object with a valid file: prv.Providentia('filename.conf')")
+            return False
+        else:
+            return True
+
     def download(self, **kwargs):
         """ Wrapper function for initialising Download class"""
-        
+
+        # check have valid conf
+        valid_config = self.have_valid_config()
+        if not valid_config:
+            return
+
         from .download import Download
 
         kwargs['download'] = True
@@ -1457,6 +1554,11 @@ class Providentia:
     def interpolate(self, **kwargs):
         """ Wrapper function for initialising Interpolation class"""
         
+        # check have valid conf
+        valid_config = self.have_valid_config()
+        if not valid_config:
+            return
+
         from .interpolation import experiment_interpolation_submission as interpolation
         
         kwargs['interpolation'] = True
@@ -1490,6 +1592,11 @@ class Providentia:
 
     def report(self, **kwargs):
         """ Wrapper function for initialising Report class"""
+
+        # check have valid conf
+        valid_config = self.have_valid_config()
+        if not valid_config:
+            return
 
         from .report import Report
         
