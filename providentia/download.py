@@ -292,62 +292,73 @@ class Download(object):
 
         # initialise temporal variables
         prv_user, prv_password = None, None
+        counter = 0
 
-        # if couldn't get user, ask for it
-        if self.prv_user is None:
-            prv_user = ''
-            while prv_user == '':
-                prv_user = input(f"\nInsert BSC {self.remote_machine} ssh user: ")
-            self.prv_user = prv_user
-        
-        # if couldn't get user, check if you have to ask for it
-        if self.prv_password is None:
-            # check if user needs a password
+        # iterate through the different 
+        while True:
+
+            # ask for user if not in .env
+            if self.prv_user is None:
+                prv_user = ''
+                while prv_user == '':
+                    prv_user = input(f"\nInsert BSC {self.remote_machine} ssh user: ")
+                self.prv_user = prv_user
+            
+            # ask for password if not in .env
+            if self.prv_password is None:
+                try:
+                    self.ssh.connect(self.remote_hostname, username=self.prv_user, password='placeholder')
+                # if authentication error, that means that the user or and the password are wrong
+                except paramiko.ssh_exception.AuthenticationException:
+                    # if name was not changed, then user in .env is not valid
+                    if prv_user is None:
+                        error = f"Authentication failed. Please, check if PRV_USER on {join(PROVIDENTIA_ROOT, '.env')} aligns with your BSC {self.remote_machine} ssh user."
+                        error += "\nIf it does not, change the user to the correct one. If it does, delete the whole PRV_USER row and execute again."
+                        self.logger.error(error)
+                        sys.exit(1)
+                    else:
+                        prv_password = getpass("Insert password: ")
+                        self.prv_password = prv_password
+
+            # catch identification method
             try:
-                self.ssh.connect(self.remote_hostname, username=self.prv_user, password='placeholder')
-            # if authentication error, that means that the user or and the password are wrong
+                # connect through ssh and create Secure File Transfer Protocol object
+                self.ssh.connect(self.remote_hostname, username=self.prv_user, password=self.prv_password)
+                self.sftp = self.ssh.open_sftp()
+                
+            # if credentials are invalid, notify the user and retry
             except paramiko.ssh_exception.AuthenticationException:
-                # if name was not changed, then user in .env is not valid
-                if prv_user is None:
-                    error = f"Authentication failed. Please, check if PRV_USER on {join(PROVIDENTIA_ROOT, '.env')} aligns with your BSC {self.remote_machine} ssh user."
-                    error += "\nIf it does not, change the user to the correct one. If it does, delete the whole PRV_USER row and execute again."
+                msg = "Authentication failed. Please re-enter your credentials."
+                show_message(self, msg)
+
+                self.prv_user, self.prv_password = None, None
+                counter += 1
+
+                if counter == 2:
+                    error = "Error: Maximum number of authentication attempts reached. Please close and reopen the terminal, then try again"
                     self.logger.error(error)
                     sys.exit(1)
-                else:
-                    prv_password = getpass("Insert password: ")
-                    self.prv_password = prv_password
 
-        # catch identification method
-        try:
-            # connect through ssh and create Secure File Transfer Protocol object
-            self.ssh.connect(self.remote_hostname, username=self.prv_user, password=self.prv_password)
-            self.sftp = self.ssh.open_sftp()
-            
-        # if credentials are invalid, throw an error
-        except paramiko.ssh_exception.AuthenticationException:
-            error = "Authentication failed."
-            # if user or password were taken from .env (did not change), tell the user to check .env
-            if prv_user is None:
-                error += f" Please, check your credentials on {join(PROVIDENTIA_ROOT, '.env')}"
-            self.logger.error(error)
-            sys.exit(1)
+                continue
 
-        # if pwd or user changed, ask if user wants to remember credentials
-        if (prv_user is not None) or (prv_password is not None):
-            # ask user if they want their credentials saved
-            remind_txt = input("\nRemember credentials (y/n)? ")
-            while remind_txt.lower() not in ['y','n']:
-                remind_txt = input("\nRemember credentials (y/n)? ")
-            
-            # create .env with the input user and/or password
-            if remind_txt.lower() == 'y':
-                with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
-                    if prv_user is not None:
-                        f.write(f"PRV_USER={self.prv_user}\n")
-                    if prv_password is not None:
-                        f.write(f"PRV_PWD={self.prv_password}\n")
+            # if pwd or user changed, ask if user wants to remember credentials
+            if (prv_user is not None) or (prv_password is not None):
+                # ask user if they want their credentials saved
+                while True:
+                    remind_txt = input("\nRemember credentials ([y]/n)? ")
+                    if remind_txt in ['y', 'n', '']:
+                        break
+                
+                # create .env with the input user and/or password
+                if remind_txt.lower() in ['y', '']:
+                    with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
+                        if prv_user is not None:
+                            f.write(f"PRV_USER={self.prv_user}\n")
+                        if prv_password is not None:
+                            f.write(f"PRV_PWD={self.prv_password}\n")
 
-                self.logger.info(f"\nRemote machine credentials saved on {join(PROVIDENTIA_ROOT, '.env')}\n")
+                    self.logger.info(f"\nRemote machine credentials saved on {join(PROVIDENTIA_ROOT, '.env')}\n")
+                break
                     
     def select_files_to_download(self, nc_files_to_download):
         """ Returns the files that are not already downloaded. """
