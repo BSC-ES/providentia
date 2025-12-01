@@ -26,12 +26,12 @@ from .warnings_prv import show_message
 from .zenodo import Zenodo
 
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
-REMOTE_MACHINE = "storage5"
 
 # load the defined experiments paths, agrupations yaml and mapping species
 data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
+dl_hpc = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'dl_hpc.yaml')))
 
 class Download(object):
     def __init__(self, **kwargs):
@@ -108,14 +108,14 @@ class Download(object):
         # initialize the necessary things in local
         if self.machine == "local":
 
-            # initialise remote hostname
-            self.remote_hostname = "transfer1.bsc.es"
+            # index to know which remote machine has been tried already
+            self.switched_remote = 0
+
+            # initialise remote hostname and machine
+            self.remote_hostname, self.remote_machine = dl_hpc[self.switched_remote]
 
             # initialise ssh 
             self.ssh = None
-
-            # initialise boolean thath indicates whether remote machine changed 
-            self.switched_remote = False
 
     def run(self):
         for section_ind, section in enumerate(self.sections):
@@ -250,15 +250,12 @@ class Download(object):
                 self.ssh.close() 
                 self.sftp.close()
 
-    def connect(self):
-        # declare that we are using the remote machine
-        global REMOTE_MACHINE
-        
+    def connect(self):       
         # initialise the paths
-        self.ghost_remote_obs_path = data_paths[REMOTE_MACHINE]["ghost_root"]
-        self.nonghost_remote_obs_path = data_paths[REMOTE_MACHINE]["nonghost_root"]
-        self.exp_remote_path = data_paths[REMOTE_MACHINE]["exp_root"]
-        self.exp_to_interp_remote_path = data_paths[REMOTE_MACHINE]["exp_to_interp_root"]
+        self.ghost_remote_obs_path = data_paths[self.remote_machine]["ghost_root"]
+        self.nonghost_remote_obs_path = data_paths[self.remote_machine]["nonghost_root"]
+        self.exp_remote_path = data_paths[self.remote_machine]["exp_root"]
+        self.exp_to_interp_remote_path = data_paths[self.remote_machine]["exp_to_interp_root"]
 
         # get public remote machine public key and add it to ssh object
         _, output = subprocess.getstatusoutput(f"ssh-keyscan -t ed25519 {self.remote_hostname}")
@@ -270,22 +267,20 @@ class Download(object):
         
         # in case transfer broke
         except:
-            msg = f"Remote machine {REMOTE_MACHINE} not working right now."
-
             # if the remote machine has not been changed
-            if not self.switched_remote:
+            if self.switched_remote < len(dl_hpc):
+
                 # change remote machine and hostname
-                self.remote_hostname, REMOTE_MACHINE = "glogin4.bsc.es", "mn5" 
-                msg += f" Changing it to {REMOTE_MACHINE}..."
-
-            show_message(self, msg)
-            
-            # if the remote machine has not been changed
-            if not self.switched_remote:
-                # connect but with the new machine
-                self.switched_remote = True
+                self.switched_remote += 1
+                self.remote_hostname, self.remote_machine = dl_hpc[self.switched_remote]
+                
+                msg = f"Remote machine {self.remote_machine} not working right now. Changing it to {self.remote_machine}..."
+                show_message(self, msg)
+ 
+                # connect with the new machine
                 return self.connect()
-            # if it has been changed already, exit
+            
+            # no machines left to try, exit
             else:
                 error = "Error: None of the machines are working right now. Try later."
                 self.logger.error(error)
@@ -301,7 +296,7 @@ class Download(object):
         if self.prv_user is None:
             prv_user = ''
             while prv_user == '':
-                prv_user = input(f"\nInsert BSC {REMOTE_MACHINE} ssh user: ")
+                prv_user = input(f"\nInsert BSC {self.remote_machine} ssh user: ")
             self.prv_user = prv_user
         
         # if couldn't get user, check if you have to ask for it
@@ -313,7 +308,7 @@ class Download(object):
             except paramiko.ssh_exception.AuthenticationException:
                 # if name was not changed, then user in .env is not valid
                 if prv_user is None:
-                    error = f"Authentication failed. Please, check if PRV_USER on {join(PROVIDENTIA_ROOT, '.env')} aligns with your BSC {REMOTE_MACHINE} ssh user."
+                    error = f"Authentication failed. Please, check if PRV_USER on {join(PROVIDENTIA_ROOT, '.env')} aligns with your BSC {self.remote_machine} ssh user."
                     error += "\nIf it does not, change the user to the correct one. If it does, delete the whole PRV_USER row and execute again."
                     self.logger.error(error)
                     sys.exit(1)
@@ -390,7 +385,7 @@ class Download(object):
         if not initial_check:
             # print current_network
             self.logger.info('\n'+'-'*40)
-            self.logger.info(f"\nDownloading non-GHOST {network} network data from {REMOTE_MACHINE}...")
+            self.logger.info(f"\nDownloading non-GHOST {network} network data from {self.remote_machine}...")
 
         # if not valid network, check if user put the network on init_prov 
         # TODO Move to configuration.py
@@ -405,7 +400,7 @@ class Download(object):
         try:
             self.sftp.stat(join(self.nonghost_remote_obs_path,network))
         except FileNotFoundError:
-            msg = f"There is no data available in {REMOTE_MACHINE} for {network} network."
+            msg = f"There is no data available in {self.remote_machine} for {network} network."
             show_message(self, msg, deactivate=initial_check)
             return
 
@@ -427,7 +422,7 @@ class Download(object):
             try:
                 sftp_species = self.species if self.species else set(self.sftp.listdir(join(self.nonghost_remote_obs_path,network,resolution))).intersection(self.available_species)
             except FileNotFoundError:
-                msg = f"There is no data available in {REMOTE_MACHINE} for {network} network at {resolution} resolution"
+                msg = f"There is no data available in {self.remote_machine} for {network} network at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species: 
@@ -450,12 +445,12 @@ class Download(object):
 
                 #  print the species, resolution and network combinations that are going to be downloaded
                 if not initial_check:
-                    self.logger.info(f"\n  - {local_dir}, source: {remote_dir} ({REMOTE_MACHINE})")
+                    self.logger.info(f"\n  - {local_dir}, source: {remote_dir} ({self.remote_machine})")
 
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
                 except FileNotFoundError:
-                    msg = f"There is no data available in {REMOTE_MACHINE} for {network} network for {species} species at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} for {network} network for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
                 
@@ -464,7 +459,7 @@ class Download(object):
 
                 # warning if network + species + resolution + date range combination gets no matching results       
                 if not valid_nc_files:                 
-                    msg = f"There is no data available in {REMOTE_MACHINE} from {self.start_date} to {self.end_date} for {network} network {species} species at {resolution} resolution."
+                    msg = f"There is no data available in {self.remote_machine} from {self.start_date} to {self.end_date} for {network} network {species} species at {resolution} resolution."
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -517,17 +512,17 @@ class Download(object):
         if not initial_check:
             # print current_network
             self.logger.info('\n'+'-'*40)
-            self.logger.info(f"\nDownloading GHOST {network} network data from {REMOTE_MACHINE}...")
+            self.logger.info(f"\nDownloading GHOST {network} network data from {self.remote_machine}...")
 
         # if not valid network, next
         if network not in self.sftp.listdir(self.ghost_remote_obs_path):
-            msg = f"There is no data available in {REMOTE_MACHINE} for {network} network."
+            msg = f"There is no data available in {self.remote_machine} for {network} network."
             show_message(self, msg, deactivate=initial_check)
             return 
         
         # if not valid combination of GHOST version and network, next 
         elif self.ghost_version not in self.sftp.listdir(join(self.ghost_remote_obs_path,network)):
-            msg = f"There is no data available in {REMOTE_MACHINE} for {network} network for the current GHOST version ({self.ghost_version})."
+            msg = f"There is no data available in {self.remote_machine} for {network} network for the current GHOST version ({self.ghost_version})."
             
             available_ghost_versions = set(self.sftp.listdir(join(self.ghost_remote_obs_path,network))).intersection(self.possible_ghost_versions)
 
@@ -580,7 +575,7 @@ class Download(object):
             try:
                 sftp_species = self.species if self.species else set(self.sftp.listdir(join(remote_dir,resolution))).intersection(self.available_species)
             except FileNotFoundError:
-                msg = f"There is no data available in {REMOTE_MACHINE} for {network} network at {resolution} resolution"
+                msg = f"There is no data available in {self.remote_machine} for {network} network at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species: 
@@ -604,12 +599,12 @@ class Download(object):
 
                 #  print the species, resolution and network combinations that are going to be downloaded
                 if not initial_check:
-                    self.logger.info(f"\n  - {local_dir}, source: {remote_dir} ({REMOTE_MACHINE})")
+                    self.logger.info(f"\n  - {local_dir}, source: {remote_dir} ({self.remote_machine})")
 
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
                 except FileNotFoundError:
-                    msg = f"There is no data available in {REMOTE_MACHINE} for {network} network for {species} species at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} for {network} network for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
                 
@@ -618,7 +613,7 @@ class Download(object):
 
                 # warning if network + species + resolution + date range combination gets no matching results       
                 if not valid_nc_files:                 
-                    msg = f"There is no data available in {REMOTE_MACHINE} from {self.start_date} to {self.end_date} for {network} network {species} species at {resolution} resolution."
+                    msg = f"There is no data available in {self.remote_machine} from {self.start_date} to {self.end_date} for {network} network {species} species at {resolution} resolution."
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -671,7 +666,7 @@ class Download(object):
         if not initial_check:
             # print current experiment
             self.logger.info('\n'+'-'*40)
-            self.logger.info(f"\nDownloading {experiment} experiment data from {REMOTE_MACHINE}...")
+            self.logger.info(f"\nDownloading {experiment} experiment data from {self.remote_machine}...")
             
         # get resolution and species combinations
         res_spec_dir = []
@@ -692,7 +687,7 @@ class Download(object):
         try:
             self.sftp.stat(remote_dir)
         except FileNotFoundError:
-            msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment for the current GHOST version ({self.ghost_version})."
+            msg = f"There is no data available in {self.remote_machine} for {experiment_new} experiment for the current GHOST version ({self.ghost_version})."
 
             # get possible GHOST versions from the combination of GHOST_standards and the real avaibles in the experiment remote machine path
             possible_ghost_versions = set(self.sftp.listdir(self.exp_remote_path)).intersection(set(self.possible_ghost_versions))
@@ -766,14 +761,14 @@ class Download(object):
             try:
                 sftp_species = self.species if self.species else set(self.sftp.listdir(join(remote_dir,resolution))).intersection(self.available_species)
             except FileNotFoundError:
-                msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment at {resolution} resolution"
+                msg = f"There is no data available in {self.remote_machine} for {experiment_new} experiment at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species: 
                 try:
                     sftp_network = self.network if self.network else self.sftp.listdir(join(remote_dir,resolution,species))
                 except FileNotFoundError:
-                    msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment for {species} species at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} for {experiment_new} experiment for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
                 for network in sftp_network:
@@ -796,9 +791,9 @@ class Download(object):
                 if not initial_check:
                     local_path = remote_dir.split('/',7)[-1]
                     if self.ghost_version in ["1.2", "1.3", "1.3.1"]:
-                        self.logger.info(f"\n  - {join(self.exp_root,self.ghost_version,'-'.join(local_path.split('/')[1:4]),*local_path.split('/')[4:])}, source: {remote_dir} ({REMOTE_MACHINE})")
+                        self.logger.info(f"\n  - {join(self.exp_root,self.ghost_version,'-'.join(local_path.split('/')[1:4]),*local_path.split('/')[4:])}, source: {remote_dir} ({self.remote_machine})")
                     else:
-                        self.logger.info(f"\n  - {join(self.exp_root,local_path)}, source: {remote_dir} ({REMOTE_MACHINE})")
+                        self.logger.info(f"\n  - {join(self.exp_root,local_path)}, source: {remote_dir} ({self.remote_machine})")
             
                 network = remote_dir.split('/')[-1]
                 species = remote_dir.split('/')[-2]
@@ -808,7 +803,7 @@ class Download(object):
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
                 except FileNotFoundError:
-                    msg = f"There is no data available in {REMOTE_MACHINE} for {experiment_new} experiment for {species} species {network} network at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} for {experiment_new} experiment for {species} species {network} network at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -817,7 +812,7 @@ class Download(object):
 
                 # warning if experiment + species + resolution + network + date range combination gets no matching results       
                 if not valid_nc_files:                 
-                    msg = f"There is no data available in {REMOTE_MACHINE} from {self.start_date} to {self.end_date} for {experiment_new} experiment {species} species {network} network at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} from {self.start_date} to {self.end_date} for {experiment_new} experiment {species} species {network} network at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -872,7 +867,7 @@ class Download(object):
         if not initial_check:
             # print current experiment
             self.logger.info('\n'+'-'*40)
-            self.logger.info(f"\nDownloading {experiment} non-interpolated experiment data from {REMOTE_MACHINE}...")
+            self.logger.info(f"\nDownloading {experiment} non-interpolated experiment data from {self.remote_machine}...")
             
         # get resolution and species combinations
         res_spec_dir = []
@@ -911,7 +906,7 @@ class Download(object):
 
             # if none of the paths are in this current machine, break
             if not exp_dir_functional_list:
-                msg += f"None of the paths specified in {join('settings', 'interp_experiments.yaml')} are available on the remote machine ({REMOTE_MACHINE}). "
+                msg += f"None of the paths specified in {join('settings', 'interp_experiments.yaml')} are available on the remote machine ({self.remote_machine}). "
             # if any path works, get the first one that has the experiment
             else:
                 # get first functional directory  
@@ -927,7 +922,7 @@ class Download(object):
 
                 # if the experiment-domain combination is not possible, show the warning
                 if experiment_exists is False:
-                    msg += f"There is no data available for the {exp_id} experiment with the {domain} domain in none of the paths specified in {join('settings', 'interp_experiments.yaml')} in the remote machine ({REMOTE_MACHINE}). "
+                    msg += f"There is no data available for the {exp_id} experiment with the {domain} domain in none of the paths specified in {join('settings', 'interp_experiments.yaml')} in the remote machine ({self.remote_machine}). "
 
         # if experiment was not in the list, or any of the paths were available
         # or there was no valid path experiment combination then search in the gpfs directory
@@ -959,7 +954,7 @@ class Download(object):
                 available_species = self.available_species+[spec[0] for spec in mapping_species.values()]
                 sftp_species = self.species if self.species else set(self.sftp.listdir(join(remote_dir,resolution))).intersection(available_species)
             except FileNotFoundError:
-                msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain at {resolution} resolution"
+                msg = f"There is no data available in {self.remote_machine} for the {exp_id} experiment with the {domain} domain at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
                 continue
 
@@ -1000,7 +995,7 @@ class Download(object):
                 
                 # if no species were found, then show the message
                 if species_exists is False:
-                    msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain for {species} species at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} for the {exp_id} experiment with the {domain} domain for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -1020,7 +1015,7 @@ class Download(object):
             for remote_dir in res_spec_dir:
                 if not initial_check:
                     local_path = remote_dir.split('/', 6)[-1]
-                    self.logger.info(f"\n  - {join(self.exp_to_interp_root,local_path)}, source: {remote_dir} ({REMOTE_MACHINE})")
+                    self.logger.info(f"\n  - {join(self.exp_to_interp_root,local_path)}, source: {remote_dir} ({self.remote_machine})")
                          
                 # get nc files
                 nc_files = self.sftp.listdir(remote_dir)
@@ -1074,7 +1069,7 @@ class Download(object):
                 
                 # if there is no options with the ensemble, tell the user
                 if nc_files == []:
-                    msg = f"There is no data available in {REMOTE_MACHINE} for the {exp_id} experiment with the {domain} domain with the {ensemble} ensemble."
+                    msg = f"There is no data available in {self.remote_machine} for the {exp_id} experiment with the {domain} domain with the {ensemble} ensemble."
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -1083,7 +1078,7 @@ class Download(object):
 
                 # warning if experiment + species + resolution + network + date range combination gets no matching results       
                 if not valid_nc_files:                 
-                    msg = f"There is no data available in {REMOTE_MACHINE} from {self.start_date} to {self.end_date} for {experiment} experiment {species} species at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} from {self.start_date} to {self.end_date} for {experiment} experiment {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
