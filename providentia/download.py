@@ -268,13 +268,14 @@ class Download(object):
         # in case transfer broke
         except:
             # if the remote machine has not been changed
-            if self.switched_remote < len(dl_hpc):
+            if self.switched_remote < len(dl_hpc) - 1:
 
                 # change remote machine and hostname
                 self.switched_remote += 1
+                previous_remote_hostname = self.remote_hostname
                 self.remote_hostname, self.remote_machine = dl_hpc[self.switched_remote]
                 
-                msg = f"Remote machine {self.remote_machine} not working right now. Changing it to {self.remote_machine}..."
+                msg = f"Remote machine {previous_remote_hostname} not working right now. Changing it to {self.remote_hostname}..."
                 show_message(self, msg)
  
                 # connect with the new machine
