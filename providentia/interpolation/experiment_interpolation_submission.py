@@ -28,6 +28,7 @@ from configuration import ProvConfiguration, load_conf
 # load the defined experiments and species yamls
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
+temporal_resolution_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'temporal_resolution_map.yaml')))
 
 class SubmitInterpolation(object):
     """ Class that handles the interpolation submission. """
@@ -219,30 +220,7 @@ class SubmitInterpolation(object):
                     # if output resolution is instantaneous, prioritise instanstaneous resolutions first,
                     # then non-instanstaneous
 
-                    if temporal_resolution_to_output == 'hourly':
-                        resolutions_to_keep = ['hourly', '3hourly', '6hourly', 'daily', 'monthly',
-                                               'hourly_instantaneous', '3hourly_instantaneous', '6hourly_instantaneous']
-                    elif temporal_resolution_to_output == 'hourly_instantaneous':
-                        resolutions_to_keep = ['hourly_instantaneous', '3hourly_instantaneous', '6hourly_instantaneous',
-                                               'hourly', '3hourly', '6hourly', 'daily', 'monthly']
-                    elif temporal_resolution_to_output == '3hourly':
-                        resolutions_to_keep = ['3hourly', 'hourly', '6hourly', 'daily', 'monthly',
-                                               '3hourly_instantaneous', 'hourly_instantaneous', '6hourly_instantaneous']
-                    elif temporal_resolution_to_output == '3hourly_instantaneous':
-                        resolutions_to_keep = ['3hourly_instantaneous', 'hourly_instantaneous', '6hourly_instantaneous',
-                                               '3hourly', 'hourly', '6hourly', 'daily', 'monthly']
-                    elif temporal_resolution_to_output == '6hourly':  
-                        resolutions_to_keep = ['6hourly', 'hourly', '3hourly', 'daily', 'monthly',
-                                               '6hourly_instantaneous', 'hourly_instantaneous', '3hourly_instantaneous']
-                    elif temporal_resolution_to_output == '6hourly_instantaneous':
-                        resolutions_to_keep = ['6hourly_instantaneous', 'hourly_instantaneous', '3hourly_instantaneous',
-                                               '6hourly', 'hourly', '3hourly', 'daily', 'monthly']
-                    elif temporal_resolution_to_output == 'daily':
-                        resolutions_to_keep = ['daily', 'hourly', '3hourly', '6hourly', 'monthly',
-                                               'hourly_instantaneous', '3hourly_instantaneous', '6hourly_instantaneous']
-                    elif temporal_resolution_to_output == 'monthly':
-                        resolutions_to_keep = ['monthly', 'hourly', '3hourly', '6hourly', 'daily',
-                                               'hourly_instantaneous', '3hourly_instantaneous', '6hourly_instantaneous']
+                    resolutions_to_keep = temporal_resolution_map[temporal_resolution_to_output]
                     
                     # iterate through resolutions_to_keep until find one for which have speci_to_process (or mapped speci)
                     have_valid_resolution = False
