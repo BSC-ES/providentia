@@ -177,7 +177,7 @@ It is also possible that the default branch is not set to be the master, you can
 
 ## Run tests
 
-To run all the pipeline tests in your local machine, just run:
+To run all the pipeline tests in your local machine, you will need to add `return "github"` in the function `get_machine()` in `auxiliar.py` and then run:
 
 ```
 conda activate providentia-env_v3.0.0

@@ -1,21 +1,23 @@
 import matplotlib
 import numpy as np
 import pandas as pd
+import xarray as xr
 from pandas.testing import assert_frame_equal
 
 from providentia.statistics import get_z_statistic_info
 
 GENERATE_OUTPUT = False
 
-def read_data(inst, path):
+def read_data(inst, path, network_type):
 
     # get data in memory in xarray format
     inst.print_config()
     data = inst.data(format='xr')
-    try:
-        generated_output = data['EBAS|sconco3_data'].values
-    except:
-        generated_output = data['nasa-aeronet_directsun_v3-lev15|od550aero_data'].values
+    if network_type == 'ghost':
+        var = 'EBAS|sconco3_data'
+    else:
+        var = 'nasa-aeronet_directsun_v3-lev15|od550aero_data'
+    generated_output = data[var].values
 
     # save data, uncomment if we want to update it
     if GENERATE_OUTPUT:
@@ -175,12 +177,12 @@ def check_filter_data(inst, statistic_mode, network_type, filter):
 
     # Check filtered data
     filter_path = f'tests/reference/{network_type}/{statistic_mode}/data/data_{filter}.npy'
-    read_data(inst, filter_path)
+    read_data(inst, filter_path, network_type)
 
     # Reset filter and check original data
     inst.reset(initialise=True)
     orig_path = f'tests/reference/{network_type}/{statistic_mode}/data/data.npy'
-    read_data(inst, orig_path)
+    read_data(inst, orig_path, network_type)
 
     # Check filtered data is different from original data
     orig_output = np.load(orig_path, allow_pickle=True)
@@ -189,3 +191,35 @@ def check_filter_data(inst, statistic_mode, network_type, filter):
         assert (not np.allclose(orig_output, filter_output, equal_nan=True))
     except ValueError as e:
         assert True
+
+def save_data(inst, format, fname, network_type, statistic_mode):
+
+    expected_path = f'tests/reference/{network_type}/{statistic_mode}/data/{fname}'
+    if GENERATE_OUTPUT:
+        inst.save(format=format, fname=expected_path)
+
+    generated_path = f'saved_data/{fname}'
+    inst.save(format=format, fname=generated_path)
+    
+    if format == 'npz':
+        expected_data = np.load(f'{expected_path}.npz', allow_pickle=True)
+        generated_data = np.load(f'{generated_path}.npz', allow_pickle=True)
+        assert set(expected_data.files) == set(generated_data.files)
+        for key in expected_data.files:
+            a = expected_data[key]
+            b = generated_data[key]
+            # Test only numeric arrays
+            if np.issubdtype(a.dtype, np.number) and np.issubdtype(b.dtype, np.number):
+                assert np.allclose(a, b, equal_nan=True)
+    
+    elif format == 'nc':
+        expected_data = xr.open_dataset(f'{expected_path}.nc')
+        generated_data = xr.open_dataset(f'{generated_path}.nc')
+        assert expected_data.equals(generated_data)
+
+    elif format == 'conf':
+        with open(f'{expected_path}.conf') as f:
+            expected_conf = f.read()
+        with open(f'{generated_path}.conf') as f:
+            generated_conf = f.read()
+        assert expected_conf == generated_conf

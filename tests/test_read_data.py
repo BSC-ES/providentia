@@ -50,11 +50,11 @@ possibilities = [
 def test_read_data(inst, statistic_mode, network_type):
     path = f'tests/reference/{network_type}/{statistic_mode}/data/data.npy'
     inst.load()
-    read_data(inst, path)
+    read_data(inst, path, network_type)
 
 
 @pytest.mark.parametrize("inst, statistic_mode, network_type", possibilities[6:9])
 def test_calibration(inst, statistic_mode, network_type):
     path = f'tests/reference/{network_type}/{statistic_mode}/data/data_calibration.npy'
     inst.load()
-    read_data(inst, path)
+    read_data(inst, path, network_type)

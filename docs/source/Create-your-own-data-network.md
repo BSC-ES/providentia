@@ -16,10 +16,9 @@ git checkout master
 
 You can learn more about how to create your own datasets with the following tutorials:
 
-- Create hourly datasets from Port Barcelona: https://earth.bsc.es/gitlab/es/NES/-/blob/master/tutorials/2.Creation/2.4.Create_Points_Port_Barcelona.ipynb
+- [Create hourly datasets from Port Barcelona](https://earth.bsc.es/gitlab/es/NES/-/blob/master/tutorials/2.Creation/2.4.Create_Points_Port_Barcelona.ipynb)
 
-- Create monthly datasets from CSIC:
-https://earth.bsc.es/gitlab/es/NES/-/blob/master/tutorials/2.Creation/2.5.Create_Points_CSIC.ipynb
+- [Create monthly datasets from CSIC](https://earth.bsc.es/gitlab/es/NES/-/blob/master/tutorials/2.Creation/2.5.Create_Points_CSIC.ipynb)
 
 Providentia will be able to find these datasets if they are stored in the path specified in the `nonghost_root` key under the corresponding machine in the `settings/data_paths.yaml` file. The name of the network must be included in the `nonghost_available_networks` list in `settings/init_prov.yaml`. For example, in the nord3v2 machine, to get the data from CSIC stored at this location: `/esarchive/obs/csic/csic/monthly/sconcnh3/`, you would need to modify the configuration files as follows.
 

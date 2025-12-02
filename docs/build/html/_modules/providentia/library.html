@@ -161,11 +161,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">representativity_info</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/internal/representativity.yaml&#39;</span><span class="p">)))</span>
 
         <span class="c1"># set configuration variables, as well as any other defined variables</span>
-        <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
-
-        <span class="c1"># if configuration read was not valid then return here</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
-            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to read data. &quot;&quot;&quot;</span>
@@ -205,6 +201,14 @@
 <span class="sd">        :param upper: upper bound to retain data</span>
 <span class="sd">        :type upper: str, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># check have valid conf and have loaded data</span>
+        <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">loaded_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded_data</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">loaded_data</span><span class="p">:</span>
+            <span class="k">return</span>
 
         <span class="c1"># variable to know if to filter or not</span>
         <span class="n">do_filter</span> <span class="o">=</span> <span class="kc">False</span>
@@ -314,6 +318,14 @@
 <span class="sd">        :type station: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
+        <span class="c1"># check have valid conf and have loaded data</span>
+        <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">loaded_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded_data</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">loaded_data</span><span class="p">:</span>
+            <span class="k">return</span>
+
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">station</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
             <span class="n">stations_to_keep</span> <span class="o">=</span> <span class="p">[</span><span class="n">station</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -332,6 +344,14 @@
 <span class="sd">        :param initialise: Indicates whether to reset data to initial state when class was initialised </span>
 <span class="sd">        :type initialise: boolean, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># check have valid conf and have loaded data</span>
+        <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">loaded_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded_data</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">loaded_data</span><span class="p">:</span>
+            <span class="k">return</span>
 
         <span class="k">if</span> <span class="n">initialise</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Resetting data filters to when class was initialised, loading </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">subsection</span><span class="si">}</span><span class="s1"> subsection filters.&#39;</span><span class="p">)</span>
@@ -446,6 +466,14 @@
 <span class="sd">        :rtype: list</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># check have valid conf and have loaded data</span>
+        <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">loaded_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded_data</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">loaded_data</span><span class="p">:</span>
+            <span class="k">return</span>
+
         <span class="c1"># close any previously open figures</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
@@ -544,7 +572,7 @@
                 
                 <span class="c1"># get available chunk timeseries resolutions</span>
                 <span class="n">available_timeseries_chunk_resolutions</span> <span class="o">=</span> <span class="n">get_possible_resampling_resolutions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active_resolution</span><span class="p">,</span>
-                                                                                             <span class="n">daily_forecast</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">daily_forecast</span><span class="p">)</span>
+                                                                                            <span class="n">daily_forecast</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">daily_forecast</span><span class="p">)</span>
 
                 <span class="c1"># show warning if it is not</span>
                 <span class="k">if</span> <span class="n">chunk_resolution</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_timeseries_chunk_resolutions</span><span class="p">:</span>
@@ -683,7 +711,7 @@
 
             <span class="c1"># create gridspec and add it to a list</span>
             <span class="n">gs</span> <span class="o">=</span>  <span class="n">gridspec</span><span class="o">.</span><span class="n">GridSpecFromSubplotSpec</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span><span class="p">,</span> <span class="n">subplot_spec</span><span class="o">=</span><span class="n">main_gs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                                                   <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="s2">&quot;fairmode-statsummary&quot;</span><span class="p">][</span><span class="s2">&quot;gridspec_kw&quot;</span><span class="p">])</span>
+                                                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="s2">&quot;fairmode-statsummary&quot;</span><span class="p">][</span><span class="s2">&quot;gridspec_kw&quot;</span><span class="p">])</span>
             <span class="n">ax</span> <span class="o">=</span> <span class="p">[</span><span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nrows</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ncols</span><span class="p">)]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">main_gs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -713,7 +741,7 @@
             <span class="n">func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotting</span><span class="p">,</span> <span class="s1">&#39;make_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">base_plot_type</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span><span class="s1">&#39;_&#39;</span><span class="p">)))</span>
         <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="o">!=</span> <span class="s1">&#39;legend&#39;</span><span class="p">:</span>
             <span class="n">func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotting</span><span class="p">,</span> <span class="s1">&#39;make_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">base_plot_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))</span>
-         
+        
         <span class="c1"># set boolean on whether to plot obs in legend or not, and relevant data labels (data labels plotted)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;scatter&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;bias&#39;</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">z_statistic_sign</span> <span class="o">==</span> <span class="s1">&#39;bias&#39;</span><span class="p">):</span>
             <span class="n">set_obs_legend</span> <span class="o">=</span> <span class="kc">False</span>
@@ -755,7 +783,7 @@
                 <span class="n">map_title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">labelb</span><span class="p">)</span>
 
             <span class="n">func</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> <span class="n">plot_options</span><span class="p">,</span> <span class="n">zstat</span><span class="o">=</span><span class="n">zstat</span><span class="p">,</span> 
-                 <span class="n">labela</span><span class="o">=</span><span class="n">labela</span><span class="p">,</span> <span class="n">labelb</span><span class="o">=</span><span class="n">labelb</span><span class="p">)</span>
+                <span class="n">labela</span><span class="o">=</span><span class="n">labela</span><span class="p">,</span> <span class="n">labelb</span><span class="o">=</span><span class="n">labelb</span><span class="p">)</span>
         <span class="c1"># periodic plot</span>
         <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;periodic&#39;</span><span class="p">:</span>
             <span class="n">func</span><span class="p">(</span><span class="n">grid_dict</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">data_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> <span class="n">plot_options</span><span class="p">,</span> <span class="n">zstat</span><span class="o">=</span><span class="n">zstat</span><span class="p">)</span>
@@ -823,7 +851,7 @@
 
             <span class="c1"># make plot</span>
             <span class="n">func</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">relevant_data_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> <span class="n">plot_options</span><span class="p">,</span>
-                 <span class="n">statsummary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">plotting_paradigm</span><span class="o">=</span><span class="s1">&#39;summary&#39;</span><span class="p">,</span> <span class="n">stats_df</span><span class="o">=</span><span class="n">stats_df</span><span class="p">)</span>     
+                <span class="n">statsummary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">plotting_paradigm</span><span class="o">=</span><span class="s1">&#39;summary&#39;</span><span class="p">,</span> <span class="n">stats_df</span><span class="o">=</span><span class="n">stats_df</span><span class="p">)</span>     
 
             <span class="c1"># re-filter for original subsection</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;subsection&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig_ss</span>
@@ -883,8 +911,8 @@
 
             <span class="c1"># make plot</span>
             <span class="n">func</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">relevant_data_labels</span><span class="p">,</span> 
-                 <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> <span class="n">plot_options</span><span class="p">,</span> <span class="n">plotting_paradigm</span><span class="o">=</span><span class="s1">&#39;summary&#39;</span><span class="p">,</span> 
-                 <span class="n">stats_df</span><span class="o">=</span><span class="n">stats_df</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> <span class="n">plot_options</span><span class="p">,</span> <span class="n">plotting_paradigm</span><span class="o">=</span><span class="s1">&#39;summary&#39;</span><span class="p">,</span> 
+                <span class="n">stats_df</span><span class="o">=</span><span class="n">stats_df</span><span class="p">)</span>
 
             <span class="c1"># re-filter for original subsection</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;subsection&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig_ss</span>
@@ -897,18 +925,18 @@
         <span class="c1"># make timeseries plot</span>
         <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;timeseries&#39;</span><span class="p">:</span>
             <span class="n">func</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">data_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> 
-                 <span class="n">plot_options</span><span class="p">,</span> <span class="n">chunk_stat</span><span class="o">=</span><span class="n">chunk_stat</span><span class="p">,</span> <span class="n">chunk_resolution</span><span class="o">=</span><span class="n">chunk_resolution</span><span class="p">)</span>
+                <span class="n">plot_options</span><span class="p">,</span> <span class="n">chunk_stat</span><span class="o">=</span><span class="n">chunk_stat</span><span class="p">,</span> <span class="n">chunk_resolution</span><span class="o">=</span><span class="n">chunk_resolution</span><span class="p">)</span>
         
         <span class="c1"># make taylor diagram plot</span>
         <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;taylor&#39;</span><span class="p">:</span>
             <span class="n">stddev_max</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_station_stddev_max</span><span class="p">[</span><span class="n">networkspeci</span><span class="p">]</span>
             <span class="n">func</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">data_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> 
-                 <span class="n">plot_options</span><span class="p">,</span> <span class="n">zstat</span><span class="o">=</span><span class="n">zstat</span><span class="p">,</span> <span class="n">stddev_max</span><span class="o">=</span><span class="n">stddev_max</span><span class="p">)</span>
+                <span class="n">plot_options</span><span class="p">,</span> <span class="n">zstat</span><span class="o">=</span><span class="n">zstat</span><span class="p">,</span> <span class="n">stddev_max</span><span class="o">=</span><span class="n">stddev_max</span><span class="p">)</span>
             
         <span class="c1"># other plots</span>
         <span class="k">elif</span> <span class="n">base_plot_type</span> <span class="o">!=</span> <span class="s1">&#39;legend&#39;</span><span class="p">:</span> 
             <span class="n">func</span><span class="p">(</span><span class="n">relevant_ax</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">data_labels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> 
-                 <span class="n">plot_options</span><span class="p">)</span>
+                <span class="n">plot_options</span><span class="p">)</span>
 
         <span class="c1"># get relevant station inds</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span><span class="p">:</span>
@@ -985,16 +1013,16 @@
                     <span class="n">title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s1">&#39;axis_title&#39;</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
                     <span class="k">if</span> <span class="n">title</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
                         <span class="n">stat_label</span> <span class="o">=</span> <span class="n">generate_colourbar_detail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zstat</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">],</span> 
-                                                               <span class="n">speci</span><span class="p">,</span> <span class="n">only_label</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                                                            <span class="n">speci</span><span class="p">,</span> <span class="n">only_label</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                         <span class="k">if</span> <span class="s1">&#39;[&#39;</span> <span class="ow">in</span> <span class="n">stat_label</span><span class="p">:</span>
                             <span class="n">stat_label</span> <span class="o">=</span> <span class="n">stat_label</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                         <span class="k">if</span> <span class="n">n_stations</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                             <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> for </span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1"> ({:.</span><span class="si">{}</span><span class="s1">f}, {:.</span><span class="si">{}</span><span class="s1">f})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stat_label</span><span class="p">,</span> <span class="n">current_station_reference</span><span class="p">,</span>
-                                                                              <span class="n">current_station_name</span><span class="p">,</span> 
-                                                                              <span class="n">current_lon</span><span class="p">,</span>
-                                                                              <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s1">&#39;round_decimal_places&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">],</span>
-                                                                              <span class="n">current_lat</span><span class="p">,</span>
-                                                                              <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s1">&#39;round_decimal_places&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">])</span>
+                                                                            <span class="n">current_station_name</span><span class="p">,</span> 
+                                                                            <span class="n">current_lon</span><span class="p">,</span>
+                                                                            <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s1">&#39;round_decimal_places&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">],</span>
+                                                                            <span class="n">current_lat</span><span class="p">,</span>
+                                                                            <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s1">&#39;round_decimal_places&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">])</span>
                             <span class="k">if</span> <span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;map&#39;</span><span class="p">:</span>
                                 <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">map_title</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
 
@@ -1012,11 +1040,11 @@
                     <span class="k">if</span> <span class="n">title</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">n_stations</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                             <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">, </span><span class="si">{}</span><span class="s1"> ({:.</span><span class="si">{}</span><span class="s1">f}, {:.</span><span class="si">{}</span><span class="s1">f})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">current_station_reference</span><span class="p">,</span>
-                                                                       <span class="n">current_station_name</span><span class="p">,</span> 
-                                                                       <span class="n">current_lon</span><span class="p">,</span>
-                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s1">&#39;round_decimal_places&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">],</span>
-                                                                       <span class="n">current_lat</span><span class="p">,</span>
-                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s1">&#39;round_decimal_places&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">])</span>
+                                                                    <span class="n">current_station_name</span><span class="p">,</span> 
+                                                                    <span class="n">current_lon</span><span class="p">,</span>
+                                                                    <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s1">&#39;round_decimal_places&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">],</span>
+                                                                    <span class="n">current_lat</span><span class="p">,</span>
+                                                                    <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s1">&#39;round_decimal_places&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">])</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> stations&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_stations</span><span class="p">)</span>
 
@@ -1172,6 +1200,14 @@
 <span class="sd">        :rtype: np.ndarray</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># check have valid conf and have loaded data</span>
+        <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">loaded_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded_data</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">loaded_data</span><span class="p">:</span>
+            <span class="k">return</span>
+
         <span class="c1"># if no specific labels defined then take first data label and give warning</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">labela</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">labelb</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
             <span class="n">labela</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -1196,9 +1232,9 @@
 
         <span class="c1"># if only 1 label passed and stat is a bias statistic then throw error</span>
         <span class="k">elif</span> <span class="p">(</span><span class="n">z_statistic_sign</span> <span class="o">==</span> <span class="s1">&#39;bias&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">labelb</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
-              <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Calculating a bias statistic, and only 1 label is set. Cannot calculate statistic.&quot;</span>
-              <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
-              <span class="k">return</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Calculating a bias statistic, and only 1 label is set. Cannot calculate statistic.&quot;</span>
+            <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="k">return</span>
 
         <span class="c1"># if calculating bias stat but temporal_colocation is not active, then throw error</span>
         <span class="k">elif</span> <span class="p">(</span><span class="n">z_statistic_type</span> <span class="o">==</span> <span class="s1">&#39;expbias&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span><span class="p">):</span>
@@ -1220,7 +1256,7 @@
 
         <span class="c1"># calculate statistic</span>
         <span class="n">stat</span> <span class="o">=</span> <span class="n">calculate_statistic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">networkspeci</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="p">[</span><span class="n">labela</span><span class="p">],</span> <span class="p">[</span><span class="n">labelb</span><span class="p">],</span> <span class="n">per_station</span><span class="o">=</span><span class="n">per_station</span><span class="p">,</span> 
-                                   <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span> <span class="n">chunk_resolution</span><span class="o">=</span><span class="n">chunk</span><span class="p">)</span>
+                                <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span> <span class="n">chunk_resolution</span><span class="o">=</span><span class="n">chunk</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="n">stat</span></div>
 
@@ -1366,6 +1402,11 @@
 <span class="sd">        :type config: str, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># check have valid conf</span>
+        <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
+            <span class="k">return</span>
+
         <span class="c1"># if conf or config not None, then print that file</span>
         <span class="k">if</span> <span class="n">conf</span><span class="p">:</span>
             <span class="k">pass</span>
@@ -1402,10 +1443,22 @@
 <span class="sd">        :type format: str, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># check have valid conf and have loaded data</span>
+        <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">loaded_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded_data</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">loaded_data</span><span class="p">:</span>
+            <span class="k">return</span>
+
         <span class="c1"># set fname if not provided</span>
         <span class="k">if</span> <span class="n">fname</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
             <span class="n">date_str</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">_%H%M&#39;</span><span class="p">)</span>
             <span class="n">fname</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;saved_data/PRV_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">date_str</span><span class="p">))</span>
+
+        <span class="c1"># remove extension if provided in fname</span>
+        <span class="k">if</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">fname</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="n">fname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;conf&#39;</span><span class="p">,</span><span class="s1">&#39;config&#39;</span><span class="p">,</span><span class="s1">&#39;.conf&#39;</span><span class="p">]:</span>
             <span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.conf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
@@ -1432,6 +1485,14 @@
 <span class="sd">        :return: Data</span>
 <span class="sd">        :rtype: numpy.ndarray</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># check have valid conf and have loaded data</span>
+        <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">loaded_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded_data</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">loaded_data</span><span class="p">:</span>
+            <span class="k">return</span>
 
         <span class="c1"># for non-ghost, update networkspecies name </span>
         <span class="c1"># (e.g. ghost_btx/ghost_btx|sconcc6h6 -&gt; ghost_btx-ghost_btx|sconcc6h6)</span>
@@ -1478,6 +1539,14 @@
 <span class="sd">        :rtype: numpy.ndarray</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># check have valid conf and have loaded data</span>
+        <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">loaded_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loaded_data</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">loaded_data</span><span class="p">:</span>
+            <span class="k">return</span>
+
         <span class="c1"># if variable is undefined then print warning</span>
         <span class="k">if</span> <span class="n">var</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Variable to read is undefined.&quot;</span>
@@ -1502,6 +1571,11 @@
 <div class="viewcode-block" id="Providentia.load">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.load">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># check have valid conf</span>
+        <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
+            <span class="k">return</span>
 
         <span class="c1"># generate file trees if needed</span>
         <span class="n">generate_file_trees</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -1538,7 +1612,7 @@
 
         <span class="c1"># update available experiments for selected fields</span>
         <span class="n">get_valid_experiments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
-                              <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)</span>
 
         <span class="c1"># read data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  
@@ -1553,11 +1627,40 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">initialised</span> <span class="o">=</span> <span class="kc">True</span></div>
 
     
+<div class="viewcode-block" id="Providentia.loaded_data">
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.loaded_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">loaded_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Helper method for determining if data has been read&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;data_in_memory&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Error: Data has not been loaded. Use the load() method&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
+
+        
+<div class="viewcode-block" id="Providentia.have_valid_config">
+<a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.have_valid_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">have_valid_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Helper method for determining if a valid .conf file has been read&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_config</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Error: A valid configuration file has not been read. Please reinitialise your Providentia object with a valid file: prv.Providentia(&#39;filename.conf&#39;)&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
+
+
 <div class="viewcode-block" id="Providentia.download">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.download">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper function for initialising Download class&quot;&quot;&quot;</span>
-        
+
+        <span class="c1"># check have valid conf</span>
+        <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
+            <span class="k">return</span>
+
         <span class="kn">from</span><span class="w"> </span><span class="nn">.download</span><span class="w"> </span><span class="kn">import</span> <span class="n">Download</span>
 
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;download&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1585,6 +1688,11 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">interpolate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper function for initialising Interpolation class&quot;&quot;&quot;</span>
         
+        <span class="c1"># check have valid conf</span>
+        <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
+            <span class="k">return</span>
+
         <span class="kn">from</span><span class="w"> </span><span class="nn">.interpolation</span><span class="w"> </span><span class="kn">import</span> <span class="n">experiment_interpolation_submission</span> <span class="k">as</span> <span class="n">interpolation</span>
         
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;interpolation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1621,6 +1729,11 @@
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.report">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper function for initialising Report class&quot;&quot;&quot;</span>
+
+        <span class="c1"># check have valid conf</span>
+        <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
+            <span class="k">return</span>
 
         <span class="kn">from</span><span class="w"> </span><span class="nn">.report</span><span class="w"> </span><span class="kn">import</span> <span class="n">Report</span>
         
