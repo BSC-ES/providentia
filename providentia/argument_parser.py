@@ -101,7 +101,10 @@ class ProvArgumentParser(object):
                                      help="define species to load (e.g. 'sconco3', 'pm10'")
             self.parser.add_argument("--resolution",
                                      dest="resolution",
-                                     help="define data resolution (e.g. 'hourly', '3hourly', 'daily'")
+                                     help="define data resolution (e.g. 'hourly', '3hourly', 'daily')")
+            self.parser.add_argument("--model_resolution",
+                                     dest="model_resolution",
+                                     help="define model resolution if it is different from the obs one")
             self.parser.add_argument("--start_date",
                                      dest="start_date",
                                      help="define start date in format as 20160101")

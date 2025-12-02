@@ -111,7 +111,7 @@ class SubmitInterpolation(object):
 
         # TODO Hardcoded
         interp_print_variables = ['ghost_version', 'start_date', 'end_date', 'experiments', 
-                                  'species', 'network', 'resolution', 'forecast',
+                                  'species', 'network', 'resolution', 'model_resolution', 'forecast',
                                   'interp_spinup_timesteps', 'interp_experiment_downsampling',
                                   'interp_experiment_upsampling', 'interp_n_neighbours', 
                                   'interp_reverse_vertical_orientation', 'interp_chunk_size', 
@@ -220,8 +220,8 @@ class SubmitInterpolation(object):
                     # if output resolution is instantaneous, prioritise instanstaneous resolutions first,
                     # then non-instanstaneous
 
-                    resolutions_to_keep = temporal_resolution_map[temporal_resolution_to_output]
-                    
+                    resolutions_to_keep = self.model_resolution if self.model_resolution else temporal_resolution_map[temporal_resolution_to_output]
+
                     # iterate through resolutions_to_keep until find one for which have speci_to_process (or mapped speci)
                     have_valid_resolution = False
                     for model_temporal_resolution in resolutions_to_keep:

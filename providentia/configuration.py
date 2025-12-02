@@ -278,7 +278,7 @@ class ProvConfiguration:
                 else:
                     return [value.strip()]
 
-        elif key == 'resolution':
+        elif key in ['resolution', 'model_resolution']:
             # parse resolution
             
             if isinstance(value, str):

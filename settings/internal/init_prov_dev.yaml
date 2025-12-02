@@ -29,6 +29,7 @@
   "framework": [],
   "species": [],
   "resolution": [],
+  "model_resolution": [],
   "start_date": null,
   "end_date": null,
   "observations_data_label": "observations",
