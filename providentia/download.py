@@ -294,7 +294,7 @@ class Download(object):
         prv_user, prv_password = None, None
         counter = 0
 
-        # iterate through the different 
+        # iterate through the different user password combinations
         while True:
 
             # ask for user if not in .env
@@ -325,6 +325,9 @@ class Download(object):
                 # connect through ssh and create Secure File Transfer Protocol object
                 self.ssh.connect(self.remote_hostname, username=self.prv_user, password=self.prv_password)
                 self.sftp = self.ssh.open_sftp()
+
+                # exit the loop when the connection was succesful
+                break
                 
             # if credentials are invalid, notify the user and retry
             except paramiko.ssh_exception.AuthenticationException:
@@ -339,26 +342,23 @@ class Download(object):
                     self.logger.error(error)
                     sys.exit(1)
 
-                continue
-
-            # if pwd or user changed, ask if user wants to remember credentials
-            if (prv_user is not None) or (prv_password is not None):
-                # ask user if they want their credentials saved
-                while True:
-                    remind_txt = input("\nRemember credentials ([y]/n)? ")
-                    if remind_txt in ['y', 'n', '']:
-                        break
-                
-                # create .env with the input user and/or password
-                if remind_txt.lower() in ['y', '']:
-                    with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
-                        if prv_user is not None:
-                            f.write(f"PRV_USER={self.prv_user}\n")
-                        if prv_password is not None:
-                            f.write(f"PRV_PWD={self.prv_password}\n")
+        # if pwd or user changed, ask if user wants to remember credentials
+        if (prv_user is not None) or (prv_password is not None):
+            # ask user if they want their credentials saved
+            while True:
+                remind_txt = input("\nRemember credentials ([y]/n)? ")
+                if remind_txt in ['y', 'n', '']:
+                    break
+            
+            # create .env with the input user and/or password
+            if remind_txt.lower() in ['y', '']:
+                with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
+                    if prv_user is not None:
+                        f.write(f"PRV_USER={self.prv_user}\n")
+                    if prv_password is not None:
+                        f.write(f"PRV_PWD={self.prv_password}\n")
 
                     self.logger.info(f"\nRemote machine credentials saved on {join(PROVIDENTIA_ROOT, '.env')}\n")
-                break
                     
     def select_files_to_download(self, nc_files_to_download):
         """ Returns the files that are not already downloaded. """
