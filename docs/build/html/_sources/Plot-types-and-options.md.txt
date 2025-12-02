@@ -1,14 +1,29 @@
 # Plot types and options
 
-This page is only useful to those who want to create their own reports. Users can choose which plots these reports will have, as you will see below.
+Users can choose which plots their reports will have from the options below.
 
 ![plot-options-types](uploads/plot-options-types.png)
 
 ## Plot types
 
-The standard plot types consist of: maps (`map`), metadata summary (`metadata`), timeseries (`timeseries`), periodic plots (`periodic`), periodic violin plots (`periodic-violin`), box plots (`boxplot`), distribution plots (`distribution`), scatter plots (`scatter`), heat maps (`heatmap`), tables that give one stat per subsection per experiment (`table`), tables that give multiple stats per experiment (`statsummary`), Taylor Diagrams (`taylor`), and FAIRMODE plots (`fairmode-target` and `fairmode-statsummary`).
+The standard plot types consist of:
 
-Some of these plots involve calculating a specific statistic, namely: `map`, `periodic`, `heatmap`, `taylor` and `table`. This statistic is defined by aggregating the `-[stat]` field to the plot type will make a plot of the required type for the specific type of statistic set. `[stat]` should be replaced with any of the base statistic names (e.g. p5, Mean), or experiment bias names. For example to show the median values spatially, `map-p50` would be set as the plot name, or `map-r2` to show the coefficient of determination. The available statistic names are documented in `settings/basic_stats.yaml` and `settings/experiment_bias_stats.yaml` for reference. For the Taylor diagram, only `r`and `r2`can be used.
+- Map (`map`)
+- Metadata summary (`metadata`)
+- Timeseries (`timeseries`)
+- Periodic plot (`periodic`)
+- Periodic violin plot (`periodic-violin`)
+- Box plot (`boxplot`)
+- Distribution plot (`distribution`)
+- Scatter plot (`scatter`)
+- Heat map (`heatmap`)
+- Table that gives one stat per subsection per experiment (`table`)
+- Table that gives multiple stats per experiment (`statsummary`)
+- Taylor Diagram (`taylor`)
+- FAIRMODE target plot (`fairmode-target`)
+- FAIRMODE statistics summary plot (`fairmode-statsummary`).
+
+Some of these plots are created for specific statistics, namely: `map`, `periodic`, `heatmap`, `taylor` and `table`. This statistic is defined by aggregating the `-[stat]` field to the plot type. `[stat]` should be replaced with any of the base statistic names (e.g. p5, Mean), or experiment bias names (e.g. r2, RMSE). For example to show the median values spatially, `map-p50` would be set as the plot name, or `map-r2` to show the coefficient of determination. The available statistic names are documented in `settings/basic_stats.yaml` and `settings/experiment_bias_stats.yaml`. For the Taylor diagram, only `r`and `r2`can be used.
 
 The timeseries can also be used to show how statistics vary in time. In order to do this, we need to add `-[stat]` and the temporal resolution after the plot type name (e.g. `timeseries-Mean-daily`, `timeseries-r2-monthly`, `timeseries-r-annual`).
 
@@ -88,7 +103,7 @@ The extension `_individual` allows users to disaggregate the plots and see the p
 
 ### Add annotations (`_annotate`)
 
-If the configuration option `_annotate` is added, a box will be created on the plots to show several statistical data. The style and position of this box, as well as the statistics, can be defined by the user in `plot_characteristics.yaml` under `settings` by changing the parameter `annotate_stats`.
+If the configuration option `_annotate` is added, a box will be created on the plots to show several statistical data. The style and position of this box, as well as the statistics, can be defined by the user in `plot_characteristics.yaml` under `settings` by changing the parameter `annotate_stats` per plot type.
 
 ![annotate](uploads/annotate.jpg)
 
@@ -110,6 +125,12 @@ Adding the option `_regression` will plot the linear regression between observat
 
 ![regression](uploads/regression.jpg)
 
+### Hide points and only show regression / smooth lines (`_hidedata`)
+
+The option `_hidedata` needs to be accompanied by `_smooth` in the `timeseries` plot and by `_regression` in the `scatter` plot.
+
+![hidedata](uploads/hidedata.png)
+
 ### Make the scale logarithmic (`_logx` / `_logy`)
 
 Adding the options `_logx` or `_logy` will set the desired axis to be logarithmically scaled. 
@@ -122,12 +143,6 @@ Incorporate all read species in the plot type.
 
 ![multispecies](uploads/multispecies.jpg)
 
-### Hide points and only show regression / smooth lines (`_hidedata`)
-
-The option `_hidedata` needs to be accompanied by `_smooth` in the `timeseries` plot and by `_regression` in the `scatter` plot.
-
-![hidedata](uploads/hidedata.png)
-
 ### Show the model grid in the maps (`_domain`)
 
 Adding `_domain` will add the model grid on top of the map.
@@ -136,6 +151,6 @@ Adding `_domain` will add the model grid on top of the map.
 
 ### Add threshold line (`_threshold`)
 
-Adding `_threshold` will add a line indicating the exceedances.
+Adding `_threshold` will add a line indicating the exceedances. These exceedances are set in `settings/exceedances.yaml`.
 
 ![threshold](uploads/threshold.png)

@@ -1,14 +1,14 @@
 # Getting started
 
-The first thing you need to decide is whether you want to use Providentia on HPC or on your local computer. 
+If you have access to the HPC machines at Barcelona Supercomputing Center (BSC), the first thing you need to decide is whether you want to use Providentia on a supercomputer (MN5 or Nord4) or on your local computer (Linux or Mac).
 
-We always recommend working on local machines because the interactive features of the dashboard are faster and you do not need to wait in queue to use the software. The only disadvantage is that the data (experiments and observations) stored on HPC cannot be accessed. To solve this we developed the {ref}`download mode <default-download>`, which allows you to download data from HPC directly onto your local machine.
+We recommend working on local machines to everyone, including the users at BSC, because the interactive features of the dashboard are faster and you do not need to wait in queue to get resources and use the software. The only disadvantage is that the data (experiments and observations) stored on HPC cannot be accessed directly and need to be downloaded onto your local machine using the {ref}`download mode <default-download>` in advance. If you do not want to download the data and instead you prefer to use an HPC machine for your analysis, we recommend reading the Wiki section [Connection setup](Connection-setup).
 
-If you do not want to download the data and instead you prefer to use an HPC machine for your analysis, we recommend reading the Wiki section [Connection setup](Connection-setup).
+If you do not have access to the machines, you won't be able to use the download mode to get model data (only observations from limited sources, i.e. Zenodo for GHOST and NILU Thredds for ACTRIS). If you want to use your own data, consider checking the tutorial [2. Formatting model data](https://github.com/BSC-ES/providentia/blob/master/tutorials/2.%20Formatting%20model%20data.ipynb) and reading the section [Create your own data network](Create-your-own-data-network) to process and create netCDF files that Providentia can read.
 
 ## Cloning the project
 
-Independently of the machine, use the following command to get a copy of the repository in your local or HPC machine:
+Use the following command to get a copy of the repository in your machine:
 
 ```
 git clone https://github.com/bsc-es/providentia
@@ -18,17 +18,16 @@ When you have finished cloning the repository from Github, you are automatically
 
 ## Running the tool the first time
 
-Before running the tool, we suggest checking if conda is installed on your machine. If it is installed, Providentia will create a conda environment on your machine called `providentia-env_v[version]` and install everything that's needed the first time you run it. You can test this by doing:
+Once cloned, you should be able to open the dashboard by running this command from your terminal:
 
 ```
+cd providentia
 ./bin/providentia
 ```
 
-If the dashboard opens, it worked!
+The first time the software runs in a local machine it will create a conda environment called `providentia-env_v[version]` with all the modules needed. If conda is not installed, an error message will appear. If this is the case you should follow [the steps on this page](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) to install it.  If you encountered any other problem, feel free to [contact us](Home).
 
-If it didn't and it is because conda is missing, you can follow the steps on [this page](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) to install it. If you encountered any other problem, feel free to [contact us](Home).
-
-By default, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total memory. This can be modified as desired using the bash options. You can check the available options with:
+In HPC, the environment is not created by the user as it is stored in a shared folder. Every time we run Providentia on HPC, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total memory. This can be modified as desired using the bash options. You can check the available options with:
 
 ```
 ./bin/providentia --usage
@@ -36,7 +35,93 @@ By default, a wall time of 2 hours is requested, with 12 CPUs and 30Gb of total 
 
 ## Accessing the data
 
-If you are running the tool on HPC, you will already see that there are options to choose from in the menu on the top. However, if you opened the dashboard on a local machine, you won't see anything on the dropdowns and you will need to download the data into a directory. By default, the data will be stored in `/home/{user}/data/providentia`, if for some reason you want to save it elsewhere you can edit the path in `settings/data_paths.yaml`.
+When you open the dashboard on a local machine the first time, you don't see anything on the dropdowns and you need to place the data into a local directory. By default, the data is read from `/home/{user}/data/providentia`. If for some reason you want to store it elsewhere you can edit the paths in `settings/data_paths.yaml`. 
+
+### Directory tree and filename conventions
+
+The datasets need to be saved following a very specific directory tree. The download mode takes care of that when saving the files, more details can be found in the {ref}`download section <default-download>`. However, if you are using your own data you will need to take that into account.
+
+By default, in the folder `/home/{user}/data/providentia` (or your preferred) there should be three folders: 
+- `exp`: Interpolated model data as in: {GHOST version} -> {experiment}_{domain}_{ensemble} -> {resolution} -> {species} -> {network} -> {species}_{year}{month}.nc.
+- `exp_to_interp`: Model data to interpolate as in: {experiment} -> {domain} -> {resolution} -> {species} -> {species}_{year}{month}.nc.
+- `obs`: Observation datasets. For GHOST as in: ghost -> {network} -> {GHOST version} -> {resolution} -> {species} -> {species}_{year}{month}.nc. For non-GHOST as in: nonghost -> {provider} -> {network} -> {resolution} -> {species} -> {species}_{year}{month}.nc.
+
+As observed, datasets must be saved per month, independently of their temporal resolution. An example of a working directory tree is the following:
+
+```
+├── exp
+│   └── 1.5
+│       └── cams61_emep_ph2-eu-000
+│           └── hourly
+│               └── sconcno2
+│                   └── eea-eionet
+│                       ├── sconcno2_201801.nc
+│                       ├── sconcno2_201802.nc
+│                       ├── sconcno2_201803.nc
+│                       ├── sconcno2_201804.nc
+│                       ├── sconcno2_201805.nc
+│                       ├── sconcno2_201806.nc
+│                       ├── sconcno2_201807.nc
+│                       ├── sconcno2_201808.nc
+│                       ├── sconcno2_201809.nc
+│                       ├── sconcno2_201810.nc
+│                       ├── sconcno2_201811.nc
+│                       └── sconcno2_201812.nc
+├── exp_to_interp
+│   └── cams61_emep_ph2
+│       └── eu
+│           └── hourly
+│               └── sconcno2
+│                   ├── sconcno2_201801.nc
+│                   ├── sconcno2_201802.nc
+│                   ├── sconcno2_201803.nc
+│                   ├── sconcno2_201804.nc
+│                   ├── sconcno2_201805.nc
+│                   ├── sconcno2_201806.nc
+│                   ├── sconcno2_201807.nc
+│                   ├── sconcno2_201808.nc
+│                   ├── sconcno2_201809.nc
+│                   ├── sconcno2_201810.nc
+│                   ├── sconcno2_201811.nc
+│                   └── sconcno2_201812.nc
+└── obs
+    ├── ghost
+    │   └── EBAS
+    │       └── 1.5
+    │           └── hourly
+    │               └── sconcno2
+    │                   ├── sconcno2_201801.nc
+    │                   ├── sconcno2_201802.nc
+    │                   ├── sconcno2_201803.nc
+    │                   ├── sconcno2_201804.nc
+    │                   ├── sconcno2_201805.nc
+    │                   ├── sconcno2_201806.nc
+    │                   ├── sconcno2_201807.nc
+    │                   ├── sconcno2_201808.nc
+    │                   ├── sconcno2_201809.nc
+    │                   ├── sconcno2_201810.nc
+    │                   ├── sconcno2_201811.nc
+    │                   └── sconcno2_201812.nc
+    └── nonghost
+        └── eea
+            └── eionet
+                └── hourly
+                    └── sconcno2
+                        ├── sconcno2_201801.nc
+                        ├── sconcno2_201802.nc
+                        ├── sconcno2_201803.nc
+                        ├── sconcno2_201804.nc
+                        ├── sconcno2_201805.nc
+                        ├── sconcno2_201806.nc
+                        ├── sconcno2_201807.nc
+                        ├── sconcno2_201808.nc
+                        ├── sconcno2_201809.nc
+                        ├── sconcno2_201810.nc
+                        ├── sconcno2_201811.nc
+                        └── sconcno2_201812.nc
+```
+
+If you are running Providentia on HPC, you will already see that there are options to choose from in the menu on the top. The data is being read from the paths specified in `settings/data_paths.yaml`.
 
 ## Launching the dashboard
 
@@ -46,48 +131,51 @@ As explained, you can launch the dashboard by simply running:
 ./bin/providentia
 ```
 
-If you already have a [configuration file](Configuration-files), you can specify its path in the command line with the argument `--config`:
+If you want to define which data is loaded in advance, you can use a configuration file. Some examples can be found under the folder `configurations`, for more details read the section [Configuration files](Configuration-files). Once you have it, you can specify its path in the command line with the argument `--config`:
 
 ```
 ./bin/providentia --config='/path/to/file/example.conf'
 ```
 
-If you have defined multiple sections or subsections, a pop-up window will immediately appear where you can choose the section or subsection of interest. After that, the graphical window of Providentia will appear and you can begin using the tool. 
+If you have multiple sections or subsections, a pop-up window will immediately appear where you can choose the section or subsection of interest. After that, the graphical window of Providentia will appear and you can begin using the tool. 
 
 ## Generating a report
 
-If you have your [configuration file](Configuration-files) ready, you can generate reports by running Providentia with the following command:
+With the configuration file you can also generate PDF reports. In order to do this, you should use the argument `report`:
 
 ```
-./bin/providentia --config='/path/to/file/example.conf' --report
+./bin/providentia --config=/path/to/file/example.conf --report
 ```
 
-The mandatory commands are:
+If your configuration file is inside the folder `configurations`, you don't need to specify the full path:
 
-* `--config`: specify the path of your [configuration file](Configuration-files)
-* `--report`: for creating a report, without launching the dashboard
+```
+./bin/providentia --config=example.conf --report
+```
 
-You can also launch the dashboard or get a report for only one section by using the option  `--section`. In order to indicate subsections, you will need to write the section name, followed by a hyphen (-) and the subsection name.
+You can launch the dashboard or get a report for only one section by using the option  `--section`. In order to indicate subsections, you will need to write the section name, followed by an interpunct (·) and the subsection name.
+
+```
+./bin/providentia --config=example.conf --report --section=All·France
+```
 
 The reports will be saved under the folder `reports`. You can add a path in the `report_filename` of the configuration file to change the default directory.
 
 ## Using Providentia backend functions
 
-A Jupyter notebook can be launched with the following command:
+Providentia can be imported and used in your own Python scripts. Some examples on how to use Providentia's backend functions can be found in the [tutorials folder](https://github.com/BSC-ES/providentia/tree/master/tutorials).
+
+Also, a Jupyter notebook with an active conda environment can be launched with the following command:
 
 ```
 ./bin/providentia --notebook
-```        
-
-Some examples on how to use Providentia's backend functions can be found in [the notebooks folder](https://github.com/BSC-ES/providentia/tree/master/notebooks).
-
-Providentia can also be imported and used in your own Python scripts.
+```
 
 ## Interpolating your model data to observations
 
-Using a [configuration file](Configuration-files), you can start interpolating your model data to your desired observational network.
+If you want to visualise data from your model, you will need to interpolate it to the network. Using a configuration file, you can start interpolating your model data to your desired observational network.
 ```
-./bin/providentia --config='/path/to/file/example.conf' --interpolate
+./bin/providentia --config=example.conf --interpolate
 ```
 
 More details can be found in the [interpolation section](Interpolation).

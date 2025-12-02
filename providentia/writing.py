@@ -13,6 +13,7 @@ import xarray as xr
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import write_conf
+from .read_aux import get_default_qa
 from .statistics import do_resampling, merge_forecast_days
 
 # get current path and providentia root path
@@ -539,9 +540,10 @@ def export_configuration(prv, cname, separator="||"):
         :type separator: str
     """
     
-    # if no data was loaded, there won't be any maximum nor minimum value
-    if prv.le_minimum_value.text() == '' and  prv.le_minimum_value.text() == '':
-        raise Exception("Error: No data available for writing. Please click on READ before trying to save any file.")
+    # if no data was loaded on dashboard, there won't be any maximum nor minimum value
+    if prv.mode not in ['report', 'library']:
+        if prv.le_minimum_value.text() == '' and  prv.le_minimum_value.text() == '':
+            raise Exception("Error: No data available for writing. Please click on READ before trying to save any file.")
     
     # load initialisation defaults
     init_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'init_prov_dev.yaml')))
@@ -561,12 +563,10 @@ def export_configuration(prv, cname, separator="||"):
     # set section and subsection names in config file
     if not hasattr(prv, 'section'):
         section = 'SECTION1'
-        #subsection = '[SUBSECTION1]'
         subsection = None
     else:
         if '·' in prv.section:
             section = prv.section.split('·')[0]
-            #subsection = '[' + prv.section.split('·')[1] + ']'
             subsection = None
         else:
             section = prv.section
@@ -576,16 +576,39 @@ def export_configuration(prv, cname, separator="||"):
     options['section'] = {}
     options['subsection'] = {}
 
-    # default
-    options['section'] = {'network': prv.network[0],
-                          'species': prv.species[0],
+    # default variables
+    if prv.mode in ['report', 'library']:
+        if len(np.unique(prv.network)) > 1:
+            network = ",".join(str(i) for i in prv.network)
+        else:
+            network = prv.network[0]
+        if len(np.unique(prv.species)) > 1:
+            species = ",".join(str(i) for i in prv.species)
+        else:
+            species = prv.species[0]
+    else:
+        network = prv.network[0]
+        species = prv.species[0]
+
+    options['section'] = {'network': network,
+                          'species': species,
                           'resolution': prv.resolution,
                           'start_date': prv.start_date,
                           'end_date': prv.end_date}
 
     # experiments
-    if prv.experiments_menu['experiments']['keep_selected']:
-        options['section']['experiments'] = ",".join(str(i) for i in prv.experiments_menu['experiments']['keep_selected'])
+    if prv.experiments:
+        exps = []
+        aliases = []
+        for exp_raw, exp in prv.experiments.items():
+            exps.append(exp_raw)
+            if exp_raw != exp:
+                aliases.append(exp) 
+        exp_str = ",".join(str(i) for i in exps)
+        if len(aliases) > 0:
+            alias_str = ",".join(str(i) for i in aliases)
+            exp_str = "{} ({})".format(exp_str, alias_str)
+        options['section']['experiments'] = exp_str
 
     # colocation variables
     options['section'].update({'temporal_colocation': prv.temporal_colocation,
@@ -625,40 +648,59 @@ def export_configuration(prv, cname, separator="||"):
                 calibration_factor += '{} ({}), '.format(exp, factor)
         options['section'].update({'calibration_factor': calibration_factor})
 
-    # forecast
-    if len(prv.forecast) > 0:
-        options['section']['forecast'] = ",".join(str(i) for i in prv.forecast)
-
     # qa
-    if set(prv.qa_menu['checkboxes']['remove_selected']) != set(prv.qa_menu['checkboxes']['remove_default']):
-        options['section']['qa'] = ",".join(str(i) for i in prv.qa_menu['checkboxes']['remove_selected'])
-        
+    if prv.mode in ['report', 'library']:
+        default_qa = get_default_qa(prv, prv.species[0])
+        if set(default_qa) != set(prv.qa):
+            options['section']['qa'] = ",".join(str(i) for i in prv.qa)
+    else:
+        if set(prv.qa_menu['checkboxes']['remove_selected']) != set(prv.qa_menu['checkboxes']['remove_default']):
+            options['section']['qa'] = ",".join(str(i) for i in prv.qa_menu['checkboxes']['remove_selected'])
+
     # flags
-    if prv.flag_menu['checkboxes']['remove_selected']:
-        options['section']['flags'] = ",".join(str(i) for i in prv.flag_menu['checkboxes']['remove_selected'])
+    if prv.mode in ['report', 'library']:
+        if prv.flags:
+            options['section']['flags'] = ",".join(str(i) for i in prv.flags)
+    else:
+        if prv.flag_menu['checkboxes']['remove_selected']:
+            options['section']['flags'] = ",".join(str(i) for i in prv.flag_menu['checkboxes']['remove_selected'])
 
     # representativity
-    for i, label in enumerate(prv.representativity_menu['rangeboxes']['labels']):
-        if 'max_gap' in label:
-            if prv.representativity_menu['rangeboxes']['current_lower'][i] != '100':
-                options['section'][label] = prv.representativity_menu['rangeboxes']['current_lower'][i]
-        else:
-            if prv.representativity_menu['rangeboxes']['current_lower'][i] != '0':
-                options['section'][label] = prv.representativity_menu['rangeboxes']['current_lower'][i]
+    representativity_vars = prv.representativity_menu['rangeboxes']['labels']
+    for i, label in enumerate(representativity_vars):
+        representativity_limit = prv.representativity_menu['rangeboxes']['current_lower'][i] 
+        if float(representativity_limit) != 0:  
+            options['section'][label] = representativity_limit
 
     # period
     if prv.period_menu['checkboxes']['keep_selected'] or prv.period_menu['checkboxes']['remove_selected']:
-        period_k = "keep: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['keep_selected']) + separator
-        period_r = " remove: " + ",".join(str(i) for i in prv.period_menu['checkboxes']['remove_selected']) + separator
-        options['section']['period'] = period_k + period_r
+        keeps = prv.period_menu['checkboxes']['keep_selected']
+        removes = prv.period_menu['checkboxes']['remove_selected']
+        period_str = ''
+        if (len(keeps) > 0) & (len(removes) > 0):
+            period_str = "keep: {} {} remove: {}".format(",".join(str(i) for i in keeps), separator, ",".join(str(i) for i in removes))
+        elif len(keeps) > 0:
+            period_str = "keep: {}".format(",".join(str(i) for i in keeps))
+        elif len(removes) > 0:
+            period_str = "remove: {}".format(",".join(str(i) for i in removes))
+        if period_str:
+            options['section']['period'] = period_str
     
-    # bounds
-    if np.float32(prv.le_minimum_value.text()) != \
-            np.float32(prv.parameter_dictionary[prv.species[0]]['extreme_lower_limit']):
-        options['section']['lower_bound'] = prv.le_minimum_value.text()
-    if np.float32(prv.le_maximum_value.text()) != \
-            np.float32(prv.parameter_dictionary[prv.species[0]]['extreme_upper_limit']):
-        options['section']['upper_bound'] = prv.le_maximum_value.text()
+    # bounds (only set if have one species)
+    if len(prv.species) == 1:
+        if prv.mode in ['report', 'library']:
+            lower_bound = prv.lower_bound[prv.species[0]]
+            upper_bound = prv.upper_bound[prv.species[0]]
+        else:
+            lower_bound = prv.le_minimum_value.text()
+            upper_bound = prv.le_maximum_value.text()
+
+        if np.float32(lower_bound) != \
+                np.float32(prv.parameter_dictionary[prv.species[0]]['extreme_lower_limit']):
+            options['section']['lower_bound'] = lower_bound
+        if np.float32(upper_bound) != \
+                np.float32(prv.parameter_dictionary[prv.species[0]]['extreme_upper_limit']):
+            options['section']['upper_bound'] = upper_bound
 
     # metadata
     for menu_type in prv.metadata_types:
@@ -679,18 +721,23 @@ def export_configuration(prv, cname, separator="||"):
         for label in prv.metadata_menu[menu_type]['navigation_buttons']['labels']:
             keeps = prv.metadata_menu[menu_type][label]['checkboxes']['keep_selected']
             removes = prv.metadata_menu[menu_type][label]['checkboxes']['remove_selected']
-            if keeps or removes:
-                meta_keep = "keep: " + ",".join(str(i) for i in keeps) + separator
-                meta_remove = " remove: " + ",".join(str(i) for i in removes) + separator
-                options['section'][label] = meta_keep + meta_remove
+            metadata_str = ''
+            if (len(keeps) > 0) & (len(removes) > 0):
+                metadata_str = "keep: {} {} remove: {}".format(",".join(str(i) for i in keeps), separator, ",".join(str(i) for i in removes))
+            elif len(keeps) > 0:
+                metadata_str = "keep: {}".format(",".join(str(i) for i in keeps))
+            elif len(removes) > 0:
+                metadata_str = "remove: {}".format(",".join(str(i) for i in removes))
+            if metadata_str:    
+                options['section'][label] = metadata_str
 
     # map extent
-    if prv.map_extent != [-180.0,180.0,-90.0,90.0]:
-        options['section']['map_extent'] = ",".join(str(i) for i in prv.map_extent)
+    if prv.map_extent: 
+        if prv.map_extent != [-180.0,180.0,-90.0,90.0]:
+            options['section']['map_extent'] = ",".join(str(i) for i in prv.map_extent)
 
     # active dashboard plots 
     if prv.active_dashboard_plots != merged_defaults['active_dashboard_plots']:
-        print(prv.active_dashboard_plots)
         options['section']['active_dashboard_plots'] = ",".join(str(i) for i in prv.active_dashboard_plots)
 
     # plot_characteristics_filename

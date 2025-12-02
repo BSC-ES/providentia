@@ -530,23 +530,21 @@ class Report:
         else:
             os.system("mv {} {}".format(reports_path_temp, reports_path))
 
-        # reorder pages
-        if (len(self.summary_multispecies_pages) > 0) or (len(self.station_multispecies_pages) > 0):
-            self.logger.info('\nReordering pages')
-            # if only summary plots have been made, set paradigm break page to last page
-            if not hasattr(self, 'paradigm_break_page'):
-                pdf_file = PdfReader(open(reports_path, "rb"))
-                self.paradigm_break_page = len(pdf_file.pages)
+        # make page with DOIs
+        doi_pdf = None
+        if 'actris/actris' in self.network:
+            self.plotting.set_plot_characteristics(['doi'])
+            doi_pdf = self.plotting.make_doi_pdf(self.plot_characteristics['doi'], reports_doi_path_temp)
 
-            # make page with DOIs
-            doi_pdf = None
-            if 'actris/actris' in self.network:
-                self.plotting.set_plot_characteristics(['doi'])
-                doi_pdf = self.plotting.make_doi_pdf(self.plot_characteristics['doi'], reports_doi_path_temp)
-            
-            reorder_pdf_pages(self, reports_path, reports_path, self.summary_multispecies_pages, 
-                              self.station_multispecies_pages, self.paradigm_break_page, doi_pdf, 
-                              reports_doi_path_temp)
+        # reorder pages
+        # if only summary plots have been made, set paradigm break page to last page
+        if not hasattr(self, 'paradigm_break_page'):
+            pdf_file = PdfReader(open(reports_path, "rb"))
+            self.paradigm_break_page = len(pdf_file.pages)
+        
+        reorder_pdf_pages(self, reports_path, reports_path, self.summary_multispecies_pages, 
+                          self.station_multispecies_pages, self.paradigm_break_page, doi_pdf, 
+                          reports_doi_path_temp)
 
     def setup_plot_geometry(self, plotting_paradigm, networkspeci, have_setup_multispecies):
         """ Setup plotting geometry for summary or station specific plots, per network/species. """

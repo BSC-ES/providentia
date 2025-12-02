@@ -1,30 +1,32 @@
 # Plot customisation
 
-## Editing the plot style from the configuration files
+## Editing the plots style
 
-If you want to edit the style of your plots, you will need to **edit it in `settings/plot_characteristics.yaml` and launch the tool again.
+### General edits
 
-### Setting the map coastline resolution
+If you want to edit the style of your plots, you will need to edit the file `settings/plot_characteristics.yaml`. There you will find parameters per plot type, and within those, parameters for each of the available modes, as well as general ones that are applied to all modes.
 
-It is possible to customise the map coastline resolution by changing the `map_coastline_resolution` variable under the `map` section in the appropriate plot characteristics file. 
+### Map coastline resolution
+
+It is possible to customise the map coastline resolution by changing the `map_coastline_resolution` variable under the `map` section in the plot characteristics file. 
 
 There are 3 options as present:
 - `low`: 110m in resolution
-- `medium`: 50m in resolution
+- `medium`: 50m in resolution (default)
 - `high`: 10m in resolution
 
-### Setting the map background
+### Map background
 
-Users can define the type of background that is plotted on the map. This can be set by changing the background variable under the `map` section in the appropriate plot characteristics file.
+Users can define the type of background that is plotted on the map. This can be set by changing the background variable under the `map` section.
 
 There are 3 available standard options:
-- `providentia`: The standard white and grey combination that has been historically available. *Default
+- `providentia`: The standard white and grey combination that has been historically available (default)
 - `blue_marble`: NASA's blue marble product
-- `shaded_relief`: imagery showing changes in elevation 
+- `shaded_relief`: Imagery showing changes in elevation 
 
 Users can easily add any type of background by putting an image file in the `providentia/dependencies/resources` folder, with the filename named in the same way as in the plot characteristics file, e.g. `blue_marble.png` and `"background": "blue_marble"`. 
 
-### Setting custom bounds and cmap per species
+### Custom colorbars
 
 Users can define the color and bounds of the colorbar (cmap, vmin and vmax) per species using a dictionary, with the keys being the names of the species inside `basic_stats.yaml` and `experiment_bias_stats.yaml`. An example can be seen in the code below:
 
@@ -43,9 +45,9 @@ Users can define the color and bounds of the colorbar (cmap, vmin and vmax) per 
                 "cmap_bias": "RdYlBu_r"},
 ```
 
-If they define the cmap, they will need to give a complete list of cmap options for each of the species that they load or otherwise a warning will appear. For vmin and vmax, they can define the bounds for some species and the rest will take the data minimum and maximum values.
+If they define the cmap, they will need to give a complete list of cmap options **for each of the species** that they load or otherwise a warning will appear. For vmin and vmax, they can define the bounds for some species and the rest will take the data minimum and maximum values.
 
-### Remove extreme stations by their statistical values
+## Removing extreme stations by their statistical values
 
 If you want to automatically remove stations that have certain statistical values, you will need to add your criteria in the file `settings/remove_extreme_stations.yaml`. An example of this exists for `CAMS`:
 
@@ -76,7 +78,8 @@ You will also need to add the variable `remove_extreme_stations` in your configu
 ```
 remove_extreme_stations=CAMS
 ```
-### Calculating exceedances
+
+## Calculating exceedances
 
 In Providentia the `exceedances` statistic is available in the list of available statistics. How it is currently implemented is simplistic, but users can simply state a threshold/limit value per component or network-component pair, and each instance where values exceed this limit will be counted. Therefore the `exceedances` statistic simply gives the number of instances above the threshold. The threshold values can be set in the file `settings/exceedances.yaml` per component, or network-component pair, as so: 
 
@@ -92,7 +95,7 @@ EBAS|sconcno2: {
 ```
 In the case a threshold is set for a specific component, and per network-component, then the threshold for network-component is taken preferentially.
 
-## Editing the plot style in the dashboard
+## Dashboard interactive features
 
 ### Changing the plot style
 
@@ -102,7 +105,7 @@ The style of the plots can be edited by clicking on the burger menus and changin
 
 ### Legend picking
 
-Clicking on the legend labels will remove or add data to each of the plots. If the label appears in bold, the data will be visible. If not, it will disappear.
+Clicking on the legend labels will remove or add data to each of the plots. If the label appears in bold, the data will be visible. If not, it will be hidden.
 
 ![legend-picking](uploads/legend-picking.png)
 
