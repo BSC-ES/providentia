@@ -855,7 +855,7 @@ class Report:
                 # update subsection variables (if not passed via command line)
                 for k, val in self.subsection_opts.items():
                     if k not in self.commandline_arguments:
-                        value = provconf.parse_parameter(k, val, deactivate_warning=True)
+                        value = provconf.parse_parameter(k, val)
                         setattr(self, k, value)
 
                 # now all variables have been parsed, check validity of those, throwing errors where necessary

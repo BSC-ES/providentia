@@ -126,7 +126,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
                                                             order='F')
 
                 # aggregate across the time dimension, after this shape is (24, label, station, fct)
-                data_array_forecast_agg = aggregation(data_array_forecast_grouped_rs, read_instance.timeseries_statistic_aggregation, axis=-2)
+                data_array_forecast_agg = aggregation(data_array_forecast_grouped_rs, read_instance.timeseries_statistic_aggregation, read_instance=read_instance, axis=-2)
 
                 # move per hour dimension from first to second last
                 data_array_forecast_agg = data_array_forecast_agg.transpose(1, 2, 0, 3)
@@ -168,7 +168,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
                                            order='F')
 
                 # aggregate across the forecast day dimension, after this shape is (label, station, time)
-                data_array_forecast_agg = aggregation(data_array_rs, read_instance.timeseries_statistic_aggregation, axis=-1)
+                data_array_forecast_agg = aggregation(data_array_rs, read_instance.timeseries_statistic_aggregation, read_instance=read_instance, axis=-1)
 
                 # set data array for timeseries
                 data_array_ts = data_array_forecast_agg
@@ -186,7 +186,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             if len(canvas_instance.station_inds[networkspeci]) == 1:
                 canvas_instance.selected_station_data[networkspeci]['timeseries'] = data_array_ts[:,0,:]
             else:
-                canvas_instance.selected_station_data[networkspeci]['timeseries'] = aggregation(data_array_ts, read_instance.timeseries_statistic_aggregation, axis=1)
+                canvas_instance.selected_station_data[networkspeci]['timeseries'] = aggregation(data_array_ts, read_instance.timeseries_statistic_aggregation, read_instance=read_instance, axis=1)
 
             # save data per station
             if read_instance.statistic_mode == 'Spatial|Temporal':
@@ -197,7 +197,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
                     if len(canvas_instance.station_inds[networkspeci]) == 1:
                         spatial_agg = data_array[:,0,:]
                     else:
-                        spatial_agg = aggregation(data_array, read_instance.statistic_aggregation, axis=1)
+                        spatial_agg = aggregation(data_array, read_instance.statistic_aggregation, read_instance=read_instance, axis=1)
                     canvas_instance.selected_station_data[networkspeci]['per_station'] = spatial_agg[:,np.newaxis,:]
 
                 # non-daily forecast cases
@@ -207,7 +207,7 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
                         canvas_instance.selected_station_data[networkspeci]['per_station'] = canvas_instance.selected_station_data[networkspeci]['timeseries'][:,np.newaxis,:]
                     # otherwise do aggregation
                     else:
-                        aggregated_data = aggregation(data_array_ts, read_instance.statistic_aggregation, axis=1)
+                        aggregated_data = aggregation(data_array_ts, read_instance.statistic_aggregation, read_instance=read_instance, axis=1)
                         canvas_instance.selected_station_data[networkspeci]['per_station'] = aggregated_data[:,np.newaxis,:]
 
             elif read_instance.statistic_mode in ['Temporal|Spatial', 'Flattened']:
@@ -902,7 +902,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 # if periodic statistic mode is cycle, then aggregate per periodic grouping, and then calculate stat
                 if periodic_statistic_mode == 'Cycle':
                     # aggregation in each group, per station, by periodic statistic
-                    z_statistic = aggregation(data_array_a, periodic_statistic_aggregation, axis=-1).transpose()
+                    z_statistic = aggregation(data_array_a, periodic_statistic_aggregation, read_instance=read_instance, axis=-1).transpose()
 
                     #print('Calculating Stat, Cycle Aggregation ', z_statistic.shape)
 
@@ -925,7 +925,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
                     # aggregate data per station (removing period dimension)
                     if base_zstat != 'NStations':
-                        z_statistic = aggregation(z_statistic, periodic_statistic_aggregation, axis=-1).transpose()
+                        z_statistic = aggregation(z_statistic, periodic_statistic_aggregation, read_instance=read_instance, axis=-1).transpose()
 
             # calculate statistics per station 
             else:
@@ -1027,8 +1027,8 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                     # if periodic statistic mode is cycle, then aggregate per periodic grouping, and then calculate stat
                     if periodic_statistic_mode == 'Cycle':
                         # aggregation in each group, per station, by periodic statistic
-                        statistic_a = aggregation(data_array_a, periodic_statistic_aggregation, axis=-1).transpose()
-                        statistic_b = aggregation(data_array_b, periodic_statistic_aggregation, axis=-1).transpose()
+                        statistic_a = aggregation(data_array_a, periodic_statistic_aggregation, read_instance=read_instance, axis=-1).transpose()
+                        statistic_b = aggregation(data_array_b, periodic_statistic_aggregation, read_instance=read_instance, axis=-1).transpose()
                         
                         # need to reshape nan_padding_counts if set as argument
                         if 'nan_padding_counts' in function_arguments_a:
@@ -1050,8 +1050,8 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
 
                         # aggregate data per station (removing period dimension)
                         if base_zstat != 'NStations':
-                            statistic_a = aggregation(statistic_a, periodic_statistic_aggregation, axis=-1).transpose()
-                            statistic_b = aggregation(statistic_b, periodic_statistic_aggregation, axis=-1).transpose()
+                            statistic_a = aggregation(statistic_a, periodic_statistic_aggregation, read_instance=read_instance, axis=-1).transpose()
+                            statistic_b = aggregation(statistic_b, periodic_statistic_aggregation, read_instance=read_instance, axis=-1).transpose()
 
                 # calculate statistics per station 
                 else:
@@ -1090,8 +1090,8 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                     # if periodic statistic mode is cycle, then aggregate per periodic grouping, and then calculate stat
                     if periodic_statistic_mode == 'Cycle':
                         # aggregation in each group, per station, by periodic statistic
-                        statistic_a = aggregation(data_array_a, periodic_statistic_aggregation, axis=-1).transpose()
-                        statistic_b = aggregation(data_array_b, periodic_statistic_aggregation, axis=-1).transpose()
+                        statistic_a = aggregation(data_array_a, periodic_statistic_aggregation, read_instance=read_instance, axis=-1).transpose()
+                        statistic_b = aggregation(data_array_b, periodic_statistic_aggregation, read_instance=read_instance, axis=-1).transpose()
                         
                         # calculate statistic per station (removing period dimension)
                         z_statistic = getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':statistic_a,'exp':statistic_b}}).transpose()
@@ -1103,7 +1103,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                         z_statistic = getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':data_array_a,'exp':data_array_b}}).transpose()
 
                         # aggregate data per station (removing period dimension)
-                        z_statistic = aggregation(z_statistic, periodic_statistic_aggregation, axis=-1).transpose()
+                        z_statistic = aggregation(z_statistic, periodic_statistic_aggregation, read_instance=read_instance, axis=-1).transpose()
 
                 # calculate statistics per station 
                 else:
@@ -1139,10 +1139,10 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
         else:
             if reduction:
                 if (statistic_mode == 'Temporal|Spatial') & ((base_zstat not in ['NStations','MDA8']) or (z_statistic_period is not None)):
-                    z_statistic = aggregation(z_statistic, statistic_aggregation, axis=-1)
+                    z_statistic = aggregation(z_statistic, statistic_aggregation, read_instance=read_instance, axis=-1)
                 elif (statistic_mode in ['Flattened', 'Spatial|Temporal']) & ((base_zstat not in ['NStations','MDA8']) or (z_statistic_period is not None)):
                     if base_zstat in ['NStations','MDA8']:
-                        z_statistic = aggregation(z_statistic, statistic_aggregation, axis=-1)
+                        z_statistic = aggregation(z_statistic, statistic_aggregation, read_instance=read_instance, axis=-1)
                     else:
                         z_statistic = np.squeeze(z_statistic, axis=-1)
             stats_calc[zstat] = z_statistic
@@ -1617,7 +1617,7 @@ def get_z_statistic_info(plot_type=None, zstat=None):
 
     return zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period
     
-def aggregation(data_array, statistic_aggregation, axis=0):
+def aggregation(data_array, statistic_aggregation, read_instance=None, axis=0):
     """ Aggregate data across a the specific axis using a given statistic
     
         :param data_array: array of data
@@ -1637,10 +1637,11 @@ def aggregation(data_array, statistic_aggregation, axis=0):
                                            q=int(statistic_aggregation.split('p')[1]),
                                            axis=axis, method='nearest')
     else:
-        error = 'Aggregation statistic {0} is not available. '.format(statistic_aggregation)
-        error += 'The options are: Mean, Median, p1, p5, p10, p25, p75, p90, p95 and p99'
-        read_instance.logger.error(error)
-        sys.exit(1) 
+        if read_instance:
+            error = 'Aggregation statistic {0} is not available. '.format(statistic_aggregation)
+            error += 'The options are: Mean, Median, p1, p5, p10, p25, p75, p90, p95 and p99'
+            read_instance.logger.error(error)
+            sys.exit(1) 
 
     return aggregated_data
 
