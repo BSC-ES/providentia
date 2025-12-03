@@ -139,6 +139,8 @@ If you want to define which data is loaded in advance, you can use a configurati
 
 If you have multiple sections or subsections, a pop-up window will immediately appear where you can choose the section or subsection of interest. After that, the graphical window of Providentia will appear and you can begin using the tool. 
 
+More details can be found in the [dashboard section](Dashboard).
+
 ## Generating a report
 
 With the configuration file you can also generate PDF reports. In order to do this, you should use the argument `report`:
@@ -161,6 +163,8 @@ You can launch the dashboard or get a report for only one section by using the o
 
 The reports will be saved under the folder `reports`. You can add a path in the `report_filename` of the configuration file to change the default directory.
 
+More details can be found in the [report section](Report).
+
 ## Using Providentia backend functions
 
 Providentia can be imported and used in your own Python scripts. Some examples on how to use Providentia's backend functions can be found in the [tutorials folder](https://github.com/BSC-ES/providentia/tree/master/tutorials).
@@ -170,6 +174,8 @@ Also, a Jupyter notebook with an active conda environment can be launched with t
 ```
 ./bin/providentia --notebook
 ```
+
+More details can be found in the [library section](Library).
 
 ## Interpolating your model data to observations
 

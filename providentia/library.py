@@ -448,12 +448,6 @@ class Providentia:
         else:
             zstat = None
 
-        # check if data was loaded
-        if not hasattr(self, 'networkspecies'):
-            msg = 'Data was not loaded, use load() first.'
-            show_message(self, msg)
-            return
-
         # get networkspeci to plot (for non-multispecies plots), taking first one preferentially
         if len(self.networkspecies) > 0:
             networkspeci = self.networkspecies[0]
