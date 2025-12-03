@@ -178,10 +178,9 @@ class DataReader:
                 self.read_instance.original_data_labels = copy.deepcopy(self.read_instance.data_labels)
                 self.read_instance.original_data_labels_raw = copy.deepcopy(self.read_instance.data_labels_raw)
                 self.read_instance.original_experiments = copy.deepcopy(self.read_instance.experiments)
-                #self.read_instance.original_plotting_params = copy.deepcopy(self.read_instance.plotting_params)
 
                 self.check_forecast(yearmonths_to_read=yearmonths_to_read)
-                self.read_instance.data_labels, self.read_instance.data_labels_raw, self.read_instance.experiments = self.update_forecast_indices()
+                self.read_instance.data_labels, self.read_instance.data_labels_raw, self.read_instance.experiments = self.update_forecast_indices(init=True)
 
             # create data in memory array
             self.read_instance.data_in_memory = {networkspeci: 
@@ -578,7 +577,7 @@ class DataReader:
         self.read_instance.combined_forecast = np.any([True for data_label in self.read_instance.data_labels if '-combined' in data_label])
 
         # if have reading daily or combined forecast data, make original copy of data labels, experiments and plotting params, 
-        # as will be modified later and may need restoring
+        # as will be modified later and may need restoring, for dashboard mode only
         if ((self.read_instance.daily_forecast) or (self.read_instance.combined_forecast)) & (self.read_instance.mode not in ['report', 'library']):
             self.read_instance.original_data_labels = copy.deepcopy(self.read_instance.data_labels)
             self.read_instance.original_data_labels_raw = copy.deepcopy(self.read_instance.data_labels_raw)
@@ -913,7 +912,8 @@ class DataReader:
 
  
     def update_forecast_indices(self, data_labels=None, data_labels_raw=None, 
-                                selected_data_labels=None, selected_data_labels_raw=None, networkspecies=None):
+                                selected_data_labels=None, selected_data_labels_raw=None, 
+                                networkspecies=None, init=False):
         """
         Updates forecast-related indices, labels, and experiment configurations based on
         the current forecast settings and selected data labels.
@@ -978,7 +978,7 @@ class DataReader:
                 else:
                     wanted_forecast_days.append(int(fct))
 
-        # initialize dictionary to store forecast indices per data label
+        # initialise dictionary to store forecast indices per data label
         self.read_instance.forecast_indices_per_data_label = {}
 
         # prepare unique lists to track which labels are added/removed across network species
@@ -996,12 +996,18 @@ class DataReader:
             data_labels_to_add = []
             data_labels_raw_to_add = []
 
-            # reset experiments pop-up menu options if in dashboard mode
-            if self.read_instance.mode not in ['report', 'library']:
+            # reset experiments pop-up menu options if in dashboard mode, and are initialising
+            if (self.read_instance.mode not in ['report', 'library']) & (init):
                 self.read_instance.experiments_menu['experiments']['forecast'] = {}
                 self.read_instance.experiments_menu['experiments']['forecast_days'] = {}
+            # otherwise reset selected and disabled forecast variable and day options (to ensure data labels that are no longer selected are cleaned)
+            elif (self.read_instance.mode not in ['report', 'library']) & (not init): 
+                for data_label in self.read_instance.experiments_menu['experiments']['forecast']:
+                    self.read_instance.experiments_menu['experiments']['forecast'][data_label][1] = []
+                    self.read_instance.experiments_menu['experiments']['forecast'][data_label][2] = []
+                    self.read_instance.experiments_menu['experiments']['forecast_days'][data_label][1] = []
 
-            # initialize dictionary for this network species
+            # initialise dictionary for this network species
             self.read_instance.forecast_indices_per_data_label[networkspeci] = {}
             for data_label, data_label_raw in zip(data_labels, data_labels_raw):
                 # skip the observation data label
@@ -1013,6 +1019,12 @@ class DataReader:
                     continue
                 # get number of forecast days for this label
                 n_forecast_days = self.read_instance.forecast_days_per_data_label[networkspeci][data_label]
+
+                # reset experiments pop-up menu options if in dashboard mode for specific data label (as now know will reset it)
+                if (self.read_instance.mode not in ['report', 'library']) & (data_label in self.read_instance.experiments_menu['experiments']['forecast']):
+                    del self.read_instance.experiments_menu['experiments']['forecast'][data_label]
+                    del self.read_instance.experiments_menu['experiments']['forecast_days'][data_label]
+
                 # if no forecast days available, just update the menu with empty entry
                 if n_forecast_days == 0:
                     self.update_forecast_menu(networkspeci, data_label, '', n_forecast_days, '')
@@ -1118,7 +1130,7 @@ class DataReader:
             # Case 1: No forecast days are available
             if n_forecast_days == 0:
                 
-                # Initialize all forecast-related lists as empty
+                # Initialise all forecast-related lists as empty
                 available_forecast_vars = []
                 available_forecast_day_vars = []
                 selected_forecast_vars = []
@@ -1170,7 +1182,7 @@ class DataReader:
                     disabled_forecast_vars
                 ]
 
-                # Initialize available forecast day options and empty selected list
+                # Initialise available forecast day options and empty selected list
                 self.read_instance.experiments_menu['experiments']['forecast_days'][data_label] = [
                     available_forecast_day_vars,
                     []

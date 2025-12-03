@@ -63,8 +63,8 @@ class DataFilter:
         self.read_instance.time_index = self.read_instance.time_array
 
         # if are reading daily or combined forecast data restore data labels, experiments and plotting params
-        # to how they were upon read
-        if (self.read_instance.daily_forecast) or (self.read_instance.combined_forecast):
+        # to how they were upon read for dashboard mode
+        if ((self.read_instance.daily_forecast) or (self.read_instance.combined_forecast)) & (self.read_instance.mode not in ['report', 'library']):
             self.read_instance.data_labels = copy.deepcopy(self.read_instance.original_data_labels)
             self.read_instance.data_labels_raw = copy.deepcopy(self.read_instance.original_data_labels_raw)
             self.read_instance.experiments = copy.deepcopy(self.read_instance.original_experiments)
@@ -687,7 +687,7 @@ class DataFilter:
         7. Updates plotting parameters to reflect the new data structure.
 
         Note:
-            - Observational data is repeated across all forecast days.
+            - Observational data and non-forecast data is repeated across all forecast days.
             - Forecast data is tiled in same dimension corresponding to each forecast day.
             - The function assumes `read_instance` contains all necessary 
             attributes (data_labels, data_in_memory_filtered, forecast_indices_per_data_label, etc.).

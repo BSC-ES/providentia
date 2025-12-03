@@ -862,7 +862,7 @@ class Dashboard(QtWidgets.QWidget):
         # update forecast indices and data labels based on selected forecast data 
         selected_data_labels, selected_data_labels_raw, selected_experiments = self.datareader.update_forecast_indices(data_labels=all_data_labels, data_labels_raw=all_data_labels_raw,
                                                                                                                        selected_data_labels=selected_data_labels, selected_data_labels_raw=selected_data_labels_raw,
-                                                                                                                       networkspecies=[self.selected_networkspeci])
+                                                                                                                       networkspecies=[self.selected_networkspeci], init=True)
     
         # if are loading from a .conf file then set data labels and experiments
         if self.from_conf:
@@ -1345,7 +1345,7 @@ class Dashboard(QtWidgets.QWidget):
             # update forecast indices and data labels based on selected forecast data 
             self.data_labels, self.data_labels_raw, self.experiments = self.datareader.update_forecast_indices(data_labels=data_labels, data_labels_raw=data_labels_raw,
                                                                                                                networkspecies=[self.networkspeci])
-    
+
         # remove bias plot options if have no experiments loaded
         if len(self.data_labels) == 1:
             for plot_type in self.mpl_canvas.all_plots:
