@@ -46,6 +46,7 @@ cams_analysis:
     calendar: standard
     stream: false
     split: false
+    lookahead_days: 0
 cams_forecast:
   regional:
     dataset: cams-europe-air-quality-forecasts
@@ -97,6 +98,7 @@ cams_forecast:
     stream: false
     file_format: ENS_FORECAST_yyyy-mm-dd.nc
     split: false
+    lookahead_days: 5
   global:
     dataset: cams-global-atmospheric-composition-forecasts
     resolution: 
@@ -182,6 +184,7 @@ cams_forecast:
     stream: false
     file_format: data_mlev_yyyy-mm-dd.nc
     split: true
+    lookahead_days: 5
 cams_reanalysis:
   regional:
     dataset: cams-europe-air-quality-reanalyses
@@ -221,6 +224,7 @@ cams_reanalysis:
     calendar: standard
     stream: true
     split: false
+    lookahead_days: 0
   global:
     dataset: cams-global-reanalysis-eac4
     resolution: 3hourly
@@ -271,3 +275,4 @@ cams_reanalysis:
     calendar: proleptic_gregorian
     stream: false
     split: false
+    lookahead_days: 0
