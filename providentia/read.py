@@ -1021,9 +1021,10 @@ class DataReader:
                 n_forecast_days = self.read_instance.forecast_days_per_data_label[networkspeci][data_label]
 
                 # reset experiments pop-up menu options if in dashboard mode for specific data label (as now know will reset it)
-                if (self.read_instance.mode not in ['report', 'library']) & (data_label in self.read_instance.experiments_menu['experiments']['forecast']):
-                    del self.read_instance.experiments_menu['experiments']['forecast'][data_label]
-                    del self.read_instance.experiments_menu['experiments']['forecast_days'][data_label]
+                if self.read_instance.mode not in ['report', 'library']:
+                    if data_label in self.read_instance.experiments_menu['experiments']['forecast']:
+                        del self.read_instance.experiments_menu['experiments']['forecast'][data_label]
+                        del self.read_instance.experiments_menu['experiments']['forecast_days'][data_label]
 
                 # if no forecast days available, just update the menu with empty entry
                 if n_forecast_days == 0:
