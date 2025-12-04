@@ -1,35 +1,34 @@
 # Tips and tricks for developers
 
-This page can be used by developers to better understand certain parts of the code:
+This page can be used by developers to better understand certain parts of the code and perform certain actions:
 
-- [Migrate from Gitlab to Github](#migrate-from-gitlab-to-github)
+- [Migrate repository from Gitlab to Github](#migrate-repository-from-gitlab-to-github)
 - [Run tests](#run-tests)
 - [Upload to PyPI](#upload-to-pypi)
 - [Check that all reports are created](#check-that-all-reports-are-created)
 - [Run Providentia inside Docker container](#run-providentia-inside-docker-container)
 - [Create the docs for the first time and upload to readthedocs](#create-the-docs-for-the-first-time-and-upload-to-readthedocs)
 - [Generate the docs](#generate-the-docs)
-- [Create providentia-env_v3.0.0 in MN5](#create-providentia-env_v300-in-mn5)
-- [Create local environment](#create-local-environment)
+- [Create conda environments](#create-conda-environments)
 - [Memory Profiling Code](#memory-profiling-code)
 
-## Migrate from Gitlab to Github
+## Migrate repository from Gitlab to Github
 
 Things to do in advance:
 
-- Create a file that maps all users from Gitlab to Github. For example: avilanov is albavilanova. You can use this file as reference https://docs.google.com/spreadsheets/d/1O7pKzNNfRjM8O-iP_fB2HM5AvJiBXq31FO40BLUuu_M/edit?gid=0#gid=0.
+- Create a file that maps all users from Gitlab to Github. For example: avilanov in Gitlab is albavilanova in Github. You can use this file as reference https://docs.google.com/spreadsheets/d/1O7pKzNNfRjM8O-iP_fB2HM5AvJiBXq31FO40BLUuu_M/edit?gid=0#gid=0.
 
 - Request permission to Francesco or Albert to become an owner in https://github.com/BSC-ES.
 
 - Invite users who created issues in Gitlab as team members to BSC-ES group in Github.
 
-- Create empty repository in Github
+- Create empty repository in Github.
 
-Once you have done completed these steps:
+Once you have completed these steps:
 
-- Prepare to use node-gitlab-2-github repository
+- Prepare to use node-gitlab-2-github repository, which will be used to transfer all issues and milestones:
 
-```
+```bash
 git clone --mirror https://earth.bsc.es/gitlab/ac/providentia.git
 cd providentia.git
 git push --no-verify --mirror git@github.com:BSC-ES/providentia.git
@@ -38,14 +37,14 @@ git fetch -p origin
 git push --no-verify --mirror
 ```
 
-- Install node-gitlab-2-github: You can try to install the original repository but I don't recommend it since so many things are failing. I fixed them in a forked version.
+- Install node-gitlab-2-github: You can try to install the original repository but I don't recommend it since so many things are failing. I fixed them in a forked version at https://github.com/albavilanova/node-gitlab-2-github.
 
-```
+```bash
 git clone https://github.com/albavilanova/node-gitlab-2-github
 cd node-gitlab-2-github
 ```
 
-- Create settings.ts: Leave projectId as 0 the first time you do `npm run start`so that it throws an error showing you all the project ids and their corresponding project names. Then update `settings.ts`. Our file was:
+- Edit the settings.ts within the repository that you've just cloned: Leave projectId as 0 the first time you run `npm run start`, that way it will throw an error showing you all the available project ids and their corresponding project names. Then update `settings.ts` with your id and run again. Our `settings.ts` was:
 
 ```
 import Settings from './src/settings';
@@ -136,31 +135,22 @@ export default {
 } as Settings;
 ```
 
-Session cookie is obtained from Developer tools -> Application -> Cookies -> _gitlab_session while being in the Gitlab page.
+Session cookie is obtained from Developer tools -> Application -> Cookies -> _gitlab_session while being in the Gitlab page. Tokens for Gitlab and Github need to be obtained from your account.
 
 - Run code
 
-```
+```bash
 npm run start
 Transferring Description
 Transferring Milestones
 Transferring Labels
 Transferring Releases
 Transferring Issues
+...
 ```
 
-- Once it is finished, go to Github and check if everything is correct. You might see that the commits are not linked to your accounts, that's because they are associated to your BSC emails and not your Gitlab emails. To solve this, create a .mailmap and do the following:
+- Once it is finished, go to Github and check if everything is correct. You might see that the commits are not linked to your accounts, that's because they are associated to your BSC emails and not your Gitlab emails. To solve this, create a .mailmap file in your repository. Our .mailmap-gitlab contained:
 
-```
-git clone https://github.com/BSC-ES/providentia.git
-cd providentia
-git filter-repo --mailmap .mailmap --force
-git remote add origin https://github.com/BSC-ES/providentia.git
-git push --set-upstream origin master  --force
-git push --mirror --force origin
-```
-
-Our .mailmap-gitlab contains:
 ```
 # FORMAT: <replace-with--name>  <replace-with-email>  <commit-name>  <commit-email>
 # Omit commit-name or commit-email if same as replace-with.
@@ -173,47 +163,63 @@ Amalia Vradi                <amalia.vradi@bsc.es>                Amalia Vradi   
 Francesco Benincasa         <fbeninca@gmail.com>                 Francesco Benincasa       <francesco.benincasa@bsc.es>
 ```
 
+Then:
+
+```bash
+git clone https://github.com/BSC-ES/providentia.git
+cd providentia
+git filter-repo --mailmap .mailmap --force
+git remote add origin https://github.com/BSC-ES/providentia.git
+git push --set-upstream origin master  --force
+git push --mirror --force origin
+```
+
 It is also possible that the default branch is not set to be the master, you can change that from Settings -> General.
 
 ## Run tests
 
-To run all the pipeline tests in your local machine, you will need to add `return "github"` in the function `get_machine()` in `auxiliar.py` and then run:
+To run all the pipeline tests in your local machine and read the data from the folder `tests/data`, you will need to add `return "github"` in the function `get_machine()` in `auxiliar.py` and then run:
 
-```
-conda activate providentia-env_v3.0.0
+```bash
+conda activate providentia-env_v[version]
 pytest tests
 ```
 
-If you want to run a specific set of tests (there are three sets: test_apply_filter, test_make_plot, test_read_data), you can do so by specifying the set:
+If you want to run a specific set of tests (from: test_apply_filter, test_make_plot, test_read_data, test_save, test_unit_converter), you can do so by specifying the set:
 
-```
+```bash
 pytest tests/test_read_data.py
 ```
 
 To run a specific test, you will need to edit these files and comment the functions you are not interested in testing.
 
+If you want to recreate the expected data in the tests, set the variable `GENERATE_OUTPUT` in `tests/aux_functions.py` to True temporarily and run the tests once before reverting it back to False.
+
 If you want to see the coverage report use:
 
-```
+```bash
 coverage report -i -m
 ```
 
 ## Upload to PyPI
 
-Every time a version is released, we should update Providentia in PyPI. To do so, we will first create a source distribution:
+Every time a version is released, we should update Providentia in PyPI. To do so, we will first create a source distribution in the folder `dist``:
 
-```
+```bash
 python setup.py sdist
 ```
 
 We can check if it can be installed doing:
-```
+
+```bash
 pip install dist/providentia-X.X.X.tar.gz
 ```
 
-If everything is correct, we can proceed to upload our distribution to the website. For this we need to install twine:
+If everything is correct, we can proceed to upload our distribution to the website.
 
-```
+To upload the package we need to install twine:
+
+```bash
 pip install twine
 ```
 
@@ -225,7 +231,7 @@ And get an API key in PyPI. I recommend creating a folder in your home directory
   password = pypi-[key]
 ```
 
-That way you won't be asked for the your credentials anymore. Make sure the version name has been updated in __init__.py, and no more changes are needed since **it is not allowed to update the repository for that version once it is uploaded even if deleted**.
+That way you won't be asked for the your credentials anymore. Make sure the version name has been updated in __init__.py, and no more changes are needed since **it is not allowed to update the repository for that version once it is uploaded even if deleted**. Be very sure that everything is working fine at this point, as the uploaded version cannot be overwritten, only deleted.
 
 To upload it, you can do:
 
@@ -235,13 +241,15 @@ twine upload dist/providentia-X.X.X.tar.gz
 
 ## Check that all reports are created
 
-```
+To generate reports for all configuration files under `configurations` folder:
+
+```bash
 #!/bin/bash
 folder_path="configurations"
 error_log="error_log2.txt"
 > "$error_log"
 for file in "$folder_path"/*; do
-        command="./bin/providentia --offline --config="$file
+        command="./bin/providentia --report --config="$file
   echo
   echo
   echo
@@ -261,46 +269,42 @@ done
 
 We need to first build our image:
 
-```
+```bash
 docker build -t "providentia-image" .
 ```
 
 To be able to display the dashboard we will also run these commands:
-```
+```bash
 export DISPLAY=:1.0
 xhost +local:*
 ```
 
-We can then start the service without using compose.yml:
-```
-docker run -v /data:/data -v /home/avilanov/software/Providentia:/tmp/Providentia -v /home/avilanov/software/providentia-interpolation:/tmp/providentia-interpolation -it -p 8888:8888 providentia-image /bin/bash
-```
-
-Or simply doing
-```
+We can then start the service using compose.yml:
+```bash
 docker compose run providentia bash
 ```
 
 This will open a "session" inside our container, from which we can run Providentia.
 
-Prior to that you should update the paths to the volumes (/data, /home/avilanov/software/Providentia, /home/avilanov/software/providentia-interpolation), used to access the data and repositories that are found in your local machine (outside the Docker container). The changes you do to your local files will be automatically reflected in the container.
+Prior to that you should update the paths to the volumes (/data, /home/avilanov/software/Providentia) in `compose.yml`, used to access the data and repositories that are found in your local machine (outside the Docker container). The changes you do to your local files will be automatically reflected in the container.
 
 ## Create the docs for the first time and upload to readthedocs
 
-Install `myst-parser==3.0.1`, `Sphinx==7.2.6` and `Sphinx-rtd-theme==2.0.0` in your environment and add the modules to your `requirements.txt` file.
+Install `myst-parser`, `Sphinx` and `Sphinx-rtd-theme` in your environment and add the modules to your `requirements.txt` file.
 
-```
-conda activate providentia-env_v3.0.0
-pip install myst-parser==3.0.1 Sphinx==7.2.6 Sphinx-rtd-theme==2.0.0
+```bash
+conda activate providentia-env_v[version]
+pip install myst-parser Sphinx Sphinx-rtd-theme
 ```
 
 Create a folder called docs inside your repository and do:
-```
+
+```bash
 cd docs
 sphinx-quickstart
 ```
 
-This will ask you a few questions (we answered with yes to the question of whether we want to separate source and build folders) and a `conf.py` file together with other files will be generated in the `docs/source` folder. You can edit the configuration file. In our case, we added some extensions and plugins:
+This will ask you a few questions (we answered with yes to the question of whether we want to separate source and build folders) and a `conf.py` file, together with other files, will be generated in the `docs/source` folder. You can edit the configuration file. In our case, we added some extensions and plugins:
 
 ```
 # -- General configuration ---------------------------------------------------
@@ -321,16 +325,16 @@ html_css_files = [
 ]
 ```
 
-Add your markdown files to `docs/source` and add the filenames to `index.rst` in order to show their contents. Then run:
+Add your markdown files to `docs/source` and add the .md filenames to `index.rst` in order to show their contents. Then run:
 
-```
+```bash
 make clean
 make html
 ```
 
-Here you might get some errors related to the format of your .md files, fix them and run the commands again. This will generate the HTML files, you can open them from the browser to make sure they look correct.
+Here you might get some errors related to the format of your .md files, fix them and run both commands again. This will generate the HTML files under `docs/build`, you can open them from the browser to make sure they look correct.
 
-Now create an account and project in https://app.readthedocs.org/, and associate it with your project, which must be open source. To show the documentation, you will need to create the file .readthedocs.yaml in your repository. Ours looks like this:
+Now create an account and project in https://app.readthedocs.org/, and associate it with your project in Github, which must be open source. To show the documentation, you will need to create the file .readthedocs.yaml in your repository. Ours looks like this:
 
 ```
 # Read the Docs configuration file
@@ -358,53 +362,68 @@ Trigger a build from your latest commit containing this file and you should be r
 
 ## Generate the docs
 
-Edit the files under `docs/source``, then navigate to docs and simply run:
-```
+Edit the files under `docs/source`, then navigate to docs and simply run:
+
+```bash
 conda activate providentia-env_v3.0.0
 cd docs
 make clean
 make html
 ```
 
-## Create providentia-env_v3.0.0-nord4 in Nord4
+Do not edit anything under `docs/build` as it gets deleted everytime you run `make clean`.
+
+## Create conda environments
+
+### Create local environment
+
+If for some reason you want to create the environment from scratch, you can use:
 
 ```
-conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0-nord4 -y python=3.11.5 -c conda-forge --override-channels
-conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0-nord4
-conda install -c conda-forge cartopy jupyterlab ghostscript dask --override-channels
-pip install -r requirements.txt
+conda env create -f environment.yaml
 ```
 
-## Create providentia-env_v3.0.0 in MN5
+You might get a warning like:
 
 ```
-conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0 -y python=3.11.5 -c conda-forge --override-channels
-conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0
-conda install -c conda-forge cartopy jupyterlab ghostscript dask --override-channels
-pip install -r requirements.txt
+WARNING conda.models.version:get_matcher(556): Using .* with relational operator is superfluous and deprecated and will be removed in a future version of conda. Your spec was 1.6.0.*, but conda is ignoring the .* and treating it as 1.6.0
 ```
 
-## Create local environment
-
-In order to test modules with pip, you need to create an environment. Once activated, you can start installing modules using either `pip` or `conda`, as in this example:
+This can be removed by updating conda:
 
 ```
+conda update conda
+conda install -n base conda=24.4.0 conda-build=24.3.0
+```
+
+Check what the latest versions of [conda](https://github.com/conda/conda/releases) and [conda-build](https://github.com/conda/conda-build/releases) are.
+
+What the first command does is creating an environment called `providentia-env_v3.0.0` with the Python version 3.11.5, and installing `cartopy`, `jupyterlab`, `ghostscript` and `dask` with conda, and the Python packages from `requirements.txt` using pip. The equivalent would be:
+
+```bash
 conda create -n providentia-env_v3.0.0 python=3.11.5 -c conda-forge --override-channels
 conda activate providentia-env_v3.0.0
 conda install -c conda-forge cartopy jupyterlab ghostscript dask --override-channels
 pip install -r requirements.txt
 ```
 
-Here we create an environment called `providentia-env_v3.00` with the Python version 3.11.5, and we install the latest version of Cartopy (with conda, with pip it gives problems), and the Python packages from `requirements.txt` using pip.
+### Create providentia-env_v3.0.0-nord4 in Nord4
 
+```bash
+conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0-nord4 -y python=3.11.5 -c conda-forge --override-channels
+conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0-nord4
+conda install -c conda-forge cartopy jupyterlab ghostscript dask --override-channels
+pip install -r requirements.txt
+```
 
-pip install memray
+### Create providentia-env_v3.0.0 in MN5
 
-memray run -o result.bin python your_script.py
-memray flamegraph result.bin  # Creates a flamegraph
-memray table result.bin       # Text summary
-memray stats result.bin       # Detailed stats
-
+```bash
+conda create -p /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0 -y python=3.11.5 -c conda-forge --override-channels
+conda activate /gpfs/projects/bsc32/repository/apps/conda_envs/providentia-env_v3.0.0
+conda install -c conda-forge cartopy jupyterlab ghostscript dask --override-channels
+pip install -r requirements.txt
+```
 
 ## Memory Profiling Code
 

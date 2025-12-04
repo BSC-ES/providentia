@@ -61,7 +61,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#unknown-miniconda3-23-9-0-0-on-nord4">Unknown Miniconda3/23.9.0-0 on Nord4</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#could-not-load-the-qt-platform-plugin-xcb-on-hpc">Could not load the Qt platform plugin “xcb” on HPC</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#segmentation-fault-on-nord4">Segmentation fault on Nord4</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#creating-environment-using-environment-yml">Creating environment using environment.yml</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
@@ -99,10 +98,9 @@
 <h2>Providentia’s graphic interface appears distorted/magnified<a class="headerlink" href="#providentia-s-graphic-interface-appears-distorted-magnified" title="Link to this heading"></a></h2>
 <p>For some particular cases, it can happen that when the application is launched, the graphics of the tools appear weird, as if magnified, like in the following picture:</p>
 <p><img alt="prv_magnified" src="_images/prv_magnified.png" /></p>
-<p>The solution to this issue is running the command <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">QT_AUTO_SCREEN_SCALE_FACTOR=0</span></code> before you launch the application. So, you need to execute something like the following:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">load_modules</span><span class="o">.</span><span class="n">sh</span>
-<span class="n">export</span> <span class="n">QT_AUTO_SCREEN_SCALE_FACTOR</span><span class="o">=</span><span class="mi">0</span>
-<span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span>
+<p>The solution to this issue is running the command <code class="docutils literal notranslate"><span class="pre">export</span> <span class="pre">QT_AUTO_SCREEN_SCALE_FACTOR=0</span></code> before you launch the application:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">QT_AUTO_SCREEN_SCALE_FACTOR</span><span class="o">=</span><span class="m">0</span>
+./bin/providentia
 </pre></div>
 </div>
 </section>
@@ -112,7 +110,7 @@
 </section>
 <section id="salloc-error-x11-get-xauth-could-not-retrieve-magic-cookie-cannot-use-x11-forwarding">
 <h2>salloc: error: x11_get_xauth: Could not retrieve magic cookie. Cannot use X11 forwarding.<a class="headerlink" href="#salloc-error-x11-get-xauth-could-not-retrieve-magic-cookie-cannot-use-x11-forwarding" title="Link to this heading"></a></h2>
-<p>When this error occurs, you should go to your home directory, remove .Xauthority file and then reconnect with ssh.</p>
+<p>When this error occurs, you should go to your home directory, remove the .Xauthority file and then reconnect with ssh.</p>
 </section>
 <section id="fatal-error-when-cloning-providentia-on-hpc">
 <h2>Fatal error when cloning Providentia on HPC<a class="headerlink" href="#fatal-error-when-cloning-providentia-on-hpc" title="Link to this heading"></a></h2>
@@ -129,8 +127,7 @@
 <li><p>Clone the Providentia repository using <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/BSC-ES/providentia.git</span></code>.</p></li>
 <li><p>Open the dashboard using <code class="docutils literal notranslate"><span class="pre">/bin/providentia</span></code>, this will create the conda environment in your machine.</p></li>
 <li><p>Add your experiment ID in <code class="docutils literal notranslate"><span class="pre">settings/interp_experiments.yaml</span></code> so that Providentia can know where to download the data from.</p></li>
-<li><p>Add <code class="docutils literal notranslate"><span class="pre">interpolated=False</span></code> in your configuration file to indicate that you want to download data that has not yet been interpolated.</p></li>
-<li><p>Use the <a class="reference internal" href="Download.html#default-download"><span class="std std-ref">download mode</span></a>. to download the observations and experiments to interpolate by <code class="docutils literal notranslate"><span class="pre">./bin/providentia</span> <span class="pre">--config='/path/to/file/example.conf'</span> <span class="pre">--download</span></code>. If you get an authentication error, review the .env file and redefine the username and password to access storage5 (PRV_USER, PRV_PWD).</p></li>
+<li><p>Use the <a class="reference internal" href="Download.html#default-download"><span class="std std-ref">download mode</span></a>. to download the observations and experiments to interpolate by <code class="docutils literal notranslate"><span class="pre">./bin/providentia</span> <span class="pre">--config='/path/to/file/example.conf'</span> <span class="pre">--download</span></code>. The data will be downloaded into the paths defined in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
 <li><p>After downloading the data do the interpolation as usual: <code class="docutils literal notranslate"><span class="pre">./bin/providentia</span> <span class="pre">--config='/path/to/file/example.conf'</span> <span class="pre">--interp</span></code>.</p></li>
 </ul>
 </section>
@@ -145,7 +142,7 @@ It is also possible your cache file is out-of-date; it may help to try:
   $ module --ignore-cache load &quot;Miniconda3/23.9.0-0&quot;
 </pre></div>
 </div>
-<p>To avoid this issue, remember that you need to edit your .bashrc file in /home/bsc/{username} as specified in the <a class="reference internal" href="Connection-setup.html"><span class="doc std std-doc">Connection setup section</span></a></p>
+<p>To avoid this issue, remember that your .bashrc file in /home/bsc/{username} needs to be as specified in the <a class="reference internal" href="Connection-setup.html"><span class="doc std std-doc">Connection setup section</span></a></p>
 </section>
 <section id="could-not-load-the-qt-platform-plugin-xcb-on-hpc">
 <h2>Could not load the Qt platform plugin “xcb” on HPC<a class="headerlink" href="#could-not-load-the-qt-platform-plugin-xcb-on-hpc" title="Link to this heading"></a></h2>
@@ -158,32 +155,15 @@ It is also possible your cache file is out-of-date; it may help to try:
 <span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span><span class="p">:</span> <span class="n">line</span> <span class="mi">542</span><span class="p">:</span> <span class="mi">388441</span> <span class="n">Aborted</span>                 <span class="p">(</span><span class="n">core</span> <span class="n">dumped</span><span class="p">)</span> <span class="n">python3</span> <span class="o">-</span><span class="n">u</span> <span class="o">-</span><span class="n">Wi</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39;from providentia import main;main.main()&#39;</span>
 </pre></div>
 </div>
-<p>To solve it you must have sudo permissions and install in your system:</p>
+<p>To solve it you must have sudo permissions to install this in your system:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">dnf</span> <span class="n">libxcb</span> <span class="n">xcb</span><span class="o">-</span><span class="n">util</span> <span class="n">xcb</span><span class="o">-</span><span class="n">util</span><span class="o">-</span><span class="n">image</span> <span class="n">xcb</span><span class="o">-</span><span class="n">util</span><span class="o">-</span><span class="n">keysyms</span> <span class="n">xcb</span><span class="o">-</span><span class="n">util</span><span class="o">-</span><span class="n">renderutil</span> <span class="n">xcb</span><span class="o">-</span><span class="n">util</span><span class="o">-</span><span class="n">wm</span> <span class="n">libxkbcommon</span> <span class="n">libxkbcommon</span><span class="o">-</span><span class="n">x11</span>
 </pre></div>
 </div>
-<p>These are the names for Rocky Linux.</p>
+<p>These are the module names for Rocky Linux.</p>
 </section>
 <section id="segmentation-fault-on-nord4">
 <h2>Segmentation fault on Nord4<a class="headerlink" href="#segmentation-fault-on-nord4" title="Link to this heading"></a></h2>
 <p>This error appears when slurm is not able to submit the job properly. This is not a problem of Providentia, but of the machine. Try again, change machines or work locally.</p>
-</section>
-<section id="creating-environment-using-environment-yml">
-<h2>Creating environment using environment.yml<a class="headerlink" href="#creating-environment-using-environment-yml" title="Link to this heading"></a></h2>
-<p>If for some reason you want to create the environment from scratch, you can use:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">environment</span><span class="o">.</span><span class="n">yaml</span>
-</pre></div>
-</div>
-<p>You might get a warning like:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">WARNING</span> <span class="n">conda</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">version</span><span class="p">:</span><span class="n">get_matcher</span><span class="p">(</span><span class="mi">556</span><span class="p">):</span> <span class="n">Using</span> <span class="o">.*</span> <span class="k">with</span> <span class="n">relational</span> <span class="n">operator</span> <span class="ow">is</span> <span class="n">superfluous</span> <span class="ow">and</span> <span class="n">deprecated</span> <span class="ow">and</span> <span class="n">will</span> <span class="n">be</span> <span class="n">removed</span> <span class="ow">in</span> <span class="n">a</span> <span class="n">future</span> <span class="n">version</span> <span class="n">of</span> <span class="n">conda</span><span class="o">.</span> <span class="n">Your</span> <span class="n">spec</span> <span class="n">was</span> <span class="mf">1.6.0</span><span class="o">.*</span><span class="p">,</span> <span class="n">but</span> <span class="n">conda</span> <span class="ow">is</span> <span class="n">ignoring</span> <span class="n">the</span> <span class="o">.*</span> <span class="ow">and</span> <span class="n">treating</span> <span class="n">it</span> <span class="k">as</span> <span class="mf">1.6.0</span>
-</pre></div>
-</div>
-<p>This can be removed by updating conda:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">update</span> <span class="n">conda</span>
-<span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">n</span> <span class="n">base</span> <span class="n">conda</span><span class="o">=</span><span class="mf">24.4.0</span> <span class="n">conda</span><span class="o">-</span><span class="n">build</span><span class="o">=</span><span class="mf">24.3.0</span>
-</pre></div>
-</div>
-<p>Check what the latest versions of <a class="reference external" href="https://github.com/conda/conda/releases">conda</a> and <a class="reference external" href="https://github.com/conda/conda-build/releases">conda-build</a> are.</p>
 </section>
 </section>
 
