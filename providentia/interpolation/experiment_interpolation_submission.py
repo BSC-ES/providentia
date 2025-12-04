@@ -864,9 +864,6 @@ class SubmitInterpolation(object):
             if len(not_finished_tasks) > 0:
                 print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
 
-        # print finalised output to console if in library mode
-        self.stdout_to_console()
-
     def submit_job_multiprocessing(self):
         """Submit interpolation jobs using multiprocessing pool."""
 
@@ -905,20 +902,25 @@ class SubmitInterpolation(object):
         if n_cpus > len(self.commands):
             old_n_cpus = copy.deepcopy(n_cpus)
             n_cpus = len(self.commands)
-            msg = f'Capping {old_n_cpus} CPUs to {n_cpus} since there are only {n_cpus} tasks to process.'
+            print(f'Capping {old_n_cpus} CPUs to {n_cpus} since there are only {n_cpus} tasks to process.')
 
-        # print current output to console if in library mode
-        self.stdout_to_console()
+        # add print space
+        print()
+
+        # get total number of jobs
+        self.total_jobs = len(self.commands)
 
         # launch interpolation
         # if have no swap memory, or have just 1 cpu, run in serial without multiprocessing
         if n_cpus == 1:
-            for cmd in self.commands:
+            for i, cmd in enumerate(self.commands):
                 self.run_command(cmd)
+                print(f"{i}/{self.total_jobs} jobs completed", flush=True)
         # otherwise, use multiprocessing pool
         else:
             with multiprocessing.Pool(n_cpus) as pool:
-                pool.map(self.resource_safe_job, self.commands)
+                for i, r in enumerate(pool.imap_unordered(self.resource_safe_job, self.commands), start=1):
+                    print(f"{i}/{self.total_jobs} jobs completed", flush=True)
 
         # stop timer
         total_time = (time.time()-self.start)/60.
@@ -1130,35 +1132,16 @@ class SubmitInterpolation(object):
         ''' Function to submit interpolation job.'''
 
         arguments_list = commands.strip().split()
+        print('Submitting job with arguments: [{} {} {} {} {}]'.format(arguments_list[3],arguments_list[5],arguments_list[6],arguments_list[7],arguments_list[8]), flush=True)
         if self.machine == 'nord4':
             arguments_list.insert(0, 'nord3_singu_es')
         result = subprocess.run(arguments_list, capture_output=True, text=True)
+
         if result.returncode != 0:
             error = result.stderr
             if error == '':
                 error = 'Unknown error'
-            print(f"Error in submission using the following args {result.args[3:-1]}: {error}", flush=True)
-
-    def stdout_to_console(self):
-        ''' Function to print stdout to console in library mode'''
-
-        #library mode?
-        if self.mode == 'library':
-            #flush stdout
-            sys.stdout.flush()
-            #get current stdout
-            current_stdout = sys.stdout
-            #restore stdout to console
-            sys.stdout = sys.__stdout__
-            #open management logfile and print contents
-            with open(join(PROVIDENTIA_ROOT, 'logs', 'interpolation', 'management_logs', f'{self.slurm_job_id}.out'), 'r') as f:
-                for line_ii, line in enumerate(f):
-                    #only print line if not previously printed
-                    if line_ii > self.current_line:
-                        print(line.rstrip('\n'))
-                        self.current_line = line_ii 
-            #restore stdout to file
-            sys.stdout = current_stdout
+            print(f"Error in submission using the arguments: {result.args[3:-1]}: {error}", flush=True)
 
 def main(**kwargs):
 

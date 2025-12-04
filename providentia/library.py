@@ -79,6 +79,48 @@ class Providentia:
         # set configuration variables, as well as any other defined variables
         self.valid_config = self.set_config(**self.kwargs)
 
+
+
+        # generate file trees if needed
+        generate_file_trees(self)
+        
+        # initialise DataReader class
+        self.datareader = DataReader(self)
+
+        # check for self defined plot characteristics file
+        if self.tests:
+            mode = 'tests'
+        else:
+            mode = 'library'
+        if self.plot_characteristics_filename == '':
+            self.plot_characteristics_filename = join(PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')
+        plot_characteristics = yaml.safe_load(open(self.plot_characteristics_filename))
+        self.plot_characteristics_templates = expand_plot_characteristics(plot_characteristics, mode)
+
+        # initialise Plotting class
+        self.plotting = Plotting(read_instance=self, canvas_instance=self)
+
+        # add general plot characteristics to self
+        for k, val in self.plot_characteristics_templates['general'].items():
+            if k not in kwargs:
+                setattr(self, k, val)
+
+        # set some key configuration variables
+        self.periodic_relevant_temporal_resolutions = get_periodic_relevant_temporal_resolutions(self.resolution)
+        self.periodic_nonrelevant_temporal_resolutions = get_periodic_nonrelevant_temporal_resolutions(self.resolution)
+        self.data_labels = [self.observations_data_label] + list(self.experiments.values())
+        self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
+        self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
+
+        # get valid observations in date range
+        get_valid_obs_files_in_date_range(self, self.start_date, self.end_date)
+
+        # update available experiments for selected fields
+        get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
+                            self.network, self.species)
+
+
+
     def read(self):
         """ Wrapper method to read data. """
 
@@ -1266,7 +1308,7 @@ class Providentia:
             self.subsection_opts = {k: (self.section_opts[k] if k in self.fixed_section_vars else val) 
                                     for (k, val) in self.subsection_opts.items()}
             
-            # update subsection variables
+            # update subsection variables (if not overwritten by kwargs)
             for k, val in self.subsection_opts.items():
                 if k not in kwargs:
                     setattr(self, k, self.provconf.parse_parameter(k, val))
@@ -1451,43 +1493,6 @@ class Providentia:
         valid_config = self.have_valid_config()
         if not valid_config:
             return
-
-        # generate file trees if needed
-        generate_file_trees(self)
-        
-        # initialise DataReader class
-        self.datareader = DataReader(self)
-
-        # check for self defined plot characteristics file
-        if self.tests:
-            mode = 'tests'
-        else:
-            mode = 'library'
-        if self.plot_characteristics_filename == '':
-            self.plot_characteristics_filename = join(PROVIDENTIA_ROOT, 'settings/plot_characteristics.yaml')
-        plot_characteristics = yaml.safe_load(open(self.plot_characteristics_filename))
-        self.plot_characteristics_templates = expand_plot_characteristics(plot_characteristics, mode)
-
-        # initialise Plotting class
-        self.plotting = Plotting(read_instance=self, canvas_instance=self)
-
-        # add general plot characteristics to self
-        for k, val in self.plot_characteristics_templates['general'].items():
-            setattr(self, k, val)
-
-        # set some key configuration variables
-        self.periodic_relevant_temporal_resolutions = get_periodic_relevant_temporal_resolutions(self.resolution)
-        self.periodic_nonrelevant_temporal_resolutions = get_periodic_nonrelevant_temporal_resolutions(self.resolution)
-        self.data_labels = [self.observations_data_label] + list(self.experiments.values())
-        self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
-        self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
-
-        # get valid observations in date range
-        get_valid_obs_files_in_date_range(self, self.start_date, self.end_date)
-
-        # update available experiments for selected fields
-        get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
-                            self.network, self.species)
 
         # read data
         self.read()  
