@@ -19,7 +19,8 @@ You will also need to load the necessary modules for it to function, for this yo
 conda activate providentia-env_v[version]
 ```
 
-Then the Providentia library can be used in any script, through simply importing it as a module:   
+Then the Providentia library can be used in any script, through simply importing it as a module:
+
 ```
 import providentia as prv
 ```
@@ -46,6 +47,14 @@ provi = prv.Providentia('interactive_template.conf')
 Providentia looks for configuration files in the `configurations` folder by default, if your configuration file is saved elsewhere, pass the complete path.
 
 The configuration will become part of the object, therefere you can call the modes as explained below. You can pass any arguments you wish when calling each function to override what is set in the loaded configuration file. 
+
+When using Providentia inside a Python script, instead of through the terminal or in a Jupyter notebook, we need to call its functions with the main guard:
+
+```
+if __name__ == "__main__":
+    provi = prv.Providentia('interactive_template.conf')
+    # Other functions (load, plot, etc.)
+```
 
 **Download**
 
