@@ -1,3 +1,3 @@
 dataset,annotation
-a2intest-regional-000,"Mean: -0.01, MB: -0.01, RMSE: 0.30, r: 0.50"
-a4xftest-regional-000,"Mean: 0.30, MB: 0.30, RMSE: 0.56, r: 0.50"
+a2in-regional-000,"Mean: -0.01, MB: -0.01, RMSE: 0.30, r: 0.50"
+a4xf-regional-000,"Mean: 0.30, MB: 0.30, RMSE: 0.56, r: 0.50"
