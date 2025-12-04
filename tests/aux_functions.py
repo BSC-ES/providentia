@@ -8,15 +8,12 @@ from providentia.statistics import get_z_statistic_info
 
 GENERATE_OUTPUT = False
 
-def read_data(inst, path, network_type):
+def read_data(inst, path):
 
     # get data in memory in xarray format
     inst.print_config()
     data = inst.data(format='xr')
-    if network_type == 'ghost':
-        var = 'EBAS|sconco3_data'
-    else:
-        var = 'nasa-aeronet_directsun_v3-lev15|od550aero_data'
+    var = [v for v in list(data.data_vars) if v.endswith("_data")][0]
     generated_output = data[var].values
 
     # save data, uncomment if we want to update it
@@ -177,12 +174,12 @@ def check_filter_data(inst, statistic_mode, network_type, filter):
 
     # Check filtered data
     filter_path = f'tests/reference/{network_type}/{statistic_mode}/data/data_{filter}.npy'
-    read_data(inst, filter_path, network_type)
+    read_data(inst, filter_path)
 
     # Reset filter and check original data
     inst.reset(initialise=True)
     orig_path = f'tests/reference/{network_type}/{statistic_mode}/data/data.npy'
-    read_data(inst, orig_path, network_type)
+    read_data(inst, orig_path)
 
     # Check filtered data is different from original data
     orig_output = np.load(orig_path, allow_pickle=True)
