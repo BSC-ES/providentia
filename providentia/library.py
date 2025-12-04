@@ -79,8 +79,6 @@ class Providentia:
         # set configuration variables, as well as any other defined variables
         self.valid_config = self.set_config(**self.kwargs)
 
-
-
         # generate file trees if needed
         generate_file_trees(self)
         
@@ -118,8 +116,6 @@ class Providentia:
         # update available experiments for selected fields
         get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
                             self.network, self.species)
-
-
 
     def read(self):
         """ Wrapper method to read data. """
@@ -1266,7 +1262,7 @@ class Providentia:
             if k not in kwargs:
                 setattr(self, k, self.provconf.parse_parameter(k, val))
 
-        # parse subsection
+        # parse subsection (if not already parsed from section)
         # if subsection name is provided, try and use that
         # otherwise take first defined subsection name
         # if have no subsections, section is set as subsection name
@@ -1276,8 +1272,14 @@ class Providentia:
                             if self.section == subsection_name.split('·')[0]]
         self.subsections_reduced = [subsection_name.split('·')[1] for subsection_name in self.subsections]
 
-        if hasattr(self, 'subsection'): 
-            # check that subsection actually exists
+        #give warning if have previously defined subsection in section name, but it is defined again 
+        if (hasattr(self, 'subsection')) & ('·' in self.section): 
+            msg = "Defined subsection {} is not taken into account as it is already passed in section {}.".format(self.subsection, self.section)
+            show_message(self, msg)
+
+        # check that subsection actually exists if defined
+        elif (hasattr(self, 'subsection')) & ('·' not in self.section): 
+            
             if self.subsection in self.subsections:
                 have_subsection = True
             elif self.subsection in self.subsections_reduced:
@@ -1289,6 +1291,7 @@ class Providentia:
                 msg = "Defined subsection {} does not exist in configuration file.".format(self.subsection)
                 show_message(self, msg)
 
+        # reduce multiple subsections to first one if none defined
         if len(self.subsections) > 0:
             if not have_subsection:
                 self.subsection = self.subsections[0]

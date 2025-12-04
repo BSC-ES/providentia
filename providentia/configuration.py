@@ -1089,7 +1089,7 @@ class ProvConfiguration:
                     if ghost_exp_found:
                         available_ghost_versions.append(ghost_version)
 
-                msg = f"There is no experiment {expid}-{domain} data for the current ghost version ({self.read_instance.ghost_version})." 
+                msg = f"There is no experiment {expid}-{domain} data for the current GHOST version ({self.read_instance.ghost_version})." 
                 if available_ghost_versions:
                     msg += f" Please, check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
