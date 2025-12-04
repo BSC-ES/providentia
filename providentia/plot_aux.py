@@ -30,34 +30,41 @@ from .warnings_prv import show_message
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
+def get_AERONET_sizedist_bin_radius(species):
+    """ Get AERONET size distribution bin radius for 
+        a given species.
+    """
+
+    radius_per_species = {'vconcaerobin1': '0.05',
+                          'vconcaerobin2': '0.066',
+                          'vconcaerobin3': '0.086',
+                          'vconcaerobin4': '0.113',
+                          'vconcaerobin5': '0.148',
+                          'vconcaerobin6': '0.194',
+                          'vconcaerobin7': '0.255',
+                          'vconcaerobin8': '0.335',
+                          'vconcaerobin9': '0.439',
+                          'vconcaerobin10': '0.576',
+                          'vconcaerobin11': '0.756',
+                          'vconcaerobin12': '0.992',
+                          'vconcaerobin13': '1.302',
+                          'vconcaerobin14': '1.708',
+                          'vconcaerobin15': '2.241',
+                          'vconcaerobin16': '2.940',
+                          'vconcaerobin17': '3.857',
+                          'vconcaerobin18': '5.061',
+                          'vconcaerobin19': '6.641',
+                          'vconcaerobin20': '8.713',
+                          'vconcaerobin21': '11.432',
+                          'vconcaerobin22': '15.00'
+                          }
+    
+    return radius_per_species[species] 
+
 def get_multispecies_aliases(networkspecies):
     """ Map networkspecies to networkspecies aliases.
         Also get label for alias.   
     """
-
-    multispecies_aliases = {'vconcaerobin1': '0.05',
-                            'vconcaerobin2': '0.066',
-                            'vconcaerobin3': '0.086',
-                            'vconcaerobin4': '0.113',
-                            'vconcaerobin5': '0.148',
-                            'vconcaerobin6': '0.194',
-                            'vconcaerobin7': '0.255',
-                            'vconcaerobin8': '0.335',
-                            'vconcaerobin9': '0.439',
-                            'vconcaerobin10': '0.576',
-                            'vconcaerobin11': '0.756',
-                            'vconcaerobin12': '0.992',
-                            'vconcaerobin13': '1.302',
-                            'vconcaerobin14': '1.708',
-                            'vconcaerobin15': '2.241',
-                            'vconcaerobin16': '2.940',
-                            'vconcaerobin17': '3.857',
-                            'vconcaerobin18': '5.061',
-                            'vconcaerobin19': '6.641',
-                            'vconcaerobin20': '8.713',
-                            'vconcaerobin21': '11.432',
-                            'vconcaerobin22': '15.00'
-                            }
 
     multispecies_labels =  {'vconcaerobin1': 'Radius [µm]',
                             'vconcaerobin2': 'Radius [µm]',
@@ -83,8 +90,8 @@ def get_multispecies_aliases(networkspecies):
                             'vconcaerobin22': 'Radius [µm]'
                             }
     
-    networkspecies_aliases = [multispecies_aliases[networkspeci] 
-                              if networkspeci in multispecies_aliases else networkspeci 
+    networkspecies_aliases = [get_AERONET_sizedist_bin_radius(networkspeci) 
+                              if networkspeci in multispecies_labels else networkspeci 
                               for networkspeci in networkspecies]
 
     labels = np.unique([multispecies_labels[networkspeci] 

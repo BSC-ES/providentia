@@ -33,7 +33,7 @@ from .calculate import ExpBias, Stats
 from .statistics import (boxplot_inner_fences, calculate_statistic, group_periodic,
                          get_fairmode_data, get_z_statistic_info, get_z_statistic_type)
 from .read_aux import drop_nans, get_valid_metadata
-from .plot_aux import (create_statistical_timeseries, get_multispecies_aliases, 
+from .plot_aux import (create_statistical_timeseries, get_multispecies_aliases, get_AERONET_sizedist_bin_radius,
                        get_taylor_diagram_ghelper_info, kde_fft, merge_cells, periodic_labels, 
                        periodic_xticks, round_decimal_places, temp_axis_dict, get_fairmode_RV_exceendance)
 from .plot_formatting import set_axis_title
@@ -1479,47 +1479,58 @@ class Plotting:
         # if multispecies in plot options then make plot for all networkspecies
         if 'multispecies' in plot_options:
             networkspecies = self.read_instance.networkspecies
+            species = self.read_instance.species
         else:
             networkspecies = [networkspeci]
+            species = [networkspeci.split('|')[1]]
 
-        # if norm in plot options, then get factor for normalisation (per observations and experiment)
-        if ('normmedian' in plot_options) or ('normmean' in plot_options) or ('normmin' in plot_options) or ('normmax' in plot_options) or ('normsum' in plot_options):
+        # determine if have all species are size distribution species
+        if np.all([True if 'vconcbin' in speci else False for speci in species]):
+            sizedist = True
+            radii_bins = np.array([get_AERONET_sizedist_bin_radius(speci) for speci in species])
+            bin_widths = np.diff(np.log(radii_bins))
+            bin_widths = np.append(bin_widths, bin_widths[-1])
+        else:
+            sizedist = False  
 
+        # if normalise in plot options, then get factor for normalisation (per observations and experiment)
+        if ('normalise' in plot_options): 
+
+            # initialise dict to store normalisation factors
             norm_factor = {}
 
-            # iterate through networkspecies
-            for ns in networkspecies:
-            
-                # get valid data labels for networkspeci
-                valid_data_labels = self.canvas_instance.selected_station_data_labels[ns]
+            # iterate through data labels
+            for data_label in data_labels:
                 
-                # cut data_labels for those in valid data labels
-                cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
-
-                # iterate through cut data labels making plot
-                for data_label_ii, data_label in enumerate(cut_data_labels):
-
-                    if data_label not in norm_factor:
-                        norm_factor[data_label] = []
+                # initialse list to store bin means
+                y_bins = [] 
+                
+                # iterate through networkspecies
+                for ns in networkspecies:
+            
+                    # get valid data labels for networkspeci
+                    valid_data_labels = self.canvas_instance.selected_station_data_labels[ns]
+                
+                    # if data label not in valid data labels, continue
+                    if data_label not in valid_data_labels:
+                        continue
 
                     # get data (flattened and drop NaNs)
                     data_array = drop_nans(self.canvas_instance.selected_station_data[ns]['flat'][valid_data_labels.index(data_label),0,:])
 
-                    #calculate values for normalisation
-                    if 'normmedian' in plot_options:
-                        norm_factor[data_label].append(np.nanmedian(data_array))
-                    elif 'normmean' in plot_options:
-                        norm_factor[data_label].append(np.nanmean(data_array))
-                    elif 'normmin' in plot_options:
-                        norm_factor[data_label].append(np.nanmin(data_array))    
-                    elif 'normmax' in plot_options:
-                        norm_factor[data_label].append(np.nanmax(data_array)) 
-                    elif 'normsum' in plot_options:
-                        norm_factor[data_label].append(np.nansum(data_array)) 
+                    # For area calculation, take mean over time for each bin
+                    y_bins.append(np.nanmean(data_array))
 
-            # get ultimate factor per observations / experiments for normalisation
-            for data_label in norm_factor:
-                norm_factor[data_label] = sum(np.diff(bins)*norm_factor[data_label])
+                # create numpy array of bin means
+                y_bins = np.array(y_bins)
+
+                # calculate area under curve for normalisation
+                if sizedist:
+                    widths_used = bin_widths[:len(y_bins)]
+                    area = np.sum(y_bins * widths_used)
+                else:               
+                    area = np.nansum(y_bins)
+                norm_factor[data_label] = area
             
         # iterate through networkspecies
         ns_current = 0
@@ -1564,8 +1575,8 @@ class Plotting:
                     data_array = drop_nans(self.canvas_instance.selected_station_data[ns]['flat'][valid_data_labels.index(data_label),0,:])
 
                     # normalise data array
-                    if ('normmedian' in plot_options) or ('normmean' in plot_options) or ('normmin' in plot_options) or ('normmax' in plot_options) or ('normsum' in plot_options):
-                        data_array = data_array * norm_factor[data_label]
+                    if 'normalise' in plot_options:
+                        data_array = data_array / norm_factor[data_label]
 
                     # make boxplot
                     boxplot = relevant_axis.boxplot(x=data_array, positions=[positions[data_label_ii]], widths=widths, 
