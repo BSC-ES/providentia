@@ -86,6 +86,9 @@ class Cams:
         cams_start_date = datetime.strptime(self.download_instance.start_date, "%Y%m%d")
         cams_end_date = datetime.strptime(self.download_instance.end_date, "%Y%m%d") - timedelta(days=1)
 
+        # download N days ahead for forecast
+        cams_start_date = cams_start_date - timedelta(days=cams_dict['lookahead_days'])
+
         # if the minimum date is over the end date
         if min_start_date > cams_end_date or max_end_date < cams_start_date:
             msg = f"The selected dates are unavailable. Please choose dates between {min_start_date.strftime('%Y-%m-%d')} and {max_end_date.strftime('%Y-%m-%d')}."
@@ -483,6 +486,11 @@ class Cams:
         # stop download if the dates are not correct
         if cams_start_date is None and cams_end_date is None:
             return
+        
+        # warn the user that download is going to be for N days before
+        if cams_dict['lookahead_days'] > 0:
+            msg = f"Mdel data will be downloaded {cams_dict['lookahead_days']} day(s) in advance relative to the configured date."
+            show_message(self.download_instance, msg)
 
         # iterate through the species
         for species in self.download_instance.species: 

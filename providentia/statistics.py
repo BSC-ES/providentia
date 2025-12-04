@@ -328,8 +328,7 @@ def do_resampling(read_instance, data_array, writing=False):
 def merge_forecast_days(read_instance, networkspeci, data_labels, unique_base_data_labels, data_array):
     """
     Function which joins different forecast days separated as different expertiments as 1 tiled experiment.
-    Observations are repeatedly tiled to macth the tiled experiment shape.
-    Non-forecst experiments also change to match the shape but only the first forecast day is filled.
+    Observations and non-forecast experiments are repeatedly tiled to macth the tiled experiment shape.
     """
 
     # get n_labels and n_stations of data array
@@ -354,16 +353,13 @@ def merge_forecast_days(read_instance, networkspeci, data_labels, unique_base_da
 
         for j, ind in enumerate(relevant_inds):
             data_block = data_array[ind, :, :]  # Extract data for this label
-            if base_label == read_instance.observations_data_label:
-                # Observations are repeated across all forecast days
+            if (base_label == read_instance.observations_data_label) or (len(read_instance.forecast_indices_per_data_label[networkspeci][base_label]) == 0):
+                # Observations and non-forecast data is repeated across all forecast days
                 for day in range(read_instance.max_forecast_days):
                     new_data_in_memory[base_label_ii, :, day*block_size:(day+1)*block_size] = data_block
             else:
                 # For forecast data, place each day in its corresponding block
                 new_data_in_memory[base_label_ii, :, j*block_size:(j+1)*block_size] = data_block
-                # If there are no forecast indices and this is the first block, stop
-                if (len(read_instance.forecast_indices_per_data_label[networkspeci][base_label]) == 0) & (j == 0):
-                    break
 
     return new_data_in_memory
 
