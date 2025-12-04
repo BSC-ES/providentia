@@ -4,6 +4,8 @@ import numpy as np
 import socket
 import time
 
+from .unit_converter import convert_units, get_molecular_mass
+
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -209,10 +211,6 @@ def unit_conversion(initial_units, final_units, standard_parameter_speci):
         Conversion object or error
     """
 
-    # import unit converter
-    sys.path.insert(1, join(CURRENT_PATH, 'dependencies/unit-converter'))
-    import unit_converter
-
     # if units are unitless, then no need for conversion (i.e. conversion factor = 1.0)   
     if (final_units == 'unitless') or (final_units == '-') or (final_units == '1'):
         return type('convert_units', (object,), {'conversion_factor':1.0, 'output_standard_units':'unitless'})
@@ -227,16 +225,14 @@ def unit_conversion(initial_units, final_units, standard_parameter_speci):
     if ('units_quantity' in list(standard_parameter_speci.keys())) and (initial_units == standard_parameter_speci['standard_units']):
         initial_quantity = standard_parameter_speci['units_quantity']
     else:
-        conv_obj = unit_converter.convert_units(initial_units, initial_units, 1, 
-                                                species=speci_chemical_formula)
+        conv_obj = convert_units(initial_units, initial_units, 1, species=speci_chemical_formula)
         initial_quantity = conv_obj.output_quantity
 
     # get output (observational) quantity for conversion
     if ('units_quantity' in list(standard_parameter_speci.keys())) and (final_units == standard_parameter_speci['standard_units']):
         final_quantity = standard_parameter_speci['units_quantity']
     else:
-        conv_obj = unit_converter.convert_units(final_units, final_units, 1, 
-                                                species=speci_chemical_formula)
+        conv_obj = convert_units(final_units, final_units, 1, species=speci_chemical_formula)
         final_quantity = conv_obj.output_quantity
 
     # unit converter module does not produce conversion factor for temperature, 
@@ -260,19 +256,19 @@ def unit_conversion(initial_units, final_units, standard_parameter_speci):
                        initial_quantity: initial_units}
         input_values = {'temperature': 293.15, 
                         'pressure': 1013.25, 
-                        'molar_mass': unit_converter.get_molecular_mass(speci_chemical_formula), 
+                        'molar_mass': get_molecular_mass(speci_chemical_formula), 
                         initial_quantity: 1.0}
-        conv_obj = unit_converter.convert_units(input_units, final_units, input_values, 
-                                                species=speci_chemical_formula, 
-                                                input_quantity=initial_quantity, 
-                                                output_quantity=final_quantity)
+        conv_obj = convert_units(input_units, final_units, input_values, 
+                                 species=speci_chemical_formula, 
+                                 input_quantity=initial_quantity, 
+                                 output_quantity=final_quantity)
     
     # same quantity conversion
     else:
-        conv_obj = unit_converter.convert_units(initial_units, final_units, 1.0, 
-                                                species=speci_chemical_formula, 
-                                                input_quantity=initial_quantity, 
-                                                output_quantity=final_quantity) 
+        conv_obj = convert_units(initial_units, final_units, 1.0, 
+                                 species=speci_chemical_formula, 
+                                 input_quantity=initial_quantity, 
+                                 output_quantity=final_quantity) 
     
     # return conversion object
     return conv_obj

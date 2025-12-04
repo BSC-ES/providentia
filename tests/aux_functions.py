@@ -223,3 +223,11 @@ def save_data(inst, format, fname, network_type, statistic_mode):
         with open(f'{generated_path}.conf') as f:
             generated_conf = f.read()
         assert expected_conf == generated_conf
+
+def check_unit_conversion(conv_obj, new_val, orig_val, orig_unit, new_unit, atol=1e-08):
+    if np.isclose(conv_obj.converted_value, new_val, atol=atol) == False:
+        print('{} {} to {} should be {}, is {}'.format(orig_val, orig_unit, new_unit, new_val, 
+                                                       conv_obj.converted_value))
+    else:
+        print('{} {} to {} {} correctly converted'.format(orig_val, orig_unit, new_val, new_unit))
+    assert np.isclose(conv_obj.converted_value, new_val, atol=atol)
