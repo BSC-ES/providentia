@@ -738,7 +738,7 @@ def reorder_pdf_pages(read_instance, input_pdf, output_pdf, summary_multispecies
 
     # Get original order
     input_pdf_file = PdfReader(open(input_pdf, "rb"))
-    all_pages = [int(x) for x in np.arange(len(input_pdf_file.pages))]
+    all_pages = np.arange(len(input_pdf_file.pages))
 
     # Initialise page order
     page_order = copy.deepcopy(all_pages)
@@ -763,7 +763,7 @@ def reorder_pdf_pages(read_instance, input_pdf, output_pdf, summary_multispecies
     # Reorder pages
     output_pdf_file = PdfWriter()
     for page_number in page_order:
-        output_pdf_file.add_page(input_pdf_file.pages[page_number])
+        output_pdf_file.add_page(input_pdf_file.pages[int(page_number)])
 
     # Add DOI pages at the end
     if doi_pdf is not None:
