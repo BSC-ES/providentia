@@ -10,5 +10,5 @@ Download
 
    BSC-download.md
    Zenodo-download.md
-   CAMS.rst
+   CAMS-download.md
    ACTRIS-download.md

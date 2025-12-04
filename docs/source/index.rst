@@ -9,7 +9,6 @@ Contents
    Getting-started.md
    Modes.rst
    Topics-in-depth.rst
-   Running-on-HPC.rst
    Other-topics.rst
    Evolution.md
    FAQ.md

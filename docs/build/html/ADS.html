@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Account setup &mdash; Providentia 2.4.0 documentation</title>
+  <title>Account setup in Atmosphere Data Store &mdash; Providentia 2.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -22,8 +22,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Data download" href="CAMS-download.html" />
-    <link rel="prev" title="Atmosphere Data Store" href="CAMS.html" /> 
+    <link rel="next" title="Evolution" href="Evolution.html" />
+    <link rel="prev" title="Redirecting output to a file" href="Redirecting-output-to-a-file.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,28 +48,27 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Home.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="Modes.html">Modes</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Interpolation.html">Interpolation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Report.html">Report</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="Download-mode.html">Download</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="Download-mode.html#general">General</a></li>
-<li class="toctree-l3"><a class="reference internal" href="BSC-download.html">Barcelona Supercomputing Center</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Zenodo-download.html">Zenodo</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="CAMS.html">Atmosphere Data Store</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">Account setup</a></li>
-<li class="toctree-l4"><a class="reference internal" href="CAMS-download.html">Data download</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="ACTRIS-download.html">ACTRIS</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="Library-mode.html">Library</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="Modes.html">Modes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Topics-in-depth.html">Topics in depth</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Running-on-HPC.html">Running on HPC</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="Other-topics.html">Other topics</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Running-on-HPC.html">Running on HPC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Command-line-configuration.html">Command line configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Data-flags-and-QA-names-and-codes.html">Data flags and QA names and codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Representativity-filters.html">Representativity filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Saved-file-formats.html">Saved file formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Create-your-own-data-network.html">Create your own data network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Colocation.html">Colocation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Multispecies-filtering.html">Multispecies filtering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Redirecting-output-to-a-file.html">Redirecting output to a file</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Account setup in Atmosphere Data Store</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#create-an-ecmwf-account">1. Create an ECMWF Account</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#accept-dataset-terms">2. Accept Dataset Terms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare-the-configuration-file">3. Prepare the Configuration File</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#api-configuration">4. API Configuration</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="Evolution.html">Evolution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
@@ -90,10 +89,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="Modes.html">Modes</a></li>
-          <li class="breadcrumb-item"><a href="Download-mode.html">Download</a></li>
-          <li class="breadcrumb-item"><a href="CAMS.html">Atmosphere Data Store</a></li>
-      <li class="breadcrumb-item active">Account setup</li>
+          <li class="breadcrumb-item"><a href="Other-topics.html">Other topics</a></li>
+      <li class="breadcrumb-item active">Account setup in Atmosphere Data Store</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/ADS.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -103,8 +100,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="account-setup">
-<h1>Account setup<a class="headerlink" href="#account-setup" title="Link to this heading"></a></h1>
+  <section id="account-setup-in-atmosphere-data-store">
+<h1>Account setup in Atmosphere Data Store<a class="headerlink" href="#account-setup-in-atmosphere-data-store" title="Link to this heading"></a></h1>
 <section id="create-an-ecmwf-account">
 <h2>1. Create an ECMWF Account<a class="headerlink" href="#create-an-ecmwf-account" title="Link to this heading"></a></h2>
 <blockquote>
@@ -159,8 +156,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="CAMS.html" class="btn btn-neutral float-left" title="Atmosphere Data Store" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="CAMS-download.html" class="btn btn-neutral float-right" title="Data download" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Redirecting-output-to-a-file.html" class="btn btn-neutral float-left" title="Redirecting output to a file" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Evolution.html" class="btn btn-neutral float-right" title="Evolution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

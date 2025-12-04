@@ -1,5 +1,5 @@
 
-# Account setup
+# Account setup in Atmosphere Data Store
 
 ## 1. Create an ECMWF Account
 

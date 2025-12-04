@@ -1,4 +1,4 @@
-# Data download
+# CAMS
 
 Providentia's download mode supports downloading model output data provided by **CAMS** from the **Atmosphere Data Store**:
 

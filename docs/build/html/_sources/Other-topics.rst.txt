@@ -5,6 +5,7 @@ Other topics
 .. toctree::
    :maxdepth: 2
 
+   Running-on-HPC.rst
    Command-line-configuration.md
    Data-flags-and-QA-names-and-codes.md
    Representativity-filters.md
@@ -13,3 +14,4 @@ Other topics
    Colocation.md
    Multispecies-filtering.md
    Redirecting-output-to-a-file.md
+   ADS.md
