@@ -62,6 +62,15 @@ class ProvConfiguration:
             else:
                 setattr(self.read_instance, k, self.parse_parameter(k, val))
             
+        # for any passed command line arguments not in default Providentia variables, now set them to self
+        for kwarg in kwargs:
+            if (kwarg not in self.var_defaults):
+                # do not set section or subsection arguments if not in library mode
+                if (self.read_instance.mode != 'library') & (kwarg in ['section', 'subsection']):
+                    continue
+                # set argument
+                setattr(self.read_instance, kwarg, kwargs[kwarg])
+
         # direct output to file/screen
         if hasattr(self.read_instance, 'logger') is False:
             self.switch_logging()
@@ -1080,7 +1089,7 @@ class ProvConfiguration:
                     if ghost_exp_found:
                         available_ghost_versions.append(ghost_version)
 
-                msg = f"There is no experiment {expid}-{domain} data for the current ghost version ({self.read_instance.ghost_version})." 
+                msg = f"There is no experiment {expid}-{domain} data for the current GHOST version ({self.read_instance.ghost_version})." 
                 if available_ghost_versions:
                     msg += f" Please, check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)

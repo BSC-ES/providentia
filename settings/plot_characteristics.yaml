@@ -1477,7 +1477,6 @@
       "xtick_params": { "rotation": 45 },
       "dashboard": {
           "plot_options": ["annotate", "logy", "threshold"],
-          #"plot_options": ["annotate", "logy", "normmedian", "normmean", "normmin", "normmax", "normsum", "threshold"],
           "remove_spines": ["top", "right"],
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "xlabel": { "fontsize": 8 },
@@ -1488,15 +1487,7 @@
         },
       "report": {
           "plot_options":
-            [
-              "annotate",
-              "individual",
-              "logy",
-              "multispecies",
-              "obs",
-              "threshold",
-            ],
-          #"plot_options": ["annotate", "individual", "logy", "multispecies", "normmedian", "normmean", "normmin", "normmax", "normsum", "obs", "threshold"],
+            ["annotate", "individual", "logy", "multispecies", "obs", "threshold", "normalise"],
           "orientation": "landscape",
           "figure": { "ncols": 2, "nrows": 1 },
           "page_title":
@@ -1538,8 +1529,7 @@
           "annotate_text": { "fontsize": 6 },
         },
       "library": {
-          "plot_options": ["annotate", "logy", "multispecies", "threshold"],
-          #"plot_options": ["annotate", "logy", "multispecies", "normmedian", "normmean", "normmin", "normmax", "normsum", "threshold"],
+          "plot_options": ["annotate", "logy", "multispecies", "threshold", "normalise"],
           "figsize": [13, 7],
           "subplots_adjust":
             {
