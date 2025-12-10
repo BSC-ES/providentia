@@ -169,14 +169,94 @@ class ExperimentInterpolation(object):
                                                         self.speci_to_process, self.ensemble, 
                                                         self.speci_to_process, self.yearmonth, self.ensemble)))
             
+        # if have forecast data, then get the max number of complete forecast days across model files
+        if self.forecast:
+
+            # ititalise max forecast days as 0
+            max_forecast_days = 0
+
+            # iterate and read chunked model files
+            for model_ii, model_file in enumerate(self.model_files):
+                # read in chunked netcdf file
+                mod_nc_root = Dataset(model_file)
+
+                # check if have time dimension in daily file, if do not, do not process file
+                if 'time' not in list(mod_nc_root.dimensions.keys()):
+                    mod_nc_root.close()
+                    continue
+
+                # get date from filename
+                if not self.ensemble_member:
+                    file_date = model_file.replace('_' + self.ensemble, '').split('_')[-1][:-3]
+                else:
+                    file_date = model_file.split('_')[-1][:-3]    
+
+                # get file chunk type
+                if len(file_date) == 6:
+                    chunk_type = 'monthly'
+                elif len(file_date) in [8,10]:
+                    chunk_type = 'daily'
+                else:
+                    mod_nc_root.close()
+                    continue
+
+                # cannot have chunked monthly file which has forecast data, so throw an error
+                if chunk_type == 'monthly':
+                    self.log_file_str += 'File {} is monthly, for which forecast data cannot be processed. Terminating process.'.format(model_file)
+                    create_output_logfile(1, self.log_file_str)
+                # cannot have monthly resolution file which has forecast data, so throw an error
+                elif self.model_temporal_resolution == 'monthly':
+                    self.log_file_str += 'File {} resolution is monthly, for which forecast data cannot be processed. Terminating process.'.format(model_file)
+                    create_output_logfile(1, self.log_file_str)
+
+                # get number of timesteps in file
+                n_timesteps = mod_nc_root.dimensions['time'].size
+
+                # get number of complete forecast days
+                if self.model_temporal_resolution in ['hourly', 'hourly_instantaneous']:
+                    forecast_days = int(n_timesteps / 24.0)
+                elif self.model_temporal_resolution in ['3hourly', '3hourly_instantaneous']:
+                    forecast_days = int(n_timesteps / (24.0/3.0))
+                elif self.model_temporal_resolution in ['6hourly', '6hourly_instantaneous']:
+                    forecast_days = int(n_timesteps / (24.0/6.0))
+                elif self.model_temporal_resolution == 'daily':
+                    forecast_days = int(n_timesteps)
+
+                # determine if current file has more complete forecast days than the previous maximum
+                if forecast_days > max_forecast_days:
+                    max_forecast_days = forecast_days
+
+                # close model netCDF root
+                mod_nc_root.close()
+
+            # if max forecast days is 1 or less then forecast is not active, as have no forecast data, so deactivate it
+            if max_forecast_days <= 1:
+                self.forecast = None
+                self.forecast_days = 1
+            # otherwise set forecast days  as max forecast days
+            else:
+                self.forecast_days = max_forecast_days
+
+        # else, set forecast days as 1 (as have no forecast)
+        else:        
+            self.forecast_days = 1
+
         # if have hour in model fname, and it is not 0 then insert previous file also to get times from previous yearmonth that are offset
+        # if forecast is set also get times from previous yearmonth to get prior forecasts for first days of the month 
         if not self.ensemble_member:
             first_file_date = self.model_files[0].replace('_' + self.ensemble, '').split('_')[-1][:-3]
         else:
             first_file_date = self.model_files[0].split('_')[-1][:-3]  
-        if len(first_file_date) == 10:
-            model_start_hour = int(first_file_date[-2:])
-            if model_start_hour != 0:
+        
+        if (len(first_file_date) == 10) or (self.forecast):
+
+            if len(first_file_date) == 10:
+                model_start_hour = int(first_file_date[-2:])
+            else:
+                model_start_hour = 0
+
+            # model start hour is not 0, or forecast is set
+            if (model_start_hour != 0) or (self.forecast):
                 # get previous month
                 prev_yearmonth = (datetime.datetime.strptime(self.yearmonth, '%Y%m') - relativedelta.relativedelta(months=1)).strftime('%Y%m')
                 # get previous month files
@@ -205,9 +285,30 @@ class ExperimentInterpolation(object):
                     if len(prev_month_files_final) == 0:
                         prev_month_files_final = prev_month_files
 
-                # if have previous month files, insert last one as first file in all_model_files
+                # if have previous month files, then if forecast insert the previous N forecast day files 
+                # otherwise, insert the last one as first file in all_model_files
                 if len(prev_month_files_final) > 0:
-                    self.model_files = np.insert(self.model_files, 0, prev_month_files_final[-1])
+                    valid_prev_month_files = []
+                    if self.forecast:
+                        first_file_YYYYMMDD = datetime.datetime.strptime(first_file_date[:8], "%Y%m%d") 
+                        for prev_month_file in prev_month_files_final:
+                            if not self.ensemble_member:
+                                file_YYYYMMDD = datetime.datetime.strptime(prev_month_file.replace('_' + self.ensemble, '').split('_')[-1][:-3][:8], "%Y%m%d")
+                            else:
+                                file_YYYYMMDD = datetime.datetime.strptime(self.model_files[0].split('_')[-1][:-3][:8], "%Y%m%d")   
+
+                            if model_start_hour != 0:
+                                N_prev_days = self.forecast_days + 1
+                            else:
+                                N_prev_days = self.forecast_days
+                            
+                            if ((first_file_YYYYMMDD - file_YYYYMMDD).days) <= N_prev_days:
+                                valid_prev_month_files.append(prev_month_file)
+                    else:
+                        valid_prev_month_files.append(prev_month_files_final[-1])
+
+                    # add valid previous month files to start of model files array         
+                    self.model_files = np.insert(self.model_files, 0, valid_prev_month_files)
 
         # if have no valid model files, exit
         if len(self.model_files) == 0:
@@ -699,78 +800,6 @@ class ExperimentInterpolation(object):
             self.descriptive_temporal_resolution = 'months'
             self.temporal_resolution_to_output_code = 'MS'
 
-        # if have forecast data, then get the max number of complete forecast days across model files
-        if self.forecast:
-
-            # ititalise max forecast days as 0
-            max_forecast_days = 0
-
-            # iterate and read chunked model files
-            for model_ii, model_file in enumerate(self.model_files):
-                # read in chunked netcdf file
-                mod_nc_root = Dataset(model_file)
-
-                # check if have time dimension in daily file, if do not, do not process file
-                if 'time' not in list(mod_nc_root.dimensions.keys()):
-                    mod_nc_root.close()
-                    continue
-
-                # get date from filename
-                if not self.ensemble_member:
-                    file_date = model_file.replace('_' + self.ensemble, '').split('_')[-1][:-3]
-                else:
-                    file_date = model_file.split('_')[-1][:-3]    
-
-                # get file chunk type
-                if len(file_date) == 6:
-                    chunk_type = 'monthly'
-                elif len(file_date) in [8,10]:
-                    chunk_type = 'daily'
-                else:
-                    mod_nc_root.close()
-                    continue
-
-                # cannot have chunked monthly file which has forecast data, so throw an error
-                if chunk_type == 'monthly':
-                    self.log_file_str += 'File {} is monthly, for which forecast data cannot be processed. Terminating process.'.format(model_file)
-                    create_output_logfile(1, self.log_file_str)
-                # cannot have monthly resolution file which has forecast data, so throw an error
-                elif self.model_temporal_resolution == 'monthly':
-                    self.log_file_str += 'File {} resolution is monthly, for which forecast data cannot be processed. Terminating process.'.format(model_file)
-                    create_output_logfile(1, self.log_file_str)
-
-                # get number of timesteps in file
-                n_timesteps = mod_nc_root.dimensions['time'].size
-
-                # get number of complete forecast days
-                if self.model_temporal_resolution in ['hourly', 'hourly_instantaneous']:
-                    forecast_days = int(n_timesteps / 24.0)
-                elif self.model_temporal_resolution in ['3hourly', '3hourly_instantaneous']:
-                    forecast_days = int(n_timesteps / (24.0/3.0))
-                elif self.model_temporal_resolution in ['6hourly', '6hourly_instantaneous']:
-                    forecast_days = int(n_timesteps / (24.0/6.0))
-                elif self.model_temporal_resolution == 'daily':
-                    forecast_days = int(n_timesteps)
-
-                # determine if current file has more complete forecast days than the previous maximum
-                if forecast_days > max_forecast_days:
-                    max_forecast_days = forecast_days
-
-                # close model netCDF root
-                mod_nc_root.close()
-
-            # if max forecast days is 1 or less then forecast is not active, as have no forecast data, so deactivate it
-            if max_forecast_days <= 1:
-                self.forecast = None
-                self.forecast_days = 1
-            # otherwise set forecast days  as max forecast days
-            else:
-                self.forecast_days = max_forecast_days
-
-        # else, set forecast days as 1 (as have no forecast)
-        else:        
-            self.forecast_days = 1
-
         # create array for storing daily monthly model data
         # if have forecast data, then have an extra dimension for the number of forecast days
         if self.forecast:
@@ -867,10 +896,7 @@ class ExperimentInterpolation(object):
                     for forecast_day in range(self.forecast_days):
                         forecast_start_dt = start_file_dt + datetime.timedelta(days=forecast_day)
                         forecast_end_dt = start_file_dt + datetime.timedelta(days=forecast_day+1)
-                        if forecast_day == 0:
-                            valid_inds = np.where((file_time_dt >= forecast_start_dt) & (file_time_dt < forecast_end_dt) & (file_time_dt >= start_month_dt) & (file_time_dt < end_month_dt))[0]
-                        else:
-                            valid_inds = np.where((file_time_dt >= forecast_start_dt) & (file_time_dt < forecast_end_dt))[0]
+                        valid_inds = np.where((file_time_dt >= forecast_start_dt) & (file_time_dt < forecast_end_dt))[0]
                         valid_file_time_inds.append(np.array([valid_ind for valid_ind in valid_inds if valid_ind >= self.interp_spinup_timesteps], dtype=np.int32))
 
                 # for non-forecast runs, get all timesteps (excluding spinup timesteps)
@@ -963,11 +989,20 @@ class ExperimentInterpolation(object):
                             elif self.interp_experiment_upsampling == 'gaps':
                                 xr_data = xr_data.reindex(time=new_index)
 
-                    # get indices in yearmonth to fill with read data
-                    inds_to_fill = np.isin(self.yearmonth_dt, xr_data.time.values)
-                    if not any(inds_to_fill):
+                    # get indices in yearmonth to fill with read data. Adjust for forecast day if neccessary.
+                    if (self.forecast) and (forecast_day_ii != 0):
+                        file_time = xr_data.time.values + pd.Timedelta(days=forecast_day_ii)
+                    else:
+                        file_time = xr_data.time.values
+                    inds_to_fill = np.isin(self.yearmonth_dt, file_time)
+                    
+                    # check if any file fimes are not in monthly yearmonth time array
+                    # this should not be the case unless time format is bad, or forecast data is being read
+                    if (not any(inds_to_fill)) and (self.forecast):
+                        continue
+                    elif (not any(inds_to_fill)) and (not self.forecast):
                         if not bad_time_format:
-                            self.log_file_str += 'Time in model dataset {} is not in standard format: \n {}'.format(model_file, xr_data.time.values)
+                            self.log_file_str += 'Time in model dataset {} is not in standard format: \n {}'.format(model_file, file_time)
                             failed_files += 1
                             bad_time_format = True
                         continue

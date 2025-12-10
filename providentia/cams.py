@@ -489,7 +489,7 @@ class Cams:
         
         # warn the user that download is going to be for N days before
         if cams_dict['lookahead_days'] > 0:
-            msg = f"Mdel data will be downloaded {cams_dict['lookahead_days']} day(s) in advance relative to the configured date."
+            msg = f"Model data will be downloaded {cams_dict['lookahead_days']} day(s) in advance relative to the configured date."
             show_message(self.download_instance, msg)
 
         # iterate through the species
