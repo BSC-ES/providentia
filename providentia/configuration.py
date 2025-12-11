@@ -658,7 +658,7 @@ class ProvConfiguration:
         elif key in ['statistic_mode','statistic_aggregation','periodic_statistic_mode','periodic_statistic_aggregation',
                      'timeseries_statistic_aggregation','interp_n_neighbours','interp_reverse_vertical_orientation',
                      'interp_chunk_size','interp_job_array_limit','interp_multiprocessing','interp_spinup_timesteps',
-                     'interp_experiment_downsampling','interp_experiment_upsampling']:
+                     'interp_model_downsampling','interp_model_upsampling']:
             # treat leaving the field blank as default
             if value == '':
                 return self.var_defaults[key]
@@ -1349,18 +1349,18 @@ class ProvConfiguration:
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.interp_n_neighbours = default
 
-        # check have correct interp_experiment_downsampling information
-        if self.read_instance.mode == 'interpolation' and self.read_instance.interp_experiment_downsampling:
-            if self.read_instance.interp_experiment_downsampling not in ['mean','median']:
-                default = default_values['interp_experiment_downsampling']
-                error = "Error: interp_experiment_downsampling must be 'mean' or 'median'. Using '{}' as default.".format(default)
+        # check have correct interp_model_downsampling information
+        if self.read_instance.mode == 'interpolation' and self.read_instance.interp_model_downsampling:
+            if self.read_instance.interp_model_downsampling not in ['mean','median']:
+                default = default_values['interp_model_downsampling']
+                error = "Error: interp_model_downsampling must be 'mean' or 'median'. Using '{}' as default.".format(default)
                 self.read_instance.logger.error(error) 
 
-        # check have correct interp_experiment_upsampling information
-        if self.read_instance.mode == 'interpolation' and self.read_instance.interp_experiment_upsampling:
-            if self.read_instance.interp_experiment_upsampling not in ['fill','gaps']:
-                default = default_values['interp_experiment_upsampling']
-                error = "Error: interp_experiment_upsampling must be 'fill' or 'gaps'. Using '{}' as default.".format(default)
+        # check have correct interp_model_upsampling information
+        if self.read_instance.mode == 'interpolation' and self.read_instance.interp_model_upsampling:
+            if self.read_instance.interp_model_upsampling not in ['fill','gaps']:
+                default = default_values['interp_model_upsampling']
+                error = "Error: interp_model_upsampling must be 'fill' or 'gaps'. Using '{}' as default.".format(default)
                 self.read_instance.logger.error(error) 
 
         # create empty directories for the observations and experiments

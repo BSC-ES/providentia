@@ -1535,13 +1535,12 @@ class Providentia:
         if not valid_config:
             return
 
-        from .download import Download
+        from .download import main
 
         kwargs['download'] = True
         parent_kwargs = copy.deepcopy(self.kwargs) 
         parent_kwargs.update(kwargs)
-        download = Download(**parent_kwargs)
-        download.run(**parent_kwargs)
+        main(**parent_kwargs)
 
     def dashboard(self, **kwargs):
         """ Wrapper function for initialising Dashboard class"""
@@ -1600,9 +1599,9 @@ class Providentia:
         if not valid_config:
             return
 
-        from .report import Report
+        from .report import main
         
         kwargs['report'] = True
         parent_kwargs = copy.deepcopy(self.kwargs) 
         parent_kwargs.update(kwargs)
-        Report(**parent_kwargs)
+        main(**parent_kwargs)

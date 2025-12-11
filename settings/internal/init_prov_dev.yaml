@@ -88,8 +88,8 @@
   "interp_job_array_limit": 100,
   "interp_multiprocessing": False,
   "interp_spinup_timesteps": 0,
-  "interp_experiment_downsampling": "mean",
-  "interp_experiment_upsampling": "fill",
+  "interp_model_downsampling": "mean",
+  "interp_model_upsampling": "fill",
   "logfile": False,
   "fixed_section_vars":
     [
@@ -152,8 +152,8 @@
       "interp_job_array_limit",
       "interp_multiprocessing",
       "interp_spinup_timesteps",
-      "interp_experiment_downsampling",
-      "interp_experiment_upsampling"
+      "interp_model_downsampling",
+      "interp_model_upsampling"
     ],
   "non_writing_vars":
     [

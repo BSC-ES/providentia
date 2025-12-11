@@ -112,8 +112,8 @@ class SubmitInterpolation(object):
         # TODO Hardcoded
         interp_print_variables = ['ghost_version', 'start_date', 'end_date', 'experiments', 
                                   'species', 'network', 'resolution', 'model_resolution', 'forecast',
-                                  'interp_spinup_timesteps', 'interp_experiment_downsampling',
-                                  'interp_experiment_upsampling', 'interp_n_neighbours', 
+                                  'interp_spinup_timesteps', 'interp_model_downsampling',
+                                  'interp_model_upsampling', 'interp_n_neighbours', 
                                   'interp_reverse_vertical_orientation', 'interp_chunk_size', 
                                   'interp_job_array_limit', 'exp_root', 'ghost_root', 'nonghost_root', 
                                   'exp_to_interp_root', 'interp_multiprocessing']
@@ -1120,6 +1120,7 @@ class SubmitInterpolation(object):
             if overload <= 1.0:
                 break
 
+            print('system overloaded', flush=True)
             time.sleep(check_interval)  # Wait and retry
 
         # stagger to avoid spikes

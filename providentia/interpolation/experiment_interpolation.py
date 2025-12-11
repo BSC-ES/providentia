@@ -88,7 +88,7 @@ class ExperimentInterpolation(object):
 
         # get configuration variables from the management_logs
         for variable_key in ["ghost_version", "forecast", "interp_spinup_timesteps", 
-                             "interp_experiment_downsampling", "interp_experiment_upsampling", 
+                             "interp_model_downsampling", "interp_model_upsampling", 
                              "interp_n_neighbours", "interp_reverse_vertical_orientation", 
                              "exp_root", "ghost_root", "exp_to_interp_root", 
                              "nonghost_root"]:
@@ -960,11 +960,11 @@ class ExperimentInterpolation(object):
                         if resampling_direction == 'downsampling':
                         
                             # mean
-                            if self.interp_experiment_downsampling == 'mean':
+                            if self.interp_model_downsampling == 'mean':
                                 xr_data = xr_data.resample(time=self.temporal_resolution_to_output_code).mean()   
                         
                             # median
-                            elif self.interp_experiment_downsampling == 'median':
+                            elif self.interp_model_downsampling == 'median':
                                 xr_data = xr_data.resample(time=self.temporal_resolution_to_output_code).median()   
                         
                         # upsampling (coarser to finer)
@@ -982,11 +982,11 @@ class ExperimentInterpolation(object):
                             new_index = pd.date_range(start=start_time, end=end_extended, freq=self.temporal_resolution_to_output_code)
     
                             # fill gaps (repeating values between measurements)
-                            if self.interp_experiment_upsampling == 'fill':
+                            if self.interp_model_upsampling == 'fill':
                                 xr_data = xr_data.reindex(time=new_index, method="ffill")
                         
                             # leave gaps (setting nans between measurements)
-                            elif self.interp_experiment_upsampling == 'gaps':
+                            elif self.interp_model_upsampling == 'gaps':
                                 xr_data = xr_data.reindex(time=new_index)
 
                     # get indices in yearmonth to fill with read data. Adjust for forecast day if neccessary.

@@ -91,9 +91,9 @@ It is **mandatory** to define sections to launch Providentia. Their names must b
 | forecast | ✗ | Controls how forecast data is handled. Valid options are `dayN` (e.g. `day1`) or `daily`. If this field is not empty in the interpolation, all forecast data will be processed.|
 | interp_n_neighbours | ✗ | The number of nearest neighbours to use in the interpolation of experiment output to observational stations. If not set, this defaults to `4`.|
 | interp_spinup_timesteps | ✗ | Needs to be a number|
-| interp_experiment_downsampling | ✗ | mean or median|
-| interp_experiment_upsampling | ✗ | fill or gaps|
-| interp_multiprocessing | ✗ | Use multiprocessing instead of greasy to interpolate in HPC machines. |
+| interp_model_downsampling | ✗ | Sets how downsampling of the model resolution to the observational resolution should be handled. Options: `mean`, `median`.|
+| interp_model_upsampling | ✗ | Sets how upsampling of the model resolution to the observational resolution should be handled. `fill` linearly fills between measurements, and `gaps` sets NaN values for times that the model does not have.|
+| interp_multiprocessing | ✗ | Boolean variable to set if you wish to use multiprocessing instead of greasy to interpolate on HPC machines. |
   
 Defining a list of experiments is optional since the user might only want to check the observations data.
 
