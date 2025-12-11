@@ -3625,6 +3625,10 @@ class Canvas(FigureCanvas):
         # update statistic in memory
         self.read_instance.statistic_aggregation = self.read_instance.selected_statistic_aggregation 
 
+        # update timeseries aggregation statistic in memory
+        self.timeseries_stat.setCurrentText(self.read_instance.selected_statistic_aggregation) 
+        self.read_instance.timeseries_statistic_aggregation = self.read_instance.selected_statistic_aggregation 
+
     def update_timeseries_aggregation_statistic(self):
         """ Update timeseries aggregation statistic
         """
@@ -3634,7 +3638,6 @@ class Canvas(FigureCanvas):
     
         # update statistic in memory
         self.read_instance.timeseries_statistic_aggregation = self.read_instance.selected_timeseries_statistic_aggregation
-
 
     def update_option_on_combobox(self, event_source, index, uncheck=True):
         """ Check or uncheck option in combobox dropdown
