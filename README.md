@@ -3,7 +3,9 @@
 
 # About
 
-Providentia is designed to allow on-the-fly and offline analysis of experiment outputs, with respect to processed observational data.
+Providentia is an evaluation software package developed at the Barcelona Supercomputing Center for the in-depth analysis of in-situ surface observations and colocated model output, tailored specifically for the atmospheric science community.
+
+Providentia offers a variety of use modes. These include an interactive dashboard for quick-look visualisations; a report mode designed for more exhaustive evaluations; a library mode that enables the Providentia backend to be used in scripts or Jupyter notebooks, for example for reading, filtering, or plotting data; a download mode that automatically retrieves and formats observational and model datasets; and an interpolation mode that spatially colocates model output with observational stations.
 
 # How to clone
 
@@ -13,6 +15,12 @@ Use the following command to get a copy of the repository:
 git clone https://github.com/BSC-ES/providentia.git
 ```
 
-# Run
+# Getting Started
 
-For running Providentia, please follow the instruction in [Read the docs](https://providentia.readthedocs.io/en/latest/).
+For getting started using Providentia, please follow the guide on [Read the docs](https://providentia.readthedocs.io/en/latest/).
+
+# Bugs / New Features
+
+If you encounter a bug or would like to request a new feature in Providentia, you an open a new issue here: https://github.com/BSC-ES/providentia/issues 
+
+For bugs please use the Bug report template to aid the developers in recreating the issue. 
