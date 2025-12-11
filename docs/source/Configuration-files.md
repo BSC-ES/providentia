@@ -57,7 +57,7 @@ It is **mandatory** to define sections to launch Providentia. Their names must b
 
 | Parameter | Mandatory | Description |
 | ------ | ------ | ------ |
-| network | ✓ | Network you want to load observations from. Can be multiple (e.g. `CAPMoN, EBAS`). Adding a wild card (\*) is going to expand to certain variables (vconc* → vconc1, vconc2, etc.). |
+| network | ✓ | Network you want to load observations from. Can be multiple (e.g. `CAPMoN, EBAS`). Adding a wild card (\*) is going to expand to certain variables (vconcaerobin* → vconcaerobin1, vconcaerobin2, etc.). |
 | species | ✓ | Species to load. Can be multiple (e.g. `sconco3, sconcno2`). |
 | resolution | ✓ | Temporal resolution of the observations you want to load (e.g. `3hourly`). |
 | start_date | ✓ | Comparison start date in YYYYMMDD format (e.g. `20170101`). |
@@ -147,16 +147,16 @@ The QA window contains contains a menu where you can select the quality assuranc
 
 ##### Select a new set of QA flags
 
-The field's name is simply QA. Then, you can assign to that field the new set of flags you want to select. You can define the flags either by their codes:
+The field's name is simply `qa`. Then, you can assign to that field the new set of flags you want to select. You can define the flags either by their codes:
 
 ```
-QA = 0,1,2,3
+qa = 0,1,2,3
 ```
 
 or by using their full names:
 
 ```
-QA = Missing Measurement, Infinite Value, Negative Measurement, Zero Measurement
+qa = Missing Measurement, Infinite Value, Negative Measurement, Zero Measurement
 ```
 
 ##### Remove them all
@@ -164,7 +164,7 @@ QA = Missing Measurement, Infinite Value, Negative Measurement, Zero Measurement
 If you do not want to apply any QA filter, then you should define the field and leave it empty. Not defining it does not mean that there will be no QA selected. Therefore, if you want zero QA flags, then you should write the field as in the example below:
 
 ```
-QA = 
+qa = 
 ```
 
 All the options to set the QA flags can be found in [Data flags and QA names and codes](Data-flags-and-QA-names-and-codes).

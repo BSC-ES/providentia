@@ -29,7 +29,7 @@ Namely, these are:
 | file_tree | Generate file tree to update data directories | |
 | gft | Generate file tree to update data directories | |
 | report | Start [reports](Report). | |
-| network | Network you want to load observations from. Can be multiple (e.g. `CAPMoN, EBAS`). Adding a wild card (\*) is going to expand to certain variables (vconc* → vconc1, vconc2, etc.). | EBAS |
+| network | Network you want to load observations from. Can be multiple (e.g. `CAPMoN, EBAS`). Adding a wild card (\*) is going to expand to certain variables (vconcaerobin* → vconcaerobin1, vconcaerobin2, etc.). | EBAS |
 | species | Species to load. Can be multiple (e.g. `sconco3, sconcno2`). | sconco3 |
 | resolution | Temporal resolution of the observations you want to load (e.g. `3hourly`). | hourly |
 | start_date | Comparison start date in YYYYMMDD format (e.g. `20170101`). | 20180101 |

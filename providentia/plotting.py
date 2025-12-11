@@ -1485,9 +1485,9 @@ class Plotting:
             species = [networkspeci.split('|')[1]]
 
         # determine if have all species are size distribution species
-        if np.all([True if 'vconcbin' in speci else False for speci in species]):
+        if np.all([True if 'vconcaerobin' in speci else False for speci in species]):
             sizedist = True
-            radii_bins = np.array([get_AERONET_sizedist_bin_radius(speci) for speci in species])
+            radii_bins = np.array([get_AERONET_sizedist_bin_radius(speci) for speci in species]).astype(np.float32)
             bin_widths = np.diff(np.log(radii_bins))
             bin_widths = np.append(bin_widths, bin_widths[-1])
         else:
