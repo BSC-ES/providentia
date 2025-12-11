@@ -48,10 +48,10 @@ possibilities = [
 def test_same_quantity_unit_conversion(orig_unit, orig_val, new_unit, new_val, input_quantity, output_quantity):
     """Same quantity unit conversion."""
     
-    conv_obj = unit_converter.convert_units(orig_unit, new_unit, orig_val, input_quantity=input_quantity, output_quantity=output_quantity)
+    conv_obj = unit_converter.UnitConverter(orig_unit, new_unit, orig_val, input_quantity=input_quantity, output_quantity=output_quantity)
     check_unit_conversion(conv_obj, new_val, orig_val, orig_unit, new_unit)
     
-    conv_obj = unit_converter.convert_units(orig_unit, new_unit, orig_val)
+    conv_obj = unit_converter.UnitConverter(orig_unit, new_unit, orig_val)
     check_unit_conversion(conv_obj, new_val, orig_val, orig_unit, new_unit)
 
 
@@ -77,7 +77,7 @@ possibilities = [
 def test_valence_species_unit_conversion(orig_unit, orig_val, new_unit, new_val, species, valence):
     """Valence and species dependent unit conversions."""
 
-    conv_obj = unit_converter.convert_units(orig_unit, new_unit, orig_val, species=species, valence=valence)
+    conv_obj = unit_converter.UnitConverter(orig_unit, new_unit, orig_val, species=species, valence=valence)
     check_unit_conversion(conv_obj, new_val, orig_val, orig_unit, new_unit, atol=1.0)
 
 
@@ -149,7 +149,7 @@ def test_different_quantity_unit_conversion(orig_unit, orig_val, new_unit, new_v
                                             input_values, input_quantity, output_quantity):
     """Different quantity unit conversion"""
 
-    conv_obj = unit_converter.convert_units(input_units, new_unit, input_values, 
+    conv_obj = unit_converter.UnitConverter(input_units, new_unit, input_values, 
                                             input_quantity=input_quantity, 
                                             output_quantity=output_quantity,
                                             species=species)

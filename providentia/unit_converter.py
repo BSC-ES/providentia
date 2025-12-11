@@ -9,7 +9,7 @@ import sys
 import numpy as np
 import pandas as pd
     
-class convert_units:
+class UnitConverter:
     ''' Python class that converts units (specifically tailored for conversions of components in the field of 
         Atmospheric Composition). 
 
@@ -68,7 +68,7 @@ class convert_units:
         input_value = 1.0
 
         2. Do conversion
-        conv_obj = unit_converter.convert_units(input_units, output_units, input_value)
+        conv_obj = unit_converter.UnitConverter(input_units, output_units, input_value)
 
         -----------------------------------------------------
         Different unit quantity conversion (e.g. ug m-3 --> ppbv)
@@ -79,7 +79,7 @@ class convert_units:
         input_values = {'temperature':273.0, 'pressure':1013.0, 'molar_mass':48.0, 'mass_concentration':10.0}
 
         2. Do conversion
-        conv_obj = unit_converter.convert_units(input_units, output_units, input_values, 
+        conv_obj = unit_converter.UnitConverter(input_units, output_units, input_values, 
                                                 input_quantity='mass_concentration')
 
         ----------------------------------------------------------------------------------------
@@ -1537,7 +1537,7 @@ class convert_units:
 def get_molecular_mass(molecule):
     ''' Get molecular mass of a specific molecule in kg mol-1. '''
 
-    # if molecule is empty string then return molecular mass as np.nan
+    # if molecule is empty string then return molecular mass as np.NaN
     if molecule == '':
         return np.nan
 
@@ -1575,7 +1575,7 @@ def get_molecular_mass(molecule):
 def get_N_atoms(molecule, element):
     ''' Get integer number of atoms of a desired element in a molecule. '''
 
-    # if molecule or element is empty string then return number of atoms as np.nan
+    # if molecule or element is empty string then return number of atoms as np.NaN
     if (molecule == '') or (element == ''):
         return np.nan
 
@@ -1591,7 +1591,7 @@ def get_N_atoms(molecule, element):
 def get_valence(molecule):
     ''' Get valence of a desired molecule. '''
 
-    # if molecule is empty string then return valence as np.nan
+    # if molecule is empty string then return valence as np.NaN
     if molecule == '':
         return np.nan
 
