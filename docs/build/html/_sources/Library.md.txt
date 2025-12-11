@@ -480,7 +480,7 @@ The boxplot can be made as follows:
 provi.plot('boxplot')
 ```
 
-The available plot options are: `annotate`, `logy` and `multispecies`.
+The available plot options are: `annotate`, `logy`, `multispecies`, `normalise` and 'threshold'.
 
 ##### heatmap
 

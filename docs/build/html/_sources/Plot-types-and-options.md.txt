@@ -154,3 +154,9 @@ Adding `_domain` will add the model grid on top of the map.
 Adding `_threshold` will add a line indicating the exceedances. These exceedances are set in `settings/exceedances.yaml`.
 
 ![threshold](uploads/threshold.png)
+
+### Normalise the boxplot (`_normalise`)
+
+Adding `_normalise` will normalise a multispecies boxplot by the average area under the curve of the boxplots across species. This is done independently for observations and each model. For plots of size distribution, the normalisation takes into account the logged nature of the bins. 
+
+![normalise](uploads/normalise.png)
