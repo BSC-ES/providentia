@@ -57,8 +57,8 @@ class Canvas(FigureCanvas):
         
         Parameters
         ----------
-        read_instance : instance
-            Read instance
+        read_instance : object
+            Instance of class Dashboard or Report
         """
 
         # create figure and canvas objects

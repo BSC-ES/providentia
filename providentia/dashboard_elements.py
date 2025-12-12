@@ -25,7 +25,27 @@ elif operating_system in ['Windows','MINGW32_NT','MINGW64_NT']:
 
 
 def set_formatting(PyQt5_obj, format, valid_obj=None, disabled=False, extra_arguments={}):
-    """ Function that takes a PyQt5 object and applies some defined formatting. """
+    """ 
+    Function that takes a PyQt5 object and applies some defined formatting
+
+    Parameters
+    ----------
+    PyQt5_obj : object
+        PyQt5 element
+    format : dict
+        Format dictionary
+    valid_obj : list
+        PyQt5 element to format
+    disabled : bool
+        Whether we want to format the disabled version of the object
+    extra_arguments : list
+        Extra arguments
+
+    Returns
+    -------
+    object
+        PyQt5 element with new format
+    """
 
     # initialise style
     full_defined_style = ""
@@ -99,12 +119,27 @@ def set_formatting(PyQt5_obj, format, valid_obj=None, disabled=False, extra_argu
 
 
 def wrap_tooltip_text(tooltip_text, max_width, format_type):
-    """ Function which takes the text for a tooltip and wraps it by the screen pixel width.
-        It does this by estimating the pixel width of the tooltip text (as formatted),
-        and then gets the ratio exceedance over the screen pixel width.
-        If there is an exceedance (i.e. > 1), the text is then broken into n max_char pieces
-        based on the position of the first exceedance in the text
-        (i.e. the part of the text which first exceeds the screen pixel width).
+    """ 
+    Function which takes the text for a tooltip and wraps it by the screen pixel width.
+    It does this by estimating the pixel width of the tooltip text (as formatted),
+    and then gets the ratio exceedance over the screen pixel width.
+    If there is an exceedance (i.e. > 1), the text is then broken into n max_char pieces
+    based on the position of the first exceedance in the text
+    (i.e. the part of the text which first exceeds the screen pixel width).
+
+    Parameters
+    ----------
+    tooltip_text : str
+        Tooltip text 
+    max_width : int
+        Maximum width accepted
+    format_type : str
+        Element type
+
+    Returns
+    -------
+    str
+        Updated tooltip text
     """
 
     tooltip_label = set_formatting(QtWidgets.QLabel(text=tooltip_text), formatting_dict[format_type], valid_obj=['QToolTip'])
@@ -118,7 +153,15 @@ def wrap_tooltip_text(tooltip_text, max_width, format_type):
 
 
 def center(window):
-    # Reference: https://wiki.qt.io/How_to_Center_a_Window_on_the_Screen
+    """
+    Center window
+    Reference: https://wiki.qt.io/How_to_Center_a_Window_on_the_Screen
+    
+    Parameters
+    ----------
+    window : MessageBox
+        Message box
+    """
 
     window.setGeometry(
         QtWidgets.QStyle.alignedRect(
@@ -133,6 +176,14 @@ class ComboBox(QtWidgets.QComboBox):
     """ Modify default class of PyQT5 combobox. """
 
     def __init__(self, parent=None):
+        """
+        Initialise class
+
+        Parameters
+        ----------
+        parent : object
+            Dashboard instance
+        """
 
         super(ComboBox, self).__init__(parent)
 
@@ -150,7 +201,9 @@ class ComboBox(QtWidgets.QComboBox):
         self.currentTextChanged.connect(self.fixCursorPosition)
 
     def fixCursorPosition(self):
-        """ Move (invisible) cursor to first position to avoid cutting off the start. """
+        """ 
+        Move (invisible) cursor to first position to avoid cutting off the start
+        """
 
         # apply only to comboboxes with text lengths of more than 8 chars
         if len(self.lineEdit().text()) >= 8:
@@ -158,7 +211,9 @@ class ComboBox(QtWidgets.QComboBox):
             self.lineEdit().setFocus()
     
     def showPopup(self):
-        """ Show pop-up. """
+        """ 
+        Show pop-up
+        """
 
         # set index of selected choice to highlight it
         text = self.lineEdit().text()
@@ -176,6 +231,10 @@ class ComboBox(QtWidgets.QComboBox):
 
 class CheckableComboBox(QtWidgets.QComboBox):
     def __init__(self, *args, **kwargs):
+        """
+        Initialise class
+        """
+
         super().__init__(*args, **kwargs)
 
         # make the combo editable to set a custom text, but readonly
@@ -201,7 +260,9 @@ class CheckableComboBox(QtWidgets.QComboBox):
         self.view().viewport().installEventFilter(self)
 
     def fixCursorPosition(self):
-        """ Move (invisible) cursor to first position to avoid cutting off the start. """
+        """
+        Move (invisible) cursor to first position to avoid cutting off the start
+        """
 
         # apply only to comboboxes with text lengths of more than 8 chars
         if len(self.lineEdit().text()) >= 8:
@@ -209,40 +270,32 @@ class CheckableComboBox(QtWidgets.QComboBox):
             self.lineEdit().setFocus()
     
     def resizeEvent(self, event):
+        """
+        Resize event after updating text
+
+        Parameters
+        ----------
+        event : QResizeEvent
+            Resize event
+        """
 
         # recompute text to elide as needed
         self.updateText()
         super().resizeEvent(event)
 
-    def eventFilter_old(self, obj, event):
-        if obj == self.lineEdit():
-            if event.type() == QtCore.QEvent.MouseButtonRelease:
-                if self.closeOnLineEditClick:
-                    self.hidePopup()
-                else:
-                    self.showPopup()
-                return True
-            return False
-
-        if obj == self.view().viewport():
-            if event.type() == QtCore.QEvent.MouseButtonRelease:
-                index = self.view().indexAt(event.pos())
-                if not index.isValid():
-                    return False
-                item = self.model().item(index.row())
-
-                if not (item.flags() & QtCore.Qt.ItemIsEnabled):
-                    return True
-
-                if item.checkState() == QtCore.Qt.Checked:
-                    item.setCheckState(QtCore.Qt.Unchecked)
-                else:
-                    item.setCheckState(QtCore.Qt.Checked)
-                return True
-
-        return False
-
     def eventFilter(self, obj, event):
+        """
+        Custom multi-select dropdown where clicking items checks/unchecks them while keeping the
+        popup visually smooth.
+
+        Parameters
+        ----------
+        obj : object
+            Element
+        event : QtCore.QEvent
+            Event
+        """
+
         if obj == self.lineEdit():
             if event.type() == QtCore.QEvent.MouseButtonRelease:
                 if self.closeOnLineEditClick:
@@ -304,6 +357,10 @@ class CheckableComboBox(QtWidgets.QComboBox):
         return False
 
     def showPopup(self):
+        """
+        Custom show pop up
+        """
+
         model = self.model()
         
         # Find the first enabled item
@@ -333,15 +390,32 @@ class CheckableComboBox(QtWidgets.QComboBox):
         self.closeOnLineEditClick = True
 
     def hidePopup(self):
+        """
+        Custom hide pop up
+        """
+
         super().hidePopup()
         self.startTimer(100)
         self.updateText()
 
     def timerEvent(self, event):
+        """
+        Stop timer and disable closing the popup
+
+        Parameters
+        ----------
+        event : QtCore.QEvent
+            Event
+        """
+
         self.killTimer(event.timerId())
         self.closeOnLineEditClick = False
 
     def updateText(self):
+        """
+        Show checked elements as one string in line
+        """
+
         texts = [
             self.model().item(i).text()
             for i in range(self.model().rowCount())
@@ -350,6 +424,19 @@ class CheckableComboBox(QtWidgets.QComboBox):
         self.lineEdit().setText(", ".join(texts))
 
     def addItem(self, text, data=None, enabled=True):
+        """
+        Add a single checkable item to the model
+
+        Parameters
+        ----------
+        text : str
+            Display text of the item
+        data : int, None
+            Associated data
+        enabled : bool, default True
+            If False, item is disabled and grayed out.
+        """
+
         item = QtGui.QStandardItem()
         item.setText(text)
         item.setData(data if data is not None else text)
@@ -373,12 +460,40 @@ class CheckableComboBox(QtWidgets.QComboBox):
                     break
 
     def addItems(self, texts, datalist=None, enabled_list=None):
+        """
+        Add multiple checkable items to the model
+
+        Parameters
+        ----------
+        texts : list of str
+            Display texts for the items
+        datalist : list
+            Data for each item
+        enabled_list : list
+            Enabled state for each item
+        """
+
         for i, text in enumerate(texts):
             data = datalist[i] if datalist and i < len(datalist) else None
             enabled = enabled_list[i] if enabled_list and i < len(enabled_list) else True
             self.addItem(text, data, enabled)
 
     def currentData(self, all=False):
+        """
+        Return item data from the model
+
+        Parameters
+        ----------
+        all : bool
+            If True, return data for all items
+            If False, return data only for checked items
+
+        Returns
+        -------
+        list
+            List of item data values
+        """
+
         return [
             self.model().item(i).data()
             for i in range(self.model().rowCount())
@@ -386,7 +501,9 @@ class CheckableComboBox(QtWidgets.QComboBox):
         ]
 
 class QVLine(QtWidgets.QFrame):
-    """ Define class that generates vertical separator line. """
+    """ 
+    Define class that generates vertical separator line
+    """
 
     def __init__(self, parent=None):
         super(QVLine, self).__init__(parent)
@@ -398,10 +515,27 @@ class Switch(QtWidgets.QPushButton):
     """ Define class that generates switch buttons. """
 
     def __init__(self, parent=None):
+        """
+        Initialise class
+
+        Parameters
+        ----------
+        parent : object
+            Dashboard instance
+        """
+
         super(Switch, self).__init__(parent)
         self.setCheckable(True)
 
     def paintEvent(self, event):
+        """
+        Define switch properties
+
+        Parameters
+        ----------
+        event : QtCore.QEvent
+            Event
+        """
 
         # set switch properties
         radius = 9
@@ -442,6 +576,16 @@ class Switch(QtWidgets.QPushButton):
 class MessageBox(QtWidgets.QWidget):
 
     def __init__(self, msg, parent=None):
+        """
+        Initialise class
+
+        Parameters
+        ----------
+        msg : str
+            Text on message box
+        parent : object
+            Dashboard instance
+        """
 
         super().__init__(parent)
         msg_box = self.create_msg_box(msg)
@@ -451,7 +595,14 @@ class MessageBox(QtWidgets.QWidget):
             center(self)
 
     def create_msg_box(self, msg):
+        """
+        Create message box
 
+        Parameters
+        ----------
+        msg : str
+            Text on message box
+        """
         # add warning box
         msg_box = QtWidgets.QMessageBox()
         msg_box.setWindowTitle("Warning")
@@ -470,6 +621,22 @@ class MessageBox(QtWidgets.QWidget):
 class InputDialog(QtWidgets.QWidget):
 
     def __init__(self, read_instance, title, msg, options, parent=None):
+        """
+        Initialise class
+
+        Parameters
+        ----------
+        read_instance : object
+            Instance of class Dashboard or Report
+        title : str
+            Title of input dialog
+        msg : str
+            Text of input dialog
+        options : list
+            Dialog options
+        parent : object
+            Dashboard instance
+        """
 
         super().__init__(parent)
         
