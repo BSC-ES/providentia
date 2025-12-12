@@ -35,7 +35,7 @@ class LassoSelector(_SelectorWidget):
         lasso = LassoSelector(ax, onselect)
     Parameters
     ----------
-    ax : `~matplotlib.axes.Axes`
+    ax : matplotlib.axes.Axes
         The parent Axes for the widget.
     onselect : function
         Whenever the lasso is released, the *onselect* function is called and

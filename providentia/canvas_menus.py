@@ -1,7 +1,5 @@
 """ Settings menus """
 
-import json
-import os
 import platform
 import yaml
 
@@ -26,7 +24,17 @@ elif operating_system in ['Windows','MINGW32_NT','MINGW64_NT']:
 class SettingsMenu(object):
 
     def __init__(self, plot_type, canvas_instance):
-        
+        """
+        Initialise object to create plot settings menu
+
+        Parameters
+        ----------
+        plot_type : str
+            Plot type
+        canvas_instance : instance
+            Canvas instance
+        """
+
         self.canvas_instance = canvas_instance
 
         self.elements = list(settings_dict[plot_type].keys())
@@ -40,7 +48,8 @@ class SettingsMenu(object):
         for element_name in self.elements:
             element_settings = settings_dict[plot_type][element_name]
             element_type = element_settings['element_type']
-            if element_type in ['button', 'container', 'label', 'combobox', 'checkable_combobox', 'slider', 'checkbox']:
+            if element_type in ['button', 'container', 'label', 'combobox', 'checkable_combobox', 
+                                'slider', 'checkbox']:
 
                 # Add element
                 element = getattr(self, 'add_' + element_type)(element_settings)
@@ -83,7 +92,8 @@ class SettingsMenu(object):
 
 
     def add_button(self, element_settings):
-        """ Add button as settings menu
+        """
+        Add button as settings menu
 
         Parameters
         ----------
@@ -105,7 +115,8 @@ class SettingsMenu(object):
         return button 
 
     def add_container(self, element_settings):
-        """ Add elements container
+        """
+        Add elements container
 
         Parameters
         ----------
@@ -125,7 +136,8 @@ class SettingsMenu(object):
         return container
 
     def add_label(self, element_settings):
-        """ Add label
+        """
+        Add label
 
         Parameters
         ----------
@@ -147,7 +159,8 @@ class SettingsMenu(object):
         return label
 
     def add_combobox(self, element_settings):
-        """ Add combobox
+        """
+        Add combobox
 
         Parameters
         ----------
@@ -160,13 +173,15 @@ class SettingsMenu(object):
             Combobox
         """
 
-        combobox = set_formatting(ComboBox(self.canvas_instance), formatting_dict[element_settings['formatting_dict']])
+        combobox = set_formatting(ComboBox(self.canvas_instance), 
+                                  formatting_dict[element_settings['formatting_dict']])
         combobox.currentTextChanged.connect(partial(self.connect, element_settings['function']))
 
         return combobox
 
     def add_slider(self, element_settings):
-        """ Add slider
+        """
+        Add slider
 
         Parameters
         ----------
@@ -193,7 +208,8 @@ class SettingsMenu(object):
         return slider
 
     def add_checkable_combobox(self, element_settings):
-        """ Add checkable combobox
+        """
+        Add checkable combobox
 
         Parameters
         ----------
@@ -213,7 +229,8 @@ class SettingsMenu(object):
         return checkable_combobox
 
     def add_checkbox(self, element_settings):
-        """ Add checkbox
+        """
+        Add checkbox
 
         Parameters
         ----------
@@ -233,7 +250,8 @@ class SettingsMenu(object):
         return combobox
 
     def get_elements(self):
-        """ Get elements inside menu settings
+        """
+        Get elements inside menu settings
         
         Returns
         -------
@@ -250,7 +268,14 @@ class SettingsMenu(object):
         return [self.container] + sliders + comboboxes + labels + checkable_comboboxes + checkboxes
 
     def connect(self, function):
-        """ Connect element to functions in settings dictionary """
+        """ 
+        Connect element to functions in settings dictionary 
+        
+        Parameters
+        ----------
+        function : str
+            Function name
+        """
 
         if hasattr(self.canvas_instance, 'interactive_elements'):
             # Call function only after all elements have been added

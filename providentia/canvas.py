@@ -1,10 +1,7 @@
 """ Class to generate canvas """
 
 import copy
-import json
-import os
 import sys
-import time
 
 import matplotlib
 from matplotlib.backend_bases import MouseButton
@@ -23,13 +20,11 @@ from PyQt5 import QtCore, QtWidgets
 from weakref import WeakKeyDictionary
 
 from providentia.auxiliar import CURRENT_PATH, join
-from .calculate import Stats, ExpBias
 from .canvas_menus import SettingsMenu
 from .dashboard_elements import ComboBox
 from .dashboard_elements import set_formatting
 from .dashboard_interactivity import HoverAnnotation
 from .dashboard_interactivity import legend_picker_func, picker_block_func, zoom_map_func
-from .fields_menus import update_period_fields, update_representativity_fields
 from .filter import DataFilter
 from .plotting import Plotting
 from .plot_aux import get_map_extent
@@ -51,12 +46,20 @@ settings_dict = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/ca
 
 
 class Canvas(FigureCanvas):
-    """ Class that handles the creation and updates of
-        a matplotlib canvas, and associated subplots.
+    """ 
+    Class that handles the creation and updates of
+    a matplotlib canvas, and associated subplots
     """
 
     def __init__(self, read_instance):
-        """ Initialise the MPL canvas. """
+        """ 
+        Initialise the MPL canvas
+        
+        Parameters
+        ----------
+        read_instance : instance
+            Read instance
+        """
 
         # create figure and canvas objects
         self.figure = Figure(dpi=100)
@@ -205,8 +208,9 @@ class Canvas(FigureCanvas):
             element.raise_()
 
     def update_MPL_canvas(self):
-        """ Function that updates MPL canvas upon clicking
-            the 'READ' button, and when colocating data.
+        """ 
+        Function that updates MPL canvas upon clicking
+        the 'READ' button, and when colocating data
         """
 
         # reset relative index lists of selected station on map as empty lists
@@ -241,8 +245,14 @@ class Canvas(FigureCanvas):
         return None
 
     def reset_ax_navigation_toolbar_stack(self, ax):
-        """ Function which resets the navigation toolbar stack
-            for a given axis with the current view limits.
+        """ 
+        Function which resets the navigation toolbar stack
+        for a given axis with the current view limits
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes
+            Axes
         """
 
         # get appropriate axes for nested axes
@@ -281,7 +291,9 @@ class Canvas(FigureCanvas):
         return None
 
     def handle_data_filter_update(self):
-        """ Function which handles updates of data filtering. """
+        """ 
+        Function which handles updates of data filtering
+        """
 
         # return if nothing has been loaded yet
         if not hasattr(self.read_instance, 'data_in_memory'):
@@ -305,7 +317,9 @@ class Canvas(FigureCanvas):
         return None
 
     def handle_resampling_update(self):
-        """ Function which handles updates of resampling. """
+        """ 
+        Function which handles updates of resampling
+        """
 
         if not self.read_instance.block_config_bar_handling_updates:
 
@@ -356,7 +370,9 @@ class Canvas(FigureCanvas):
         return None
 
     def update_resampling_statistics(self):
-        """Update resampling statistics."""
+        """
+        Update resampling statistics
+        """
 
         # turn off handling updates to configuration bar
         self.read_instance.block_config_bar_handling_updates = True
@@ -414,7 +430,9 @@ class Canvas(FigureCanvas):
         self.read_instance.block_config_bar_handling_updates = False
 
     def update_active_map(self):
-        """ Function that updates plotted map z statistic and updates associated plots. """
+        """
+        Function that updates plotted map z statistic and updates associated plots
+        """
 
         if not self.read_instance.block_MPL_canvas_updates:
 
@@ -435,8 +453,9 @@ class Canvas(FigureCanvas):
         return None
     
     def handle_statistic_mode_update(self):
-        """ Function that handles the update of the MPL canvas
-            when we change the statistical calculation mode
+        """ 
+        Function that handles the update of the MPL canvas
+        when we change the statistical calculation mode
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
@@ -459,10 +478,6 @@ class Canvas(FigureCanvas):
 
             # update timeseries aggregation statistic
             self.update_timeseries_aggregation_statistic()
-            
-            # handle special cases for some chunk statistics
-            chunk_stat = self.timeseries_chunk_stat.currentText()
-            chunk_resolution = self.timeseries_chunk_resolution.currentText()
                 
             # update chunk statistic
             self.update_timeseries_chunk_statistics()
@@ -482,8 +497,9 @@ class Canvas(FigureCanvas):
         return None
 
     def handle_statistic_aggregation_update(self):
-        """ Function that handles the update of the MPL canvas
-            when we change the aggregation statistic
+        """ 
+        Function that handles the update of the MPL canvas
+        when we change the aggregation statistic
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
@@ -516,8 +532,9 @@ class Canvas(FigureCanvas):
         return None
 
     def handle_temporal_colocate_update(self):
-        """ Function that handles the update of the MPL canvas
-            with colocated data upon checking of the temporal colocate checkbox.
+        """ 
+        Function that handles the update of the MPL canvas
+        with colocated data upon checking of the temporal colocate checkbox
         """
             
         # update mouse cursor to a waiting cursor
@@ -592,7 +609,9 @@ class Canvas(FigureCanvas):
         return None
 
     def unselect_map_checkboxes(self):
-        """ Function to uncheck All, Intersect and Extent checkboxes without updating canvas. """
+        """
+        Function to uncheck All, Intersect and Extent checkboxes without updating canvas
+        """
 
         self.read_instance.block_MPL_canvas_updates = True
 
@@ -611,7 +630,9 @@ class Canvas(FigureCanvas):
         self.read_instance.block_MPL_canvas_updates = False
 
     def update_map_z_statistic(self):
-        """ Function that updates plotted z statistic on map, with colourbar. """
+        """
+        Function that updates plotted z statistic on map, with colourbar
+        """
 
         # remove axis elements from map/cb
         self.remove_axis_elements(self.plot_axes['map'], 'map')
@@ -693,7 +714,9 @@ class Canvas(FigureCanvas):
         return None
 
     def update_map_station_selection(self):
-        """ Function that updates the visual selection of stations on map. """
+        """
+        Function that updates the visual selection of stations on map
+        """
 
         # update map title
         if len(self.relative_selected_station_inds) == 1:
@@ -760,7 +783,14 @@ class Canvas(FigureCanvas):
         self.figure.canvas.flush_events()
 
     def update_associated_active_dashboard_plot(self, plot_type):
-        """ Function that updates a plot associated with selected stations on map. """
+        """
+        Function that updates a plot associated with selected stations on map
+
+        Parameters
+        ----------
+        plot_type : str
+            Plot type
+        """
 
         if hasattr(self, 'relative_selected_station_inds'):
             if len(self.relative_selected_station_inds) > 0:
@@ -950,8 +980,15 @@ class Canvas(FigureCanvas):
 
 
     def get_plot_type_position(self, plot_type):
-        """ Function that returns numeric position of plot type within the dashboard
+        """ 
+        Function that returns numeric position of plot type within the dashboard
+
+        Parameters
+        ----------
+        plot_type : str
+            Plot type
         """
+
         position_vars = [self.read_instance.position_2, self.read_instance.position_3, 
                          self.read_instance.position_4, self.read_instance.position_5]
         positions = [2, 3, 4, 5]
@@ -960,7 +997,9 @@ class Canvas(FigureCanvas):
                 return position
 
     def update_associated_active_dashboard_plots(self):
-        """ Function that updates all plots associated with selected stations on map. """
+        """
+        Function that updates all plots associated with selected stations on map 
+        """
 
         # update dashboard plots
         if hasattr(self, 'relative_selected_station_inds'):
@@ -993,7 +1032,9 @@ class Canvas(FigureCanvas):
             self.update_plot_options(plot_types=['map'])
 
     def update_experiment_domain_edges(self):
-        """ Function that plots grid domain edges of experiments in memory. """
+        """
+        Function that plots grid domain edges of experiments in memory
+        """
 
         # remove grid domain polygon if previously plotted
         self.remove_axis_objects(self.plot_axes['map'].patches, types_to_remove=[matplotlib.patches.Polygon])
@@ -1006,7 +1047,9 @@ class Canvas(FigureCanvas):
             self.plot_axes['map'].add_patch(grid_edge_polygon)
 
     def update_legend(self):
-        """ Function that updates legend. """
+        """
+        Function that updates legend
+        """
 
         # create legend element handles
         legend_plot_characteristics = self.plotting.make_legend_handles(copy.deepcopy(self.plot_characteristics['legend']))
@@ -1022,7 +1065,9 @@ class Canvas(FigureCanvas):
         return None
 
     def handle_map_z_statistic_update(self):
-        """ Function which handles update of map z statistic upon interaction with map comboboxes. """
+        """
+        Function which handles update of map z statistic upon interaction with map comboboxes
+        """
 
         if not self.read_instance.block_config_bar_handling_updates:
 
@@ -1098,8 +1143,9 @@ class Canvas(FigureCanvas):
         return None
 
     def handle_timeseries_aggregation_statistic_update(self):
-        """ Function that handles update of timeseries aggregation statistic
-            upon interaction with timeseries aggregation statistic combobox.
+        """ 
+        Function that handles update of timeseries aggregation statistic
+        upon interaction with timeseries aggregation statistic combobox
         """
 
         if not self.read_instance.block_config_bar_handling_updates:  
@@ -1133,8 +1179,9 @@ class Canvas(FigureCanvas):
         return None
 
     def handle_timeseries_chunk_statistic_update(self):
-        """ Function that handles update of plotted timeseries chunk statistic
-            upon interaction with timeseries chunk statistic/resolution comboboxes.
+        """ 
+        Function that handles update of plotted timeseries chunk statistic
+        upon interaction with timeseries chunk statistic/resolution comboboxes
         """
         
         if not self.read_instance.block_config_bar_handling_updates:
@@ -1213,7 +1260,8 @@ class Canvas(FigureCanvas):
         return None
     
     def update_timeseries_chunk_statistics(self):
-        """ Update timeseries chunk statistic and aggregation statistic.
+        """ 
+        Update timeseries chunk statistic and aggregation statistic
         """
 
         # turn off handling updates to configuration bar
@@ -1293,8 +1341,9 @@ class Canvas(FigureCanvas):
         self.read_instance.block_config_bar_handling_updates = False
 
     def handle_periodic_statistic_update(self):
-        """ Function that handles update of plotted periodic statistic
-            upon interaction with periodic statistic combobox.
+        """ 
+        Function that handles update of plotted periodic statistic
+        upon interaction with periodic statistic combobox
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
@@ -1355,8 +1404,9 @@ class Canvas(FigureCanvas):
         return None
 
     def handle_taylor_correlation_statistic_update(self):
-        """ Function that handles update of correlation statistic
-            upon interaction with Taylor diagram statistic combobox.
+        """
+        Function that handles update of correlation statistic
+        upon interaction with Taylor diagram statistic combobox
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
@@ -1408,7 +1458,14 @@ class Canvas(FigureCanvas):
         return None
 
     def get_active_statsummary_stats(self, statistic_type):
-        """ Get active statistics from dictionary of statsummary statistics in list """
+        """
+        Get active statistics from dictionary of statsummary statistics in list 
+
+        Parameters
+        ----------
+        statistic_type : str
+            Statistic type
+        """
         
         active_statsummary_stats = copy.deepcopy(self.read_instance.current_statsummary_stats[statistic_type])
         active_statsummary_stats = [stat for sublist in 
@@ -1418,7 +1475,9 @@ class Canvas(FigureCanvas):
         return active_statsummary_stats
     
     def check_statsummary_stats(self):
-        """ Function that checks the statistics in the statsummary statistic combobox. """
+        """ 
+        Function that checks the statistics in the statsummary statistic combobox
+        """
 
         # get stats to check for the selected periodic cycle
         periodic_cycle = self.statsummary_cycle.currentText()
@@ -1452,8 +1511,9 @@ class Canvas(FigureCanvas):
             self.statsummary_stat.lineEdit().setText('')
 
     def handle_statsummary_statistics_update(self):
-        """ Function that handles update of plotted statsummary statistics
-            upon interaction with statistic comboboxes.
+        """
+        Function that handles update of plotted statsummary statistics
+        upon interaction with statistic comboboxes
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
@@ -1559,6 +1619,10 @@ class Canvas(FigureCanvas):
                 QtWidgets.QApplication.restoreOverrideCursor()
 
     def handle_statsummary_cycle_update(self):
+        """
+        Function that handles update of statsummary periodic cycle
+        upon interaction with statistic comboboxes
+        """
 
         if not self.read_instance.block_config_bar_handling_updates:
             
@@ -1609,8 +1673,9 @@ class Canvas(FigureCanvas):
         return None
     
     def handle_statsummary_periodic_aggregation_update(self):
-        """ Function that handles update of plotted statsummary periodic aggregation statistic
-            upon interaction with combobox.
+        """ 
+        Function that handles update of plotted statsummary periodic aggregation statistic
+        upon interaction with combobox
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
@@ -1645,8 +1710,9 @@ class Canvas(FigureCanvas):
         return None
     
     def handle_statsummary_periodic_mode_update(self):
-        """ Function that handles update of plotted statsummary periodic aggregation mode
-            upon interaction with combobox.
+        """ 
+        Function that handles update of plotted statsummary periodic aggregation mode
+        upon interaction with combobox
         """
 
         if not self.read_instance.block_config_bar_handling_updates:
@@ -1681,6 +1747,10 @@ class Canvas(FigureCanvas):
         return None
     
     def handle_fairmode_target_classification_update(self):
+        """
+        Function that handles update of station classification on FAIRMODE target plot
+        upon interaction with temporal colocation checkbox
+        """
 
         if not self.read_instance.block_config_bar_handling_updates:
 
@@ -1713,7 +1783,9 @@ class Canvas(FigureCanvas):
         return None
     
     def remove_axis_objects(self, ax_elements, elements_to_skip=None, types_to_remove=None):
-        """ Remove objects (artists, lines, collections, patches) from axis. """
+        """
+        Remove objects (artists, lines, collections, patches) from axis
+        """
         
         # define default argument mutables
         if elements_to_skip is None:
@@ -1744,7 +1816,9 @@ class Canvas(FigureCanvas):
         return None
     
     def remove_axis_elements(self, ax, plot_type):
-        """ Remove all plotted axis elements."""
+        """ 
+        Remove all plotted axis elements
+        """
 
         # get appropriate axes for nested axes
         axs_to_remove = []
@@ -1825,9 +1899,15 @@ class Canvas(FigureCanvas):
         return None
 
     def update_plot_options(self, plot_types):
-        """ Uncheck checked boxes in plot configuration options under menus and
-            reapply check with new data. This can be done for all currently active plot types, 
-            or just one specific type.
+        """ 
+        Uncheck checked boxes in plot configuration options under menus and
+        reapply check with new data. This can be done for all currently active plot types, 
+        or just one specific type
+
+        Parameters
+        ----------
+        plot_type : str
+            Plot type
         """
 
         if not isinstance(plot_types, list):
@@ -1860,8 +1940,9 @@ class Canvas(FigureCanvas):
         return None
 
     def select_all_stations(self):
-        """ Function that selects/unselects all plotted stations
-            (and associated plots) upon ticking of checkbox.
+        """ 
+        Function that selects/unselects all plotted stations
+        (and associated plots) upon ticking of checkbox
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
@@ -1931,9 +2012,10 @@ class Canvas(FigureCanvas):
         return None
 
     def select_intersect_stations(self):
-        """ Function that selects/unselects intersection of
-            stations and all experiment domains (and associated plots)
-            upon ticking of checkbox.
+        """ 
+        Function that selects/unselects intersection of
+        stations and all experiment domains (and associated plots)
+        upon ticking of checkbox
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
@@ -2029,9 +2111,10 @@ class Canvas(FigureCanvas):
         return None
 
     def select_extent_stations(self):
-        """ Function that selects/unselects the
-            stations for the current map extent (and associated plots)
-            upon ticking of checkbox.
+        """ 
+        Function that selects/unselects the
+        stations for the current map extent (and associated plots)
+        upon ticking of checkbox
         """
 
         if not self.read_instance.block_MPL_canvas_updates:
@@ -2120,6 +2203,14 @@ class Canvas(FigureCanvas):
         return None
 
     def station_select(self, event):
+        """
+        Select station on map
+
+        Parameters
+        ----------
+        event : matplotlib.backend_bases.Event
+            Event
+        """
 
         # return if not on map axis
         if event.inaxes != self.plot_axes['map']:
@@ -2226,13 +2317,19 @@ class Canvas(FigureCanvas):
             QtWidgets.QApplication.restoreOverrideCursor()
         
     def onlassoselect(self, verts):
-        """ Function that handles station selection upon lasso selection with left click.
+        """ 
+        Function that handles station selection upon lasso selection with left click.
 
-            Operation:
-            Select all stations within lasso boundaries.
-            If a click is made rather than using lasso, then select nearest station within tolerance.
+        Operation:
+        Select all stations within lasso boundaries.
+        If a click is made rather than using lasso, then select nearest station within tolerance.
 
-            If no station is found with left click, all stations are unselected.
+        If no station is found with left click, all stations are unselected.
+
+        Parameters
+        ----------
+        verts : array
+            Path vertices
         """
 
         # check if have any plotted stations on map, if not, return
@@ -2299,9 +2396,15 @@ class Canvas(FigureCanvas):
         return None
 
     def map_selected_station_inds_to_all_available_inds(self, selected_map_inds):
-        """ Take the indices of selected stations on the map
-            (potentially a subset of all available stations), and returns the indices
-            of the stations inside the full loaded data arrays.
+        """ 
+        Take the indices of selected stations on the map
+        (potentially a subset of all available stations), and returns the indices
+        of the stations inside the full loaded data arrays
+
+        Parameters
+        ----------
+        selected_map_inds : numpy.array
+            Selected station indices
         """
 
         # index the array of indices of stations plotted on the map (indexed with respect to
@@ -2309,7 +2412,9 @@ class Canvas(FigureCanvas):
         return self.active_map_valid_station_inds[selected_map_inds]
 
     def generate_interactive_elements(self):
-        """ Function to create settings menus for each plot and their elements."""
+        """
+        Function to create settings menus for each plot and their elements
+        """
 
         self.interactive_elements = {}
 
@@ -2585,7 +2690,9 @@ class Canvas(FigureCanvas):
         return None
 
     def interactive_elements_button_func(self):
-        """ Function to show and hide elements in setting menus. """
+        """
+        Function to show and hide elements in setting menus
+        """
 
         event_source = self.sender()
         for key, val in self.interactive_elements.items():
@@ -2615,7 +2722,9 @@ class Canvas(FigureCanvas):
         return None
 
     def update_markersize_func(self):
-        """ Function to handle the update of the markers size. """
+        """
+        Function to handle the update of the markers size
+        """
 
         event_source = self.sender()
         source_object = event_source.objectName()
@@ -2641,7 +2750,9 @@ class Canvas(FigureCanvas):
         return None
 
     def update_opacity_func(self):
-        """ Function to handle the update of the markers opacity. """
+        """
+        Function to handle the update of the markers opacity
+        """
 
         event_source = self.sender()
         source_object = event_source.objectName()
@@ -2661,8 +2772,11 @@ class Canvas(FigureCanvas):
         return None
 
     def update_linewidth_func(self):
-        """ Function to handle the update of the lines widths. """
+        """
+        Function to handle the update of the lines widths
+        """
 
+        # get source
         event_source = self.sender()
         for key, val in self.interactive_elements.items():
             if 'linewidth_sl' in self.interactive_elements[key]:
@@ -2679,7 +2793,10 @@ class Canvas(FigureCanvas):
         return None
 
     def update_smooth_window_func(self):
-        
+        """
+        Function to handle the update of the smooth window
+        """
+
         # get source
         event_source = self.sender()
         plot_type = event_source.objectName().split('_smooth')[0]
@@ -2692,7 +2809,10 @@ class Canvas(FigureCanvas):
         return None
 
     def update_smooth_min_points_func(self):
-        
+        """
+        Function to handle the update of the smooth minimum points
+        """
+
         # get source
         event_source = self.sender()
         plot_type = event_source.objectName().split('_smooth')[0]
@@ -2704,7 +2824,9 @@ class Canvas(FigureCanvas):
 
         return None
     def update_plot_option(self):
-        """ Function to handle the update of the plot options. """
+        """ 
+        Function to handle the update of the plot options
+        """
 
         if not self.read_instance.block_MPL_canvas_updates:
 
@@ -3205,8 +3327,22 @@ class Canvas(FigureCanvas):
         return None
 
     def redraw_active_options(self, data_labels, plot_type, active, plot_options, z_statistic_sign='absolute'):
-        """ Redraw active plot option elements when moving between absolute and bias plots,
-            if do not already exist.
+        """ 
+        Redraw active plot option elements when moving between absolute and bias plots,
+        if do not already exist
+
+        Parameters
+        ----------
+        data_labels : list
+            Data labels
+        plot_type : str
+            Plot type
+        active : str
+            'bias' if bias is active, else 'absolute'
+        plot_options : list
+            Plot options
+        z_statistic_sign : str
+            Statistic sign
         """
 
         # if 'bias' is active, remove observations data label from data labels
@@ -3249,7 +3385,20 @@ class Canvas(FigureCanvas):
                                   data_labels_alt, plot_type, self.plot_characteristics[plot_type], plot_options)
 
     def update_markersize(self, ax, plot_type, markersize, event_source):
-        """ Update markers size for each plot type. """
+        """
+        Update markers size for each plot type
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes
+            Axes
+        plot_type : str
+            Plot type
+        markersize : int
+            Marker size
+        event_source : object
+            Event source
+        """
         
         # set markersize
         if plot_type in ['timeseries', 'periodic', 'scatter', 'periodic-violin', 'taylor', 'fairmode-target', 'fairmode-statsummary']:
@@ -3327,7 +3476,20 @@ class Canvas(FigureCanvas):
         return None
 
     def update_opacity(self, ax, plot_type, opacity, event_source):
-        """ Update markers opacity for each plot type. """
+        """
+        Update markers opacity for each plot type
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes
+            Axes
+        plot_type : str
+            Plot type
+        opacity : float
+            Opacity
+        event_source : object
+            Event source
+        """
 
         # set opacity
         if plot_type == 'map':
@@ -3395,7 +3557,18 @@ class Canvas(FigureCanvas):
         return None
 
     def update_linewidth(self, ax, plot_type, linewidth):
-        """ Update line widths for each plot type. """
+        """ 
+        Update line widths for each plot type
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes
+            Axes
+        plot_type : str
+            Plot type
+        linewidth : int
+            Line width
+        """
         
         # set linewidth
         if isinstance(ax, dict):
@@ -3426,6 +3599,16 @@ class Canvas(FigureCanvas):
         return None
 
     def update_smooth_window(self, plot_type, smooth_window):
+        """ 
+        Update smooth window
+
+        Parameters
+        ----------
+        plot_type : str
+            Plot type
+        smooth_window : int
+            Smooth window
+        """
 
         # update characteristics per plot type
         self.plot_characteristics[plot_type]['smooth']['window'] = smooth_window
@@ -3449,6 +3632,16 @@ class Canvas(FigureCanvas):
         return None
 
     def update_smooth_min_points(self, plot_type, smooth_min_points):
+        """ 
+        Update smooth minimum points
+
+        Parameters
+        ----------
+        plot_type : str
+            Plot type
+        smooth_min_points : int
+            Smooth minimum points
+        """
 
         # update characteristics per plot type
         self.plot_characteristics[plot_type]['smooth']['min_points_percentage'] = smooth_min_points
@@ -3474,7 +3667,18 @@ class Canvas(FigureCanvas):
         return None
     
     def update_violin_widths(self, ax, plot_type, width):
-        """ Update violin widths for violin plots. """
+        """ 
+        Update violin widths for violin plots
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes
+            Axes
+        plot_type : str
+            Plot type
+        width : int
+            Width
+        """
         
         # set violin widths
         if plot_type == 'periodic-violin':
@@ -3499,7 +3703,16 @@ class Canvas(FigureCanvas):
         return None
 
     def save_axis_figure_dialog(self, plot_type, relevant_temporal_resolution=None):
-        """ Function to create the dialog box to save each plot figure. """
+        """ 
+        Function to create the dialog box to save each plot figure
+
+        Parameters
+        ----------
+        plot_type : str
+            Plot type
+        relevant_temporal_resolution : str
+            Temporal resolution
+        """
 
         default_filename = '{0}-{1}-{2}-{3}-{4}-{5}-{6}.png'.format(self.read_instance.network[0],
                                                                     self.read_instance.species[0],
@@ -3520,7 +3733,9 @@ class Canvas(FigureCanvas):
             return figure_path
 
     def save_axis_figure_func(self):
-        """ Function to save each plot figure. """
+        """
+        Function to save each plot figure
+        """
         
         # get option and plot names
         event_source = self.sender()
@@ -3616,7 +3831,8 @@ class Canvas(FigureCanvas):
         return None
 
     def update_aggregation_statistic(self):
-        """ Update general aggregation statistic
+        """ 
+        Update general aggregation statistic
         """
         
         # get statistic
@@ -3630,7 +3846,8 @@ class Canvas(FigureCanvas):
         self.read_instance.timeseries_statistic_aggregation = self.read_instance.selected_statistic_aggregation 
 
     def update_timeseries_aggregation_statistic(self):
-        """ Update timeseries aggregation statistic
+        """ 
+        Update timeseries aggregation statistic
         """
         
         # get statistic
@@ -3640,7 +3857,17 @@ class Canvas(FigureCanvas):
         self.read_instance.timeseries_statistic_aggregation = self.read_instance.selected_timeseries_statistic_aggregation
 
     def update_option_on_combobox(self, event_source, index, uncheck=True):
-        """ Check or uncheck option in combobox dropdown
+        """ 
+        Check or uncheck option in combobox dropdown
+
+        Parameters
+        ----------
+        event_source : object
+            Event source
+        index : int
+            Index
+        uncheck : bool
+            Check or uncheck combobox
         """
 
         self.read_instance.block_MPL_canvas_updates = True
