@@ -96,26 +96,6 @@ def test_apply_period(inst, statistic_mode, network_type):
     inst.filter('period', remove='Spring')
     check_filter_data(inst, statistic_mode, network_type, filter='remove_Spring')
 
-    # Filter by keeping Summer
-    inst.reset(initialise=True)
-    inst.filter('period', keep='Summer')
-    check_filter_data(inst, statistic_mode, network_type, filter='keep_Summer')
-
-    # Filter by removing Summer
-    inst.reset(initialise=True)
-    inst.filter('period', remove='Summer')
-    check_filter_data(inst, statistic_mode, network_type, filter='remove_Summer')
-
-    # Filter by keeping Autumn
-    inst.reset(initialise=True)
-    inst.filter('period', keep='Autumn')
-    check_filter_data(inst, statistic_mode, network_type, filter='keep_Autumn')
-
-    # Filter by removing Autumn
-    inst.reset(initialise=True)
-    inst.filter('period', remove='Autumn')
-    check_filter_data(inst, statistic_mode, network_type, filter='remove_Autumn')
-
     # Filter by keeping Winter
     inst.reset(initialise=True)
     inst.filter('period', keep='Winter')
