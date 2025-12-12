@@ -339,7 +339,7 @@ class Canvas(FigureCanvas):
             original_block_MPL_canvas_updates = copy.deepcopy(self.read_instance.block_MPL_canvas_updates)
             self.read_instance.block_MPL_canvas_updates = True
 
-            # disable MDA8 stat from periodic, statsummary and timeseries chunk statistic plots if active resolution is not hourly
+            # disable MDA8 stat where neccessary
             self.handle_statsummary_statistics_update()
             self.handle_periodic_statistic_update()
             self.update_timeseries_chunk_statistics()
@@ -644,6 +644,8 @@ class Canvas(FigureCanvas):
             zstat = get_z_statistic_comboboxes(base_zstat)
         else:
             zstat = get_z_statistic_comboboxes(base_zstat, bias=True)
+
+        # ensure label that have in memory still exists 
 
         # plot map for zstat --> updating active map valid station indices and setting up plot picker
         self.plotting.make_map(self.plot_axes['map'], self.read_instance.networkspeci, self.plot_characteristics['map'], 
@@ -1367,8 +1369,8 @@ class Canvas(FigureCanvas):
             else:
                 available_periodic_stats = copy.deepcopy(self.read_instance.basic_and_bias_z_stats)
 
-            # remove MDA8 from available stats if active resolution is not hourly
-            if ('MDA8' in available_periodic_stats) & (self.read_instance.active_resolution != 'hourly'):
+            # remove MDA8 from available stats
+            if 'MDA8' in available_periodic_stats:
                 available_periodic_stats = np.delete(available_periodic_stats, np.where(available_periodic_stats == 'MDA8')[0]) 
 
             # if base_zstat is empty string, it is because fields are being initialised for the first time
@@ -1489,8 +1491,8 @@ class Canvas(FigureCanvas):
             items = list(copy.deepcopy(self.read_instance.basic_and_bias_z_stats))
         else:
             items = list(copy.deepcopy(self.read_instance.basic_z_stats))
-        # remove MDA8 as option if active resolution is not hourly
-        if ('MDA8' in items) & (self.read_instance.active_resolution != 'hourly'):
+        # remove MDA8 as option if periodic cycle is not None
+        if ('MDA8' in items) & (periodic_cycle != 'None'):
             items.remove('MDA8')
         if periodic_cycle != 'None':
             items = [stat + '-' + periodic_cycle.lower() for stat in items]

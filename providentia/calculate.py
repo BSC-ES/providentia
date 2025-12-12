@@ -347,9 +347,27 @@ class Stats(object):
             MDA8
         """
 
+        from .statistics import aggregation
+
         if data.size == 0:
             return np.nan
         else:
+
+            # if have periodic statistic, then cannot calculate MDA8, so return NaN
+            if periodic_statistic_mode:
+                return np.nan
+
+            # if array is 5d are reading daily forecast data, so make neccesary adjustments to calculation
+            if data.ndim == 5:
+                agg_dim = -2
+            else:
+                agg_dim = -1
+
+            # if last dimension is not 24, then reshape it to be so
+            extra_agg = False
+            if (data.shape[-1] != 24):
+                data = data.reshape(*data.shape[:-1], -1, 24)
+                extra_agg = True
 
             # calculate MDA8
             start_inds = np.arange(0,17)
@@ -362,12 +380,18 @@ class Stats(object):
             mda8 = np.nanmax(mda8_arr, axis=-1)
 
             # do aggregation (if not calculating periodic statistic, or per station)
-            if (not periodic_statistic_mode) & (not per_station):
-                from .statistics import aggregation
+            if (not periodic_statistic_mode) and (not per_station):
                 if statistic_mode in ['Temporal|Spatial','Spatial|Temporal']:
                     mda8 = aggregation(mda8, statistic_aggregation, axis=-1)
                 elif statistic_mode == 'Flattened':
                     mda8 = aggregation(mda8, 'Median', axis=-1)
+
+            # do extra aggregation for daily forecast data (if not calculating periodic statistic, or per station)
+            if (extra_agg) and (not periodic_statistic_mode) and (not per_station):
+                if statistic_mode in ['Temporal|Spatial','Spatial|Temporal']:
+                    mda8 = aggregation(mda8, statistic_aggregation, axis=agg_dim)
+                elif statistic_mode == 'Flattened':
+                    mda8 = aggregation(mda8, 'Median', axis=agg_dim)
 
             return mda8
 

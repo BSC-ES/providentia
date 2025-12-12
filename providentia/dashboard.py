@@ -27,9 +27,8 @@ from .configuration import ProvConfiguration
 from .dashboard_elements import ComboBox, QVLine, InputDialog
 from .dashboard_elements import set_formatting
 from .fields_menus import (init_experiments, init_flags, init_qa, update_qa, init_metadata, init_multispecies, init_period, init_representativity,
-                           metadata_conf, multispecies_conf, representativity_conf, period_conf, 
-                           update_representativity_fields, update_period_fields, update_metadata_fields)
-from .plot_aux import get_taylor_diagram_ghelper, update_plotting_parameters
+                           multispecies_conf, update_representativity_fields, update_period_fields, update_metadata_fields)
+from .plot_aux import get_taylor_diagram_ghelper
 from .plot_formatting import format_axis
 from .pop_up_window import PopUpWindow
 from .read import DataReader
@@ -669,6 +668,7 @@ class Dashboard(QtWidgets.QWidget):
             self.data_labels_raw = []
             self.previous_chunk_stat = 'None'
             self.previous_chunk_resolution = 'None'
+            self.init_experiments = []
 
             self.performing_read = False
 
@@ -843,17 +843,34 @@ class Dashboard(QtWidgets.QWidget):
                                                                 if previous_selected_experiment in
                                                                 self.experiments_menu['experiments']['map_vars']]
 
-        # set selected experiments
-        all_experiments = {exp:self.experiments[exp] if exp in self.experiments else exp
-                           for exp in self.experiments_menu['experiments']['map_vars']}
-        selected_experiments = {exp:self.experiments[exp] if exp in self.experiments else exp
-                                for exp in self.experiments_menu['experiments']['keep_selected']}
+        # set all and selected experiments
+        all_experiments = {}
+        for exp in self.experiments_menu['experiments']['map_vars']:
+            if exp in self.experiments:
+                all_experiments[exp] = self.experiments[exp]
+            elif exp in self.init_experiments:
+                all_experiments[exp] = self.init_experiments[exp]
+            else:
+                all_experiments[exp] = exp
+
+        selected_experiments = {}
+        for exp in self.experiments_menu['experiments']['keep_selected']:
+            if exp in self.experiments:
+                selected_experiments[exp] = self.experiments[exp]
+            elif exp in self.init_experiments:
+                selected_experiments[exp] = self.init_experiments[exp]
+            else:
+                selected_experiments[exp] = exp
 
         # set selected data labels
         all_data_labels = [self.observations_data_label] + list(all_experiments.values())
         all_data_labels_raw = [self.observations_data_label] + list(all_experiments.keys())
         selected_data_labels = [self.observations_data_label] + list(selected_experiments.values())
         selected_data_labels_raw = [self.observations_data_label] + list(selected_experiments.keys())
+
+        # save intial experiments if loading from .conf file to keep alias
+        if self.from_conf:
+            self.init_experiments = copy.deepcopy(selected_experiments)
 
         # check N available forecast days for experiment
         self.datareader.check_forecast(data_labels=all_data_labels, data_labels_raw=all_data_labels_raw,
@@ -869,7 +886,7 @@ class Dashboard(QtWidgets.QWidget):
             self.data_labels = copy.deepcopy(selected_data_labels)
             self.data_labels_raw = copy.deepcopy(selected_data_labels_raw)
             self.experiments = copy.deepcopy(selected_experiments)
-
+            
         # update default qa
         default_qa = get_default_qa(self, self.selected_species)
         previous_default_qa = copy.deepcopy(self.qa_menu['checkboxes']['remove_default']) 
@@ -1307,12 +1324,20 @@ class Dashboard(QtWidgets.QWidget):
         self.filter_species = copy.deepcopy(self.selected_filter_species)
         # if are not loading from conf then get data labels, experiments and forecast indices
         if not self.from_conf:
-            experiments = {exp:self.previous_experiments[exp] if exp in self.previous_experiments else exp 
-                        for exp in self.experiments_menu['experiments']['keep_selected']}
+            experiments = {}
+            for exp in self.experiments_menu['experiments']['keep_selected']:
+                if exp in self.previous_experiments:
+                    experiments[exp] = self.previous_experiments[exp]
+                elif exp in self.init_experiments:
+                    experiments[exp] = self.init_experiments[exp]
+                else:
+                    experiments[exp] = exp
+
             data_labels = [self.observations_data_label] + list(experiments.values())
             data_labels_raw = [self.observations_data_label] + list(experiments.keys())
             self.forecast = []
             for experiment_raw, experiment in experiments.items():
+
                 # get available and selected forecast options
                 available_forecast_options = self.experiments_menu['experiments']['forecast'][experiment][0]
                 selected_forecast_options = self.experiments_menu['experiments']['forecast'][experiment][1]
@@ -1341,11 +1366,11 @@ class Dashboard(QtWidgets.QWidget):
                                     forecast_var = '{}{}'.format(selected_forecast_option, forecast_day)
                                 if forecast_var not in self.forecast:
                                     self.forecast.append(forecast_var)
-        
+
             # update forecast indices and data labels based on selected forecast data 
             self.data_labels, self.data_labels_raw, self.experiments = self.datareader.update_forecast_indices(data_labels=data_labels, data_labels_raw=data_labels_raw,
                                                                                                                networkspecies=[self.networkspeci])
-
+            
         # remove bias plot options if have no experiments loaded
         if len(self.data_labels) == 1:
             for plot_type in self.mpl_canvas.all_plots:

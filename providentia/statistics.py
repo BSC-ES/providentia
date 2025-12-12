@@ -175,7 +175,9 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
 
                 # set time index, and set to self
                 time_index = read_instance.time_index[:data_array_forecast_agg.shape[-1]]
-                read_instance.time_index = time_index
+                read_instance.time_index_ts = time_index
+                if read_instance.statistic_mode == 'Spatial|Temporal':
+                    read_instance.time_index = time_index
 
             # otherwise, set data array for timeseries and time_index
             else:
@@ -346,7 +348,7 @@ def merge_forecast_days(read_instance, networkspeci, data_labels, unique_base_da
     # Iterate over each unique base label
     for base_label_ii, base_label in enumerate(unique_base_data_labels):
         # Find indices of all data_labels that match this base label
-        relevant_inds = np.array([i for i, lbl in enumerate(data_labels) if base_label in lbl], dtype=np.int32)
+        relevant_inds = np.array([i for i, lbl in enumerate(data_labels) if lbl.startswith(base_label)], dtype=np.int32)
 
         if len(relevant_inds) == 0:
             continue  # Skip if no matching labels
@@ -885,8 +887,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 function_arguments['per_station'] = per_station
                 if z_statistic_period is not None:
                     function_arguments['periodic_statistic_mode'] = periodic_statistic_mode
-                    function_arguments['periodic_statistic_aggregation'] = periodic_statistic_aggregation
-
+                    
             # add argument to correct caculation of Data%, when using groups because of padded NaNs
             elif (base_zstat == 'Data%') & (nan_padding_counts_a is not None):
                 function_arguments['nan_padding_counts'] = nan_padding_counts_a
@@ -1006,8 +1007,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                     function_arguments_a['per_station'] = per_station
                     if z_statistic_period is not None:
                         function_arguments_a['periodic_statistic_mode'] = periodic_statistic_mode
-                        function_arguments_a['periodic_statistic_aggregation'] = periodic_statistic_aggregation
-
+                        
                 function_arguments_b = copy.deepcopy(function_arguments_a)
 
                 # add argument to correct caculation of Data%, when using groups because of padded NaNs

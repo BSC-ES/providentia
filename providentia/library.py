@@ -570,6 +570,18 @@ class Providentia:
             show_message(self, msg)
             return
         
+        # do not make periodic plot if stat is MDA8
+        if (base_plot_type == 'periodic') and (base_zstat == 'MDA8'):
+            msg = f"Cannot make {plot_type} because MDA8 statistic is not available for periodic plots. Not making plot."
+            show_message(self, msg)
+            return
+        
+        # do not make statsummary plot if stat is MDA8, and are making periodic statistic
+        if (base_plot_type == 'statsummary') and (base_zstat == 'MDA8') and (z_statistic_period is not None):
+            msg = f"Cannot make {plot_type} because MDA8 statistic is not available for periodic statistics. Not making plot."
+            show_message(self, msg)
+            return
+
         if base_plot_type in ['fairmode-target','fairmode-statsummary']:
             # warning for fairmode plots if species aren't PM2.5, PM10, NO2 or O3
             if speci not in ['sconco3', 'sconcno2', 'pm10', 'pm2p5']:

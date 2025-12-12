@@ -711,7 +711,7 @@ class DataFilter:
                 if base_data_label != self.read_instance.observations_data_label:
                     current_count = 0
                     for data_label in self.read_instance.data_labels:
-                        if base_data_label in data_label:
+                        if data_label.startswith(base_data_label):
                             current_count += 1 
                             # Check if this label has forecast indices for the current network
                             if data_label in self.read_instance.forecast_indices_per_data_label[networkspeci][base_data_label]:

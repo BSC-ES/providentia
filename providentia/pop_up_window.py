@@ -487,13 +487,24 @@ class PopUpWindow(QtWidgets.QWidget):
                         elif element == 'forecast':
                             
                             #gather all forecast options, selected options and disabled options
-                            var_to_check = menu_current_type['map_vars'][label_ii]
+                            var_to_check_raw = menu_current_type['map_vars'][label_ii]
+                            if var_to_check_raw in self.read_instance.init_experiments:
+                                var_to_check = self.read_instance.init_experiments[var_to_check_raw]
+                            else:
+                                var_to_check = None
+
+                            if var_to_check_raw in menu_current_type['forecast']:
+                                matched_var = var_to_check_raw
+                            elif var_to_check in menu_current_type['forecast']:
+                                matched_var = var_to_check
+                            else:
+                                matched_var = None
 
                             # only proceed if have previously intialised
-                            if var_to_check in menu_current_type['forecast']:
-                                all_forecast_vars = menu_current_type['forecast'][var_to_check][0]
-                                selected_forecast_vars = menu_current_type['forecast'][var_to_check][1]
-                                disabled_forecast_vars = menu_current_type['forecast'][var_to_check][2]
+                            if matched_var:
+                                all_forecast_vars = menu_current_type['forecast'][matched_var][0]
+                                selected_forecast_vars = menu_current_type['forecast'][matched_var][1]
+                                disabled_forecast_vars = menu_current_type['forecast'][matched_var][2]
                                 # add available forecast options to combobox
                                 self.page_memory[menu_type]['forecast'][label_ii].addItems(all_forecast_vars)
                                 # if experiment is checked and have available forecast options, then show combobox
@@ -526,12 +537,24 @@ class PopUpWindow(QtWidgets.QWidget):
                         elif element == 'forecast_days': 
 
                             #gather all forecast options, selected forecast options, forecast days, and selected forecast days
-                            var_to_check = menu_current_type['map_vars'][label_ii]
+                            var_to_check_raw = menu_current_type['map_vars'][label_ii]
+                            if var_to_check_raw in self.read_instance.init_experiments:
+                                var_to_check = self.read_instance.init_experiments[var_to_check_raw]
+                            else:
+                                var_to_check = None
+
+                            if var_to_check_raw in menu_current_type['forecast']:
+                                matched_var = var_to_check_raw
+                            elif var_to_check in menu_current_type['forecast']:
+                                matched_var = var_to_check
+                            else:
+                                matched_var = None
+
                             # only proceed if have previously intialised
-                            if var_to_check in menu_current_type['forecast']:
-                                selected_forecast_vars = menu_current_type['forecast'][var_to_check][1]
-                                all_forecast_day_vars = menu_current_type['forecast_days'][var_to_check][0]
-                                selected_forecast_day_vars = menu_current_type['forecast_days'][var_to_check][1]  
+                            if matched_var:
+                                selected_forecast_vars = menu_current_type['forecast'][matched_var][1]
+                                all_forecast_day_vars = menu_current_type['forecast_days'][matched_var][0]
+                                selected_forecast_day_vars = menu_current_type['forecast_days'][matched_var][1]  
                                 # add available forecast days to combobox
                                 self.page_memory[menu_type]['forecast_days'][label_ii].addItems(all_forecast_day_vars) 
                                 # if experiment is checked and have selected forecast options, then show combobox
@@ -1038,9 +1061,10 @@ class PopUpWindow(QtWidgets.QWidget):
 
         # Extract the numeric index from the checkbox object name (e.g., 'experiment_2' → 2)
         label_ii = int(event_source.objectName().split('_')[1])
-
-        # Retrieve the experiment name corresponding to this index
         experiment = self.menu_current['experiments']['map_vars'][label_ii]
+        if experiment not in self.menu_current['experiments']['forecast']:
+            if experiment in self.read_instance.init_experiments:
+                experiment = self.read_instance.init_experiments[experiment]
 
         # Build a combined key for network and species (used for accessing forecast data)
         networkspeci = '{}|{}'.format(self.read_instance.selected_network, self.read_instance.selected_species)
@@ -1117,6 +1141,9 @@ class PopUpWindow(QtWidgets.QWidget):
         event_source = self.sender()
         label_ii = int(event_source.objectName().split('_')[1])
         experiment = self.menu_current['experiments']['map_vars'][label_ii]
+        if experiment not in self.menu_current['experiments']['forecast']: 
+            if experiment in self.read_instance.init_experiments:
+                experiment = self.read_instance.init_experiments[experiment]
 
         # disconnect the combobox event while inside event so it is not infinitely called
         self.page_memory['experiments']['forecast'][label_ii].model().dataChanged.disconnect(self.forecast_option_checked)
@@ -1233,11 +1260,16 @@ class PopUpWindow(QtWidgets.QWidget):
                         # iterate through experiments
                         for checkbox_ii, checkbox in enumerate(self.page_memory[menu_type][element]):
                             # get experiment name
-                            experiment = self.menu_current[menu_type]['map_vars'][checkbox_ii]
+                            experiment_raw = self.menu_current[menu_type]['map_vars'][checkbox_ii]
+                            experiment = copy.deepcopy(experiment_raw)
+                            if experiment not in self.menu_current[menu_type]['forecast']:
+                                if experiment in self.read_instance.init_experiments:
+                                    experiment = self.read_instance.init_experiments[experiment]
+
                             # check if experiment is checked
                             if checkbox.checkState() == QtCore.Qt.Checked:
                                 # append checked experiment
-                                selected_vars.append(experiment)
+                                selected_vars.append(experiment_raw)
                                 # get current selected and disabled forecast variables for experiment
                                 if experiment in self.menu_current[menu_type]['forecast']:
                                     all_forecast_vars = self.menu_current[menu_type]['forecast'][experiment][0]

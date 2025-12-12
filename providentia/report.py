@@ -1427,6 +1427,18 @@ class Report:
             show_message(self, msg)
             return plot_indices
 
+        # do not make periodic plot if stat is MDA8
+        if (base_plot_type == 'periodic') and (base_zstat == 'MDA8'):
+            msg = f"Cannot make {plot_type} because MDA8 statistic is not available for periodic plots. Not making plot."
+            show_message(self, msg)
+            return plot_indices
+        
+        # do not make statsummary plot if stat is MDA8, and are making periodic statistic
+        if (base_plot_type == 'statsummary') and (base_zstat == 'MDA8') and (z_statistic_period is not None):
+            msg = f"Cannot make {plot_type} because MDA8 statistic is not available for periodic statistics. Not making plot."
+            show_message(self, msg)
+            return plot_indices
+
         # get data labels without observations
         data_labels_sans_obs = copy.deepcopy(data_labels)
         if self.observations_data_label in data_labels_sans_obs:

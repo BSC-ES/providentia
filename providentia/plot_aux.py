@@ -230,28 +230,6 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
                                 instance.plotting_params[data_label]['grid_edge_longitude'] = grid_edge_longitude
                                 instance.plotting_params[data_label]['grid_edge_latitude'] = grid_edge_latitude
                                 processed_data_labels.append(data_label)
-                        
-                    # if daily_forecast:
-                    #     # For daily forecast, copy grid edge info from removed labels
-                    #     for data_label in data_labels_to_add:
-                    #         relevant_inds = [ii for ii, data_label_to_remove in enumerate(data_labels_to_remove) if data_label in data_label_to_remove]
-                    #         instance.plotting_params[data_label] = {}
-                    #         instance.plotting_params[data_label]['grid_edge_longitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_longitude'] 
-                    #         instance.plotting_params[data_label]['grid_edge_latitude'] = instance.plotting_params[data_labels_to_remove[relevant_inds[0]]]['grid_edge_latitude'] 
-                    #         processed_data_labels.append(data_label)
-                    # elif unique_base_data_label in instance.files_to_read[valid_networkspeci]:
-                    #     # Open NetCDF file to extract grid edges
-                    #     exp_nc_root = Dataset(instance.files_to_read[valid_networkspeci][unique_base_data_label][0])
-                    #     for data_label in data_labels_to_add:
-                    #         if data_label not in processed_data_labels:
-                    #             base_data_label = data_label.split('-day')[0].split('-daily')[0].split('-combined')[0]
-                    #             if base_data_label == unique_base_data_label:
-                    #                 instance.plotting_params[data_label] = {}
-                    #                 instance.plotting_params[data_label]['grid_edge_longitude'] = exp_nc_root['grid_edge_longitude'][:]
-                    #                 instance.plotting_params[data_label]['grid_edge_latitude'] = exp_nc_root['grid_edge_latitude'][:]
-                    #                 processed_data_labels.append(data_label)
-                    #     # Close NetCDF file
-                    #     exp_nc_root.close()  
 
     # Remove plotting parameters for labels marked for removal
     if data_labels_to_remove is not None:
@@ -706,16 +684,24 @@ def create_statistical_timeseries(read_instance, canvas_instance, chunk_stat, ch
                                          statistic_aggregation=read_instance.timeseries_statistic_aggregation,
                                          forecast_type=forecast_type) 
 
-    if (chunk_resolution == read_instance.active_resolution) & (forecast_type != 'daily'):
+    if (chunk_resolution == read_instance.active_resolution) & (forecast_type == 'combined'):
+        chunk_dates = read_instance.time_index_ts
+    elif (chunk_resolution == read_instance.active_resolution) & (forecast_type != 'daily'):
         chunk_dates = read_instance.time_index
     else:
         chunk_dates = canvas_instance.grouped_ts_index
 
     timeseries_data = pd.DataFrame(index=chunk_dates, columns=cut_data_labels, dtype=np.float32)
 
+    # if shape of stats_calc is not correct return error
+    if (stats_calc.shape[0] != len(chunk_dates)) or (stats_calc.shape[1] != len(cut_data_labels)):
+        error = "Error: The shape of the calculated statistical timseseries does not match the expected shape."
+        read_instance.logger.error(error)
+        sys.exit(1)
+
     for chunk_date_idx, chunk_date in enumerate(chunk_dates):
         for label_idx, data_label in enumerate(cut_data_labels):
-            timeseries_data.loc[chunk_date, data_label] = np.float32(stats_calc[chunk_date_idx][label_idx])
+            timeseries_data.loc[chunk_date, data_label] = np.float32(stats_calc[chunk_date_idx,label_idx])
     
     return timeseries_data
 
