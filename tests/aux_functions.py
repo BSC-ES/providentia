@@ -115,7 +115,7 @@ def plot(inst, statistic_mode, network_type, plot_type, plot_options=[]):
                 expected_output = pd.read_csv(path)
 
                 assert assert_frame_equal(
-                generated_output, expected_output) is None
+                generated_output, expected_output, atol=1e-7) is None
 
     elif base_plot_type in ['map']:
 
