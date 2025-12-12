@@ -11,12 +11,6 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@v4
-      with:
-        lfs: true
-    - name: Install Git LFS
-      run: |
-        git lfs install
-        git lfs pull
     - name: Set up Python 3.11
       uses: actions/setup-python@v3
       with:
