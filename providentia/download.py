@@ -190,7 +190,7 @@ class Download(object):
                         if network == 'actris/actris':   
                             for resolution in self.resolution:
                                 actris = Actris(self, resolution)
-                                actris.download_actris_network()
+                                actris.download_actris_data()
                         # GHOST and non-GHOST 
                         else:
                             # download GHOST network

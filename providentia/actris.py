@@ -1,6 +1,5 @@
 import bisect
 import copy
-import csv
 import ctypes
 import datetime
 import itertools
@@ -9,7 +8,6 @@ import requests
 import sys
 import yaml
 import re
-import time
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
@@ -44,6 +42,16 @@ shared_memory_vars = {}
 class Actris:
 
     def __init__(self, download_instance, resolution):
+        """Initialise the object.
+
+        Parameters
+        ----------
+        download_instance : object
+            Instance used to download data.
+        resolution : str
+            Desired output resolution.
+        """
+
         self.download_instance = download_instance
         self.resolution = resolution
 
@@ -52,6 +60,8 @@ class Actris:
 
         Parameters
         ----------
+        base_url : str
+            URL to NILU Thredds where data is stored
         var : str
             Variable
 
@@ -137,6 +147,13 @@ class Actris:
             Array with flags in EBAS standards
         ghost_version : float
             GHOST version
+
+        Returns
+        -------
+        numpy.array
+            Array with flags in GHOST standards
+        numpy.array
+            Array with QA in GHOST standards
         """
 
         sys.path.insert(1, join(
@@ -169,6 +186,18 @@ class Actris:
         return np.array(standard_flags, dtype=np.float32), np.array(qa, dtype=np.float32)
 
     def create_time_pairs(self, time):
+        """Build pairs of consecutive time values
+
+        Parameters
+        ----------
+        time : numpy.array
+            Standard datetimes
+
+        Returns
+        -------
+        list
+            Pairs of standard datetimes
+        """
 
         time_pairs = list(zip(time[:-1], time[1:]))
         last_time_pair = (time[-1], time[-1] + (time[-1] - time[-2]))
@@ -177,7 +206,7 @@ class Actris:
         return time_pairs
 
     def datetime_to_fractional_minutes_from_reference(self, date):
-        """Get datetime in fractional minutes
+        """Get datetime in fractional minutes (e.g. 10 minutes 45 seconds beacomes 10.45)
 
         Parameters
         ----------
@@ -195,18 +224,43 @@ class Actris:
         
         return difference.total_seconds() / datetime.timedelta(minutes=1).total_seconds()
                         
-    def get_window_indices(self, standard_start_date, standard_end_date, valid_start_times, valid_end_times, last_relevant_index):
+    def get_window_indices(self, standard_start_date, standard_end_date, valid_start_times, 
+                           valid_end_times, last_relevant_index):
+        """Determines which measurement intervals overlap with a given time window
+
+        Parameters
+        ----------
+        standard_start_date : datetime.datetime
+            Window standard start date
+        standard_end_date : datetime.datetime
+            Window standard end date
+        valid_start_times : numpy.array
+            Actual start times
+        valid_end_times : numpy.array
+            Actual end times
+        last_relevant_index : int
+            Index to start searching from to ignore earlier timesteps
+
+        Returns
+        -------
+        numpy.array
+            All measurement periods that overlap with the window (fully inside or overlapping edges)
+        int
+            Overlap time from the standard start date of the window
+        int
+            Overlap time from the standard end date of the window
+        """
 
         window_start_minute = self.datetime_to_fractional_minutes_from_reference(standard_start_date)
         window_end_minute = self.datetime_to_fractional_minutes_from_reference(standard_end_date)
 
         # get index where valid start times >= window start minute
         valid_start_times_begin = bisect.bisect_left(valid_start_times, window_start_minute, 
-                                                        lo=last_relevant_index, hi=len(valid_start_times))
+                                                     lo=last_relevant_index, hi=len(valid_start_times))
         
         # get index where valid start times < window end minute
         valid_start_times_end = bisect.bisect_left(valid_start_times, window_end_minute, 
-                                                    lo=last_relevant_index, hi=len(valid_start_times))
+                                                   lo=last_relevant_index, hi=len(valid_start_times))
 
         # get index of first start time < window start minute
         start_time_index_before_window = valid_start_times_begin - 1
@@ -217,7 +271,7 @@ class Actris:
         
         # get index where valid end times <= window end minute
         valid_end_times_end = bisect.bisect_right(valid_end_times, window_end_minute, 
-                                                    lo=last_relevant_index, hi=len(valid_end_times))
+                                                  lo=last_relevant_index, hi=len(valid_end_times))
 
         # get index of first end time > window end minute
         end_time_index_after_window = copy.deepcopy(valid_end_times_end)
@@ -229,42 +283,64 @@ class Actris:
             window_in_measurement_indices = np.array([], dtype=np.uint32)
 
         # get indices of measurements entirely contained within window
-        start_time_indices_in_window = np.arange(valid_start_times_begin, valid_start_times_end, dtype=np.uint32)
+        start_time_indices_in_window = np.arange(valid_start_times_begin, valid_start_times_end, 
+                                                 dtype=np.uint32)
         end_time_indices_in_window = np.arange(valid_end_times_begin, valid_end_times_end, dtype=np.uint32)
-        measurement_in_window_indices = np.intersect1d(start_time_indices_in_window,end_time_indices_in_window, assume_unique=True)
+        measurement_in_window_indices = np.intersect1d(start_time_indices_in_window,
+                                                       end_time_indices_in_window, 
+                                                       assume_unique=True)
         
         # get indices of measurements which overlap on left/right edges of window
-        left_overlap_indices = np.setdiff1d(end_time_indices_in_window, measurement_in_window_indices, assume_unique=True)
-        left_overlap_indices = np.setdiff1d(left_overlap_indices, window_in_measurement_indices, assume_unique=True)
-        right_overlap_indices = np.setdiff1d(start_time_indices_in_window, measurement_in_window_indices, assume_unique=True)
-        right_overlap_indices = np.setdiff1d(right_overlap_indices, window_in_measurement_indices, assume_unique=True)
+        left_overlap_indices = np.setdiff1d(end_time_indices_in_window, measurement_in_window_indices, 
+                                            assume_unique=True)
+        left_overlap_indices = np.setdiff1d(left_overlap_indices, window_in_measurement_indices, 
+                                            assume_unique=True)
+        right_overlap_indices = np.setdiff1d(start_time_indices_in_window, measurement_in_window_indices, 
+                                             assume_unique=True)
+        right_overlap_indices = np.setdiff1d(right_overlap_indices, window_in_measurement_indices, 
+                                             assume_unique=True)
 
         # deal with cases where left/right borders align but measurement period entirely contains window
         # add indices of these cases to window_in_measurement_indices
         # remove these indices also from the overlap indices
-        left_window_in_measurement_indices = right_overlap_indices[np.where(valid_start_times[right_overlap_indices] == window_start_minute)]
-        right_window_in_measurement_indices = left_overlap_indices[np.where(valid_end_times[left_overlap_indices] == window_end_minute)]
+        left_window_in_measurement_indices = right_overlap_indices[np.where(
+            valid_start_times[right_overlap_indices] == window_start_minute)]
+        right_window_in_measurement_indices = left_overlap_indices[np.where(
+            valid_end_times[left_overlap_indices] == window_end_minute)]
         if len(left_window_in_measurement_indices) > 0:
-            window_in_measurement_indices = np.concatenate((window_in_measurement_indices, left_window_in_measurement_indices))
-            right_overlap_indices = np.setdiff1d(right_overlap_indices, left_window_in_measurement_indices, assume_unique=True)
+            window_in_measurement_indices = np.concatenate((window_in_measurement_indices, 
+                                                            left_window_in_measurement_indices))
+            right_overlap_indices = np.setdiff1d(right_overlap_indices, 
+                                                 left_window_in_measurement_indices, 
+                                                 assume_unique=True)
         if len(right_window_in_measurement_indices) > 0:
-            window_in_measurement_indices = np.concatenate((window_in_measurement_indices, right_window_in_measurement_indices))
-            left_overlap_indices = np.setdiff1d(left_overlap_indices, right_window_in_measurement_indices, assume_unique=True)
+            window_in_measurement_indices = np.concatenate((window_in_measurement_indices, 
+                                                            right_window_in_measurement_indices))
+            left_overlap_indices = np.setdiff1d(left_overlap_indices, 
+                                                right_window_in_measurement_indices, 
+                                                assume_unique=True)
         
-        # if there is a left border overlap, get the number of minutes the measurement period overlaps the measurement window
+        # if there is a left border overlap, get the number of minutes the measurement period 
+        # overlaps the measurement window
         if len(left_overlap_indices) > 0:
             left_overlap = valid_end_times[left_overlap_indices[0]] - window_start_minute
         # otherwise left overlap == 0
         else:
             left_overlap = 0
-        # if there is a right border overlap, get the number of minutes the measurement period overlaps the measurement window
+        
+        # if there is a right border overlap, get the number of minutes the measurement period 
+        # overlaps the measurement window
         if len(right_overlap_indices) > 0:
             right_overlap = window_end_minute - valid_start_times[right_overlap_indices[0]]
         # otherwise right overlap == 0
         else:
             right_overlap = 0
+        
         # concatenate all relevant measurements indices in current window
-        window_indices = np.sort(np.concatenate((measurement_in_window_indices,window_in_measurement_indices,left_overlap_indices,right_overlap_indices)))
+        window_indices = np.sort(np.concatenate((measurement_in_window_indices,
+                                                 window_in_measurement_indices,
+                                                 left_overlap_indices,
+                                                 right_overlap_indices)))
                 
         return window_indices, right_overlap, left_overlap
 
@@ -279,11 +355,19 @@ class Actris:
             Variable
         ghost_version : float
             GHOST version
-
+        standard_time_pairs : list
+            Pairs of standard datetimes
+        vfunc : callable
+            Vectorised function to map ghost validity flags
+        
         Returns
         -------
-        ds : xarray.Dataset
-            Data per station with valid times per month
+        list
+            Station temporally averaged data
+        list
+            Station temporally averaged flag data
+        list
+            Station temporally averaged QA data
         """
 
         # initialise averaged data
@@ -411,7 +495,8 @@ class Actris:
         return wavelength_var
 
     def get_files_info(self, files, var, path):
-        """Read variables, resolution, start date and end date from all files in ACTRIS server per variable.
+        """Read variables, resolution, start date and end date from all files in ACTRIS server 
+        per variable.
 
         Parameters
         ----------
@@ -484,6 +569,26 @@ class Actris:
 
 
     def get_var_in_file(self, ds, var, actris_parameter, ebas_component):
+        """Get variable name from dataset
+
+        Parameters
+        ----------
+        ds : xarray.Dataset
+            Dataset
+        var : str
+            GHOST variable name
+        actris_parameter : str
+            ACTRIS vocabulary name
+        ebas_component : str
+            EBAS vocabulary name
+
+        Returns
+        -------
+        list
+            List of possible variable names
+        str
+            Actual variable name found in dataset
+        """
 
         unformatted_units = variable_mapping[actris_parameter]['units']
         units = unformatted_units.replace('/', '_per_').replace(' ', '_')
@@ -507,10 +612,26 @@ class Actris:
         return possible_vars, possible_var
 
     def select_station_file(self, urls, files_info):
+        """Select one station file from available ones, depending on 
+        statistics, data level and revision date
+
+        Parameters
+        ----------
+        urls : list
+            List of available URLs for the same station
+        files_info : dict
+            Dictionary with information of all files in Thredds for one variable
+
+        Returns
+        -------
+        str
+            Selected URL
+        """
 
         attrs_dict = {}
         urls = np.array(urls)
-        # create dictionary with information about statistics, data level and revision date of available files
+        # create dictionary with information about statistics, data level and revision date of 
+        # available files
         for url in urls:
             attrs = files_info[url]
             for attr in ['ebas_statistics', 'ebas_data_level', 'ebas_revision_date']:
@@ -544,7 +665,8 @@ class Actris:
             urls_data_levels = np.unique(attrs_dict['ebas_data_level'])
             # if we have different data levels
             if len(urls_data_levels) > 1:
-                max_level_ind = np.nanargmax(np.float32([np.nan if x == '' else x for x in attrs_dict['ebas_data_level']]))
+                max_level_ind = np.nanargmax(np.float32([np.nan if x == '' else x for x 
+                                                         in attrs_dict['ebas_data_level']]))
                 is_max = attrs_dict['ebas_data_level'] == attrs_dict['ebas_data_level'][max_level_ind]
                 
                 # remove urls if the data level is not the maximum of all files
@@ -584,12 +706,31 @@ class Actris:
         bool
             Whether string contains only commas or not
         """
+
         stripped = val.replace(" ", "")
         if stripped and all(c == "," for c in stripped):
             return True
         return False
 
     def read_data(self, args):
+        """Read data for one station and extract valuable information
+
+        Parameters
+        ----------
+        args : tuple
+            Tuple containing all necessary information to process data for one station
+
+        Returns
+        -------
+        str
+            Selected URL
+        str
+            Station code
+        str
+            Station errors
+        str
+            Station warnings
+        """
 
         (i, station, urls, data_shape, flag_shape, qa_shape,
         metadata_shape, files_info, var, actris_parameter, ebas_component,
@@ -792,6 +933,22 @@ class Actris:
 
     def init_shared_vars_read_data(self, shared_data, shared_flag_data, shared_qa_data, shared_metadata, 
                                    data_shape):
+        """Initialise shared arrays across processes
+
+        Parameters
+        ----------
+        shared_data : multiprocessing.RawArray
+            Shared data array
+        shared_flag_data : multiprocessing.RawArray
+            Shared flag data array
+        shared_qa_data : multiprocessing.RawArray
+            Shared QA data array
+        shared_metadata : multiprocessing.RawArray
+            Shared metadata array
+        data_shape : tuple
+            Data shape
+        """
+
         # multiprocessing.RawArray does not support NaN initialisation and initialised to zeros
         # replace 0 by nan before reading data so that if there are any errors we can later 
         # drop the stations
@@ -805,6 +962,19 @@ class Actris:
             shared_memory_vars['metadata'][ghost_key] = shared_metadata[ghost_key]
 
     def ghost_validity_flag_mapper(self, flag):
+        """Get GHOST decreed validity from flag
+
+        Parameters
+        ----------
+        flag : float
+            GHOST flag
+
+        Returns
+        -------
+        str
+            GHOST decreed validity
+        """
+
         if np.isnan(flag):
             return np.nan
         elif flag == 0:
@@ -855,15 +1025,13 @@ class Actris:
             Target start date (defined from configuration file)
         target_end_date : datetime.datetime
             Target end date (defined from configuration file)
-
+        files_info : dict
+            Dictionary with information of all files in Thredds for one variable
+        
         Returns
         -------
-        list
-            Standarised variable data
-        list
-            Standarised metadata
-        wavelength : None, float, int
-            Wavelength
+        xarray.Dataset
+            Temporally averaged data with flags, QA and metadata
         """
 
         # get EBAS component
@@ -881,7 +1049,7 @@ class Actris:
             frequency = 'MS'
 
         standard_time = pd.date_range(start=target_start_date, end=target_end_date,
-                                    freq=frequency).to_pydatetime()
+                                      freq=frequency).to_pydatetime()
         
         # get dimension of new arrays
         n_stations = len(files)
@@ -1091,8 +1259,10 @@ class Actris:
 
         return paths
 
-    def download_actris_network(self):
-
+    def download_actris_data(self):
+        """Download ACTRIS data
+        """
+        
         target_start_date = datetime.datetime(int(self.download_instance.start_date[:4]), 
                                               int(self.download_instance.start_date[4:6]), 
                                               int(self.download_instance.start_date[6:8]), 0)
@@ -1210,14 +1380,10 @@ class Actris:
             if len(files) != 0:
 
                 # get data for each file within period and temporally average to standard times
-                # start = time.time()
                 combined_ds = self.get_data(files, var, actris_parameter, 
                                             target_start_date, target_end_date, files_info)
                 if combined_ds is None:
                     continue
-                # end = time.time()
-                # elapsed_minutes = (end - start) / 60
-                # self.download_instance.logger.info(f"Time to read data: {elapsed_minutes:.2f} minutes")
 
                 # save data per year and month
                 if not os.path.isdir(path):
