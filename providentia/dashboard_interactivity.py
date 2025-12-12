@@ -2,20 +2,14 @@
 
 import copy
 import datetime
-import math
-import time
 
-from matplotlib.dates import num2date
 from matplotlib.lines import Line2D
 from matplotlib.widgets import _SelectorWidget
 import numpy as np
-from packaging.version import Version
-import pandas as pd
 from PyQt5.QtWidgets import QToolTip, QWidget
 
 from .dashboard_elements import set_formatting
 from .plot_aux import get_map_extent, get_hex_code
-from .plot_formatting import harmonise_xy_lims_paradigm
 
 
 class LassoSelector(_SelectorWidget):
@@ -53,6 +47,23 @@ class LassoSelector(_SelectorWidget):
     """
 
     def __init__(self, ax, onselect, useblit=True, props=None, button=None):
+        """
+        Initialise class
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes
+            Axes
+        onselect : callable
+            Callback function called when a selection is completed.
+            It receives the list of polygon vertices.
+        useblit : bool
+            Whether to use blitting for faster drawing
+        props : dict
+            Line2D properties for the selection outline (e.g., color, linewidth).
+        button : int or list of int
+            Mouse button(s) used to start the selection.
+        """
 
         super().__init__(ax, onselect, useblit=useblit, button=button)
         self.verts = None
@@ -69,13 +80,29 @@ class LassoSelector(_SelectorWidget):
         return None
     
     def _press(self, event):
-            
+        """
+        Handle mouse press event to start a new selection
+
+        Parameters
+        ----------
+        event : matplotlib.backend_bases.MouseEvent
+            Mouse event containing the click position
+        """
+
         self.verts = [self._get_data(event)]
         self._selection_artist.set_visible(True)
 
         return None
     
     def _onmove(self, event):
+        """
+        Handle mouse movement during selection
+
+        Parameters
+        ----------
+        event : matplotlib.backend_bases.MouseEvent
+            Mouse move event used to update the selection path
+        """
 
         if self.verts is None:
             return
@@ -87,6 +114,14 @@ class LassoSelector(_SelectorWidget):
         return None
 
     def _release(self, event):
+        """
+        Handle mouse release event and finalise the selection
+
+        Parameters
+        ----------
+        event : matplotlib.backend_bases.MouseEvent
+            Mouse release event marking the end of the selection
+        """
 
         if self.verts is not None:
             self.verts.append(self._get_data(event))
@@ -98,7 +133,16 @@ class LassoSelector(_SelectorWidget):
         return None
 
 def zoom_map_func(canvas_instance, event):
-    """ Function to handle zoom on map using scroll wheel. """
+    """
+    Handle scroll-wheel zooming on the map axis
+
+    Parameters
+    ----------
+    canvas_instance : object
+        Canvas instance
+    event : matplotlib.backend_bases.MouseEvent
+        Scroll event providing mouse position, scroll direction, and axis info
+    """
 
     if event.inaxes == canvas_instance.plot_axes['map']:
 
@@ -153,8 +197,15 @@ def zoom_map_func(canvas_instance, event):
     return None
 
 def picker_block_func(canvas_instance, event):
-    """ Block or unblock the station and legend pick functions
-        to avoid interferences.
+    """
+    Enable or disable legend picking depending on where the click occurs
+
+    Parameters
+    ----------
+    canvas_instance : object
+        Canvas instance
+    event : matplotlib.backend_bases.MouseEvent
+        Mouse event used to determine which axis was clicked
     """
 
     if event.inaxes == canvas_instance.plot_axes['legend']:
@@ -168,7 +219,16 @@ def picker_block_func(canvas_instance, event):
     return None
 
 def legend_picker_func(canvas_instance, event):
-    """ Function to handle legend picker. """
+    """
+    Handle clicks on legend items to toggle visibility of plotted data
+
+    Parameters
+    ----------
+    canvas_instance : object
+        Canvas instance
+    event : matplotlib.backend_bases.PickEvent
+        Pick event providing the clicked legend artist
+    """
 
     if canvas_instance.lock_legend_pick == False:
         if canvas_instance.plot_elements:
@@ -232,8 +292,15 @@ def legend_picker_func(canvas_instance, event):
 
 class HoverAnnotation(object):
 
-    def __init__(self, canvas_instance, add_vline=False):
-        
+    def __init__(self, canvas_instance):
+        """Initialise class
+
+        Parameters
+        ----------
+        canvas_instance : object
+            Canvas instance
+        """
+
         self.canvas_instance = canvas_instance
 
         # set up formatting for canvas annotations
@@ -250,7 +317,14 @@ class HoverAnnotation(object):
         return None
 
     def hover_annotation(self, event):
-        """ Function that annotates on hover in timeseries, scatter, distribution, taylor and FAIRMODE target plots.
+        """ 
+        Handle hover events to display point annotations on timeseries, scatter, distribution, taylor 
+        and FAIRMODE target plots
+
+        Parameters
+        ----------
+        event : matplotlib.backend_bases.MouseEvent
+            Mouse move event used to determine hovered axis and point
         """
 
         #hide annotation and vline
@@ -362,7 +436,14 @@ class HoverAnnotation(object):
         return None
 
     def update_map_annotation(self, annotation_index):
-        """ Update annotation for each station that is hovered. """
+        """
+        Update the tooltip annotation for a hovered station on the map
+
+        Parameters
+        ----------
+        annotation_index : dict
+            Dictionary containing the index of the hovered station
+        """
 
         # retrieve stations references and coordinates
         station_name = self.canvas_instance.read_instance.station_names[self.canvas_instance.read_instance.networkspeci][self.canvas_instance.active_map_valid_station_inds[annotation_index['ind'][0]]]
@@ -383,7 +464,14 @@ class HoverAnnotation(object):
         return None
 
     def update_timeseries_annotation(self, annotation_index):
-        """ Update annotation for each timeseries point that is hovered. """
+        """
+        Update the tooltip annotation for a hovered point on the timeseries
+
+        Parameters
+        ----------
+        annotation_index : dict
+            Dictionary containing the index of the hovered point
+        """
 
         # initialise annotation text
         text_label = ''
@@ -432,6 +520,16 @@ class HoverAnnotation(object):
         return None
 
     def update_scatter_annotation(self, annotation_index, data_label):
+        """
+        Update the tooltip annotation for a hovered point on the scatter
+
+        Parameters
+        ----------
+        annotation_index : dict
+            Dictionary containing the index of the hovered point
+        data_label : str
+            Data label
+        """
 
         # initialise annotation text
         text_label = ''
@@ -464,6 +562,16 @@ class HoverAnnotation(object):
         return None
 
     def update_fairmode_target_annotation(self, annotation_index, data_label):
+        """
+        Update the tooltip annotation for a hovered point on the FAIRMODE target plot
+
+        Parameters
+        ----------
+        annotation_index : dict
+            Dictionary containing the index of the hovered point
+        data_label : str
+            Data label
+        """
 
         # initialise annotation text
         text_label = ''
@@ -496,6 +604,16 @@ class HoverAnnotation(object):
         return None
     
     def update_fairmode_statsummary_annotation(self, annotation_index, data_label):
+        """
+        Update the tooltip annotation for a hovered point on the FAIRMODE statistics summary plot
+
+        Parameters
+        ----------
+        annotation_index : dict
+            Dictionary containing the index of the hovered point
+        data_label : str
+            Data label
+        """
 
         # initialise annotation text
         text_label = ''
@@ -530,8 +648,15 @@ class HoverAnnotation(object):
         return None
     
     def update_distribution_annotation(self, annotation_index):
-        """ Update annotation for each distribution point that is hovered. """
-        
+        """
+        Update the tooltip annotation for a hovered point on the distribution plot
+
+        Parameters
+        ----------
+        annotation_index : dict
+            Dictionary containing the index of the hovered point
+        """
+
         # initialise annotation text
         text_label = ''
 
@@ -576,7 +701,15 @@ class HoverAnnotation(object):
         return None
 
     def update_taylor_annotation(self, annotation_index, data_label):
-        
+        """
+        Update the tooltip annotation for a hovered point on the Taylor diagram plot
+
+        Parameters
+        ----------
+        annotation_index : dict
+            Dictionary containing the index of the hovered point
+        """
+
         # initialise annotation text
         text_label = ''
                 
@@ -609,7 +742,16 @@ class HoverAnnotation(object):
         return None
 
     def update_periodic_annotation(self, annotation_index, resolution):
-        """ Update annotation for each periodic point that is hovered. """
+        """
+        Update the tooltip annotation for a hovered point on the periodic plot
+
+        Parameters
+        ----------
+        annotation_index : dict
+            Dictionary containing the index of the hovered point
+        resolution : str
+            Temporal resolution
+        """
 
         # initialise annotation text
         text_label = ''
@@ -667,7 +809,16 @@ class HoverAnnotation(object):
         return None
     
     def update_periodic_violin_annotation(self, annotation_index, resolution):
-        """ Update annotation for each periodic violin point that is hovered. """
+        """
+        Update the tooltip annotation for a hovered point on the periodic violin plot
+
+        Parameters
+        ----------
+        annotation_index : dict
+            Dictionary containing the index of the hovered point
+        resolution : str
+            Temporal resolution
+        """
 
         # initialise annotation text
         text_label = ''
@@ -725,7 +876,8 @@ class HoverAnnotation(object):
         return None
     
     def update_vline_position(self):
-        """Function to update vline position 
+        """
+        Update the position of the vertical line on hover
         """
 
         # get current canvas width / height
