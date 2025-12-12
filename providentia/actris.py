@@ -42,21 +42,23 @@ shared_memory_vars = {}
 class Actris:
 
     def __init__(self, download_instance, resolution):
-        """Initialise the object.
+        """
+        Initialise the object
 
         Parameters
         ----------
         download_instance : object
-            Instance used to download data.
+            Instance used to download data
         resolution : str
-            Desired output resolution.
+            Desired output resolution
         """
 
         self.download_instance = download_instance
         self.resolution = resolution
 
     def get_files_per_var(self, base_url, var):
-        """Get all files available in ACTRIS server per variable
+        """
+        Get all files available in ACTRIS server per variable
 
         Parameters
         ----------
@@ -115,7 +117,8 @@ class Actris:
         return files_per_var
 
     def get_files_path(self, var):
-        """Get path of file where files per variable are saved
+        """
+        Get path of file where files per variable are saved
 
         Parameters
         ----------
@@ -139,7 +142,8 @@ class Actris:
         return path
 
     def get_standard_flags_and_qa(self, flags, ghost_version):
-        """Convert flags from EBAS standards to GHOST standards and get QA
+        """
+        Convert flags from EBAS standards to GHOST standards and get QA
 
         Parameters
         ----------
@@ -186,7 +190,8 @@ class Actris:
         return np.array(standard_flags, dtype=np.float32), np.array(qa, dtype=np.float32)
 
     def create_time_pairs(self, time):
-        """Build pairs of consecutive time values
+        """
+        Build pairs of consecutive time values
 
         Parameters
         ----------
@@ -206,7 +211,8 @@ class Actris:
         return time_pairs
 
     def datetime_to_fractional_minutes_from_reference(self, date):
-        """Get datetime in fractional minutes (e.g. 10 minutes 45 seconds beacomes 10.45)
+        """
+        Get datetime in fractional minutes (e.g. 10 minutes 45 seconds beacomes 10.45)
 
         Parameters
         ----------
@@ -226,7 +232,8 @@ class Actris:
                         
     def get_window_indices(self, standard_start_date, standard_end_date, valid_start_times, 
                            valid_end_times, last_relevant_index):
-        """Determines which measurement intervals overlap with a given time window
+        """
+        Determines which measurement intervals overlap with a given time window
 
         Parameters
         ----------
@@ -345,7 +352,8 @@ class Actris:
         return window_indices, right_overlap, left_overlap
 
     def temporally_average_data(self, station_ds, var, ghost_version, standard_time_pairs, vfunc):
-        """Temporally average data and get unique flags in the valid times (temporally averaged)
+        """
+        Temporally average data and get unique flags in the valid times (temporally averaged)
 
         Parameters
         ----------
@@ -471,7 +479,8 @@ class Actris:
         return station_averaged_data, station_flag_data, station_qa_data
 
     def is_wavelength_var(self, actris_parameter):
-        """Check if ACTRIS parameter depends on wavelength
+        """
+        Check if ACTRIS parameter depends on wavelength
 
         Parameters
         ----------
@@ -495,8 +504,9 @@ class Actris:
         return wavelength_var
 
     def get_files_info(self, files, var, path):
-        """Read variables, resolution, start date and end date from all files in ACTRIS server 
-        per variable.
+        """
+        Read variables, resolution, start date and end date from all files in ACTRIS server 
+        per variable
 
         Parameters
         ----------
@@ -569,7 +579,8 @@ class Actris:
 
 
     def get_var_in_file(self, ds, var, actris_parameter, ebas_component):
-        """Get variable name from dataset
+        """
+        Get variable name from dataset
 
         Parameters
         ----------
@@ -612,7 +623,8 @@ class Actris:
         return possible_vars, possible_var
 
     def select_station_file(self, urls, files_info):
-        """Select one station file from available ones, depending on 
+        """
+        Select one station file from available ones, depending on 
         statistics, data level and revision date
 
         Parameters
@@ -694,7 +706,8 @@ class Actris:
         return url
 
     def str_to_nan(self, val):
-        """Detect strings that only contain commas
+        """
+        Detect strings that only contain commas
 
         Parameters
         ----------
@@ -713,7 +726,8 @@ class Actris:
         return False
 
     def read_data(self, args):
-        """Read data for one station and extract valuable information
+        """
+        Read data for one station and extract valuable information
 
         Parameters
         ----------
@@ -933,7 +947,8 @@ class Actris:
 
     def init_shared_vars_read_data(self, shared_data, shared_flag_data, shared_qa_data, shared_metadata, 
                                    data_shape):
-        """Initialise shared arrays across processes
+        """
+        Initialise shared arrays across processes
 
         Parameters
         ----------
@@ -983,7 +998,8 @@ class Actris:
             return flags_dict[str(int(flag))]["GHOST_decreed_validity"][0]
 
     def get_metadata(self, doi):
-        """Get metadata dictionary from DOI
+        """
+        Get metadata dictionary from DOI
 
         Parameters
         ----------
@@ -1011,7 +1027,8 @@ class Actris:
         return metadata
 
     def get_data(self, files, var, actris_parameter, target_start_date, target_end_date, files_info):
-        """Read variable and metadata data standarising dimensions
+        """
+        Read variable and metadata data standarising dimensions
 
         Parameters
         ----------
@@ -1222,7 +1239,8 @@ class Actris:
         return combined_ds
 
     def get_files_to_download(self, target_start_date, target_end_date, var):
-        """Get filenames that should be downloaded
+        """
+        Get filenames that should be downloaded
 
         Parameters
         ----------
@@ -1260,9 +1278,10 @@ class Actris:
         return paths
 
     def download_actris_data(self):
-        """Download ACTRIS data
         """
-        
+        Download ACTRIS data
+        """
+
         target_start_date = datetime.datetime(int(self.download_instance.start_date[:4]), 
                                               int(self.download_instance.start_date[4:6]), 
                                               int(self.download_instance.start_date[6:8]), 0)

@@ -10,13 +10,15 @@ CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
 def join(*args):
-    """Join paths making sure they are all in the right direction
+    """
+    Join paths making sure they are all in the right direction
     """
     return os.path.join(*args).replace("\\", "/")
 
 
 def deep_merge(dict1, dict2):
-    """Merge dictionaries recursively to avoid values getting replaced
+    """
+    Merge dictionaries recursively to avoid values getting replaced
 
     Parameters
     ----------
@@ -24,7 +26,12 @@ def deep_merge(dict1, dict2):
         First dictionary
     dict2 : dict
         Second dictionary
+
+    Returns
+    -------
+        Merged dictionary
     """
+
     for key, value in dict2.items():
         if key in dict1 and isinstance(dict1[key], dict) and isinstance(value, dict):
             # if both values are dictionaries merge them recursively
@@ -32,11 +39,13 @@ def deep_merge(dict1, dict2):
         else:
             # replace or add the value
             dict1[key] = value
+
     return dict1
 
 
 def expand_plot_characteristics(plot_characteristics, mode):
-    """Get values from active mode and expand generic plot characteristics
+    """
+    Get values from active mode and expand generic plot characteristics
 
     Parameters
     ----------
@@ -44,6 +53,11 @@ def expand_plot_characteristics(plot_characteristics, mode):
         Plot characteristics dictionary
     mode : str
         Active mode
+
+    Returns
+    -------
+    dict
+        Plot characteristics dictionary
     """
 
     keys_to_remove = ["dashboard", "report", "library", "tests"]
@@ -88,7 +102,8 @@ def expand_plot_characteristics(plot_characteristics, mode):
 
 
 def pad_array(arr, length, pad_value=np.nan):
-    """Pad array with pad value if its length is less than input length
+    """
+    Pad array with pad value if its length is less than input length
 
     Parameters
     ----------
@@ -111,6 +126,14 @@ def pad_array(arr, length, pad_value=np.nan):
 
 
 def get_machine():
+    """
+    Get machine where code is running
+
+    Returns
+    -------
+    str
+        Machine
+    """
 
     # return github machine if tests are running in actions
     if os.getenv("GITHUB_ACTIONS") == "true":
@@ -152,23 +175,49 @@ def get_machine():
     return machine
 
 class Tee:
-    """Class to show interpolation output in terminal from notebook"""
+    """
+    Class to show interpolation output in terminal from notebook
+    """
 
     def __init__(self, *streams):
+        """
+        Initialise the object
+
+        Parameters
+        ----------
+        *streams : file-like objects
+            One or more streams (e.g., sys.stdout, open file objects) where
+            output should be duplicated
+        """
+
         self.streams = streams
 
     def write(self, data):
+        """
+        Write data to all output streams
+
+        Parameters
+        ----------
+        data : str
+            The string to write to each stream
+        """
+
         for s in self.streams:
             s.write(data)
             s.flush()
 
     def flush(self):
+        """
+        Flush all output streams ensuring that any buffered output is written immediately
+        """
+
         for s in self.streams:
             s.flush()
 
 
 def get_standard_parameters_by_speci(speci, ghost_version):
-    """ Get GHOST standard parameters dictionary
+    """
+    Get GHOST standard parameters dictionary
 
     Parameters
     ----------
@@ -194,7 +243,8 @@ def get_standard_parameters_by_speci(speci, ghost_version):
 
 
 def unit_conversion(initial_units, final_units, standard_parameter_speci):
-    """ Use unit_converter class to return conversion object from initial to final units.
+    """
+    Use unit_converter class to return conversion object from initial to final units.
 
     Parameters
     ----------
@@ -275,8 +325,9 @@ def unit_conversion(initial_units, final_units, standard_parameter_speci):
 
 
 def get_conversion_factor(initial_units, final_units, standard_parameter_speci):
-    """ Get conversion factor to convert from initial to final units.
-        Convenience wrapper for unit_conversion function.
+    """
+    Get conversion factor to convert from initial to final units.
+    Convenience wrapper for unit_conversion function.
 
     Parameters
     ----------
@@ -298,8 +349,9 @@ def get_conversion_factor(initial_units, final_units, standard_parameter_speci):
 
 
 def get_standard_units(initial_units, standard_parameter_speci):
-    """ Get Standarsised units for given initial units.
-        Convenience wrapper for unit_conversion function.
+    """
+    Get standardised units for given initial units.
+    Convenience wrapper for unit_conversion function.
 
     Parameters
     ----------
