@@ -29,6 +29,7 @@ from configuration import ProvConfiguration, load_conf
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 temporal_resolution_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'temporal_resolution_map.yaml')))
+interp_print_variables = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'interpolation_fields.yaml')))
 
 class SubmitInterpolation(object):
     """ Class that handles the interpolation submission. """
@@ -108,15 +109,6 @@ class SubmitInterpolation(object):
 
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         provconf.check_validity()
-
-        # TODO Hardcoded
-        interp_print_variables = ['ghost_version', 'start_date', 'end_date', 'experiments', 
-                                  'species', 'network', 'resolution', 'model_resolution', 'forecast',
-                                  'interp_spinup_timesteps', 'interp_model_downsampling',
-                                  'interp_model_upsampling', 'interp_n_neighbours', 
-                                  'interp_reverse_vertical_orientation', 'interp_chunk_size', 
-                                  'interp_job_array_limit', 'exp_root', 'ghost_root', 'nonghost_root', 
-                                  'exp_to_interp_root', 'interp_multiprocessing']
 
         # print variables used, if all species are used print "All Species"        
         print("\nVariables used for the interpolation:\n")
