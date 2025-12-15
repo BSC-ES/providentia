@@ -293,6 +293,9 @@ class Cams:
         output_file = Dataset(output_filepath, 'w', format="NETCDF4") 
         output_file.set_auto_mask(True)	
 
+        # change the last downloaded file
+        self.download_instance.latest_nc_file_path = output_filepath
+
         for input_dim_name, output_dim_name in cams_providentia_map.items():
             # skip single species
             if output_dim_name == "level" and ('single' in cams_variables_level[url] and cams_species in cams_variables_level[url]['single']):
@@ -591,9 +594,6 @@ class Cams:
                     if not initial_check:
                         self.print_request(cams_dict['dataset'], request)
 
-                    # change last downloaded file so in case there was a keyboard interrupt not remove the last file
-                    self.download_instance.latest_nc_file_path = "/path/to/file"
-
                     # make the request
                     if not initial_check:
                         try:
@@ -667,7 +667,7 @@ class Cams:
                                             domain, resolution, final_path, cams_species, url)
                         
                         # change the last downloaded file
-                        self.download_instance.latest_nc_file_path = final_path
+                        self.download_instance.latest_nc_file_path = "/path/to/file"
 
                     # add one day to the date
                     current_cams_date = next_cams_date + timedelta(days=1)    
