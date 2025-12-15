@@ -544,16 +544,17 @@ def export_configuration(prv, cname, separator="||"):
     if prv.mode not in ['report', 'library']:
         if prv.le_minimum_value.text() == '' and  prv.le_minimum_value.text() == '':
             raise Exception("Error: No data available for writing. Please click on READ before trying to save any file.")
-    
+      
     # load initialisation defaults
-    init_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'init_prov_dev.yaml')))
+    init_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'init.yaml')))
     # load variable defaults
-    var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'prov_defaults.yaml')))
+    var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'defaults.yaml')))
     # load modifiable variable defaults
-    modifiable_var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'init_prov.yaml')))
+    modifiable_var_defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'available_inputs.yaml')))
+    
     # merge defaults
     merged_defaults = init_defaults.copy()
-    merged_defaults.update(var_defaults)
+    merged_defaults.update(var_defaults[prv.mode])
     merged_defaults.update(modifiable_var_defaults)
 
     # ensure cname has correct extension

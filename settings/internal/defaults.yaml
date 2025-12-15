@@ -1,0 +1,66 @@
+base_defaults: &base_defaults
+  network:
+  species:
+  resolution:
+  start_date:
+  end_date:
+  statistic_mode: Temporal|Spatial
+  statistic_aggregation:
+    Temporal|Spatial: Median
+    Spatial|Temporal: Median
+    Flattened: ""
+  periodic_statistic_mode: Independent
+  periodic_statistic_aggregation: Median
+  timeseries_statistic_aggregation: Median
+  ensemble:
+    - allmembers
+
+dashboard:
+  <<: *base_defaults
+  active_dashboard_plots:
+    - timeseries
+    - statsummary
+    - distribution
+    - periodic
+
+dashboard_empty:
+  <<: *base_defaults
+  network:
+    - EBAS
+  species:
+    - sconco3
+  resolution: hourly
+  start_date: "20180101"
+  end_date: "20190101"
+  active_dashboard_plots:
+    - timeseries
+    - statsummary
+    - distribution
+    - periodic
+
+report:
+  <<: *base_defaults
+
+library:
+  <<: *base_defaults
+
+interpolation:
+  network:
+  species:
+  resolution:
+  start_date:
+  end_date:
+  experiments:
+  ensemble:
+    - "000"
+  interp_experiment_downsampling: mean
+  interp_experiment_upsampling: fill
+  interp_n_neighbours: 4
+
+download:
+  species:
+  resolution:
+  start_date:
+  end_date:
+  ensemble:
+    - "000"
