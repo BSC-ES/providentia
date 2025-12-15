@@ -7,14 +7,10 @@ import copy
 from dotenv import dotenv_values
 from getpass import getpass
 import paramiko 
-import requests
-from remotezip import RemoteZip
 import signal
 import subprocess
-import tarfile
 import time
 from tqdm import tqdm
-import xarray as xr
 import yaml 
 
 from .actris import Actris
@@ -217,7 +213,10 @@ class Download(object):
                         # CAMS experiment
                         if experiment.startswith(tuple(cams_options.keys())):
                             self.cams = Cams(self)
-                            self.cams.download_cams_experiment(experiment)
+                            initial_check_nc_files = self.cams.download_cams_experiment(experiment, initial_check=True)
+                            files_to_download = self.select_files_to_download(initial_check_nc_files)
+                            if not initial_check_nc_files or files_to_download:
+                                self.cams.download_cams_experiment(experiment, initial_check=False, files_to_download=files_to_download)
                         # BSC machines
                         else:
                             download_experiment_fun = self.download_experiment if self.interpolated else self.download_non_interpolated_experiment

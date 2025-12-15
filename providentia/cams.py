@@ -72,7 +72,7 @@ class Cams:
 
         return minstart, maxend
         
-    def control_dates(self, url, cams_dict):
+    def control_dates(self, url, cams_dict, initial_check=False):
         # check whether end date is bigger than start date, if not, return
         if int(self.download_instance.start_date) >= int(self.download_instance.end_date):
             msg = f'Start date ({self.download_instance.start_date}) exceeds end date ({self.download_instance.end_date}).'
@@ -92,7 +92,7 @@ class Cams:
         # if the minimum date is over the end date
         if min_start_date > cams_end_date or max_end_date < cams_start_date:
             msg = f"The selected dates are unavailable. Please choose dates between {min_start_date.strftime('%Y-%m-%d')} and {max_end_date.strftime('%Y-%m-%d')}."
-            show_message(self.download_instance, msg)
+            show_message(self.download_instance, msg, deactivate=initial_check)
             return None, None
 
         # check if the start date is within limits
@@ -107,7 +107,7 @@ class Cams:
 
     # TODO check that message in stream does not get repeated in the loop
     # TODO check if it is plaussible to keep this code as a separate function since there is a continue
-    def create_request(self, cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, exp_id):
+    def create_request(self, cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, exp_id, initial_check=False):
         # create the request
         request = {"variable" : cams_species}
 
@@ -131,7 +131,7 @@ class Cams:
             # check whether the stream is available for the year
             if stream not in cams_stream[request["year"]]:
                 msg = f"The current stream '{stream}' is not available for the current date: {request['month']}-{request['year']}. Continuing...."          
-                show_message(self.download_instance, msg)
+                show_message(self.download_instance, msg, deactivate=initial_check)
                 # continue
                 
             request["type"] = stream
@@ -186,14 +186,14 @@ class Cams:
             self.download_instance.logger.error("Error: Cannot proceed without '.cdsapirc'. CAMS experiment data download requires this file.")
             sys.exit(1)
 
-    def get_experiment(self, cams_dict, u_count, config_expid, dataset, ensemble_options):
+    def get_experiment(self, cams_dict, u_count, config_expid, dataset, ensemble_options, initial_check=False):
         # determine experiment ID or stream
         exp_id, stream = None, None
         
         if u_count == 1: # e.g. cams_forecast
             if 'models' in cams_dict:
                 msg = f"The experiment '{config_expid}' is missing the model. Please add one (e.g., '{config_expid}_ensemble')."
-                show_message(self.download_instance, msg)
+                show_message(self.download_instance, msg, deactivate=initial_check)
                 return None, None, True
 
         elif u_count == 2:
@@ -202,19 +202,19 @@ class Cams:
 
             if cams_dict['stream'] is True and 'models' in cams_dict: # e.g. cams_reanalysis_ensemble-regional
                 msg = f"The '{dataset}' dataset needs a model and a stream. E.g. 'cams_reanalysis_ensemble_interim')."    
-                show_message(self.download_instance, msg)
+                show_message(self.download_instance, msg, deactivate=initial_check)
                 return None, None, True
             elif 'models' in cams_dict: # e.g. cams_analysis_ensemble
                 exp_id = last_element
                 # make sure the experiment is available in the dataset
                 if exp_id not in cams_dict["models"]:
                     msg = f"Cannot find the {exp_id} model in the '{dataset}' dataset."    
-                    show_message(self.download_instance, msg)
+                    show_message(self.download_instance, msg, deactivate=initial_check)
                     return None, None, True
             else:
                 # if there are three elements and they
                 msg = f"The '{dataset}' dataset does not admit models or streams."    
-                show_message(self.download_instance, msg)
+                show_message(self.download_instance, msg, deactivate=initial_check)
                 return None, None, True
                 
         elif u_count == 3:
@@ -222,7 +222,7 @@ class Cams:
             if not (cams_dict['stream'] is True and 'models' in cams_dict): 
                 # if there are three elements and they
                 msg = f"The '{dataset}' dataset does not admit models and streams, change the experiment in the configuration file."    
-                show_message(self.download_instance, msg)
+                show_message(self.download_instance, msg, deactivate=initial_check)
                 return None, None, True
             
             # extract the last two elements
@@ -231,13 +231,13 @@ class Cams:
             # make sure the experiment is available in the dataset
             if exp_id not in cams_dict["models"]:
                 msg = f"Cannot find the {exp_id} model in the '{dataset}' dataset."    
-                show_message(self.download_instance, msg)
+                show_message(self.download_instance, msg, deactivate=initial_check)
                 return None, None, True
             
             # make sure the stream is valid
             if stream not in ['validated','interim']:
                 msg = f"'{stream}' is not a valid stream. Availabe streams: validated, interim."    
-                show_message(self.download_instance, msg)
+                show_message(self.download_instance, msg, deactivate=initial_check)
                 return None, None, True
             
             # add reanalysis sufix to the stream
@@ -246,7 +246,7 @@ class Cams:
         # get error if it does not get any of the conditions
         else:
             msg = f"The '{config_expid}' format is not valid."    
-            show_message(self.download_instance, msg)
+            show_message(self.download_instance, msg, deactivate=initial_check)
             return None, None, True
 
         # only ensemble options allmembers and 000 are valid
@@ -254,7 +254,7 @@ class Cams:
             msg = (
             f"The current ensemble option '{ensemble_options}' is not valid for the CAMS '{dataset}' dataset."
             f"It must be '000' or 'allmembers'.")            
-            show_message(self.download_instance, msg)
+            show_message(self.download_instance, msg, deactivate=initial_check)
             return None, None, True
         
         return exp_id, stream, False
@@ -436,10 +436,11 @@ class Cams:
         # close original dataset
         input_file.close()   
 
-    def download_cams_experiment(self, experiment): 
-        # print current_experiment
-        self.download_instance.logger.info('\n'+'-'*40)
-        self.download_instance.logger.info(f"\nDownloading {experiment} experiment data from the Atmosphere Data Store...")
+    def download_cams_experiment(self, experiment, initial_check, files_to_download=None): 
+        if not initial_check:
+            # print current_experiment
+            self.download_instance.logger.info('\n'+'-'*40)
+            self.download_instance.logger.info(f"\nDownloading {experiment} experiment data from the Atmosphere Data Store...")
 
         # create cdsapirc file in case it was not created
         cdsapirc_path = join(os.getenv("HOME"),'.cdsapirc')
@@ -463,7 +464,7 @@ class Cams:
             msg = (
             f"The current domain '{domain}' is not valid for the CAMS dataset."
             f"It must be '{possible_domains}'.")            
-            show_message(self.download_instance, msg)
+            show_message(self.download_instance, msg, deactivate=initial_check)
             return
 
         # get the dictionary with the dataset characteristics
@@ -491,13 +492,16 @@ class Cams:
         if cams_dict['lookahead_days'] > 0:
             msg = f"Model data will be downloaded {cams_dict['lookahead_days']} day(s) in advance relative to the configured date."
             show_message(self.download_instance, msg)
+        
+        # initialise list with all the nc files to be downloaded
+        initial_check_nc_files = []
 
         # iterate through the species
         for species in self.download_instance.species: 
             # check if species is in the ghost_cams_variables file
             if species not in ghost_cams_variables:
                 msg = f"The species '{species}' is not available in CAMS."
-                show_message(self.download_instance, msg)
+                show_message(self.download_instance, msg, deactivate=initial_check)
                 continue
         
             # get the species in the cams vocabulary
@@ -506,13 +510,13 @@ class Cams:
             # check if the mapped species are available in the dataset
             if cams_species not in cams_dict['variable']:
                 msg = f"Mapped species '{cams_species}' for input species '{species}' is not available in the CAMS '{dataset}' dataset."          
-                show_message(self.download_instance, msg)
+                show_message(self.download_instance, msg, deactivate=initial_check)
                 continue
             
             # get the species' level
             level = 'multi' if cams_species in cams_variables_level[url]['multi'] else 'single'
 
-            # iterate throught the resolutions
+            # iterate through the resolutions
             for resolution in self.download_instance.resolution:
                 # get the resolution for the cams dataset
                 correct_resolution = cams_dict["resolution"][level] if type(cams_dict["resolution"]) == dict else cams_dict["resolution"]
@@ -521,7 +525,7 @@ class Cams:
                 if resolution != correct_resolution:
                     msg = (
                     f"The current resolution '{resolution}' is not valid. It must be '{correct_resolution}'.")            
-                    show_message(self.download_instance, msg)
+                    show_message(self.download_instance, msg, deactivate=initial_check)
                     continue
 
                 # get directory structure
@@ -535,8 +539,9 @@ class Cams:
                 os.makedirs(final_dir, exist_ok=True)
 
                 # create client
-                self.download_instance.logger.info('')
-                client = cdsapi.Client(retry_max=1, quiet=True)
+                if not initial_check:
+                    self.download_instance.logger.info('')
+                    client = cdsapi.Client(retry_max=1, quiet=True)
 
                 # iterate through the dates
                 current_cams_date = cams_start_date
@@ -556,46 +561,49 @@ class Cams:
                     temp_path = join(temp_dir, 'zip_file')
 
                     # print the request
-                    self.print_request(cams_dict['dataset'], request)
+                    if not initial_check:
+                        self.print_request(cams_dict['dataset'], request)
 
                     # change last downloaded file so in case there was a keyboard interrupt not remove the last file
-                    self.download_instance.latest_nc_file_path = "/dummy/path/to/file"
+                    self.download_instance.latest_nc_file_path = "/path/to/file"
 
                     # make the request
-                    try:
-                        client.retrieve(dataset, request, target=temp_path)
-                    except requests.exceptions.HTTPError as err:
-                        # invalid credential on .cdsapirc
-                        if err.response.status_code == 401: 
-                            self.download_instance.logger.info(
-                                "\nBad request (401): Client Error. Invalid credentials in the .cdsapirc file. "
-                                "Removing authentication file...\n"
-                                "Please run the program again so Providentia can recreate the file automatically, "
-                                "or manually create a new .cdsapirc file by following the instructions at: "
-                                "https://cds.climate.copernicus.eu/how-to-api"
-                            )
-                            os.remove(cdsapirc_path)
-                            return
-                        # bad request
-                        if err.response.status_code == 400: 
-                            self.download_instance.logger.info("\nBad request (400): The server could not understand the request.")
-                            self.download_instance.logger.info(f"Details: {err}")
-                        # connection error
-                        elif err.response.status_code == 500: 
-                            self.download_instance.logger.info("\nServer error (500): The server encountered an error while processing the request.")
-                            self.download_instance.logger.info(f"Details: {err}")
-                            self.download_instance.logger.info("Please try again later.")
-                            return
-                        else:
-                            self.download_instance.logger.info(f"\nUnexpected error ({err.response.status_code}):")
-                            self.download_instance.logger.info(f"Details: {err}")
-                        # make the next download
-                        continue
+                    if not initial_check:
+                        try:
+                            client.retrieve(dataset, request, target=temp_path)
+                        except requests.exceptions.HTTPError as err:
+                            # invalid credential on .cdsapirc
+                            if err.response.status_code == 401: 
+                                self.download_instance.logger.info(
+                                    "\nBad request (401): Client Error. Invalid credentials in the .cdsapirc file. "
+                                    "Removing authentication file...\n"
+                                    "Please run the program again so Providentia can recreate the file automatically, "
+                                    "or manually create a new .cdsapirc file by following the instructions at: "
+                                    "https://cds.climate.copernicus.eu/how-to-api"
+                                )
+                                os.remove(cdsapirc_path)
+                                return
+                            # bad request
+                            if err.response.status_code == 400: 
+                                self.download_instance.logger.info("\nBad request (400): The server could not understand the request.")
+                                self.download_instance.logger.info(f"Details: {err}")
+                            # connection error
+                            elif err.response.status_code == 500: 
+                                self.download_instance.logger.info("\nServer error (500): The server encountered an error while processing the request.")
+                                self.download_instance.logger.info(f"Details: {err}")
+                                self.download_instance.logger.info("Please try again later.")
+                                return
+                            else:
+                                self.download_instance.logger.info(f"\nUnexpected error ({err.response.status_code}):")
+                                self.download_instance.logger.info(f"Details: {err}")
+                            # go to the next download
+                            continue
 
                     # extract file 
-                    with zipfile.ZipFile(temp_path, 'r') as zip_ref:
-                        zip_file_name = zip_ref.namelist()[0]
-                        zip_ref.extractall(temp_dir)
+                    if not initial_check:
+                        with zipfile.ZipFile(temp_path, 'r') as zip_ref:
+                            zip_file_name = zip_ref.namelist()[0]
+                            zip_ref.extractall(temp_dir)
 
                     # iterate through the different days of the month if forecast
                     if "file_format" in cams_dict:
@@ -604,19 +612,21 @@ class Cams:
                         all_dates = [current_cams_date]
 
                     # split the forecast file
-                    if cams_dict["split"] is True:
-                        self.split_nc_file(zip_file_name, all_dates, cams_dict, temp_dir, prefix, domain, level)
+                    if not initial_check:
+                        if cams_dict["split"] is True:
+                            self.split_nc_file(zip_file_name, all_dates, cams_dict, temp_dir, prefix, domain, level)
                         
                     # iterate through all dates to format each of the day files
                     for date in all_dates:
-
-                        # get the file format
-                        if "file_format" in cams_dict:
-                            zip_file_name = cams_dict["file_format"].replace("yyyy", f"{date.year:04d}") \
-                            .replace("mm", f"{date.month:02d}") \
-                            .replace("dd", f"{date.day:02d}")
-                        
-                        input_filepath = join(temp_dir,zip_file_name)
+                            
+                        if not initial_check:
+                            # get the file format
+                            if "file_format" in cams_dict:
+                                zip_file_name = cams_dict["file_format"].replace("yyyy", f"{date.year:04d}") \
+                                .replace("mm", f"{date.month:02d}") \
+                                .replace("dd", f"{date.day:02d}")
+                            
+                            input_filepath = join(temp_dir, zip_file_name)
 
                         # get filename depending whether it is a download for the whole month or just a day
                         date_format = '%Y%m' if cams_dict['forecast'] is False else '%Y%m%d'
@@ -626,8 +636,11 @@ class Cams:
                         final_path = join(final_dir, file_name)
                     
                         # format the cams files and move them to the corresponding folder
-                        self.format_data(input_filepath, final_path, species, prefix, 
-                                        domain, resolution, final_path, cams_species, url)
+                        if initial_check:
+                            initial_check_nc_files.append(final_path)
+                        else:
+                            self.format_data(input_filepath, final_path, species, prefix, 
+                                            domain, resolution, final_path, cams_species, url)
                         
                         # change the file to remove to the last downloaded
                         self.download_instance.latest_nc_file_path = final_path
@@ -639,3 +652,5 @@ class Cams:
 
                     # remove the temp directory tail
                     shutil.rmtree(temp_dir)
+                    
+        return initial_check_nc_files
