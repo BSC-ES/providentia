@@ -560,6 +560,33 @@ class Cams:
                     # get temporal path
                     temp_path = join(temp_dir, 'zip_file')
 
+                    # get filename depending whether it is a download for the whole month or just a day
+                    date_format = '%Y%m' if cams_dict['forecast'] is False else '%Y%m%d'
+
+                    # check if any of the files to download is in the current date range
+                    if files_to_download:
+                        date_in_range = False
+
+                        for file in files_to_download:
+                            # get date from the file path
+                            date_str = os.path.basename(file).split('_')[1].split('.')[0]
+                            date = datetime.strptime(date_str, date_format)
+
+                            # break if any file is in the date range
+                            if cams_dict['forecast']:
+                                in_range = current_cams_date <= date <= next_cams_date
+                            else:
+                                in_range = date.year == current_cams_date.year and date.month == current_cams_date.month
+                            
+                            if in_range:
+                                date_in_range = True
+                                break
+                        
+                        # continue if there is no file in the date range
+                        if not date_in_range:
+                            current_cams_date = next_cams_date + timedelta(days=1)
+                            continue
+
                     # print the request
                     if not initial_check:
                         self.print_request(cams_dict['dataset'], request)
@@ -596,7 +623,7 @@ class Cams:
                             else:
                                 self.download_instance.logger.info(f"\nUnexpected error ({err.response.status_code}):")
                                 self.download_instance.logger.info(f"Details: {err}")
-                            # go to the next download
+                            # next download
                             continue
 
                     # extract file 
@@ -627,25 +654,20 @@ class Cams:
                                 .replace("dd", f"{date.day:02d}")
                             
                             input_filepath = join(temp_dir, zip_file_name)
-
-                        # get filename depending whether it is a download for the whole month or just a day
-                        date_format = '%Y%m' if cams_dict['forecast'] is False else '%Y%m%d'
                         
                         # get final path
                         file_name = f"{species}_{date.strftime(date_format)}.nc"
                         final_path = join(final_dir, file_name)
                     
-                        # format the cams files and move them to the corresponding folder
+                        # format the cams files if they are not downloaded or user wants to overwrite
                         if initial_check:
                             initial_check_nc_files.append(final_path)
                         else:
                             self.format_data(input_filepath, final_path, species, prefix, 
                                             domain, resolution, final_path, cams_species, url)
                         
-                        # change the file to remove to the last downloaded
+                        # change the last downloaded file
                         self.download_instance.latest_nc_file_path = final_path
-
-                    self.download_instance.logger.info('')
 
                     # add one day to the date
                     current_cams_date = next_cams_date + timedelta(days=1)    
