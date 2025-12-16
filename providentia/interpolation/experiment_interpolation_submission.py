@@ -52,7 +52,7 @@ class SubmitInterpolation(object):
         # initialize commandline arguments, if given
         provconf = ProvConfiguration(self, **self.commandline_arguments)
 
-        print('\n')
+        print()
 
         # update variables from config file
         if self.config != '':  
@@ -144,8 +144,14 @@ class SubmitInterpolation(object):
         # create list of arguments to compare between the iterations
         last_arguments = None
 
+        # get all networks in case the asterisk was used
+        networks = self.get_all_networks() if self.network == ['*'] else self.network
+
+        # get all experiments in case the asterisk was used
+        experiments = self.get_all_experiments() if self.experiments == {'*': '*'} else self.experiments
+
         # iterate through desired experiment IDs and its types
-        for exp_dom_ens, alias in self.experiments.items():
+        for exp_dom_ens, alias in experiments.items():
 
             experiment_to_process, grid_type, ensemble = exp_dom_ens.split("-") 
 
@@ -195,28 +201,35 @@ class SubmitInterpolation(object):
             # get model bin edges
             r_edges, rho_bins = get_model_bin_radii(experiment_type)
 
-            # iterate through species to process
-            for speci_ii, speci_to_process in enumerate(self.species):
+            # get all resolutions in case the asterisk was used
+            resolutions = self.get_all_resolutions(experiment_to_process, grid_type) if self.resolution == ['*'] else self.resolution
 
-                original_speci_to_process = copy.deepcopy(speci_to_process)
+            # iterate through temporal_resolutions to output
+            for temporal_resolution_to_output in resolutions:
 
-                # iterate through temporal_resolutions to output
-                for temporal_resolution_to_output in self.resolution:
+                experiment_species_ensemblestat = []
 
-                    experiment_species_ensemblestat = []
+                # get priority resolutions to look for in model files based on output resolution
+                # look for same resolution first, then prioritise finer resolutions
+                # if output resolution is non-instantaneous, prioritise non-instanstaneous resolutions first,
+                # then instanstaneous
+                # if output resolution is instantaneous, prioritise instanstaneous resolutions first,
+                # then non-instanstaneous
 
-                    # get priority resolutions to look for in model files based on output resolution
-                    # look for same resolution first, then prioritise finer resolutions
-                    # if output resolution is non-instantaneous, prioritise non-instanstaneous resolutions first,
-                    # then instanstaneous
-                    # if output resolution is instantaneous, prioritise instanstaneous resolutions first,
-                    # then non-instanstaneous
+                resolutions_to_keep = temporal_resolution_map[temporal_resolution_to_output]
+                
+                # iterate through resolutions_to_keep until find one for which have speci_to_process (or mapped speci)
+                have_valid_resolution = False
+                for model_temporal_resolution in resolutions_to_keep:
 
-                    resolutions_to_keep = self.model_resolution if self.model_resolution else temporal_resolution_map[temporal_resolution_to_output]
+                    # get all species in case the asterisk was used
+                    species = self.get_all_species(experiment_to_process, grid_type, model_temporal_resolution) if self.species == ['*'] else self.species
 
-                    # iterate through resolutions_to_keep until find one for which have speci_to_process (or mapped speci)
-                    have_valid_resolution = False
-                    for model_temporal_resolution in resolutions_to_keep:
+                    # iterate through species to process
+                    for speci_ii, speci_to_process in enumerate(species):
+
+                        original_speci_to_process = copy.deepcopy(speci_to_process)
+
                         # test if have directory for current speci_to_process
                         if os.path.isdir("{}/{}/{}/{}".format(self.exp_dir, grid_type, model_temporal_resolution, speci_to_process)):
                             have_valid_resolution = True
@@ -307,7 +320,7 @@ class SubmitInterpolation(object):
                     if have_valid_resolution:
 
                         # iterate through observational networks to interpolate against
-                        for network_to_interpolate_against in self.network:
+                        for network_to_interpolate_against in networks:
 
                             # define if network is in GHOST format
                             self.reading_ghost = check_for_ghost(network_to_interpolate_against)
@@ -424,8 +437,8 @@ class SubmitInterpolation(object):
 
                                 # remove observational files outside date ranges 
                                 obs_files_ii = np.array([obs_files_ii for obs_files_ii, obs_files_date in enumerate(obs_files_dates) 
-                                                        if ((int(obs_files_date) >= int(self.start_date)) 
-                                                            and (int(obs_files_date) < int(self.end_date)))])       
+                                                        if ((self.start_date == "*" or int(obs_files_date) >= int(self.start_date)) 
+                                                            and (self.end_date == "*" or int(obs_files_date) < int(self.end_date)))])
                                 if len(obs_files_ii) == 0:
                                     obs_files = []
                                     obs_files_dates = []
@@ -435,8 +448,8 @@ class SubmitInterpolation(object):
 
                                 # remove experiment files outside date ranges 
                                 exp_files_ii = np.array([exp_files_ii for exp_files_ii, exp_files_date in enumerate(exp_files_dates) 
-                                                        if ((int(exp_files_date) >= int(self.start_date)) 
-                                                            and (int(exp_files_date) < int(self.end_date)))])      
+                                                        if ((self.start_date == "*" or int(exp_files_date) >= int(self.start_date)) 
+                                                            and (self.end_date == "*" or int(exp_files_date) < int(self.end_date)))])
                                 if len(exp_files_ii) == 0:
                                     exp_files = []
                                     exp_files_dates = []
@@ -454,7 +467,7 @@ class SubmitInterpolation(object):
                                 # create Providentia experiment code (expid-region-ensembleoption)
                                 prov_exp_code = '{}-{}-{}'.format(experiment_to_process, grid_type, 
                                                                 available_ensemble)
-       
+        
                                 # create directories to store slurm output/error logs for interpolation task of 
                                 # specific combination of iterated variables (if does not already exist)
                                 if not os.path.exists('{}/{}/{}/{}/{}'.format(self.interpolation_log_dir, 
@@ -1027,7 +1040,6 @@ class SubmitInterpolation(object):
 
         return max_worker_mem_gb
                 
-
     def guess_pool_workers(self):
         """
         Estimate a safe number of pool workers considering expected job resource usage.
@@ -1091,7 +1103,7 @@ class SubmitInterpolation(object):
         """Wait until system resources are below thresholds, then run the job."""
 
         # print for debugging
-        #print(f"[JOB INIT] Preparing to run: {cmd}", flush=True)
+        # print(f"[JOB INIT] Preparing to run: {cmd}", flush=True)
 
         while True:
             cpu = psutil.cpu_percent(interval=None) / 100.0
@@ -1112,7 +1124,6 @@ class SubmitInterpolation(object):
             if overload <= 1.0:
                 break
 
-            print('system overloaded', flush=True)
             time.sleep(check_interval)  # Wait and retry
 
         # stagger to avoid spikes
@@ -1134,7 +1145,102 @@ class SubmitInterpolation(object):
             error = result.stderr
             if error == '':
                 error = 'Unknown error'
-            print(f"Error in submission using the arguments: {result.args[3:-1]}: {error}", flush=True)
+            print(f"Error in submission using the following arguments: {result.args[3:-1]}: {error}", flush=True)
+
+    def get_all_experiments(self):
+        experiments = []
+
+        # from interp_experiments (remothe machine)
+        if self.machine != "local":
+            for experiment_dict in interp_experiments.values():
+                for exp_id in experiment_dict['experiments']:
+                    for temp_exp_dir in experiment_dict["paths"]:
+                        exp_to_interp_path = join(temp_exp_dir, exp_id)
+                        if os.path.exists(exp_to_interp_path):
+                            for dom in os.listdir(exp_to_interp_path):
+                                experiments.append(f"{exp_id}-{dom}-{self.default_values['ensemble'][0]}")
+
+        # from data_paths (local and remote machine)
+        for exp_id in os.listdir(self.exp_to_interp_root):
+            if not exp_id.startswith("."):
+                exp_to_interp_path = join(self.exp_to_interp_root, exp_id)
+                for dom in os.listdir(exp_to_interp_path):
+                    experiments.append(f"{exp_id}-{dom}-{self.default_values['ensemble'][0]}")
+
+        return dict(zip(experiments, experiments))
+    
+    def get_all_resolutions(self, exp_id, domain):
+        resolutions = []
+
+        # from interp_experiments (remothe machine)
+        if self.machine != "local":
+            for experiment_dict in interp_experiments.values():
+                if exp_id in experiment_dict['experiments']:
+                    for temp_exp_dir in experiment_dict["paths"]:
+                        domain_dir = join(temp_exp_dir, exp_id, domain)
+                        if os.path.exists(domain_dir):
+                            resolutions += os.listdir(domain_dir)
+        
+        # from data_paths (local and remote machine)
+        domain_dir = join(self.exp_to_interp_root, exp_id, domain)
+        if os.path.exists(domain_dir):
+            resolutions += os.listdir(domain_dir)
+
+        return resolutions
+    
+    def get_all_species(self, exp_id, domain, resolution):
+        species = []
+
+        # from interp_experiments (remothe machine)
+        if self.machine != "local":
+            for experiment_dict in interp_experiments.values():
+                if exp_id in experiment_dict['experiments']:
+                    for temp_exp_dir in experiment_dict["paths"]:
+                        resolution_dir = join(temp_exp_dir, exp_id, domain, resolution)
+                        if os.path.exists(resolution_dir):
+                            species += os.listdir(resolution_dir)
+        
+        # from data_paths (local and remote machine)
+        resolution_dir = join(self.exp_to_interp_root, exp_id, domain, resolution)
+        if os.path.exists(resolution_dir):
+            species += os.listdir(resolution_dir)
+
+        return species
+    
+    def get_all_networks(self):
+        if self.network_type:
+            # exit if the value is neither GHOST or non-GHOST
+            network_type = str(self.network_type).lower()
+            if network_type not in ['ghost', 'non-ghost']:
+                error = f"Error: Invalid 'network_type': '{self.network_type}'. Expected 'ghost' or 'non-ghost'."
+                self.logger.error(error)
+                sys.exit(1)
+
+            self.reading_ghost = network_type == 'ghost'  
+        else:
+            # get user input to know which kind of network wants
+            while True:
+                download_source = input("\nDo you want to interpolate all the GHOST networks? (Otherwise all the non-GHOST networks will be interpolated) ([y]/n): ").lower()
+                if download_source in ['','y','n']:
+                    break
+            
+            # get the boolean value from the answer of the user
+            self.reading_ghost = download_source in ['','y']
+        
+        networks = []
+
+        if self.reading_ghost:
+            # from data_paths (local and remote machine)
+            if os.path.exists(self.ghost_root):
+                networks = os.listdir(self.ghost_root)
+        else:
+            # from data_paths (local and remote machine)
+            if os.path.exists(self.nonghost_root):
+                for dir1 in os.listdir(self.nonghost_root):
+                    for dir2 in os.listdir(join(self.nonghost_root, dir1)):
+                        networks.append(f"{dir1}/{dir2}")
+
+        return networks
 
 def main(**kwargs):
 

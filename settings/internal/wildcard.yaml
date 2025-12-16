@@ -1,0 +1,17 @@
+dashboard: []
+report: []
+library: []
+interpolation:
+  - network
+  - experiments
+  - species
+  - resolution
+  - end_date
+  - start_date
+download:
+  - network
+  - experiments
+  - species
+  - resolution
+  - end_date
+  - start_date

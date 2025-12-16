@@ -24,6 +24,21 @@ class ProvArgumentParser(object):
 
         try:
             self.parser = ArgumentParser(description='Main parser for Providentia.')
+            self.parser.add_argument("--download", "--dl",
+                                     dest="download",
+                                     default=False,
+                                     action='store_true',
+                                     help="run Providentia download mode")
+            self.parser.add_argument('--interpolation','--interp','--interpolate', 
+                                     dest="interpolation",
+                                     default=False,
+                                     action='store_true',
+                                     help='runs Providentia Interpolation') 
+            self.parser.add_argument("--report", "--reports", "--offline",
+                                     dest="report",
+                                     default=False,
+                                     action='store_true',
+                                     help="run Providentia report mode")
             self.parser.add_argument('-V', '--version', action='version',
                                      version=providentia.__version__,
                                      help="returns Providentia version number and exit")
@@ -69,21 +84,6 @@ class ProvArgumentParser(object):
                                      default=False,
                                      action='store_true',
                                      help="Whether to disable dynamically creating observational filetrees")
-            self.parser.add_argument("--report", "--reports", "--offline",
-                                     dest="report",
-                                     default=False,
-                                     action='store_true',
-                                     help="run Providentia report mode")
-            self.parser.add_argument("--notebook", "--nb", "--jupyter",
-                                     help="opens a Jupyter Notebook session")
-            self.parser.add_argument("--download", "--dl",
-                                     dest="download",
-                                     default=False,
-                                     action='store_true',
-                                     help="run Providentia download mode")
-            self.parser.add_argument('--interpolation','--interp','--interpolate', 
-                                     action='store_true',
-                                     help='runs Providentia Interpolation') 
             self.parser.add_argument("--slurm_job_id",
                                      dest="slurm_job_id",
                                      help="id of the interpolation sbatch job")     
@@ -189,9 +189,6 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--remove_extreme_stations",
                                      dest="remove_extreme_stations",
                                      help="remove extreme stations using defined statistic limits")
-            self.parser.add_argument("--interpolated",
-                                     dest="interpolated",
-                                     help="indicates whether the experiment to be downloaded is interpolated")
             self.parser.add_argument("--report_type",
                                      dest="report_type",
                                      help="define plot options")
@@ -237,6 +234,21 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--plot_characteristics_filename",
                                      dest="plot_characteristics_filename",
                                      help="set filename for plot characteristics")
+            self.parser.add_argument("--dl_overwrite",
+                                     dest="dl_overwrite",
+                                     help="indicates whether to overwrite already downloaded files")
+            self.parser.add_argument("--dl_ghost_source",
+                                     dest="dl_ghost_source",
+                                     help="differentiates between Zenodo or HPC observations download")
+            self.parser.add_argument("--dl_interpolated",
+                                     dest="dl_interpolated",
+                                     help="differentiates between the interpolated and non-interpolated model download")
+            self.parser.add_argument("--dl_mode",
+                                     dest="dl_mode",
+                                     help="confirms the download of observations, models or both")
+            self.parser.add_argument("--network_type",
+                                     dest="network_type",
+                                     help="accompanied with the wildcard in observations indicates whether to use all GHOST, non-GHOST or both observations")
             self.parser.add_argument("--interp_n_neighbours",
                                      dest="interp_n_neighbours",
                                      help="number of N nearest neighbours used for interpolation")

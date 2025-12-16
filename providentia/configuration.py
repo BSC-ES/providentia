@@ -6,15 +6,10 @@ import copy
 from datetime import datetime
 import logging
 import os
-from packaging.version import Version
 import platform
 import math
-import socket
 import sys
-import time
 import yaml
-
-import matplotlib
 import numpy as np
 import pandas as pd
 
@@ -30,6 +25,7 @@ multispecies_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'inter
 mapping_species = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 modes = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'modes.yaml')))
+wildcard = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'wildcard.yaml')))
 
 # set current MACHINE
 MACHINE = get_machine()
@@ -63,8 +59,8 @@ class ProvConfiguration:
             setattr(self.read_instance, k, self.parse_parameter(k, val))
                 
         # set default values of the current mode
-        self.read_instance.default_values = defaults[self.read_instance.mode]
-
+        self.read_instance.default_values = defaults['dashboard_empty'] if self.read_instance.mode == 'dashboard' and self.read_instance.config == '' else defaults[self.read_instance.mode]
+        
         # for any passed command line arguments not in default Providentia variables, now set them to self
         for kwarg in kwargs:
             if (kwarg not in self.var_defaults):
@@ -86,10 +82,23 @@ class ProvConfiguration:
             value = True
         elif value == 'false':
             value = False
+        
+        # check wildcard '*'
+        elif value == '*' and key not in wildcard[self.read_instance.mode]:
+            error = f"Error: The wildcard ('*') in the '{key}' parameter is not allowed for the '{self.read_instance.mode}' mode."
+            self.read_instance.logger.error(error)
+            sys.exit(1)
+            
+        elif value != '*' and '*' in str(value).split(','):
+            error = f"Error: The wildcard ('*') in the '{key}' parameter does not allow multiple values."
+            self.read_instance.logger.error(error)
+            sys.exit(1)
 
-        # when the value is default then it is as if it was a blank value
-        if value == 'default':
-            return self.var_defaults[key]
+        # throw an error if default keyword is passed
+        elif value == 'default':
+            error = f"Error: 'default' was detected in '{key}'. 'default' is no longer an allowed keyword."
+            self.read_instance.logger.error(error)
+            sys.exit(1)
 
         # parse config file name
         if key == 'conf':
@@ -676,39 +685,41 @@ class ProvConfiguration:
     def decompose_experiments(self, deactivate_warning):
         """ Get experiment components (experiment-domain-ensemble-forecast) and fill the class variables with their value."""
 
-        # make sure there are experiments for interpolation mode
-        if (self.read_instance.mode == 'interpolation') and (len(self.read_instance.experiments) == 0):
-            error = 'Error: No experiments were provided in the configuration file.'
-            self.read_instance.logger.error(error)
-            sys.exit(1)
-
         # get separated experiment parts list
         split_experiments = [exp.split("-") for exp in self.read_instance.experiments]
 
-        # get default domain and ensemble
-        default_domain = defaults["domain"]
-        if self.read_instance.mode == 'interpolation':
-            default_ensemble = ["000"]
-        else:
-            default_ensemble = defaults["ensemble"]
+        # get default ensemble
+        default_ensemble = self.read_instance.default_values["ensemble"]
 
         # get original domain, ensemble and forecast as passed in the configuration file
         config_domain = copy.deepcopy(self.read_instance.domain) 
         config_ensemble = copy.deepcopy(self.read_instance.ensemble)
         config_forecast = copy.deepcopy(self.read_instance.forecast)
 
-        # if there's experiments, ask the user whether they want interpolated or non-interpolated
-        if self.read_instance.interpolated is None and (self.read_instance.experiments and self.read_instance.mode == 'download'):
-            interpolated = input("\nExperiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
-            while interpolated.lower() not in ['','y','n']:
-                interpolated = input("\nExperiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n): ")
+        # ignore the experiments if user wants to download observations
+        if self.read_instance.dl_mode == 'obs':
+            return
 
-            # set the interpolated parameter  
-            self.read_instance.interpolated = interpolated.lower() in ['','y']
+        if self.read_instance.experiments and self.read_instance.mode == 'download':
+
+            # set experiment to be non-interpolated if there is no network
+            if not self.read_instance.network:
+                self.read_instance.dl_interpolated = False
+                msg = "Experiments detected but no network specified, proceeding to download non-interpolated model output."
+                show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
+
+            # if there's experiments, ask the user whether they want interpolated or non-interpolated
+            if not isinstance(self.read_instance.dl_interpolated, bool):
+                while True:
+                    interpolated = input("\nModel data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded) ([y]/n): ").lower()
+                    if interpolated in ['','y','n']:
+                        break
+                # set the interpolated parameter  
+                self.read_instance.dl_interpolated = interpolated in ['','y']
 
         # get function for checking formating of experiment for current mode
         # if the current mode is interpolation or the experiment wanted to be downloaded is not interpolated
-        if self.read_instance.mode == 'interpolation' or (self.read_instance.mode == 'download' and self.read_instance.interpolated is False):
+        if self.read_instance.mode == 'interpolation' or (self.read_instance.mode == 'download' and self.read_instance.dl_interpolated is False):
             check_experiment_func = self.check_experiment_interpolation
         elif self.read_instance.mode == 'download':
             check_experiment_func = self.check_experiment_download
@@ -753,7 +764,7 @@ class ProvConfiguration:
                     exp_id = copy.deepcopy(experiment_part)
 
                 # have domain part?
-                elif experiment_part in default_domain: 
+                elif experiment_part in self.read_instance.available_domains: 
                     exp_dom = copy.deepcopy(experiment_part)
                 
                 # have forecast part?
@@ -789,12 +800,12 @@ class ProvConfiguration:
                 dom = copy.deepcopy(config_domain)
             # else no information for domain from domain or experiment fields, then set default value
             else:
-                dom = copy.deepcopy(default_domain)
+                dom = copy.deepcopy(self.read_instance.available_domains)
                        
             # throw error if ensemble has been defined in both ensemble and experiment fields
             if (exp_ens) and (config_ensemble):
                 error = f"Error: Unable to set 'ensemble' as {', '.join(config_ensemble)} because the "
-                error +=  f"experiment {self.read_instance.experiments[exp_ii]} already contains information about the ensemble."                  
+                error += f"experiment {self.read_instance.experiments[exp_ii]} already contains information about the ensemble."                  
                 self.read_instance.logger.error(error)
                 sys.exit(1)
             # elif if have ensemble information from experiment field, then use that
@@ -972,7 +983,6 @@ class ProvConfiguration:
         return exp_found
     
     # TODO use inheritance in the future 
-    # TODO add more checking, for now only this is enough
     def check_experiment_interpolation(self, experiment, deactivate_warning):     
         """ Checks if experiment, domain and ensemble combination works 
         for interpolation or the download of non-interpolated experiments
@@ -993,7 +1003,7 @@ class ProvConfiguration:
         experiment_exists = False
         msg = ""
 
-        # HPC machines download (copy) and hpc interpolation
+        # HPC machines download (copy) and HPC interpolation
         if self.read_instance.machine != "local":
             # search in interp_experiments
             for experiment_type, experiment_dict in interp_experiments.items():
@@ -1003,7 +1013,7 @@ class ProvConfiguration:
             
             msg += f"Cannot find the experiment ID '{expid}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
 
-            # hpc interpolation
+            # HPC interpolation only
             if experiment_exists is False and self.read_instance.mode == 'interpolation':
                 # search in hpc exp_to_interp_path
                 exp_to_interp_path = join(self.read_instance.exp_to_interp_root, expid)
@@ -1056,7 +1066,6 @@ class ProvConfiguration:
 
         return [experiment]
     
-    # TODO maybe remove this one and keep the download check since its much cleaner
     def check_experiment_download(self, experiment, deactivate_warning):
         """ Check individual experiment and get list of options."""
 
@@ -1171,32 +1180,37 @@ class ProvConfiguration:
             self.read_instance.non_default_fields_per_section = {
                 field_name:fields-set(self.var_defaults) 
                 for field_name, fields in self.read_instance.fields_per_section.items()}
-          
-        # check have network information, 
-        # if report, throw message, stating are using default instead
-        # in download mode of non interpolated experiments is allowed to not have network, so continue
-        if not self.read_instance.network and not (self.read_instance.mode == 'download' and not self.read_instance.interpolated):
-            if self.read_instance.mode == 'interpolation':
-                default = self.read_instance.ghost_available_networks
-            else:
-                default = defaults['network']
-            msg = "Network (network) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.network = default
+        
+        # assign defaults
+        for field, default in self.read_instance.default_values.items():
+            current_value = getattr(self.read_instance, field)
 
-        # check have species information, TODO REFACTOR INTERPOLATION STUFF
-        # if report, throw message, stating are using default instead
-        # in download mode is allowed to not pass any species, so continue
-        if (not self.read_instance.species and self.read_instance.mode not in ['interpolation', 'download']):
-            if self.read_instance.mode == 'interpolation':
-                default = self.read_instance.available_species
-            else:
-                default = defaults['species']
-            msg = "Species (species) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.species = default
+            # skip ensemble so it is done in decompose_experiment
+            if field == 'ensemble':
+                pass
+            
+            # ensure that statistic aggregation matches with the statistic_mode
+            elif field == 'statistic_aggregation': 
+                if not current_value or self.read_instance.statistic_mode != 'Flattened':
+                    setattr(self.read_instance, field, default[self.read_instance.statistic_mode])
 
-        # chech resolution
+            # set the defined defaults
+            elif not current_value:
+                if default:
+                    setattr(self.read_instance, field, default)
+                else:
+                    error = f"Error: '{field}' was not defined in the configuration file. It is mandatory for the '{self.read_instance.mode}' mode."
+                    self.read_instance.logger.error(error)
+                    sys.exit(1)
+
+            # check downsampling and upsampling
+            elif field == 'interp_model_downsampling' and current_value not in ['mean', 'median']:
+                setattr(self.read_instance, field, default)
+                
+            elif field == 'interp_model_upsampling' and current_value not in ['fill', 'gaps']:
+                setattr(self.read_instance, field, default)
+
+        # check resolution
         # if not interpolation or download, get first resolution in list
         if (',' in self.read_instance.resolution) and (self.read_instance.mode not in ['interpolation', 'download']):
             default = self.read_instance.resolution.split(',')[0]
@@ -1209,7 +1223,7 @@ class ProvConfiguration:
         # then duplicate respestive network/species
         # in download mode is allowed to not have a different number, so continue
         # TODO in download mode and interpolation separate this somehow.
-        if len(self.read_instance.network) != len(self.read_instance.species) and not (self.read_instance.mode == 'download' or self.read_instance.mode == 'interpolation'):
+        if len(self.read_instance.network) != len(self.read_instance.species) and not (self.read_instance.mode in ['download', 'interpolation']):
 
             # 1 network?
             if len(self.read_instance.network) == 1:
@@ -1247,7 +1261,7 @@ class ProvConfiguration:
 
         # if are using dashboard then just take first network/species pair, as multivar not supported yet
         if ((len(self.read_instance.network) > 1) and (len(self.read_instance.species) > 1) and 
-            (self.read_instance.mode not in ['interpolation', 'report', 'library', 'download', 'interpolation'])):
+            (self.read_instance.mode == 'dashboard')):
              
             msg = 'Multiple networks/species are not supported in the dashboard. First ones will be taken.'
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
@@ -1255,128 +1269,73 @@ class ProvConfiguration:
             self.read_instance.network = [self.read_instance.network[0]]
             self.read_instance.species = [self.read_instance.species[0]]
 
-        if self.read_instance.network:
+        if self.read_instance.network and self.read_instance.species:
             # initialise networkspeci as first network and species pair
             self.read_instance.networkspeci = '{}|{}'.format(self.read_instance.network[0],
                                                             self.read_instance.species[0]) 
-
-        # check have resolution information, TODO when refactoring init change this way of checking defaults
-        # if report, throw message, stating are using default instead
-        if (not self.read_instance.resolution and (self.read_instance.mode != 'download')):
-            if self.read_instance.mode == 'interpolation':
-                default = ["hourly", "hourly_instantaneous", "daily", "monthly"]
-            else:
-                default = defaults['resolution']
-            msg = "Resolution (resolution) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.resolution = default
 
         # set active resolution, resampling_resolution when set, otherwise resolution
         if self.read_instance.resampling_resolution != 'None':
             self.read_instance.active_resolution = self.read_instance.resampling_resolution
         else:
             self.read_instance.active_resolution = self.read_instance.resolution
+          
+        # check and format start_date and end_date
+        dates = ['start_date', 'end_date']
 
-        # check start_date format, TODO START DATE IS DIFFERENT IN INTERPOLATION (check in the refactoring)
-        # if report, throw message, stating are using default instead
-        if not self.read_instance.start_date:
-            if self.read_instance.mode == 'interpolation':
-                default = defaults['start_date'][:6]
+        for date_var_name in dates:
+            date = getattr(self.read_instance, date_var_name)
+            
+            # minimum/maximum dates
+            if date == '*':
+                pass
+            # YYYYMMDD
+            elif len(date) == 8:
+                if self.read_instance.mode == 'interpolation':
+                    setattr(self.read_instance, date_var_name, date[:-2])    
+            # YYYYMM
+            elif len(date) == 6:  
+                if self.read_instance.mode != 'interpolation':
+                    setattr(self.read_instance, date_var_name, date + "01")     
+            # throw error if format is not valid
             else:
-                default = defaults['start_date']
-            msg = "Start date (start_date) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.start_date = default
-        else:
-            len_start_date = len(self.read_instance.start_date)
-            if self.read_instance.mode == 'interpolation':
-                if len_start_date != 6:
-                    if len_start_date == 8:
-                        self.read_instance.start_date = self.read_instance.start_date[:-2]
-                        msg = "Start date (start_date) was defined as YYYYMMDD, changing it to YYYYMM. Using '{}'.".format(self.read_instance.start_date)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                    else:
-                        error = "Error: Format of Start date (start_date) not correct, please change it to YYYYMM."
-                        self.read_instance.logger.error(error)
-                        sys.exit(1)
-            else:
-                if len_start_date != 8:
-                    if len_start_date == 6:
-                        self.read_instance.start_date = self.read_instance.start_date + "01"
-                        msg = "Start date (start_date) was defined as YYYYMM, changing it to YYYYMMDD. Using '{}'.".format(self.read_instance.start_date)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                    else:
-                        error = "Error: The format of Start date (start_date) is not correct, please change it to YYYYMMDD."
-                        self.read_instance.logger.error(error)
-                        sys.exit(1)
-
-        # check end_date  format, TODO START DATE IS DIFFERENT IN INTERPOLATION (check in the refactoring)
-        # if report, throw message, stating are using default instead
-        if not self.read_instance.end_date:
-            if self.read_instance.mode == 'interpolation':
-                default = defaults['end_date'][:6]
-            else:
-                default = defaults['end_date']
-            msg = "End date (end_date) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.end_date = default
-        else:
-            len_end_date = len(self.read_instance.end_date)
-            if self.read_instance.mode == 'interpolation':
-                if len_end_date != 6:
-                    if len_end_date == 8:
-                        self.read_instance.end_date = self.read_instance.end_date[:-2]
-                        msg = "End Date (end_date) was defined as YYYYMMDD, changing it to YYYYMM. Using '{}'.".format(self.read_instance.end_date)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                    else:
-                        error = "Error: Format of End Date (end_date) not correct, please change it to YYYYMM."
-                        self.read_instance.logger.error(error)
-                        sys.exit(1)
-            else:
-                if len_end_date != 8:
-                    if len_end_date == 6:
-                        self.read_instance.end_date = self.read_instance.end_date + "01"
-                        msg = "End Date (end_date) was defined as YYYYMM, changing it to YYYYMMDD. Using '{}'.".format(self.read_instance.end_date)
-                        show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-                    else:
-                        error = "Error: The format of End Date (end_date) is not correct, please change it to YYYYMMDD."
-                        self.read_instance.logger.error(error)
-                        sys.exit(1)
-
-        # check have interp_n_neighbours information, TODO ONLY FOR INTERPOLATION
-        # if report, throw message, stating are using default instead
-        # TODO CHANGE THE MESSAGE WHEN ITS DEFAULT AND WHEN ITS BECAUSE I DIDNT PUT THE NAME
-        if self.read_instance.mode == 'interpolation' and not self.read_instance.interp_n_neighbours:
-            default = defaults['interp_n_neighbours']
-            msg = "Number of neighbours (interp_n_neighbours) was not defined in the configuration file. Using '{}' as default.".format(default)
-            show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
-            self.read_instance.interp_n_neighbours = default
-
-        # check have correct interp_model_downsampling information
-        if self.read_instance.mode == 'interpolation' and self.read_instance.interp_model_downsampling:
-            if self.read_instance.interp_model_downsampling not in ['mean','median']:
-                default = defaults['interp_model_downsampling']
-                error = "Error: interp_model_downsampling must be 'mean' or 'median'. Using '{}' as default.".format(default)
-                self.read_instance.logger.error(error) 
-
-        # check have correct interp_model_upsampling information
-        if self.read_instance.mode == 'interpolation' and self.read_instance.interp_model_upsampling:
-            if self.read_instance.interp_model_upsampling not in ['fill','gaps']:
-                default = defaults['interp_model_upsampling']
-                error = "Error: interp_model_upsampling must be 'fill' or 'gaps'. Using '{}' as default.".format(default)
-                self.read_instance.logger.error(error) 
+                error = f"Error: Invalid value or format for '{date_var_name}': '{date}'."
+                self.read_instance.logger.error(error)
+                sys.exit(1)
 
         # create empty directories for the observations and experiments
         if MACHINE == "local":
             for path in [self.read_instance.nonghost_root, self.read_instance.ghost_root, self.read_instance.exp_root, self.read_instance.exp_to_interp_root]:
                 if not os.path.exists(path):
                     os.makedirs(path)
+                    
+        # check for what to download if there's both networks and model output
+        if self.read_instance.network and self.read_instance.experiments and self.read_instance.mode == 'download':
+            valid_modes = ["both", "obs", "mod"]
+            
+            # validate and format correctly dl_mode
+            if self.read_instance.dl_mode:
+                mode = str(self.read_instance.dl_mode).lower()
+                if mode not in valid_modes:
+                    error = f"Error: Invalid 'dl_mode': '{self.read_instance.dl_mode}'. Expected 'both', 'obs' or 'mod'."
+                    self.logger.error(error)
+                    sys.exit(1)
+                self.read_instance.dl_mode = mode
 
+            # if not provided, ask user interactively
+            else:
+                while True:
+                    user_input = input("\nWhich type of data do you want to download? Observational, modelled or both? ([both]/obs/mod): ").lower()
+
+                    self.read_instance.dl_mode = user_input or "both"
+                    if self.read_instance.dl_mode in valid_modes:
+                        break
+                        
         # set expID, domain, ensemble, forecast from experiment name
         self.decompose_experiments(deactivate_warning)
 
         # before checking the experiment check that the remote download has the interpolated tag as False, if not exit
-        if self.read_instance.mode == 'download' and MACHINE in ["storage5", "nord3v2", "nord4"] and self.read_instance.interpolated is True:
+        if self.read_instance.mode == 'download' and MACHINE in ["storage5", "nord3v2", "nord4"] and self.read_instance.dl_interpolated is True:
             error = F"Error: Nothing from the {self.read_instance.section} section was copied to gpfs, change the interpolated field to 'False'."
             self.read_instance.logger.error(error)
             sys.exit(1)
@@ -1410,60 +1369,7 @@ class ProvConfiguration:
             # replace calibration factors by new dictionary
             self.read_instance.calibration_factor = calibration_factor_dict
 
-        # check have statistic_mode information,
-        # if report, throw message, stating are using default instead
-        # TODO not needed in interpolation 
-        if not self.read_instance.statistic_mode and self.read_instance.mode != 'interpolation':
-            default = defaults['statistic_mode']
-            self.read_instance.statistic_mode = default
-
-        # check have statistic_aggregation information,
-        # if report, throw message, stating are using default instead
-        # TODO not needed in interpolation 
-        if self.read_instance.mode != 'interpolation':
-            default = defaults['statistic_aggregation'][self.read_instance.statistic_mode]
-            if not self.read_instance.statistic_aggregation:  
-                self.read_instance.statistic_aggregation = default
-            # if statistic_aggregation is defined ensure that it matches with the statistic_mode
-            else:
-                if self.read_instance.statistic_mode == 'Flattened':
-                    self.read_instance.statistic_aggregation = default
-
-        # check have periodic_statistic_mode information,
-        # if report, throw message, stating are using default instead
-        # TODO not needed in interpolation 
-        if not self.read_instance.periodic_statistic_mode and self.read_instance.mode != 'interpolation':
-            default = defaults['periodic_statistic_mode']
-            self.read_instance.periodic_statistic_mode = default
-
-        # check have periodic_statistic_aggregation information,
-        # if report, throw message, stating are using default instead
-        # TODO not needed in interpolation 
-        if not self.read_instance.periodic_statistic_aggregation and self.read_instance.mode != 'interpolation':
-            default = defaults['periodic_statistic_aggregation']
-            self.read_instance.periodic_statistic_aggregation = default
-
-        # check have timeseries_statistic_aggregation information,
-        # if report, throw message, stating are using default instead
-        # TODO not needed in interpolation 
-        if not self.read_instance.timeseries_statistic_aggregation and self.read_instance.mode != 'interpolation':
-            default = defaults['timeseries_statistic_aggregation']
-            self.read_instance.timeseries_statistic_aggregation = default
-
-        # check have correct active_dashboard_plots information, 
-        # should have 4 plots if non-empty, throw error if using dashboard if not
-        if not self.read_instance.active_dashboard_plots:
-            default = defaults['active_dashboard_plots']
-            self.read_instance.active_dashboard_plots = default
-        # TODO: For Taylor diagrams, remove this piece of code when we stop using Matplotlib 3.3
-        else:
-            if Version(matplotlib.__version__) < Version("3.8"):
-                if 'taylor' in self.read_instance.active_dashboard_plots:
-                    error = 'It is not possible to create Taylor diagrams yet, please remove from settings/report_plots.yaml.'
-                    self.read_instance.logger.error(error)
-                    sys.exit(1)
-
-        if (len(self.read_instance.active_dashboard_plots) != 4) and (self.read_instance.mode not in ['report', 'library']):
+        if len(self.read_instance.active_dashboard_plots) != 4 and 'active_dashboard_plots' in self.read_instance.default_values:
             error = 'Error: there must be 4 "active_dashboard_plots"'
             self.read_instance.logger.error(error)
             sys.exit(1)
@@ -1480,8 +1386,8 @@ class ProvConfiguration:
         # remove any species for which there exists no data
         new_species = copy.deepcopy(self.read_instance.species)
         for speci_ii, speci in enumerate(self.read_instance.species): 
-            if '*' in speci:
-                # throw mapping error if species not ablet to be mapped
+            if speci != '*' and '*' in speci:
+                # throw mapping error if species not able to be mapped
                 if speci not in multispecies_map:
                     error = f'Error: not able to map species "{speci}".'
                     self.read_instance.logger.error(error)
@@ -1498,8 +1404,8 @@ class ProvConfiguration:
         self.read_instance.species = copy.deepcopy(new_species)
 
         # get species and filter species which are not on the current ghost version
-        invalid_species = set(self.read_instance.species) - set(self.read_instance.available_species)
-        invalid_filter_species = set(map(lambda x:x.split('|')[1], self.read_instance.filter_species)) - set(self.read_instance.available_species)                          
+        invalid_species = set(self.read_instance.species) - set(self.read_instance.available_species) - {'*'}
+        invalid_filter_species = set(map(lambda x:x.split('|')[1], self.read_instance.filter_species)) - set(self.read_instance.available_species) - {'*'}                          
         
         # check species, remove the ones that are not on the ghost version       
         if invalid_species:                                                            
@@ -1522,8 +1428,7 @@ class ProvConfiguration:
                 if filter_species.split('|')[1] in invalid_filter_species:
                     del self.read_instance.filter_species[filter_species]
 
-        # TODO change this in the refactoring, not do this in download mode
-        if self.read_instance.mode != 'download': 
+        if self.read_instance.mode not in ['download', 'interpolation']: 
             # create variable for all unique species (plus filter species)
             filter_species = []
             species_plus_filter_species = copy.deepcopy(self.read_instance.species)

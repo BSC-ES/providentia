@@ -45,8 +45,7 @@ class Download(object):
         self.prv_user = env.get("PRV_USER")
         self.prv_password = env.get("PRV_PWD")
 
-        # get user preference over GHOST download, overwrite and origin update (ACTRIS)
-        self.overwrite_choice = env.get("OVERWRITE")
+        # get origin update (ACTRIS)
         self.origin_update_choice = env.get("ORIGIN_UPDATE")
 
         # set timeout limit
@@ -125,38 +124,69 @@ class Download(object):
                     setattr(self, k, self.provconf.parse_parameter(k, val))
             
             # now all variables have been parsed, check validity of those, throwing errors where necessary
-            self.provconf.check_validity(deactivate_warning=True)
+            self.provconf.check_validity()
 
+            # TODO: make it work directly with the asterisk
+            # transform asterisk fields to empty since it was originally coded this way
+            for field in ['species', 'resolution']:
+                if getattr(self, field) == ['*']:
+                    setattr(self, field, '')
+
+            # TODO: remove the filters instead
+            # transform asterisk fields to a low and high date
+            for field, date_num in {'start_date' : '0', 'end_date' : '9'}.items():
+                if getattr(self, field) == '*':
+                    setattr(self, field, date_num * 8)
+            
             # from here generate control if user stopped execution
             signal.signal(signal.SIGINT, self.sighandler)
             
             # only the local download iterates through the networks
-            if self.machine in "local":
-                # if networks is none and is not the non interpolated mode, raise error
-                if not self.network and self.interpolated is True:
-                    error = "Error: No networks were passed."
-                    self.logger.error(error)
-                    sys.exit(1)
-
+            if self.machine in "local":                        
                 # networks
-                if self.network:
+                if self.network and self.dl_mode != 'mod':
 
                     if self.network == ["*"]:
-                        # get user input to know which kind of network wants
-                        download_source = input("\nDo you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n): ")
-                        while download_source.lower() not in ['','y','n']:
-                            download_source = input("\nDo you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n): ")
-                        self.reading_ghost = download_source.lower() in ['','y']
+                        if self.network_type:
+                            # exit if the value is neither BSC or zenodo
+                            network_type = str(self.network_type).lower()
+                            if network_type not in ['ghost', 'non-ghost']:
+                                error = f"Error: Invalid 'network_type': '{self.network_type}'. Expected 'ghost' or 'non-ghost'."
+                                self.logger.error(error)
+                                sys.exit(1)
+
+                            self.reading_ghost = network_type == 'ghost'  
+                        else:
+                            # get user input to know which kind of network wants
+                            while True:
+                                download_source = input("\nDo you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n): ").lower()
+                                if download_source in ['','y','n']:
+                                    break
+                            
+                            # get the boolean value from the answer of the user
+                            self.reading_ghost = download_source in ['','y']
 
                     # if there are GHOST networks, ask the user whether they want to download it from zenodo or HPC machines
                     if self.reading_ghost:
-                        # ask whether the user wants to download from the zenodo or bsc machine
-                        self.bsc_download = input("\nDo you want to download from the BSC remote machine? (Otherwise, GHOST data will be retrieved from Zenodo) ([y]/n): ")
-                        while self.bsc_download.lower() not in ['','y','n']:
-                            self.bsc_download = input("\nDo you want to download from the BSC remote machine? (Otherwise, GHOST data will be retrieved from Zenodo) ([y]/n): ")
+                        if not self.dl_ghost_source:
+                            # ask whether the user wants to download from the zenodo or bsc machine
+                            while True: 
+                                dl_ghost_source = input("\nDo you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo) ([y]/n): ").lower()
+                                if dl_ghost_source in ['','y','n']:
+                                    break
+
+                            self.dl_ghost_source = 'bsc' if dl_ghost_source in ['', 'y'] else 'zenodo'
+                        else:
+                            # exit if the value is neither bsc or zenodo
+                            if str(self.dl_ghost_source).lower() not in ['bsc', 'zenodo']:
+                                error = f"Error: Invalid 'dl_ghost_source': '{self.dl_ghost_source}'. Expected 'bsc' or 'zenodo'."
+                                self.logger.error(error)
+                                sys.exit(1)
+
+                            self.dl_ghost_source = self.dl_ghost_source.lower()
 
                         # initialise the Zenodo object if user chose a Zenodo download
-                        if self.bsc_download.lower() not in ['', 'y']:
+                        if self.dl_ghost_source == 'zenodo':
                             self.zenodo = Zenodo(self)        
 
                     # get all networks if wildcard is passed
@@ -172,7 +202,7 @@ class Download(object):
 
                     # get the download function 
                     download_fun = (
-                    self.download_ghost_network_sftp if self.reading_ghost and self.bsc_download.lower() in ['', 'y']
+                    self.download_ghost_network_sftp if self.reading_ghost and self.dl_ghost_source == 'bsc'
                     else self.zenodo.download_ghost_network_zenodo if self.reading_ghost
                     else self.download_nonghost_network)
                     
@@ -202,7 +232,7 @@ class Download(object):
             if self.experiments == {'*' : '*'}:
                 self.get_all_experiments()
 
-            if self.experiments:
+            if self.experiments and self.dl_mode != 'obs':
                 # remote machine experiment download
                 if self.machine in ["storage5", "nord3v2", "nord4"]:
                     # get function to download experiment depending on the configuration file field
@@ -219,7 +249,7 @@ class Download(object):
                                 self.cams.download_cams_experiment(experiment, initial_check=False, files_to_download=files_to_download)
                         # BSC machines
                         else:
-                            download_experiment_fun = self.download_experiment if self.interpolated else self.download_non_interpolated_experiment
+                            download_experiment_fun = self.download_experiment if self.dl_interpolated else self.download_non_interpolated_experiment
                     
                             # iterate the experiments download
                             for experiment in self.experiments.keys():
@@ -239,9 +269,13 @@ class Download(object):
             self.domain = []
             self.ensemble = []
 
+            # reinitialise default configuration variables
+            # modified by commandline arguments, if given
+            self.provconf = ProvConfiguration(self, **self.commandline_arguments)
+
         # show message in case experiments or observations were ignored
         if self.overwritten_files_flag == True:
-            self.logger.info("\nSome experiments/observations were found but were not downloaded because the OVERWRITE option is set to 'n'.")
+            self.logger.info("\nSome experiments/observations were found but were not downloaded because the user chose not to overwrite or because 'dl_overwrite' is set to False.")
 
         if self.machine == "local":
             # close connection, if it exists
@@ -279,8 +313,7 @@ class Download(object):
  
                 # connect with the new machine
                 return self.connect()
-            
-            # no machines left to try, exit
+            # if it has been changed already, exit
             else:
                 error = "Error: None of the machines are working right now. Try later."
                 self.logger.error(error)
@@ -345,19 +378,19 @@ class Download(object):
         if (prv_user is not None) or (prv_password is not None):
             # ask user if they want their credentials saved
             while True:
-                remind_txt = input("\nRemember credentials ([y]/n)? ")
+                remind_txt = input("\nRemember credentials ([y]/n)? ").lower()
                 if remind_txt in ['y', 'n', '']:
                     break
             
             # create .env with the input user and/or password
-            if remind_txt.lower() in ['y', '']:
+            if remind_txt in ['y', '']:
                 with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
                     if prv_user is not None:
                         f.write(f"PRV_USER={self.prv_user}\n")
                     if prv_password is not None:
                         f.write(f"PRV_PWD={self.prv_password}\n")
 
-                    self.logger.info(f"\nRemote machine credentials saved on {join(PROVIDENTIA_ROOT, '.env')}\n")
+                self.logger.info(f"\nRemote machine credentials saved on {join(PROVIDENTIA_ROOT, '.env')}")
                     
     def select_files_to_download(self, nc_files_to_download):
         """ Returns the files that are not already downloaded. """
@@ -374,13 +407,18 @@ class Download(object):
             # if there was any file downloaded before the execution    
             if downloaded_before_execution_files:
                 # make the user choose between overwriting or not overwriting
-                if self.overwrite_choice not in ['y','n']:
+                if not isinstance(self.dl_overwrite, bool):
                     # ask if user wants to overwrite
-                    while self.overwrite_choice not in ['y','n']:
-                        self.overwrite_choice = input("\nThere are some files that were already downloaded in a previous download, do you want to overwrite them (y/n)? ").lower() 
-                # if user wants to overwrite then add the the files that were 
-                # downloaded before the execution as if they were never download
-                if self.overwrite_choice == 'y':
+                    while True:
+                        dl_overwrite = input("\nThere are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)? ").lower() 
+                        if dl_overwrite in ['y','n','']:
+                            break
+                    
+                    # get the boolean value
+                    self.dl_overwrite = dl_overwrite != 'n'
+
+                # if user wants to overwrite then add the files downloaded before the execution as if they were never downloaded
+                if self.dl_overwrite:
                     not_downloaded_files += downloaded_before_execution_files
                 # change overwritten files boolean to True to indicate that some files were ignored
                 else:
@@ -398,8 +436,7 @@ class Download(object):
             self.logger.info('\n'+'-'*40)
             self.logger.info(f"\nDownloading non-GHOST {network} network data from {self.remote_machine}...")
 
-        # if not valid network, check if user put the network on init_prov 
-        # TODO Move to configuration.py
+        # if not valid network, check if user put the network on init.yaml 
         if network not in self.nonghost_available_networks:
             msg = f"The {network} network could not be found on {join(PROVIDENTIA_ROOT,'settings','available_inputs.yaml')} nonghost_available_networks list."
             msg += "\nPlease, add the network to the list and execute again."
@@ -407,16 +444,14 @@ class Download(object):
             return
         
         # check if nonghost network exists in directory
-        # TODO: Change this to somewhere in configuration, the one up too
         try:
-            self.sftp.stat(join(self.nonghost_remote_obs_path,network))
+            self.sftp.stat(join(self.nonghost_remote_obs_path, network))
         except FileNotFoundError:
             msg = f"There is no data available in {self.remote_machine} for {network} network."
             show_message(self, msg, deactivate=initial_check)
             return
 
-        # check if all resolutions are in init_prov, if not warning and delete the not correct ones
-        # TODO move to configuration.py
+        # check if all resolutions are in init.yaml, if not warning and delete the not correct ones
         not_available_resolutions = set(self.resolution) - set(self.nonghost_available_resolutions)
         if not_available_resolutions:
             available_resolutions = set(self.resolution) - not_available_resolutions
@@ -799,17 +834,19 @@ class Download(object):
             
             # get all the nc files in the date range
             for remote_dir in res_spec_dir:
-                if not initial_check:
-                    local_path = remote_dir.split('/',7)[-1]
-                    if self.ghost_version in ["1.2", "1.3", "1.3.1"]:
-                        self.logger.info(f"\n  - {join(self.exp_root,self.ghost_version,'-'.join(local_path.split('/')[1:4]),*local_path.split('/')[4:])}, source: {remote_dir} ({self.remote_machine})")
-                    else:
-                        self.logger.info(f"\n  - {join(self.exp_root,local_path)}, source: {remote_dir} ({self.remote_machine})")
-            
+                
+                # get network, species and resolution
                 network = remote_dir.split('/')[-1]
                 species = remote_dir.split('/')[-2]
                 resolution = remote_dir.split('/')[-3]
-                
+
+                # get local directory 
+                local_dir = join(self.exp_root, self.ghost_version, experiment_new, resolution, species, network)
+
+                # print source and destination  
+                if not initial_check:
+                    self.logger.info(f"\n  - {local_dir}, source: {remote_dir} ({self.remote_machine})")
+            
                 # get nc files if directory is found
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
@@ -829,8 +866,6 @@ class Download(object):
 
                 # download the valid resolution specie date combinations
                 else:
-                    # create local directory (always with experiments on the new format)
-                    local_dir = join(self.exp_root,self.ghost_version,experiment_new,resolution,species,network)
                     
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
@@ -906,7 +941,7 @@ class Download(object):
             exp_dir_functional_list = []    
             for exp_dir in experiment_dict["paths"]:
                 # esarchive in transfer5 is located inside gpfs
-                if "/esarchive/" == exp_dir[:11]:
+                if "/esarchive/" == exp_dir[:11] and self.remote_hostname.startswith('transfer'):
                     exp_dir = join("/gpfs/archive/bsc32/",exp_dir[1:])
                 # check if directory exists in the remote machine
                 try:
@@ -1024,9 +1059,6 @@ class Download(object):
             
             # get all the nc files in the date range
             for remote_dir in res_spec_dir:
-                if not initial_check:
-                    local_path = remote_dir.split('/', 6)[-1]
-                    self.logger.info(f"\n  - {join(self.exp_to_interp_root,local_path)}, source: {remote_dir} ({self.remote_machine})")
                          
                 # get nc files
                 nc_files = self.sftp.listdir(remote_dir)
@@ -1063,8 +1095,8 @@ class Download(object):
                         elif format == (0, 3):
                             nc_files = list(filter(lambda x:x.split("_")[0] == species, nc_files))
 
+                        # unknown format
                         else:
-                            # TODO delete this in the future
                             error = f"It is not possible to download this nc file type yet. Please, contact the developers. Files to download: {nc_files}"
                             self.logger.error(error)
                             sys.exit(1)
@@ -1078,6 +1110,16 @@ class Download(object):
                         # filter the nc files to only get the ones that have the correct species and stats
                         nc_files = list(filter(lambda x:x.split("_")[0] == species and "_".join(x[:-3].split("_")[2:]) == ensemble, nc_files))
                 
+                # add ensemble-stats directory if it is an ensemble member
+                if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
+                    local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,species)
+                else:
+                    local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+ensemble)
+
+                # print source and destination
+                if not initial_check:
+                    self.logger.info(f"\n  - {local_dir}, source: {remote_dir} ({self.remote_machine})")
+                    
                 # if there is no options with the ensemble, tell the user
                 if nc_files == []:
                     msg = f"There is no data available in {self.remote_machine} for the {exp_id} experiment with the {domain} domain with the {ensemble} ensemble."
@@ -1095,12 +1137,6 @@ class Download(object):
 
                 # download the valid resolution specie date combinations
                 else:
-                    # create local directory 
-                    # if it is an ensemble member
-                    if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
-                        local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,species)
-                    else:
-                        local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+ensemble)
                     
                     # create directories if they don't exist
                     if not os.path.exists(local_dir):
@@ -1142,7 +1178,7 @@ class Download(object):
 
         # tell the user if not valid resolution specie date combinations
         else:
-            msg = "There are no available observations to be downloaded."
+            msg = "There is no available model output to be downloaded."
             show_message(self, msg, deactivate=initial_check)
             
     def copy_non_interpolated_experiment(self, experiment, initial_check, files_to_download=None):
@@ -1411,12 +1447,12 @@ class Download(object):
 
         # tell the user if not valid resolution specie date combinations
         else:
-            msg = "There are no available observations to be copied."
+            msg = "There is no available model output to be copied."
             show_message(self, msg, deactivate=initial_check)
 
     def get_all_networks(self): 
         if self.reading_ghost:
-            if self.bsc_download.lower() in ['', 'y']:
+            if self.dl_ghost_source == 'bsc':
                 self.network = self.ghost_available_networks
             elif not hasattr(self,"zenodo_ghost_available_networks"): 
                 if not self.zenodo.fetch_zenodo_networks():
@@ -1427,7 +1463,7 @@ class Download(object):
     
     def get_all_experiments(self):
         # download all interpolated experiments
-        if self.interpolated is True:
+        if self.dl_interpolated is True:
             # check if ssh exists and check if still active, connect if not
             if (self.ssh is None) or (self.ssh.get_transport().is_active()):
                 self.connect()  
