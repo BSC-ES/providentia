@@ -216,7 +216,7 @@ class SubmitInterpolation(object):
                 # if output resolution is instantaneous, prioritise instanstaneous resolutions first,
                 # then non-instanstaneous
 
-                resolutions_to_keep = temporal_resolution_map[temporal_resolution_to_output]
+                resolutions_to_keep = self.model_resolution if self.model_resolution else temporal_resolution_map[temporal_resolution_to_output]
                 
                 # iterate through resolutions_to_keep until find one for which have speci_to_process (or mapped speci)
                 have_valid_resolution = False

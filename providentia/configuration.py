@@ -1217,6 +1217,10 @@ class ProvConfiguration:
             msg = "Resolution (resolution) contains multiple values. Using '{}' as default.".format(default)
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
             self.read_instance.resolution = default
+
+        # copy value of resolution into model_resolution
+        if not self.read_instance.model_resolution:
+            self.read_instance.model_resolution = self.read_instance.resolution 
             
         # if number of networks and species is not the same,
         # and len of one of network or species == 1,

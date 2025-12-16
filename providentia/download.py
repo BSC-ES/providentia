@@ -766,7 +766,7 @@ class Download(object):
                     remote_dir_ghost_version = join(self.exp_remote_path, possible_ghost_version, experiment_old if possible_ghost_version in ["1.2", "1.3", "1.3.1"] else experiment_new)
                     
                     # iterate the different resolutions
-                    sftp_resolutions = self.resolution if self.resolution else set(self.sftp.listdir(remote_dir)).intersection(self.nonghost_available_resolutions)
+                    sftp_resolutions = self.model_resolution if self.model_resolution else set(self.sftp.listdir(remote_dir)).intersection(self.nonghost_available_resolutions)
                     for resolution in sftp_resolutions:                        
                         try:
                             species_list = self.species if self.species else self.sftp.listdir(join(remote_dir_ghost_version, resolution))
@@ -802,7 +802,7 @@ class Download(object):
             show_message(self, msg, deactivate=initial_check)
             return
 
-        sftp_resolutions = self.resolution if self.resolution else set(self.sftp.listdir(remote_dir)).intersection(self.nonghost_available_resolutions)
+        sftp_resolutions = self.model_resolution if self.model_resolution else set(self.sftp.listdir(remote_dir)).intersection(self.nonghost_available_resolutions)
         for resolution in sftp_resolutions:
             try:
                 sftp_species = self.species if self.species else set(self.sftp.listdir(join(remote_dir,resolution))).intersection(self.available_species)
@@ -991,7 +991,7 @@ class Download(object):
             return
 
         # get all the resolutions available in the remote directory
-        sftp_resolutions = self.resolution if self.resolution else set(self.sftp.listdir(remote_dir)).intersection(self.nonghost_available_resolutions)
+        sftp_resolutions = self.model_resolution if self.model_resolution else set(self.sftp.listdir(remote_dir)).intersection(self.nonghost_available_resolutions)
 
         # iterate through the resolutions
         for resolution in sftp_resolutions:
@@ -1235,7 +1235,7 @@ class Download(object):
             return
 
         # get all the resolutions available in the esarchive directory
-        sftp_resolutions = self.resolution if self.resolution else set(os.listdir(esarchive_dir)).intersection(self.nonghost_available_resolutions)
+        sftp_resolutions = self.model_resolution if self.model_resolution else set(os.listdir(esarchive_dir)).intersection(self.nonghost_available_resolutions)
 
         # iterate through the resolutions
         for resolution in sftp_resolutions:
