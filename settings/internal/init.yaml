@@ -169,6 +169,7 @@
       "disable_file_tree",
       "nonghost_available_resolutions",
       "nonghost_available_networks",
+      "model_resolution",
       "report",
       "library",
       "download",
