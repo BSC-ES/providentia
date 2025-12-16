@@ -393,7 +393,7 @@ class Cams:
         # loop through the possible dates
         for i, date in enumerate(all_dates_iter):
             # create a new file for each slice
-            output_file_name = cams_dict["file_format"].replace("yyyy", f"{date.year:04d}") \
+            output_file_name = cams_dict["dated_file_format"].replace("yyyy", f"{date.year:04d}") \
                             .replace("mm", f"{date.month:02d}") \
                             .replace("dd", f"{date.day:02d}")
             output_filepath = join(temp_dir,output_file_name)
@@ -633,7 +633,7 @@ class Cams:
                             zip_ref.extractall(temp_dir)
 
                     # iterate through the different days of the month if forecast
-                    if "file_format" in cams_dict:
+                    if "dated_file_format" in cams_dict:
                         all_dates = [current_cams_date + timedelta(days=i) for i in range((next_cams_date - current_cams_date).days + 1)]
                     else:
                         all_dates = [current_cams_date]
@@ -648,8 +648,8 @@ class Cams:
                             
                         if not initial_check:
                             # get the file format
-                            if "file_format" in cams_dict:
-                                zip_file_name = cams_dict["file_format"].replace("yyyy", f"{date.year:04d}") \
+                            if "dated_file_format" in cams_dict and len(all_dates) != 1:
+                                zip_file_name = cams_dict["dated_file_format"].replace("yyyy", f"{date.year:04d}") \
                                 .replace("mm", f"{date.month:02d}") \
                                 .replace("dd", f"{date.day:02d}")
                             

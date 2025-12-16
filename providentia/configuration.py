@@ -1133,7 +1133,7 @@ class ProvConfiguration:
                 self.read_instance.experiments = self.read_instance.model
             elif self.read_instance.models:
                 self.read_instance.experiments = self.read_instance.models
-
+                     
         # check if species is valid
         if self.read_instance.species:
             species = copy.deepcopy(self.read_instance.species)

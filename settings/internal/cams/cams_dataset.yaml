@@ -96,7 +96,7 @@ cams_forecast:
     data_format: netcdf_zip
     calendar: standard
     stream: false
-    file_format: ENS_FORECAST_yyyy-mm-dd.nc
+    dated_file_format: ENS_FORECAST_yyyy-mm-dd.nc
     split: false
     lookahead_days: 5
   global:
@@ -182,7 +182,7 @@ cams_forecast:
     data_format: netcdf_zip
     calendar: proleptic_gregorian
     stream: false
-    file_format: data_mlev_yyyy-mm-dd.nc
+    dated_file_format: data_mlev_yyyy-mm-dd.nc
     split: true
     lookahead_days: 5
 cams_reanalysis:
