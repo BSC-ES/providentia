@@ -638,6 +638,17 @@ class Canvas(FigureCanvas):
         self.remove_axis_elements(self.plot_axes['map'], 'map')
         self.remove_axis_elements(self.plot_axes['cb'], 'cb')
 
+        # check if labels that have set for map exist in current data labels
+        # if not then reset map plot
+        labela = self.map_z1.currentText()
+        labelb = self.map_z2.currentText()
+        if labela not in self.read_instance.data_labels:
+            self.map_z1.setCurrentText(self.read_instance.observations_data_label)
+            self.map_z2.setCurrentTextText('')
+        elif labelb not in self.read_instance.data_labels:
+            self.map_z1.setCurrentText(self.read_instance.observations_data_label)
+            self.map_z2.setCurrentText('')
+
         # get zstat name from combobox 
         base_zstat = self.map_z_stat.currentText()
         if self.map_z2.currentText() == '':
