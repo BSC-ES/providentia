@@ -737,11 +737,6 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
         # get zstat information 
         zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat)
 
-        if z_statistic_period is not None:
-            pp = z_statistic_period
-        elif period is not None:
-            pp = period
-
         #if (z_statistic_period is not None) & (period is not None) & (chunk_resolution is not None):
         #    print('Stat:{}, Mode:{}, zstat period:{}, period:{}, resolution:{}'.format(zstat, statistic_mode, z_statistic_period, period, chunk_resolution))
         #elif (z_statistic_period is not None) & (period is not None):
@@ -758,6 +753,10 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
         #    print('Stat:{}, Mode:{}, resolution:{}'.format(zstat, statistic_mode, chunk_resolution))
         #else:
         #    print('Stat:{}, Mode:{}'.format(zstat, statistic_mode))
+
+        # if are calculating a periodic statistic, and stat is Data%, ensure the mode is Independent to ensure calculate is correct
+        if (periodic_statistic_mode) and (base_zstat == 'Data%'):
+            periodic_statistic_mode = 'Independent'
 
         # for map statistics, get active map valid station indices and then data_labels_a data 
         if (map) or (per_station):
@@ -898,6 +897,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
             if z_statistic_period is not None:
                 # if periodic statistic mode is cycle, then aggregate per periodic grouping, and then calculate stat
                 if periodic_statistic_mode == 'Cycle':
+
                     # aggregation in each group, per station, by periodic statistic
                     z_statistic = aggregation(data_array_a, periodic_statistic_aggregation, axis=-1).transpose()
 
@@ -915,9 +915,10 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 # if periodic statistic mode is independent, then calculate stats independently per periodic grouping,
                 # and then aggregate 
                 elif periodic_statistic_mode == 'Independent':
+                    
                     # calculate statistic per periodic grouping per station
                     z_statistic = getattr(Stats, stats_dict['function'])(data_array_a, **function_arguments).transpose()
-                    
+
                     #print('Calculating Stat, Independent Aggregation ', z_statistic.shape)
 
                     # aggregate data per station (removing period dimension)

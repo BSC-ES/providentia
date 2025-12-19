@@ -873,12 +873,9 @@ class SubmitInterpolation(object):
         """Submit interpolation jobs using multiprocessing pool."""
 
         # set resource usage parameters for estimating safe number of pool workers 
-        self.per_worker_mem_gb = self.guess_memory_per_worker()
-        self.per_worker_cpu_fraction = 1.0/self.n_cpus
-        self.per_worker_swap_gb = self.per_worker_mem_gb * 0.05 
-        self.cpu_fraction_limit = 0.74
-        self.mem_fraction_limit = 0.74
-        self.swap_fraction_limit = 0.74
+        self.per_worker_mem_gb = self.guess_peak_RSS_per_worker()
+        self.cpu_fraction_limit = 0.75
+        self.mem_fraction_limit = 0.75
 
         # set run commands
         self.commands = ['python -u {}/interpolation/experiment_interpolation.py {}'.format(
@@ -918,7 +915,7 @@ class SubmitInterpolation(object):
         # launch interpolation
         # if have no swap memory, or have just 1 cpu, run in serial without multiprocessing
         if n_cpus == 1:
-            for i, cmd in enumerate(self.commands):
+            for i, cmd in enumerate(self.commands, start=1):
                 self.run_command(cmd)
                 print(f"{i}/{self.total_jobs} jobs completed", flush=True)
         # otherwise, use multiprocessing pool
@@ -959,22 +956,27 @@ class SubmitInterpolation(object):
                 print('THE FOLLOWING INTERPOLATION TASKS FAILED: {}'.format(failed_tasks))
             if len(not_finished_tasks) > 0:
                 print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
-
-    def guess_memory_per_worker(self):
+                
+    def guess_peak_RSS_per_worker(self):
         """
-        Estimate the memory usage that each worker will use.
-        Goes through each file to be read and gets the memory that will be consusmed, 
-        and then takes the max to be conservative.
+        Get conservative estimate of peak RSS per worker in GB.
         """
 
-        # initialise max worker gb as 0
-        max_worker_mem_gb = 0
+        # define conservative factors for estimation for peak RSS in GB
+        array_overhead_factor = 1.5
+        temp_array_factor = 3.0
+        if self.operating_system == "Mac":
+            process_overhead_gb = 0.15
+        else:
+            process_overhead_gb = 0.08
+        hdf5_cache_gb = 0.1
 
-        # iterate through arguments
+        # initialise peak RSS as 0 
+        max_worker_rss_gb = 0.0
+
+        # iterate through all jobs to submit and get peak RSS for a job
         for argument in self.arguments:
-
-            # initialise worker memory gb as 0
-            worker_mem_gb = 0
+            worker_payload_gb = 0.0
 
             argument = argument.split(' ')
             prov_exp_code = argument[0]
@@ -984,152 +986,173 @@ class SubmitInterpolation(object):
             experiment_to_process, grid_type, ensemble = prov_exp_code.split('-')
             ensemble_member = ensemble.isdigit()
 
-            # get relevant model files
             if ensemble_member:
-                all_model_files = np.sort(glob.glob('{}/{}/{}/{}/{}*{}*.nc'\
-                                                    .format(self.exp_dir, grid_type,
-                                                            model_temporal_resolution,
-                                                            speci_to_process, speci_to_process, yearmonth)))
-
-                # drop all analysis files ending with '_an.nc' which are not in ensemble-stats
-                all_model_files = [f for f in all_model_files if '_an.nc' not in f] 
-
-                # isolate model files to be only those associated with relevant ensemble
-                model_files = np.sort([f for f in all_model_files if '{}-{}_'.format(
-                                    speci_to_process,ensemble) in f])
-                
-                # if the number of remaining model files is 0, this is because the files
-                # do not contain an ensemble member number, therefore take all model files
-                if len(model_files) == 0:
+                all_model_files = np.sort(glob.glob(
+                    f"{self.exp_dir}/{grid_type}/{model_temporal_resolution}/"
+                    f"{speci_to_process}/{speci_to_process}*{yearmonth}*.nc"
+                ))
+                all_model_files = [f for f in all_model_files if "_an.nc" not in f]
+                model_files = [f for f in all_model_files if f"{speci_to_process}-{ensemble}_" in f]
+                if not model_files:
                     model_files = all_model_files
-        
-            else:            
-                model_files = np.sort(glob.glob('{}/{}/{}/ensemble-stats/{}_{}/{}*{}*{}.nc'\
-                                                    .format(self.exp_dir, grid_type,
-                                                            model_temporal_resolution,
-                                                            speci_to_process, ensemble, 
-                                                            speci_to_process, yearmonth, ensemble)))
+            else:
+                model_files = np.sort(glob.glob(
+                    f"{self.exp_dir}/{grid_type}/{model_temporal_resolution}/"
+                    f"ensemble-stats/{speci_to_process}_{ensemble}/"
+                    f"{speci_to_process}*{yearmonth}*{ensemble}.nc"
+                ))
 
-            # iterate through all files for 1 worker and add memory together
             for model_file in model_files:
-
-                # open framework of .nc file
                 with Dataset(model_file, "r") as nc:
-
-                    # get required variable
                     var = nc.variables[speci_to_process]
-
-                    # dimension lengths
                     dims = [nc.dimensions[d].size for d in var.dimensions]
-
-                    # total number of elements
                     n_elements = math.prod(dims)
-
-                    # bytes per element (float32=4, float64=8, int16=2, etc.)
                     dtype_size = np.dtype(var.dtype).itemsize
+                    worker_payload_gb += (n_elements * dtype_size) / (1024**3)
 
-                    # convert to GB
-                    size_gb = (n_elements * dtype_size) / (1024**3)
+            # Inflate to peak RSS
+            peak_worker_gb = (
+                worker_payload_gb
+                * array_overhead_factor
+                * temp_array_factor
+                + process_overhead_gb
+                + hdf5_cache_gb
+            )
 
-                    # add size to worker gb
-                    worker_mem_gb += size_gb
+            # get peak worker RSS in GB
+            max_worker_rss_gb = max(max_worker_rss_gb, peak_worker_gb)
 
-            # if worker mem gb is greater than current max then overwrite it
-            if worker_mem_gb > max_worker_mem_gb:
-                max_worker_mem_gb = copy.deepcopy(worker_mem_gb)
+        return max_worker_rss_gb
 
-        return max_worker_mem_gb
-                
     def guess_pool_workers(self):
         """
-        Estimate a safe number of pool workers considering expected job resource usage.
+        Conservative estimation of multiprocessing pool size
+        based on physical cores and peak per-worker memory.
         """
-        
-        # --- CPU constraint ---
-        total_cores = psutil.cpu_count(logical=False) or 1
-        cpu_now = psutil.cpu_percent(interval=None) / 100.0
-        max_workers_cpu = max(1, int((self.cpu_fraction_limit - cpu_now) / self.per_worker_cpu_fraction))
 
-        # --- Memory constraint ---
+        # ---------------------------
+        # Static system capacity
+        # ---------------------------
+        physical_cores = psutil.cpu_count(logical=False) or 1
         vm = psutil.virtual_memory()
-        used_mem_gb = (vm.total - vm.available) / (1024**3)
-        max_mem_gb = self.mem_fraction_limit * (vm.total / (1024**3) - used_mem_gb)
-        max_workers_mem = max(1, int(max_mem_gb / self.per_worker_mem_gb))
 
-        # --- Swap adjustment ---
-        swap = psutil.swap_memory()
-        swap_total_gb = swap.total / (1024**3)
-        swap_used_gb = swap_total_gb * swap.percent / 100
-        swap_allowed_gb = swap_total_gb * self.swap_fraction_limit - swap_used_gb
-        # if swap is zero adjust max_workers_mem to be 1
-        if swap_total_gb == 0:
-            max_workers_mem = 1
+        # ---------------------------
+        # Per-worker estimates
+        # ---------------------------
+        per_worker_mem_gb = self.per_worker_mem_gb  # from guess_memory_per_worker()
 
-        # Adjust memory fraction if swap is tight
-        if self.operating_system != 'Mac':
-            total_swap_needed = self.per_worker_swap_gb * min(max_workers_cpu, max_workers_mem)
-            if total_swap_needed > swap_allowed_gb:
-                # Swap tight — reduce memory fraction proportionally
-                excess_ratio = (total_swap_needed - swap_allowed_gb) / total_swap_needed
-                effective_mem_fraction = self.mem_fraction_limit * (1 - excess_ratio)
-                effective_mem_fraction = max(0.1, effective_mem_fraction)
-                max_mem_gb = effective_mem_fraction * (vm.total / (1024**3) - used_mem_gb)
-                max_workers_mem = max(1, int(max_mem_gb / self.per_worker_mem_gb))
-        
-        # --- Combine constraints ---
-        # if have no swap memory then only use 1 worker
-        if swap_total_gb == 0:
-            n_workers = 1
-        # otherwise use the minimum of all constraints
+        # ---------------------------
+        # CPU-based limit
+        # ---------------------------
+        cpu_capacity_workers = int(physical_cores * self.cpu_fraction_limit)
+        cpu_capacity_workers = min(cpu_capacity_workers, physical_cores)  # cap to actual cores
+        cpu_capacity_workers = max(1, cpu_capacity_workers)
+
+        # ---------------------------
+        # Memory-based limit (peak RSS)
+        # ---------------------------
+        available_mem_gb = vm.available / (1024**3)
+        usable_mem_gb = max(0.0, available_mem_gb)
+
+        if per_worker_mem_gb > 0:
+            mem_capacity_workers = int(usable_mem_gb / per_worker_mem_gb)
         else:
-            n_workers = min(max_workers_cpu, max_workers_mem, total_cores)
-        
-        # --- Summary print for debugging
-        #print("=== Safe Pool Worker Estimation ===")
-        #print(f"CPU: {cpu_now*100:.1f}% used / limit fraction: {self.cpu_fraction_limit}, max workers: {max_workers_cpu}")
-        #print(f"Memory: {used_mem_gb:.2f} GB used / {vm.total / (1024**3):.2f} GB total")
-        #if 'effective_mem_fraction' in locals():
-        #    print(f"Memory fraction limit: {self.mem_fraction_limit} -> effective: {effective_mem_fraction:.2f}, max workers: {max_workers_mem}")
-        #else:
-        #    print(f"Memory fraction limit: {self.mem_fraction_limit}, max workers: {max_workers_mem}")
-        #print(f"Swap: {swap_used_gb:.2f} GB used / {swap_total_gb:.2f} GB total")
-        #print(f"Swap fraction limit: {self.swap_fraction_limit}, swap allowed for pool: {swap_allowed_gb:.2f} GB")
-        #print(f"Total physical cores: {total_cores}")
-        #print(f"=== Suggested safe pool size: {n_workers} workers ===\n")
+            mem_capacity_workers = physical_cores
+
+        mem_capacity_workers = max(1, mem_capacity_workers)
+
+        # ---------------------------
+        # Final worker count
+        # ---------------------------
+        n_workers = min(
+            cpu_capacity_workers,
+            mem_capacity_workers,
+            physical_cores
+        )
 
         return max(1, n_workers)
 
-    def resource_safe_job(self, cmd, check_interval=1.0, stagger_range=(0.0, 5.0)):
-        """Wait until system resources are below thresholds, then run the job."""
+    def resource_safe_job(self, cmd, check_interval=1.0, stagger_range=(0.0,5.0)):
+        """
+        Manage multiprocessing worker submission with hysteresis.
+        If system is overloaded it will wait until the system is stable before submitting more jobs.
+        """
 
-        # print for debugging
-        # print(f"[JOB INIT] Preparing to run: {cmd}", flush=True)
+        # set cpu, memory and swap limits 
+        cpu_enter = self.cpu_fraction_limit
+        cpu_exit = self.cpu_fraction_limit * 0.9
+        mem_enter = self.mem_fraction_limit
+        mem_exit = self.mem_fraction_limit * 0.85
+        swap_panic_limit = 0.95
 
+        # initialise hysteresis counters
+        overload_enter_count = 3
+        recovery_exit_count = 3
+        overload_count = 0
+        recovery_count = 0
+        paused = False
+        max_pause_seconds = 120
+        pause_start = None
+
+
+        # while loop to trap jobs while there is an overload
         while True:
+
+            # get current swap, cpu and memory percent
+            swap_frac = psutil.swap_memory().percent / 100.0
             cpu = psutil.cpu_percent(interval=None) / 100.0
-            mem = psutil.virtual_memory().percent / 100.0
-            swap = psutil.swap_memory().percent / 100.0
+            mem = 1.0 - (psutil.virtual_memory().available / psutil.virtual_memory().total)
 
-            if self.operating_system == "Mac":
-                overload = max(cpu / self.cpu_fraction_limit, mem / self.mem_fraction_limit)
+            # If have extremely high swap (and are not on Mac) then pause for 30 seconds
+            if (self.operating_system != "Mac") and (swap_frac > swap_panic_limit):
+                print(f"Warning: Swap memory is extremely high: {swap_frac*100:.1f}% — sleeping 30s", flush=True)
+                time.sleep(30)
+                continue
+
+            # check if system is overloaded
+            # 1. system exceeds cpu limits
+            # 2. system exeeds memory limits
+            overloaded = (cpu > cpu_enter) or (mem > mem_enter)
+
+            # hysteresis counters
+            if overloaded:
+                overload_count += 1
+                recovery_count = 0
             else:
-                overload = max(cpu / self.cpu_fraction_limit, mem / self.mem_fraction_limit, swap / self.swap_fraction_limit)
+                overload_count = 0
+                recovery_count += 1
 
-            # print for debugging
-            #print(f"[RESOURCE CHECK] CPU: {cpu*100:.1f}% / {self.cpu_fraction_limit*100:.0f}% | "
-            #    f"MEM: {mem*100:.1f}% / {self.mem_fraction_limit*100:.0f}% | "
-            #    f"SWAP: {swap*100:.1f}% / {self.swap_fraction_limit*100:.0f}% | "
-            #    f"{'Waiting...' if overload>1 else 'Safe to run!'}", flush=True)
+            # if system is overloaded then pause submissions
+            if (not paused) and (overload_count >= overload_enter_count):
+                paused = True
+                pause_start = time.time()
+                print("Warning: Sustained overload. Pausing job submissions.", flush=True)
 
-            if overload <= 1.0:
+            # check if can resume submissions
+            if paused:
+                # Force progress after max pause
+                if (pause_start) and (time.time() - pause_start > max_pause_seconds):
+                    print("Warning: Forcing job submission to avoid deadlock.", flush=True)
+                    paused = False
+                    break
+                healthy = ((cpu < cpu_exit and mem < mem_exit) or (cpu < 0.25))
+                if healthy:
+                    recovery_count += 1
+                else:
+                    recovery_count = 0
+                if recovery_count >= recovery_exit_count:
+                    paused = False
+                    print("Warning: System has recovered. Resuming job submissions.", flush=True)
+
+            # break out of loop if not paused
+            if not paused:
                 break
 
-            time.sleep(check_interval)  # Wait and retry
+            # if paused then sleep a little
+            time.sleep(check_interval)
 
-        # stagger to avoid spikes
+        # Stagger before starting job
         time.sleep(random.uniform(*stagger_range))
-
-        # Run the actual job
         self.run_command(cmd)
 
     def run_command(self, commands):
@@ -1145,7 +1168,7 @@ class SubmitInterpolation(object):
             error = result.stderr
             if error == '':
                 error = 'Unknown error'
-            print(f"Error in submission using the following arguments: {result.args[3:-1]}: {error}", flush=True)
+            print(f"Error in submission using the arguments: {result.args[3:-1]}: {error}", flush=True)
 
     def get_all_experiments(self):
         experiments = []
@@ -1241,6 +1264,7 @@ class SubmitInterpolation(object):
                         networks.append(f"{dir1}/{dir2}")
 
         return networks
+
 
 def main(**kwargs):
 
