@@ -70,10 +70,10 @@ class ProvArgumentParser(object):
                                      help="root directory where non-GHOST observations are stored")                         
             self.parser.add_argument("--exp_root",
                                      dest="exp_root",
-                                     help="set experiment root data directory")
+                                     help="set model root data directory")
             self.parser.add_argument("--exp_to_interp_root",
                                      dest="exp_to_interp_root",
-                                     help="set experiment to interpolate root data directory")
+                                     help="set model to interpolate root data directory")
             self.parser.add_argument("--generate_file_tree", '--gft',
                                      dest="generate_file_tree",
                                      default=False,
@@ -119,10 +119,10 @@ class ProvArgumentParser(object):
                                      help="models to read")
             self.parser.add_argument("--domain",
                                      dest="domain",
-                                     help="domain of the experiment")
+                                     help="domain of the model")
             self.parser.add_argument("--ensemble",
                                      dest="ensemble",
-                                     help="ensemble member number or ensemble statistic of the experiment")
+                                     help="ensemble member number or ensemble statistic of the model")
             self.parser.add_argument("--forecast",
                                      dest="forecast",
                                      help="set part of forecast data desired")
@@ -146,7 +146,7 @@ class ProvArgumentParser(object):
                                      help="list of network flags (numbers or text) to subtract from default network flags, used to filter data")
             self.parser.add_argument("--temporal_colocation",
                                      dest="temporal_colocation",
-                                     help="activate temporal colocation betwen observations and experiments")
+                                     help="activate temporal colocation betwen observations and models")
             self.parser.add_argument("--spatial_colocation",
                                      dest="spatial_colocation",
                                      help="activate spatial colocation between multiple read species")
@@ -266,13 +266,13 @@ class ProvArgumentParser(object):
                                      help="use multiprocessing instead of greasy to interpolate in HPC machines")
             self.parser.add_argument("--interp_spinup_timesteps",
                                      dest="interp_spinup_timesteps",
-                                     help="number of timesteps to skip for spinup at start of each experiment file")
+                                     help="number of timesteps to skip for spinup at start of each model file")
             self.parser.add_argument("--interp_model_downsampling",
                                      dest="interp_model_downsampling",
-                                     help="statistic to use for downsampling the experiment data")
+                                     help="statistic to use for downsampling the model data")
             self.parser.add_argument("--interp_model_upsampling",
                                      dest="interp_model_upsampling",
-                                     help="set how the upsampling of experiment data should be done")
+                                     help="set how the upsampling of model data should be done")
             self.parser.add_argument("--logfile",
                                      dest="logfile",
                                      action='store_true',

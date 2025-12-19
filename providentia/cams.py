@@ -140,7 +140,7 @@ class Cams:
         if 'type' in cams_dict:
             request["type"] = cams_dict['type']
 
-        # add the experiment if models are available in the dataset
+        # add the model if models are available in the dataset
         if 'models' in cams_dict:
             request["model"] = exp_id
 
@@ -183,16 +183,16 @@ class Cams:
                 f.write("url: https://ads.atmosphere.copernicus.eu/api\n")
                 f.write(f"key: {personal_access_token}\n")
         else:
-            self.download_instance.logger.error("Error: Cannot proceed without '.cdsapirc'. CAMS experiment data download requires this file.")
+            self.download_instance.logger.error("Error: Cannot proceed without '.cdsapirc'. CAMS model data download requires this file.")
             sys.exit(1)
 
     def get_experiment(self, cams_dict, u_count, config_expid, dataset, ensemble_options, initial_check=False):
-        # determine experiment ID or stream
+        # determine model ID or stream
         exp_id, stream = None, None
         
         if u_count == 1: # e.g. cams_forecast
             if 'models' in cams_dict:
-                msg = f"The experiment '{config_expid}' is missing the model. Please add one (e.g., '{config_expid}_ensemble')."
+                msg = f"The model '{config_expid}' is missing the model. Please add one (e.g., '{config_expid}_ensemble')."
                 show_message(self.download_instance, msg, deactivate=initial_check)
                 return None, None, True
 
@@ -206,7 +206,7 @@ class Cams:
                 return None, None, True
             elif 'models' in cams_dict: # e.g. cams_analysis_ensemble
                 exp_id = last_element
-                # make sure the experiment is available in the dataset
+                # make sure the model is available in the dataset
                 if exp_id not in cams_dict["models"]:
                     msg = f"Cannot find the {exp_id} model in the '{dataset}' dataset."    
                     show_message(self.download_instance, msg, deactivate=initial_check)
@@ -221,14 +221,14 @@ class Cams:
 
             if not (cams_dict['stream'] is True and 'models' in cams_dict): 
                 # if there are three elements and they
-                msg = f"The '{dataset}' dataset does not admit models and streams, change the experiment in the configuration file."    
+                msg = f"The '{dataset}' dataset does not admit models and streams, change the model in the configuration file."    
                 show_message(self.download_instance, msg, deactivate=initial_check)
                 return None, None, True
             
             # extract the last two elements
             _, exp_id, stream = config_expid.rsplit('_', 2)
 
-            # make sure the experiment is available in the dataset
+            # make sure the model is available in the dataset
             if exp_id not in cams_dict["models"]:
                 msg = f"Cannot find the {exp_id} model in the '{dataset}' dataset."    
                 show_message(self.download_instance, msg, deactivate=initial_check)
@@ -439,11 +439,11 @@ class Cams:
         # close original dataset
         input_file.close()   
 
-    def download_cams_experiment(self, experiment, initial_check, files_to_download=None): 
+    def download_cams_experiment(self, model, initial_check, files_to_download=None): 
         if not initial_check:
-            # print current_experiment
+            # print current model
             self.download_instance.logger.info('\n'+'-'*40)
-            self.download_instance.logger.info(f"\nDownloading {experiment} experiment data from the Atmosphere Data Store...")
+            self.download_instance.logger.info(f"\nDownloading {model} model data from the Atmosphere Data Store...")
 
         # create cdsapirc file in case it was not created
         cdsapirc_path = join(os.getenv("HOME"),'.cdsapirc')
@@ -452,8 +452,8 @@ class Cams:
         if not os.path.isfile(cdsapirc_path):
             self.create_cdsapirc(cdsapirc_path)
 
-        # get experiment id and the domain
-        config_expid, domain, ensemble_options = experiment.split("-")
+        # get model id and the domain
+        config_expid, domain, ensemble_options = model.split("-")
         
         # count underscores to determine format
         u_count = config_expid.count('_')
@@ -477,11 +477,11 @@ class Cams:
         dataset = cams_dict["dataset"]
         url = cams_dict['url']
         
-        # make the necessary checks to the experiment
-        exp_id, stream, invalid_experiment = self.get_experiment(cams_dict, u_count, config_expid, dataset, ensemble_options)
+        # make the necessary checks to the model
+        exp_id, stream, invalid_model = self.get_experiment(cams_dict, u_count, config_expid, dataset, ensemble_options)
     
-        # stop download if the experiment format is not correct
-        if invalid_experiment:
+        # stop download if the model format is not correct
+        if invalid_model:
             return
     
         # make the necessary checks to the dates

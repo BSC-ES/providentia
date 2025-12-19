@@ -1,6 +1,6 @@
 # Mounting filesystems
 
-It is possible to mount filesystems, such as esarchive from MN5, on your personal computer. This can then be used to load observations/experiments that are stored remotely on these filesystems while using Providentia on your local machine. The Providentia data paths should be updated to point to the local mounted directory in `settings/data_paths.yaml`.
+It is possible to mount filesystems, such as esarchive from MN5, on your personal computer. This can then be used to load observations/models that are stored remotely on these filesystems while using Providentia on your local machine. The Providentia data paths should be updated to point to the local mounted directory in `settings/data_paths.yaml`.
 
 How this is done varies by operating system. In this section you will find information on how to mount esarchive, you can use this as inspiration for other filesystems.
 

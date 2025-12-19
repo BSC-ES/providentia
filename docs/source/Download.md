@@ -34,20 +34,20 @@ There are currently four types of downloads available:
    - **How to get this type of download:** Answer `n` to the _Do you want to download from BSC remote machine?_ question or change the `BSC_DL_CHOICE` value to `n`.
 
 3. **Download of interpolated Experiments:**
-   - Downloads interpolated experiments from the storage5 machine (or mn5 if storage5 is down).
+   - Downloads interpolated models from the storage5 machine (or mn5 if storage5 is down).
    - Saves them in the `exp_root` paths specified in `settings/data_paths.yaml`.
    - **How to get this type of download:** Set the `interpolated` field in the configuration file to `True` or don't even set it since that is the default.
 
 4. **Download of non-interpolated Experiments:**
    - For local downloads:
-       - Downloads non-interpolated experiments from the storage5 machine (or mn5 if storage5 is down).
-       - The preferred path is specified in `interp_experiments.yaml`. If the experiment is not listed or no path or experiment domain is found, the system will look in the `exp_to_interp_root` path specified in `settings/data_paths.yaml`.
+       - Downloads non-interpolated models from the storage5 machine (or mn5 if storage5 is down).
+       - The preferred path is specified in `interp_experiments.yaml`. If the model is not listed or no path or model domain is found, the system will look in the `exp_to_interp_root` path specified in `settings/data_paths.yaml`.
    - For HPC downloads:
-       - In this case, the download (more accurately, the copy) will transfer non-interpolated experiments from esarchive to the gpfs folder found in `exp_to_interp_root` in the `settings/data_paths.yaml` file.
+       - In this case, the download (more accurately, the copy) will transfer non-interpolated models from esarchive to the gpfs folder found in `exp_to_interp_root` in the `settings/data_paths.yaml` file.
        - It only copies from the paths that are specified in `interp_experiments.yaml`. 
    - **How to get this type of download:** Set the `interpolated` field in the configuration file to `False`.
 
-*To know how to define an experiment in `interp_experiments.yaml`, please visit {ref}`this page <define-experiments>`.
+*To know how to define an model in `interp_experiments.yaml`, please visit {ref}`this page <define-experiments>`.
 
 ## Where to download from
 
@@ -82,12 +82,12 @@ Fields work a bit different in this mode, as only the parameters below will be u
 | resolution      | ✗                           | ✓                       |
 | start_date      | ✓                           | ✓                        |
 | end_date        | ✓                           | ✓                        |
-| experiments     | ✗                           | ✗                        |
+| model     | ✗                           | ✗                        |
 | filter_species  | ✗                           | ✗                        |
 
 Other important changes from the other modes are:
 
-1. **Wildcard (*) keyword:** If you want to download all available networks or experiments, simply use the wildcard `*` in the `networks` or `experiments` field. Be careful with this.
+1. **Wildcard (*) keyword:** If you want to download all available networks or models, simply use the wildcard `*` in the `networks` or `model` field. Be careful with this.
 2. **Default keyword:** The keyword `default` functions the same as leaving the field empty, meaning it will retrieve all possible values for that parameter.
 
 ## .env file

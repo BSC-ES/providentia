@@ -188,15 +188,15 @@ class ProvConfiguration:
                 return os.path.expanduser(nonghost_root[0])+nonghost_root[1:]
 
         elif key == 'exp_root':
-            # define experiment root data directory
-            # set experiment root data directory if left undefined
+            # define model root data directory
+            # set model root data directory if left undefined
             if value == '':
                 exp_root = data_paths[MACHINE]["exp_root"]
                 return os.path.expanduser(exp_root[0])+exp_root[1:]
 
         elif key == 'exp_to_interp_root':
-            # define experiment root data directory
-            # set experiment root data directory if left undefined
+            # define model root data directory
+            # set model root data directory if left undefined
             if value == '':
                 exp_to_interp_root = data_paths[MACHINE]["exp_to_interp_root"]
                 if exp_to_interp_root != '': 
@@ -512,19 +512,19 @@ class ProvConfiguration:
                     return [value.strip().lower()]
             
         elif key in ['experiments', 'experiment', 'model', 'models']:
-            # parse experiments
+            # parse models
 
             if isinstance(value, str):
                 # empty string
                 if value == "":
                     return []
-                # split experiments
+                # split models
                 else:
-                    # have alternative experiment names for the legend, then parse them?
+                    # have alternative model names for the legend, then parse them?
                     if ('(' in value) & (')' in value):
                         exps = [exp.strip() for exp in value.split('(')[0].strip().split(",")]
                         self.read_instance.alias = [exp_legend.strip() for exp_legend in value.split('(')[1].split(')')[0].strip().split(",")]
-                    # otherwise set legend names as given experiment names in full
+                    # otherwise set legend names as given model names in full
                     else: 
                         exps = [exp.strip() for exp in value.split(",")]
                         self.read_instance.alias = []
@@ -682,11 +682,11 @@ class ProvConfiguration:
         # if no special parsing treatment for variable, simply return value
         return value
 
-    def decompose_experiments(self, deactivate_warning):
-        """ Get experiment components (experiment-domain-ensemble-forecast) and fill the class variables with their value."""
+    def decompose_models(self, deactivate_warning):
+        """ Get model components (model-domain-ensemble-forecast) and fill the class variables with their value."""
 
-        # get separated experiment parts list
-        split_experiments = [exp.split("-") for exp in self.read_instance.experiments]
+        # get separated model parts list
+        split_models = [exp.split("-") for exp in self.read_instance.experiments]
 
         # get default ensemble
         default_ensemble = self.read_instance.default_values["ensemble"]
@@ -696,19 +696,19 @@ class ProvConfiguration:
         config_ensemble = copy.deepcopy(self.read_instance.ensemble)
         config_forecast = copy.deepcopy(self.read_instance.forecast)
 
-        # ignore the experiments if user wants to download observations
+        # ignore the models if user wants to download observations
         if self.read_instance.dl_mode == 'obs':
             return
 
         if self.read_instance.experiments and self.read_instance.mode == 'download':
 
-            # set experiment to be non-interpolated if there is no network
+            # set model to be non-interpolated if there is no network
             if not self.read_instance.network:
                 self.read_instance.dl_interpolated = False
                 msg = "Experiments detected but no network specified, proceeding to download non-interpolated model output."
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
-            # if there's experiments, ask the user whether they want interpolated or non-interpolated
+            # if there's models, ask the user whether they want interpolated or non-interpolated
             if not isinstance(self.read_instance.dl_interpolated, bool):
                 while True:
                     interpolated = input("\nModel data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded) ([y]/n): ").lower()
@@ -717,28 +717,28 @@ class ProvConfiguration:
                 # set the interpolated parameter  
                 self.read_instance.dl_interpolated = interpolated in ['','y']
 
-        # get function for checking formating of experiment for current mode
-        # if the current mode is interpolation or the experiment wanted to be downloaded is not interpolated
+        # get function for checking formating of model for current mode
+        # if the current mode is interpolation or the model wanted to be downloaded is not interpolated
         if self.read_instance.mode == 'interpolation' or (self.read_instance.mode == 'download' and self.read_instance.dl_interpolated is False):
-            check_experiment_func = self.check_experiment_interpolation
+            check_model_func = self.check_model_interpolation
         elif self.read_instance.mode == 'download':
-            check_experiment_func = self.check_experiment_download
+            check_model_func = self.check_model_download
         else:
-            check_experiment_func = self.check_experiment
+            check_model_func = self.check_model
 
-        # initialise lists to store experiments / aliases/ domain / ensemble / forecast to update class variables
-        experiments = []
+        # initialise lists to store models / aliases/ domain / ensemble / forecast to update class variables
+        models = []
         aliases = []
         domains = []
         ensembles = []
         forecasts = []
 
-        # iterate through each experiment string
-        for exp_ii, split_experiment in enumerate(split_experiments):
+        # iterate through each model string
+        for exp_ii, split_model in enumerate(split_models):
 
-            # if experiment is composed by more than 4 parts, exit
-            if len(split_experiment) > 4:
-                error = 'Invalid experiment format, experiments have to consist of four elements maximum.'
+            # if model is composed by more than 4 parts, exit
+            if len(split_model) > 4:
+                error = 'Invalid model format, models have to consist of four elements maximum.'
                 self.read_instance.logger.error(error)
                 sys.exit(1)
 
@@ -748,32 +748,32 @@ class ProvConfiguration:
             else:
                 alias = None
 
-            # initialise expID, domain, ensemble and forecast for the experiment
+            # initialise expID, domain, ensemble and forecast for the model
             exp_id = None
             exp_dom = None
             exp_ens = None
             exp_fct = None
 
-            # iterate through experiment parts and come up with list of experiments, 
-            # using information from each of domain, ensemble, forecast fields when not in experiments field,
+            # iterate through model parts and come up with list of models, 
+            # using information from each of domain, ensemble, forecast fields when not in models field,
             # otherwise default values are used
-            for experiment_part_ii, experiment_part in enumerate(split_experiment):
+            for model_part_ii, model_part in enumerate(split_model):
 
                 # have expID part?
-                if experiment_part_ii == 0:
-                    exp_id = copy.deepcopy(experiment_part)
+                if model_part_ii == 0:
+                    exp_id = copy.deepcopy(model_part)
 
                 # have domain part?
-                elif experiment_part in self.read_instance.available_domains: 
-                    exp_dom = copy.deepcopy(experiment_part)
+                elif model_part in self.read_instance.available_domains: 
+                    exp_dom = copy.deepcopy(model_part)
                 
                 # have forecast part?
-                elif ('day' in experiment_part) or ('daily' in experiment_part) or ('combined' in experiment_part): 
-                    exp_fct = experiment_part.strip().lower()
+                elif ('day' in model_part) or ('daily' in model_part) or ('combined' in model_part): 
+                    exp_fct = model_part.strip().lower()
 
                 # have ensemble part?
                 else:
-                    exp_ens = copy.deepcopy(experiment_part)
+                    exp_ens = copy.deepcopy(model_part)
                     # if it is a number, then make it 3 digits, if not it stays as it is
                     if exp_ens.isdigit():
                         exp_ens = exp_ens.strip().zfill(3)
@@ -786,83 +786,83 @@ class ProvConfiguration:
                             self.read_instance.logger.error(error)
                             sys.exit(1)
 
-            # throw error if domain has been defined in both domain and experiment fields
+            # throw error if domain has been defined in both domain and model fields
             if (exp_dom) and (config_domain):
                 error = f"Error: Unable to set domain(s) as {', '.join(config_domain)} because the "
-                error += f"experiment {self.read_instance.experiments[exp_ii]} already contains information about the domain."
+                error += f"model {self.read_instance.models[exp_ii]} already contains information about the domain."
                 self.read_instance.logger.error(error)
                 sys.exit(1)
-            # elif if have domain information from experiment field, then use that
+            # elif if have domain information from model field, then use that
             elif exp_dom:
                 dom = [exp_dom]
             # elif if have domain information from domain field, then use that
             elif config_domain:
                 dom = copy.deepcopy(config_domain)
-            # else no information for domain from domain or experiment fields, then set default value
+            # else no information for domain from domain or model fields, then set default value
             else:
                 dom = copy.deepcopy(self.read_instance.available_domains)
                        
-            # throw error if ensemble has been defined in both ensemble and experiment fields
+            # throw error if ensemble has been defined in both ensemble and model fields
             if (exp_ens) and (config_ensemble):
                 error = f"Error: Unable to set 'ensemble' as {', '.join(config_ensemble)} because the "
-                error += f"experiment {self.read_instance.experiments[exp_ii]} already contains information about the ensemble."                  
+                error += f"model {self.read_instance.experiments[exp_ii]} already contains information about the ensemble."                  
                 self.read_instance.logger.error(error)
                 sys.exit(1)
-            # elif if have ensemble information from experiment field, then use that
+            # elif if have ensemble information from model field, then use that
             elif exp_ens:
                 ens = [exp_ens]
             # elif if have ensemble information from ensemble field, then use that
             elif config_ensemble:
                 ens = copy.deepcopy(config_ensemble)
-            # else no information for ensemble from ensemble or experiment fields, then set default value
+            # else no information for ensemble from ensemble or model fields, then set default value
             else:
                 ens = copy.deepcopy(default_ensemble)
 
-            # throw error if forecast has been defined in both forecast and experiment fields
+            # throw error if forecast has been defined in both forecast and model fields
             if (exp_fct) and (config_forecast):
                 error = f"Error: Unable to set 'forecast' as {', '.join(config_forecast)} because the "
-                error +=  f"experiment {self.read_instance.experiments[exp_ii]} already contains information about the forecast."                  
+                error +=  f"model {self.read_instance.experiments[exp_ii]} already contains information about the forecast."                  
                 self.read_instance.logger.error(error)
                 sys.exit(1)
-            # elif if have forecast information from experiment field, then use that
+            # elif if have forecast information from model field, then use that
             elif exp_fct:
                 fct = [exp_fct]
             # elif if have forecast information from forecast field, then use that
             elif config_forecast:
                 fct = copy.deepcopy(config_forecast)
-            # else no information for forecast from forecast or experiment fields, then set default value (None)
+            # else no information for forecast from forecast or model fields, then set default value (None)
             else:
                 fct = [None]
 
-            # iterate through combinations of all expIDs, domain, ensemble and forecast and put together experiment str
+            # iterate through combinations of all expIDs, domain, ensemble and forecast and put together model str
             if exp_id is not None:
                 for d in dom:
                     for e in ens:
-                        # set experiment str
-                        experiment = '{}-{}-{}'.format(exp_id, d, e)
+                        # set model str
+                        model = '{}-{}-{}'.format(exp_id, d, e)
 
-                        # check experiment validity
-                        altered_experiments = check_experiment_func(experiment, deactivate_warning)
+                        # check model validity
+                        altered_models = check_model_func(model, deactivate_warning)
 
-                        #iterate through returned experiments and re-split experiment
-                        for altered_experiment in altered_experiments:
-                            altered_experiment_split = altered_experiment.split('-')
+                        #iterate through returned models and re-split model
+                        for altered_model in altered_models:
+                            altered_model_split = altered_model.split('-')
 
                             # determine if have just expID, or also domain and ensemble
-                            exp_id_alt = altered_experiment_split[0]
-                            if len(altered_experiment_split) == 1:
+                            exp_id_alt = altered_model_split[0]
+                            if len(altered_model_split) == 1:
                                 d_alt = None
                                 e_alt = None
                             else:
-                                d_alt = altered_experiment_split[1]
-                                e_alt = altered_experiment_split[2]
+                                d_alt = altered_model_split[1]
+                                e_alt = altered_model_split[2]
                             
-                            # iterate through forecast and set final experiment str
+                            # iterate through forecast and set final model str
                             for f in fct:
                                 if d_alt is None:
-                                    final_experiment = '{}'.format(exp_id_alt)
+                                    final_model = '{}'.format(exp_id_alt)
                                 else:
-                                    final_experiment = '{}-{}-{}'.format(exp_id_alt, d_alt, e_alt)
+                                    final_model = '{}-{}-{}'.format(exp_id_alt, d_alt, e_alt)
 
                                 # append domain, ensemble, and forecast to arrays if not None, and not already set
                                 if (d_alt is not None) & (d_alt not in domains):
@@ -872,29 +872,29 @@ class ProvConfiguration:
                                 if (f is not None) & (f not in forecasts):
                                     forecasts.append(f)
 
-                                # set final experiment str (if not already set), as well as alias (if not None)
-                                if final_experiment not in experiments:
-                                    experiments.append(final_experiment)
+                                # set final model str (if not already set), as well as alias (if not None)
+                                if final_model not in models:
+                                    models.append(final_model)
                                     if alias is not None:
                                         aliases.append(alias)
 
-        # set experiments dictionary mapping experiments to aliases
-        # it is mandatory to have the same number of experiments and alises, otherwise alises are dropped
-        if (len(experiments) == len(aliases)) & (len(experiments) > 0): 
+        # set models dictionary mapping models to aliases
+        # it is mandatory to have the same number of models and alises, otherwise alises are dropped
+        if (len(models) == len(aliases)) & (len(models) > 0): 
             self.read_instance.alias_flag = True
-            experiments = {exp:alias for exp, alias in zip(experiments, aliases)}
+            models = {exp:alias for exp, alias in zip(models, aliases)}
         else:
             self.read_instance.alias_flag = False
-            experiments = {exp:exp for exp in experiments}
+            models = {exp:exp for exp in models}
 
         # show warning if alias not possible to be set
         if (not self.read_instance.alias_flag) & (len(aliases) > 0):
             msg = "Experiment aliases could not be set."
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
-        # if experiments were passed but there is no valid experiment, show warning, or exit in interpolation case
-        if (self.read_instance.experiments != []) and (experiments == {}):
-            msg = 'No experiment data available.'
+        # if models were passed but there is no valid model, show warning, or exit in interpolation case
+        if (self.read_instance.experiments != []) and (models == {}):
+            msg = 'No model data available.'
             if self.read_instance.mode == 'interpolation':
                 error = "Error: " + msg
                 self.read_instance.logger.error(error)
@@ -902,17 +902,17 @@ class ProvConfiguration:
             else:
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
-        # if there is no domain set in configuration file, set it with values derived from experiment field and defaults (if not empty list)
+        # if there is no domain set in configuration file, set it with values derived from model field and defaults (if not empty list)
         if not config_domain:
             if len(domains) > 0:
                 self.read_instance.domain = domains
         
-        # if there is no ensemble set in configuration file, set it with values derived from experiment field and defaults (if not empty list)
+        # if there is no ensemble set in configuration file, set it with values derived from model field and defaults (if not empty list)
         if not config_ensemble:
             if len(ensembles) > 0:
                 self.read_instance.ensemble = ensembles
         
-        # if there is no forecast set in configuration file, set it with values derived from experiment field (if not empty list)
+        # if there is no forecast set in configuration file, set it with values derived from model field (if not empty list)
         if not config_forecast:
             if len(forecasts) > 0:
                 self.read_instance.forecast = forecasts
@@ -936,18 +936,18 @@ class ProvConfiguration:
                 self.read_instance.logger.error(error)
                 sys.exit(1)
 
-        # set class variable experiments with experiments dictionary that have now fully set
-        self.read_instance.experiments = experiments
+        # set class variable models with models dictionary that have now fully set
+        self.read_instance.experiments = models
 
-    def check_experiment(self, experiment, deactivate_warning):
-        """ Check individual experiment and get list of options. """
+    def check_model(self, model, deactivate_warning):
+        """ Check individual model and get list of options. """
 
-        # split experiment
-        expid, domain, ensemble = experiment.split('-')
+        # split model
+        expid, domain, ensemble = model.split('-')
         
-        # get all possible experiments
+        # get all possible models
         exp_path = join(self.read_instance.exp_root,self.read_instance.ghost_version)
-        self.possible_experiments = [] if not os.path.exists(exp_path) else os.listdir(exp_path)
+        self.possible_models = [] if not os.path.exists(exp_path) else os.listdir(exp_path)
 
         # initialise list of possible ghost versions
         available_ghost_versions = []
@@ -957,7 +957,7 @@ class ProvConfiguration:
 
         # if ensemble is allmembers, get all the possible ensemble members
         if ensemble == "allmembers":
-            exp_found = list(filter(lambda x:x.startswith(expid+'-'+domain), self.possible_experiments))
+            exp_found = list(filter(lambda x:x.startswith(expid+'-'+domain), self.possible_models))
            
             # search for other ghost versions
             if not exp_found:
@@ -965,17 +965,17 @@ class ProvConfiguration:
                     ghost_exp_found = list(filter(lambda x:x.startswith(expid+'-'+domain), os.listdir(join(self.read_instance.exp_root,ghost_version))))
                     if ghost_exp_found:
                         available_ghost_versions.append(ghost_version)
-        # if it is a concrete ensemble, then just get the experiment from the list
+        # if it is a concrete ensemble, then just get the model from the list
         else:
-            exp_found = [experiment] if experiment in self.possible_experiments else []
+            exp_found = [model] if model in self.possible_models else []
 
             # search for other ghost versions
             if not exp_found:
-                available_ghost_versions = list(filter(lambda x:experiment in os.listdir(join(self.read_instance.exp_root,x)), possible_ghost_versions))
+                available_ghost_versions = list(filter(lambda x:model in os.listdir(join(self.read_instance.exp_root,x)), possible_ghost_versions))
         
         # if not found because of the ghost version, tell the user
         if available_ghost_versions and ('/' not in self.read_instance.network[0]):
-            msg = f"There is no data available for {experiment} experiment for the current"
+            msg = f"There is no data available for {model} model for the current"
             msg += f" GHOST version ({self.read_instance.ghost_version}). Please check one of the available versions:"
             msg += f" {', '.join(sorted(available_ghost_versions))}"
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
@@ -983,113 +983,113 @@ class ProvConfiguration:
         return exp_found
     
     # TODO use inheritance in the future 
-    def check_experiment_interpolation(self, experiment, deactivate_warning):     
-        """ Checks if experiment, domain and ensemble combination works 
-        for interpolation or the download of non-interpolated experiments
-        Returns if experiment if valid and the experiment type (if there is one) """
+    def check_model_interpolation(self, model, deactivate_warning):     
+        """ Checks if model, domain and ensemble combination works 
+        for interpolation or the download of non-interpolated models
+        Returns if model if valid and the model type (if there is one) """
 
         # get the cams possible datasets
-        experiment_options = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_dataset.yaml')))
+        model_options = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_dataset.yaml')))
         
-        # split experiment
-        expid, domain, ensemble = experiment.split('-')
+        # split model
+        expid, domain, ensemble = model.split('-')
 
-        # accept asterisk to download all experiments (non-interpolated)
+        # accept asterisk to download all models (non-interpolated)
         if expid == '*':
             return [expid]
         
         # search if the expid is in the interp_experiments file
-        # initialize experiment search variables
-        experiment_exists = False
+        # initialize model search variables
+        model_exists = False
         msg = ""
 
         # HPC machines download (copy) and HPC interpolation
         if self.read_instance.machine != "local":
             # search in interp_experiments
-            for experiment_type, experiment_dict in interp_experiments.items():
-                if expid in experiment_dict["experiments"]:
-                    experiment_exists = True
+            for model_type, model_dict in interp_experiments.items():
+                if expid in model_dict["experiments"]:
+                    model_exists = True
                     break
             
-            msg += f"Cannot find the experiment ID '{expid}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
+            msg += f"Cannot find the model ID '{expid}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
 
             # HPC interpolation only
-            if experiment_exists is False and self.read_instance.mode == 'interpolation':
+            if model_exists is False and self.read_instance.mode == 'interpolation':
                 # search in hpc exp_to_interp_path
                 exp_to_interp_path = join(self.read_instance.exp_to_interp_root, expid)
                 if os.path.exists(exp_to_interp_path):
-                    experiment_exists = True
+                    model_exists = True
                 
-                msg += f"Cannot find the experiment ID {expid} with the {domain} domain in '{exp_to_interp_path}'."
+                msg += f"Cannot find the model ID {expid} with the {domain} domain in '{exp_to_interp_path}'."
         
         # local download and interpolation
         else:
-            # cams experiment is directly valid
-            if experiment.startswith(tuple(experiment_options.keys())):
-                return [experiment]
+            # cams model is directly valid
+            if model.startswith(tuple(model_options.keys())):
+                return [model]
 
             # local interpolation
             if self.read_instance.mode == 'interpolation':
                 # search in local exp_to_interp_path
                 exp_to_interp_path = join(self.read_instance.exp_to_interp_root, expid)
                 if os.path.exists(exp_to_interp_path):
-                    experiment_exists = True
+                    model_exists = True
 
-                msg += f"Cannot find the experiment ID {expid} with the {domain} domain in '{exp_to_interp_path}'."
+                msg += f"Cannot find the model ID {expid} with the {domain} domain in '{exp_to_interp_path}'."
             
             # local download
             else:
                 # search in interp_experiments
-                for experiment_type, experiment_dict in interp_experiments.items():
-                    if expid in experiment_dict["experiments"]:
-                        experiment_exists = True
+                for model_type, model_dict in interp_experiments.items():
+                    if expid in model_dict["experiments"]:
+                        model_exists = True
                         break
                 
-                msg += f"Cannot find the experiment ID '{expid}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
+                msg += f"Cannot find the model ID '{expid}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
 
                 # search in hpc exp_to_interp_path
-                if experiment_exists is False:
+                if model_exists is False:
                     self.read_instance.connect() 
                     exp_to_interp_path = join(self.read_instance.exp_to_interp_remote_path,expid,domain)
 
                     try:
                         self.read_instance.sftp.stat(exp_to_interp_path)
-                        experiment_exists = True
+                        model_exists = True
                     except FileNotFoundError:
-                        msg += f"Cannot find the experiment ID {expid} with the {domain} domain in '{exp_to_interp_path}'."
+                        msg += f"Cannot find the model ID {expid} with the {domain} domain in '{exp_to_interp_path}'."
 
-        # if experiment does not exist, exit
+        # if model does not exist, exit
         # supressed warning deactivation
-        if experiment_exists is False:
+        if model_exists is False:
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
             return []
 
-        return [experiment]
+        return [model]
     
-    def check_experiment_download(self, experiment, deactivate_warning):
-        """ Check individual experiment and get list of options."""
+    def check_model_download(self, model, deactivate_warning):
+        """ Check individual model and get list of options."""
 
-        # split experiment
-        expid, domain, ensemble = experiment.split('-')
+        # split model
+        expid, domain, ensemble = model.split('-')
 
-        # accept asterisk to download all experiments
+        # accept asterisk to download all models
         if expid == '*':
             return [expid]
         
-        # all experiments pass this check because the real one is in the remote machine
-        exp_found = [experiment]
+        # all models pass this check because the real one is in the remote machine
+        exp_found = [model]
         
         # connect to the remote machine
         self.read_instance.connect()        
         
-        # get all possible experiments
+        # get all possible models
         exp_path = join(self.read_instance.exp_remote_path,self.read_instance.ghost_version)
-        self.possible_experiments = self.read_instance.sftp.listdir(exp_path)
+        self.possible_models = self.read_instance.sftp.listdir(exp_path)
 
         # TODO repeated code, put this into a method in the future?
         # if ensemble is allmembers, get all the possible ensemble
         if ensemble == "allmembers":
-            exp_found = list(sorted(filter(lambda x:x.startswith(expid+'-'+domain), self.possible_experiments)))
+            exp_found = list(sorted(filter(lambda x:x.startswith(expid+'-'+domain), self.possible_models)))
            
             if not exp_found:
                 # initialise list of possible ghost versions
@@ -1101,7 +1101,7 @@ class ProvConfiguration:
                     if ghost_exp_found:
                         available_ghost_versions.append(ghost_version)
 
-                msg = f"There is no experiment {expid}-{domain} data for the current GHOST version ({self.read_instance.ghost_version})." 
+                msg = f"There is no model {expid}-{domain} data for the current GHOST version ({self.read_instance.ghost_version})." 
                 if available_ghost_versions:
                     msg += f" Please, check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
@@ -1185,7 +1185,7 @@ class ProvConfiguration:
         for field, default in self.read_instance.default_values.items():
             current_value = getattr(self.read_instance, field)
 
-            # skip ensemble so it is done in decompose_experiment
+            # skip ensemble so it is done in decompose_model
             if field == 'ensemble':
                 pass
             
@@ -1307,7 +1307,7 @@ class ProvConfiguration:
                 self.read_instance.logger.error(error)
                 sys.exit(1)
 
-        # create empty directories for the observations and experiments
+        # create empty directories for the observations and models
         if MACHINE == "local":
             for path in [self.read_instance.nonghost_root, self.read_instance.ghost_root, self.read_instance.exp_root, self.read_instance.exp_to_interp_root]:
                 if not os.path.exists(path):
@@ -1335,10 +1335,10 @@ class ProvConfiguration:
                     if self.read_instance.dl_mode in valid_modes:
                         break
                         
-        # set expID, domain, ensemble, forecast from experiment name
-        self.decompose_experiments(deactivate_warning)
+        # set expID, domain, ensemble, forecast from model name
+        self.decompose_models(deactivate_warning)
 
-        # before checking the experiment check that the remote download has the interpolated tag as False, if not exit
+        # before checking the model check that the remote download has the interpolated tag as False, if not exit
         if self.read_instance.mode == 'download' and MACHINE in ["storage5", "nord3v2", "nord4"] and self.read_instance.dl_interpolated is True:
             error = F"Error: Nothing from the {self.read_instance.section} section was copied to gpfs, change the interpolated field to 'False'."
             self.read_instance.logger.error(error)
@@ -1347,28 +1347,28 @@ class ProvConfiguration:
         # check calibration factor
         if self.read_instance.calibration_factor:
 
-            # detect if calibration factor is passed by experiment
-            calibration_by_experiment = not self.read_instance.calibration_factor[0][0] in ['+', '-', '*', '/']
+            # detect if calibration factor is passed by model
+            calibration_by_model = not self.read_instance.calibration_factor[0][0] in ['+', '-', '*', '/']
 
-            # control that calibration factor not by experiment can only be one element
-            if not calibration_by_experiment and len(self.read_instance.calibration_factor) > 1:
-                error = "Error: When calibration factor is not provided by the experiment, only one value can be passed."
+            # control that calibration factor not by model can only be one element
+            if not calibration_by_model and len(self.read_instance.calibration_factor) > 1:
+                error = "Error: When calibration factor is not provided by the model, only one value can be passed."
                 self.read_instance.logger.error(error)
                 sys.exit(1)
 
-            # create dictionary per experiment
+            # create dictionary per model
             calibration_factor_dict = {}
 
-            # if calibration is by experiment
-            if calibration_by_experiment:
-                for i, experiment in enumerate(self.read_instance.experiments):
+            # if calibration is by model
+            if calibration_by_model:
+                for i, model in enumerate(self.read_instance.models):
                     for calibration_factor in self.read_instance.calibration_factor:
-                        if experiment in calibration_factor:
+                        if model in calibration_factor:
                             calibration_factor_exp = calibration_factor.split("(")[1][:-1]
-                            calibration_factor_dict[experiment] = calibration_factor_exp
-            # if the same calibration is applied to all experiments
+                            calibration_factor_dict[model] = calibration_factor_exp
+            # if the same calibration is applied to all models
             else:
-                calibration_factor_dict = {experiment:self.read_instance.calibration_factor[0] for experiment in self.read_instance.experiments}                 
+                calibration_factor_dict = {model:self.read_instance.calibration_factor[0] for model in self.read_instance.experiments}                 
 
             # replace calibration factors by new dictionary
             self.read_instance.calibration_factor = calibration_factor_dict

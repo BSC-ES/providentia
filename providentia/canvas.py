@@ -542,7 +542,7 @@ class Canvas(FigureCanvas):
             self.read_instance.cursor_function = 'handle_temporal_colocate_update'
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
-        # else, if have loaded experiment data, check if colocate checkbox is checked or unchecked
+        # else, if have loaded model data, check if colocate checkbox is checked or unchecked
         check_state = self.read_instance.ch_colocate.checkState()
 
         # update variable to inform plotting functions whether to use colocated data/or not
@@ -808,14 +808,14 @@ class Canvas(FigureCanvas):
                     self.read_instance.handle_layout_update('None', sender=plot_type_position)
                     return
                 
-                # if temporal colocation is turned off or there are no experiments, skip some plots
+                # if temporal colocation is turned off or there are no models, skip some plots
                 if plot_type in ['scatter', 'taylor', 'fairmode-target', 'fairmode-statsummary']:
                     if ((not self.read_instance.temporal_colocation) 
                         or ((self.read_instance.temporal_colocation) and (len(self.read_instance.data_labels) == 1))):
                         if (not self.read_instance.temporal_colocation):
                             msg = f'It is not possible to make {plot_type} plots without activating the temporal colocation.'
                         else:
-                            msg = f'It is not possible to make {plot_type} plots without loading experiments.'
+                            msg = f'It is not possible to make {plot_type} plots without loading models.'
                         show_message(self.read_instance, msg)
                         self.read_instance.handle_layout_update('None', sender=plot_type_position)
                         return
@@ -1033,16 +1033,16 @@ class Canvas(FigureCanvas):
             # update map plot options
             self.update_plot_options(plot_types=['map'])
 
-    def update_experiment_domain_edges(self):
+    def update_model_domain_edges(self):
         """
-        Function that plots grid domain edges of experiments in memory
+        Function that plots grid domain edges of models in memory
         """
 
         # remove grid domain polygon if previously plotted
         self.remove_axis_objects(self.plot_axes['map'].patches, types_to_remove=[matplotlib.patches.Polygon])
 
-        # create grid edge polygons for experiments in memory
-        grid_edge_polygons = self.plotting.make_experiment_domain_polygons()
+        # create grid edge polygons for models in memory
+        grid_edge_polygons = self.plotting.make_model_domain_polygons()
 
         # plot grid edge polygons on map
         for grid_edge_polygon in grid_edge_polygons:
@@ -1539,7 +1539,7 @@ class Canvas(FigureCanvas):
                 # get initial stats from plot characteristics
                 periodic_cycle = 'None'
                 self.read_instance.current_statsummary_stats['basic']['None'] = self.plot_characteristics['statsummary']['basic']
-                self.read_instance.current_statsummary_stats['expbias']['None'] = self.plot_characteristics['statsummary']['experiment_bias']
+                self.read_instance.current_statsummary_stats['expbias']['None'] = self.plot_characteristics['statsummary']['model_bias']
                 self.active_statsummary_stats = {'basic': self.get_active_statsummary_stats('basic'),
                                                  'expbias': self.get_active_statsummary_stats('expbias')}
 
@@ -2016,7 +2016,7 @@ class Canvas(FigureCanvas):
     def select_intersect_stations(self):
         """ 
         Function that selects/unselects intersection of
-        stations and all experiment domains (and associated plots)
+        stations and all model domains (and associated plots)
         upon ticking of checkbox
         """
 
@@ -2050,7 +2050,7 @@ class Canvas(FigureCanvas):
                 self.absolute_non_selected_station_inds = np.arange(len(self.relative_selected_station_inds),
                                                                     dtype=np.int32)
 
-            # else, if checkbox is checked then select all stations which intersect with all loaded experiment domains
+            # else, if checkbox is checked then select all stations which intersect with all loaded model domains
             elif check_state == QtCore.Qt.Checked:
 
                 # if have only observations loaded into memory, select all plotted stations
@@ -2060,7 +2060,7 @@ class Canvas(FigureCanvas):
                                                                     dtype=np.int32)
                     self.absolute_non_selected_station_inds = np.array([], dtype=np.int32)
                 # else, define list of lists to get intersection between (active_map_valid_station_inds, 
-                # and valid station indices associated with each loaded experiment array)
+                # and valid station indices associated with each loaded model array)
                 else:
                     intersect_lists = [self.active_map_valid_station_inds]
                     for data_label in self.read_instance.data_labels:
@@ -2072,7 +2072,7 @@ class Canvas(FigureCanvas):
                             intersect_lists.append(valid_station_inds)
                     
                     # get intersect between active map valid station indices and valid station indices
-                    # associated with each loaded experiment array --> relative selected station indcies
+                    # associated with each loaded model array --> relative selected station indcies
                     self.relative_selected_station_inds = np.sort(list(set.intersection(*map(set, intersect_lists))))
                     
                     # get absolute selected station indices (indices relative to plotted stations on map)
@@ -3066,8 +3066,8 @@ class Canvas(FigureCanvas):
                     # option 'domain'
                     elif option == 'domain':
                         if not undo:
-                            # plot experiment grid domain edges on map
-                            self.update_experiment_domain_edges()
+                            # plot model grid domain edges on map
+                            self.update_model_domain_edges()
                         else:
                             # remove grid domain polygon if previously plotted
                             self.remove_axis_objects(self.plot_axes['map'].patches, types_to_remove=[matplotlib.patches.Polygon])

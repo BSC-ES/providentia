@@ -2,7 +2,7 @@
 
 If you have access to the HPC machines at Barcelona Supercomputing Center (BSC), the first thing you need to decide is whether you want to use Providentia on a supercomputer (MN5 or Nord4) or on your local computer (Linux or Mac).
 
-We recommend working on local machines to everyone, including the users at BSC, because the interactive features of the dashboard are faster and you do not need to wait in queue to get resources and use the software. The only disadvantage is that the data (experiments and observations) stored on HPC cannot be accessed directly and need to be downloaded onto your local machine using the {ref}`download mode <default-download>` in advance. If you do not want to download the data and instead you prefer to use an HPC machine for your analysis, we recommend reading the Wiki section [Connection setup](Connection-setup).
+We recommend working on local machines to everyone, including the users at BSC, because the interactive features of the dashboard are faster and you do not need to wait in queue to get resources and use the software. The only disadvantage is that the data (models and observations) stored on HPC cannot be accessed directly and need to be downloaded onto your local machine using the {ref}`download mode <default-download>` in advance. If you do not want to download the data and instead you prefer to use an HPC machine for your analysis, we recommend reading the Wiki section [Connection setup](Connection-setup).
 
 If you do not have access to the machines, you won't be able to use the download mode to get model data (only observations from limited sources, i.e. Zenodo for GHOST and NILU Thredds for ACTRIS). If you want to use your own data, consider checking the tutorial [2. Formatting model data](https://github.com/BSC-ES/providentia/blob/master/tutorials/2.%20Formatting%20model%20data.ipynb) and reading the section [Create your own data network](Create-your-own-data-network) to process and create netCDF files that Providentia can read.
 
@@ -42,8 +42,8 @@ When you open the dashboard on a local machine the first time, you don't see any
 The datasets need to be saved following a very specific directory tree. The download mode takes care of that when saving the files, more details can be found in the {ref}`download section <default-download>`. However, if you are using your own data you will need to take that into account.
 
 By default, in the folder `/home/{user}/data/providentia` (or your preferred) there should be three folders: 
-- `exp`: Interpolated model data as in: {GHOST version} -> {experiment}_{domain}_{ensemble} -> {resolution} -> {species} -> {network} -> {species}_{year}{month}.nc.
-- `exp_to_interp`: Model data to interpolate as in: {experiment} -> {domain} -> {resolution} -> {species} -> {species}_{year}{month}.nc.
+- `exp`: Interpolated model data as in: {GHOST version} -> {model}_{domain}_{ensemble} -> {resolution} -> {species} -> {network} -> {species}_{year}{month}.nc.
+- `exp_to_interp`: Model data to interpolate as in: {model} -> {domain} -> {resolution} -> {species} -> {species}_{year}{month}.nc.
 - `obs`: Observation datasets. For GHOST as in: ghost -> {network} -> {GHOST version} -> {resolution} -> {species} -> {species}_{year}{month}.nc. For non-GHOST as in: nonghost -> {provider} -> {network} -> {resolution} -> {species} -> {species}_{year}{month}.nc.
 
 As observed, datasets must be saved per month, independently of their temporal resolution. An example of a working directory tree is the following:

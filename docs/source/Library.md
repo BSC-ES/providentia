@@ -200,7 +200,7 @@ In order to calculate statistics for a dataset, this can done via the following 
 stat_calc = provi.statistic(stat, labela='OBS')
 ```
 
-where `stat` is the statistic wished to be calculated, and `labela` is the name of the observations/experiment data (this can be an alias set in the configuration file or the original dataset name). The statistic returned will be one summary value, which can be formulated in differing ways, e.g. taking a median time series across all stations and then calculating the statistic, or calculating the statistic across all stations and then taking the median. This formulation can be set by changing the statistical mode in the configuration file, for which more information can be found [here](Statistics).
+where `stat` is the statistic wished to be calculated, and `labela` is the name of the observations/model data (this can be an alias set in the configuration file or the original dataset name). The statistic returned will be one summary value, which can be formulated in differing ways, e.g. taking a median time series across all stations and then calculating the statistic, or calculating the statistic across all stations and then taking the median. This formulation can be set by changing the statistical mode in the configuration file, for which more information can be found [here](Statistics).
 
 If wanting to calculate a bias statistic, then an additional dataset is needed to be compared against, which can be set via the following argument:
 

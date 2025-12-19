@@ -17,13 +17,13 @@ The standard plot types consist of:
 - Distribution plot (`distribution`)
 - Scatter plot (`scatter`)
 - Heat map (`heatmap`)
-- Table that gives one stat per subsection per experiment (`table`)
-- Table that gives multiple stats per experiment (`statsummary`)
+- Table that gives one stat per subsection per model (`table`)
+- Table that gives multiple stats per model (`statsummary`)
 - Taylor Diagram (`taylor`)
 - FAIRMODE target plot (`fairmode-target`)
 - FAIRMODE statistics summary plot (`fairmode-statsummary`).
 
-Some of these plots are created for specific statistics, namely: `map`, `periodic`, `heatmap`, `taylor` and `table`. This statistic is defined by aggregating the `-[stat]` field to the plot type. `[stat]` should be replaced with any of the base statistic names (e.g. p5, Mean), or experiment bias names (e.g. r2, RMSE). For example to show the median values spatially, `map-p50` would be set as the plot name, or `map-r2` to show the coefficient of determination. The available statistic names are documented in `settings/basic_stats.yaml` and `settings/experiment_bias_stats.yaml`. For the Taylor diagram, only `r`and `r2`can be used.
+Some of these plots are created for specific statistics, namely: `map`, `periodic`, `heatmap`, `taylor` and `table`. This statistic is defined by aggregating the `-[stat]` field to the plot type. `[stat]` should be replaced with any of the base statistic names (e.g. p5, Mean), or model bias names (e.g. r2, RMSE). For example to show the median values spatially, `map-p50` would be set as the plot name, or `map-r2` to show the coefficient of determination. The available statistic names are documented in `settings/basic_stats.yaml` and `settings/experiment_bias_stats.yaml`. For the Taylor diagram, only `r`and `r2`can be used.
 
 The timeseries can also be used to show how statistics vary in time. In order to do this, we need to add `-[stat]` and the temporal resolution after the plot type name (e.g. `timeseries-Mean-daily`, `timeseries-r2-monthly`, `timeseries-r-annual`).
 
@@ -97,7 +97,7 @@ The extension `_obs` allows users to only show observations in their plots.
 
 ### Split the plots by label (`_individual`)
 
-The extension `_individual` allows users to disaggregate the plots and see the plots by experiments, individually. This can help to visualise the results in a clear way when multiple experiments have been selected.
+The extension `_individual` allows users to disaggregate the plots and see the plots by models, individually. This can help to visualise the results in a clear way when multiple models have been selected.
 
 ![individual](uploads/individual.jpg)
 
@@ -109,7 +109,7 @@ If the configuration option `_annotate` is added, a box will be created on the p
 
 ### Get the bias of the data (`_bias`)
 
-Alternatively the plots can be modified to show, rather than the absolute observational vs experiment values, the bias between these pairings. This is done by adding `_bias` to the base plot names, for example: `distribution_bias` or `periodic-Max_bias`.
+Alternatively the plots can be modified to show, rather than the absolute observational vs model values, the bias between these pairings. This is done by adding `_bias` to the base plot names, for example: `distribution_bias` or `periodic-Max_bias`.
 
 ![bias](uploads/bias.jpg)
 
@@ -121,7 +121,7 @@ Adding the option `_smooth` to the `timeseries` plot will plot a smooth line ove
 
 ### Add a regression line to the scatter plot (`_regression`)
 
-Adding the option `_regression` will plot the linear regression between observations and experiment.
+Adding the option `_regression` will plot the linear regression between observations and model.
 
 ![regression](uploads/regression.jpg)
 

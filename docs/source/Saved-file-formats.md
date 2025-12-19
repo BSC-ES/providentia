@@ -18,16 +18,16 @@ As Providentia is capable of loading multiple network and species simultaneously
 
 | Variable | Description |
 | ------ | ------ |
-| [network]-[species]_data | Values of the desired species for both observations and experiments |
+| [network]-[species]_data | Values of the desired species for both observations and models |
 | [network]-[species]_ghost_data | GHOST data variables used for additional filtering | 
 | [network]-[species]_metadata | Metadata of the observations which varies per month gives as a multidimensional array |
 | time | Time in given resolution from the start date |
-| data_labels | Labels associated with each data array, e.g. observations, experiment_1, etc. |
+| data_labels | Labels associated with each data array, e.g. observations, model_1, etc. |
 | ghost_data_variables | The names of the GHOST data variables used for additional filtering |
 | resolution | Temporal resolution of data |
 | start_date | Start date of data |
 | end_date | End date of data |
-| temporal_colocation | Boolean stating if observations and experiments have been temporally colocated |
+| temporal_colocation | Boolean stating if observations and models have been temporally colocated |
 | spatial_colocation | Boolean stating if data has been spatially colocated across [network]-[species] |
 | filter_species | Data ranges per species used filter read data |
 | ghost_version | Version of GHOST |
@@ -73,13 +73,13 @@ In [6]: latitude = obs['metadata']['latitude']
 
 | Variable | Description |
 | ------ | ------ |
-| [network]-[species]_data | Values of the desired species for both observations and experiments |
+| [network]-[species]_data | Values of the desired species for both observations and models |
 | [network]-[species]_ghost_data | GHOST data variables used for additional filtering | 
 | [network]-[species]_[metadata_var] | Metadata of the observations which varies per month given per variable |
 | [network]-[species]_qa | Quality assurance flags, GHOST performed quality control checks |
 | [network]-[species]_flags | Data flags, standardised flags taken from the data provider |
 | time | Time in given resolution from the start date |
-| data_labels | Labels associated with each data array, e.g. observations, experiment_1, etc. |
+| data_labels | Labels associated with each data array, e.g. observations, model_1, etc. |
 | ghost_data_variables | The names of the GHOST data variables used for additional filtering |
 
 resolution, start_date, end_date, temporal_colocation, spatial_colocation, filter_species and ghost_version are stored as attributes of [network]-[species]_data.

@@ -244,7 +244,7 @@ def legend_picker_func(canvas_instance, event):
                 # put observations label always first in pop-ups on hover
                 if data_label == canvas_instance.read_instance.observations_data_label:
                     canvas_instance.plot_elements['data_labels_active'].insert(0, data_label)
-                # put experiment labels in the same order as in the legend
+                # put model labels in the same order as in the legend
                 else:
                     canvas_instance.plot_elements['data_labels_active'].insert(list(canvas_instance.read_instance.experiments.values()).index(data_label)+1, 
                                                                                 data_label)
@@ -553,7 +553,7 @@ class HoverAnnotation(object):
         text_label += ('<font color="{0}">{1}</font>').format(hex_colour, data_label)
         # observations label
         text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'x', x, self.canvas_instance.plot_characteristics['scatter']['marker_annotate_rounding'])
-        # experiment label
+        # model label
         text_label += ('<br><font color="{0}">{1}: {2:.{3}f}</font>').format(hex_colour, 'y', y, self.canvas_instance.plot_characteristics['scatter']['marker_annotate_rounding'])
 
         # update tooltip

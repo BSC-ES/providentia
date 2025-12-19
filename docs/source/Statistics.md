@@ -38,7 +38,7 @@ NOTE: For the Flattened mode, there is no aggregation statistic.
 
 ## Periodic statistics
 
-The periodic plot gives statistical information for grouped data in individual timesteps. Thus it can be seen how each individual timesteps compare for observations vs experiment/s.
+The periodic plot gives statistical information for grouped data in individual timesteps. Thus it can be seen how each individual timesteps compare for observations vs model/s.
 
 However, when looking to evaluate the agreement across the whole of the periodic cycle, Providentia was previously lacking statistics to enable such a comparison.
 

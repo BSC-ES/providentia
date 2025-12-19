@@ -1,10 +1,10 @@
 # Interpolation
 
-This mode allows users to spatially interpolate experiment output against available observational stations to be viewable in **Providentia**. 
+This mode allows users to spatially interpolate model output against available observational stations to be viewable in **Providentia**. 
 
-The Interpolation mode allows to interpolate experiments against **GHOST** and **non-GHOST** observations.
+The Interpolation mode allows to interpolate models against **GHOST** and **non-GHOST** observations.
 
-Contained in: `/gpfs/projects/bsc32/AC_cache/recon/exp_interp/` exists an archive of previously interpolated experiment output, depending on the version. If the experiment you want to analyse is not there, or if you have re-run the experiment, add new variables etc. then this guide will aid you in interpolating the experiment output.
+Contained in: `/gpfs/projects/bsc32/AC_cache/recon/exp_interp/` exists an archive of previously interpolated model output, depending on the version. If the model you want to analyse is not there, or if you have re-run the model, add new variables etc. then this guide will aid you in interpolating the model output.
 
 ## Starting an Interpolation
 
@@ -47,37 +47,37 @@ To check the status/output of an interpolation job, the following log files are 
 
    These logs give information about individual interpolations and how long it took to do them.
    
-    Found in the `logs/interpolation/interpolation_logs` folder, for each individual interpolation, new directories are created with the structure `{experiment}/{species}/{network}/{resolution}`. Inside these directories, logs for each month are stored as `{YYYYMM}_{exit_code}.out`. If successful, the exit code will be 0.
+    Found in the `logs/interpolation/interpolation_logs` folder, for each individual interpolation, new directories are created with the structure `{model}/{species}/{network}/{resolution}`. Inside these directories, logs for each month are stored as `{YYYYMM}_{exit_code}.out`. If successful, the exit code will be 0.
 
  
 If the interpolation is succesful, the resulted interpolated files are stored under the directory : `/gpfs/projects/bsc32/AC_cache/recon/exp_interp/` followed by the latest version of GHOST used by the interpolation.
 
-(define-experiments)=
-## Define experiments
+(define-models)=
+## Define models
 
-All the experiments that are runned in the interpolation need to be defined in `/settings/interp_experiments.yaml`.
+All the models that are runned in the interpolation need to be defined in `/settings/interp_experiments.yaml`.
 
-This file contains a dictionary of default relevant experiments grouped by type, in where you find the list of names of the experiments and the list of possible paths for them. 
+This file contains a dictionary of default relevant models grouped by type, in where you find the list of names of the models and the list of possible paths for them. 
 
-If you have a new experiment to interpolate and it is located on one of the examples paths such as `/esarchive/exp/monarch/`, you only need to add it to its list of experiments.
+If you have a new model to interpolate and it is located on one of the examples paths such as `/esarchive/exp/monarch/`, you only need to add it to its list of models.
 
-If the experiment is not located in one of the predefined paths, you will need to add the **experiment type**, the **experiment name**, and the **experiment storage directory** from root (excluding the experiment name). For example:
+If the model is not located in one of the predefined paths, you will need to add the **model type**, the **model name**, and the **model storage directory** from root (excluding the model name). For example:
 
 ```
-"example_experiment_type": {
-        "experiments": ["example_experiment_name"],
+"example_model_type": {
+        "experiments": ["example_model_name"],
         "paths": [ 
-            "/example/experiment/path"
+            "/example/model/path"
         ]
 ```
 
 You can find this exact template at the end of the `interp_experiments.yaml` file.
 
-When adding a new experiment to a directory, if you want it to be read from Providentia, the subdirectories inside the experiment storage directory must follow this structure: `{experiment_name}/{domain}/{resolution}/{species}`. For example: `cams61_monarch_ph3/eu/hourly/sconco3`.
+When adding a new experiment to a directory, if you want it to be read from Providentia, the subdirectories inside the model storage directory must follow this structure: `{model_name}/{domain}/{resolution}/{species}`. For example: `cams61_monarch_ph3/eu/hourly/sconco3`.
 
-There can be multiple paths to the same experiments, and you can add them to the list of paths. The order is important: the first path that works on the machine will be used.
+There can be multiple paths to the same model, and you can add them to the list of paths. The order is important: the first path that works on the machine will be used.
 
-There's normally two location types of experiment data:
+There's normally two location types of model data:
 
 * **gpfs**: Accessible by the ***MareNostrum5/Nord4*** machines.
 * **esarchive**: Accessible by the ***Nord4*** machine.
@@ -86,7 +86,7 @@ If you are using a machine that allows both types of paths, it is recommended to
 
 ## Additional considerations
 
-When checking if an experiment is stored in a location with the corresponding domain, resolution, and species, consider that the species might not always be listed under the same name.
+When checking if an model is stored in a location with the corresponding domain, resolution, and species, consider that the species might not always be listed under the same name.
 
 The file `internal/mapping_species.yaml` contains a dictionary mapping original species names to their alternative names. 
 

@@ -1,6 +1,6 @@
 """
 Provides functions for basic statistic
-calculations and experiment bias evaluation.
+calculations and model bias evaluation.
 
 Function defintions mainly stem from: 
 https://www.tandfonline.com/doi/pdf/10.1080/10962247.2016.1265027 ,
@@ -433,7 +433,7 @@ class ExpBias(object):
     @staticmethod
     def calculate_coe(obs, exp):
         """
-        Calculate coefficient of efficiency (COE) between observations and experiment,
+        Calculate coefficient of efficiency (COE) between observations and model,
         based on Legates and McCabe (1999, 2012). There have been many suggestions for
         measuring model performance over the years, but the COE is a simple formulation
         which is easy to interpret. A perfect model has a COE = 1. As noted by Legates
@@ -471,7 +471,7 @@ class ExpBias(object):
     @staticmethod
     def calculate_ioa(obs, exp):
         """
-        Calculate the Index of Agreement (IOA) between observations and experiment, based on Willmott et al. (2011)
+        Calculate the Index of Agreement (IOA) between observations and model, based on Willmott et al. (2011)
         The metric spans between -1 and +1 with values approaching +1 representing better model performance.
         An IOA of 0.5, for example, indicates that the sum of the error-magnitudes is one half of the sum
         of the observed-deviation magnitudes.
@@ -731,7 +731,7 @@ class ExpBias(object):
         """
         Calculate root mean squared error (RMSE) /
         normalised root mean squared error (NRMSE)
-        between observations and experiment.
+        between observations and model.
 
         Parameters
         ----------
@@ -796,7 +796,7 @@ class ExpBias(object):
     @staticmethod
     def calculate_r(obs, exp):
         """
-        Calculate the Pearson correlation coefficient (r) between observations and experiment
+        Calculate the Pearson correlation coefficient (r) between observations and model
         The Pearson correlation coefficient measures the linear relationship between two datasets.
         Strictly speaking, Pearson's correlation requires that each dataset be normally distributed.
         Like other correlation coefficients, this one varies between -1 and +1 with 0 implying no correlation.
@@ -835,7 +835,7 @@ class ExpBias(object):
     @staticmethod
     def calculate_r_squared(obs, exp):
         """
-        Calculate the coefficient of determination, r squared, between observations and experiment
+        Calculate the coefficient of determination, r squared, between observations and model
         It is the proportion of the variance in the dependent variable
         that is predictable from the independent variable(s).
         In linear least squares multiple regression with an estimated intercept term,
@@ -862,7 +862,7 @@ class ExpBias(object):
     @staticmethod
     def calculate_fac2(obs, exp):
         """
-        Calculate fraction of experiment values within
+        Calculate fraction of model values within
         a factor of two of observed values (FAC2)
 
         Parameters

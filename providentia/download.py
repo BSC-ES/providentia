@@ -23,7 +23,7 @@ from .zenodo import Zenodo
 
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
-# load the defined experiments paths, agrupations yaml and mapping species
+# load the defined models paths, agrupations yaml and mapping species
 data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
@@ -97,7 +97,7 @@ class Download(object):
             self.logger.error(error)
             sys.exit(1)
 
-        # variable that saves whether some experiments/observations were downloaded before
+        # variable that saves whether some models/observations were downloaded before
         self.overwritten_files_flag = False
 
         # initialize the necessary things in local
@@ -228,35 +228,35 @@ class Download(object):
                     # get orignal species back
                     self.species = main_species
 
-            # when one of those symbols is passed, get all experiments
+            # when one of those symbols is passed, get all models
             if self.experiments == {'*' : '*'}:
-                self.get_all_experiments()
+                self.get_all_models()
 
             if self.experiments and self.dl_mode != 'obs':
-                # remote machine experiment download
+                # remote machine model download
                 if self.machine in ["storage5", "nord3v2", "nord4"]:
-                    # get function to download experiment depending on the configuration file field
-                    download_experiment_fun = self.copy_non_interpolated_experiment
-                # local experiment download
+                    # get function to download model depending on the configuration file field
+                    download_model_fun = self.copy_non_interpolated_model
+                # local model download
                 else:
-                    for experiment in self.experiments:
-                        # CAMS experiment
-                        if experiment.startswith(tuple(cams_options.keys())):
+                    for model in self.experiments:
+                        # CAMS model
+                        if model.startswith(tuple(cams_options.keys())):
                             self.cams = Cams(self)
-                            initial_check_nc_files = self.cams.download_cams_experiment(experiment, initial_check=True)
+                            initial_check_nc_files = self.cams.download_cams_model(model, initial_check=True)
                             files_to_download = self.select_files_to_download(initial_check_nc_files)
                             if not initial_check_nc_files or files_to_download:
-                                self.cams.download_cams_experiment(experiment, initial_check=False, files_to_download=files_to_download)
+                                self.cams.download_cams_model(model, initial_check=False, files_to_download=files_to_download)
                         # BSC machines
                         else:
-                            download_experiment_fun = self.download_experiment if self.dl_interpolated else self.download_non_interpolated_experiment
+                            download_model_fun = self.download_model if self.dl_interpolated else self.download_non_interpolated_model
                     
-                            # iterate the experiments download
-                            for experiment in self.experiments.keys():
-                                initial_check_nc_files = download_experiment_fun(experiment, initial_check=True)
+                            # iterate the models download
+                            for model in self.experiments.keys():
+                                initial_check_nc_files = download_model_fun(model, initial_check=True)
                                 files_to_download = self.select_files_to_download(initial_check_nc_files)
                                 if not initial_check_nc_files or files_to_download:
-                                    download_experiment_fun(experiment, initial_check=False, files_to_download=files_to_download)
+                                    download_model_fun(model, initial_check=False, files_to_download=files_to_download)
 
             # remove section variables from memory
             for k in self.section_opts:
@@ -273,9 +273,9 @@ class Download(object):
             # modified by commandline arguments, if given
             self.provconf = ProvConfiguration(self, **self.commandline_arguments)
 
-        # show message in case experiments or observations were ignored
+        # show message in case models or observations were ignored
         if self.overwritten_files_flag == True:
-            self.logger.info("\nSome experiments/observations were found but were not downloaded because the user chose not to overwrite or because 'dl_overwrite' is set to False.")
+            self.logger.info("\nSome models/observations were found but were not downloaded because the user chose not to overwrite or because 'dl_overwrite' is set to False.")
 
         if self.machine == "local":
             # close connection, if it exists
@@ -704,52 +704,52 @@ class Download(object):
                        
             return initial_check_nc_files
 
-    def download_experiment(self, experiment, initial_check, files_to_download=None):
+    def download_model(self, model, initial_check, files_to_download=None):
         # check if ssh exists and check if still active, connect if not
         if (self.ssh is None) or (self.ssh.get_transport().is_active()):
             self.connect()  
         
         if not initial_check:
-            # print current experiment
+            # print current model
             self.logger.info('\n'+'-'*40)
-            self.logger.info(f"\nDownloading {experiment} experiment data from {self.remote_machine}...")
+            self.logger.info(f"\nDownloading {model} model data from {self.remote_machine}...")
             
         # get resolution and species combinations
         res_spec_dir = []
         
-        # domain and ensemble are part of the experiment name, all united by dash (-)
-        experiment_new = experiment
+        # domain and ensemble are part of the model name, all united by dash (-)
+        model_new = model
 
         # domain and ensemble are directories
-        experiment_old = experiment.replace("-","/")
+        model_old = model.replace("-","/")
         
         # get remote directory format depending on the GHOST version
-        experiment = experiment_old if self.ghost_version in ["1.2", "1.3", "1.3.1"] else experiment_new
+        model = model_old if self.ghost_version in ["1.2", "1.3", "1.3.1"] else model_new
 
         # get remote directory
-        remote_dir = join(self.exp_remote_path,self.ghost_version,experiment)
+        remote_dir = join(self.exp_remote_path,self.ghost_version,model)
 
-        # check if experiment exists
+        # check if model exists
         try:
             self.sftp.stat(remote_dir)
         except FileNotFoundError:
-            msg = f"There is no data available in {self.remote_machine} for {experiment_new} experiment for the current GHOST version ({self.ghost_version})."
+            msg = f"There is no data available in {self.remote_machine} for {model_new} model for the current GHOST version ({self.ghost_version})."
 
-            # get possible GHOST versions from the combination of GHOST_standards and the real avaibles in the experiment remote machine path
+            # get possible GHOST versions from the combination of GHOST_standards and the real avaibles in the model remote machine path
             possible_ghost_versions = set(self.sftp.listdir(self.exp_remote_path)).intersection(set(self.possible_ghost_versions))
             
-            # get available experiments in other GHOST versions (considering different formats)
+            # get available models in other GHOST versions (considering different formats)
             available_ghost_versions = []
 
             for possible_ghost_version in possible_ghost_versions:
                 try:
-                    # get experiment path depending on the GHOST version
-                    remote_dir_ghost_version = join(self.exp_remote_path, possible_ghost_version, experiment_old if possible_ghost_version in ["1.2", "1.3", "1.3.1"] else experiment_new)
+                    # get model path depending on the GHOST version
+                    remote_dir_ghost_version = join(self.exp_remote_path, possible_ghost_version, model_old if possible_ghost_version in ["1.2", "1.3", "1.3.1"] else model_new)
                     
                     # check if directory exists
                     self.sftp.stat(remote_dir_ghost_version)
 
-                    # if it doesn't break, the experiment exists in this version
+                    # if it doesn't break, the model exists in this version
                     available_ghost_versions.append(possible_ghost_version)
 
                 except FileNotFoundError:
@@ -763,7 +763,7 @@ class Download(object):
 
                 # iterate the different GHOST versions
                 for possible_ghost_version in available_ghost_versions:
-                    remote_dir_ghost_version = join(self.exp_remote_path, possible_ghost_version, experiment_old if possible_ghost_version in ["1.2", "1.3", "1.3.1"] else experiment_new)
+                    remote_dir_ghost_version = join(self.exp_remote_path, possible_ghost_version, model_old if possible_ghost_version in ["1.2", "1.3", "1.3.1"] else model_new)
                     
                     # iterate the different resolutions
                     sftp_resolutions = self.model_resolution if self.model_resolution else set(self.sftp.listdir(remote_dir)).intersection(self.nonghost_available_resolutions)
@@ -807,14 +807,14 @@ class Download(object):
             try:
                 sftp_species = self.species if self.species else set(self.sftp.listdir(join(remote_dir,resolution))).intersection(self.available_species)
             except FileNotFoundError:
-                msg = f"There is no data available in {self.remote_machine} for {experiment_new} experiment at {resolution} resolution"
+                msg = f"There is no data available in {self.remote_machine} for {model_new} model at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
                 continue
             for species in sftp_species: 
                 try:
                     sftp_network = self.network if self.network else self.sftp.listdir(join(remote_dir,resolution,species))
                 except FileNotFoundError:
-                    msg = f"There is no data available in {self.remote_machine} for {experiment_new} experiment for {species} species at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} for {model_new} model for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
                 for network in sftp_network:
@@ -823,14 +823,14 @@ class Download(object):
                         network = network.replace("/", "-")
                     res_spec_dir.append(join(remote_dir,resolution,species,network))
         
-        # print the species, resolution and experiment combinations that are going to be downloaded
+        # print the species, resolution and model combinations that are going to be downloaded
         if res_spec_dir:
 
             # initialise list with all the nc files to be downloaded
             initial_check_nc_files = []
 
             if not initial_check:
-                self.logger.info(f"\n{experiment_new} experiment data to download ({len(res_spec_dir)}):")
+                self.logger.info(f"\n{model_new} model data to download ({len(res_spec_dir)}):")
             
             # get all the nc files in the date range
             for remote_dir in res_spec_dir:
@@ -841,7 +841,7 @@ class Download(object):
                 resolution = remote_dir.split('/')[-3]
 
                 # get local directory 
-                local_dir = join(self.exp_root, self.ghost_version, experiment_new, resolution, species, network)
+                local_dir = join(self.exp_root, self.ghost_version, model_new, resolution, species, network)
 
                 # print source and destination  
                 if not initial_check:
@@ -851,16 +851,16 @@ class Download(object):
                 try:
                     nc_files = self.sftp.listdir(remote_dir)
                 except FileNotFoundError:
-                    msg = f"There is no data available in {self.remote_machine} for {experiment_new} experiment for {species} species {network} network at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} for {model_new} model for {species} species {network} network at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
                 # get the nc files in the date range       
                 valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
 
-                # warning if experiment + species + resolution + network + date range combination gets no matching results       
+                # warning if model + species + resolution + network + date range combination gets no matching results       
                 if not valid_nc_files:                 
-                    msg = f"There is no data available in {self.remote_machine} from {self.start_date} to {self.end_date} for {experiment_new} experiment {species} species {network} network at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} from {self.start_date} to {self.end_date} for {model_new} model {species} species {network} network at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -905,41 +905,41 @@ class Download(object):
             
             return initial_check_nc_files
 
-    def download_non_interpolated_experiment(self, experiment, initial_check, files_to_download=None):
+    def download_non_interpolated_model(self, model, initial_check, files_to_download=None):
         # check if ssh exists and check if still active, connect if not
         if (self.ssh is None) or (self.ssh.get_transport().is_active()):
             self.connect()  
         
         if not initial_check:
-            # print current experiment
+            # print current model
             self.logger.info('\n'+'-'*40)
-            self.logger.info(f"\nDownloading {experiment} non-interpolated experiment data from {self.remote_machine}...")
+            self.logger.info(f"\nDownloading {model} non-interpolated model data from {self.remote_machine}...")
             
         # get resolution and species combinations
         res_spec_dir = []
 
-        # get experiment id and the domain
-        exp_id, domain, ensemble = experiment.split("-")
+        # get model id and the domain
+        exp_id, domain, ensemble = model.split("-")
 
-        # initialise warning message and experiment exists boolean
+        # initialise warning message and model exists boolean
         msg = ""
-        experiment_exists = False
+        model_exists = False
 
-        # see if the experiment is any of the interp_experiment.yaml lists
-        for experiment_type, experiment_dict in interp_experiments.items():
-            if exp_id in experiment_dict["experiments"]:
-                experiment_exists = True
+        # see if the model is any of the interp_experiments.yaml lists
+        for model_type, model_dict in interp_experiments.items():
+            if exp_id in model_dict["experiments"]:
+                model_exists = True
                 break
         
         # if it is in the list, check if the paths work
-        if experiment_exists is True:
+        if model_exists is True:
             # get boolean to False again until the paths works
-            experiment_exists = False
+            model_exists = False
 
             # get all paths that work
             # if there is none, show a warning
             exp_dir_functional_list = []    
-            for exp_dir in experiment_dict["paths"]:
+            for exp_dir in model_dict["paths"]:
                 # esarchive in transfer5 is located inside gpfs
                 if "/esarchive/" == exp_dir[:11] and self.remote_hostname.startswith('transfer'):
                     exp_dir = join("/gpfs/archive/bsc32/",exp_dir[1:])
@@ -953,40 +953,40 @@ class Download(object):
             # if none of the paths are in this current machine, break
             if not exp_dir_functional_list:
                 msg += f"None of the paths specified in {join('settings', 'interp_experiments.yaml')} are available on the remote machine ({self.remote_machine}). "
-            # if any path works, get the first one that has the experiment
+            # if any path works, get the first one that has the model
             else:
                 # get first functional directory  
                 for exp_dir in exp_dir_functional_list:
                     remote_dir = join(exp_dir,exp_id,domain)
-                    # check if remote experiment and domain directories exist in the remote machine
+                    # check if remote model and domain directories exist in the remote machine
                     try:
                         self.sftp.stat(remote_dir)
-                        experiment_exists = True
+                        model_exists = True
                         break
                     except FileNotFoundError:
                         pass
 
-                # if the experiment-domain combination is not possible, show the warning
-                if experiment_exists is False:
-                    msg += f"There is no data available for the {exp_id} experiment with the {domain} domain in none of the paths specified in {join('settings', 'interp_experiments.yaml')} in the remote machine ({self.remote_machine}). "
+                # if the model-domain combination is not possible, show the warning
+                if model_exists is False:
+                    msg += f"There is no data available for the {exp_id} model with the {domain} domain in none of the paths specified in {join('settings', 'interp_experiments.yaml')} in the remote machine ({self.remote_machine}). "
 
-        # if experiment was not in the list, or any of the paths were available
-        # or there was no valid path experiment combination then search in the gpfs directory
-        if experiment_exists is False:
-            # get all possible experiments
+        # if model was not in the list, or any of the paths were available
+        # or there was no valid path model combination then search in the gpfs directory
+        if model_exists is False:
+            # get all possible models
             exp_to_interp_path = join(self.exp_to_interp_remote_path,exp_id,domain)
             try:
                 self.sftp.stat(exp_to_interp_path)
                 remote_dir = exp_to_interp_path
-                experiment_exists = True
+                model_exists = True
             except FileNotFoundError:
                 pass 
             
-            # add to the message if experiment was not found in the gpfs remote directory
-            msg += f"Cannot find the {exp_id} experiment with the {domain} domain in '{self.exp_to_interp_remote_path}'."    
+            # add to the message if model was not found in the gpfs remote directory
+            msg += f"Cannot find the {exp_id} model with the {domain} domain in '{self.exp_to_interp_remote_path}'."    
         
-        # if the experiment-domain combination is not possible, break
-        if experiment_exists is False:
+        # if the model-domain combination is not possible, break
+        if model_exists is False:
             show_message(self, msg, deactivate=initial_check)
             return
 
@@ -1000,7 +1000,7 @@ class Download(object):
                 available_species = self.available_species+[spec[0] for spec in mapping_species.values()]
                 sftp_species = self.species if self.species else set(self.sftp.listdir(join(remote_dir,resolution))).intersection(available_species)
             except FileNotFoundError:
-                msg = f"There is no data available in {self.remote_machine} for the {exp_id} experiment with the {domain} domain at {resolution} resolution"
+                msg = f"There is no data available in {self.remote_machine} for the {exp_id} model with the {domain} domain at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
                 continue
 
@@ -1041,21 +1041,21 @@ class Download(object):
                 
                 # if no species were found, then show the message
                 if species_exists is False:
-                    msg = f"There is no data available in {self.remote_machine} for the {exp_id} experiment with the {domain} domain for {species} species at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} for the {exp_id} model with the {domain} domain for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
                 # add the path with the resolution and species combination to the list
                 res_spec_dir.append(res_spec)
                         
-        # print the species, resolution and experiment combinations that are going to be downloaded
+        # print the species, resolution and model combinations that are going to be downloaded
         if res_spec_dir:
 
             # initialise list with all the nc files to be downloaded
             initial_check_nc_files = []
 
             if not initial_check:
-                self.logger.info(f"\n{experiment} experiment data to download ({len(res_spec_dir)}):")
+                self.logger.info(f"\n{model} model data to download ({len(res_spec_dir)}):")
             
             # get all the nc files in the date range
             for remote_dir in res_spec_dir:
@@ -1122,16 +1122,16 @@ class Download(object):
                     
                 # if there is no options with the ensemble, tell the user
                 if nc_files == []:
-                    msg = f"There is no data available in {self.remote_machine} for the {exp_id} experiment with the {domain} domain with the {ensemble} ensemble."
+                    msg = f"There is no data available in {self.remote_machine} for the {exp_id} model with the {domain} domain with the {ensemble} ensemble."
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
                 # get the nc files in the date range        
                 valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
 
-                # warning if experiment + species + resolution + network + date range combination gets no matching results       
+                # warning if model + species + resolution + network + date range combination gets no matching results       
                 if not valid_nc_files:                 
-                    msg = f"There is no data available in {self.remote_machine} from {self.start_date} to {self.end_date} for {experiment} experiment {species} species at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} from {self.start_date} to {self.end_date} for {model} model {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -1181,25 +1181,25 @@ class Download(object):
             msg = "There is no available model output to be downloaded."
             show_message(self, msg, deactivate=initial_check)
             
-    def copy_non_interpolated_experiment(self, experiment, initial_check, files_to_download=None):
+    def copy_non_interpolated_model(self, model, initial_check, files_to_download=None):
         if not initial_check:
-            # print current experiment
+            # print current model
             self.logger.info('\n'+'-'*40)
-            self.logger.info(f"\nCopying {experiment} non-interpolated experiment data from esarchive to gpfs in {self.machine}...")
+            self.logger.info(f"\nCopying {model} non-interpolated model data from esarchive to gpfs in {self.machine}...")
             
         # get resolution and species combinations
         res_spec_dir = []
 
-        # get experiment id and the domain
-        exp_id, domain, ensemble = experiment.split("-")
+        # get model id and the domain
+        exp_id, domain, ensemble = model.split("-")
 
-        # get experiment type
-        for experiment_type, experiment_dict in interp_experiments.items():
-            if exp_id in experiment_dict["experiments"]:
+        # get model type
+        for model_type, model_dict in interp_experiments.items():
+            if exp_id in model_dict["experiments"]:
                 break
         
-        # get experiment specific directories list
-        exp_dir_list = experiment_dict["paths"]
+        # get model specific directories list
+        exp_dir_list = model_dict["paths"]
 
         # take all functional directories
         exp_dir_functional_list = []    
@@ -1223,14 +1223,14 @@ class Download(object):
         esarchive_dir = None
         for exp_dir in exp_dir_functional_list:
             temp_esarchive_dir = join(exp_dir,exp_id,domain)
-            # check if experiment and domain directories exist in esarchive machine
+            # check if model and domain directories exist in esarchive machine
             if os.path.exists(temp_esarchive_dir): 
                 esarchive_dir = temp_esarchive_dir
                 break
         
-        # if the experiment-domain combination is not possible, break
+        # if the model-domain combination is not possible, break
         if esarchive_dir is None:
-            msg = f"There is no data available for the {exp_id} experiment with the {domain} domain in none of the paths specified in {join('settings', 'interp_experiments.yaml')} in esarchive."
+            msg = f"There is no data available for the {exp_id} model with the {domain} domain in none of the paths specified in {join('settings', 'interp_experiments.yaml')} in esarchive."
             show_message(self, msg, deactivate=initial_check)
             return
 
@@ -1244,7 +1244,7 @@ class Download(object):
                 available_species = self.available_species+[spec[0] for spec in mapping_species.values()]
                 sftp_species = self.species if self.species else set(os.listdir(join(esarchive_dir,resolution))).intersection(available_species)
             except FileNotFoundError:
-                msg = f"There is no data available in esarchive for the {exp_id} experiment with the {domain} domain at {resolution} resolution"
+                msg = f"There is no data available in esarchive for the {exp_id} model with the {domain} domain at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
                 continue
 
@@ -1277,21 +1277,21 @@ class Download(object):
                 
                 # if no species were found, then show the message
                 if species_exists is False:
-                    msg = f"There is no data available in esarchive for the {exp_id} experiment with the {domain} domain for {species} species at {resolution} resolution"
+                    msg = f"There is no data available in esarchive for the {exp_id} model with the {domain} domain for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
                 # add the path with the resolution and species combination to the list
                 res_spec_dir.append(res_spec)
                         
-        # print the species, resolution and experiment combinations that are going to be copied
+        # print the species, resolution and model combinations that are going to be copied
         if res_spec_dir:
 
             # initialise list with all the nc files to be copied
             initial_check_nc_files = []
 
             if not initial_check:
-                self.logger.info(f"\n{experiment} experiment data to copy ({len(res_spec_dir)}):")
+                self.logger.info(f"\n{model} model data to copy ({len(res_spec_dir)}):")
             
             # get all the nc files in the date range
             for esarchive_dir in res_spec_dir:
@@ -1349,16 +1349,16 @@ class Download(object):
                         
                 # if there is no options with the ensemble, tell the user
                 if nc_files == []:
-                    msg = f"There is no data available in esarchive for the {exp_id} experiment with the {domain} domain with the {ensemble} ensemble."
+                    msg = f"There is no data available in esarchive for the {exp_id} model with the {domain} domain with the {ensemble} ensemble."
                     show_message(self, msg, deactivate=initial_check)
                     continue
                 
                 # get the nc files in the date range        
                 valid_nc_files = self.get_valid_nc_files_in_date_range(nc_files)
 
-                # warning if experiment + species + resolution + network + date range combination gets no matching results       
+                # warning if model + species + resolution + network + date range combination gets no matching results       
                 if not valid_nc_files:                 
-                    msg = f"There is no data available in esarchive from {self.start_date} to {self.end_date} for {experiment} experiment {species} species at {resolution} resolution"
+                    msg = f"There is no data available in esarchive from {self.start_date} to {self.end_date} for {model} model {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -1461,29 +1461,29 @@ class Download(object):
         else:
             self.network = self.nonghost_available_networks
     
-    def get_all_experiments(self):
-        # download all interpolated experiments
+    def get_all_models(self):
+        # download all interpolated models
         if self.dl_interpolated is True:
             # check if ssh exists and check if still active, connect if not
             if (self.ssh is None) or (self.ssh.get_transport().is_active()):
                 self.connect()  
 
-            # get directory content and format it as the experiments       
-            experiment_list = self.sftp.listdir(join(self.exp_remote_path,self.ghost_version))
-        # download all non interpolated experiments
+            # get directory content and format it as the models       
+            model_list = self.sftp.listdir(join(self.exp_remote_path,self.ghost_version))
+        # download all non interpolated models
         else:
-            # get all the experiments id
-            experiments = []
-            for experiment_dict in interp_experiments.values():
-                experiments += experiment_dict["experiments"]
+            # get all the models id
+            models = []
+            for model_dict in interp_experiments.values():
+                models += model_dict["experiments"]
             # get all the domain and ensemble combinations 
-            experiment_list = []
+            model_list = []
             # TODO hardcoded
             for domain in ["ip", "d03", "d01", "regional", "eu", "reg", "ex", "bcn", "cat", "d02", "global","regional_i01", "regional_i02", "regional_i03"]:
-                for exp in experiments:
-                    experiment_list.append(exp+"-"+domain+"-allmembers")
+                for exp in models:
+                    model_list.append(exp+"-"+domain+"-allmembers")
 
-        self.experiments = dict(zip(experiment_list,experiment_list))
+        self.experiments = dict(zip(model_list,model_list))
 
     def get_valid_nc_files_in_date_range(self, nc_files):
         valid_nc_files = []

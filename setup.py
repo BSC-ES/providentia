@@ -54,7 +54,7 @@ setup(
     url="https://github.com/BSC-ES/providentia",
     keywords=["earth sciences", "atmospheric composition",
               "evaluation", "verification", "observations", "air quality"],
-    description="Providentia is designed to allow on-the-fly, offline and interactive analysis of experiment outputs, with respect to processed observational data.",
+    description="Providentia is designed to allow on-the-fly, offline and interactive analysis of model outputs, with respect to processed observational data.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[
