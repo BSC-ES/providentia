@@ -20,8 +20,6 @@
   "cpus_per_task": 12,
   "cores_explicit": False,
   "network": [],
-  "observation": [],
-  "framework": [],
   "species": [],
   "resolution": [],
   "model_resolution": [],
@@ -30,11 +28,8 @@
   "observations_data_label": "observations",
   "alias_flag": False,
   "experiments": [],
-  "experiment": [],
-  "model": [],
-  "models": [],
   "alias": [],
-  "domain": null, 
+  "domain": null,
   "ensemble": null,
   "forecast": [],
   "qa": null,
@@ -88,6 +83,11 @@
   "interp_model_downsampling": "mean",
   "interp_model_upsampling": "fill",
   "logfile": False,
+  "aliases":
+    {
+      "experiments": ["experiment", "model", "models"],
+      "network": ["observation", "framework"],
+    },
   "fixed_section_vars":
     [
       "ghost_version",
@@ -149,7 +149,7 @@
       "interp_multiprocessing",
       "interp_spinup_timesteps",
       "interp_model_downsampling",
-      "interp_model_upsampling"
+      "interp_model_upsampling",
     ],
   "non_writing_vars":
     [
