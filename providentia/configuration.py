@@ -789,7 +789,7 @@ class ProvConfiguration:
             # throw error if domain has been defined in both domain and model fields
             if (exp_dom) and (config_domain):
                 error = f"Error: Unable to set domain(s) as {', '.join(config_domain)} because the "
-                error += f"model {self.read_instance.models[exp_ii]} already contains information about the domain."
+                error += f"model {self.read_instance.experiments[exp_ii]} already contains information about the domain."
                 self.read_instance.logger.error(error)
                 sys.exit(1)
             # elif if have domain information from model field, then use that
@@ -1361,7 +1361,7 @@ class ProvConfiguration:
 
             # if calibration is by model
             if calibration_by_model:
-                for i, model in enumerate(self.read_instance.models):
+                for i, model in enumerate(self.read_instance.experiments):
                     for calibration_factor in self.read_instance.calibration_factor:
                         if model in calibration_factor:
                             calibration_factor_exp = calibration_factor.split("(")[1][:-1]

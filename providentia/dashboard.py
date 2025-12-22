@@ -885,7 +885,7 @@ class Dashboard(QtWidgets.QWidget):
         if self.from_conf:
             self.data_labels = copy.deepcopy(selected_data_labels)
             self.data_labels_raw = copy.deepcopy(selected_data_labels_raw)
-            self.models = copy.deepcopy(selected_models)
+            self.experiments = copy.deepcopy(selected_models)
             
         # update default qa
         default_qa = get_default_qa(self, self.selected_species)

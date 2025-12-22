@@ -1053,7 +1053,7 @@ class Canvas(FigureCanvas):
         self.remove_axis_objects(self.plot_axes['map'].patches, types_to_remove=[matplotlib.patches.Polygon])
 
         # create grid edge polygons for models in memory
-        grid_edge_polygons = self.plotting.make_model_domain_polygons()
+        grid_edge_polygons = self.plotting.make_experiment_domain_polygons()
 
         # plot grid edge polygons on map
         for grid_edge_polygon in grid_edge_polygons:
@@ -1550,7 +1550,7 @@ class Canvas(FigureCanvas):
                 # get initial stats from plot characteristics
                 periodic_cycle = 'None'
                 self.read_instance.current_statsummary_stats['basic']['None'] = self.plot_characteristics['statsummary']['basic']
-                self.read_instance.current_statsummary_stats['expbias']['None'] = self.plot_characteristics['statsummary']['model_bias']
+                self.read_instance.current_statsummary_stats['expbias']['None'] = self.plot_characteristics['statsummary']['experiment_bias']
                 self.active_statsummary_stats = {'basic': self.get_active_statsummary_stats('basic'),
                                                  'expbias': self.get_active_statsummary_stats('expbias')}
 
