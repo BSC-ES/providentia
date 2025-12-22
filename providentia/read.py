@@ -1,4 +1,4 @@
-""" Class that reads observational/experiment data into memory """
+""" Class for reading data into memory """
 
 import copy
 import ctypes
@@ -6,14 +6,13 @@ import datetime
 import multiprocessing
 import os
 import sys
-import time
 
 from dateutil.relativedelta import relativedelta
 from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
 
-from providentia.auxiliar import CURRENT_PATH, join, get_standard_units, get_standard_parameters_by_speci
+from providentia.auxiliar import get_standard_units, get_standard_parameters_by_speci
 from .fields_menus import (init_representativity, init_period, init_metadata,
                            update_representativity_fields, update_period_fields, update_metadata_fields,
                            representativity_conf, period_conf, metadata_conf)

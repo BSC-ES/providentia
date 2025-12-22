@@ -1,12 +1,9 @@
-""" Auxiliar functions to create plots """
+""" Auxiliary plotting functions """
 
 import copy
-import sys
-import os
 import math
-import json
-import scipy
-import yaml
+import os
+import sys
 
 from matplotlib import transforms
 from matplotlib.colors import cnames
@@ -21,12 +18,10 @@ from scipy.signal import convolve
 from scipy.signal.windows import gaussian
 from scipy.sparse import coo_matrix
 import seaborn as sns
+import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join, get_conversion_factor, get_standard_parameters_by_speci
-from .statistics import (calculate_statistic, get_z_statistic_sign, 
-                         aggregation)
-from .warnings_prv import show_message
-
+from .statistics import calculate_statistic, get_z_statistic_sign
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 

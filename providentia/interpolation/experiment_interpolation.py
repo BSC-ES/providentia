@@ -1,23 +1,22 @@
+""" Class for the spatial and temporal interpolation of model data to observational data"""
+
 import ast
 from calendar import monthrange
-import cartopy.crs as ccrs
-import cftime
 import copy
+import datetime
 import glob
 import os
-import re
+import pathlib
 import shutil
 import subprocess
 import sys
 import time
 import traceback
-import yaml
-import pathlib
-from pydoc import locate
 
-import datetime
+import cartopy.crs as ccrs
+import cftime
 import dateutil.relativedelta as relativedelta
-from netCDF4 import Dataset, num2date, date2num, chartostring
+from netCDF4 import Dataset, num2date, chartostring
 import numpy as np
 from packaging.version import Version
 import pandas as pd
@@ -26,10 +25,11 @@ import scipy
 from scipy.spatial import cKDTree
 from shapely.geometry import Polygon, Point
 import xarray as xr
+import yaml
+
 from aux_interp import (check_for_ghost, findMiddle, check_directory_existence, set_file_permissions_ownership,
                         get_aeronet_bin_radius_from_bin_variable, get_aeronet_model_bin, 
                         get_model_to_aeronet_bin_transform_factor)
-
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[2]))
 from providentia.auxiliar import CURRENT_PATH, join, get_machine, get_conversion_factor, get_standard_parameters_by_speci
 
@@ -43,7 +43,7 @@ PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
 
 class ExperimentInterpolation(object):
-    """ Class which handles interpolation of experiment data to surface observations. """
+    """ Class which handles interpolation of model data to surface data, both spatially and temporally. """
 
     def __init__(self,submit_args):
         

@@ -1,7 +1,8 @@
-""" Class to generate canvas """
+""" Class for Dashboard matplotlib canvas """
 
 import copy
 import sys
+from weakref import WeakKeyDictionary
 
 import matplotlib
 from matplotlib.backend_bases import MouseButton
@@ -17,7 +18,6 @@ from packaging.version import Version
 import pandas as pd
 from pandas.plotting import register_matplotlib_converters
 from PyQt5 import QtCore, QtWidgets
-from weakref import WeakKeyDictionary
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .canvas_menus import SettingsMenu

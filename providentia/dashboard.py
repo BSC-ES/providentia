@@ -1,24 +1,20 @@
-""" Module which provides main window """
+""" Class for Providentia dashboard mode """
 
 from collections import OrderedDict
 import copy
-import datetime
 from functools import partial
-import json
 import os
 import sys
 import time
 from weakref import WeakKeyDictionary
-import yaml
 
 import matplotlib
-import matplotlib.gridspec as gridspec
 from matplotlib.projections import PolarAxes
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 from packaging.version import Version
-import pandas as pd
 from PyQt5 import QtCore, QtWidgets, QtGui
+import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 from .canvas import Canvas
@@ -47,13 +43,22 @@ QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 class Dashboard(QtWidgets.QWidget):
-    """ Class that generates Providentia dashboard. """
+    """Class that generates Providentia dashboard interface."""
 
     # create signals that are fired upon resizing/moving of main Providentia window
     resized = QtCore.pyqtSignal()
     move = QtCore.pyqtSignal()
 
     def __init__(self, **kwargs):
+        """
+        Initialise the Dashboard instance.
+
+        Parameters
+        ----------
+        **kwargs : dict
+            Arbitrary keyword arguments used to configure the dashboard 
+            settings and override default configuration values.
+        """
 
         # allow access to methods of parent class QtWidgets.QWidget
         super(Dashboard, self).__init__()
@@ -200,31 +205,85 @@ class Dashboard(QtWidgets.QWidget):
             show_message(self, msg)
 
     def resizeEvent(self, event):
-        """ Function to overwrite default PyQt5 resizeEvent function --> for calling get_geometry. """
+        """
+        Handle window resize events and emit the resized signal.
+
+        This method overrides the default PyQt5 `resizeEvent` function to 
+        trigger custom logic, such as calling `get_geometry`. By emitting 
+        the `resized` signal before passing the event to the superclass, 
+        it ensures all connected components are notified of the change 
+        during the resize operation.
+
+        Parameters
+        ----------
+        event : QResizeEvent
+            The resize event object containing the old and new sizes 
+            of the widget.
+
+        Returns
+        -------
+        None
+            The result of the parent class `resizeEvent` implementation.
+        """
 
         self.resized.emit()
 
         return super(Dashboard, self).resizeEvent(event)
 
     def moveEvent(self, event):
-        """ Function to overwrite default PyQt5 moveEvent function --> for calling get_geometry. """
+        """
+        Handle window move events and emit the move signal.
+
+        This method overrides the default PyQt5 `moveEvent` function to 
+        trigger custom logic, such as updating geometry tracking via 
+        `get_geometry`. It emits the custom `move` signal before passing 
+        the event to the superclass to ensure the application state 
+        remains synchronised with the window's screen position.
+
+        Parameters
+        ----------
+        event : QMoveEvent
+            The move event object containing the old and new positions 
+            of the widget.
+
+        Returns
+        -------
+        None
+            The result of the parent class `moveEvent` implementation.
+        """
         
         self.move.emit()
         
         return super(Dashboard, self).moveEvent(event)
 
     def get_geometry(self):
-        """ Update current geometry of main Providentia window and buttons. """
+        """
+        Update the current geometry of the main Providentia window and buttons.
+        """
 
         # get geometry of full window
-        #self.full_window_geometry = copy.deepcopy(self.geometry())
         self.full_window_geometry = copy.deepcopy(self.frameGeometry())
 
         # update geometry of qt elements
         self.update_qt_elements_geometry(resize=True)
 
     def update_qt_elements_geometry(self, plot_types='ALL', positions = [1,2,3,4,5], resize=False):
-        """ Update current geometry of canvas qt elements"""
+        """
+        Update the proportional geometry of canvas Qt elements based on window size.
+
+        Parameters
+        ----------
+        plot_types : str or list, optional
+            A list of active plot types to update, or 'ALL' to target all 
+            predefined dashboard positions. Defaults to 'ALL'.
+        positions : list, optional
+            The numerical dashboard positions to be updated. 
+            Defaults to [1, 2, 3, 4, 5].
+        resize : bool, optional
+            If True, the geometry for full and partial canvas covers and 
+            layout selector buttons will also be recalculated. 
+            Defaults to False.
+        """
 
         # get dashboard and canvas pixels
         full_window_width = self.full_window_geometry.width()
@@ -331,7 +390,7 @@ class Dashboard(QtWidgets.QWidget):
                     break
 
     def init_ui(self):
-        """ Initialise user interface. """
+        """Initialise the user interface layout, widgets, and signal connections."""
 
         self.logger.info("Starting Providentia dashboard...")
 
@@ -630,12 +689,20 @@ class Dashboard(QtWidgets.QWidget):
             self.showMaximized()
 
     def generate_pop_up_window(self, menu_root):
-        """ Generate pop up window. """
+        """
+        Initialise and display a synchronised pop-up configuration window.
+
+        Parameters
+        ----------
+        menu_root : QWidget or str
+            The root menu object or identifier used to populate the 
+            pop-up window content.
+        """
         
         self.pop_up_window = PopUpWindow(self, menu_root, [], self.full_window_geometry)
 
     def update_configuration_bar_fields(self):
-        """ Function that initialises/updates configuration bar fields. """
+        """Initialise or synchronise all configuration bar widgets and their available options."""
 
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
@@ -906,7 +973,15 @@ class Dashboard(QtWidgets.QWidget):
         self.block_MPL_canvas_updates = False
 
     def update_layout_fields(self, canvas_instance):
-        """ Function which updates layout fields. """
+        """
+        Synchronise available plot types and layout selector options based on current data state.
+
+        Parameters
+        ----------
+        canvas_instance : Canvas
+            The Matplotlib canvas instance containing the layout options to be 
+            filtered and updated.
+        """
 
         # set variable to block interactive handling while updating config bar parameters
         self.block_config_bar_handling_updates = True
@@ -992,7 +1067,15 @@ class Dashboard(QtWidgets.QWidget):
         self.block_config_bar_handling_updates = False
 
     def handle_config_bar_params_change(self, changed_param):
-        """ Function which handles interactive updates of combo box fields. """
+        """
+        Update internal state and synchronise interface fields when configuration parameters are modified.
+
+        Parameters
+        ----------
+        changed_param : str
+            The new value of the parameter that was modified in the 
+            configuration bar.
+        """
 
         if (changed_param != '') & (not self.block_config_bar_handling_updates):
 
@@ -1035,7 +1118,17 @@ class Dashboard(QtWidgets.QWidget):
             self.update_configuration_bar_fields()
 
     def handle_layout_update(self, changed_plot_type, sender=None):
-        """ Function which handles update of layout. """
+        """
+        Update the dashboard layout, axis elements, and widget visibility when a plot type changes.
+
+        Parameters
+        ----------
+        changed_plot_type : str
+            The name of the new plot type selected for a specific position.
+        sender : int, optional
+            The numerical identifier for the position (2-5) that triggered the 
+            update, if not determined by the event source. Defaults to None.
+        """
 
         if (changed_plot_type != '') & (not self.block_config_bar_handling_updates):
 
@@ -1166,7 +1259,18 @@ class Dashboard(QtWidgets.QWidget):
         return None
 
     def update_plot_axis(self, canvas_instance, changed_position, changed_plot_type):
-        """ Update plot axis position from layout options."""
+        """
+        Update the Matplotlib subplot axes based on the selected layout position and plot type.
+
+        Parameters
+        ----------
+        canvas_instance : Canvas
+            The Matplotlib canvas instance where the subplots will be generated.
+        changed_position : QComboBox or int
+            The widget or numerical identifier indicating the dashboard position to update.
+        changed_plot_type : str
+            The identifier of the plot type determining the subplot geometry and class.
+        """
 
         # since we have no data, we need to use a random reference to initialize the polar axes
         # the axis will be updated when we create the taylor diagram
@@ -1256,9 +1360,7 @@ class Dashboard(QtWidgets.QWidget):
             canvas_instance.plot_axes[changed_plot_type] = [canvas_instance.figure.add_subplot(inner_gs[i, j]) for i in range(nrows) for j in range(ncols)]
 
     def handle_data_selection_update(self):
-        """ Function which handles update of data selection
-            and MPL canvas upon pressing of READ button.
-        """
+        """Execute the data reading process and synchronise the interface and canvas based on current selections."""
 
         # if have no data to read, then do not read any data
         if self.no_data_to_read:
@@ -1564,7 +1666,7 @@ class Dashboard(QtWidgets.QWidget):
         self.block_MPL_canvas_updates = False
 
     def reset_options(self):
-        """ Reset all filter fields to initial values. """
+        """Restore all filter fields, metadata, and representativity settings to their initial values."""
 
         # return if canvas updates blocked or not yet read data
         if (self.block_MPL_canvas_updates) or (not hasattr(self, 'reading_ghost')):
@@ -1617,7 +1719,7 @@ class Dashboard(QtWidgets.QWidget):
             QtWidgets.QApplication.restoreOverrideCursor()
 
     def disable_ghost_buttons(self):
-        """ Disable button related only to ghost data. """
+        """Disable and restyle interface buttons that are exclusive to GHOST data."""
         
         # change background-color to indicate that it's nonusable
         self.bu_flags = set_formatting(self.bu_flags, self.formatting_dict['menu_button_disabled'], disabled=True)
@@ -1630,7 +1732,7 @@ class Dashboard(QtWidgets.QWidget):
         self.bu_period.setEnabled(False)
 
     def enable_ghost_buttons(self):
-        """ Enable button related only to ghost data. """
+        """Restore and enable the interface buttons exclusive for GHOST data."""
 
         # reset formatting as now enabled again
         self.bu_flags = set_formatting(self.bu_flags, self.formatting_dict['menu_button'])
@@ -1644,7 +1746,14 @@ class Dashboard(QtWidgets.QWidget):
 
 # generate Providentia dashboard
 def main(**kwargs):
-    """ Main function. """
+    """
+    Initialise the application environment and launch the Providentia dashboard.
+
+    Parameters
+    ----------
+    **kwargs : dict
+        Arbitrary keyword arguments passed to the Dashboard class constructor.
+    """
     
     # pause briefly to allow QT modules time to correctly initilise
     time.sleep(0.1)

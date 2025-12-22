@@ -1,18 +1,19 @@
+""" Class for the submission of interpolation jobs """
+
 import copy
 import glob
 import math
 import multiprocessing
 import os
-import psutil
-from queue import Empty
 import random
 import subprocess
 import sys
 import time
-import yaml
 
 from netCDF4 import Dataset
 import numpy as np
+import psutil
+import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join
 

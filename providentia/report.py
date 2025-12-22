@@ -1,9 +1,8 @@
-""" Class to generate Providentia reports """
+""" Class for Providentia report mode """
 
 import copy
 import os
 import sys
-import yaml
 
 import matplotlib
 from matplotlib.backends.backend_pdf import PdfPages
@@ -14,6 +13,7 @@ import numpy as np
 from packaging.version import Version
 import pandas as pd
 from pypdf import PdfReader
+import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 from .configuration import load_conf

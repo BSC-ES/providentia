@@ -1,15 +1,13 @@
-""" Module storing writing functions """
+""" Functions for writing numpy, netCDF and configuration files """
 
 import copy
-from datetime import datetime, timedelta
 import os
-import sys
-import yaml
 
 from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
 import xarray as xr
+import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import write_conf

@@ -1,22 +1,19 @@
-""" Functions to format the axes """
+""" Functions for plot formatting """
 
 import copy
-import os
-from PIL import Image
-
-import cartopy
-import cartopy.feature as cfeature
 from datetime import datetime, timedelta
+import os
+
+import cartopy.feature as cfeature
 import matplotlib
 import matplotlib as mpl 
-import matplotlib.dates as mdates
-import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 from matplotlib.dates import num2date
 from matplotlib import ticker
 import numpy as np
 from packaging.version import Version
 import pandas as pd
+from PIL import Image
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .plot_aux import get_land_polygon_resolution, set_map_extent

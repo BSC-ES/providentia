@@ -1,6 +1,5 @@
 """
-Provides functions for basic statistic
-calculations and model bias evaluation.
+Classes for the calculation of basic and model bias statistics.
 
 Function defintions mainly stem from: 
 https://www.tandfonline.com/doi/pdf/10.1080/10962247.2016.1265027 ,
@@ -12,18 +11,28 @@ import copy
 import numpy as np
 
 def nansumwrapper(data, **kwargs):
-    """ 
-    np.nansum returns 0 when all NaNs are encountered,
-    as opposed to np.nan, which is inconsistent with the other
-    Nan functions. This is a wrapper function to make operation 
-    consistent.
+    """Sum array elements over a given axis treating Not a Numbers as zero, returning NaN if all elements are NaN.
+
+    Parameters
+    ----------
+    data : numpy.array
+        Array containing numbers to sum.
+    **kwargs : dict
+        Arbitrary keyword arguments passed to the underlying numpy.nansum function.
+
+    Returns
+    -------
+    numpy.array or scalar
+        An array with the same shape as data, with the specified axis removed.
     """
+
     if np.isnan(data).all():
         return np.full(data.shape[:data.ndim-1], np.nan, dtype=np.float32)
     else:
         return np.nansum(data, **kwargs)
 
 class Stats(object):
+    """Class for the calculation of basic statistics."""
 
     @staticmethod
     def calculate_mean(data):
@@ -429,6 +438,7 @@ class Stats(object):
 
 
 class ExpBias(object):
+    """Class for the calculation of model bias statistics."""
 
     @staticmethod
     def calculate_coe(obs, exp):

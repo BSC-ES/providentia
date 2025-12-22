@@ -1,13 +1,6 @@
-""" Providentia argument parser module """
-# -*- coding: utf-8 -*-
-#
-# Copyright (c) 2016 Barcelona Supercomputing Center
-# @license: https://www.gnu.org/licenses/gpl-3.0.html
-# @author: see AUTHORS file
+""" Class for parsing command line arguments """
 
 import logging
-import os
-import sys
 
 from configargparse import ArgumentParser
 
@@ -17,7 +10,7 @@ logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
 
 class ProvArgumentParser(object):
-    """ Class that handles the argument parser. """
+    """ Class that handles the command line argument parser. """
 
     def __init__(self):
         """ Initialise the arguments the parser can handle. """

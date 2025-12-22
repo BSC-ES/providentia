@@ -1,4 +1,4 @@
-""" Functions to initialise and update fields (flags, period, metadata, etc.) """
+""" Functions to initialise and update fields for filtering (flags, period, metadata, etc.) """
 
 import copy
 

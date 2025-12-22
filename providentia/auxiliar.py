@@ -1,8 +1,11 @@
+""" Auxiliary functions """
+
 import os
-import sys
-import numpy as np
 import socket
+import sys
 import time
+
+import numpy as np
 
 from .unit_converter import UnitConverter, get_molecular_mass
 

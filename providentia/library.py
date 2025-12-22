@@ -1,21 +1,18 @@
-""" Class to create library session"""
+""" Class for Providentia library mode """
 
 import copy
 import datetime
-import json
 import os
 import random
-import subprocess
 import sys
-import yaml
 
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from matplotlib.projections import PolarAxes
 import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 import pandas as pd
+import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics, Tee
 from .configuration import load_conf

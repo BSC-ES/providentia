@@ -1,13 +1,13 @@
-""" Functions to create and format PyQT elements"""
+""" Functions and classes to create and format dashboard PyQt elements """
 
 import copy
 from functools import partial
 import platform
-import yaml
+from textwrap import wrap
 
 import numpy as np
 from PyQt5 import QtCore, QtWidgets, QtGui
-from textwrap import wrap
+import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join
 

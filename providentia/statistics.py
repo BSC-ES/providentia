@@ -1,26 +1,21 @@
-""" Functions for the processing/calculation of statistics and colourbars """
+""" Functions for the calculation of statistics """
 
 from calendar import monthrange
 import copy
 import datetime
-import json
-import os
 import sys
-import time
-import yaml
 
 import matplotlib
 from matplotlib import colors
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import scipy.stats as st
+import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join, get_conversion_factor, get_standard_parameters_by_speci
 from .calculate import Stats, ExpBias
 from .read_aux import (get_frequency_code, get_chunk_size,
                        get_periodic_nonrelevant_temporal_resolutions, get_periodic_relevant_temporal_resolutions)
-from .warnings_prv import show_message
 
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])

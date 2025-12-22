@@ -1,15 +1,17 @@
-import sys
-import os
-import shutil
+""" Class for Providentia download mode """
 
 from base64 import decodebytes
 import copy
-from dotenv import dotenv_values
 from getpass import getpass
-import paramiko 
+import os
+import shutil
 import signal
 import subprocess
+import sys
 import time
+
+from dotenv import dotenv_values
+import paramiko 
 from tqdm import tqdm
 import yaml 
 

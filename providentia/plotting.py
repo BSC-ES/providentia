@@ -1,20 +1,15 @@
-""" Functions to generate plots """
+""" Class for plotting """
 
 import copy
-import json
-import os
+from datetime import datetime
+from itertools import groupby
+import math
 import sys
-import yaml
 
 import cartopy
 import cartopy.crs as ccrs
-from datetime import datetime
-# from KDEpy import FFTKDE
-from itertools import groupby
-import math
 import matplotlib
 from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.image as mpimg
 import matplotlib.lines as mlines
 from matplotlib.lines import Line2D
 from matplotlib.patches import Polygon
@@ -23,13 +18,14 @@ import matplotlib.pyplot as plt
 import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 from packaging.version import Version
-from PIL import Image
 import pandas as pd
+from PIL import Image
 import pyproj
 import seaborn as sns
+import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join
-from .calculate import ExpBias, Stats
+from .calculate import ExpBias
 from .statistics import (boxplot_inner_fences, calculate_statistic, group_periodic,
                          get_fairmode_data, get_z_statistic_info, get_z_statistic_type)
 from .read_aux import drop_nans, get_valid_metadata
@@ -1251,8 +1247,6 @@ class Plotting:
                         return
                     else:
                         PDF_obs_sampled = kde_fft(kde_data_obs, xgrid=x_grid)
-                        #PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data_obs)
-                        #PDF_obs_sampled = PDF_fit.evaluate(x_grid)
 
                         if isinstance(PDF_obs_sampled, str):
                             msg = PDF_obs_sampled
@@ -1282,9 +1276,6 @@ class Plotting:
                     msg += f'The distribution plot will be created and not include data for this label ({data_label}). '
                     show_message(self.read_instance, msg)
                     continue
-    
-                #PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data_model)
-                #PDF_model_sampled = PDF_fit.evaluate(x_grid)
 
                 # calculate difference
                 PDF_sampled = PDF_model_sampled - PDF_obs_sampled
@@ -1351,8 +1342,6 @@ class Plotting:
                             show_message(self.read_instance, msg)
                             continue
                         
-                        #PDF_fit = FFTKDE(kernel='gaussian', bw='scott').fit(kde_data)
-                        #PDF_sampled = PDF_fit.evaluate(x_grid)
                         # save PDF for violin plot
                         if violin_resolution is not None:
                             PDFs_sampled[data_label_ii, period_ii, :] = PDF_sampled

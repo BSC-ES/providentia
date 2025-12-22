@@ -1,23 +1,20 @@
-""" Navigation toolbar and buttons/options functions"""
+""" Class for the dashboard matplotlib navigation toolbar """
 
-import configparser
 import copy
 from enum import Enum
 import os
-import traceback
 
 import matplotlib
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
-from matplotlib.transforms import Bbox
 from packaging.version import Version
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import ProvConfiguration
 from .configuration import load_conf
 from .dashboard_elements import InputDialog
 from .dashboard_interactivity import LassoSelector
-from .fields_menus import metadata_conf, multispecies_conf, period_conf, representativity_conf
+from .fields_menus import multispecies_conf
 from .plot_aux import get_map_extent
 from .plot_formatting import harmonise_xy_lims_paradigm
 from .read_aux import generate_file_trees

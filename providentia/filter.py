@@ -1,15 +1,12 @@
-""" Class that filters observational/experiment data into memory as required """
+""" Class for filtering of observational and model data """
 
 import ast
 import copy
-import json
-import os
-import yaml
 import sys
-import time
 
 import numpy as np
 import pandas as pd
+import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join, get_conversion_factor, get_standard_parameters_by_speci
 from .calculate import Stats, ExpBias
