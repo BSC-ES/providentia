@@ -607,7 +607,7 @@ def export_configuration(prv, cname, separator="||"):
         if len(aliases) > 0:
             alias_str = ",".join(str(i) for i in aliases)
             mod_str = "{} ({})".format(mod_str, alias_str)
-        options['section']['models'] = mod_str
+        options['section']['experiments'] = mod_str
 
     # colocation variables
     options['section'].update({'temporal_colocation': prv.temporal_colocation,
