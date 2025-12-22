@@ -1,11 +1,11 @@
-""" Class for spatial colocation """
+""" Class for spatial colocation of stations across species """
 
 import copy
 import itertools
-from packaging.version import Version
 import sys
 
 import numpy as np
+from packaging.version import Version
 import pyproj
 import scipy
 from scipy.spatial import cKDTree

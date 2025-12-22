@@ -1,12 +1,10 @@
-""" Module storing static reading functions """
+""" Auxiliary reading functions """
 
-import copy
 import datetime
 from glob import glob
 import json
 import os
 import sys
-import time
 
 import bisect
 import cftime
@@ -16,7 +14,6 @@ from packaging.version import Version
 import pandas as pd
 
 from providentia.auxiliar import CURRENT_PATH, join
-from providentia.fields_menus import update_period_fields, update_representativity_fields
 from providentia.warnings_prv import show_message
 
 # initialise dictionary for storing pointers to shared memory variables in read step 

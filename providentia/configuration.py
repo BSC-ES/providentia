@@ -1,17 +1,18 @@
-""" Providentia Configuration Module """
+""" Class that handles setting of Providentia internal variables """
 
 import ast
 import configparser
 import copy
 from datetime import datetime
 import logging
+import math
 import os
 import platform
-import math
 import sys
-import yaml
+
 import numpy as np
 import pandas as pd
+import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join, get_machine
 from providentia.read_aux import check_for_ghost, get_default_qa
@@ -37,7 +38,10 @@ def parse_path(dir, f):
         return join(dir, f)
 
 class ProvConfiguration:
-    """ Class that handles the configuration parameters definitions. """
+    """ 
+    Class that handles setting of Providentia internal variables, 
+    mixing defaults, command line and configuration variables.
+    """
 
     def __init__(self, read_instance, **kwargs):
         

@@ -1,4 +1,4 @@
-""" Functions to use plot options (annotate, log, etc.) """
+""" Functions for applying plot options (annotate, log, etc.) """
 
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker
 import numpy as np

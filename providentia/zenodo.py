@@ -1,13 +1,14 @@
+""" Class for downloading and formatting data from Zenodo """
+
 import os
 import shutil
-
-import requests
-from remotezip import RemoteZip
 import tarfile
+
+from remotezip import RemoteZip
+import requests
 from tqdm import tqdm
 import yaml 
 
-from .cams import (Cams, cams_options)
 from providentia.auxiliar import CURRENT_PATH, join
 from .warnings_prv import show_message
 

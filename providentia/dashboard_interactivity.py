@@ -1,4 +1,4 @@
-""" Objects and functions to interact with the axes """
+""" Functions and classes that allow interactivity of dashboard plots """
 
 import copy
 import datetime

@@ -1,16 +1,12 @@
-""" Pop-up window class for Dashboard """
+""" Class for dashboard pop-up window """
 
 import copy
-import datetime
-import json
-import os
 import platform
 import time
-import yaml
 
 import numpy as np
-import pandas as pd
 from PyQt5 import QtCore, QtWidgets, QtGui
+import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .read_aux import get_default_qa

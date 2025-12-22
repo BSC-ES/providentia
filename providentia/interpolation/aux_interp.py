@@ -1,4 +1,4 @@
-""" Auxiliary functions. """
+""" Auxiliary interpolation functions """
 
 def get_aeronet_bin_radius_from_bin_variable(binvar):
     """ Return AERONET bin radius instance from bin variable. AERONET bins are not bins in the classical sense in that 

@@ -1,10 +1,10 @@
-""" Settings menus """
-
-import platform
-import yaml
+""" Class for plot settings menus """
 
 from functools import partial
-from PyQt5 import QtCore, QtGui, QtWidgets 
+import platform
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+import yaml 
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .dashboard_elements import CheckableComboBox, ComboBox

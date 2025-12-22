@@ -1,17 +1,19 @@
-import sys
+""" Class for downloading and formatting CAMS data """
+
+from datetime import datetime, timedelta
 import os
+import re
+import shutil
+import sys
+import zipfile 
 
 import cdsapi
-from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from netCDF4 import Dataset
 import numpy as np
-import re
 import requests
-import shutil
 from tqdm import tqdm
 import yaml
-import zipfile 
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .warnings_prv import show_message

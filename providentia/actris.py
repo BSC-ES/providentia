@@ -1,21 +1,24 @@
+""" Class for downloading and formatting Actris data """
+
 import bisect
 import copy
 import ctypes
 import datetime
 import itertools
+import multiprocessing
 import os
-import requests
-import sys
-import yaml
 import re
-from tqdm import tqdm
+import sys
+
+from dateutil.relativedelta import relativedelta
+from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
 import pycountry
+import requests
+from tqdm import tqdm
 import xarray as xr
-from netCDF4 import Dataset
-import multiprocessing
-from dateutil.relativedelta import relativedelta
+import yaml
 
 from providentia.auxiliar import CURRENT_PATH, join, pad_array
 from .warnings_prv import show_message

@@ -1,4 +1,5 @@
 """ Warning functions """
+
 def show_message(read_instance, msg, from_conf=None, deactivate=False, print=False):
     # variable used to control when the warnings don't need to be shown
     if deactivate:

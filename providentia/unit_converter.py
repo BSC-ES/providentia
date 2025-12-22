@@ -1,10 +1,11 @@
+""" Class for the conversion of units """
+
 from collections import Counter
 import copy
 import math
 import re
 from string import digits
 import sys
-
 
 import numpy as np
 import pandas as pd
