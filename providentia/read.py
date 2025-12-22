@@ -1,4 +1,4 @@
-""" Class that reads observational/experiment data into memory """
+""" Class that reads observational/model data into memory """
 
 import copy
 import ctypes
@@ -30,15 +30,15 @@ class DataReader:
     def __init__(self, read_instance):
         self.read_instance = read_instance
         
-    def read_setup(self, operations, experiments_to_remove=None, experiments_to_read=None):
-        """ Setup structures for read of new observational/experiment data and then perform read.
+    def read_setup(self, operations, models_to_remove=None, models_to_read=None):
+        """ Setup structures for read of new observational/model data and then perform read.
 
             :param operations: list of instructions on how to adjust data structures
             :type operation: list
-            :param experiments_to_remove: list of experiments to remove from arrays
-            :type experiments_to_remove: list
-            :param experiments_to_read: list of experiments to add to arrays
-            :type experiments_to_read: list
+            :param models_to_remove: list of models to remove from arrays
+            :type models_to_remove: list
+            :param models_to_read: list of models to add to arrays
+            :type models_to_read: list
         """
 
         # changing time dimension ?
@@ -171,13 +171,13 @@ class DataReader:
             yearmonths_to_read = get_yearmonths_to_read(self.read_instance.yearmonths, self.read_instance.start_date,
                                                         self.read_instance.end_date, self.read_instance.resolution)
 
-            # check if any of the experiment data has a forecast dimension to handle 
+            # check if any of the model data has a forecast dimension to handle 
             # only for report / library modes as dashboard handled previously
             if self.read_instance.mode in ['report', 'library']:
 
                 self.read_instance.original_data_labels = copy.deepcopy(self.read_instance.data_labels)
                 self.read_instance.original_data_labels_raw = copy.deepcopy(self.read_instance.data_labels_raw)
-                self.read_instance.original_experiments = copy.deepcopy(self.read_instance.experiments)
+                self.read_instance.original_models = copy.deepcopy(self.read_instance.experiments)
 
                 self.check_forecast(yearmonths_to_read=yearmonths_to_read)
                 self.read_instance.data_labels, self.read_instance.data_labels_raw, self.read_instance.experiments = self.update_forecast_indices(init=True)
@@ -303,7 +303,7 @@ class DataReader:
                 self.read_instance.measurement_units = {speci.split('|')[1]:self.read_instance.parameter_dictionary[speci.split('|')[1]]['standard_units'] 
                                                         for speci in self.read_instance.networkspecies}
 
-            # update plotting parameters colours, zorder and experiment grid edges
+            # update plotting parameters colours, zorder and model grid edges
             update_plotting_parameters(self.read_instance) 
 
         # need to read on left / read on right / cut on left / cut on right (for dashboard)
@@ -518,26 +518,26 @@ class DataReader:
                 # read data 
                 self.read_data(all_yearmonths_to_read, self.read_instance.data_labels) 
 
-        # need to remove experiment/s ?
-        if 'remove_exp' in operations: 
+        # need to remove model/s ?
+        if 'remove_mod' in operations: 
 
-            # get indices of experiments to remove
-            experiments_to_remove_inds = [self.read_instance.previous_data_labels.index(experiment) for experiment in experiments_to_remove]
+            # get indices of models to remove
+            models_to_remove_inds = [self.read_instance.previous_data_labels.index(model) for model in models_to_remove]
             
-            # remove experiment data
+            # remove model data
             self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
-                np.delete(self.read_instance.data_in_memory[self.read_instance.networkspecies[0]], experiments_to_remove_inds, axis=0)
+                np.delete(self.read_instance.data_in_memory[self.read_instance.networkspecies[0]], models_to_remove_inds, axis=0)
 
-        # need to read experiment/s ? 
-        if 'read_exp' in operations: 
+        # need to read model/s ? 
+        if 'read_mod' in operations: 
 
-            # insert space for new experiments in data array
-            for experiment_to_read in experiments_to_read:
-                experiments_to_read_ind = self.read_instance.data_labels.index(experiment_to_read) 
+            # insert space for new models in data array
+            for model_to_read in models_to_read:
+                models_to_read_ind = self.read_instance.data_labels.index(model_to_read) 
                 
                 self.read_instance.data_in_memory[self.read_instance.networkspecies[0]] = \
                     np.insert(self.read_instance.data_in_memory[self.read_instance.networkspecies[0]], 
-                                experiments_to_read_ind,
+                                models_to_read_ind,
                                 np.full((1, len(self.read_instance.station_references[self.read_instance.networkspecies[0]]), len(self.read_instance.time_array)), 
                                 np.nan, dtype=np.float32),                     
                                 axis=0)
@@ -547,12 +547,12 @@ class DataReader:
                                                         self.read_instance.end_date, self.read_instance.resolution)
 
             # read data
-            self.read_data(yearmonths_to_read, experiments_to_read)       
+            self.read_data(yearmonths_to_read, models_to_read)       
 
-        # if removing or adding experiments, update plotting parameters colours, zorder and experiment grid edges
-        if ('remove_exp' in operations) or ('read_exp' in operations): 
-            data_labels_to_remove = [exp for exp in experiments_to_remove if exp in list(self.read_instance.plotting_params.keys())]
-            data_labels_to_add = [exp for exp in experiments_to_read if exp not in list(self.read_instance.plotting_params.keys())]
+        # if removing or adding models, update plotting parameters colours, zorder and model grid edges
+        if ('remove_mod' in operations) or ('read_mod' in operations): 
+            data_labels_to_remove = [mod for mod in models_to_remove if mod in list(self.read_instance.plotting_params.keys())]
+            data_labels_to_add = [mod for mod in models_to_read if mod not in list(self.read_instance.plotting_params.keys())]
             update_plotting_parameters(self.read_instance, data_labels_to_remove=data_labels_to_remove, 
                                        data_labels_to_add=data_labels_to_add)
 
@@ -576,12 +576,12 @@ class DataReader:
         # determine if have combined forecast active or not
         self.read_instance.combined_forecast = np.any([True for data_label in self.read_instance.data_labels if '-combined' in data_label])
 
-        # if have reading daily or combined forecast data, make original copy of data labels, experiments and plotting params, 
+        # if have reading daily or combined forecast data, make original copy of data labels, models and plotting params, 
         # as will be modified later and may need restoring, for dashboard mode only
         if ((self.read_instance.daily_forecast) or (self.read_instance.combined_forecast)) & (self.read_instance.mode not in ['report', 'library']):
             self.read_instance.original_data_labels = copy.deepcopy(self.read_instance.data_labels)
             self.read_instance.original_data_labels_raw = copy.deepcopy(self.read_instance.data_labels_raw)
-            self.read_instance.original_experiments = copy.deepcopy(self.read_instance.experiments)
+            self.read_instance.original_models = copy.deepcopy(self.read_instance.experiments)
             self.read_instance.original_plotting_params = copy.deepcopy(self.read_instance.plotting_params)
         
         # print basic information species
@@ -590,25 +590,25 @@ class DataReader:
             self.read_instance.logger.info(f" - {network}")
         if self.read_instance.filter_species:
             self.read_instance.logger.info('OBSERVATIONS TO FILTER BY')
-            for network_experiment, parameters in self.read_instance.filter_species.items():
-                self.read_instance.logger.info(f" - {network_experiment} {parameters}")                       
-        # print experiments after observations
+            for network_model, parameters in self.read_instance.filter_species.items():
+                self.read_instance.logger.info(f" - {network_model} {parameters}")                       
+        # print models after observations
         if self.read_instance.experiments:
-            self.read_instance.logger.info("EXPERIMENTS")
-            exps_printed = []
-            for experiment, alias in self.read_instance.experiments.items():
-                if '-daily' in experiment:
-                    experiment = '{}-daily'.format(experiment.split('-daily')[0])
+            self.read_instance.logger.info("MODELS")
+            mods_printed = []
+            for model, alias in self.read_instance.experiments.items():
+                if '-daily' in model:
+                    model = '{}-daily'.format(model.split('-daily')[0])
                     alias = '{}-daily'.format(alias.split('-daily')[0])
-                if '-combined' in experiment:
-                    experiment = '{}-combined'.format(experiment.split('-combined')[0])
+                if '-combined' in model:
+                    model = '{}-combined'.format(model.split('-combined')[0])
                     alias = '{}-combined'.format(alias.split('-combined')[0])
-                if experiment not in exps_printed:
-                    str_experiment = f" - {experiment}"
+                if model not in mods_printed:
+                    str_model = f" - {model}"
                     if self.read_instance.alias_flag: 
-                        str_experiment += f" ({alias})"
-                    self.read_instance.logger.info(str_experiment)
-                    exps_printed.append(experiment)
+                        str_model += f" ({alias})"
+                    self.read_instance.logger.info(str_model)
+                    mods_printed.append(model)
         self.read_instance.logger.info("")
 
     def read_basic_metadata(self):     
@@ -804,7 +804,7 @@ class DataReader:
 
 
     def check_forecast(self, yearmonths_to_read=None, data_labels=None, data_labels_raw=None, networkspecies=None):
-        """ For experiment data, check if there is a forecast dimension in the data files,
+        """ For model data, check if there is a forecast dimension in the data files,
             and if so, determine which forecast days to read for each data label (per networkspeci).
         """
 
@@ -862,21 +862,21 @@ class DataReader:
             # iterate through data labels
             for data_label, data_label_raw in zip(data_labels, data_labels_raw):
 
-                # only check experiment data labels
+                # only check model data labels
                 if data_label != self.read_instance.observations_data_label:
 
                     if '/' in network:
                         file_root = \
-                            '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
+                            '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.mod_root, self.read_instance.ghost_version, 
                                                         data_label_raw, self.read_instance.resolution, speci, 
                                                         network.replace('/', '-'), speci)
                     else:
                         file_root = \
-                            '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
+                            '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.mod_root, self.read_instance.ghost_version, 
                                                         data_label_raw, self.read_instance.resolution, speci, network, speci)
 
                     try:
-                        available_yearmonths = self.read_instance.available_experiment_data[network][self.read_instance.resolution][speci][data_label_raw]
+                        available_yearmonths = self.read_instance.available_model_data[network][self.read_instance.resolution][speci][data_label_raw]
                     except KeyError:
                         continue
 
@@ -884,7 +884,7 @@ class DataReader:
                     yearmonths_to_read_intersect = list(set(yearmonths_to_read) & set(available_yearmonths))
                     files_to_read[data_label] = sorted([file_root+str(yyyymm)+'.nc' for yyyymm in yearmonths_to_read_intersect])[0]
 
-            # read forecast dimension for each experiment
+            # read forecast dimension for each model
             # if only one data label, then read forecast dimension directly
             if len(files_to_read) == 0:
                 continue
@@ -915,13 +915,13 @@ class DataReader:
                                 selected_data_labels=None, selected_data_labels_raw=None, 
                                 networkspecies=None, init=False):
         """
-        Updates forecast-related indices, labels, and experiment configurations based on
+        Updates forecast-related indices, labels, and model configurations based on
         the current forecast settings and selected data labels.
 
         Returns:
             new_data_labels (list): Updated list of data labels.
             new_data_labels_raw (list): Updated list of raw data labels.
-            new_experiments (dict): Mapping of data_label_raw → data_label for updated experiments.
+            new_models (dict): Mapping of data_label_raw → data_label for updated models.
         """
 
         # set data labels if not defined
@@ -996,16 +996,16 @@ class DataReader:
             data_labels_to_add = []
             data_labels_raw_to_add = []
 
-            # reset experiments pop-up menu options if in dashboard mode, and are initialising
+            # reset models pop-up menu options if in dashboard mode, and are initialising
             if (self.read_instance.mode not in ['report', 'library']) & (init):
-                self.read_instance.experiments_menu['experiments']['forecast'] = {}
-                self.read_instance.experiments_menu['experiments']['forecast_days'] = {}
+                self.read_instance.models_menu['models']['forecast'] = {}
+                self.read_instance.models_menu['models']['forecast_days'] = {}
             # otherwise reset selected and disabled forecast variable and day options (to ensure data labels that are no longer selected are cleaned)
             elif (self.read_instance.mode not in ['report', 'library']) & (not init): 
-                for data_label in self.read_instance.experiments_menu['experiments']['forecast']:
-                    self.read_instance.experiments_menu['experiments']['forecast'][data_label][1] = []
-                    self.read_instance.experiments_menu['experiments']['forecast'][data_label][2] = []
-                    self.read_instance.experiments_menu['experiments']['forecast_days'][data_label][1] = []
+                for data_label in self.read_instance.models_menu['models']['forecast']:
+                    self.read_instance.models_menu['models']['forecast'][data_label][1] = []
+                    self.read_instance.models_menu['models']['forecast'][data_label][2] = []
+                    self.read_instance.models_menu['models']['forecast_days'][data_label][1] = []
 
             # initialise dictionary for this network species
             self.read_instance.forecast_indices_per_data_label[networkspeci] = {}
@@ -1020,11 +1020,11 @@ class DataReader:
                 # get number of forecast days for this label
                 n_forecast_days = self.read_instance.forecast_days_per_data_label[networkspeci][data_label]
 
-                # reset experiments pop-up menu options if in dashboard mode for specific data label (as now know will reset it)
+                # reset models pop-up menu options if in dashboard mode for specific data label (as now know will reset it)
                 if self.read_instance.mode not in ['report', 'library']:
-                    if data_label in self.read_instance.experiments_menu['experiments']['forecast']:
-                        del self.read_instance.experiments_menu['experiments']['forecast'][data_label]
-                        del self.read_instance.experiments_menu['experiments']['forecast_days'][data_label]
+                    if data_label in self.read_instance.models_menu['models']['forecast']:
+                        del self.read_instance.models_menu['models']['forecast'][data_label]
+                        del self.read_instance.models_menu['models']['forecast_days'][data_label]
 
                 # if no forecast days available, just update the menu with empty entry
                 if n_forecast_days == 0:
@@ -1084,12 +1084,12 @@ class DataReader:
                 if data_label_raw_to_add not in unique_data_labels_raw_to_add:
                     unique_data_labels_raw_to_add.append(data_label_raw_to_add)
 
-        # update data labels and experiments (replace removed labels with new forecasted ones)
+        # update data labels and models (replace removed labels with new forecasted ones)
         if (len(unique_data_labels_to_remove) > 0) & (len(unique_data_labels_to_add) > 0):
 
             new_data_labels = []
             new_data_labels_raw = []
-            new_experiments = {}
+            new_models = {}
 
             # iterate through selected data labels and build updated lists
             for data_label, data_label_raw in zip(selected_data_labels, selected_data_labels_raw):
@@ -1098,7 +1098,7 @@ class DataReader:
                     new_data_labels.append(data_label)
                     new_data_labels_raw.append(data_label_raw)
                     if data_label != self.read_instance.observations_data_label:
-                        new_experiments[data_label_raw] = data_label
+                        new_models[data_label_raw] = data_label
                 else:
                     # replace removed labels with corresponding forecast labels
                     for data_label_to_add, data_label_raw_to_add in zip(unique_data_labels_to_add, unique_data_labels_raw_to_add):
@@ -1107,18 +1107,18 @@ class DataReader:
                         if base_data_label_to_add == data_label:
                             new_data_labels.append(data_label_to_add)
                             new_data_labels_raw.append(data_label_raw_to_add)
-                            new_experiments[data_label_raw_to_add] = data_label_to_add
+                            new_models[data_label_raw_to_add] = data_label_to_add
         else:
             # if no changes were made, keep existing selections
             new_data_labels = copy.deepcopy(selected_data_labels)
             new_data_labels_raw = copy.deepcopy(selected_data_labels_raw)
-            new_experiments = {} 
+            new_models = {} 
             for data_label, data_label_raw in zip(new_data_labels, new_data_labels_raw):
                 if data_label != self.read_instance.observations_data_label:
-                    new_experiments[data_label_raw] = data_label
+                    new_models[data_label_raw] = data_label
 
-        # return updated data label lists and experiment mapping
-        return new_data_labels, new_data_labels_raw, new_experiments
+        # return updated data label lists and model mapping
+        return new_data_labels, new_data_labels_raw, new_models
 
     def update_forecast_menu(self, networkspeci, data_label, new_data_label, n_forecast_days, wanted_forecast_day):
         """
@@ -1175,27 +1175,27 @@ class DataReader:
                     selected_forecast_day_var = 'day {}'.format(selected_forecast_index + 1)
 
             # If this data_label has no existing entry in the forecast menu, initialize it
-            if data_label not in self.read_instance.experiments_menu['experiments']['forecast']:
+            if data_label not in self.read_instance.models_menu['models']['forecast']:
                 # Store available, selected, and disabled forecast variable options
-                self.read_instance.experiments_menu['experiments']['forecast'][data_label] = [
+                self.read_instance.models_menu['models']['forecast'][data_label] = [
                     available_forecast_vars,
                     selected_forecast_vars,
                     disabled_forecast_vars
                 ]
 
                 # Initialise available forecast day options and empty selected list
-                self.read_instance.experiments_menu['experiments']['forecast_days'][data_label] = [
+                self.read_instance.models_menu['models']['forecast_days'][data_label] = [
                     available_forecast_day_vars,
                     []
                 ]
 
             # If a specific forecast day is selected, add it to the selected forecast days list
             if selected_forecast_day_var != '':
-                self.read_instance.experiments_menu['experiments']['forecast_days'][data_label][1].append(selected_forecast_day_var)
+                self.read_instance.models_menu['models']['forecast_days'][data_label][1].append(selected_forecast_day_var)
 
 
     def read_data(self, yearmonths_to_read, data_labels):
-        """ Function that handles reading of observational/experiment data.
+        """ Function that handles reading of observational/model data.
         #    :param yearmonths_to_read: list of yearmonths to read
         #    :type yearmonths_to_read: list
         #    :param data_labels: Data arrays to plot
@@ -1273,7 +1273,7 @@ class DataReader:
                         except KeyError:
                             continue
 
-                # experiments 
+                # models 
                 else:
                     # if are reading filter species continue to next data_label
                     if filter_read:
@@ -1281,15 +1281,15 @@ class DataReader:
 
                     elif '/' in network:
                         file_root = \
-                            '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
+                            '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.mod_root, self.read_instance.ghost_version, 
                                                         base_data_label_raw, self.read_instance.resolution, speci, 
                                                         network.replace('/', '-'), speci)
                     else:
                         file_root = \
-                            '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.exp_root, self.read_instance.ghost_version, 
+                            '%s/%s/%s/%s/%s/%s/%s_' % (self.read_instance.mod_root, self.read_instance.ghost_version, 
                                                        base_data_label_raw, self.read_instance.resolution, speci, network, speci)
                     try:
-                        available_yearmonths = self.read_instance.available_experiment_data[network][self.read_instance.resolution][speci][base_data_label_raw]
+                        available_yearmonths = self.read_instance.available_model_data[network][self.read_instance.resolution][speci][base_data_label_raw]
                     except KeyError:
                         continue
 
@@ -1364,10 +1364,10 @@ class DataReader:
                 # no forecast indices if loading observations
                 if base_data_label == self.read_instance.observations_data_label:
                     forecast_indices = np.array([], dtype=np.int32)
-                # no forecast indices if loading non-forecast experiment
+                # no forecast indices if loading non-forecast model
                 elif len(self.read_instance.forecast_indices_per_data_label[networkspeci][base_data_label]) == 0:
                     forecast_indices = np.array([], dtype=np.int32)
-                # get forecast indices if loading forecast experiment
+                # get forecast indices if loading forecast model
                 else:
                     forecast_indices = np.array([self.read_instance.forecast_indices_per_data_label[networkspeci][base_data_label][data_label] 
                                                  for data_label in data_labels if data_label in self.read_instance.forecast_indices_per_data_label[networkspeci][base_data_label]], dtype=np.int32)
@@ -1428,10 +1428,10 @@ class DataReader:
                 (np.isin(data_array.flatten(), [-9999.0, np.nan]).all()):
 
                 if data_array.size == 0:
-                    error = 'Error: The observation and experiment arrays for {} are empty.'.format(networkspeci)
+                    error = 'Error: The observation and model arrays for {} are empty.'.format(networkspeci)
             
                 elif np.isin(data_array.flatten(), [-9999.0, np.nan]).all():
-                    error = 'Error: All observation and experiment arrays for {} are void.'.format(networkspeci)
+                    error = 'Error: All observation and model arrays for {} are void.'.format(networkspeci)
 
                 self.read_instance.logger.error(error)
                 sys.exit(1) 

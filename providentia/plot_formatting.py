@@ -20,7 +20,7 @@ import pandas as pd
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .plot_aux import get_land_polygon_resolution, set_map_extent
-from .plot_options import annotation, experiment_domain, linear_regression, log_axes, smooth, threshold
+from .plot_options import annotation, model_domain, linear_regression, log_axes, smooth, threshold
 from .statistics import get_z_statistic_info
 from .warnings_prv import show_message
 
@@ -615,10 +615,10 @@ def format_plot_options(read_instance, canvas_instance, relevant_axs, relevant_d
         if 'domain' in plot_options:
             if len(read_instance.data_labels) == 1:
                 if read_instance.data_labels[0] == read_instance.observations_data_label:
-                    msg = "'domain' plot option cannot be made as have no experiments."
+                    msg = "'domain' plot option cannot be made as have no models."
                     show_message(read_instance, msg)
                     return
-            experiment_domain(canvas_instance, relevant_ax, relevant_data_labels[relevant_ax_ii], map_extent)
+            model_domain(canvas_instance, relevant_ax, relevant_data_labels[relevant_ax_ii], map_extent)
 
         # annotation
         if 'annotate' in plot_options:

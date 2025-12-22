@@ -1,4 +1,4 @@
-""" Class that filters observational/experiment data into memory as required """
+""" Class that filters observational/model data into memory as required """
 
 import ast
 import copy
@@ -12,12 +12,11 @@ import numpy as np
 import pandas as pd
 
 from providentia.auxiliar import CURRENT_PATH, join, get_conversion_factor, get_standard_parameters_by_speci
-from .calculate import Stats, ExpBias
+from .calculate import Stats, ModBias
 from .configuration import split_options
 from .plot_aux import update_plotting_parameters
 from .statistics import merge_forecast_days, get_z_statistic_info, exceedance_lim
 from .warnings_prv import show_message
-
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
@@ -62,12 +61,12 @@ class DataFilter:
         # reset time index to original time array
         self.read_instance.time_index = self.read_instance.time_array
 
-        # if are reading daily or combined forecast data restore data labels, experiments and plotting params
+        # if are reading daily or combined forecast data restore data labels, models and plotting params
         # to how they were upon read for dashboard mode
         if ((self.read_instance.daily_forecast) or (self.read_instance.combined_forecast)) & (self.read_instance.mode not in ['report', 'library']):
             self.read_instance.data_labels = copy.deepcopy(self.read_instance.original_data_labels)
             self.read_instance.data_labels_raw = copy.deepcopy(self.read_instance.original_data_labels_raw)
-            self.read_instance.experiments = copy.deepcopy(self.read_instance.original_experiments)
+            self.read_instance.experiments = copy.deepcopy(self.read_instance.original_models)
             self.read_instance.plotting_params = copy.deepcopy(self.read_instance.original_plotting_params)
 
     def filter_by_species(self):
@@ -177,7 +176,7 @@ class DataFilter:
             lower_bound *= conversion_factor
             upper_bound *= conversion_factor
 
-            # filter all observational/experiment data out of bounds of lower/upper limits
+            # filter all observational/model data out of bounds of lower/upper limits
             inds_out_of_bounds = np.logical_or(self.read_instance.data_in_memory_filtered[networkspeci][:,:,:] < lower_bound,
                                                self.read_instance.data_in_memory_filtered[networkspeci][:,:,:] > upper_bound)
             self.read_instance.data_in_memory_filtered[networkspeci][inds_out_of_bounds] = np.nan
@@ -339,7 +338,7 @@ class DataFilter:
                                 inds_to_screen = data_array[networkspeci][var_index,:,:] < data_availability_lower_bounds[var_ii]
                                 self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_screen] = np.nan
 
-        # filter observations and experiment data by non-native percentage data availability variables 
+        # filter observations and model data by non-native percentage data availability variables 
         # (calculated on the fly)
         for var_ii, var in enumerate(active_data_availablity_vars):
             if 'native' not in var:
@@ -503,7 +502,7 @@ class DataFilter:
             'p95_bias': ['<10','>20']
 
             If statistic is an absolute statistic, then only remove stations based on observations.
-            If statistic is a bias statistic, then remove collection of all stations outside limits across all obs-exp
+            If statistic is a bias statistic, then remove collection of all stations outside limits across all obs-mod
             comparsions.
         """
 
@@ -541,12 +540,12 @@ class DataFilter:
                 # if have only observations data then cannot calculate bias statistic, so continue to next stat
                 if z_statistic_sign == 'bias':
                     if len(self.read_instance.data_labels) == 1:
-                        msg = "Cannot remove extreme stations via calculation of '{}' as no experiment data has been read.".format(zstat)
+                        msg = "Cannot remove extreme stations via calculation of '{}' as no model data has been read.".format(zstat)
                         show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
                         continue
                         
-                # if temporal_colocation is not active then cannot calculate ExpBias statistic, so continue to next stat 
-                if z_statistic_type == 'expbias':
+                # if temporal_colocation is not active then cannot calculate ModBias statistic, so continue to next stat 
+                if z_statistic_type == 'modbias':
                     if not self.read_instance.temporal_colocation:
                         msg = "Cannot remove extreme stations via calculation of '{}' as 'temporal_colocation' is not active.".format(zstat)
                         show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
@@ -556,7 +555,7 @@ class DataFilter:
                 if z_statistic_type == 'basic':
                     stats_dict = self.read_instance.basic_stats[base_zstat]
                 else:
-                    stats_dict = self.read_instance.expbias_stats[base_zstat]
+                    stats_dict = self.read_instance.modbias_stats[base_zstat]
 
                 # load default selected z statistic arguments for passing to statistical function
                 function_arguments = stats_dict['arguments']
@@ -592,22 +591,22 @@ class DataFilter:
                         for specific_stat_argument in specific_stat_arguments:
                             invalid_stations = ast.literal_eval('calc_stat{}'.format(specific_stat_argument))
                             self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,invalid_stations,:] = np.nan
-                    # calculate basic bias stats and expbias stats
+                    # calculate basic bias stats and modbias stats
                     else:
                         for data_label in self.read_instance.data_labels:
                             if data_label != self.read_instance.observations_data_label:
-                                #get expid data label index
-                                exp_data_index = self.read_instance.data_labels.index(data_label)
+                                #get modid data label index
+                                mod_data_index = self.read_instance.data_labels.index(data_label)
                                 data_array_a = self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:]
-                                data_array_b = self.read_instance.data_in_memory_filtered[networkspeci][exp_data_index,:,:]
+                                data_array_b = self.read_instance.data_in_memory_filtered[networkspeci][mod_data_index,:,:]
                                 # calculate basic bias stats
                                 if (z_statistic_type == 'basic') and (z_statistic_sign == 'bias'): 
                                     statistic_a = np.array(getattr(Stats, stats_dict['function'])(data_array_a, **function_arguments))
                                     statistic_b = np.array(getattr(Stats, stats_dict['function'])(data_array_b, **function_arguments))
                                     calc_stat = statistic_b - statistic_a
-                                # calculate expbias stats
-                                elif z_statistic_type == 'expbias':
-                                    calc_stat = np.array(getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':data_array_a,'exp':data_array_b}}))
+                                # calculate modbias stats
+                                elif z_statistic_type == 'modbias':
+                                    calc_stat = np.array(getattr(ModBias, stats_dict['function'])(**{**function_arguments, **{'obs':data_array_a,'mod':data_array_b}}))
                                 non_finite_stat = ~np.isfinite(calc_stat)
                                 self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,non_finite_stat,:] = np.nan
                                 for specific_stat_argument in specific_stat_arguments:
@@ -615,8 +614,8 @@ class DataFilter:
                                     self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,invalid_stations,:] = np.nan
                                     
     def apply_calibration_factor(self):
-        """ Apply calibration factor to add or subtract a number to the experiments, 
-            multiply or divide the experiment data by a certain value.
+        """ Apply calibration factor to add or subtract a number to the models, 
+            multiply or divide the model data by a certain value.
         """
 
         if self.read_instance.calibration_factor:
@@ -628,18 +627,18 @@ class DataFilter:
                 relevant_data_labels = copy.deepcopy(self.read_instance.data_labels)
                 relevant_data_labels.remove(self.read_instance.observations_data_label)
 
-                # get calibration factor per experiment
+                # get calibration factor per model
                 for data_label_ii, data_label in enumerate(relevant_data_labels):
 
-                    # get calibration factor per experiment
+                    # get calibration factor per model
                     if isinstance(self.read_instance.calibration_factor, dict):
-                        exp_label = list(self.read_instance.experiments.keys())[
+                        mod_label = list(self.read_instance.experiments.keys())[
                             list(self.read_instance.experiments.values()).index(data_label)]
-                        if exp_label not in self.read_instance.calibration_factor:
-                            msg = f"No calibration factor applied to experiment {exp_label}."
+                        if mod_label not in self.read_instance.calibration_factor:
+                            msg = f"No calibration factor applied to model {mod_label}."
                             self.read_instance.logger.info(msg)
                             continue
-                        calibration_factor = self.read_instance.calibration_factor[exp_label]
+                        calibration_factor = self.read_instance.calibration_factor[mod_label]
                     else:
                         calibration_factor = self.read_instance.calibration_factor
 
@@ -648,7 +647,7 @@ class DataFilter:
                         calibration_factor = calibration_factor.split(',')[networkspeci_ii]
                     
                     msg = 'Applying calibration factor: '
-                    msg += '{0} in {1} experiment'.format(calibration_factor, data_label)
+                    msg += '{0} in {1} model'.format(calibration_factor, data_label)
                     self.read_instance.logger.info(msg)
                     
                     # apply calibration factor
@@ -671,7 +670,7 @@ class DataFilter:
 
     def forecast_daily_switch(self):
         """
-        Adjust the in-memory forecast data and experiment labels to handle 
+        Adjust the in-memory forecast data and model labels to handle 
         daily or combined forecasts. 
 
         This function performs several key operations:
@@ -680,9 +679,9 @@ class DataFilter:
         3. Determines the maximum number of forecast days across all labels 
         and collects active forecast days.
         4. Rebuilds the in-memory data array (data_in_memory_filtered) to 
-        combine forecast day data separated as different experiments to the same dimension.
+        combine forecast day data separated as different models to the same dimension.
         5. Updates the global time index to match the tiled forecast data.
-        6. Updates experiments, data_labels, and data_labels_raw to include 
+        6. Updates models, data_labels, and data_labels_raw to include 
         '-daily' or '-combined' suffixes as appropriate.
         7. Updates plotting parameters to reflect the new data structure.
 
@@ -727,10 +726,10 @@ class DataFilter:
         # Sort the active forecast days for consistent ordering
         self.read_instance.active_forecast_days = np.sort(self.read_instance.active_forecast_days)
 
-        # Pass 2: Rebuild the in-memory data array to merge forecast days separated as different experiments to same dimension (tiled)
+        # Pass 2: Rebuild the in-memory data array to merge forecast days separated as different models to same dimension (tiled)
         for networkspeci in self.read_instance.networkspecies:
 
-            # merge forecast days as different experiments to same dimension (tiled)
+            # merge forecast days as different models to same dimension (tiled)
             new_data_in_memory = merge_forecast_days(self.read_instance, networkspeci, self.read_instance.data_labels, 
                                                      unique_base_data_labels, self.read_instance.data_in_memory_filtered[networkspeci])
 
@@ -740,36 +739,36 @@ class DataFilter:
         # Rebuild the global time index by tiling the original time array for each forecast day
         self.read_instance.time_index = pd.DatetimeIndex(np.tile(self.read_instance.time_array, self.read_instance.max_forecast_days))
 
-        # Update experiment labels and data_labels to reflect daily or combined forecasts
+        # Update model labels and data_labels to reflect daily or combined forecasts
         data_labels_to_remove = []
         data_labels_to_add = set()
-        new_experiments = {}
+        new_models = {}
 
-        for exp_raw, exp in self.read_instance.experiments.items():
-            if ('-daily' in exp) or ('-combined' in exp):
+        for mod_raw, mod in self.read_instance.experiments.items():
+            if ('-daily' in mod) or ('-combined' in mod):
                 if self.read_instance.daily_forecast:
-                    new_exp = f"{exp.split('-daily')[0]}-daily"
-                    new_exp_raw = f"{exp_raw.split('-daily')[0]}-daily"
+                    new_mod = f"{mod.split('-daily')[0]}-daily"
+                    new_mod_raw = f"{mod_raw.split('-daily')[0]}-daily"
                 elif self.read_instance.combined_forecast:  
-                    new_exp = f"{exp.split('-combined')[0]}-combined"
-                    new_exp_raw = f"{exp_raw.split('-combined')[0]}-combined"
-                if new_exp_raw not in new_experiments:
-                    new_experiments[new_exp_raw] = new_exp
-                data_labels_to_remove.append(exp)
-                data_labels_to_add.add(new_exp)
+                    new_mod = f"{mod.split('-combined')[0]}-combined"
+                    new_mod_raw = f"{mod_raw.split('-combined')[0]}-combined"
+                if new_mod_raw not in new_models:
+                    new_models[new_mod_raw] = new_mod
+                data_labels_to_remove.append(mod)
+                data_labels_to_add.add(new_mod)
             else:
-                # Keep experiments without '-daily' or '-combined' unchanged
-                new_experiments[exp_raw] = exp
+                # Keep models without '-daily' or '-combined' unchanged
+                new_models[mod_raw] = mod
 
-        # Update the experiments dictionary
-        self.read_instance.experiments = dict(new_experiments)
+        # Update the models dictionary
+        self.read_instance.experiments = dict(new_models)
         # Rebuild the data_labels and raw data_labels including observations first
         self.read_instance.data_labels = [self.read_instance.observations_data_label] + list(self.read_instance.experiments.values())
         self.read_instance.data_labels_raw = [self.read_instance.observations_data_label] + list(self.read_instance.experiments.keys())
 
         # Update plotting parameters to reflect changes in labels and daily forecasts
-        data_labels_to_remove = [exp for exp in data_labels_to_remove if exp in list(self.read_instance.plotting_params.keys())]
-        data_labels_to_add = [exp for exp in list(data_labels_to_add) if exp not in list(self.read_instance.plotting_params.keys())]
+        data_labels_to_remove = [mod for mod in data_labels_to_remove if mod in list(self.read_instance.plotting_params.keys())]
+        data_labels_to_add = [mod for mod in list(data_labels_to_add) if mod not in list(self.read_instance.plotting_params.keys())]
         update_plotting_parameters(
             self.read_instance,
             data_labels_to_remove=data_labels_to_remove,
@@ -778,7 +777,7 @@ class DataFilter:
         )
 
     def temporally_colocate_data(self):
-        """ Define function which temporally colocates observational and experiment data.
+        """ Define function which temporally colocates observational and model data.
             If spatial colocation is active, then data is also temporally colocated across all network / species,
             otherwise it is done independently per network / species.
             This in reality means storing the indices for the temporal colocation.
@@ -793,9 +792,9 @@ class DataFilter:
                 # initialise as being all False (i.e. non-NaN), set as True on the occasion there is a NaN in the observations
                 obs_all_nan = np.full(self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:].shape, False)
 
-                # create array for finding instances where have 0 valid values across all experiments
-                # initialise as being all False (i.e. non-NaN), set as True on the occasion there is a NaN in an experiment
-                exps_all_nan = np.full(obs_all_nan.shape, False)
+                # create array for finding instances where have 0 valid values across all models
+                # initialise as being all False (i.e. non-NaN), set as True on the occasion there is a NaN in an model
+                mods_all_nan = np.full(obs_all_nan.shape, False)
 
             # get all instances observations is NaN
             nan_obs = np.isnan(self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,:,:])
@@ -805,31 +804,31 @@ class DataFilter:
             if not np.all(nan_obs):
                 obs_all_nan = np.any([obs_all_nan, nan_obs], axis=0)
 
-            # iterate through experiment data arrays in data in memory dictionary
+            # iterate through model data arrays in data in memory dictionary
             # save indices for colocation with observations
-            for experiment in self.read_instance.experiments.values():
+            for model in self.read_instance.experiments.values():
                 
-                #get expid data label index
-                exp_data_index = self.read_instance.data_labels.index(experiment)
+                #get modid data label index
+                mod_data_index = self.read_instance.data_labels.index(model)
                 
-                # get all instances experiment is NaN
-                nan_exp = np.isnan(self.read_instance.data_in_memory_filtered[networkspeci][exp_data_index,:,:])
+                # get all instances model is NaN
+                nan_mod = np.isnan(self.read_instance.data_in_memory_filtered[networkspeci][mod_data_index,:,:])
 
-                # update exps_all_nan array, making True all instances where have NaNs
-                # if all experiment values are nan then do not update for that experiment
-                if not np.all(nan_exp):
-                    exps_all_nan = np.any([exps_all_nan, nan_exp], axis=0)
+                # update mods_all_nan array, making True all instances where have NaNs
+                # if all model values are nan then do not update for that model
+                if not np.all(nan_mod):
+                    mods_all_nan = np.any([mods_all_nan, nan_mod], axis=0)
 
             # if spatial colocation is not active,
-            # get indices where one of observations and experiments per network /species is NaN
+            # get indices where one of observations and models per network /species is NaN
             if not self.read_instance.spatial_colocation:
-                self.read_instance.temporal_colocation_nans[networkspeci] = np.any([obs_all_nan, exps_all_nan], axis=0)
+                self.read_instance.temporal_colocation_nans[networkspeci] = np.any([obs_all_nan, mods_all_nan], axis=0)
 
         # if spatial colocation is active, 
-        # get indices where one of observations and experiments across networks / species is NaN
+        # get indices where one of observations and models across networks / species is NaN
         if self.read_instance.spatial_colocation:
             for networkspeci in self.read_instance.networkspecies:
-                self.read_instance.temporal_colocation_nans[networkspeci] = np.any([obs_all_nan, exps_all_nan], axis=0)
+                self.read_instance.temporal_colocation_nans[networkspeci] = np.any([obs_all_nan, mods_all_nan], axis=0)
 
     def get_valid_stations(self):
         """ Get valid station indices before and after all filtering has been performed.
@@ -875,9 +874,9 @@ class DataFilter:
                     self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = \
                         np.arange(len(station_data_availability_number), dtype=np.int32)[station_data_availability_number > 1]                    
 
-            # get equivalent valid station indices for experimental arrays
-            # subset observational valid station indices, with experimental array stations with > 1 valid measurements
-            # therefore number of observational valid indices will always be > experimental valid indices
+            # get equivalent valid station indices for model arrays
+            # subset observational valid station indices, with model array stations with > 1 valid measurements
+            # therefore number of observational valid indices will always be > model valid indices
             for data_label in self.read_instance.data_labels:
 
                 # check if data array is not an observational data array
@@ -886,29 +885,29 @@ class DataFilter:
                     # get indices of valid observational data array stations
                     valid_station_inds = copy.deepcopy(self.read_instance.valid_station_inds[networkspeci][self.read_instance.observations_data_label])
 
-                    # get experimental data array (first subset by valid observational stations)
-                    exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),valid_station_inds,:])
+                    # get model data array (first subset by valid observational stations)
+                    mod_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),valid_station_inds,:])
 
-                    # get absolute data availability number per station in experiment data array
-                    if exp_data.size == 0:
+                    # get absolute data availability number per station in model data array
+                    if mod_data.size == 0:
                         station_data_availability_number = np.array([])
                     else:
-                        station_data_availability_number = Stats.calculate_data_avail_number(exp_data)
+                        station_data_availability_number = Stats.calculate_data_avail_number(mod_data)
                     
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds[networkspeci][data_label] = \
                         valid_station_inds[np.arange(len(station_data_availability_number), dtype=np.int32)[station_data_availability_number > 1]]
                     
-                    # get colocated experimental data array (first subset by valid observational stations)
-                    exp_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),:,:])
-                    exp_data[self.read_instance.temporal_colocation_nans[networkspeci]] = np.nan
-                    exp_data = exp_data[valid_station_inds,:]
+                    # get colocated model data array (first subset by valid observational stations)
+                    mod_data = copy.deepcopy(self.read_instance.data_in_memory_filtered[networkspeci][self.read_instance.data_labels.index(data_label),:,:])
+                    mod_data[self.read_instance.temporal_colocation_nans[networkspeci]] = np.nan
+                    mod_data = mod_data[valid_station_inds,:]
 
-                    # get absolute data availability number per station in experiment data array
-                    if exp_data.size == 0:
+                    # get absolute data availability number per station in model data array
+                    if mod_data.size == 0:
                         station_data_availability_number = np.array([])
                     else:
-                        station_data_availability_number = Stats.calculate_data_avail_number(exp_data)
+                        station_data_availability_number = Stats.calculate_data_avail_number(mod_data)
                     
                     # get indices of stations with > 1 available measurements
                     self.read_instance.valid_station_inds_temporal_colocation[networkspeci][data_label] = \

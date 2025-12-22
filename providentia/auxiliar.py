@@ -292,7 +292,7 @@ def unit_conversion(initial_units, final_units, standard_parameter_speci):
         if initial_units == 'K':
             return type('UnitConverter', (object,), {'conversion_factor':1.0, 'output_standard_units':'K'})
         else:
-            error = "Error: Experiment units should be 'K', but are set as '{}'".format(initial_units)
+            error = "Error: Model units should be 'K', but are set as '{}'".format(initial_units)
             return error
 
     # initial and final quantities not equal (convert to observational units, 

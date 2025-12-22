@@ -39,11 +39,11 @@ MACHINE = get_machine()
 # get current path and providentia root path
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
-# load the defined experiments paths and agrupations jsons
-interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
+# load the defined models paths and agrupations jsons
+interp_models = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_models.yaml')))
 
-class ExperimentInterpolation(object):
-    """ Class which handles interpolation of experiment data to surface observations. """
+class ModelInterpolation(object):
+    """ Class which handles interpolation of model data to surface observations. """
 
     def __init__(self,submit_args):
         
@@ -59,8 +59,8 @@ class ExperimentInterpolation(object):
         self.yearmonth                            = submit_args['yearmonth']
         self.original_speci_to_process            = submit_args['original_speci_to_process']
         self.unique_id                            = submit_args['job_id']
-        self.prov_exp_code                        = submit_args['prov_exp_code']
-        self.experiment_to_process, self.grid_type, self.ensemble = self.prov_exp_code.split('-')
+        self.prov_mod_code                        = submit_args['prov_mod_code']
+        self.experiment_to_process, self.grid_type, self.ensemble = self.prov_mod_code.split('-')
         
         # get year/month string
         self.year = self.yearmonth[:4]
@@ -90,7 +90,7 @@ class ExperimentInterpolation(object):
         for variable_key in ["ghost_version", "forecast", "interp_spinup_timesteps", 
                              "interp_model_downsampling", "interp_model_upsampling", 
                              "interp_n_neighbours", "interp_reverse_vertical_orientation", 
-                             "exp_root", "ghost_root", "exp_to_interp_root", 
+                             "mod_root", "ghost_root", "mod_to_interp_root", 
                              "nonghost_root"]:
             variable_val_idx = submission_file_txt_joined.index(variable_key+":")+1
             variable_val = submission_file_txt_joined[variable_val_idx]
@@ -107,25 +107,25 @@ class ExperimentInterpolation(object):
         self.GHOST_speci_lower_limit = self.standard_parameter_speci['extreme_lower_limit']
         self.GHOST_speci_upper_limit = self.standard_parameter_speci['extreme_upper_limit']
 
-        exp_dir = None
-        # for HPC machines, search in interp_experiments
+        mod_dir = None
+        # for HPC machines, search in interp_models
         if MACHINE != "local":
-            # get experiment type and specific directories
-            for experiment_type, experiment_dict in interp_experiments.items():
-                if self.experiment_to_process in experiment_dict["experiments"]:
+            # get model type and specific directories
+            for model_type, model_dict in interp_models.items():
+                if self.experiment_to_process in model_dict["models"]:
                     # take first functional directory 
-                    for temp_exp_dir in experiment_dict["paths"]:
-                        temp_exp_dir = join(temp_exp_dir, self.experiment_to_process)
-                        if os.path.exists(temp_exp_dir):
-                            exp_dir = temp_exp_dir
+                    for temp_mod_dir in model_dict["paths"]:
+                        temp_mod_dir = join(temp_mod_dir, self.experiment_to_process)
+                        if os.path.exists(temp_mod_dir):
+                            mod_dir = temp_mod_dir
                             break
                     break
 
-        # if local machine or if not exp_dir, get directory from data_paths
-        if exp_dir is None: 
-            exp_to_interp_path = join(self.exp_to_interp_root, self.experiment_to_process)
-            if os.path.exists(exp_to_interp_path):
-                exp_dir = exp_to_interp_path
+        # if local machine or if not mod_dir, get directory from data_paths
+        if mod_dir is None: 
+            mod_to_interp_path = join(self.mod_to_interp_root, self.experiment_to_process)
+            if os.path.exists(mod_to_interp_path):
+                mod_dir = mod_to_interp_path
 
         # define if network is in GHOST format
         self.reading_ghost = check_for_ghost(self.network_to_interpolate_against)
@@ -146,7 +146,7 @@ class ExperimentInterpolation(object):
         # get relevant model files
         if self.ensemble_member:
             all_model_files = np.sort(glob.glob('{}/{}/{}/{}/{}*{}*.nc'\
-                                                .format(exp_dir, self.grid_type,
+                                                .format(mod_dir, self.grid_type,
                                                         self.model_temporal_resolution,
                                                         self.speci_to_process, self.speci_to_process, self.yearmonth)))
 
@@ -164,7 +164,7 @@ class ExperimentInterpolation(object):
      
         else:            
             self.model_files = np.sort(glob.glob('{}/{}/{}/ensemble-stats/{}_{}/{}*{}*{}.nc'\
-                                                .format(exp_dir, self.grid_type,
+                                                .format(mod_dir, self.grid_type,
                                                         self.model_temporal_resolution,
                                                         self.speci_to_process, self.ensemble, 
                                                         self.speci_to_process, self.yearmonth, self.ensemble)))
@@ -262,12 +262,12 @@ class ExperimentInterpolation(object):
                 # get previous month files
                 if self.ensemble_member:
                     prev_month_files = np.sort(glob.glob('{}/{}/{}/{}/{}*{}*.nc'\
-                                                        .format(exp_dir, self.grid_type,
+                                                        .format(mod_dir, self.grid_type,
                                                                 self.model_temporal_resolution,
                                                                 self.speci_to_process, self.speci_to_process, prev_yearmonth)))
                 else:
                     prev_month_files_final = np.sort(glob.glob('{}/{}/{}/ensemble-stats/{}_{}/{}*{}*{}.nc'\
-                                                        .format(exp_dir, self.grid_type,
+                                                        .format(mod_dir, self.grid_type,
                                                                 self.model_temporal_resolution,
                                                                 self.speci_to_process, self.ensemble, 
                                                                 self.speci_to_process, prev_yearmonth, self.ensemble)))
@@ -1111,11 +1111,11 @@ class ExperimentInterpolation(object):
         else:
             # as it appears in PRV (e.g. nasa-aeronet/oneill_v3-lev15 -> nasa-aeronet-oneill_v3-lev15)
             network_name = self.network_to_interpolate_against.replace('/', '-')
-        output_dir = join(self.exp_root, self.ghost_version, self.prov_exp_code, 
+        output_dir = join(self.mod_root, self.ghost_version, self.prov_mod_code, 
                                   self.temporal_resolution_to_output, self.original_speci_to_process, network_name)
 
         # check if need to create any directories in path 
-        check_directory_existence(output_dir, self.exp_root)
+        check_directory_existence(output_dir, self.mod_root)
 
         # create netCDF dataset
         netCDF_fname = '{}/{}_{}.nc'.format(output_dir, self.original_speci_to_process, self.yearmonth)
@@ -1126,14 +1126,14 @@ class ExperimentInterpolation(object):
 
         # file contents
         msg = 'Inverse distance weighting ({} neighbours) interpolated '.format(self.interp_n_neighbours)
-        msg += '{} experiment data for the component {} '.format(self.experiment_to_process, 
+        msg += '{} model data for the component {} '.format(self.experiment_to_process, 
                                                                 self.original_speci_to_process)
         msg += 'with reference to the measurement stations in the '
         msg += '{} network '.format(self.network_to_interpolate_against)
         msg += 'in {}-{}.'.format(self.year, self.month)
         root_grp.title = msg
         root_grp.institution = 'Barcelona Supercomputing Center'
-        root_grp.source = 'Experiment {}'.format(self.experiment_to_process)
+        root_grp.source = 'Model {}'.format(self.experiment_to_process)
         root_grp.creator_name = 'Dene R. Bowdalo'
         root_grp.creator_email = 'dene.bowdalo@bsc.es'
 
@@ -1241,14 +1241,14 @@ class ExperimentInterpolation(object):
                         measured_var.long_name = self.obs_long_name
                         measured_var.units = self.obs_units
                         measured_var.standard_name = self.obs_standard_name
-                        measured_var.description = 'Interpolated value of {} from the experiment {} ' \
+                        measured_var.description = 'Interpolated value of {} from the model {} ' \
                                             'with reference to the measurement stations in the {} network'.format(
                             self.obs_standard_name, self.experiment_to_process, 
                             self.network_to_interpolate_against)
                     # non-GHOST
                     else:
                         measured_var.standard_name = self.original_speci_to_process
-                        measured_var.description = 'Interpolated value of {} from the experiment {} with reference to the measurement stations in the {} network'.format(
+                        measured_var.description = 'Interpolated value of {} from the model {} with reference to the measurement stations in the {} network'.format(
                             self.original_speci_to_process, self.experiment_to_process,
                             self.network_to_interpolate_against)
 
@@ -1346,7 +1346,7 @@ def create_output_logfile(process_code, log_file_str):
         :type process_code: int
     """
     output_logfile_dir = (f"{join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs/')}"
-    f"{submit_args['prov_exp_code']}/"
+    f"{submit_args['prov_mod_code']}/"
     f"{submit_args['original_speci_to_process']}/"
     f"{submit_args['network_to_interpolate_against']}/"
     f"{submit_args['temporal_resolution_to_output']}/"
@@ -1366,7 +1366,7 @@ if __name__ == "__main__":
         interpolation_start = time.time()
 
         # get arguments passed from submittal script --> put into dict
-        submit_args = {'prov_exp_code': sys.argv[1], 
+        submit_args = {'prov_mod_code': sys.argv[1], 
                        'model_temporal_resolution': sys.argv[2], 
                        'speci_to_process': sys.argv[3], 
                        'network_to_interpolate_against': sys.argv[4], 
@@ -1376,8 +1376,8 @@ if __name__ == "__main__":
                        'job_id': sys.argv[8]
                        }   
 
-        # initialise ExperimentInterpolation object
-        EI = ExperimentInterpolation(submit_args)
+        # initialise ModelInterpolation object
+        EI = ModelInterpolation(submit_args)
  
         # read model domain information
         EI.get_model_information()
@@ -1388,7 +1388,7 @@ if __name__ == "__main__":
         # get necessary data objects from the observational file
         EI.get_observational_objects()
 
-        # get unit conversion factor between observations and experiment data
+        # get unit conversion factor between observations and model data
         EI.conversion_factor = get_conversion_factor(EI.mod_speci_units, EI.obs_units, EI.standard_parameter_speci)
         if isinstance(EI.conversion_factor, str):
             EI.log_file_str += EI.conversion_factor

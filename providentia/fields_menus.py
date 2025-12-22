@@ -5,7 +5,6 @@ import copy
 import numpy as np
 import pandas as pd
 
-
 def init_flags(instance):
     """ Initialise internal structure to store selected flags.
 
@@ -78,8 +77,8 @@ def update_qa(instance):
     instance.qa_menu['checkboxes']['map_vars'] = np.sort(list(qa_map_vars))
     
 
-def init_experiments(instance):
-    """ Initialise internal structure to store selected experiments.
+def init_models(instance):
+    """ Initialise internal structure to store selected models.
 
         :param instance: Instance of class Report or Dashboard
         :type instance: object
@@ -87,18 +86,18 @@ def init_experiments(instance):
 
     # do not have object instance already?
     # if not, create it
-    if not hasattr(instance, 'experiments_menu'):
-        instance.experiments_menu = {'window_title': 'Experiments', 
-                                     'page_title': 'Select Experiment/s', 
-                                     'experiments': {}}
-        instance.experiments_menu['select_buttons'] = ['all', 'clear']
+    if not hasattr(instance, 'models_menu'):
+        instance.models_menu = {'window_title': 'Models', 
+                                     'page_title': 'Select Model/s', 
+                                     'models': {}}
+        instance.models_menu['select_buttons'] = ['all', 'clear']
     
     # reset fields
-    instance.experiments_menu['experiments']['labels'] = [] 
-    instance.experiments_menu['experiments']['keep_selected'] = [] 
-    instance.experiments_menu['experiments']['forecast'] = {} 
-    instance.experiments_menu['experiments']['forecast_days'] = {}
-    instance.experiments_menu['experiments']['map_vars'] = [] 
+    instance.models_menu['models']['labels'] = [] 
+    instance.models_menu['models']['keep_selected'] = [] 
+    instance.models_menu['models']['forecast'] = {} 
+    instance.models_menu['models']['forecast_days'] = {}
+    instance.models_menu['models']['map_vars'] = [] 
 
 
 def init_multispecies(instance):

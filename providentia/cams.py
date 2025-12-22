@@ -107,7 +107,7 @@ class Cams:
 
     # TODO check that message in stream does not get repeated in the loop
     # TODO check if it is plaussible to keep this code as a separate function since there is a continue
-    def create_request(self, cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, exp_id, initial_check=False):
+    def create_request(self, cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, mod_id, initial_check=False):
         # create the request
         request = {"variable" : cams_species}
 
@@ -142,7 +142,7 @@ class Cams:
 
         # add the model if models are available in the dataset
         if 'models' in cams_dict:
-            request["model"] = exp_id
+            request["model"] = mod_id
 
         # get the level and apply it if the species is multi level
         level_variable = 'level' if 'level' in cams_dict else 'model_level'
@@ -186,29 +186,29 @@ class Cams:
             self.download_instance.logger.error("Error: Cannot proceed without '.cdsapirc'. CAMS model data download requires this file.")
             sys.exit(1)
 
-    def get_experiment(self, cams_dict, u_count, config_expid, dataset, ensemble_options, initial_check=False):
+    def get_model(self, cams_dict, u_count, config_modid, dataset, ensemble_options, initial_check=False):
         # determine model ID or stream
-        exp_id, stream = None, None
+        mod_id, stream = None, None
         
         if u_count == 1: # e.g. cams_forecast
             if 'models' in cams_dict:
-                msg = f"The model '{config_expid}' is missing the model. Please add one (e.g., '{config_expid}_ensemble')."
+                msg = f"The model '{config_modid}' is missing the model. Please add one (e.g., '{config_modid}_ensemble')."
                 show_message(self.download_instance, msg, deactivate=initial_check)
                 return None, None, True
 
         elif u_count == 2:
             # extract last element
-            last_element = config_expid.rsplit('_', 1)[1]
+            last_element = config_modid.rsplit('_', 1)[1]
 
             if cams_dict['stream'] is True and 'models' in cams_dict: # e.g. cams_reanalysis_ensemble-regional
                 msg = f"The '{dataset}' dataset needs a model and a stream. E.g. 'cams_reanalysis_ensemble_interim')."    
                 show_message(self.download_instance, msg, deactivate=initial_check)
                 return None, None, True
             elif 'models' in cams_dict: # e.g. cams_analysis_ensemble
-                exp_id = last_element
+                mod_id = last_element
                 # make sure the model is available in the dataset
-                if exp_id not in cams_dict["models"]:
-                    msg = f"Cannot find the {exp_id} model in the '{dataset}' dataset."    
+                if mod_id not in cams_dict["models"]:
+                    msg = f"Cannot find the {mod_id} model in the '{dataset}' dataset."    
                     show_message(self.download_instance, msg, deactivate=initial_check)
                     return None, None, True
             else:
@@ -226,11 +226,11 @@ class Cams:
                 return None, None, True
             
             # extract the last two elements
-            _, exp_id, stream = config_expid.rsplit('_', 2)
+            _, mod_id, stream = config_modid.rsplit('_', 2)
 
             # make sure the model is available in the dataset
-            if exp_id not in cams_dict["models"]:
-                msg = f"Cannot find the {exp_id} model in the '{dataset}' dataset."    
+            if mod_id not in cams_dict["models"]:
+                msg = f"Cannot find the {mod_id} model in the '{dataset}' dataset."    
                 show_message(self.download_instance, msg, deactivate=initial_check)
                 return None, None, True
             
@@ -245,7 +245,7 @@ class Cams:
 
         # get error if it does not get any of the conditions
         else:
-            msg = f"The '{config_expid}' format is not valid."    
+            msg = f"The '{config_modid}' format is not valid."    
             show_message(self.download_instance, msg, deactivate=initial_check)
             return None, None, True
 
@@ -257,7 +257,7 @@ class Cams:
             show_message(self.download_instance, msg, deactivate=initial_check)
             return None, None, True
         
-        return exp_id, stream, False
+        return mod_id, stream, False
 
     def extract_date(self, input_file, prefix, domain):
         
@@ -439,7 +439,7 @@ class Cams:
         # close original dataset
         input_file.close()   
 
-    def download_cams_experiment(self, model, initial_check, files_to_download=None): 
+    def download_cams_model(self, model, initial_check, files_to_download=None): 
         if not initial_check:
             # print current model
             self.download_instance.logger.info('\n'+'-'*40)
@@ -453,13 +453,13 @@ class Cams:
             self.create_cdsapirc(cdsapirc_path)
 
         # get model id and the domain
-        config_expid, domain, ensemble_options = model.split("-")
+        config_modid, domain, ensemble_options = model.split("-")
         
         # count underscores to determine format
-        u_count = config_expid.count('_')
+        u_count = config_modid.count('_')
 
         # get the prefix
-        prefix = config_expid.rsplit('_', u_count-1)[0]
+        prefix = config_modid.rsplit('_', u_count-1)[0]
 
         # check if the domain is the correct one for the dataset
         if domain not in cams_options[prefix]:
@@ -478,7 +478,7 @@ class Cams:
         url = cams_dict['url']
         
         # make the necessary checks to the model
-        exp_id, stream, invalid_model = self.get_experiment(cams_dict, u_count, config_expid, dataset, ensemble_options)
+        mod_id, stream, invalid_model = self.get_model(cams_dict, u_count, config_modid, dataset, ensemble_options)
     
         # stop download if the model format is not correct
         if invalid_model:
@@ -532,11 +532,11 @@ class Cams:
                     continue
 
                 # get directory structure
-                dir_tail = join(config_expid, domain, resolution, species)
+                dir_tail = join(config_modid, domain, resolution, species)
 
                 # get temporal and final dir
-                temp_dir = join(self.download_instance.exp_to_interp_root,'.temp', dir_tail)
-                final_dir = join(self.download_instance.exp_to_interp_root, dir_tail)
+                temp_dir = join(self.download_instance.mod_to_interp_root,'.temp', dir_tail)
+                final_dir = join(self.download_instance.mod_to_interp_root, dir_tail)
 
                 # create dir
                 os.makedirs(final_dir, exist_ok=True)
@@ -555,7 +555,7 @@ class Cams:
                     next_cams_date = cams_end_date if next_cams_date > cams_end_date else next_cams_date
 
                     # create dictionary to do the request
-                    request = self.create_request(cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, exp_id)
+                    request = self.create_request(cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, mod_id)
 
                     # create temporal dir to store the middle zip file with its directories
                     os.makedirs(temp_dir, exist_ok=True)

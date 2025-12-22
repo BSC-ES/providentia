@@ -25,7 +25,7 @@ If you are creating a reports, add here your definition of report plots, e.g. `[
 
 If you are interpolating, add here your definition of interp models e.g. `
 "monarch": {
-    "experiments": ["a7kg"],
+    "models": ["a7kg"],
     "paths": [
         "/esarchive/exp/monarch/"
     ]

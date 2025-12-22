@@ -42,14 +42,14 @@ When you open the dashboard on a local machine the first time, you don't see any
 The datasets need to be saved following a very specific directory tree. The download mode takes care of that when saving the files, more details can be found in the {ref}`download section <default-download>`. However, if you are using your own data you will need to take that into account.
 
 By default, in the folder `/home/{user}/data/providentia` (or your preferred) there should be three folders: 
-- `exp`: Interpolated model data as in: {GHOST version} -> {model}_{domain}_{ensemble} -> {resolution} -> {species} -> {network} -> {species}_{year}{month}.nc.
-- `exp_to_interp`: Model data to interpolate as in: {model} -> {domain} -> {resolution} -> {species} -> {species}_{year}{month}.nc.
+- `mod`: Interpolated model data as in: {GHOST version} -> {model}_{domain}_{ensemble} -> {resolution} -> {species} -> {network} -> {species}_{year}{month}.nc.
+- `mod_to_interp`: Model data to interpolate as in: {model} -> {domain} -> {resolution} -> {species} -> {species}_{year}{month}.nc.
 - `obs`: Observation datasets. For GHOST as in: ghost -> {network} -> {GHOST version} -> {resolution} -> {species} -> {species}_{year}{month}.nc. For non-GHOST as in: nonghost -> {provider} -> {network} -> {resolution} -> {species} -> {species}_{year}{month}.nc.
 
 As observed, datasets must be saved per month, independently of their temporal resolution. An example of a working directory tree is the following:
 
 ```
-├── exp
+├── mod
 │   └── 1.5
 │       └── cams61_emep_ph2-eu-000
 │           └── hourly
@@ -67,7 +67,7 @@ As observed, datasets must be saved per month, independently of their temporal r
 │                       ├── sconcno2_201810.nc
 │                       ├── sconcno2_201811.nc
 │                       └── sconcno2_201812.nc
-├── exp_to_interp
+├── mod_to_interp
 │   └── cams61_emep_ph2
 │       └── eu
 │           └── hourly

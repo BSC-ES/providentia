@@ -62,7 +62,7 @@ It is **mandatory** to define sections to launch Providentia. Their names must b
 | resolution | ✓ | Temporal resolution of the observations you want to load (e.g. `3hourly`). |
 | start_date | ✓ | Comparison start date in YYYYMMDD format (e.g. `20170101`). |
 | end_date | ✓ | Comparison end date in YYYYMMDD format (e.g. `20180601`). |
-| model | ✗ | ID of model. The model IDs can be mapped to different names by adding a list of alternative names after the model IDs (e.g. `exp1, exp2 (altexp1, altexp2)`). After interpolation model IDs will consist of 3 separate strings [ID-domain-ensemble]. The domain and ensemble  |
+| model | ✗ | ID of model. The model IDs can be mapped to different names by adding a list of alternative names after the model IDs (e.g. `mod1, mod2 (altmod1, altmod2)`). After interpolation model IDs will consist of 3 separate strings [ID-domain-ensemble]. The domain and ensemble  |
 | domain | ✗ | Domain of the model. Can be multiple. |
 | ensemble | ✗ | Ensemble member number or ensemble statistic of the model. defaults to all members available. Can be multiple. |  
 | temporal_colocation | ✗ | Boolean variable to set if you want to temporally colocate the observation and model data. |

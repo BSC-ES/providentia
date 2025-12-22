@@ -46,7 +46,7 @@ def init_shared_vars_read_netcdf_data(data_in_memory, data_in_memory_shape, ghos
 
 
 def read_netcdf_data(tuple_arguments):
-    """ Function that handles reading of observational/experiment
+    """ Function that handles reading of observational/model
         netCDF data also handles filtering of observational data based
         on selected qa/flag/classification flags. If file does not exist,
         returns None.
@@ -124,7 +124,7 @@ def read_netcdf_data(tuple_arguments):
             else:
                 file_station_references = chartostring(file_station_references)
 
-    # GHOST and interpolated experiment data
+    # GHOST and interpolated model data
     else:
         file_station_references = ncdf_root['station_reference'][:]
 
@@ -295,7 +295,7 @@ def read_netcdf_data(tuple_arguments):
                 # put metadata in array
                 file_metadata[meta_var][full_array_station_indices, 0] = meta_val
 
-    # experiment data
+    # model data
     else:
 
         # determine if data is structured as forecast data or not
@@ -761,9 +761,9 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
                         instance.available_observation_data[network][resolution][matrix][speci] = valid_file_yearmonths
 
 
-def get_valid_experiments(instance, start_date, end_date, resolution, networks, species):
-    """ Get valid experiments for daterange, and selected parameters.
-        Update experiment pop-up with valid experiments.
+def get_valid_models(instance, start_date, end_date, resolution, networks, species):
+    """ Get valid models for daterange, and selected parameters.
+        Update model pop-up with valid models.
 
         :param instance: Instance of class Report or Dashboard
         :type instance: object
@@ -779,16 +779,16 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
         :type species: list 
     """
 
-    # get all different experiment names (from providentia-interpolation output dir)
-    available_experiments = []
-    if os.path.exists(join(instance.exp_root,instance.ghost_version)):
-        available_experiments = os.listdir('%s/%s' % (instance.exp_root, instance.ghost_version))
+    # get all different model names (from providentia-interpolation output dir)
+    available_models = []
+    if os.path.exists(join(instance.mod_root,instance.ghost_version)):
+        available_models = os.listdir('%s/%s' % (instance.mod_root, instance.ghost_version))
 
-    # create dictionary to store available experiment data
-    instance.available_experiment_data = {}
+    # create dictionary to store available model data
+    instance.available_model_data = {}
 
-    #list for saving experiments to add to experiments pop-up 
-    experiments_to_add = []
+    #list for saving models to add to models pop-up 
+    models_to_add = []
 
     # get start date on first of month
     start_date_firstdayofmonth = int(str(start_date)[:6] + '01')
@@ -796,19 +796,19 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
     # iterate through networks and species
     for network, speci in zip(networks, species):
 
-        # iterate through available experiments
-        for experiment in available_experiments:
+        # iterate through available models
+        for model in available_models:
 
-            # get folder where interpolated experiments are saved
+            # get folder where interpolated models are saved
             if '/' not in network:           
-                files_directory = '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
-                                                         experiment, resolution, speci, network)
+                files_directory = '%s/%s/%s/%s/%s/%s' % (instance.mod_root, instance.ghost_version, 
+                                                         model, resolution, speci, network)
             else:
-                files_directory = '%s/%s/%s/%s/%s/%s' % (instance.exp_root, instance.ghost_version, 
-                                                          experiment, resolution, speci,
+                files_directory = '%s/%s/%s/%s/%s/%s' % (instance.mod_root, instance.ghost_version, 
+                                                          model, resolution, speci,
                                                           network.replace('/', '-'))
                 
-            # test if interpolated directory exists for experiment
+            # test if interpolated directory exists for model
             # if it does not exit, continue
             if not os.path.exists(files_directory):
                 continue
@@ -822,32 +822,32 @@ def get_valid_experiments(instance, start_date, end_date, resolution, networks, 
             # get monthly start date (YYYYMM) of all files
             file_yearmonths = sorted([f.split('_')[-1][:6] for f in available_files])
 
-            # write nested dictionary for experiment, with associated file yearmonths
+            # write nested dictionary for model, with associated file yearmonths
             if len(file_yearmonths) > 0:
 
                 # get file yearmonths within date range
                 valid_file_yearmonths = sorted([ym for ym in file_yearmonths if 
                                                 (int('{}01'.format(ym)) >= start_date_firstdayofmonth) & (int('{}01'.format(ym)) < int(end_date))])
 
-                #if have valid files, then add experiment to pop-up menu, 
-                # and add yearmonths to available experiment data
+                #if have valid files, then add model to pop-up menu, 
+                # and add yearmonths to available model data
                 if len(valid_file_yearmonths) > 0:
-                    experiments_to_add.append(experiment)
+                    models_to_add.append(model)
 
-                    if network not in instance.available_experiment_data:
-                        instance.available_experiment_data[network] = {}
-                    if resolution not in instance.available_experiment_data[network]:
-                        instance.available_experiment_data[network][resolution] = {}
-                    if speci not in instance.available_experiment_data[network][resolution]:
-                        instance.available_experiment_data[network][resolution][speci] = {}
-                    if experiment not in instance.available_experiment_data[network][resolution][speci]:
-                        instance.available_experiment_data[network][resolution][speci][experiment] = valid_file_yearmonths
+                    if network not in instance.available_model_data:
+                        instance.available_model_data[network] = {}
+                    if resolution not in instance.available_model_data[network]:
+                        instance.available_model_data[network][resolution] = {}
+                    if speci not in instance.available_model_data[network][resolution]:
+                        instance.available_model_data[network][resolution][speci] = {}
+                    if model not in instance.available_model_data[network][resolution][speci]:
+                        instance.available_model_data[network][resolution][speci][model] = valid_file_yearmonths
 
-    # set list of experiment names to add on experiments pop-up
+    # set list of model names to add on models pop-up
     if instance.mode not in ['report', 'library']:
-        experiments_to_add = np.array(sorted(experiments_to_add))
-        instance.experiments_menu['experiments']['labels'] = experiments_to_add
-        instance.experiments_menu['experiments']['map_vars'] = experiments_to_add
+        models_to_add = np.array(sorted(models_to_add))
+        instance.models_menu['models']['labels'] = models_to_add
+        instance.models_menu['models']['map_vars'] = models_to_add
 
 def get_possible_temporal_resolutions():
     """ Return possible temporal resolutions as a list.

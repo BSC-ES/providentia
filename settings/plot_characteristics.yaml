@@ -4,7 +4,7 @@
       "legend_color_palette": "husl",
       "obs_markerfacecolor": "black",
       "obs_zorder": 5,
-      "experiment_domain_polygon":
+      "model_domain_polygon":
         { "linewidth": 1, "linestyle": "--", "fill": false, "zorder": 2 },
       "dashboard":
         {
@@ -65,9 +65,9 @@
               "key": "Date range",
               "value": ""
             },
-            "experiments": {
+            "models": {
               "active": true,
-              "key": "Experiments",
+              "key": "Models",
               "value": ""   
             },
             "temporal_colocation": {
@@ -391,7 +391,7 @@
         {
           "s": "",
           "n_stations": false,
-          "exp_labels": true,
+          "mod_labels": true,
           "color": "",
           "round_decimal_places": 2,
           "sep": 1,
@@ -554,7 +554,7 @@
         {
           "s": "",
           "n_stations": false,
-          "exp_labels": true,
+          "mod_labels": true,
           "color": "",
           "round_decimal_places": 2,
           "sep": 1,
@@ -768,7 +768,7 @@
         {
           "s": "",
           "n_stations": false,
-          "exp_labels": true,
+          "mod_labels": true,
           "color": "",
           "round_decimal_places": 2,
           "sep": 1,
@@ -905,7 +905,7 @@
       "violin_fill_obs": true,
       "violin_fill_1model": true,
       "violin_fill_2+models": false,
-      "violin_alphas": { "alpha_obs": 0.7, "alpha_exp": 0.5 },
+      "violin_alphas": { "alpha_obs": 0.7, "alpha_mod": 0.5 },
       "violin_widths": 0.85,
       "threshold_line":
         { "linestyle": "--", "linewidth": 1.0, "color": "red", "zorder": 0 },
@@ -924,7 +924,7 @@
           "s": "",
           "n_stations": false,
           "color": "",
-          "exp_labels": true,
+          "mod_labels": true,
           "round_decimal_places": 2,
           "sep": 1,
         },
@@ -1109,7 +1109,7 @@
         {
           "s": "",
           "n_stations": false,
-          "exp_labels": true,
+          "mod_labels": true,
           "color": "",
           "round_decimal_places": 2,
           "sep": 1,
@@ -1273,7 +1273,7 @@
         {
           "s": "",
           "n_stations": false,
-          "exp_labels": true,
+          "mod_labels": true,
           "color": "",
           "round_decimal_places": 2,
           "sep": 1,
@@ -1288,7 +1288,7 @@
       "round_decimal_places": { "title": 2 },
       "axis_title": { "label": "" },
       "xlabel": { "xlabel": "Observations [measurement_units]" },
-      "ylabel": { "ylabel": "Experiment [measurement_units]" },
+      "ylabel": { "ylabel": "Model [measurement_units]" },
       "xtick_params":
         {
           "which": "both",
@@ -1460,7 +1460,7 @@
         {
           "s": "",
           "n_stations": false,
-          "exp_labels": true,
+          "mod_labels": true,
           "color": "",
           "round_decimal_places": 2,
           "sep": 1,
@@ -1904,7 +1904,7 @@
         {
           "plot_options": ["bias"],
           "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
-          "experiment_bias":
+          "model_bias":
             ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
           "axis_title": { "fontsize": 8.5, "loc": "left" },
           "cell_height": 1.3,
@@ -1921,7 +1921,7 @@
         {
           "plot_options": ["bias", "multispecies"],
           "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
-          "experiment_bias":
+          "model_bias":
             ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
           "orientation": "portrait",
           "figure": { "ncols": 1, "nrows": 1 },
@@ -1966,7 +1966,7 @@
         {
           "plot_options": ["bias", "multispecies"],
           "basic": ["Mean", "StdDev", "p5", "Median", "p95"],
-          "experiment_bias":
+          "model_bias":
             ["Mean_bias", "StdDev_bias", "NMB", "NME", "RMSE", "r"],
           "figsize": [13, 7],
           "subplots_adjust":
@@ -2016,7 +2016,7 @@
               "p95",
               "p99",
             ],
-          "experiment_bias":
+          "model_bias":
             [
               "MB",
               "NMB",
@@ -2090,7 +2090,7 @@
         {
           "s": "",
           "n_stations": false,
-          "exp_labels": true,
+          "mod_labels": true,
           "color": "",
           "round_decimal_places": 2,
           "sep": 1,

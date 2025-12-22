@@ -29,7 +29,7 @@ import pyproj
 import seaborn as sns
 
 from providentia.auxiliar import CURRENT_PATH, join
-from .calculate import ExpBias, Stats
+from .calculate import ModBias, Stats
 from .statistics import (boxplot_inner_fences, calculate_statistic, group_periodic,
                          get_fairmode_data, get_z_statistic_info, get_z_statistic_type)
 from .read_aux import drop_nans, get_valid_metadata
@@ -111,15 +111,15 @@ class Plotting:
                     valid_plot_type = False
 
                 # remove plots when calculating bias stat but temporal_colocation is not active
-                elif (z_statistic_type == 'expbias') & (not self.read_instance.temporal_colocation):
-                        msg = f'To calculate the experiment bias stat {zstat}, temporal_colocation must be set to True, so {plot_type} plot cannot be created.'
+                elif (z_statistic_type == 'modbias') & (not self.read_instance.temporal_colocation):
+                        msg = f'To calculate the model bias stat {zstat}, temporal_colocation must be set to True, so {plot_type} plot cannot be created.'
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
-                # if no experiments are defined, remove all bias plots, or plots with bias statistics 
+                # if no models are defined, remove all bias plots, or plots with bias statistics 
                 elif ('bias' in plot_options) or (z_statistic_sign == 'bias'):
                     if len(data_labels) == 1:
-                        msg = f'No experiments defined, so {plot_type} plot cannot be created.'
+                        msg = f'No models defined, so {plot_type} plot cannot be created.'
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
@@ -139,8 +139,8 @@ class Plotting:
 
                 # get base plot type (without stat and options)
                 base_plot_type = plot_type.split('-')[0] 
-                # combine basic and expbias stats dicts together
-                stats_dict = {**self.read_instance.basic_stats, **self.read_instance.expbias_stats}
+                # combine basic and modbias stats dicts together
+                stats_dict = {**self.read_instance.basic_stats, **self.read_instance.modbias_stats}
                 
                 # check if plot type is correct for report and library modes
                 if self.read_instance.mode in ['report', 'library']:
@@ -164,9 +164,9 @@ class Plotting:
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
-                    # warning for taylor plot if have no experiments
+                    # warning for taylor plot if have no models
                     elif (base_plot_type in ['taylor']) & (len(data_labels) == 1):
-                        msg = f'No experiments defined, so {plot_type} cannot be created.'
+                        msg = f'No models defined, so {plot_type} cannot be created.'
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
@@ -234,9 +234,9 @@ class Plotting:
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
-                    # warning for scatter and fairmode plots if have no experiments
+                    # warning for scatter and fairmode plots if have no models
                     elif (base_plot_type in ['scatter', 'fairmode-target', 'fairmode-statsummary']) & (len(data_labels) == 1):
-                        msg = f'No experiments defined, so {plot_type} cannot be created.'
+                        msg = f'No models defined, so {plot_type} cannot be created.'
                         show_message(self.read_instance, msg)
                         valid_plot_type = False
 
@@ -324,23 +324,23 @@ class Plotting:
                                 markersize=plot_characteristics_legend['handles']['markersize'], 
                                 label=self.read_instance.observations_data_label))
                                   
-        # add element for each experiment
-        for experiment in data_labels:
-            if experiment != self.read_instance.observations_data_label:
-                # add experiment element
+        # add element for each model
+        for model in data_labels:
+            if model != self.read_instance.observations_data_label:
+                # add model element
                 legend_elements.append(Line2D([0], [0], 
                                               marker=plot_characteristics_legend['handles']['marker'],  
                                               color=plot_characteristics_legend['handles']['color'],
-                                              markerfacecolor=self.read_instance.plotting_params[experiment]['colour'],
+                                              markerfacecolor=self.read_instance.plotting_params[model]['colour'],
                                               markersize=plot_characteristics_legend['handles']['markersize'],
-                                              label=experiment))
+                                              label=model))
         
         plot_characteristics_legend['plot']['handles'] = legend_elements
         
         return plot_characteristics_legend
 
-    def make_experiment_domain_polygons(self, data_labels=None):
-        """ Make experiment domain polygons.
+    def make_model_domain_polygons(self, data_labels=None):
+        """ Make model domain polygons.
             
             :param data_labels: Data arrays to plot
             :type data_labels: list 
@@ -357,16 +357,16 @@ class Plotting:
 
         grid_edge_polygons = []
 
-        # iterate through read experiments and plot grid domain edges on map
-        for experiment in data_labels:
-            if experiment != self.read_instance.observations_data_label:
-                # create matplotlib polygon object from experiment grid edge map projection coordinates
+        # iterate through read models and plot grid domain edges on map
+        for model in data_labels:
+            if model != self.read_instance.observations_data_label:
+                # create matplotlib polygon object from model grid edge map projection coordinates
                 grid_edge_outline_poly = \
-                    Polygon(np.vstack((self.read_instance.plotting_params[experiment]['grid_edge_longitude'],
-                                       self.read_instance.plotting_params[experiment]['grid_edge_latitude'])).T,
-                                       edgecolor=self.read_instance.plotting_params[experiment]['colour'],
+                    Polygon(np.vstack((self.read_instance.plotting_params[model]['grid_edge_longitude'],
+                                       self.read_instance.plotting_params[model]['grid_edge_latitude'])).T,
+                                       edgecolor=self.read_instance.plotting_params[model]['colour'],
                                        transform=self.canvas_instance.datacrs,
-                                       **self.canvas_instance.experiment_domain_polygon)
+                                       **self.canvas_instance.model_domain_polygon)
                 # append polygon
                 grid_edge_polygons.append(grid_edge_outline_poly)
             
@@ -501,7 +501,7 @@ class Plotting:
             'species': self.format_value(species),
             'resolution': self.read_instance.resolution.capitalize().replace('_', ' '),
             'dates': dates,
-            'experiments': self.format_value(list(self.read_instance.experiments.values())),
+            'models': self.format_value(list(self.read_instance.experiments.values())),
             'temporal_colocation': self.read_instance.temporal_colocation,
             'spatial_colocation': self.read_instance.spatial_colocation,
             'filter_species': self.format_value(list(self.read_instance.filter_species.keys())),
@@ -882,7 +882,7 @@ class Plotting:
 
             # if it is a bias chunk statistic, add bias line
             z_statistic_type = get_z_statistic_type(chunk_stat)
-            if z_statistic_type == 'expbias':
+            if z_statistic_type == 'modbias':
                 add_bias_line = True
         # normal timeseries
         else:
@@ -891,7 +891,7 @@ class Plotting:
         # plot horizontal line across x axis at 0 if bias plot
         if add_bias_line:
             if 'bias' not in plot_options:
-               plot_characteristics['bias_line']['y'] = self.read_instance.expbias_stats[chunk_stat]['minimum_bias']
+               plot_characteristics['bias_line']['y'] = self.read_instance.modbias_stats[chunk_stat]['minimum_bias']
             bias_line = relevant_axis.axhline(**plot_characteristics['bias_line'])
             # track plot elements if using dashboard 
             if self.read_instance.mode not in ['report', 'library']:
@@ -977,11 +977,11 @@ class Plotting:
         # cut data_labels for those in valid data labels
         cut_data_labels = [data_label for data_label in data_labels if data_label in valid_data_labels]
 
-        # get number of experiments in data  labels
+        # get number of models in data  labels
         if self.read_instance.observations_data_label in cut_data_labels:
-            n_exps = len(cut_data_labels) - 1
+            n_mods = len(cut_data_labels) - 1
         else:
-            n_exps = len(cut_data_labels) 
+            n_mods = len(cut_data_labels) 
 
         # hide non-relevant resolution axes
         for nonrelevant_temporal_resolution in self.read_instance.periodic_nonrelevant_temporal_resolutions:
@@ -1026,8 +1026,8 @@ class Plotting:
                         alpha = plot_characteristics['violin_alphas']['alpha_obs']
                         violin_fill = plot_characteristics['violin_fill_obs']
                     else:
-                        alpha = plot_characteristics['violin_alphas']['alpha_exp']
-                        if (n_exps == 1) or ('individual' in plot_options):
+                        alpha = plot_characteristics['violin_alphas']['alpha_mod']
+                        if (n_mods == 1) or ('individual' in plot_options):
                             violin_fill = plot_characteristics['violin_fill_1model']
                         else:
                             violin_fill = plot_characteristics['violin_fill_2+models']
@@ -1075,14 +1075,14 @@ class Plotting:
 
                             # if have more than 1 valid data array (both obs and model), 
                             # split the violin plot across the horizontal
-                            # (observations on left, experiment violin_plots on right)
-                            if ((n_exps > 0) and (self.read_instance.observations_data_label in cut_data_labels) and
+                            # (observations on left, model violin_plots on right)
+                            if ((n_mods > 0) and (self.read_instance.observations_data_label in cut_data_labels) and
                                ('individual' not in plot_options)):
                                 m = np.mean(self.violin_plot.get_paths()[0].vertices[:, 0])
                                 # observations on left
                                 if data_label == self.read_instance.observations_data_label:
                                     self.violin_plot.get_paths()[0].vertices[:, 0] = np.clip(self.violin_plot.get_paths()[0].vertices[:, 0], -np.inf, m)
-                                # experiments on right
+                                # models on right
                                 else:
                                     self.violin_plot.get_paths()[0].vertices[:, 0] = np.clip(self.violin_plot.get_paths()[0].vertices[:, 0], m, np.inf)
 
@@ -1104,13 +1104,13 @@ class Plotting:
             # periodic plot type
             else:
 
-                # plot horizontal line/s across x axis at value/s of minimum experiment bias (if bias statistic)
+                # plot horizontal line/s across x axis at value/s of minimum model bias (if bias statistic)
                 if z_statistic_sign == 'bias':
                     # get value/s of minimum bias for statistic
                     if z_statistic_type == 'basic':
                         minimum_bias = self.read_instance.basic_stats[base_zstat]['minimum_bias']
                     else:
-                        minimum_bias = self.read_instance.expbias_stats[base_zstat]['minimum_bias']
+                        minimum_bias = self.read_instance.modbias_stats[base_zstat]['minimum_bias']
                     bias_lines = []
                     for mb in minimum_bias:
                         bias_lines += [relevant_sub_ax.axhline(y=mb, **plot_characteristics['bias_line'])]
@@ -1268,11 +1268,11 @@ class Plotting:
                 
                 # check if all values are equal in the dataframe
                 if kde_data_model.size == 0:
-                    msg = 'The kernel density cannot be calculated because there are no valid values for {} experiment.'.format(data_label)
+                    msg = 'The kernel density cannot be calculated because there are no valid values for {} model.'.format(data_label)
                     show_message(self.read_instance, msg)
                     continue
                 elif np.all(kde_data_model == kde_data_model[0]):
-                    msg = 'The kernel density cannot be calculated because all values for {} experiment are equal.'.format(data_label)
+                    msg = 'The kernel density cannot be calculated because all values for {} model are equal.'.format(data_label)
                     show_message(self.read_instance, msg)
                     continue
                 # calculate PDF
@@ -1437,19 +1437,19 @@ class Plotting:
             if data_label == self.read_instance.observations_data_label:
                 continue
 
-            # get experiment data (flattened)
-            experiment_data = self.canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(data_label),0,:]
+            # get model data (flattened)
+            model_data = self.canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(data_label),0,:]
 
             # subset data if neccessary
             if subset:
-                experiment_data = experiment_data[inds_subset]
+                model_data = model_data[inds_subset]
 
             # get marker size (for report and library)
             if self.read_instance.mode in ['report', 'library']:
                 self.get_markersize(relevant_axis, 'scatter', networkspeci, plot_characteristics, data=observations_data)
 
             # create scatter plot
-            self.scatter_plot = relevant_axis.plot(observations_data, experiment_data, 
+            self.scatter_plot = relevant_axis.plot(observations_data, model_data, 
                                                    color=self.read_instance.plotting_params[data_label]['colour'],
                                                    **plot_characteristics['plot'])
 
@@ -1493,7 +1493,7 @@ class Plotting:
         else:
             sizedist = False  
 
-        # if normalise in plot options, then get factor for normalisation (per observations and experiment)
+        # if normalise in plot options, then get factor for normalisation (per observations and model)
         if ('normalise' in plot_options): 
 
             # initialise dict to store normalisation factors
@@ -1980,7 +1980,7 @@ class Plotting:
                                 # observations in white
                                 if data_label == self.read_instance.observations_data_label:
                                     color = 'white'
-                                # experiments in legend colors
+                                # models in legend colors
                                 else:
                                     color = self.read_instance.plotting_params[data_label]['colour']
                                 cell_colours[col].append(color)
@@ -1999,7 +1999,7 @@ class Plotting:
                         # observations in white
                         if data_label == self.read_instance.observations_data_label:
                             color = 'white'
-                        # experiments in legend colors
+                        # models in legend colors
                         else:
                             color = self.read_instance.plotting_params[data_label]['colour']
                         col_colours.extend([color])
@@ -2328,8 +2328,8 @@ class Plotting:
             if data_label == self.read_instance.observations_data_label:
                 continue
 
-            # get experiment data
-            experiment_data = data[valid_data_labels.index(data_label), :, :]
+            # get model data
+            model_data = data[valid_data_labels.index(data_label), :, :]
             
             # calculate MQI for the current station
             x_points = []
@@ -2345,10 +2345,10 @@ class Plotting:
                 zip(valid_station_references, valid_station_classifications)):
 
                 st_observations_data = observations_data[station_idx, :]
-                st_experiment_data = experiment_data[station_idx, :]
+                st_model_data = model_data[station_idx, :]
       
-                x, y, mqi = ExpBias.calculate_fairmode_stats(
-                    st_observations_data, st_experiment_data, 
+                x, y, mqi = ModBias.calculate_fairmode_stats(
+                    st_observations_data, st_model_data, 
                     u_95r_RV, RV, alpha, beta, exc_threshold, percentile, 'target')
 
                 x_points.append(x)
@@ -2479,8 +2479,8 @@ class Plotting:
         # iterate through data labels
         for data_label in cut_data_labels:
 
-            # get experiment data
-            experiment_data = data[valid_data_labels.index(data_label), :, :]
+            # get model data
+            model_data = data[valid_data_labels.index(data_label), :, :]
             
             # calculate MQI for the current station
             exceedances = []
@@ -2493,10 +2493,10 @@ class Plotting:
             for station_idx, station in enumerate(valid_station_references):
 
                 st_observations_data = observations_data[station_idx, :]
-                st_experiment_data = experiment_data[station_idx, :]
+                st_model_data = model_data[station_idx, :]
 
-                mean, exc, t_bias, t_R, t_sd, h_perc = ExpBias.calculate_fairmode_stats(
-                    st_observations_data, st_experiment_data, 
+                mean, exc, t_bias, t_R, t_sd, h_perc = ModBias.calculate_fairmode_stats(
+                    st_observations_data, st_model_data, 
                     u_95r_RV, RV, alpha, beta, exc_threshold, percentile, 'summary')
 
                 means.append(mean)
@@ -2529,7 +2529,7 @@ class Plotting:
             # apply configuration to each row
             for i, (row, fairmode_data) in enumerate(zip(subplots,statistics_list)):
 
-                # for the two firsts rows, skip the experiments
+                # for the two firsts rows, skip the models
                 if i < 2 and data_label != self.read_instance.observations_data_label:
                     continue
 

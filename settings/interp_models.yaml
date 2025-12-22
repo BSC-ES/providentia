@@ -1,6 +1,6 @@
 {
     "monarch": {
-        "experiments": ["a7kg","a7kh", "a7rs", "a1vi", "a6iz", "a123", "a3ku", "a1wd", "a1vv", "a1vw", "a1x8", "a1xa", "a1xf", "a1yq", "a1yz", "a1zc", 
+        "models": ["a7kg","a7kh", "a7rs", "a1vi", "a6iz", "a123", "a3ku", "a1wd", "a1vv", "a1vw", "a1x8", "a1xa", "a1xf", "a1yq", "a1yz", "a1zc", 
                         "a1wdwodu", "a21m", "a22r", "a22s", "a28j", "a28j_v2", "a28jwodu", "a29d", "a29d_v2", "a29dwodu", "a2ba", 
                         "a2bg", "a2bk", "a2bz", "a2jj", "a2m7", "a2m8", "a2sp_bug", "a2eb", "a2ew", "a2ex", "a2vn", "a2vw", 
                         "a2yb", "a2yu", "a3bv", "a48a", "a23v", "a6fr", "a4cp", "a3ge", "a483", "a4ic", "a4in", "a45g", "a4dd", 
@@ -13,32 +13,32 @@
         ]
     },
     "nmmb-bsc-ctm": {
-        "experiments": ["b007"],
+        "models": ["b007"],
         "paths": [ 
             "/esarchive/exp/nmmb-bsc-ctm/"
         ]
     },
     "wrf-hermes-cmaq": {
-        "experiments": ["b012", "b075"],
+        "models": ["b012", "b075"],
         "paths": [ 
             "/esarchive/exp/wrf-hermes-cmaq/"
         ]
     },
     "auto-wrf-hermes-cmaq": {
-        "experiments": ["a767", "a1ay", "a1uo", "a148", "a1wz", "a1y6", "a1y7", "a1y8", "a1y9", "a1ya", "a1zk", "a1zm", "a26h", 
+        "models": ["a767", "a1ay", "a1uo", "a148", "a1wz", "a1y6", "a1y7", "a1y8", "a1y9", "a1ya", "a1zk", "a1zm", "a26h", 
                         "a26j", "a26o", "a272", "a29h", "a29i", "a2a1", "a2d1", "a2a6", "a2hl", "a2kp", "a2y4", "a50p", "a8g1"],
         "paths": [ 
             "/esarchive/exp/auto-wrf-hermes-cmaq/"
         ]
     },
     "cams50": {
-        "experiments": ["cams50", "cams50_chimere", "cams50_emep", "cams50_match", "cams50_mocage", "cams50_silam"],
+        "models": ["cams50", "cams50_chimere", "cams50_emep", "cams50_match", "cams50_mocage", "cams50_silam"],
         "paths": [ 
             "/esarchive/recon/ecmwf/"
         ]
     },
     "cams61": {
-        "experiments": ["cams61_chimere_ph1", "cams61_emep_ph1", "cams61_eurad_ph1", "cams61_lotoseuros_ph1", "cams61_match_ph1", 
+        "models": ["cams61_chimere_ph1", "cams61_emep_ph1", "cams61_eurad_ph1", "cams61_lotoseuros_ph1", "cams61_match_ph1", 
                         "cams61_mocage_ph1", "cams61_silam_ph1", "cams61_camsra_ph2", "cams61_chimere_ph2", "cams61_dehm_ph2", 
                         "cams61_emep_ph2", "cams61_eurad_ph2", "cams61_lotoseuros_ph2", "cams61_match_ph2", "cams61_minni_ph2", 
                         "cams61_monarch_ph2", "cams61_silam_ph2", "cams61_chimere_ph3", "cams61_dehm_ph3", "cams61_emep_ph3", 
@@ -49,19 +49,19 @@
         ]
     },
     "auto-caliope-urban": {
-        "experiments": ["a7n2"],
+        "models": ["a7n2"],
         "paths": [
             "/gpfs/scratch/bsc32/bsc956599/data/"
         ]
     },
-    "example_experiment_type": {
-        "experiments": ["example_experiment_name"],
+    "example_model_type": {
+        "models": ["example_model_name"],
         "paths": [ 
-            "/example/experiment/path"
+            "/example/model/path"
         ]
     },
     "cams2_82_nrt": {
-        "experiments": ["osuite", "osuite_24_48", "osuite_48_72", "osuite_72_96", "osuite_96_120",
+        "models": ["osuite", "osuite_24_48", "osuite_48_72", "osuite_72_96", "osuite_96_120",
                         "cntrl", "cntrl_24_48", "cntrl_48_72", "cntrl_72_96", "cntrl_96_120",
                         "sdswas", "sdswas_24_48", "sdswas_48_72",
                         "icap", "icap_24_48", "icap_48_72", "icap_72_96", "icap_96_120"],
@@ -70,7 +70,7 @@
         ]
     },
     "cams2_82_rean": {
-        "experiments": ["rean", "rean_cntrl"],
+        "models": ["rean", "rean_cntrl"],
         "paths": [
             "/esarchive/exp/CAMS2_82/rean/"
         ]

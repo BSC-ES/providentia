@@ -97,10 +97,10 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
             # get unfiltered data array
             data_array = copy.deepcopy(prv.data_in_memory[networkspeci])
 
-            # if daily or combined forecast need to merge forecast days separated as different experiments in 1 tiled dimension
+            # if daily or combined forecast need to merge forecast days separated as different models in 1 tiled dimension
             if (prv.daily_forecast) or (prv.combined_forecast):
             
-                # merge forecast days as different experiments to same dimension (tiled)
+                # merge forecast days as different models to same dimension (tiled)
                 unique_base_data_labels = [label.split('-daily')[0].split('-combined')[0] for label in prv.data_labels]
                 data_array = merge_forecast_days(prv, networkspeci, prv.original_data_labels, unique_base_data_labels, data_array)
 
@@ -146,11 +146,11 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
 
     # save out miscellaneous variables
     calibration_factor = ''
-    for factor_ii, (exp, factor) in enumerate(prv.calibration_factor.items()):
+    for factor_ii, (mod, factor) in enumerate(prv.calibration_factor.items()):
         if factor_ii == (len(prv.calibration_factor) - 1):
-            calibration_factor += '{} ({})'.format(exp, factor)
+            calibration_factor += '{} ({})'.format(mod, factor)
         else:
-            calibration_factor += '{} ({}), '.format(exp, factor)
+            calibration_factor += '{} ({}), '.format(mod, factor)
     save_data_dict['calibration_factor'] = calibration_factor
     save_data_dict['remove_extreme_stations'] = prv.remove_extreme_stations
     save_data_dict['spatial_colocation_tolerance'] = prv.spatial_colocation_tolerance
@@ -307,10 +307,10 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
             # get unfiltered data array
             data_array = copy.deepcopy(prv.data_in_memory[networkspeci])
 
-            # if daily or combined forecast need to merge forecast days separated as different experiments in 1 tiled dimension
+            # if daily or combined forecast need to merge forecast days separated as different models in 1 tiled dimension
             if (prv.daily_forecast) or (prv.combined_forecast):
             
-                # merge forecast days as different experiments to same dimension (tiled)
+                # merge forecast days as different models to same dimension (tiled)
                 unique_base_data_labels = [label.split('-daily')[0].split('-combined')[0] for label in prv.data_labels]
                 data_array = merge_forecast_days(prv, networkspeci, prv.original_data_labels, unique_base_data_labels, data_array)
 
@@ -402,7 +402,7 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
             var = fout.createVariable('data_labels', str, ('data_label',))
             var.standard_name = 'data_labels'
             var.long_name = 'data_labels'
-            var.description = 'Labels associated with each data array, e.g. observations, experiment_1, etc.'
+            var.description = 'Labels associated with each data array, e.g. observations, model_1, etc.'
             var[:] = np.array(prv.data_labels)
             # GHOST variables
             if prv.reading_ghost:
@@ -597,19 +597,19 @@ def export_configuration(prv, cname, separator="||"):
                           'start_date': prv.start_date,
                           'end_date': prv.end_date}
 
-    # experiments
+    # models
     if prv.experiments:
-        exps = []
+        mods = []
         aliases = []
-        for exp_raw, exp in prv.experiments.items():
-            exps.append(exp_raw)
-            if exp_raw != exp:
-                aliases.append(exp) 
-        exp_str = ",".join(str(i) for i in exps)
+        for mod_raw, mod in prv.experiments.items():
+            mods.append(mod_raw)
+            if mod_raw != mod:
+                aliases.append(mod) 
+        mod_str = ",".join(str(i) for i in mods)
         if len(aliases) > 0:
             alias_str = ",".join(str(i) for i in aliases)
-            exp_str = "{} ({})".format(exp_str, alias_str)
-        options['section']['experiments'] = exp_str
+            mod_str = "{} ({})".format(mod_str, alias_str)
+        options['section']['models'] = mod_str
 
     # colocation variables
     options['section'].update({'temporal_colocation': prv.temporal_colocation,
@@ -642,11 +642,11 @@ def export_configuration(prv, cname, separator="||"):
     # calibration_factor
     if len(prv.calibration_factor) > 0:
         calibration_factor = ''
-        for factor_ii, (exp, factor) in enumerate(prv.calibration_factor.items()):
+        for factor_ii, (mod, factor) in enumerate(prv.calibration_factor.items()):
             if factor_ii == (len(prv.calibration_factor) - 1):
-                calibration_factor += '{} ({})'.format(exp, factor)
+                calibration_factor += '{} ({})'.format(mod, factor)
             else:
-                calibration_factor += '{} ({}), '.format(exp, factor)
+                calibration_factor += '{} ({}), '.format(mod, factor)
         options['section'].update({'calibration_factor': calibration_factor})
 
     # qa

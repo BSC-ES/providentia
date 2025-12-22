@@ -78,15 +78,15 @@ def linear_regression(read_instance, canvas_instance, relevant_axis, networkspec
             inds_subset = np.random.choice(data_array_size, size=plot_characteristics['max_points'], replace=False)
             observations_data = observations_data[inds_subset]
 
-    # iterate through experiment data, making regression line to observations
+    # iterate through model data, making regression line to observations
     for data_label in cut_data_labels:
         if data_label != read_instance.observations_data_label:
-            # get experiement data (flattened and drop NaNs)
-            experiment_data = drop_nans(canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(data_label),0,:])
+            # get model data (flattened and drop NaNs)
+            model_data = drop_nans(canvas_instance.selected_station_data[networkspeci]['flat'][valid_data_labels.index(data_label),0,:])
             # subset data if neccessary
             if subset:
-                experiment_data = experiment_data[inds_subset]
-            m, b = np.polyfit(observations_data, experiment_data, deg=1)
+                model_data = model_data[inds_subset]
+            m, b = np.polyfit(observations_data, model_data, deg=1)
             regression_line = relevant_axis.plot(observations_data, m*observations_data+b, 
                                                  color=read_instance.plotting_params[data_label]['colour'],
                                                  zorder=read_instance.plotting_params[data_label]['zorder']+len(cut_data_labels),
@@ -332,7 +332,7 @@ def annotation(read_instance, canvas_instance, relevant_axis, networkspeci, data
                                                             plot_characteristics['annotate_text']['round_decimal_places'])) 
 
             # append annotation line
-            if (plot_characteristics['annotate_text']['exp_labels']):
+            if (plot_characteristics['annotate_text']['mod_labels']):
                 str_to_append = data_label + ' | ' + ', '.join(stats_annotate)
             else:
                 str_to_append = ', '.join(stats_annotate)
@@ -364,8 +364,8 @@ def annotation(read_instance, canvas_instance, relevant_axis, networkspeci, data
         show_message(read_instance, msg)
 
 
-def experiment_domain(canvas_instance, relevant_axis, data_labels, map_extent):
-    """ Plot experiment domain extents on map
+def model_domain(canvas_instance, relevant_axis, data_labels, map_extent):
+    """ Plot model domain extents on map
 
         :param canvas_instance: Instance of class Canvas or Report
         :type canvas_instance: object
@@ -377,8 +377,8 @@ def experiment_domain(canvas_instance, relevant_axis, data_labels, map_extent):
         :type map_extent: list
     """
 
-    #get experiment domain polygons
-    grid_edge_polygons = canvas_instance.plotting.make_experiment_domain_polygons(data_labels=data_labels) 
+    #get model domain polygons
+    grid_edge_polygons = canvas_instance.plotting.make_model_domain_polygons(data_labels=data_labels) 
 
     # plot grid edge polygons on map
     for grid_edge_polygon in grid_edge_polygons:

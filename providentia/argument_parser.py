@@ -68,11 +68,11 @@ class ProvArgumentParser(object):
             self.parser.add_argument("--nonghost_root",
                                      dest="nonghost_root",
                                      help="root directory where non-GHOST observations are stored")                         
-            self.parser.add_argument("--exp_root",
-                                     dest="exp_root",
+            self.parser.add_argument("--mod_root",
+                                     dest="mod_root",
                                      help="set model root data directory")
-            self.parser.add_argument("--exp_to_interp_root",
-                                     dest="exp_to_interp_root",
+            self.parser.add_argument("--mod_to_interp_root",
+                                     dest="mod_to_interp_root",
                                      help="set model to interpolate root data directory")
             self.parser.add_argument("--generate_file_tree", '--gft',
                                      dest="generate_file_tree",

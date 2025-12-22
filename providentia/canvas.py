@@ -120,10 +120,10 @@ class Canvas(FigureCanvas):
         # initialise statsummary dict
         self.read_instance.current_statsummary_stats = {}
         self.read_instance.current_statsummary_stats['basic'] = {}
-        self.read_instance.current_statsummary_stats['expbias'] = {}
+        self.read_instance.current_statsummary_stats['modbias'] = {}
         for periodic_cycle in ['None', 'Diurnal', 'Weekly', 'Monthly']:
             self.read_instance.current_statsummary_stats['basic'][periodic_cycle] = []
-            self.read_instance.current_statsummary_stats['expbias'][periodic_cycle] = []
+            self.read_instance.current_statsummary_stats['modbias'][periodic_cycle] = []
 
         # update plot characteristics for all plots, and initialise plot options per plot type 
         for plot_type in self.all_plots:
@@ -897,16 +897,16 @@ class Canvas(FigureCanvas):
                         ylabel = self.read_instance.basic_stats[base_zstat]['label']
                         ylabel_units = self.read_instance.basic_stats[base_zstat]['units']
                     else:
-                        ylabel = self.read_instance.expbias_stats[base_zstat]['label']
-                        ylabel_units = self.read_instance.expbias_stats[base_zstat]['units']
+                        ylabel = self.read_instance.modbias_stats[base_zstat]['label']
+                        ylabel_units = self.read_instance.modbias_stats[base_zstat]['units']
                     if ylabel_units == '[measurement_units]':
                         ylabel_units = self.read_instance.measurement_units[self.read_instance.species[0]] 
                     if ylabel_units != '':
                         ylabel += ' [{}]'.format(ylabel_units)
                     xlabel = ''
 
-                    # if statistic type is 'expbias' and 'bias' in plot options, remove bias from plot options
-                    if (z_statistic_type == 'expbias') and ('bias' in plot_options):
+                    # if statistic type is 'modbias' and 'bias' in plot options, remove bias from plot options
+                    if (z_statistic_type == 'modbias') and ('bias' in plot_options):
                         bias_index = self.plot_characteristics[plot_type]['plot_options'].index('bias')
                         plot_options.remove('bias')
                         self.plot_elements[plot_type]['active'] = 'absolute'
@@ -951,7 +951,7 @@ class Canvas(FigureCanvas):
                 # make statsummary plot
                 elif plot_type == 'statsummary':
                     if 'bias' in plot_options:
-                        relevant_zstats = self.active_statsummary_stats['expbias']
+                        relevant_zstats = self.active_statsummary_stats['modbias']
                     else:
                         relevant_zstats = self.active_statsummary_stats['basic']
                     
@@ -1053,7 +1053,7 @@ class Canvas(FigureCanvas):
         self.remove_axis_objects(self.plot_axes['map'].patches, types_to_remove=[matplotlib.patches.Polygon])
 
         # create grid edge polygons for models in memory
-        grid_edge_polygons = self.plotting.make_experiment_domain_polygons()
+        grid_edge_polygons = self.plotting.make_model_domain_polygons()
 
         # plot grid edge polygons on map
         for grid_edge_polygon in grid_edge_polygons:
@@ -1497,7 +1497,7 @@ class Canvas(FigureCanvas):
         if periodic_cycle == '':
             periodic_cycle = 'None'
         plot_options = self.current_plot_options['statsummary']
-        statistic_type = 'basic' if 'bias' not in plot_options else 'expbias'
+        statistic_type = 'basic' if 'bias' not in plot_options else 'modbias'
         if 'bias' in plot_options:
             items = list(copy.deepcopy(self.read_instance.basic_and_bias_z_stats))
         else:
@@ -1542,7 +1542,7 @@ class Canvas(FigureCanvas):
             
             # get all possible stats
             plot_options = self.current_plot_options['statsummary']
-            statistic_type = 'basic' if 'bias' not in plot_options else 'expbias'
+            statistic_type = 'basic' if 'bias' not in plot_options else 'modbias'
             
             # initialise stats
             if not hasattr(self, 'active_statsummary_stats'):
@@ -1550,9 +1550,9 @@ class Canvas(FigureCanvas):
                 # get initial stats from plot characteristics
                 periodic_cycle = 'None'
                 self.read_instance.current_statsummary_stats['basic']['None'] = self.plot_characteristics['statsummary']['basic']
-                self.read_instance.current_statsummary_stats['expbias']['None'] = self.plot_characteristics['statsummary']['experiment_bias']
+                self.read_instance.current_statsummary_stats['modbias']['None'] = self.plot_characteristics['statsummary']['model_bias']
                 self.active_statsummary_stats = {'basic': self.get_active_statsummary_stats('basic'),
-                                                 'expbias': self.get_active_statsummary_stats('expbias')}
+                                                 'modbias': self.get_active_statsummary_stats('modbias')}
 
                 # check stats for the selected stats
                 self.check_statsummary_stats()
@@ -1563,7 +1563,7 @@ class Canvas(FigureCanvas):
                 previous_active_statsummary_stats = copy.deepcopy(self.active_statsummary_stats[statistic_type])
 
                 # remove bias from options to get correct active stats
-                if statistic_type == 'expbias':
+                if statistic_type == 'modbias':
                     previous_active_statsummary_stats = [option.split('_bias')[0] if '_bias' in option else option 
                                                          for option in previous_active_statsummary_stats]
                 
@@ -1595,7 +1595,7 @@ class Canvas(FigureCanvas):
                 for stat in self.active_statsummary_stats['basic']:
                     if 'MDA8' in stat:
                         basic_stats_to_remove.append(stat)
-                for stat in self.active_statsummary_stats['expbias']:
+                for stat in self.active_statsummary_stats['modbias']:
                     if 'MDA8' in stat:
                         bias_stats_to_remove.append(stat)
                         
@@ -1603,7 +1603,7 @@ class Canvas(FigureCanvas):
                     for stat in basic_stats_to_remove:
                         self.active_statsummary_stats['basic'].remove(stat)
                     for stat in bias_stats_to_remove:
-                        self.active_statsummary_stats['expbias'].remove(stat)
+                        self.active_statsummary_stats['modbias'].remove(stat)
 
                     for stat_type in self.read_instance.current_statsummary_stats:
                         for resolution in self.read_instance.current_statsummary_stats[stat_type]:
@@ -3148,8 +3148,8 @@ class Canvas(FigureCanvas):
                                 # get zstat information 
                                 zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=zstat) 
 
-                                # if get_z_statistic_type == 'expbias' then return as bias already plotted
-                                if z_statistic_type == 'expbias':
+                                # if get_z_statistic_type == 'modbias' then return as bias already plotted
+                                if z_statistic_type == 'modbias':
                                     self.update_option_on_combobox(event_source, index)
                                     self.plot_elements[plot_type]['active'] = 'absolute'
                                     self.current_plot_options[plot_type] = copy.deepcopy(self.previous_plot_options[plot_type])
@@ -3161,9 +3161,9 @@ class Canvas(FigureCanvas):
                                 chunk_stat = self.timeseries_chunk_stat.currentText()
                                 chunk_resolution = self.timeseries_chunk_resolution.currentText()
                                 
-                                # if get_z_statistic_type == 'expbias' then return as bias already plotted
+                                # if get_z_statistic_type == 'modbias' then return as bias already plotted
                                 z_statistic_type = get_z_statistic_type(chunk_stat)
-                                if z_statistic_type == 'expbias':
+                                if z_statistic_type == 'modbias':
                                     # chunk timeseries is active?
                                     if (chunk_stat != 'None') and (chunk_resolution != 'None'):
                                         self.update_option_on_combobox(event_source, index)
@@ -3222,7 +3222,7 @@ class Canvas(FigureCanvas):
                                          self.current_plot_options[plot_type], zstat=zstat)
                                 # make statsummary plot
                                 elif plot_type == 'statsummary':
-                                    relevant_zstats = self.active_statsummary_stats['expbias']
+                                    relevant_zstats = self.active_statsummary_stats['modbias']
                                     func(self.plot_axes[plot_type], self.read_instance.networkspeci, 
                                          self.read_instance.data_labels, self.plot_characteristics[plot_type], 
                                          self.current_plot_options[plot_type], zstats=relevant_zstats, 

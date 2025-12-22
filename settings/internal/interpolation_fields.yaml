@@ -1,7 +1,7 @@
 - ghost_version
 - start_date
 - end_date
-- experiments
+- models
 - species
 - network
 - resolution
@@ -14,8 +14,8 @@
 - interp_reverse_vertical_orientation
 - interp_chunk_size
 - interp_job_array_limit
-- exp_root
+- mod_root
 - ghost_root
 - nonghost_root
-- exp_to_interp_root
+- mod_to_interp_root
 - interp_multiprocessing

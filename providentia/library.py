@@ -31,7 +31,7 @@ from .plot_formatting import (format_plot_options, format_axis, set_axis_label, 
 from .read import DataReader
 from .read_aux import (generate_file_trees, get_possible_resampling_resolutions, 
                        get_periodic_nonrelevant_temporal_resolutions, get_periodic_relevant_temporal_resolutions, 
-                       get_valid_experiments, get_valid_obs_files_in_date_range)
+                       get_valid_models, get_valid_obs_files_in_date_range)
 from .statistics import (calculate_statistic, generate_colourbar, generate_colourbar_detail, 
                          get_fairmode_data, get_selected_station_data, get_z_statistic_info)
 from .warnings_prv import show_message
@@ -71,7 +71,7 @@ class Providentia:
 
         # load statistical yamls
         self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
-        self.expbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
+        self.modbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/model_bias_stats.yaml')))
 
         # load representativity information
         self.representativity_info = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
@@ -113,8 +113,8 @@ class Providentia:
         # get valid observations in date range
         get_valid_obs_files_in_date_range(self, self.start_date, self.end_date)
 
-        # update available experiments for selected fields
-        get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
+        # update available models for selected fields
+        get_valid_models(self, self.start_date, self.end_date, self.resolution,
                             self.network, self.species)
 
     def read(self):
@@ -741,7 +741,7 @@ class Providentia:
             
             # get stats to plot
             if 'bias' in plot_options:
-                stats_to_plot = self.plot_characteristics[plot_type]['experiment_bias']
+                stats_to_plot = self.plot_characteristics[plot_type]['model_bias']
             else:
                 stats_to_plot = self.plot_characteristics[plot_type]['basic']
 
@@ -768,8 +768,8 @@ class Providentia:
                             zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=stp)
                             # calculate statistic
                             if dl in self.selected_station_data_labels[ns]:
-                                # if relevant stat is expbias stat, then ensure temporal colocation is active
-                                if (base_plot_type == 'statsummary') and (stp in self.expbias_stats) and ((not self.temporal_colocation) or (len(self.data_labels) == 1)):
+                                # if relevant stat is modbias stat, then ensure temporal colocation is active
+                                if (base_plot_type == 'statsummary') and (stp in self.modbias_stats) and ((not self.temporal_colocation) or (len(self.data_labels) == 1)):
                                     stats_per_data_label.append(np.nan)
                                 # otherwise calculate statistic
                                 else:
@@ -934,8 +934,8 @@ class Providentia:
                     ylabel = self.basic_stats[base_zstat]['label']
                     ylabel_units = self.basic_stats[base_zstat]['units']
                 else:
-                    ylabel = self.expbias_stats[base_zstat]['label']
-                    ylabel_units = self.expbias_stats[base_zstat]['units']
+                    ylabel = self.modbias_stats[base_zstat]['label']
+                    ylabel_units = self.modbias_stats[base_zstat]['units']
                 if ylabel_units == '[measurement_units]':
                     ylabel_units = self.measurement_units[speci] 
                 if ylabel_units != '':
@@ -1161,8 +1161,8 @@ class Providentia:
         # get zstat information 
         zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period = get_z_statistic_info(zstat=stat) 
 
-        # combine basic and expbias stats dicts together
-        stats_dict = {**self.basic_stats, **self.expbias_stats}
+        # combine basic and modbias stats dicts together
+        stats_dict = {**self.basic_stats, **self.modbias_stats}
 
         # check desired statistic is defined in stats dict
         if base_zstat not in stats_dict:
@@ -1177,8 +1177,8 @@ class Providentia:
             return
 
         # if calculating bias stat but temporal_colocation is not active, then throw error
-        elif (z_statistic_type == 'expbias') & (not self.temporal_colocation):
-            msg = f'To calculate the experiment bias stat {zstat}, temporal_colocation must be set to True. Cannot calculate statistic.'
+        elif (z_statistic_type == 'modbias') & (not self.temporal_colocation):
+            msg = f'To calculate the model bias stat {zstat}, temporal_colocation must be set to True. Cannot calculate statistic.'
             show_message(self, msg)
             return
 
@@ -1203,12 +1203,12 @@ class Providentia:
     def set_config(self, **kwargs):
         """ Wrapper method to set configuration variables. """
 
-        # if have forecast active then save current experiment variable in memory as will want to set it again 
+        # if have forecast active then save current model variable in memory as will want to set it again 
         # after resetting configuration variables, as are not re-reading 
-        forecast_experiments = None
+        forecast_models = None
         if hasattr(self, 'forecast'): 
             if len(self.forecast) != 0:
-                forecast_experiments = copy.deepcopy(self.experiments)
+                forecast_models = copy.deepcopy(self.experiments)
             
         # initialise default configuration variables
         # modified by passed arguments, if given
@@ -1331,9 +1331,9 @@ class Providentia:
         # now all variables have been parsed, check validity of those, throwing errors where necessary
         self.provconf.check_validity()
 
-        # overwrite experiments variable if forecast active
-        if forecast_experiments is not None:
-            self.experiments = forecast_experiments
+        # overwrite models variable if forecast active
+        if forecast_models is not None:
+            self.experiments = forecast_models
 
         return True
 

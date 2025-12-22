@@ -25,7 +25,7 @@ PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 
 # load the defined models paths, agrupations yaml and mapping species
 data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/data_paths.yaml')))
-interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
+interp_models = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_models.yaml')))
 mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 dl_hpc = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'dl_hpc.yaml')))
 
@@ -287,8 +287,8 @@ class Download(object):
         # initialise the paths
         self.ghost_remote_obs_path = data_paths[self.remote_machine]["ghost_root"]
         self.nonghost_remote_obs_path = data_paths[self.remote_machine]["nonghost_root"]
-        self.exp_remote_path = data_paths[self.remote_machine]["exp_root"]
-        self.exp_to_interp_remote_path = data_paths[self.remote_machine]["exp_to_interp_root"]
+        self.mod_remote_path = data_paths[self.remote_machine]["mod_root"]
+        self.mod_to_interp_remote_path = data_paths[self.remote_machine]["mod_to_interp_root"]
 
         # get public remote machine public key and add it to ssh object
         _, output = subprocess.getstatusoutput(f"ssh-keyscan -t ed25519 {self.remote_hostname}")
@@ -727,7 +727,7 @@ class Download(object):
         model = model_old if self.ghost_version in ["1.2", "1.3", "1.3.1"] else model_new
 
         # get remote directory
-        remote_dir = join(self.exp_remote_path,self.ghost_version,model)
+        remote_dir = join(self.mod_remote_path,self.ghost_version,model)
 
         # check if model exists
         try:
@@ -736,7 +736,7 @@ class Download(object):
             msg = f"There is no data available in {self.remote_machine} for {model_new} model for the current GHOST version ({self.ghost_version})."
 
             # get possible GHOST versions from the combination of GHOST_standards and the real avaibles in the model remote machine path
-            possible_ghost_versions = set(self.sftp.listdir(self.exp_remote_path)).intersection(set(self.possible_ghost_versions))
+            possible_ghost_versions = set(self.sftp.listdir(self.mod_remote_path)).intersection(set(self.possible_ghost_versions))
             
             # get available models in other GHOST versions (considering different formats)
             available_ghost_versions = []
@@ -744,7 +744,7 @@ class Download(object):
             for possible_ghost_version in possible_ghost_versions:
                 try:
                     # get model path depending on the GHOST version
-                    remote_dir_ghost_version = join(self.exp_remote_path, possible_ghost_version, model_old if possible_ghost_version in ["1.2", "1.3", "1.3.1"] else model_new)
+                    remote_dir_ghost_version = join(self.mod_remote_path, possible_ghost_version, model_old if possible_ghost_version in ["1.2", "1.3", "1.3.1"] else model_new)
                     
                     # check if directory exists
                     self.sftp.stat(remote_dir_ghost_version)
@@ -763,7 +763,7 @@ class Download(object):
 
                 # iterate the different GHOST versions
                 for possible_ghost_version in available_ghost_versions:
-                    remote_dir_ghost_version = join(self.exp_remote_path, possible_ghost_version, model_old if possible_ghost_version in ["1.2", "1.3", "1.3.1"] else model_new)
+                    remote_dir_ghost_version = join(self.mod_remote_path, possible_ghost_version, model_old if possible_ghost_version in ["1.2", "1.3", "1.3.1"] else model_new)
                     
                     # iterate the different resolutions
                     sftp_resolutions = self.model_resolution if self.model_resolution else set(self.sftp.listdir(remote_dir)).intersection(self.nonghost_available_resolutions)
@@ -841,7 +841,7 @@ class Download(object):
                 resolution = remote_dir.split('/')[-3]
 
                 # get local directory 
-                local_dir = join(self.exp_root, self.ghost_version, model_new, resolution, species, network)
+                local_dir = join(self.mod_root, self.ghost_version, model_new, resolution, species, network)
 
                 # print source and destination  
                 if not initial_check:
@@ -919,15 +919,15 @@ class Download(object):
         res_spec_dir = []
 
         # get model id and the domain
-        exp_id, domain, ensemble = model.split("-")
+        mod_id, domain, ensemble = model.split("-")
 
         # initialise warning message and model exists boolean
         msg = ""
         model_exists = False
 
-        # see if the model is any of the interp_experiments.yaml lists
-        for model_type, model_dict in interp_experiments.items():
-            if exp_id in model_dict["experiments"]:
+        # see if the model is any of the interp_models.yaml lists
+        for model_type, model_dict in interp_models.items():
+            if mod_id in model_dict["models"]:
                 model_exists = True
                 break
         
@@ -938,26 +938,26 @@ class Download(object):
 
             # get all paths that work
             # if there is none, show a warning
-            exp_dir_functional_list = []    
-            for exp_dir in model_dict["paths"]:
+            mod_dir_functional_list = []    
+            for mod_dir in model_dict["paths"]:
                 # esarchive in transfer5 is located inside gpfs
-                if "/esarchive/" == exp_dir[:11] and self.remote_hostname.startswith('transfer'):
-                    exp_dir = join("/gpfs/archive/bsc32/",exp_dir[1:])
+                if "/esarchive/" == mod_dir[:11] and self.remote_hostname.startswith('transfer'):
+                    mod_dir = join("/gpfs/archive/bsc32/",mod_dir[1:])
                 # check if directory exists in the remote machine
                 try:
-                    self.sftp.stat(exp_dir)
-                    exp_dir_functional_list.append(exp_dir)      
+                    self.sftp.stat(mod_dir)
+                    mod_dir_functional_list.append(mod_dir)      
                 except FileNotFoundError:
                     pass
 
             # if none of the paths are in this current machine, break
-            if not exp_dir_functional_list:
-                msg += f"None of the paths specified in {join('settings', 'interp_experiments.yaml')} are available on the remote machine ({self.remote_machine}). "
+            if not mod_dir_functional_list:
+                msg += f"None of the paths specified in {join('settings', 'interp_models.yaml')} are available on the remote machine ({self.remote_machine}). "
             # if any path works, get the first one that has the model
             else:
                 # get first functional directory  
-                for exp_dir in exp_dir_functional_list:
-                    remote_dir = join(exp_dir,exp_id,domain)
+                for mod_dir in mod_dir_functional_list:
+                    remote_dir = join(mod_dir,mod_id,domain)
                     # check if remote model and domain directories exist in the remote machine
                     try:
                         self.sftp.stat(remote_dir)
@@ -968,22 +968,22 @@ class Download(object):
 
                 # if the model-domain combination is not possible, show the warning
                 if model_exists is False:
-                    msg += f"There is no data available for the {exp_id} model with the {domain} domain in none of the paths specified in {join('settings', 'interp_experiments.yaml')} in the remote machine ({self.remote_machine}). "
+                    msg += f"There is no data available for the {mod_id} model with the {domain} domain in none of the paths specified in {join('settings', 'interp_models.yaml')} in the remote machine ({self.remote_machine}). "
 
         # if model was not in the list, or any of the paths were available
         # or there was no valid path model combination then search in the gpfs directory
         if model_exists is False:
             # get all possible models
-            exp_to_interp_path = join(self.exp_to_interp_remote_path,exp_id,domain)
+            mod_to_interp_path = join(self.mod_to_interp_remote_path,mod_id,domain)
             try:
-                self.sftp.stat(exp_to_interp_path)
-                remote_dir = exp_to_interp_path
+                self.sftp.stat(mod_to_interp_path)
+                remote_dir = mod_to_interp_path
                 model_exists = True
             except FileNotFoundError:
                 pass 
             
             # add to the message if model was not found in the gpfs remote directory
-            msg += f"Cannot find the {exp_id} model with the {domain} domain in '{self.exp_to_interp_remote_path}'."    
+            msg += f"Cannot find the {mod_id} model with the {domain} domain in '{self.mod_to_interp_remote_path}'."    
         
         # if the model-domain combination is not possible, break
         if model_exists is False:
@@ -1000,7 +1000,7 @@ class Download(object):
                 available_species = self.available_species+[spec[0] for spec in mapping_species.values()]
                 sftp_species = self.species if self.species else set(self.sftp.listdir(join(remote_dir,resolution))).intersection(available_species)
             except FileNotFoundError:
-                msg = f"There is no data available in {self.remote_machine} for the {exp_id} model with the {domain} domain at {resolution} resolution"
+                msg = f"There is no data available in {self.remote_machine} for the {mod_id} model with the {domain} domain at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
                 continue
 
@@ -1041,7 +1041,7 @@ class Download(object):
                 
                 # if no species were found, then show the message
                 if species_exists is False:
-                    msg = f"There is no data available in {self.remote_machine} for the {exp_id} model with the {domain} domain for {species} species at {resolution} resolution"
+                    msg = f"There is no data available in {self.remote_machine} for the {mod_id} model with the {domain} domain for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -1112,9 +1112,9 @@ class Download(object):
                 
                 # add ensemble-stats directory if it is an ensemble member
                 if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
-                    local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,species)
+                    local_dir = join(self.mod_to_interp_root,mod_id,domain,resolution,species)
                 else:
-                    local_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+ensemble)
+                    local_dir = join(self.mod_to_interp_root,mod_id,domain,resolution,"ensemble-stats",species+"_"+ensemble)
 
                 # print source and destination
                 if not initial_check:
@@ -1122,7 +1122,7 @@ class Download(object):
                     
                 # if there is no options with the ensemble, tell the user
                 if nc_files == []:
-                    msg = f"There is no data available in {self.remote_machine} for the {exp_id} model with the {domain} domain with the {ensemble} ensemble."
+                    msg = f"There is no data available in {self.remote_machine} for the {mod_id} model with the {domain} domain with the {ensemble} ensemble."
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -1191,38 +1191,38 @@ class Download(object):
         res_spec_dir = []
 
         # get model id and the domain
-        exp_id, domain, ensemble = model.split("-")
+        mod_id, domain, ensemble = model.split("-")
 
         # get model type
-        for model_type, model_dict in interp_experiments.items():
-            if exp_id in model_dict["experiments"]:
+        for model_type, model_dict in interp_models.items():
+            if mod_id in model_dict["models"]:
                 break
         
         # get model specific directories list
-        exp_dir_list = model_dict["paths"]
+        mod_dir_list = model_dict["paths"]
 
         # take all functional directories
-        exp_dir_functional_list = []    
-        for exp_dir in exp_dir_list:
+        mod_dir_functional_list = []    
+        for mod_dir in mod_dir_list:
             # make sure that it comes from esarchive
-            if "/esarchive/" in exp_dir:
+            if "/esarchive/" in mod_dir:
                 # esarchive in transfer5 is located inside gpfs
-                if "/esarchive/" == exp_dir[:11] and self.machine == "storage5":
-                    exp_dir = join("/gpfs/archive/bsc32/",exp_dir[1:])
+                if "/esarchive/" == mod_dir[:11] and self.machine == "storage5":
+                    mod_dir = join("/gpfs/archive/bsc32/",mod_dir[1:])
                 # check if directory exists in esarchive
-                if os.path.exists(exp_dir):
-                    exp_dir_functional_list.append(exp_dir)     
+                if os.path.exists(mod_dir):
+                    mod_dir_functional_list.append(mod_dir)     
             
         # if none of the paths are in this current machine, break
-        if not exp_dir_functional_list:
-            msg = f"None of the paths specified in {join('settings', 'interp_experiments.yaml')} are available on esarchive."
+        if not mod_dir_functional_list:
+            msg = f"None of the paths specified in {join('settings', 'interp_models.yaml')} are available on esarchive."
             show_message(self, msg, deactivate=initial_check)
             return
         
         # take first functional directory  
         esarchive_dir = None
-        for exp_dir in exp_dir_functional_list:
-            temp_esarchive_dir = join(exp_dir,exp_id,domain)
+        for mod_dir in mod_dir_functional_list:
+            temp_esarchive_dir = join(mod_dir,mod_id,domain)
             # check if model and domain directories exist in esarchive machine
             if os.path.exists(temp_esarchive_dir): 
                 esarchive_dir = temp_esarchive_dir
@@ -1230,7 +1230,7 @@ class Download(object):
         
         # if the model-domain combination is not possible, break
         if esarchive_dir is None:
-            msg = f"There is no data available for the {exp_id} model with the {domain} domain in none of the paths specified in {join('settings', 'interp_experiments.yaml')} in esarchive."
+            msg = f"There is no data available for the {mod_id} model with the {domain} domain in none of the paths specified in {join('settings', 'interp_models.yaml')} in esarchive."
             show_message(self, msg, deactivate=initial_check)
             return
 
@@ -1244,7 +1244,7 @@ class Download(object):
                 available_species = self.available_species+[spec[0] for spec in mapping_species.values()]
                 sftp_species = self.species if self.species else set(os.listdir(join(esarchive_dir,resolution))).intersection(available_species)
             except FileNotFoundError:
-                msg = f"There is no data available in esarchive for the {exp_id} model with the {domain} domain at {resolution} resolution"
+                msg = f"There is no data available in esarchive for the {mod_id} model with the {domain} domain at {resolution} resolution"
                 show_message(self, msg, deactivate=initial_check)
                 continue
 
@@ -1277,7 +1277,7 @@ class Download(object):
                 
                 # if no species were found, then show the message
                 if species_exists is False:
-                    msg = f"There is no data available in esarchive for the {exp_id} model with the {domain} domain for {species} species at {resolution} resolution"
+                    msg = f"There is no data available in esarchive for the {mod_id} model with the {domain} domain for {species} species at {resolution} resolution"
                     show_message(self, msg, deactivate=initial_check)
                     continue
 
@@ -1296,7 +1296,7 @@ class Download(object):
             # get all the nc files in the date range
             for esarchive_dir in res_spec_dir:
                 if not initial_check:
-                    self.logger.info(f"\n  - {join(self.exp_to_interp_root,'/'.join(esarchive_dir.split('/')[-4:]))}, source: {esarchive_dir} ({self.machine})")
+                    self.logger.info(f"\n  - {join(self.mod_to_interp_root,'/'.join(esarchive_dir.split('/')[-4:]))}, source: {esarchive_dir} ({self.machine})")
                          
                 # get nc files
                 nc_files = os.listdir(esarchive_dir)
@@ -1349,7 +1349,7 @@ class Download(object):
                         
                 # if there is no options with the ensemble, tell the user
                 if nc_files == []:
-                    msg = f"There is no data available in esarchive for the {exp_id} model with the {domain} domain with the {ensemble} ensemble."
+                    msg = f"There is no data available in esarchive for the {mod_id} model with the {domain} domain with the {ensemble} ensemble."
                     show_message(self, msg, deactivate=initial_check)
                     continue
                 
@@ -1366,9 +1366,9 @@ class Download(object):
                 else:
                     # if it is an ensemble member
                     if ensemble.isdigit() or ensemble in ['allmembers', 'av_an']:
-                        gpfs_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,species)
+                        gpfs_dir = join(self.mod_to_interp_root,mod_id,domain,resolution,species)
                     else:
-                        gpfs_dir = join(self.exp_to_interp_root,exp_id,domain,resolution,"ensemble-stats",species+"_"+ensemble)
+                        gpfs_dir = join(self.mod_to_interp_root,mod_id,domain,resolution,"ensemble-stats",species+"_"+ensemble)
                     
                     # create directories if they don't exist
                     if not os.path.exists(gpfs_dir):
@@ -1469,19 +1469,19 @@ class Download(object):
                 self.connect()  
 
             # get directory content and format it as the models       
-            model_list = self.sftp.listdir(join(self.exp_remote_path,self.ghost_version))
+            model_list = self.sftp.listdir(join(self.mod_remote_path,self.ghost_version))
         # download all non interpolated models
         else:
             # get all the models id
             models = []
-            for model_dict in interp_experiments.values():
-                models += model_dict["experiments"]
+            for model_dict in interp_models.values():
+                models += model_dict["models"]
             # get all the domain and ensemble combinations 
             model_list = []
             # TODO hardcoded
             for domain in ["ip", "d03", "d01", "regional", "eu", "reg", "ex", "bcn", "cat", "d02", "global","regional_i01", "regional_i02", "regional_i03"]:
-                for exp in models:
-                    model_list.append(exp+"-"+domain+"-allmembers")
+                for mod in models:
+                    model_list.append(mod+"-"+domain+"-allmembers")
 
         self.experiments = dict(zip(model_list,model_list))
 

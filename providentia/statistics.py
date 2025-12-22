@@ -17,7 +17,7 @@ import pandas as pd
 import scipy.stats as st
 
 from providentia.auxiliar import CURRENT_PATH, join, get_conversion_factor, get_standard_parameters_by_speci
-from .calculate import Stats, ExpBias
+from .calculate import Stats, ModBias
 from .read_aux import (get_frequency_code, get_chunk_size,
                        get_periodic_nonrelevant_temporal_resolutions, get_periodic_relevant_temporal_resolutions)
 from .warnings_prv import show_message
@@ -25,7 +25,7 @@ from .warnings_prv import show_message
 
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
-expbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
+modbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/model_bias_stats.yaml')))
 fairmode_settings = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/fairmode.yaml')))
 
 
@@ -329,8 +329,8 @@ def do_resampling(read_instance, data_array, writing=False):
 
 def merge_forecast_days(read_instance, networkspeci, data_labels, unique_base_data_labels, data_array):
     """
-    Function which joins different forecast days separated as different expertiments as 1 tiled experiment.
-    Observations and non-forecast experiments are repeatedly tiled to macth the tiled experiment shape.
+    Function which joins different forecast days separated as different models as 1 tiled model.
+    Observations and non-forecast models are repeatedly tiled to macth the tiled model shape.
     """
 
     # get n_labels and n_stations of data array
@@ -866,7 +866,7 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
         if z_statistic_type == 'basic':
             stats_dict = copy.deepcopy(basic_stats[base_zstat])
         else:
-            stats_dict = copy.deepcopy(expbias_stats[base_zstat])
+            stats_dict = copy.deepcopy(modbias_stats[base_zstat])
 
         # if have no data_labels_b, calculate 'absolute' basic statistic
         if len(data_labels_b) == 0:
@@ -1058,10 +1058,10 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                 # take difference: statistic_b - statistic_a
                 z_statistic = statistic_b - statistic_a
 
-            # else, is the difference statistic an experiment bias statistic (i.e. r)?
-            elif z_statistic_type == 'expbias':
+            # else, is the difference statistic an model bias statistic (i.e. r)?
+            elif z_statistic_type == 'modbias':
 
-                # temporal colocation must be turned on for calculation, and have some experiments, if not return NaNs
+                # temporal colocation must be turned on for calculation, and have some models, if not return NaNs
                 if (not read_instance.temporal_colocation) or (len(read_instance.data_labels) == 1):
                     if (map) or (per_station):
                         z_statistic = np.array([], dtype=np.float32)
@@ -1091,20 +1091,20 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
                         statistic_b = aggregation(data_array_b, periodic_statistic_aggregation, axis=-1).transpose()
                         
                         # calculate statistic per station (removing period dimension)
-                        z_statistic = getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':statistic_a,'exp':statistic_b}}).transpose()
+                        z_statistic = getattr(ModBias, stats_dict['function'])(**{**function_arguments, **{'obs':statistic_a,'mod':statistic_b}}).transpose()
 
                     # if periodic statistic mode is independent, then calculate stats independently per periodic grouping,
                     # and then aggregate 
                     elif periodic_statistic_mode == 'Independent':
                         # calculate statistic per periodic grouping per station
-                        z_statistic = getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':data_array_a,'exp':data_array_b}}).transpose()
+                        z_statistic = getattr(ModBias, stats_dict['function'])(**{**function_arguments, **{'obs':data_array_a,'mod':data_array_b}}).transpose()
 
                         # aggregate data per station (removing period dimension)
                         z_statistic = aggregation(z_statistic, periodic_statistic_aggregation, axis=-1).transpose()
 
                 # calculate statistics per station 
                 else:
-                    z_statistic = getattr(ExpBias, stats_dict['function'])(**{**function_arguments, **{'obs':data_array_a,'exp':data_array_b}})
+                    z_statistic = getattr(ModBias, stats_dict['function'])(**{**function_arguments, **{'obs':data_array_a,'mod':data_array_b}})
 
         # if any calculated statistics are infinite, then set them to be NaNs 
         finite_boolean = np.isfinite(z_statistic)
@@ -1209,7 +1209,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     if z_statistic_type == 'basic':
         stats_dict = basic_stats[base_zstat]
     else:
-        stats_dict = expbias_stats[base_zstat]
+        stats_dict = modbias_stats[base_zstat]
     label_units = stats_dict['units']
     if label_units == '[measurement_units]':
         label_units = read_instance.measurement_units[speci]
@@ -1288,7 +1288,7 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     # if have no defined cmap, raise error
     if not set_cmap:
         error = f"Error: colourmap ({cmap_var_name}) for the colourbar needs to be defined, either in the "
-        error += "configuration files for the map, or per statistic in 'basic_stats.yaml' or 'experiment_bias_stats.yaml'."
+        error += "configuration files for the map, or per statistic in 'basic_stats.yaml' or 'model_bias_stats.yaml'."
         read_instance.logger.error(error)
         sys.exit(1) 
 
@@ -1522,7 +1522,7 @@ def get_z_statistic_comboboxes(base_zstat, bias=False):
     return zstat
 
 def get_z_statistic_type(zstat):
-    """ Function that checks if the z statistic is basic or expbias statistic.
+    """ Function that checks if the z statistic is basic or modbias statistic.
     
         :param zstat: Statistic
         :type zstat: str   
@@ -1533,9 +1533,9 @@ def get_z_statistic_type(zstat):
     # check if the chosen statistic is a basic statistic
     if zstat in basic_stats.keys():
         return 'basic'
-    # if not a basic statistic, it must be an experiment bias statistic
+    # if not a basic statistic, it must be an model bias statistic
     else:
-        return 'expbias'
+        return 'modbias'
 
 def get_z_statistic_sign(zstat, zstat_type=None):
     """ Function that checks if the z statistic is an absolute or bias statistic.
@@ -1552,14 +1552,14 @@ def get_z_statistic_sign(zstat, zstat_type=None):
         zstat_type = get_z_statistic_type(zstat)
 
     # statistic is bias?
-    if ('_bias' in zstat) or (zstat_type == 'expbias'):
+    if ('_bias' in zstat) or (zstat_type == 'modbias'):
         return 'bias'
     # statistic is bias?
     else:
         return 'absolute'
 
 def get_z_statistic_info(plot_type=None, zstat=None):
-    """ Get z statistic name, type (basic or expbias), sign (absolute or bias), 
+    """ Get z statistic name, type (basic or modbias), sign (absolute or bias), 
         base name (dropping '_bias' suffix) and period (if any)  
         from plot_type (or known zstat name).
     
@@ -1594,7 +1594,7 @@ def get_z_statistic_info(plot_type=None, zstat=None):
         # get base name name of zstat, dropping 'bias' suffix, and dropping period
         base_zstat = zstat.split('_bias')[0].split('-')[0]
         
-        # get zstat type (basic or expbias) 
+        # get zstat type (basic or modbias) 
         z_statistic_type = get_z_statistic_type(base_zstat)
         
         # get zstat sign (absolute or bias)

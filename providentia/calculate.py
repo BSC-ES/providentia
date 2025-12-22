@@ -428,10 +428,10 @@ class Stats(object):
             return rms_u
 
 
-class ExpBias(object):
+class ModBias(object):
 
     @staticmethod
-    def calculate_coe(obs, exp):
+    def calculate_coe(obs, mod):
         """
         Calculate coefficient of efficiency (COE) between observations and model,
         based on Legates and McCabe (1999, 2012). There have been many suggestions for
@@ -453,7 +453,7 @@ class ExpBias(object):
         ----------
         obs : numpy.array
             Observations data array
-        exp : numpy.array
+        mod : numpy.array
             Model data array
             
         Returns
@@ -465,11 +465,11 @@ class ExpBias(object):
         if obs.size == 0:
             return np.nan
         else:
-            return 1.0 - nansumwrapper(np.abs(exp - obs), axis=-1) / \
+            return 1.0 - nansumwrapper(np.abs(mod - obs), axis=-1) / \
                    nansumwrapper(np.abs(obs - np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)), axis=-1) 
 
     @staticmethod
-    def calculate_ioa(obs, exp):
+    def calculate_ioa(obs, mod):
         """
         Calculate the Index of Agreement (IOA) between observations and model, based on Willmott et al. (2011)
         The metric spans between -1 and +1 with values approaching +1 representing better model performance.
@@ -490,7 +490,7 @@ class ExpBias(object):
         ----------
         obs : numpy.array
             Observations data array
-        exp : numpy.array
+        mod : numpy.array
             Model data array
             
         Returns
@@ -502,7 +502,7 @@ class ExpBias(object):
         if obs.size == 0:
             return np.nan
         else:
-            lhs = nansumwrapper(np.abs(exp - obs), axis=-1)
+            lhs = nansumwrapper(np.abs(mod - obs), axis=-1)
             rhs = 2.0 * nansumwrapper(np.abs(obs - np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)), axis=-1)
             output = np.copy(lhs)
             lower_check = lhs <= rhs
@@ -511,7 +511,7 @@ class ExpBias(object):
             return output
 
     @staticmethod
-    def calculate_mb(obs, exp, normalisation_type='none'):
+    def calculate_mb(obs, mod, normalisation_type='none'):
         """
         Calculate mean bias (MB), or normalised derivation (NMB).
         The difference between a modelled and an observed value,
@@ -523,7 +523,7 @@ class ExpBias(object):
         ----------
         obs : numpy.array
             Observations data array
-        exp : numpy.array
+        mod : numpy.array
             Model data array
         normalisation_type : str
             Normalisation type
@@ -537,7 +537,7 @@ class ExpBias(object):
         if obs.size == 0:
             return np.nan
         else:
-            mb = np.nanmean(exp - obs, axis=-1)
+            mb = np.nanmean(mod - obs, axis=-1)
 
             # handle normalisation if desired
             if normalisation_type == 'max_min':
@@ -553,7 +553,7 @@ class ExpBias(object):
             return mb
 
     @staticmethod
-    def calculate_me(obs, exp, normalisation_type='none'):
+    def calculate_me(obs, mod, normalisation_type='none'):
         """
         Calculate mean error (ME), or normalised derivation (NME).
         It is calculated from the absolute of the difference between a modelled
@@ -568,7 +568,7 @@ class ExpBias(object):
         ----------
         obs : numpy.array
             Observations data array
-        exp : numpy.array
+        mod : numpy.array
             Model data array
         normalisation_type : str
             Normalisation type
@@ -582,7 +582,7 @@ class ExpBias(object):
         if obs.size == 0:
             return np.nan
         else:
-            me = np.nanmean(np.abs(exp - obs), axis=-1)
+            me = np.nanmean(np.abs(mod - obs), axis=-1)
 
             # handle normalisation if desired
             if normalisation_type == 'max_min':
@@ -598,7 +598,7 @@ class ExpBias(object):
             return me
 
     @staticmethod
-    def calculate_mnb(obs, exp):
+    def calculate_mnb(obs, mod):
         """
         Calculate mean normalised bias (MNB).
         The mean normalised bias (MNB) is calculated in a similar fashion to the mean bias.
@@ -609,7 +609,7 @@ class ExpBias(object):
         ----------
         obs : numpy.array
             Observations data array
-        exp : numpy.array
+        mod : numpy.array
             Model data array
 
         Returns
@@ -624,11 +624,11 @@ class ExpBias(object):
             # to avoid ZeroDivisionError, replace all obs of 0 with NaN
             obs_nan = copy.deepcopy(obs)
             obs_nan[obs_nan == 0.0] = np.nan
-            mnb = np.nanmean((exp - obs_nan) / obs_nan, axis=-1) * 100.0
+            mnb = np.nanmean((mod - obs_nan) / obs_nan, axis=-1) * 100.0
             return mnb
 
     @staticmethod
-    def calculate_mne(obs, exp):
+    def calculate_mne(obs, mod):
         """
         Calculate mean normalised error (MNE).
         The mean normalised error (MNE) is calculated in a similar fashion to the mean error.
@@ -640,7 +640,7 @@ class ExpBias(object):
         ----------
         obs : numpy.array
             Observations data array
-        exp : numpy.array
+        mod : numpy.array
             Model data array
 
         Returns
@@ -655,11 +655,11 @@ class ExpBias(object):
             # to avoid ZeroDivisionError, replace all obs of 0 with NaN
             obs_nan = copy.deepcopy(obs)
             obs_nan[obs_nan == 0.0] = np.nan
-            mne = np.nanmean((np.abs(exp - obs_nan)) / obs_nan, axis=-1) * 100.0
+            mne = np.nanmean((np.abs(mod - obs_nan)) / obs_nan, axis=-1) * 100.0
             return mne
     
     @staticmethod
-    def calculate_mfb(obs, exp):
+    def calculate_mfb(obs, mod):
         """
         Calculate mean fractional bias (MFB).
         The mean fractional bias (MFB) is used as a substitute for the mean normalised bias (MNB),
@@ -677,7 +677,7 @@ class ExpBias(object):
         ----------
         obs : numpy.array
             Observations data array
-        exp : numpy.array
+        mod : numpy.array
             Model data array
 
         Returns
@@ -689,15 +689,15 @@ class ExpBias(object):
         if obs.size == 0:
             return np.nan
         else:
-            lhs = exp - obs
-            rhs = (exp + obs) / 2.0
+            lhs = mod - obs
+            rhs = (mod + obs) / 2.0
             # to avoid ZeroDivisionError, replace all rhs values of 0 with NaN
             rhs[rhs == 0.0] = np.nan
             mfb = np.nanmean(lhs / rhs, axis=-1) * 100.0
             return mfb
 
     @staticmethod
-    def calculate_mfe(obs, exp):
+    def calculate_mfe(obs, mod):
         """
         Calculate mean fractional error (MFE).
         Otherwise known as fractional error (FE), fractional gross error (FGE), 
@@ -707,7 +707,7 @@ class ExpBias(object):
         ----------
         obs : numpy.array
             Observations data array
-        exp : numpy.array
+        mod : numpy.array
             Model data array
 
         Returns
@@ -719,15 +719,15 @@ class ExpBias(object):
         if obs.size == 0:
             return np.nan
         else:
-            lhs = np.abs(exp - obs)
-            rhs = (exp + obs) / 2.0
+            lhs = np.abs(mod - obs)
+            rhs = (mod + obs) / 2.0
             # to avoid ZeroDivisionError, replace all rhs values of 0 with NaN
             rhs[rhs == 0.0] = np.nan
             mfe = np.nanmean(lhs / rhs, axis=-1) * 100.0
             return mfe
 
     @staticmethod
-    def calculate_rmse(obs, exp, normalisation_type='none'):
+    def calculate_rmse(obs, mod, normalisation_type='none'):
         """
         Calculate root mean squared error (RMSE) /
         normalised root mean squared error (NRMSE)
@@ -737,7 +737,7 @@ class ExpBias(object):
         ----------
         obs : numpy.array
             Observations data array
-        exp : numpy.array
+        mod : numpy.array
             Model data array
         normalisation_type : str
             Normalisation type
@@ -751,7 +751,7 @@ class ExpBias(object):
         if obs.size == 0:
             return np.nan
         else:
-            rmse = np.sqrt(np.nanmean((exp - obs) ** 2, axis=-1))
+            rmse = np.sqrt(np.nanmean((mod - obs) ** 2, axis=-1))
 
             # handle normalisation if desired
             if normalisation_type == 'max_min':
@@ -767,7 +767,7 @@ class ExpBias(object):
             return rmse
 
     @staticmethod
-    def calculate_crmse(obs, exp):
+    def calculate_crmse(obs, mod):
         """
         Calculate FAIRMODE cRMSE
         See here: https://publications.jrc.ec.europa.eu/repository/handle/JRC129254
@@ -776,7 +776,7 @@ class ExpBias(object):
         ----------
         obs : numpy.array
             Observations data array
-        exp : numpy.array
+        mod : numpy.array
             Model data array
             
         Returns
@@ -789,12 +789,12 @@ class ExpBias(object):
             return np.nan
         else:
             crmse = np.sqrt(
-                np.mean(((exp - np.mean(exp)) - (obs - np.mean(obs))) ** 2)
+                np.mean(((mod - np.mean(mod)) - (obs - np.mean(obs))) ** 2)
             )
             return crmse
     
     @staticmethod
-    def calculate_r(obs, exp):
+    def calculate_r(obs, mod):
         """
         Calculate the Pearson correlation coefficient (r) between observations and model
         The Pearson correlation coefficient measures the linear relationship between two datasets.
@@ -808,7 +808,7 @@ class ExpBias(object):
         ----------
         obs : numpy.array
             Observations data array
-        exp : numpy.array
+        mod : numpy.array
             Model data array
             
         Returns
@@ -822,18 +822,18 @@ class ExpBias(object):
         else:
             mean_obs = np.expand_dims(np.nanmean(obs, axis=-1), axis=-1)
             std_obs = np.expand_dims(np.nanstd(obs, axis=-1), axis=-1)
-            mean_exp = np.expand_dims(np.nanmean(exp, axis=-1), axis=-1)
-            std_exp = np.expand_dims(np.nanstd(exp, axis=-1), axis=-1)
+            mean_mod = np.expand_dims(np.nanmean(mod, axis=-1), axis=-1)
+            std_mod = np.expand_dims(np.nanstd(mod, axis=-1), axis=-1)
             # to avoid ZeroDivisionError, replace all stds of 0 with NaN
             std_obs[std_obs == 0.0] = np.nan
-            std_exp[std_exp == 0.0] = np.nan
+            std_mod[std_mod == 0.0] = np.nan
             standard_score_obs = (obs - mean_obs) / std_obs
-            standard_score_exp = (exp - mean_exp) / std_exp
-            standard_score_mult = standard_score_obs * standard_score_exp
+            standard_score_mod = (mod - mean_mod) / std_mod
+            standard_score_mult = standard_score_obs * standard_score_mod
             return nansumwrapper(standard_score_mult, axis=-1) / np.count_nonzero(~np.isnan(standard_score_mult), axis=-1)
 
     @staticmethod
-    def calculate_r_squared(obs, exp):
+    def calculate_r_squared(obs, mod):
         """
         Calculate the coefficient of determination, r squared, between observations and model
         It is the proportion of the variance in the dependent variable
@@ -845,7 +845,7 @@ class ExpBias(object):
         ----------
         obs : numpy.array
             Observations data array
-        exp : numpy.array
+        mod : numpy.array
             Model data array
             
         Returns
@@ -857,10 +857,10 @@ class ExpBias(object):
         if obs.size == 0:
             return np.nan
         else:
-            return ExpBias.calculate_r(obs, exp) ** 2
+            return ModBias.calculate_r(obs, mod) ** 2
 
     @staticmethod
-    def calculate_fac2(obs, exp):
+    def calculate_fac2(obs, mod):
         """
         Calculate fraction of model values within
         a factor of two of observed values (FAC2)
@@ -869,7 +869,7 @@ class ExpBias(object):
         ----------
         obs : numpy.array
             Observations data array
-        exp : numpy.array
+        mod : numpy.array
             Model data array
             
         Returns
@@ -884,12 +884,12 @@ class ExpBias(object):
             # to avoid ZeroDivisionError, replace all obs of 0 with NaN
             obs_nan = copy.deepcopy(obs)
             obs_nan[obs_nan == 0.0] = np.nan
-            frac = exp / obs_nan
+            frac = mod / obs_nan
             n = np.count_nonzero(~np.isnan(frac), axis=-1)
             return (100.0 / n) * nansumwrapper(((frac >= 0.5) & (frac <= 2.0)), axis=-1)
 
     @staticmethod
-    def calculate_upa(obs, exp):
+    def calculate_upa(obs, mod):
         """
         Calculate unpaired peak accuracy (UPA).
         See here: https://gitlab.com/polyphemus/atmopy/-/blob/master/stat/measure.py.
@@ -898,7 +898,7 @@ class ExpBias(object):
         ----------
         obs : numpy.array
             Observations data array
-        exp : numpy.array
+        mod : numpy.array
             Model data array
             
         Returns
@@ -911,11 +911,11 @@ class ExpBias(object):
             return np.nan
         else:
             obs_max = np.nanmax(obs, axis=-1)
-            exp_max = np.nanmax(exp, axis=-1)
-            return ((exp_max - obs_max) / obs_max) * 100.0
+            mod_max = np.nanmax(mod, axis=-1)
+            return ((mod_max - obs_max) / obs_max) * 100.0
 
     @staticmethod
-    def calculate_fairmode_stats(obs, exp, u_95r_RV, RV, alpha, beta, exc_threshold, percentile, plot):
+    def calculate_fairmode_stats(obs, mod, u_95r_RV, RV, alpha, beta, exc_threshold, percentile, plot):
         """ 
         Calculate FAIRMODE statistics
         See here: https://publications.jrc.ec.europa.eu/repository/handle/JRC129254
@@ -924,8 +924,8 @@ class ExpBias(object):
         ----------
         obs : numpy.array
             Observations data array
-        exp : numpy.array
-            Experiment data array
+        mod : numpy.array
+            Model data array
         u_95r_RV : float
             Uncertainty around the reference value
         RV : float
@@ -942,24 +942,24 @@ class ExpBias(object):
             Differenciates between fairmode target and statsummary
         """
 
-        is_finite = np.isfinite(obs+exp)
+        is_finite = np.isfinite(obs+mod)
 
         if np.any(is_finite):
 
             # remove missing data
-            obs, exp = obs[is_finite], exp[is_finite]
+            obs, mod = obs[is_finite], mod[is_finite]
 
             # calculate RMSu (root mean squared uncertainty)
             rms_u = Stats.calculate_rms_u(obs, u_95r_RV, RV, alpha)
 
             # calculate Mean Bias
-            bias = ExpBias.calculate_mb(obs, exp)
+            bias = ModBias.calculate_mb(obs, mod)
             
             # fairmode target plot
             if plot == 'target':
                         
                 # calculate x-axis values (CRMSE/BETA*RMSu)
-                crmse = ExpBias.calculate_crmse(obs, exp)
+                crmse = ModBias.calculate_crmse(obs, mod)
                 x = crmse / (beta * rms_u)
                 
                 # calculate y-axis values (Mean Bias/BETA*RMSu)
@@ -967,8 +967,8 @@ class ExpBias(object):
                 
                 # calculate ratio
                 ratio = np.abs(
-                    (Stats.calculate_standard_deviation(exp) - Stats.calculate_standard_deviation(obs))) / (
-                        Stats.calculate_standard_deviation(obs) * np.sqrt(2 * (1 - ExpBias.calculate_r(obs, exp))))
+                    (Stats.calculate_standard_deviation(mod) - Stats.calculate_standard_deviation(obs))) / (
+                        Stats.calculate_standard_deviation(obs) * np.sqrt(2 * (1 - ModBias.calculate_r(obs, mod))))
                 
                 # For ratios larger than one the σ error dominates and 
                 # the station is represented on the right, whereas the reverse
@@ -977,7 +977,7 @@ class ExpBias(object):
                     x *= -1
 
                 # calculate Modeling Quality Indicator (MQI)
-                rmse = ExpBias.calculate_rmse(obs, exp)
+                rmse = ModBias.calculate_rmse(obs, mod)
                 mqi = rmse / (beta * rms_u)
 
                 return x, y, mqi
@@ -991,24 +991,24 @@ class ExpBias(object):
                 # calculate mean
                 mean = Stats.calculate_mean(obs)
                 
-                # calculate Observation and Experiment Percentile
+                # calculate Observation and Model Percentile
                 obs_perc = Stats.calculate_percentile(obs, percentile=percentile)
-                exp_perc = Stats.calculate_percentile(exp, percentile=percentile)
+                mod_perc = Stats.calculate_percentile(mod, percentile=percentile)
 
                 # calculate Temporal Statistic for Bias
                 t_bias = bias / (beta * rms_u)
                 
                 # calculate Temporal Statistic for Correlation
-                t_R = (1 - ExpBias.calculate_r(obs, exp)) / ((0.5 * (beta ** 2) * rms_u ** 2) / (Stats.calculate_standard_deviation(obs) * Stats.calculate_standard_deviation(exp)))
+                t_R = (1 - ModBias.calculate_r(obs, mod)) / ((0.5 * (beta ** 2) * rms_u ** 2) / (Stats.calculate_standard_deviation(obs) * Stats.calculate_standard_deviation(mod)))
                 
                 # calculate Temporal Statistic for Standard Deviation
-                t_sd = (np.abs(Stats.calculate_standard_deviation(exp) - Stats.calculate_standard_deviation(obs))) / (beta * rms_u)
+                t_sd = (np.abs(Stats.calculate_standard_deviation(mod) - Stats.calculate_standard_deviation(obs))) / (beta * rms_u)
 
                 # calculate Uncertainty
                 U = u_95r_RV * np.sqrt((1 - alpha ** 2) * obs_perc ** 2 + alpha ** 2 * RV ** 2)
 
                 # calculate High Percentile
-                h_perc = np.abs(exp_perc - obs_perc) / (beta * U)
+                h_perc = np.abs(mod_perc - obs_perc) / (beta * U)
 
                 return mean, exc, t_bias, t_R, t_sd, h_perc
 

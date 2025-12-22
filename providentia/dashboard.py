@@ -26,18 +26,19 @@ from .configuration import load_conf
 from .configuration import ProvConfiguration
 from .dashboard_elements import ComboBox, QVLine, InputDialog
 from .dashboard_elements import set_formatting
-from .fields_menus import (init_experiments, init_flags, init_qa, update_qa, init_metadata, init_multispecies, init_period, init_representativity,
+from .fields_menus import (init_models, init_flags, init_qa, update_qa, init_metadata, init_multispecies, init_period, init_representativity,
                            multispecies_conf, update_representativity_fields, update_period_fields, update_metadata_fields)
 from .plot_aux import get_taylor_diagram_ghelper
 from .plot_formatting import format_axis
 from .pop_up_window import PopUpWindow
 from .read import DataReader
 from .read_aux import (check_for_ghost, get_default_qa, generate_file_trees, 
-                       get_valid_experiments, get_valid_obs_files_in_date_range,
+                       get_valid_models, get_valid_obs_files_in_date_range,
                        get_temporal_resolution_order)
 from .toolbar import NavigationToolbar
 from .warnings_prv import show_message
 
+#
 
 # set font DPI for uniform dashboard appearance across systems
 os.environ["QT_FONT_DPI"] = "96"
@@ -64,7 +65,7 @@ class Dashboard(QtWidgets.QWidget):
 
         # load statistical yamls
         self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
-        self.expbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
+        self.modbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/model_bias_stats.yaml')))
 
         # load representativity information
         self.representativity_info = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
@@ -184,7 +185,7 @@ class Dashboard(QtWidgets.QWidget):
                 OrderedDict(sorted(self.basic_stats.items(), key=lambda x: x[1]['order'])).keys()))
         if not hasattr(self, 'basic_and_bias_z_stats'):
             self.basic_and_bias_z_stats = np.append(self.basic_z_stats, list(
-                OrderedDict(sorted(self.expbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
+                OrderedDict(sorted(self.modbias_stats.items(), key=lambda x: x[1]['order'])).keys()))
 
         # initialise UI
         self.init_ui()
@@ -385,8 +386,8 @@ class Dashboard(QtWidgets.QWidget):
         self.bu_QA.setToolTip('Select standardised quality assurance flags to filter by')
         self.bu_flags = set_formatting(QtWidgets.QPushButton('FLAGS', self), self.formatting_dict['menu_button'])
         self.bu_flags.setToolTip('Select standardised data reporter provided flags to filter by')
-        self.bu_experiments = set_formatting(QtWidgets.QPushButton('EXPS', self), self.formatting_dict['menu_button'])
-        self.bu_experiments.setToolTip('Select model/s data to read')
+        self.bu_models = set_formatting(QtWidgets.QPushButton('MODS', self), self.formatting_dict['menu_button'])
+        self.bu_models.setToolTip('Select model/s data to read')
         self.bu_multispecies = set_formatting(QtWidgets.QPushButton('MULTI', self), self.formatting_dict['menu_button'])
         self.bu_multispecies.setToolTip('Select data to filter by')
         self.bu_read = set_formatting(QtWidgets.QPushButton('READ', self), self.formatting_dict['menu_button'],
@@ -473,7 +474,7 @@ class Dashboard(QtWidgets.QWidget):
         config_bar.addWidget(self.le_end_date, 2, 2, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_QA, 1, 3, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_flags, 2, 3, QtCore.Qt.AlignLeft)
-        config_bar.addWidget(self.bu_experiments, 1, 4, QtCore.Qt.AlignLeft)
+        config_bar.addWidget(self.bu_models, 1, 4, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_multispecies, 2, 4, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.bu_read, 3, 4, QtCore.Qt.AlignLeft)
         config_bar.addWidget(self.vertical_splitter_1, 0, 5, 4, 1, QtCore.Qt.AlignLeft)
@@ -527,7 +528,7 @@ class Dashboard(QtWidgets.QWidget):
         # % data representativity, data periods and metadata
         init_flags(self)
         init_qa(self)
-        init_experiments(self)
+        init_models(self)
         init_multispecies(self)
         init_representativity(self)
         init_period(self)
@@ -562,7 +563,7 @@ class Dashboard(QtWidgets.QWidget):
         # enable pop up configuration windows
         self.bu_flags.clicked.connect(partial(self.generate_pop_up_window, self.flag_menu))
         self.bu_QA.clicked.connect(partial(self.generate_pop_up_window, self.qa_menu))
-        self.bu_experiments.clicked.connect(partial(self.generate_pop_up_window, self.experiments_menu))
+        self.bu_models.clicked.connect(partial(self.generate_pop_up_window, self.models_menu))
         self.bu_multispecies.clicked.connect(partial(self.generate_pop_up_window, self.multispecies_menu))
         self.bu_meta.clicked.connect(partial(self.generate_pop_up_window, self.metadata_menu))
         self.bu_rep.clicked.connect(partial(self.generate_pop_up_window, self.representativity_menu))
@@ -668,7 +669,7 @@ class Dashboard(QtWidgets.QWidget):
             self.data_labels_raw = []
             self.previous_chunk_stat = 'None'
             self.previous_chunk_resolution = 'None'
-            self.init_experiments = []
+            self.init_models = []
 
             self.performing_read = False
 
@@ -828,39 +829,39 @@ class Dashboard(QtWidgets.QWidget):
             self.selected_timeseries_statistic_aggregation = self.mpl_canvas.timeseries_stat.currentText()
 
         # update available models for selected fields
-        get_valid_experiments(self, self.le_start_date.text(), self.le_end_date.text(), self.selected_resolution,
+        get_valid_models(self, self.le_start_date.text(), self.le_end_date.text(), self.selected_resolution,
                             [self.selected_network], [self.selected_species])
 
         # update models -- keeping previously selected models if available
         if self.config_bar_initialisation:   
-            self.experiments_menu['experiments']['keep_selected'] = [model for model in self.experiments
+            self.models_menu['models']['keep_selected'] = [model for model in self.experiments
                                                                     if model in 
-                                                                    self.experiments_menu['experiments']['map_vars']]
+                                                                    self.models_menu['models']['map_vars']]
 
-        self.experiments_menu['experiments']['keep_selected'] = [previous_selected_model for
+        self.models_menu['models']['keep_selected'] = [previous_selected_model for
                                                                 previous_selected_model in
-                                                                self.experiments_menu['experiments']['keep_selected']
+                                                                self.models_menu['models']['keep_selected']
                                                                 if previous_selected_model in
-                                                                self.experiments_menu['experiments']['map_vars']]
+                                                                self.models_menu['models']['map_vars']]
 
         # set all and selected models
         all_models = {}
-        for exp in self.experiments_menu['experiments']['map_vars']:
-            if exp in self.experiments:
-                all_models[exp] = self.experiments[exp]
-            elif exp in self.init_experiments:
-                all_models[exp] = self.init_experiments[exp]
+        for mod in self.models_menu['models']['map_vars']:
+            if mod in self.experiments:
+                all_models[mod] = self.experiments[mod]
+            elif mod in self.init_models:
+                all_models[mod] = self.init_models[mod]
             else:
-                all_models[exp] = exp
+                all_models[mod] = mod
 
         selected_models = {}
-        for exp in self.experiments_menu['experiments']['keep_selected']:
-            if exp in self.experiments:
-                selected_models[exp] = self.experiments[exp]
-            elif exp in self.init_experiments:
-                selected_models[exp] = self.init_experiments[exp]
+        for mod in self.models_menu['models']['keep_selected']:
+            if mod in self.experiments:
+                selected_models[mod] = self.experiments[mod]
+            elif mod in self.init_models:
+                selected_models[mod] = self.init_models[mod]
             else:
-                selected_models[exp] = exp
+                selected_models[mod] = mod
 
         # set selected data labels
         all_data_labels = [self.observations_data_label] + list(all_models.values())
@@ -870,7 +871,7 @@ class Dashboard(QtWidgets.QWidget):
 
         # save intial models if loading from .conf file to keep alias
         if self.from_conf:
-            self.init_experiments = copy.deepcopy(selected_models)
+            self.init_models = copy.deepcopy(selected_models)
 
         # check N available forecast days for model
         self.datareader.check_forecast(data_labels=all_data_labels, data_labels_raw=all_data_labels_raw,
@@ -1291,16 +1292,16 @@ class Dashboard(QtWidgets.QWidget):
         # if previous data labels contain daily or combined forecast data, then ensure data labels, models and plotting params
         # refer to the data labels per day, not the summary label
         if ((np.any([True for data_label in self.data_labels if '-daily' in data_label])) or (np.any([True for data_label in self.data_labels if '-combined' in data_label]))) & (not self.from_conf):
-            self.previous_experiments_summary = self.experiments
+            self.previous_models_summary = self.experiments
             self.previous_data_labels_summary = self.data_labels
             self.previous_data_labels_raw_summary = self.data_labels_raw
             self.plotting_params_summary = copy.deepcopy(self.plotting_params)
-            self.previous_experiments = self.original_experiments
+            self.previous_models = self.original_models
             self.previous_data_labels = self.original_data_labels
             self.previous_data_labels_raw = self.original_data_labels_raw
             self.plotting_params = self.original_plotting_params
         else:
-            self.previous_experiments = self.experiments
+            self.previous_models = self.experiments
             self.previous_data_labels = self.data_labels
             self.previous_data_labels_raw = self.data_labels_raw
         
@@ -1325,13 +1326,13 @@ class Dashboard(QtWidgets.QWidget):
         # if are not loading from conf then get data labels, models and forecast indices
         if not self.from_conf:
             models = {}
-            for exp in self.experiments_menu['experiments']['keep_selected']:
-                if exp in self.previous_experiments:
-                    models[exp] = self.previous_experiments[exp]
-                elif exp in self.init_experiments:
-                    models[exp] = self.init_experiments[exp]
+            for mod in self.models_menu['models']['keep_selected']:
+                if mod in self.previous_models:
+                    models[mod] = self.previous_models[mod]
+                elif mod in self.init_models:
+                    models[mod] = self.init_models[mod]
                 else:
-                    models[exp] = exp
+                    models[mod] = mod
 
             data_labels = [self.observations_data_label] + list(models.values())
             data_labels_raw = [self.observations_data_label] + list(models.keys())
@@ -1339,10 +1340,10 @@ class Dashboard(QtWidgets.QWidget):
             for model_raw, model in models.items():
 
                 # get available and selected forecast options
-                available_forecast_options = self.experiments_menu['experiments']['forecast'][model][0]
-                selected_forecast_options = self.experiments_menu['experiments']['forecast'][model][1]
-                available_forecast_days = [day.split('day')[-1].strip() for day in self.experiments_menu['experiments']['forecast_days'][model][0]]
-                selected_forecast_days = [day.split('day')[-1].strip() for day in self.experiments_menu['experiments']['forecast_days'][model][1]]
+                available_forecast_options = self.models_menu['models']['forecast'][model][0]
+                selected_forecast_options = self.models_menu['models']['forecast'][model][1]
+                available_forecast_days = [day.split('day')[-1].strip() for day in self.models_menu['models']['forecast_days'][model][0]]
+                selected_forecast_days = [day.split('day')[-1].strip() for day in self.models_menu['models']['forecast_days'][model][1]]
                 # set boolean if no forecast days are selected then by default take all
                 if len(selected_forecast_days) == 0:
                     take_all_forecast_days = True
@@ -1451,13 +1452,13 @@ class Dashboard(QtWidgets.QWidget):
                     read_operations = ['cut_right']
 
         # determine if any models need removing or reading 
-        models_to_remove = [model for model in self.previous_experiments.values() if model not in list(self.experiments.values())]
-        models_to_read = [model for model in self.experiments.values() if model not in list(self.previous_experiments.values())]
+        models_to_remove = [model for model in self.previous_models.values() if model not in list(self.experiments.values())]
+        models_to_read = [model for model in self.experiments.values() if model not in list(self.previous_models.values())]
         if 'reset' not in read_operations:
             if len(models_to_remove) > 0:
-                read_operations.append('remove_exp')
+                read_operations.append('remove_mod')
             if len(models_to_read) > 0:
-                read_operations.append('read_exp')
+                read_operations.append('read_mod')
 
         # have no read operations?
         if len(read_operations) == 0:
@@ -1465,7 +1466,7 @@ class Dashboard(QtWidgets.QWidget):
             # if have daily or combined forecast active and have no read operations, 
             # then revert data labels, models and plotting params to how they were before as will not entering filter  
             if ((np.any([True for data_label in self.data_labels if '-daily' in data_label])) or (np.any([True for data_label in self.data_labels if '-combined' in data_label]))) & (not self.from_conf):
-                self.experiments = self.previous_experiments_summary
+                self.experiments = self.previous_models_summary
                 self.data_labels = self.previous_data_labels_summary
                 self.data_labels_raw = self.previous_data_labels_raw_summary
                 self.plotting_params = self.plotting_params_summary
@@ -1499,8 +1500,8 @@ class Dashboard(QtWidgets.QWidget):
             self.previous_yearmonths = self.yearmonths
 
             # read data
-            self.datareader.read_setup(read_operations, experiments_to_remove=models_to_remove, 
-                                       experiments_to_read=models_to_read)
+            self.datareader.read_setup(read_operations, models_to_remove=models_to_remove, 
+                                       models_to_read=models_to_read)
 
             # restore mouse cursor to normal if have no valid data after read
             if self.invalid_read:

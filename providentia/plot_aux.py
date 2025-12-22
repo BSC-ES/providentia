@@ -200,11 +200,11 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
                     # read grid edge longitudes and latitudes if needed
                     if (not daily_forecast) & (unique_base_data_label in instance.files_to_read[valid_networkspeci]):
                         # Open netCDF file to extract grid edges
-                        exp_nc_root = Dataset(instance.files_to_read[valid_networkspeci][unique_base_data_label][0])
-                        grid_edge_longitude = exp_nc_root['grid_edge_longitude'][:]
-                        grid_edge_latitude = exp_nc_root['grid_edge_latitude'][:]
+                        mod_nc_root = Dataset(instance.files_to_read[valid_networkspeci][unique_base_data_label][0])
+                        grid_edge_longitude = mod_nc_root['grid_edge_longitude'][:]
+                        grid_edge_latitude = mod_nc_root['grid_edge_latitude'][:]
                         # Close netCDF file
-                        exp_nc_root.close() 
+                        mod_nc_root.close() 
 
                     # iterate through data labels to add
                     for data_label in data_labels_to_add:
@@ -240,15 +240,15 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
     instance.plotting_params[instance.observations_data_label]['colour'] = instance.plot_characteristics_templates['general']['obs_markerfacecolor']
     instance.plotting_params[instance.observations_data_label]['zorder'] = instance.plot_characteristics_templates['general']['obs_zorder']
 
-    # Generate a list of RGB tuples for the number of experiments
+    # Generate a list of RGB tuples for the number of models
     sns.reset_orig()  # Reset seaborn to default
     color_palette = instance.plot_characteristics_templates['general']['legend_color_palette']
     color_palettes = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/color_palettes.yaml')))
 
     if color_palette in color_palettes.keys():
-        # Check that the number of colors matches the number of experiments
+        # Check that the number of colors matches the number of models
         if (len(instance.data_labels) - 1) > len(color_palettes[color_palette]):
-            error = "Error: The number of experiments and palette colors should be equal. "
+            error = "Error: The number of models and palette colors should be equal. "
             error += f"Add more colors to your palette '{color_palette}' in settings/color_palettes.yaml "
             error += "or change your legend_color_palette in the plot characteristics files."
             instance.logger.error(error)
@@ -259,17 +259,17 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
         # If palette not in YAML, generate colors automatically
         clrs = sns.color_palette(color_palette, n_colors=len(instance.data_labels)-1)
 
-    # Add colours and zorder for each experiment (non-observations)
-    experiment_ind = 1
+    # Add colours and zorder for each model (non-observations)
+    model_ind = 1
     for data_label in instance.data_labels:
         if data_label != instance.observations_data_label:
-            # Define colour for experiment
-            instance.plotting_params[data_label]['colour'] = clrs[experiment_ind-1]
-            # Define zorder for experiment relative to observations
+            # Define colour for model
+            instance.plotting_params[data_label]['colour'] = clrs[model_ind-1]
+            # Define zorder for model relative to observations
             instance.plotting_params[data_label]['zorder'] = \
-                instance.plotting_params[instance.observations_data_label]['zorder'] + experiment_ind
-            # Update count of experiments
-            experiment_ind += 1
+                instance.plotting_params[instance.observations_data_label]['zorder'] + model_ind
+            # Update count of models
+            model_ind += 1
 
 
 def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott', xgrid=None):

@@ -28,7 +28,7 @@ from .plot_formatting import format_plot_options, format_axis, harmonise_xy_lims
 from .read import DataReader
 from .read_aux import (generate_file_trees, get_possible_resampling_resolutions, 
                        get_periodic_nonrelevant_temporal_resolutions, get_periodic_relevant_temporal_resolutions, 
-                       get_valid_experiments, get_valid_obs_files_in_date_range)
+                       get_valid_models, get_valid_obs_files_in_date_range)
 from .statistics import (calculate_statistic, get_fairmode_data,
                          generate_colourbar, get_selected_station_data, get_z_statistic_info)
 from .warnings_prv import show_message
@@ -50,7 +50,7 @@ class Report:
 
         # load statistical yamls
         self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))
-        self.expbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/experiment_bias_stats.yaml')))
+        self.modbias_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/model_bias_stats.yaml')))
 
         # load representativity information
         self.representativity_info = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/internal/representativity.yaml')))
@@ -183,8 +183,8 @@ class Report:
             # get valid observations in date range
             get_valid_obs_files_in_date_range(self, self.start_date, self.end_date)
 
-            # update available experiments for selected fields
-            get_valid_experiments(self, self.start_date, self.end_date, self.resolution,
+            # update available models for selected fields
+            get_valid_models(self, self.start_date, self.end_date, self.resolution,
                                   self.network, self.species)
 
             # read data
@@ -831,8 +831,8 @@ class Report:
             if self.subsection not in self.stats_station:
                 self.stats_station[self.subsection] = {}
 
-            # initialise forecast experiments as None
-            forecast_experiments = None
+            # initialise forecast models as None
+            forecast_models = None
 
             # update the conf options for defined subsection
             if len(self.child_subsection_names) > 0:
@@ -842,9 +842,9 @@ class Report:
                 read_species = copy.deepcopy(self.species)
                 read_networkspecies = copy.deepcopy(self.networkspecies)
 
-                # if have forecast active then save current experiment variable in memory as may need to set it if not re-reading data 
+                # if have forecast active then save current model variable in memory as may need to set it if not re-reading data 
                 if len(self.forecast) != 0:
-                    forecast_experiments = copy.deepcopy(self.experiments)  
+                    forecast_models = copy.deepcopy(self.experiments)  
 
                 # get subsection variables
                 self.subsection_opts = self.sub_opts[self.subsection]
@@ -875,16 +875,16 @@ class Report:
                 np.array_equal(self.flags, self.previous_flags) == False) or (
                 str(dict(sorted(self.filter_species.items()))) != str(dict(sorted(self.previous_filter_species.items())))) or (
                 str(dict(sorted(self.calibration_factor.items()))) != str(dict(sorted(self.previous_calibration_factor.items())))):
-                # reset data labels and experiments for forecast cases
+                # reset data labels and models for forecast cases
                 self.data_labels = self.original_data_labels
                 self.data_labels_raw = self.original_data_labels_raw
-                self.experiments = self.original_experiments
+                self.experiments = self.original_models
                 # re-read data
                 self.datareader.read_setup(['reset'])
             else:
-                # if not re-reading data and forecast active, then overwrite experiments variable
-                if forecast_experiments is not None:
-                    self.experiments = forecast_experiments
+                # if not re-reading data and forecast active, then overwrite models variable
+                if forecast_models is not None:
+                    self.experiments = forecast_models
 
                 # update fields available for filtering
                 init_representativity(self)
@@ -1005,7 +1005,7 @@ class Report:
                 if self.selected_station_stddev_max[ns] > self.stddev_max_summary[ns]:
                     self.stddev_max_summary[ns] = copy.deepcopy(self.selected_station_stddev_max[ns])
 
-        # if have no valid data across data labels (no observations or experiments), then set flag
+        # if have no valid data across data labels (no observations or models), then set flag
         if not self.selected_station_data[networkspeci]: 
             have_nodata = True
         else:
@@ -1143,7 +1143,7 @@ class Report:
                                       data_range_max=self.data_range_max_station,
                                       stddev_max=self.stddev_max_station)
 
-            # if have no valid data across data labels (no observations or experiments), then set flag
+            # if have no valid data across data labels (no observations or models), then set flag
             if not self.selected_station_data[networkspeci]: 
                 have_nodata = True
             else:
@@ -1294,7 +1294,7 @@ class Report:
             stats = [zstat]
         elif base_plot_type == 'statsummary':
             if 'bias' in plot_options:
-                stats = self.plot_characteristics[plot_type]['experiment_bias']
+                stats = self.plot_characteristics[plot_type]['model_bias']
             else:
                 stats = self.plot_characteristics[plot_type]['basic']
 
@@ -1322,8 +1322,8 @@ class Report:
                 
                 # get stat for current data label
                 if data_label in self.selected_station_data_labels[networkspeci]:
-                    # if relevant stat is expbias stat, then ensure temporal colocation is active
-                    if (base_plot_type == 'statsummary') and (stat in self.expbias_stats) and ((not self.temporal_colocation) or (len(self.data_labels) == 1)):
+                    # if relevant stat is modbias stat, then ensure temporal colocation is active
+                    if (base_plot_type == 'statsummary') and (stat in self.modbias_stats) and ((not self.temporal_colocation) or (len(self.data_labels) == 1)):
                         data_to_add = np.nan
                     # otherwise calculate statistic
                     else:
@@ -1691,8 +1691,8 @@ class Report:
                             ylabel = self.basic_stats[base_zstat]['label']
                             ylabel_units = self.basic_stats[base_zstat]['units']
                         else:
-                            ylabel = self.expbias_stats[base_zstat]['label']
-                            ylabel_units = self.expbias_stats[base_zstat]['units']
+                            ylabel = self.modbias_stats[base_zstat]['label']
+                            ylabel_units = self.modbias_stats[base_zstat]['units']
                         if ylabel_units == '[measurement_units]':
                             ylabel_units = self.measurement_units[networkspeci.split('|')[-1]] 
                         if ylabel_units != '':
@@ -1866,7 +1866,7 @@ class Report:
 
                 # get stats
                 if 'bias' in plot_options:
-                    stats = self.plot_characteristics[plot_type]['experiment_bias']
+                    stats = self.plot_characteristics[plot_type]['model_bias']
                 else:
                     stats = self.plot_characteristics[plot_type]['basic']
 

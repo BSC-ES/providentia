@@ -23,7 +23,7 @@ data_paths = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'data_paths.
 defaults = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'defaults.yaml')))
 multispecies_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'multispecies_shortcurts.yaml')))
 mapping_species = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
-interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
+interp_models = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_models.yaml')))
 modes = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'modes.yaml')))
 wildcard = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'wildcard.yaml')))
 
@@ -187,20 +187,20 @@ class ProvConfiguration:
                 nonghost_root = data_paths[MACHINE]["nonghost_root"]
                 return os.path.expanduser(nonghost_root[0])+nonghost_root[1:]
 
-        elif key == 'exp_root':
+        elif key == 'mod_root':
             # define model root data directory
             # set model root data directory if left undefined
             if value == '':
-                exp_root = data_paths[MACHINE]["exp_root"]
-                return os.path.expanduser(exp_root[0])+exp_root[1:]
+                mod_root = data_paths[MACHINE]["mod_root"]
+                return os.path.expanduser(mod_root[0])+mod_root[1:]
 
-        elif key == 'exp_to_interp_root':
+        elif key == 'mod_to_interp_root':
             # define model root data directory
             # set model root data directory if left undefined
             if value == '':
-                exp_to_interp_root = data_paths[MACHINE]["exp_to_interp_root"]
-                if exp_to_interp_root != '': 
-                    return os.path.expanduser(exp_to_interp_root[0])+exp_to_interp_root[1:]       
+                mod_to_interp_root = data_paths[MACHINE]["mod_to_interp_root"]
+                if mod_to_interp_root != '': 
+                    return os.path.expanduser(mod_to_interp_root[0])+mod_to_interp_root[1:]       
         
         elif key == 'ghost_version':
             # parse GHOST version
@@ -522,14 +522,14 @@ class ProvConfiguration:
                 else:
                     # have alternative model names for the legend, then parse them?
                     if ('(' in value) & (')' in value):
-                        exps = [exp.strip() for exp in value.split('(')[0].strip().split(",")]
-                        self.read_instance.alias = [exp_legend.strip() for exp_legend in value.split('(')[1].split(')')[0].strip().split(",")]
+                        mods = [mod.strip() for mod in value.split('(')[0].strip().split(",")]
+                        self.read_instance.alias = [mod_legend.strip() for mod_legend in value.split('(')[1].split(')')[0].strip().split(",")]
                     # otherwise set legend names as given model names in full
                     else: 
-                        exps = [exp.strip() for exp in value.split(",")]
+                        mods = [mod.strip() for mod in value.split(",")]
                         self.read_instance.alias = []
 
-                    return exps
+                    return mods
 
         elif key == 'map_extent':
             # parse map extent
@@ -686,7 +686,7 @@ class ProvConfiguration:
         """ Get model components (model-domain-ensemble-forecast) and fill the class variables with their value."""
 
         # get separated model parts list
-        split_models = [exp.split("-") for exp in self.read_instance.experiments]
+        split_models = [mod.split("-") for mod in self.read_instance.experiments]
 
         # get default ensemble
         default_ensemble = self.read_instance.default_values["ensemble"]
@@ -705,7 +705,7 @@ class ProvConfiguration:
             # set model to be non-interpolated if there is no network
             if not self.read_instance.network:
                 self.read_instance.dl_interpolated = False
-                msg = "Experiments detected but no network specified, proceeding to download non-interpolated model output."
+                msg = "Models detected but no network specified, proceeding to download non-interpolated model output."
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
             # if there's models, ask the user whether they want interpolated or non-interpolated
@@ -734,7 +734,7 @@ class ProvConfiguration:
         forecasts = []
 
         # iterate through each model string
-        for exp_ii, split_model in enumerate(split_models):
+        for mod_ii, split_model in enumerate(split_models):
 
             # if model is composed by more than 4 parts, exit
             if len(split_model) > 4:
@@ -743,43 +743,43 @@ class ProvConfiguration:
                 sys.exit(1)
 
             # set alias if have one
-            if exp_ii < len(self.read_instance.alias): 
-                alias = self.read_instance.alias[exp_ii]
+            if mod_ii < len(self.read_instance.alias): 
+                alias = self.read_instance.alias[mod_ii]
             else:
                 alias = None
 
-            # initialise expID, domain, ensemble and forecast for the model
-            exp_id = None
-            exp_dom = None
-            exp_ens = None
-            exp_fct = None
+            # initialise modID, domain, ensemble and forecast for the model
+            mod_id = None
+            mod_dom = None
+            mod_ens = None
+            mod_fct = None
 
             # iterate through model parts and come up with list of models, 
             # using information from each of domain, ensemble, forecast fields when not in models field,
             # otherwise default values are used
             for model_part_ii, model_part in enumerate(split_model):
 
-                # have expID part?
+                # have modID part?
                 if model_part_ii == 0:
-                    exp_id = copy.deepcopy(model_part)
+                    mod_id = copy.deepcopy(model_part)
 
                 # have domain part?
                 elif model_part in self.read_instance.available_domains: 
-                    exp_dom = copy.deepcopy(model_part)
+                    mod_dom = copy.deepcopy(model_part)
                 
                 # have forecast part?
                 elif ('day' in model_part) or ('daily' in model_part) or ('combined' in model_part): 
-                    exp_fct = model_part.strip().lower()
+                    mod_fct = model_part.strip().lower()
 
                 # have ensemble part?
                 else:
-                    exp_ens = copy.deepcopy(model_part)
+                    mod_ens = copy.deepcopy(model_part)
                     # if it is a number, then make it 3 digits, if not it stays as it is
-                    if exp_ens.isdigit():
-                        exp_ens = exp_ens.strip().zfill(3)
+                    if mod_ens.isdigit():
+                        mod_ens = mod_ens.strip().zfill(3)
                     # check that it does not start with stat
-                    elif exp_ens.startswith('stat'):
-                            error = f"Error: 'ensemble' {exp_ens} cannot start with 'stat'.\n" \
+                    elif mod_ens.startswith('stat'):
+                            error = f"Error: 'ensemble' {mod_ens} cannot start with 'stat'.\n" \
                             "For ensemble statistics, simply define them based on the stat name provided in the filename, such as:\n" \
                             "   · 'av' for ensemble average\n" \
                             "   · 'av_an' for ensemble analysis average"
@@ -787,14 +787,14 @@ class ProvConfiguration:
                             sys.exit(1)
 
             # throw error if domain has been defined in both domain and model fields
-            if (exp_dom) and (config_domain):
+            if (mod_dom) and (config_domain):
                 error = f"Error: Unable to set domain(s) as {', '.join(config_domain)} because the "
-                error += f"model {self.read_instance.experiments[exp_ii]} already contains information about the domain."
+                error += f"model {self.read_instance.experiments[mod_ii]} already contains information about the domain."
                 self.read_instance.logger.error(error)
                 sys.exit(1)
             # elif if have domain information from model field, then use that
-            elif exp_dom:
-                dom = [exp_dom]
+            elif mod_dom:
+                dom = [mod_dom]
             # elif if have domain information from domain field, then use that
             elif config_domain:
                 dom = copy.deepcopy(config_domain)
@@ -803,14 +803,14 @@ class ProvConfiguration:
                 dom = copy.deepcopy(self.read_instance.available_domains)
                        
             # throw error if ensemble has been defined in both ensemble and model fields
-            if (exp_ens) and (config_ensemble):
+            if (mod_ens) and (config_ensemble):
                 error = f"Error: Unable to set 'ensemble' as {', '.join(config_ensemble)} because the "
-                error += f"model {self.read_instance.experiments[exp_ii]} already contains information about the ensemble."                  
+                error += f"model {self.read_instance.experiments[mod_ii]} already contains information about the ensemble."                  
                 self.read_instance.logger.error(error)
                 sys.exit(1)
             # elif if have ensemble information from model field, then use that
-            elif exp_ens:
-                ens = [exp_ens]
+            elif mod_ens:
+                ens = [mod_ens]
             # elif if have ensemble information from ensemble field, then use that
             elif config_ensemble:
                 ens = copy.deepcopy(config_ensemble)
@@ -819,14 +819,14 @@ class ProvConfiguration:
                 ens = copy.deepcopy(default_ensemble)
 
             # throw error if forecast has been defined in both forecast and model fields
-            if (exp_fct) and (config_forecast):
+            if (mod_fct) and (config_forecast):
                 error = f"Error: Unable to set 'forecast' as {', '.join(config_forecast)} because the "
-                error +=  f"model {self.read_instance.experiments[exp_ii]} already contains information about the forecast."                  
+                error +=  f"model {self.read_instance.experiments[mod_ii]} already contains information about the forecast."                  
                 self.read_instance.logger.error(error)
                 sys.exit(1)
             # elif if have forecast information from model field, then use that
-            elif exp_fct:
-                fct = [exp_fct]
+            elif mod_fct:
+                fct = [mod_fct]
             # elif if have forecast information from forecast field, then use that
             elif config_forecast:
                 fct = copy.deepcopy(config_forecast)
@@ -834,12 +834,12 @@ class ProvConfiguration:
             else:
                 fct = [None]
 
-            # iterate through combinations of all expIDs, domain, ensemble and forecast and put together model str
-            if exp_id is not None:
+            # iterate through combinations of all modIDs, domain, ensemble and forecast and put together model str
+            if mod_id is not None:
                 for d in dom:
                     for e in ens:
                         # set model str
-                        model = '{}-{}-{}'.format(exp_id, d, e)
+                        model = '{}-{}-{}'.format(mod_id, d, e)
 
                         # check model validity
                         altered_models = check_model_func(model, deactivate_warning)
@@ -848,8 +848,8 @@ class ProvConfiguration:
                         for altered_model in altered_models:
                             altered_model_split = altered_model.split('-')
 
-                            # determine if have just expID, or also domain and ensemble
-                            exp_id_alt = altered_model_split[0]
+                            # determine if have just modID, or also domain and ensemble
+                            mod_id_alt = altered_model_split[0]
                             if len(altered_model_split) == 1:
                                 d_alt = None
                                 e_alt = None
@@ -860,9 +860,9 @@ class ProvConfiguration:
                             # iterate through forecast and set final model str
                             for f in fct:
                                 if d_alt is None:
-                                    final_model = '{}'.format(exp_id_alt)
+                                    final_model = '{}'.format(mod_id_alt)
                                 else:
-                                    final_model = '{}-{}-{}'.format(exp_id_alt, d_alt, e_alt)
+                                    final_model = '{}-{}-{}'.format(mod_id_alt, d_alt, e_alt)
 
                                 # append domain, ensemble, and forecast to arrays if not None, and not already set
                                 if (d_alt is not None) & (d_alt not in domains):
@@ -882,14 +882,14 @@ class ProvConfiguration:
         # it is mandatory to have the same number of models and alises, otherwise alises are dropped
         if (len(models) == len(aliases)) & (len(models) > 0): 
             self.read_instance.alias_flag = True
-            models = {exp:alias for exp, alias in zip(models, aliases)}
+            models = {mod:alias for mod, alias in zip(models, aliases)}
         else:
             self.read_instance.alias_flag = False
-            models = {exp:exp for exp in models}
+            models = {mod:mod for mod in models}
 
         # show warning if alias not possible to be set
         if (not self.read_instance.alias_flag) & (len(aliases) > 0):
-            msg = "Experiment aliases could not be set."
+            msg = "Model aliases could not be set."
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
         # if models were passed but there is no valid model, show warning, or exit in interpolation case
@@ -943,35 +943,35 @@ class ProvConfiguration:
         """ Check individual model and get list of options. """
 
         # split model
-        expid, domain, ensemble = model.split('-')
+        modid, domain, ensemble = model.split('-')
         
         # get all possible models
-        exp_path = join(self.read_instance.exp_root,self.read_instance.ghost_version)
-        self.possible_models = [] if not os.path.exists(exp_path) else os.listdir(exp_path)
+        mod_path = join(self.read_instance.mod_root,self.read_instance.ghost_version)
+        self.possible_models = [] if not os.path.exists(mod_path) else os.listdir(mod_path)
 
         # initialise list of possible ghost versions
         available_ghost_versions = []
 
         # remove possible ghost versions if they are not really in the directories
-        possible_ghost_versions = list(set(os.listdir(self.read_instance.exp_root)) & set(self.read_instance.possible_ghost_versions))
+        possible_ghost_versions = list(set(os.listdir(self.read_instance.mod_root)) & set(self.read_instance.possible_ghost_versions))
 
         # if ensemble is allmembers, get all the possible ensemble members
         if ensemble == "allmembers":
-            exp_found = list(filter(lambda x:x.startswith(expid+'-'+domain), self.possible_models))
+            mod_found = list(filter(lambda x:x.startswith(modid+'-'+domain), self.possible_models))
            
             # search for other ghost versions
-            if not exp_found:
+            if not mod_found:
                 for ghost_version in possible_ghost_versions:
-                    ghost_exp_found = list(filter(lambda x:x.startswith(expid+'-'+domain), os.listdir(join(self.read_instance.exp_root,ghost_version))))
-                    if ghost_exp_found:
+                    ghost_mod_found = list(filter(lambda x:x.startswith(modid+'-'+domain), os.listdir(join(self.read_instance.mod_root,ghost_version))))
+                    if ghost_mod_found:
                         available_ghost_versions.append(ghost_version)
         # if it is a concrete ensemble, then just get the model from the list
         else:
-            exp_found = [model] if model in self.possible_models else []
+            mod_found = [model] if model in self.possible_models else []
 
             # search for other ghost versions
-            if not exp_found:
-                available_ghost_versions = list(filter(lambda x:model in os.listdir(join(self.read_instance.exp_root,x)), possible_ghost_versions))
+            if not mod_found:
+                available_ghost_versions = list(filter(lambda x:model in os.listdir(join(self.read_instance.mod_root,x)), possible_ghost_versions))
         
         # if not found because of the ghost version, tell the user
         if available_ghost_versions and ('/' not in self.read_instance.network[0]):
@@ -980,7 +980,7 @@ class ProvConfiguration:
             msg += f" {', '.join(sorted(available_ghost_versions))}"
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
-        return exp_found
+        return mod_found
     
     # TODO use inheritance in the future 
     def check_model_interpolation(self, model, deactivate_warning):     
@@ -992,35 +992,35 @@ class ProvConfiguration:
         model_options = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_dataset.yaml')))
         
         # split model
-        expid, domain, ensemble = model.split('-')
+        modid, domain, ensemble = model.split('-')
 
         # accept asterisk to download all models (non-interpolated)
-        if expid == '*':
-            return [expid]
+        if modid == '*':
+            return [modid]
         
-        # search if the expid is in the interp_experiments file
+        # search if the modid is in the interp_models file
         # initialize model search variables
         model_exists = False
         msg = ""
 
         # HPC machines download (copy) and HPC interpolation
         if self.read_instance.machine != "local":
-            # search in interp_experiments
-            for model_type, model_dict in interp_experiments.items():
-                if expid in model_dict["experiments"]:
+            # search in interp_models
+            for model_type, model_dict in interp_models.items():
+                if modid in model_dict["models"]:
                     model_exists = True
                     break
             
-            msg += f"Cannot find the model ID '{expid}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
+            msg += f"Cannot find the model ID '{modid}' in '{join('settings', 'interp_models.yaml')}'. Please add it to the file. "
 
             # HPC interpolation only
             if model_exists is False and self.read_instance.mode == 'interpolation':
-                # search in hpc exp_to_interp_path
-                exp_to_interp_path = join(self.read_instance.exp_to_interp_root, expid)
-                if os.path.exists(exp_to_interp_path):
+                # search in hpc mod_to_interp_path
+                mod_to_interp_path = join(self.read_instance.mod_to_interp_root, modid)
+                if os.path.exists(mod_to_interp_path):
                     model_exists = True
                 
-                msg += f"Cannot find the model ID {expid} with the {domain} domain in '{exp_to_interp_path}'."
+                msg += f"Cannot find the model ID {modid} with the {domain} domain in '{mod_to_interp_path}'."
         
         # local download and interpolation
         else:
@@ -1030,33 +1030,33 @@ class ProvConfiguration:
 
             # local interpolation
             if self.read_instance.mode == 'interpolation':
-                # search in local exp_to_interp_path
-                exp_to_interp_path = join(self.read_instance.exp_to_interp_root, expid)
-                if os.path.exists(exp_to_interp_path):
+                # search in local mod_to_interp_path
+                mod_to_interp_path = join(self.read_instance.mod_to_interp_root, modid)
+                if os.path.exists(mod_to_interp_path):
                     model_exists = True
 
-                msg += f"Cannot find the model ID {expid} with the {domain} domain in '{exp_to_interp_path}'."
+                msg += f"Cannot find the model ID {modid} with the {domain} domain in '{mod_to_interp_path}'."
             
             # local download
             else:
-                # search in interp_experiments
-                for model_type, model_dict in interp_experiments.items():
-                    if expid in model_dict["experiments"]:
+                # search in interp_models
+                for model_type, model_dict in interp_models.items():
+                    if modid in model_dict["models"]:
                         model_exists = True
                         break
                 
-                msg += f"Cannot find the model ID '{expid}' in '{join('settings', 'interp_experiments.yaml')}'. Please add it to the file. "
+                msg += f"Cannot find the model ID '{modid}' in '{join('settings', 'interp_models.yaml')}'. Please add it to the file. "
 
-                # search in hpc exp_to_interp_path
+                # search in hpc mod_to_interp_path
                 if model_exists is False:
                     self.read_instance.connect() 
-                    exp_to_interp_path = join(self.read_instance.exp_to_interp_remote_path,expid,domain)
+                    mod_to_interp_path = join(self.read_instance.mod_to_interp_remote_path,modid,domain)
 
                     try:
-                        self.read_instance.sftp.stat(exp_to_interp_path)
+                        self.read_instance.sftp.stat(mod_to_interp_path)
                         model_exists = True
                     except FileNotFoundError:
-                        msg += f"Cannot find the model ID {expid} with the {domain} domain in '{exp_to_interp_path}'."
+                        msg += f"Cannot find the model ID {modid} with the {domain} domain in '{mod_to_interp_path}'."
 
         # if model does not exist, exit
         # supressed warning deactivation
@@ -1070,43 +1070,43 @@ class ProvConfiguration:
         """ Check individual model and get list of options."""
 
         # split model
-        expid, domain, ensemble = model.split('-')
+        modid, domain, ensemble = model.split('-')
 
         # accept asterisk to download all models
-        if expid == '*':
-            return [expid]
+        if modid == '*':
+            return [modid]
         
         # all models pass this check because the real one is in the remote machine
-        exp_found = [model]
+        mod_found = [model]
         
         # connect to the remote machine
         self.read_instance.connect()        
         
         # get all possible models
-        exp_path = join(self.read_instance.exp_remote_path,self.read_instance.ghost_version)
-        self.possible_models = self.read_instance.sftp.listdir(exp_path)
+        mod_path = join(self.read_instance.mod_remote_path,self.read_instance.ghost_version)
+        self.possible_models = self.read_instance.sftp.listdir(mod_path)
 
         # TODO repeated code, put this into a method in the future?
         # if ensemble is allmembers, get all the possible ensemble
         if ensemble == "allmembers":
-            exp_found = list(sorted(filter(lambda x:x.startswith(expid+'-'+domain), self.possible_models)))
+            mod_found = list(sorted(filter(lambda x:x.startswith(modid+'-'+domain), self.possible_models)))
            
-            if not exp_found:
+            if not mod_found:
                 # initialise list of possible ghost versions
                 available_ghost_versions = []
                 
                 # search for other ghost versions
                 for ghost_version in self.read_instance.possible_ghost_versions:
-                    ghost_exp_found = list(filter(lambda x:x.startswith(expid+'-'+domain), self.read_instance.sftp.listdir(join(self.read_instance.exp_remote_path,ghost_version))))
-                    if ghost_exp_found:
+                    ghost_mod_found = list(filter(lambda x:x.startswith(modid+'-'+domain), self.read_instance.sftp.listdir(join(self.read_instance.mod_remote_path,ghost_version))))
+                    if ghost_mod_found:
                         available_ghost_versions.append(ghost_version)
 
-                msg = f"There is no model {expid}-{domain} data for the current GHOST version ({self.read_instance.ghost_version})." 
+                msg = f"There is no model {modid}-{domain} data for the current GHOST version ({self.read_instance.ghost_version})." 
                 if available_ghost_versions:
                     msg += f" Please, check one of the available versions: {', '.join(sorted(available_ghost_versions))}"
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf)
 
-        return exp_found        
+        return mod_found        
 
     def check_validity(self, deactivate_warning=False):
         """ Check validity of set variables after parsing. """
@@ -1309,7 +1309,7 @@ class ProvConfiguration:
 
         # create empty directories for the observations and models
         if MACHINE == "local":
-            for path in [self.read_instance.nonghost_root, self.read_instance.ghost_root, self.read_instance.exp_root, self.read_instance.exp_to_interp_root]:
+            for path in [self.read_instance.nonghost_root, self.read_instance.ghost_root, self.read_instance.mod_root, self.read_instance.mod_to_interp_root]:
                 if not os.path.exists(path):
                     os.makedirs(path)
                     
@@ -1335,7 +1335,7 @@ class ProvConfiguration:
                     if self.read_instance.dl_mode in valid_modes:
                         break
                         
-        # set expID, domain, ensemble, forecast from model name
+        # set modID, domain, ensemble, forecast from model name
         self.decompose_models(deactivate_warning)
 
         # before checking the model check that the remote download has the interpolated tag as False, if not exit
@@ -1364,8 +1364,8 @@ class ProvConfiguration:
                 for i, model in enumerate(self.read_instance.experiments):
                     for calibration_factor in self.read_instance.calibration_factor:
                         if model in calibration_factor:
-                            calibration_factor_exp = calibration_factor.split("(")[1][:-1]
-                            calibration_factor_dict[model] = calibration_factor_exp
+                            calibration_factor_mod = calibration_factor.split("(")[1][:-1]
+                            calibration_factor_dict[model] = calibration_factor_mod
             # if the same calibration is applied to all models
             else:
                 calibration_factor_dict = {model:self.read_instance.calibration_factor[0] for model in self.read_instance.experiments}                 

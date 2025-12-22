@@ -55,7 +55,7 @@ If the interpolation is succesful, the resulted interpolated files are stored un
 (define-models)=
 ## Define models
 
-All the models that are runned in the interpolation need to be defined in `/settings/interp_experiments.yaml`.
+All the models that are runned in the interpolation need to be defined in `/settings/interp_models.yaml`.
 
 This file contains a dictionary of default relevant models grouped by type, in where you find the list of names of the models and the list of possible paths for them. 
 
@@ -65,15 +65,16 @@ If the model is not located in one of the predefined paths, you will need to add
 
 ```
 "example_model_type": {
-        "experiments": ["example_model_name"],
+        "models": ["example_model_name"],
         "paths": [ 
             "/example/model/path"
         ]
+}
 ```
 
-You can find this exact template at the end of the `interp_experiments.yaml` file.
+You can find this exact template at the end of the `interp_models.yaml` file.
 
-When adding a new experiment to a directory, if you want it to be read from Providentia, the subdirectories inside the model storage directory must follow this structure: `{model_name}/{domain}/{resolution}/{species}`. For example: `cams61_monarch_ph3/eu/hourly/sconco3`.
+When adding a new model to a directory, if you want it to be read from Providentia, the subdirectories inside the model storage directory must follow this structure: `{model_name}/{domain}/{resolution}/{species}`. For example: `cams61_monarch_ph3/eu/hourly/sconco3`.
 
 There can be multiple paths to the same model, and you can add them to the list of paths. The order is important: the first path that works on the machine will be used.
 

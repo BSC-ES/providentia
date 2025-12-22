@@ -34,7 +34,7 @@ Namely, these are:
 | resolution | Temporal resolution of the observations you want to load (e.g. `3hourly`). | hourly |
 | start_date | Comparison start date in YYYYMMDD format (e.g. `20170101`). | 20180101 |
 | end_date | Comparison end date in YYYYMMDD format (e.g. `20180601`). | 20190101 |
-| model |  ID of interpolated model output using providentia-interpolation. The model IDs can be mapped to different names by adding a list of alternative names after the model IDs (e.g. `exp1, exp2 (altexp1, altexp2)`). | |
+| model |  ID of interpolated model output using providentia-interpolation. The model IDs can be mapped to different names by adding a list of alternative names after the model IDs (e.g. `mod1, mod2 (altmod1, altmod2)`). | |
 | temporal_colocation | Boolean variable to set if you want to temporally colocate the observation and model data. | False |
 | spatial_colocation | Boolean variable to set if you want to spatially colocate the observation and model data across multiple species. | True |
 | filter_species | Filter read species by other species data within a data range (can be multiple) (e.g. `network1:species1 (lowerlim, upperlim), network2:species2 (lowerlim, upperlim)`). | |

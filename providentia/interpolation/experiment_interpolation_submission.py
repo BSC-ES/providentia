@@ -25,8 +25,8 @@ sys.path.append(join(PROVIDENTIA_ROOT, 'providentia'))
 from interpolation.aux_interp import get_aeronet_bin_radius_from_bin_variable, get_model_bin_radii, check_for_ghost
 from configuration import ProvConfiguration, load_conf
 
-# load the defined experiments and species yamls
-interp_experiments = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_experiments.yaml')))
+# load the defined models and species yamls
+interp_models = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_models.yaml')))
 mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'mapping_species.yaml')))
 temporal_resolution_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'temporal_resolution_map.yaml')))
 interp_print_variables = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'interpolation_fields.yaml')))
@@ -113,15 +113,15 @@ class SubmitInterpolation(object):
         # print variables used, if all species are used print "All Species"        
         print("\nVariables used for the interpolation:\n")
         for arg in interp_print_variables:
-            if arg != "experiments":
+            if arg != "models":
                 print(f"{arg}: {getattr(self, arg)}")
             else:
                 print(f"{arg}:")
-                for exp, alias in getattr(self, arg).items():
+                for mod, alias in getattr(self, arg).items():
                     if self.alias_flag:
-                        print(f" - {exp} ({alias})")
+                        print(f" - {mod} ({alias})")
                     else:
-                        print(f" - {exp}")
+                        print(f" - {mod}")
 
         # define the QOS (Quality of Service) used to manage jobs on the SLURM system
         if self.machine == 'mn5':
@@ -147,67 +147,67 @@ class SubmitInterpolation(object):
         # get all networks in case the asterisk was used
         networks = self.get_all_networks() if self.network == ['*'] else self.network
 
-        # get all experiments in case the asterisk was used
-        experiments = self.get_all_experiments() if self.experiments == {'*': '*'} else self.experiments
+        # get all models in case the asterisk was used
+        models = self.get_all_models() if self.experiments == {'*': '*'} else self.experiments
 
-        # iterate through desired experiment IDs and its types
-        for exp_dom_ens, alias in experiments.items():
+        # iterate through desired model IDs and its types
+        for mod_dom_ens, alias in models.items():
 
-            experiment_to_process, grid_type, ensemble = exp_dom_ens.split("-") 
+            model_to_process, grid_type, ensemble = mod_dom_ens.split("-") 
 
             print('\nMODEL: {0}\n'.format(alias))
 
             # initialise files lists
             obs_files = []
-            exp_files = []
+            mod_files = []
             obs_files_dates = []
-            exp_files_dates = []
+            mod_files_dates = []
 
-            # initialize experiment search variables
-            self.exp_dir = None
+            # initialize model search variables
+            self.mod_dir = None
             msg = ""
 
-            # get experiment type and specific directories
-            for experiment_type, experiment_dict in interp_experiments.items():
-                if experiment_to_process in experiment_dict["experiments"]:
+            # get model type and specific directories
+            for model_type, model_dict in interp_models.items():
+                if model_to_process in model_dict["models"]:
                     # take first functional directory 
                     if self.machine != "local":
-                        # for HPC machines, search in interp_experiments
-                        for temp_exp_dir in experiment_dict["paths"]:
-                            temp_exp_dir = join(temp_exp_dir, experiment_to_process)
-                            if os.path.exists(temp_exp_dir):
-                                self.exp_dir = temp_exp_dir
+                        # for HPC machines, search in interp_models
+                        for temp_mod_dir in model_dict["paths"]:
+                            temp_mod_dir = join(temp_mod_dir, model_to_process)
+                            if os.path.exists(temp_mod_dir):
+                                self.mod_dir = temp_mod_dir
                                 break
                         break
-                    # for local machines, break to get experiment_type
+                    # for local machines, break to get model_type
                     else: 
                         break
                 
-            # if local machine or if not exp_dir, get directory from data_paths
-            if self.exp_dir is None: 
+            # if local machine or if not mod_dir, get directory from data_paths
+            if self.mod_dir is None: 
                 
                 if self.machine != "local":
-                    msg = f"The experiment '{experiment_to_process}' is in none of the experiment paths defined in settings/interp_experiments.yaml."
+                    msg = f"The model '{model_to_process}' is in none of the model paths defined in settings/interp_models.yaml."
                     print(msg)
 
-                exp_to_interp_path = join(self.exp_to_interp_root, experiment_to_process)
-                if os.path.exists(exp_to_interp_path):
-                    self.exp_dir = exp_to_interp_path
+                mod_to_interp_path = join(self.mod_to_interp_root, model_to_process)
+                if os.path.exists(mod_to_interp_path):
+                    self.mod_dir = mod_to_interp_path
                 else:
-                    msg = f"The experiment '{experiment_to_process}' is not in {self.exp_to_interp_root}."
+                    msg = f"The model '{model_to_process}' is not in {self.mod_to_interp_root}."
                     print(msg)
                     continue
 
             # get model bin edges
-            r_edges, rho_bins = get_model_bin_radii(experiment_type)
+            r_edges, rho_bins = get_model_bin_radii(model_type)
 
             # get all resolutions in case the asterisk was used
-            resolutions = self.get_all_resolutions(experiment_to_process, grid_type) if self.resolution == ['*'] else self.resolution
+            resolutions = self.get_all_resolutions(model_to_process, grid_type) if self.resolution == ['*'] else self.resolution
 
             # iterate through temporal_resolutions to output
             for temporal_resolution_to_output in resolutions:
 
-                experiment_species_ensemblestat = []
+                model_species_ensemblestat = []
 
                 # get priority resolutions to look for in model files based on output resolution
                 # look for same resolution first, then prioritise finer resolutions
@@ -223,7 +223,7 @@ class SubmitInterpolation(object):
                 for model_temporal_resolution in resolutions_to_keep:
 
                     # get all species in case the asterisk was used
-                    species = self.get_all_species(experiment_to_process, grid_type, model_temporal_resolution) if self.species == ['*'] else self.species
+                    species = self.get_all_species(model_to_process, grid_type, model_temporal_resolution) if self.species == ['*'] else self.species
 
                     # iterate through species to process
                     for speci_ii, speci_to_process in enumerate(species):
@@ -231,28 +231,28 @@ class SubmitInterpolation(object):
                         original_speci_to_process = copy.deepcopy(speci_to_process)
 
                         # test if have directory for current speci_to_process
-                        if os.path.isdir("{}/{}/{}/{}".format(self.exp_dir, grid_type, model_temporal_resolution, speci_to_process)):
+                        if os.path.isdir("{}/{}/{}/{}".format(self.mod_dir, grid_type, model_temporal_resolution, speci_to_process)):
                             have_valid_resolution = True
                             break
 
                         # test if have speci directory in ensemble-stats
-                        elif os.path.isdir("{}/{}/{}/ensemble-stats".format(self.exp_dir, grid_type, model_temporal_resolution)):
+                        elif os.path.isdir("{}/{}/{}/ensemble-stats".format(self.mod_dir, grid_type, model_temporal_resolution)):
                             
                             # get all ensemble-stats species
-                            experiment_species_ensemblestat = list(np.unique([name.split('_')[0] 
+                            model_species_ensemblestat = list(np.unique([name.split('_')[0] 
                                                                 for name in os.listdir("{}/{}/{}/ensemble-stats".format(
-                                                                    self.exp_dir,grid_type,model_temporal_resolution)) 
+                                                                    self.mod_dir,grid_type,model_temporal_resolution)) 
                                                                     if os.path.isdir("{}/{}/{}/ensemble-stats/{}".format(
-                                                                        self.exp_dir,grid_type,model_temporal_resolution,name))]))
+                                                                        self.mod_dir,grid_type,model_temporal_resolution,name))]))
                             
-                            # test if have speci_to_process in experiment_species_ensemblestat
-                            if speci_to_process in experiment_species_ensemblestat:
+                            # test if have speci_to_process in model_species_ensemblestat
+                            if speci_to_process in model_species_ensemblestat:
                                 have_valid_resolution = True
                                 break
-                            # test if have mapped speci_to_process in experiment_species_ensemblestat
+                            # test if have mapped speci_to_process in model_species_ensemblestat
                             elif speci_to_process in mapping_species:
                                 for speci_to_map in mapping_species[speci_to_process]:
-                                    if speci_to_map in experiment_species_ensemblestat:
+                                    if speci_to_map in model_species_ensemblestat:
                                         # if have a binned size distribution variable to map, first check if bin radius is within model's bin extents
                                         # if not, do not process species
                                         if ('vconcaerobin' in speci_to_process) or ('vconcaerobin' in speci_to_map):
@@ -281,17 +281,17 @@ class SubmitInterpolation(object):
                         # -- 4D binned size distribution
                         # -- 4D gas variables
                         # first check if speci_to_process can be mapped
-                        # then check if the variable to map to exists for the experiment/grid_type/resolution (these can be multiple, list order sets the priority)
+                        # then check if the variable to map to exists for the model/grid_type/resolution (these can be multiple, list order sets the priority)
                         else:
                             # get species that can do mapping for
                             available_species_to_map_from = list(mapping_species.keys())
                             # check if speci_to_process can be mapped
                             if speci_to_process in available_species_to_map_from:
 
-                                # if it can be then check then if the variable to map to exists for the experiment/grid_type/resolution 
+                                # if it can be then check then if the variable to map to exists for the model/grid_type/resolution 
                                 # (these can be multiple, list order sets the priority)
                                 for speci_to_map in mapping_species[speci_to_process]:
-                                    if os.path.isdir("{}/{}/{}/{}".format(self.exp_dir, grid_type, model_temporal_resolution, speci_to_map)):
+                                    if os.path.isdir("{}/{}/{}/{}".format(self.mod_dir, grid_type, model_temporal_resolution, speci_to_map)):
 
                                         # if have a binned size distribution variable to map, first check if bin radius is within model's bin extents
                                         # if not, do not process species
@@ -350,29 +350,29 @@ class SubmitInterpolation(object):
                             # determine if ensemble is member or emsemble stat
                             ensemble_member = ensemble.isdigit()
 
-                            # check if ensemble is ensemble stat and get all relevant experiment files
+                            # check if ensemble is ensemble stat and get all relevant model files
                             if not ensemble_member:
                                 ensemble_stat = True
-                                exp_path = '{}/{}/{}/ensemble-stats/{}_{}/{}*{}.nc'.format(
-                                        self.exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
+                                mod_path = '{}/{}/{}/ensemble-stats/{}_{}/{}*{}.nc'.format(
+                                        self.mod_dir, grid_type, model_temporal_resolution, speci_to_process, 
                                         ensemble, speci_to_process, ensemble)
-                                exp_files_all = np.sort(glob.glob(exp_path))
+                                mod_files_all = np.sort(glob.glob(mod_path))
                             else:
                                 ensemble_stat = False
-                                exp_path = '{}/{}/{}/{}/{}*.nc'.format(
-                                        self.exp_dir, grid_type, model_temporal_resolution, speci_to_process, 
+                                mod_path = '{}/{}/{}/{}/{}*.nc'.format(
+                                        self.mod_dir, grid_type, model_temporal_resolution, speci_to_process, 
                                         speci_to_process)
-                                exp_files_all = np.sort(glob.glob(exp_path))    
+                                mod_files_all = np.sort(glob.glob(mod_path))    
                                 
                                 # drop all analysis files ending with '_an.nc' which are not in ensemble-stats
-                                exp_files_all = np.array([f for f in exp_files_all if '_an.nc' not in f])
+                                mod_files_all = np.array([f for f in mod_files_all if '_an.nc' not in f])
 
-                            # if have no relevant experiment files then continue
-                            if len(exp_files_all) == 0:
-                                print(f"Model files cannot be found for {temporal_resolution_to_output} resolution in {os.path.dirname(exp_path)}.")
+                            # if have no relevant model files then continue
+                            if len(mod_files_all) == 0:
+                                print(f"Model files cannot be found for {temporal_resolution_to_output} resolution in {os.path.dirname(mod_path)}.")
                                 continue
                             else:
-                                print(f"{len(exp_files_all)} model files for {temporal_resolution_to_output} resolution were found in {os.path.dirname(exp_path)}.")
+                                print(f"{len(mod_files_all)} model files for {temporal_resolution_to_output} resolution were found in {os.path.dirname(mod_path)}.")
 
                             # ensemble stat?
                             if ensemble_stat:
@@ -384,11 +384,11 @@ class SubmitInterpolation(object):
                                 # determine if simulation generates files with ensemble member numbers or not 
                                 # (test first file)
                                 # if the ensemble number is in the nc file name next to species
-                                if exp_files_all[0].split('/')[-1].rsplit('_', 1)[0] != speci_to_process:
+                                if mod_files_all[0].split('/')[-1].rsplit('_', 1)[0] != speci_to_process:
                                     have_ensemble_members = True
                                     # if have ensemble members in filename, get all unique numbers
                                     unique_ensemble_members = np.unique([f.split('/{}-'.format(speci_to_process))[-1][:3] 
-                                                                        for f in exp_files_all])
+                                                                        for f in mod_files_all])
                                     # get intersection between desired ensemble members to process and those 
                                     # available in directory
                                     # if no members defined explicitly to process, process them all 
@@ -413,14 +413,14 @@ class SubmitInterpolation(object):
                             # iterate through available ensemble to process                    
                             for available_ensemble in available_ensemble:
 
-                                # limit experiment files to be just those for specific ensemble member 
+                                # limit model files to be just those for specific ensemble member 
                                 # (where neccessary) 
-                                exp_file_speci = copy.deepcopy(speci_to_process)
-                                exp_files = copy.deepcopy(exp_files_all)
+                                mod_file_speci = copy.deepcopy(speci_to_process)
+                                mod_files = copy.deepcopy(mod_files_all)
                                 if ensemble_stat == False:
                                     if have_ensemble_members == True:
-                                        exp_file_speci = '{}-{}'.format(speci_to_process, available_ensemble)
-                                        exp_files = np.sort([f for f in exp_files_all if '{}_'.format(exp_file_speci) 
+                                        mod_file_speci = '{}-{}'.format(speci_to_process, available_ensemble)
+                                        mod_files = np.sort([f for f in mod_files_all if '{}_'.format(mod_file_speci) 
                                                             in f])                    
                                 
                                 # get all observational file start dates (year and month)
@@ -429,11 +429,11 @@ class SubmitInterpolation(object):
                                     obs_file_date = obs_file.split('{}_'.format(original_speci_to_process))[-1].split('_')[0].split('.nc')[0]
                                     obs_files_dates=np.append(obs_files_dates,obs_file_date[:6])
 
-                                # get all experiment file start dates (year and month)
-                                exp_files_dates = []
-                                for exp_file in exp_files:
-                                    exp_file_date = exp_file.split('{}_'.format(exp_file_speci))[-1].split('_')[0].split('.nc')[0]
-                                    exp_files_dates=np.append(exp_files_dates,exp_file_date[:6])
+                                # get all model file start dates (year and month)
+                                mod_files_dates = []
+                                for mod_file in mod_files:
+                                    mod_file_date = mod_file.split('{}_'.format(mod_file_speci))[-1].split('_')[0].split('.nc')[0]
+                                    mod_files_dates=np.append(mod_files_dates,mod_file_date[:6])
 
                                 # remove observational files outside date ranges 
                                 obs_files_ii = np.array([obs_files_ii for obs_files_ii, obs_files_date in enumerate(obs_files_dates) 
@@ -446,36 +446,36 @@ class SubmitInterpolation(object):
                                 obs_files = obs_files[obs_files_ii]
                                 obs_files_dates = obs_files_dates[obs_files_ii]
 
-                                # remove experiment files outside date ranges 
-                                exp_files_ii = np.array([exp_files_ii for exp_files_ii, exp_files_date in enumerate(exp_files_dates) 
-                                                        if ((self.start_date == "*" or int(exp_files_date) >= int(self.start_date)) 
-                                                            and (self.end_date == "*" or int(exp_files_date) < int(self.end_date)))])
-                                if len(exp_files_ii) == 0:
-                                    exp_files = []
-                                    exp_files_dates = []
+                                # remove model files outside date ranges 
+                                mod_files_ii = np.array([mod_files_ii for mod_files_ii, mod_files_date in enumerate(mod_files_dates) 
+                                                        if ((self.start_date == "*" or int(mod_files_date) >= int(self.start_date)) 
+                                                            and (self.end_date == "*" or int(mod_files_date) < int(self.end_date)))])
+                                if len(mod_files_ii) == 0:
+                                    mod_files = []
+                                    mod_files_dates = []
                                     continue
-                                exp_files = exp_files[exp_files_ii]
-                                exp_files_dates = exp_files_dates[exp_files_ii]
+                                mod_files = mod_files[mod_files_ii]
+                                mod_files_dates = mod_files_dates[mod_files_ii]
                                 
-                                # get intersection of file yearmonths between observations and experiment
-                                intersect_yearmonths = np.intersect1d(obs_files_dates, exp_files_dates)
+                                # get intersection of file yearmonths between observations and model
+                                intersect_yearmonths = np.intersect1d(obs_files_dates, mod_files_dates)
 
                                 # if have no intersecting months, continue
                                 if len(intersect_yearmonths) == 0:
                                     continue
 
-                                # create Providentia experiment code (expid-region-ensembleoption)
-                                prov_exp_code = '{}-{}-{}'.format(experiment_to_process, grid_type, 
+                                # create Providentia model code (modid-region-ensembleoption)
+                                prov_mod_code = '{}-{}-{}'.format(model_to_process, grid_type, 
                                                                 available_ensemble)
         
                                 # create directories to store slurm output/error logs for interpolation task of 
                                 # specific combination of iterated variables (if does not already exist)
                                 if not os.path.exists('{}/{}/{}/{}/{}'.format(self.interpolation_log_dir, 
-                                                                                prov_exp_code, 
+                                                                                prov_mod_code, 
                                                                                 original_speci_to_process, 
                                                                                 network_to_interpolate_against, 
                                                                                 temporal_resolution_to_output)):
-                                    os.makedirs('{}/{}/{}/{}/{}'.format(self.interpolation_log_dir, prov_exp_code, 
+                                    os.makedirs('{}/{}/{}/{}/{}'.format(self.interpolation_log_dir, prov_mod_code, 
                                                                         original_speci_to_process, 
                                                                         network_to_interpolate_against, 
                                                                         temporal_resolution_to_output))
@@ -485,7 +485,7 @@ class SubmitInterpolation(object):
                                 for yearmonth in intersect_yearmonths:
 
                                     # append current iterative arguments to arguments list               
-                                    self.arguments.append("{} {} {} {} {} {} {} {}".format(prov_exp_code, 
+                                    self.arguments.append("{} {} {} {} {} {} {} {}".format(prov_mod_code, 
                                                                                         model_temporal_resolution, 
                                                                                         speci_to_process, 
                                                                                         network_to_interpolate_against, 
@@ -496,7 +496,7 @@ class SubmitInterpolation(object):
 
                                     # append root name of .out file that will be output for each processed task
                                     self.output_log_roots.append('{}/{}/{}/{}/{}/{}'.format(self.interpolation_log_dir, 
-                                                                                            prov_exp_code, 
+                                                                                            prov_mod_code, 
                                                                                             original_speci_to_process, 
                                                                                             network_to_interpolate_against, 
                                                                                             temporal_resolution_to_output, 
@@ -504,7 +504,7 @@ class SubmitInterpolation(object):
 
                                     # remove previous output logs
                                     previous_logs = glob.glob('{}/{}/{}/{}/{}/{}*'.format(self.interpolation_log_dir, 
-                                                                                            prov_exp_code, 
+                                                                                            prov_mod_code, 
                                                                                             original_speci_to_process, 
                                                                                             network_to_interpolate_against, 
                                                                                             temporal_resolution_to_output, 
@@ -535,7 +535,7 @@ class SubmitInterpolation(object):
             # get the arguments from the last iteration
             last_arguments = copy.deepcopy(self.arguments)
         
-        # if have no arguments for all experiments, return message stating that
+        # if have no arguments for all models, return message stating that
         if len(self.arguments) == 0:
             error = 'INTERPOLATION CANNOT BE DONE FOR ANY EXPERIMENT'
             sys.exit(error)
@@ -979,16 +979,16 @@ class SubmitInterpolation(object):
             worker_payload_gb = 0.0
 
             argument = argument.split(' ')
-            prov_exp_code = argument[0]
+            prov_mod_code = argument[0]
             model_temporal_resolution = argument[1]
             speci_to_process = argument[2]
             yearmonth = argument[5]
-            experiment_to_process, grid_type, ensemble = prov_exp_code.split('-')
+            model_to_process, grid_type, ensemble = prov_mod_code.split('-')
             ensemble_member = ensemble.isdigit()
 
             if ensemble_member:
                 all_model_files = np.sort(glob.glob(
-                    f"{self.exp_dir}/{grid_type}/{model_temporal_resolution}/"
+                    f"{self.mod_dir}/{grid_type}/{model_temporal_resolution}/"
                     f"{speci_to_process}/{speci_to_process}*{yearmonth}*.nc"
                 ))
                 all_model_files = [f for f in all_model_files if "_an.nc" not in f]
@@ -997,7 +997,7 @@ class SubmitInterpolation(object):
                     model_files = all_model_files
             else:
                 model_files = np.sort(glob.glob(
-                    f"{self.exp_dir}/{grid_type}/{model_temporal_resolution}/"
+                    f"{self.mod_dir}/{grid_type}/{model_temporal_resolution}/"
                     f"ensemble-stats/{speci_to_process}_{ensemble}/"
                     f"{speci_to_process}*{yearmonth}*{ensemble}.nc"
                 ))
@@ -1170,61 +1170,61 @@ class SubmitInterpolation(object):
                 error = 'Unknown error'
             print(f"Error in submission using the arguments: {result.args[3:-1]}: {error}", flush=True)
 
-    def get_all_experiments(self):
-        experiments = []
+    def get_all_models(self):
+        models = []
 
-        # from interp_experiments (remothe machine)
+        # from interp_models (remothe machine)
         if self.machine != "local":
-            for experiment_dict in interp_experiments.values():
-                for exp_id in experiment_dict['experiments']:
-                    for temp_exp_dir in experiment_dict["paths"]:
-                        exp_to_interp_path = join(temp_exp_dir, exp_id)
-                        if os.path.exists(exp_to_interp_path):
-                            for dom in os.listdir(exp_to_interp_path):
-                                experiments.append(f"{exp_id}-{dom}-{self.default_values['ensemble'][0]}")
+            for model_dict in interp_models.values():
+                for mod_id in model_dict['models']:
+                    for temp_mod_dir in model_dict["paths"]:
+                        mod_to_interp_path = join(temp_mod_dir, mod_id)
+                        if os.path.exists(mod_to_interp_path):
+                            for dom in os.listdir(mod_to_interp_path):
+                                models.append(f"{mod_id}-{dom}-{self.default_values['ensemble'][0]}")
 
         # from data_paths (local and remote machine)
-        for exp_id in os.listdir(self.exp_to_interp_root):
-            if not exp_id.startswith("."):
-                exp_to_interp_path = join(self.exp_to_interp_root, exp_id)
-                for dom in os.listdir(exp_to_interp_path):
-                    experiments.append(f"{exp_id}-{dom}-{self.default_values['ensemble'][0]}")
+        for mod_id in os.listdir(self.mod_to_interp_root):
+            if not mod_id.startswith("."):
+                mod_to_interp_path = join(self.mod_to_interp_root, mod_id)
+                for dom in os.listdir(mod_to_interp_path):
+                    models.append(f"{mod_id}-{dom}-{self.default_values['ensemble'][0]}")
 
-        return dict(zip(experiments, experiments))
+        return dict(zip(models, models))
     
-    def get_all_resolutions(self, exp_id, domain):
+    def get_all_resolutions(self, mod_id, domain):
         resolutions = []
 
-        # from interp_experiments (remothe machine)
+        # from interp_models (remothe machine)
         if self.machine != "local":
-            for experiment_dict in interp_experiments.values():
-                if exp_id in experiment_dict['experiments']:
-                    for temp_exp_dir in experiment_dict["paths"]:
-                        domain_dir = join(temp_exp_dir, exp_id, domain)
+            for model_dict in interp_models.values():
+                if mod_id in model_dict['models']:
+                    for temp_mod_dir in model_dict["paths"]:
+                        domain_dir = join(temp_mod_dir, mod_id, domain)
                         if os.path.exists(domain_dir):
                             resolutions += os.listdir(domain_dir)
         
         # from data_paths (local and remote machine)
-        domain_dir = join(self.exp_to_interp_root, exp_id, domain)
+        domain_dir = join(self.mod_to_interp_root, mod_id, domain)
         if os.path.exists(domain_dir):
             resolutions += os.listdir(domain_dir)
 
         return resolutions
     
-    def get_all_species(self, exp_id, domain, resolution):
+    def get_all_species(self, mod_id, domain, resolution):
         species = []
 
-        # from interp_experiments (remothe machine)
+        # from interp_models (remothe machine)
         if self.machine != "local":
-            for experiment_dict in interp_experiments.values():
-                if exp_id in experiment_dict['experiments']:
-                    for temp_exp_dir in experiment_dict["paths"]:
-                        resolution_dir = join(temp_exp_dir, exp_id, domain, resolution)
+            for model_dict in interp_models.values():
+                if mod_id in model_dict['models']:
+                    for temp_mod_dir in model_dict["paths"]:
+                        resolution_dir = join(temp_mod_dir, mod_id, domain, resolution)
                         if os.path.exists(resolution_dir):
                             species += os.listdir(resolution_dir)
         
         # from data_paths (local and remote machine)
-        resolution_dir = join(self.exp_to_interp_root, exp_id, domain, resolution)
+        resolution_dir = join(self.mod_to_interp_root, mod_id, domain, resolution)
         if os.path.exists(resolution_dir):
             species += os.listdir(resolution_dir)
 

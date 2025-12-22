@@ -33,21 +33,21 @@ There are currently four types of downloads available:
    - To download a network, use the network name exactly as it appears in the zip file. For example, use `EBAS-COLOSSAL_tursk` instead of `EBAS`.
    - **How to get this type of download:** Answer `n` to the _Do you want to download from BSC remote machine?_ question or change the `BSC_DL_CHOICE` value to `n`.
 
-3. **Download of interpolated Experiments:**
+3. **Download of interpolated Models:**
    - Downloads interpolated models from the storage5 machine (or mn5 if storage5 is down).
-   - Saves them in the `exp_root` paths specified in `settings/data_paths.yaml`.
+   - Saves them in the `mod_root` paths specified in `settings/data_paths.yaml`.
    - **How to get this type of download:** Set the `interpolated` field in the configuration file to `True` or don't even set it since that is the default.
 
-4. **Download of non-interpolated Experiments:**
+4. **Download of non-interpolated Models:**
    - For local downloads:
        - Downloads non-interpolated models from the storage5 machine (or mn5 if storage5 is down).
-       - The preferred path is specified in `interp_experiments.yaml`. If the model is not listed or no path or model domain is found, the system will look in the `exp_to_interp_root` path specified in `settings/data_paths.yaml`.
+       - The preferred path is specified in `interp_models.yaml`. If the model is not listed or no path or model domain is found, the system will look in the `mod_to_interp_root` path specified in `settings/data_paths.yaml`.
    - For HPC downloads:
-       - In this case, the download (more accurately, the copy) will transfer non-interpolated models from esarchive to the gpfs folder found in `exp_to_interp_root` in the `settings/data_paths.yaml` file.
-       - It only copies from the paths that are specified in `interp_experiments.yaml`. 
+       - In this case, the download (more accurately, the copy) will transfer non-interpolated models from esarchive to the gpfs folder found in `mod_to_interp_root` in the `settings/data_paths.yaml` file.
+       - It only copies from the paths that are specified in `interp_models.yaml`. 
    - **How to get this type of download:** Set the `interpolated` field in the configuration file to `False`.
 
-*To know how to define an model in `interp_experiments.yaml`, please visit {ref}`this page <define-experiments>`.
+*To know how to define a model in `interp_models.yaml`, please visit {ref}`this page <define-models>`.
 
 ## Where to download from
 
@@ -55,10 +55,10 @@ As for today download mode is available:
 - **In local** for all 4 modes:
     1. Download of Network from HPC Machines.
     2. Download of Network from Zenodo.
-    3. Download of Interpolated Experiments.
-    4. Download of Non-interpolated Experiment (download from esarchive or gpfs to local).
+    3. Download of Interpolated Models.
+    4. Download of Non-interpolated Models (download from esarchive or gpfs to local).
 - **In storage5/nord4** for:
-    1. Download of Non-interpolated Experiment (copy from esarchive to gpfs).
+    1. Download of Non-interpolated Models (copy from esarchive to gpfs).
 
 ## Download requirements summary
 
@@ -68,8 +68,8 @@ The table below summarizes the basic requirements to download data from BSC:
 |--------------------------------|----------------------|-----------------------------|---------------------------------------------|
 | Network from HPC Machines      | ✓                    | ✗                           | ✓                                           |
 | Network from Zenodo            | ✓                    | ✗                           | ✗                                           |
-| Interpolated Experiment        | ✓                    | ✗                           | ✓                                           |
-| Non-interpolated Experiment    | ✓                    | ✓                           | ✓                                           |
+| Interpolated Model        | ✓                    | ✗                           | ✓                                           |
+| Non-interpolated Model    | ✓                    | ✓                           | ✓                                           |
 
 ## Fields
 

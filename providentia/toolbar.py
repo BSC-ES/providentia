@@ -405,7 +405,7 @@ class NavigationToolbar(NavigationToolbar2QT):
         if current_ghost_version != self.read_instance.ghost_version:
             generate_file_trees(self.read_instance)
         
-        # update species, experiments, qa & flags
+        # update species, models, qa & flags
         self.read_instance.config_bar_initialisation = True
         self.read_instance.update_configuration_bar_fields()
         self.read_instance.config_bar_initialisation = False
