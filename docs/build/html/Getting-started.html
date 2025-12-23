@@ -96,7 +96,7 @@
   <section id="getting-started">
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h1>
 <p>If you have access to the HPC machines at Barcelona Supercomputing Center (BSC), the first thing you need to decide is whether you want to use Providentia on a supercomputer (MN5 or Nord4) or on your local computer (Linux or Mac).</p>
-<p>We recommend working on local machines to everyone, including the users at BSC, because the interactive features of the dashboard are faster and you do not need to wait in queue to get resources and use the software. The only disadvantage is that the data (experiments and observations) stored on HPC cannot be accessed directly and need to be downloaded onto your local machine using the <a class="reference internal" href="Download.html#default-download"><span class="std std-ref">download mode</span></a> in advance. If you do not want to download the data and instead you prefer to use an HPC machine for your analysis, we recommend reading the Wiki section <a class="reference internal" href="Connection-setup.html"><span class="doc std std-doc">Connection setup</span></a>.</p>
+<p>We recommend working on local machines to everyone, including the users at BSC, because the interactive features of the dashboard are faster and you do not need to wait in queue to get resources and use the software. The only disadvantage is that the data (models and observations) stored on HPC cannot be accessed directly and need to be downloaded onto your local machine using the <a class="reference internal" href="Download.html#default-download"><span class="std std-ref">download mode</span></a> in advance. If you do not want to download the data and instead you prefer to use an HPC machine for your analysis, we recommend reading the Wiki section <a class="reference internal" href="Connection-setup.html"><span class="doc std std-doc">Connection setup</span></a>.</p>
 <p>If you do not have access to the machines, you won’t be able to use the download mode to get model data (only observations from limited sources, i.e. Zenodo for GHOST and NILU Thredds for ACTRIS). If you want to use your own data, consider checking the tutorial <a class="reference external" href="https://github.com/BSC-ES/providentia/blob/master/tutorials/2.%20Formatting%20model%20data.ipynb">2. Formatting model data</a> and reading the section <a class="reference internal" href="Create-your-own-data-network.html"><span class="doc std std-doc">Create your own data network</span></a> to process and create netCDF files that Providentia can read.</p>
 <section id="cloning-the-project">
 <h2>Cloning the project<a class="headerlink" href="#cloning-the-project" title="Link to this heading"></a></h2>
@@ -127,12 +127,12 @@
 <p>The datasets need to be saved following a very specific directory tree. The download mode takes care of that when saving the files, more details can be found in the <a class="reference internal" href="Download.html#default-download"><span class="std std-ref">download section</span></a>. However, if you are using your own data you will need to take that into account.</p>
 <p>By default, in the folder <code class="docutils literal notranslate"><span class="pre">/home/{user}/data/providentia</span></code> (or your preferred) there should be three folders:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">exp</span></code>: Interpolated model data as in: {GHOST version} -&gt; {experiment}<em>{domain}</em>{ensemble} -&gt; {resolution} -&gt; {species} -&gt; {network} -&gt; {species}_{year}{month}.nc.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">exp_to_interp</span></code>: Model data to interpolate as in: {experiment} -&gt; {domain} -&gt; {resolution} -&gt; {species} -&gt; {species}_{year}{month}.nc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mod</span></code>: Interpolated model data as in: {GHOST version} -&gt; {model}<em>{domain}</em>{ensemble} -&gt; {resolution} -&gt; {species} -&gt; {network} -&gt; {species}_{year}{month}.nc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mod_to_interp</span></code>: Model data to interpolate as in: {model} -&gt; {domain} -&gt; {resolution} -&gt; {species} -&gt; {species}_{year}{month}.nc.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">obs</span></code>: Observation datasets. For GHOST as in: ghost -&gt; {network} -&gt; {GHOST version} -&gt; {resolution} -&gt; {species} -&gt; {species}<em>{year}{month}.nc. For non-GHOST as in: nonghost -&gt; {provider} -&gt; {network} -&gt; {resolution} -&gt; {species} -&gt; {species}</em>{year}{month}.nc.</p></li>
 </ul>
 <p>As observed, datasets must be saved per month, independently of their temporal resolution. An example of a working directory tree is the following:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>├── exp
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>├── mod
 │   └── 1.5
 │       └── cams61_emep_ph2-eu-000
 │           └── hourly
@@ -150,7 +150,7 @@
 │                       ├── sconcno2_201810.nc
 │                       ├── sconcno2_201811.nc
 │                       └── sconcno2_201812.nc
-├── exp_to_interp
+├── mod_to_interp
 │   └── cams61_emep_ph2
 │       └── eu
 │           └── hourly

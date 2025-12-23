@@ -52,7 +52,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Interpolation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#starting-an-interpolation">Starting an Interpolation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#checking-output">Checking output</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#define-experiments">Define experiments</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#define-models">Define models</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#additional-considerations">Additional considerations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#different-resolutions-between-model-and-observations">Different resolutions between model and observations</a></li>
 </ul>
@@ -98,9 +98,9 @@
              
   <section id="interpolation">
 <h1>Interpolation<a class="headerlink" href="#interpolation" title="Link to this heading"></a></h1>
-<p>This mode allows users to spatially interpolate experiment output against available observational stations to be viewable in <strong>Providentia</strong>.</p>
-<p>The Interpolation mode allows to interpolate experiments against <strong>GHOST</strong> and <strong>non-GHOST</strong> observations.</p>
-<p>Contained in: <code class="docutils literal notranslate"><span class="pre">/gpfs/projects/bsc32/AC_cache/recon/exp_interp/</span></code> exists an archive of previously interpolated experiment output, depending on the version. If the experiment you want to analyse is not there, or if you have re-run the experiment, add new variables etc. then this guide will aid you in interpolating the experiment output.</p>
+<p>This mode allows users to spatially interpolate model output against available observational stations to be viewable in <strong>Providentia</strong>.</p>
+<p>The Interpolation mode allows to interpolate models against <strong>GHOST</strong> and <strong>non-GHOST</strong> observations.</p>
+<p>Contained in: <code class="docutils literal notranslate"><span class="pre">/gpfs/projects/bsc32/AC_cache/recon/exp_interp/</span></code> exists an archive of previously interpolated model output, depending on the version. If the model you want to analyse is not there, or if you have re-run the model, add new variables etc. then this guide will aid you in interpolating the model output.</p>
 <section id="starting-an-interpolation">
 <h2>Starting an Interpolation<a class="headerlink" href="#starting-an-interpolation" title="Link to this heading"></a></h2>
 <p>To start an interpolation,  you need to add either –interp, –interpolate, or –interpolation as a launch option along with the <strong>mandatory</strong> configuration file in the command line. This will initiate the interpolation process.</p>
@@ -132,28 +132,29 @@
 </li>
 <li><h3 class="rubric" id="interpolation-logs">Interpolation logs</h3>
 <p>These logs give information about individual interpolations and how long it took to do them.</p>
-<p>Found in the <code class="docutils literal notranslate"><span class="pre">logs/interpolation/interpolation_logs</span></code> folder, for each individual interpolation, new directories are created with the structure <code class="docutils literal notranslate"><span class="pre">{experiment}/{species}/{network}/{resolution}</span></code>. Inside these directories, logs for each month are stored as <code class="docutils literal notranslate"><span class="pre">{YYYYMM}_{exit_code}.out</span></code>. If successful, the exit code will be 0.</p>
+<p>Found in the <code class="docutils literal notranslate"><span class="pre">logs/interpolation/interpolation_logs</span></code> folder, for each individual interpolation, new directories are created with the structure <code class="docutils literal notranslate"><span class="pre">{model}/{species}/{network}/{resolution}</span></code>. Inside these directories, logs for each month are stored as <code class="docutils literal notranslate"><span class="pre">{YYYYMM}_{exit_code}.out</span></code>. If successful, the exit code will be 0.</p>
 </li>
 </ul>
 <p>If the interpolation is succesful, the resulted interpolated files are stored under the directory : <code class="docutils literal notranslate"><span class="pre">/gpfs/projects/bsc32/AC_cache/recon/exp_interp/</span></code> followed by the latest version of GHOST used by the interpolation.</p>
 </section>
-<section id="define-experiments">
-<span id="id1"></span><h2>Define experiments<a class="headerlink" href="#define-experiments" title="Link to this heading"></a></h2>
-<p>All the experiments that are runned in the interpolation need to be defined in <code class="docutils literal notranslate"><span class="pre">/settings/interp_experiments.yaml</span></code>.</p>
-<p>This file contains a dictionary of default relevant experiments grouped by type, in where you find the list of names of the experiments and the list of possible paths for them.</p>
-<p>If you have a new experiment to interpolate and it is located on one of the examples paths such as <code class="docutils literal notranslate"><span class="pre">/esarchive/exp/monarch/</span></code>, you only need to add it to its list of experiments.</p>
-<p>If the experiment is not located in one of the predefined paths, you will need to add the <strong>experiment type</strong>, the <strong>experiment name</strong>, and the <strong>experiment storage directory</strong> from root (excluding the experiment name). For example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;example_experiment_type&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;experiments&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;example_experiment_name&quot;</span><span class="p">],</span>
+<section id="define-models">
+<span id="id1"></span><h2>Define models<a class="headerlink" href="#define-models" title="Link to this heading"></a></h2>
+<p>All the models that are runned in the interpolation need to be defined in <code class="docutils literal notranslate"><span class="pre">/settings/interp_models.yaml</span></code>.</p>
+<p>This file contains a dictionary of default relevant models grouped by type, in where you find the list of names of the models and the list of possible paths for them.</p>
+<p>If you have a new model to interpolate and it is located on one of the examples paths such as <code class="docutils literal notranslate"><span class="pre">/esarchive/exp/monarch/</span></code>, you only need to add it to its list of models.</p>
+<p>If the model is not located in one of the predefined paths, you will need to add the <strong>model type</strong>, the <strong>model name</strong>, and the <strong>model storage directory</strong> from root (excluding the model name). For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;example_model_type&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;models&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;example_model_name&quot;</span><span class="p">],</span>
         <span class="s2">&quot;paths&quot;</span><span class="p">:</span> <span class="p">[</span> 
-            <span class="s2">&quot;/example/experiment/path&quot;</span>
+            <span class="s2">&quot;/example/model/path&quot;</span>
         <span class="p">]</span>
+<span class="p">}</span>
 </pre></div>
 </div>
-<p>You can find this exact template at the end of the <code class="docutils literal notranslate"><span class="pre">interp_experiments.yaml</span></code> file.</p>
-<p>When adding a new experiment to a directory, if you want it to be read from Providentia, the subdirectories inside the experiment storage directory must follow this structure: <code class="docutils literal notranslate"><span class="pre">{experiment_name}/{domain}/{resolution}/{species}</span></code>. For example: <code class="docutils literal notranslate"><span class="pre">cams61_monarch_ph3/eu/hourly/sconco3</span></code>.</p>
-<p>There can be multiple paths to the same experiments, and you can add them to the list of paths. The order is important: the first path that works on the machine will be used.</p>
-<p>There’s normally two location types of experiment data:</p>
+<p>You can find this exact template at the end of the <code class="docutils literal notranslate"><span class="pre">interp_models.yaml</span></code> file.</p>
+<p>When adding a new model to a directory, if you want it to be read from Providentia, the subdirectories inside the model storage directory must follow this structure: <code class="docutils literal notranslate"><span class="pre">{model_name}/{domain}/{resolution}/{species}</span></code>. For example: <code class="docutils literal notranslate"><span class="pre">cams61_monarch_ph3/eu/hourly/sconco3</span></code>.</p>
+<p>There can be multiple paths to the same model, and you can add them to the list of paths. The order is important: the first path that works on the machine will be used.</p>
+<p>There’s normally two location types of model data:</p>
 <ul class="simple">
 <li><p><strong>gpfs</strong>: Accessible by the <em><strong>MareNostrum5/Nord4</strong></em> machines.</p></li>
 <li><p><strong>esarchive</strong>: Accessible by the <em><strong>Nord4</strong></em> machine.</p></li>
@@ -162,7 +163,7 @@
 </section>
 <section id="additional-considerations">
 <h2>Additional considerations<a class="headerlink" href="#additional-considerations" title="Link to this heading"></a></h2>
-<p>When checking if an experiment is stored in a location with the corresponding domain, resolution, and species, consider that the species might not always be listed under the same name.</p>
+<p>When checking if an model is stored in a location with the corresponding domain, resolution, and species, consider that the species might not always be listed under the same name.</p>
 <p>The file <code class="docutils literal notranslate"><span class="pre">internal/mapping_species.yaml</span></code> contains a dictionary mapping original species names to their alternative names.</p>
 <p>Note that the mapping species file is only used when the species name from the configuration file is not found in the expected location, meaning Povidentia first looks for the species written in the configuration file. If it is not found, it then searches for the corresponding mapped species in <code class="docutils literal notranslate"><span class="pre">mapping_species.yaml</span></code>.</p>
 </section>

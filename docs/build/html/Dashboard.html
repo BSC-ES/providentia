@@ -103,7 +103,7 @@
              
   <section id="dashboard">
 <h1>Dashboard<a class="headerlink" href="#dashboard" title="Link to this heading"></a></h1>
-<p>Providentia’s dashboard was designed to allow on-the-fly analysis of BSC experiment output, with respect to GHOST processed observational data.</p>
+<p>Providentia’s dashboard was designed to allow on-the-fly analysis of BSC model output, with respect to GHOST processed observational data.</p>
 <section id="interface">
 <h2>Interface<a class="headerlink" href="#interface" title="Link to this heading"></a></h2>
 <p>There are several available options to perform the analysis. The header of the window contains the fields that the user can fill, which is separated into 6 sections:</p>
@@ -123,14 +123,14 @@
 <ul class="simple">
 <li><p><strong>QA</strong> contains the quality assurance flags to filter by.</p></li>
 <li><p><strong>FLAGS</strong> contain standardised data reporter provided flags to filter by.</p></li>
-<li><p><strong>EXPS</strong> contains a list of experiments that exist and are related to the variable selected.</p></li>
+<li><p><strong>MOD</strong> contains a list of models that exist and are related to the variable selected.</p></li>
 <li><p><strong>MULTI</strong> can be used to <a class="reference internal" href="Multispecies-filtering.html"><span class="doc std std-doc">filter your current network-species by the values of other network-species</span></a>.</p></li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">NOTE:</span> <span class="pre">If</span> <span class="pre">under</span> <span class="pre">the</span> <span class="pre">**QA**</span> <span class="pre">menu,</span> <span class="pre">the</span> <span class="pre">checkboxes</span> <span class="pre">‘*Invalid</span> <span class="pre">Data</span> <span class="pre">Provider</span> <span class="pre">Flags</span> <span class="pre">–</span> <span class="pre">GHOST</span> <span class="pre">Decreed*’</span> <span class="pre">or</span> <span class="pre">‘*Invalid</span> <span class="pre">Data</span> <span class="pre">Provider</span> <span class="pre">Flags</span> <span class="pre">–</span> <span class="pre">Network</span> <span class="pre">Decreed*’</span> <span class="pre">are</span> <span class="pre">selected,</span> <span class="pre">all</span> <span class="pre">checkboxes</span> <span class="pre">under</span> <span class="pre">the</span> <span class="pre">Flags</span> <span class="pre">menu</span> <span class="pre">should</span> <span class="pre">be</span> <span class="pre">unticked</span> <span class="pre">(the</span> <span class="pre">default</span> <span class="pre">setting).</span> <span class="pre">This</span> <span class="pre">is</span> <span class="pre">because</span> <span class="pre">ticking</span> <span class="pre">one</span> <span class="pre">of</span> <span class="pre">these</span> <span class="pre">checkboxes</span> <span class="pre">sets</span> <span class="pre">a</span> <span class="pre">pre-selected</span> <span class="pre">subset</span> <span class="pre">of</span> <span class="pre">Flags</span> <span class="pre">checkboxes</span> <span class="pre">automatically.</span> <span class="pre">For</span> <span class="pre">this</span> <span class="pre">reason</span> <span class="pre">also,</span> <span class="pre">only</span> <span class="pre">one</span> <span class="pre">of</span> <span class="pre">these</span> <span class="pre">QA</span> <span class="pre">checkboxes</span> <span class="pre">should</span> <span class="pre">be</span> <span class="pre">ticked</span> <span class="pre">at</span> <span class="pre">the</span> <span class="pre">same</span> <span class="pre">time.</span></code></p>
 <p>Additionally, here the user can fill the date range. In the case of there being no available data for the requested dates, there will be no data loaded.</p>
 <p>After having filled all the fields that the user is interested in, then the last step is to click <strong>Read</strong>. If the user makes changes to any of the fields, it is needed to click on <strong>Read</strong> again in order to apply the changes.
 After reading the data, the map appears showing the available stations that correspond to the data selection. The user can select either one station individually (by clicking on it) or multiple ones by drawing a circle around them.</p>
-<p>Finally, the Data Selection section contains the option <strong>Colocate</strong>. When selected this means that all observations and experiment data are forced to temporally intersect, and if not (i.e. there exists observations but no experiment data, or vice versa), then these time periods will be set as NaN. After having loaded the data and selected the desired stations, if the user chooses to colocate, there is no need to <strong>Read</strong> again, the changes apply immediately.</p>
+<p>Finally, the Data Selection section contains the option <strong>Colocate</strong>. When selected this means that all observations and model data are forced to temporally intersect, and if not (i.e. there exists observations but no model data, or vice versa), then these time periods will be set as NaN. After having loaded the data and selected the desired stations, if the user chooses to colocate, there is no need to <strong>Read</strong> again, the changes apply immediately.</p>
 <section id="available-networks">
 <h4>Available networks<a class="headerlink" href="#available-networks" title="Link to this heading"></a></h4>
 <p>The drop-down menu of the available networks shows the names of the networks that have available data for the selected date range.</p>
@@ -138,9 +138,9 @@ After reading the data, the map appears showing the available stations that corr
 </section>
 <section id="example">
 <h4>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h4>
-<p>In the following image, we can see the output for Providentia where we compare the experiment cams61_camsra_ph2-eu-000 with actual observations for ozone. We load the observations and experiment data over 2018 and we select <em>Intersect</em>, so that the stations within the experiment’s domain are automatically selected.</p>
+<p>In the following image, we can see the output for Providentia where we compare the model cams61_camsra_ph2-eu-000 with actual observations for ozone. We load the observations and model data over 2018 and we select <em>Intersect</em>, so that the stations within the model’s domain are automatically selected.</p>
 <p><img alt="intersect" src="_images/intersect.png" /></p>
-<p>In the figure above we see that the data were loaded and plotted. However, there might some data gaps in the observations or in the experiments. This might result in an inaccurate analysis. By selecting <strong>Colocate</strong>, Providentia will apply the temporal intersection of data points that exist in both the network and experiment datasets. The result of the previous example would be:</p>
+<p>In the figure above we see that the data were loaded and plotted. However, there might some data gaps in the observations or in the models. This might result in an inaccurate analysis. By selecting <strong>Colocate</strong>, Providentia will apply the temporal intersection of data points that exist in both the network and model datasets. The result of the previous example would be:</p>
 <p><img alt="colocate" src="_images/colocate.png" /></p>
 </section>
 </section>
@@ -196,7 +196,7 @@ After reading the data, the map appears showing the available stations that corr
 <p>Under this section there are three options:</p>
 <ul class="simple">
 <li><p><strong>All</strong>: It selects data from all the stations that appear on the map.</p></li>
-<li><p><strong>Intersect</strong>: It selects data from stations that spatially intersect with the experiments grid edges.</p></li>
+<li><p><strong>Intersect</strong>: It selects data from stations that spatially intersect with the models grid edges.</p></li>
 <li><p><strong>Extent</strong>: It select the data on the current map view.</p></li>
 </ul>
 </section>
@@ -206,7 +206,7 @@ After reading the data, the map appears showing the available stations that corr
 <p><img alt="toolbox" src="_images/toolbox.png" /></p>
 <p>In order from left to right, these are:</p>
 <ul class="simple">
-<li><p><strong>Export button</strong>: To export the data that users used for their evaluation (observations and experiments) in NetCDF or Numpy files and the corresponding configuration file.</p></li>
+<li><p><strong>Export button</strong>: To export the data that users used for their evaluation (observations and models) in NetCDF or Numpy files and the corresponding configuration file.</p></li>
 <li><p><strong>Load button</strong>: To load the configuration file from previous evaluation sessions. For instance, those saved using the export button.</p></li>
 <li><p><strong>World button</strong>: To return to the initial state of the map and the plots before applying any option.</p></li>
 <li><p><strong>Backward arrow button</strong>: To move to one state back from the current dashboard state.</p></li>

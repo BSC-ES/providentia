@@ -7,7 +7,7 @@ There are two types of colocations that can be used in Providentia:
 
 ## Temporal colocation
 
-The temporal colocation can be used to remove the gaps where the data of the observations or experiments are missing. Once the colocation is turned on, the user has access to more plot types (i.e. scatter plot and Taylor diagram).
+The temporal colocation can be used to remove the gaps where the data of the observations or the model output are missing. Once the colocation is turned on, the user has access to more plot types (i.e. scatter plot and Taylor diagram).
 
 **Without temporal colocation:**
 

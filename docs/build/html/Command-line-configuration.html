@@ -192,7 +192,7 @@
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p>network</p></td>
-<td><p>Network you want to load observations from. Can be multiple (e.g. <code class="docutils literal notranslate"><span class="pre">CAPMoN,</span> <span class="pre">EBAS</span></code>). Adding a wild card (*) is going to expand to certain variables (vconc* → vconc1, vconc2, etc.).</p></td>
+<td><p>Network you want to load observations from. Can be multiple (e.g. <code class="docutils literal notranslate"><span class="pre">CAPMoN,</span> <span class="pre">EBAS</span></code>). Adding a wild card (*) is going to expand to certain variables (vconcaerobin* → vconcaerobin1, vconcaerobin2, etc.).</p></td>
 <td><p>EBAS</p></td>
 </tr>
 <tr class="row-even"><td><p>species</p></td>
@@ -211,16 +211,16 @@
 <td><p>Comparison end date in YYYYMMDD format (e.g. <code class="docutils literal notranslate"><span class="pre">20180601</span></code>).</p></td>
 <td><p>20190101</p></td>
 </tr>
-<tr class="row-even"><td><p>experiments</p></td>
-<td><p>ID of interpolated experiment using providentia-interpolation. The experiment IDs can be mapped to different names by adding a list of alternative names after the experiment IDs (e.g. <code class="docutils literal notranslate"><span class="pre">exp1,</span> <span class="pre">exp2</span> <span class="pre">(altexp1,</span> <span class="pre">altexp2)</span></code>).</p></td>
+<tr class="row-even"><td><p>model</p></td>
+<td><p>ID of interpolated model output using providentia-interpolation. The model IDs can be mapped to different names by adding a list of alternative names after the model IDs (e.g. <code class="docutils literal notranslate"><span class="pre">mod1,</span> <span class="pre">mod2</span> <span class="pre">(altmod1,</span> <span class="pre">altmod2)</span></code>).</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p>temporal_colocation</p></td>
-<td><p>Boolean variable to set if you want to temporally colocate the observation and experiment data.</p></td>
+<td><p>Boolean variable to set if you want to temporally colocate the observation and model data.</p></td>
 <td><p>False</p></td>
 </tr>
 <tr class="row-even"><td><p>spatial_colocation</p></td>
-<td><p>Boolean variable to set if you want to spatially colocate the observation and experiment data across multiple species.</p></td>
+<td><p>Boolean variable to set if you want to spatially colocate the observation and model data across multiple species.</p></td>
 <td><p>True</p></td>
 </tr>
 <tr class="row-odd"><td><p>filter_species</p></td>

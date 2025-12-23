@@ -1,6 +1,6 @@
 # Report
 
-Providentia's report mode was designed to be able to generate complete reports and carry out in-depth analysis of BSC experiment output, with respect to observational data.
+Providentia's report mode was designed to be able to generate complete reports and carry out in-depth analysis of BSC model output, with respect to observational data.
 
 ## Plot types and options
 
@@ -42,7 +42,7 @@ There is also the possibility to create some plots per station, and some only as
 The cover page can be customised by editing the parameters under header in `settings/plot_characteristics.yaml` file. The most interesting ones are these:
 
 - `dark_mode` to set the background to be dark (blue tone) or light (white).
-- `variables` to specify which variables you want to show. The options are `network`, `species`, `resolution`, `dates`, `experiments`, `temporal_colocation`, `spatial_colocation`, `filter_species`, `calibration` and `subsections`. By specifying the `value` under those keys, you can overwrite the default variable values and write anything you want.
+- `variables` to specify which variables you want to show. The options are `network`, `species`, `resolution`, `dates`, `model`, `temporal_colocation`, `spatial_colocation`, `filter_species`, `calibration` and `subsections`. By specifying the `value` under those keys, you can overwrite the default variable values and write anything you want.
 - `logo` to display any logo on your report cover. To use it, you must specify the path to your PNG file for the corresponding background (dark or light mode).
 
 ## DOIs pages

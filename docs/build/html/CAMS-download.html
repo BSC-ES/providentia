@@ -131,13 +131,13 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">cams_reanalysis_&lt;model&gt;_&lt;stream&gt;-regional</span></code> — <a class="reference internal" href="#cams-european-air-quality-reanalyses">CAMS European Air Quality Reanalyses</a></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">cams_reanalysis-global</span></code> — <a class="reference internal" href="#cams-global-reanalysis-eac4">CAMS Global Reanalysis (EAC4)</a></p></li>
 </ul>
-<p>Once you have selected the dataset and specified the experiment and domain, make sure to set:</p>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+<p>Once you have selected the dataset and specified the model and domain, make sure to set:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
 </pre></div>
 </div>
 <p>or</p>
 <p>Answer <code class="docutils literal notranslate"><span class="pre">n</span></code> to the prompt:</p>
-<p><em>“Experiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n):”</em></p>
+<p><em>“Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded) ([y]/n)”</em></p>
 </section>
 <section id="cams-european-air-quality-forecasts">
 <h2>1. CAMS European Air Quality Forecasts<a class="headerlink" href="#cams-european-air-quality-forecasts" title="Link to this heading"></a></h2>
@@ -151,7 +151,7 @@
 <p>Only hourly data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> in your configuration file; otherwise, the download will not work.</p>
 <section id="mandatory-fields-for-regional-analysis-data">
 <h3>Mandatory fields for regional analysis data<a class="headerlink" href="#mandatory-fields-for-regional-analysis-data" title="Link to this heading"></a></h3>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_analysis_&lt;model&gt;</span>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_analysis_&lt;model&gt;</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
 </pre></div>
@@ -159,7 +159,7 @@
 </section>
 <section id="mandatory-fields-for-regional-forecast-data">
 <h3>Mandatory fields for regional forecast data<a class="headerlink" href="#mandatory-fields-for-regional-forecast-data" title="Link to this heading"></a></h3>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast_&lt;model&gt;</span>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast_&lt;model&gt;</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
 </pre></div>
@@ -232,10 +232,10 @@
 <span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20250701</span><span class="w"> </span>
 <span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20250702</span>
 <span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sconcno2</span>
-<span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_analysis_dehm</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_analysis_dehm</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
-<span class="na">interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-europe-air-quality-forecasts&#39;</span>
@@ -258,10 +258,10 @@
 <span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20250701</span>
 <span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20250702</span>
 <span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sconcno2</span>
-<span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast_ensemble</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast_ensemble</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
-<span class="na">interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-europe-air-quality-forecasts&#39;</span>
@@ -298,7 +298,7 @@
 <p>hourly and 3hourly data is available in this dataset. In your configuration file, you must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> or <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">3hourly</span></code>, depending on whether the data is single-level or multi-level. Otherwise, the download will fail.</p>
 <section id="mandatory-fields-for-global-forecast-single-level-data">
 <h3>Mandatory fields for global forecast single-level data<a class="headerlink" href="#mandatory-fields-for-global-forecast-single-level-data" title="Link to this heading"></a></h3>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
 </pre></div>
@@ -306,7 +306,7 @@
 </section>
 <section id="mandatory-fields-for-global-forecast-multi-level-data">
 <h3>Mandatory fields for global forecast multi-level data<a class="headerlink" href="#mandatory-fields-for-global-forecast-multi-level-data" title="Link to this heading"></a></h3>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3hourly</span>
 </pre></div>
@@ -415,10 +415,10 @@
 <span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20171201</span><span class="w"> </span>
 <span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20171202</span>
 <span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sst</span>
-<span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
-<span class="na">interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-global-atmospheric-composition-forecasts&#39;</span>
@@ -439,10 +439,10 @@
 <span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20200601</span><span class="w">  </span>
 <span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20200602</span>
 <span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sconcno2</span>
-<span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3hourly</span>
-<span class="na">interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-global-atmospheric-composition-forecasts&#39;</span>
@@ -468,7 +468,7 @@
 <p>Only hourly data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> in your configuration file; otherwise, the download will not work.</p>
 <section id="mandatory-fields-for-regional-reanalysis-data">
 <h3>Mandatory fields for regional reanalysis data<a class="headerlink" href="#mandatory-fields-for-regional-reanalysis-data" title="Link to this heading"></a></h3>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis_&lt;model&gt;_&lt;stream&gt;</span>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis_&lt;model&gt;_&lt;stream&gt;</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
 </pre></div>
@@ -544,10 +544,10 @@
 <span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20240101</span>
 <span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20240201</span>
 <span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sconcno2</span>
-<span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis_ensemble_interim</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis_ensemble_interim</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
-<span class="na">interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-europe-air-quality-reanalyses&#39;</span>
@@ -568,10 +568,10 @@
 <span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20200101</span><span class="w"> </span>
 <span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20200301</span>
 <span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sconcno2</span>
-<span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis_ensemble_validated</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis_ensemble_validated</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
-<span class="na">interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-europe-air-quality-reanalyses&#39;</span>
@@ -596,7 +596,7 @@
 <p>Only 3hourly data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">3hourly</span></code> in your configuration file; otherwise, the download will not work.</p>
 <section id="id8">
 <h3>Mandatory fields for regional reanalysis data<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
-<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis</span>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3hourly</span>
 </pre></div>
@@ -680,10 +680,10 @@
 <span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20181101</span>
 <span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20181130</span>
 <span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sst</span>
-<span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3hourly</span>
-<span class="na">interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-global-reanalysis-eac4&#39;</span>
@@ -702,10 +702,10 @@
 <span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20181101</span>
 <span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20181130</span>
 <span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sconcno2</span>
-<span class="na">experiments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis</span>
 <span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
 <span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3hourly</span>
-<span class="na">interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-global-reanalysis-eac4&#39;</span>

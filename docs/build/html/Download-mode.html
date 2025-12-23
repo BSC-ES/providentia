@@ -137,32 +137,32 @@
 <li><p><strong>How to get this type of download:</strong> Answer <code class="docutils literal notranslate"><span class="pre">n</span></code> to the <em>Do you want to download from BSC remote machine?</em> question or change the <code class="docutils literal notranslate"><span class="pre">BSC_DL_CHOICE</span></code> value to <code class="docutils literal notranslate"><span class="pre">n</span></code>.</p></li>
 </ul>
 </li>
-<li><p><strong>Download of interpolated Experiments:</strong></p>
+<li><p><strong>Download of interpolated Models:</strong></p>
 <ul class="simple">
-<li><p>Downloads interpolated experiments from the storage5 machine (or mn5 if storage5 is down).</p></li>
-<li><p>Saves them in the <code class="docutils literal notranslate"><span class="pre">exp_root</span></code> paths specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
+<li><p>Downloads interpolated models from the storage5 machine (or mn5 if storage5 is down).</p></li>
+<li><p>Saves them in the <code class="docutils literal notranslate"><span class="pre">mod_root</span></code> paths specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
 <li><p><strong>How to get this type of download:</strong> Set the <code class="docutils literal notranslate"><span class="pre">interpolated</span></code> field in the configuration file to <code class="docutils literal notranslate"><span class="pre">True</span></code> or don’t even set it since that is the default.</p></li>
 </ul>
 </li>
-<li><p><strong>Download of non-interpolated Experiments:</strong></p>
+<li><p><strong>Download of non-interpolated Models:</strong></p>
 <ul class="simple">
 <li><p>For local downloads:</p>
 <ul>
-<li><p>Downloads non-interpolated experiments from the storage5 machine (or mn5 if storage5 is down).</p></li>
-<li><p>The preferred path is specified in <code class="docutils literal notranslate"><span class="pre">interp_experiments.yaml</span></code>. If the experiment is not listed or no path or experiment domain is found, the system will look in the <code class="docutils literal notranslate"><span class="pre">exp_to_interp_root</span></code> path specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
+<li><p>Downloads non-interpolated models from the storage5 machine (or mn5 if storage5 is down).</p></li>
+<li><p>The preferred path is specified in <code class="docutils literal notranslate"><span class="pre">interp_models.yaml</span></code>. If the model is not listed or no path or model domain is found, the system will look in the <code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code> path specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p></li>
 </ul>
 </li>
 <li><p>For HPC downloads:</p>
 <ul>
-<li><p>In this case, the download (more accurately, the copy) will transfer non-interpolated experiments from esarchive to the gpfs folder found in <code class="docutils literal notranslate"><span class="pre">exp_to_interp_root</span></code> in the <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code> file.</p></li>
-<li><p>It only copies from the paths that are specified in <code class="docutils literal notranslate"><span class="pre">interp_experiments.yaml</span></code>.</p></li>
+<li><p>In this case, the download (more accurately, the copy) will transfer non-interpolated models from esarchive to the gpfs folder found in <code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code> in the <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code> file.</p></li>
+<li><p>It only copies from the paths that are specified in <code class="docutils literal notranslate"><span class="pre">interp_models.yaml</span></code>.</p></li>
 </ul>
 </li>
 <li><p><strong>How to get this type of download:</strong> Set the <code class="docutils literal notranslate"><span class="pre">interpolated</span></code> field in the configuration file to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
 </ul>
 </li>
 </ol>
-<p>*To know how to define an experiment in <code class="docutils literal notranslate"><span class="pre">interp_experiments.yaml</span></code>, please visit <a class="reference internal" href="Interpolation.html#define-experiments"><span class="std std-ref">this page</span></a>.</p>
+<p>*To know how to define a model in <code class="docutils literal notranslate"><span class="pre">interp_models.yaml</span></code>, please visit <a class="reference internal" href="Interpolation.html#define-models"><span class="std std-ref">this page</span></a>.</p>
 </section>
 <section id="where-to-download-from">
 <h3>Where to download from<a class="headerlink" href="#where-to-download-from" title="Link to this heading"></a></h3>
@@ -172,13 +172,13 @@
 <ol class="arabic simple">
 <li><p>Download of Network from HPC Machines.</p></li>
 <li><p>Download of Network from Zenodo.</p></li>
-<li><p>Download of Interpolated Experiments.</p></li>
-<li><p>Download of Non-interpolated Experiment (download from esarchive or gpfs to local).</p></li>
+<li><p>Download of Interpolated Models.</p></li>
+<li><p>Download of Non-interpolated Models (download from esarchive or gpfs to local).</p></li>
 </ol>
 </li>
 <li><p><strong>In storage5/nord4</strong> for:</p>
 <ol class="arabic simple">
-<li><p>Download of Non-interpolated Experiment (copy from esarchive to gpfs).</p></li>
+<li><p>Download of Non-interpolated Models (copy from esarchive to gpfs).</p></li>
 </ol>
 </li>
 </ul>
@@ -205,12 +205,12 @@
 <td><p>✗</p></td>
 <td><p>✗</p></td>
 </tr>
-<tr class="row-even"><td><p>Interpolated Experiment</p></td>
+<tr class="row-even"><td><p>Interpolated Model</p></td>
 <td><p>✓</p></td>
 <td><p>✗</p></td>
 <td><p>✓</p></td>
 </tr>
-<tr class="row-odd"><td><p>Non-interpolated Experiment</p></td>
+<tr class="row-odd"><td><p>Non-interpolated Model</p></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
@@ -249,7 +249,7 @@
 <td><p>✓</p></td>
 <td><p>✓</p></td>
 </tr>
-<tr class="row-odd"><td><p>experiments</p></td>
+<tr class="row-odd"><td><p>model</p></td>
 <td><p>✗</p></td>
 <td><p>✗</p></td>
 </tr>
@@ -261,7 +261,7 @@
 </table>
 <p>Other important changes from the other modes are:</p>
 <ol class="arabic simple">
-<li><p><strong>Wildcard (*) keyword:</strong> If you want to download all available networks or experiments, simply use the wildcard <code class="docutils literal notranslate"><span class="pre">*</span></code> in the <code class="docutils literal notranslate"><span class="pre">networks</span></code> or <code class="docutils literal notranslate"><span class="pre">experiments</span></code> field. Be careful with this.</p></li>
+<li><p><strong>Wildcard (*) keyword:</strong> If you want to download all available networks or models, simply use the wildcard <code class="docutils literal notranslate"><span class="pre">*</span></code> in the <code class="docutils literal notranslate"><span class="pre">networks</span></code> or <code class="docutils literal notranslate"><span class="pre">model</span></code> field. Be careful with this.</p></li>
 <li><p><strong>Default keyword:</strong> The keyword <code class="docutils literal notranslate"><span class="pre">default</span></code> functions the same as leaving the field empty, meaning it will retrieve all possible values for that parameter.</p></li>
 </ol>
 </section>

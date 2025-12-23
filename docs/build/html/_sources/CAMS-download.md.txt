@@ -26,17 +26,17 @@ To download CAMS data from the Atmosphere Data Store, include one of the followi
 * `cams_reanalysis_<model>_<stream>-regional` — [CAMS European Air Quality Reanalyses](#3-cams-european-air-quality-reanalyses)
 * `cams_reanalysis-global` — [CAMS Global Reanalysis (EAC4)](#4-cams-global-reanalysis-eac4)
 
-Once you have selected the dataset and specified the experiment and domain, make sure to set:
+Once you have selected the dataset and specified the model and domain, make sure to set:
 
 ```ini
-interpolated = False
+dl_interpolated = False
 ```
 
 or
 
 Answer `n` to the prompt:
 
-_"Experiments were detected in the configuration file. Do you want to download the interpolated versions? (Otherwise, the non-interpolated experiments will be downloaded) ([y]/n):"_
+_"Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded) ([y]/n)"_
 
 ## 1. CAMS European Air Quality Forecasts
 
@@ -54,7 +54,7 @@ Only hourly data is available in this dataset. You must set `resolution = hourly
 ### Mandatory fields for regional analysis data
 
 ```ini
-experiments = cams_analysis_<model>
+model = cams_analysis_<model>
 domain = regional
 resolution = hourly
 ```
@@ -62,7 +62,7 @@ resolution = hourly
 ### Mandatory fields for regional forecast data
 
 ```ini
-experiments = cams_forecast_<model>
+model = cams_forecast_<model>
 domain = regional
 resolution = hourly
 ```
@@ -129,10 +129,10 @@ Providentia assumes the following fixed values when downloading data:
 start_date = 20250701 
 end_date = 20250702
 species = sconcno2
-experiments = cams_analysis_dehm
+model = cams_analysis_dehm
 domain = regional
 resolution = hourly
-interpolated = False
+dl_interpolated = False
 ```
 
 ```python
@@ -156,10 +156,10 @@ request = {
 start_date = 20250701
 end_date = 20250702
 species = sconcno2
-experiments = cams_forecast_ensemble
+model = cams_forecast_ensemble
 domain = regional
 resolution = hourly
-interpolated = False
+dl_interpolated = False
 ```
 
 ```python
@@ -199,7 +199,7 @@ hourly and 3hourly data is available in this dataset. In your configuration file
 ### Mandatory fields for global forecast single-level data
 
 ```ini
-experiments = cams_forecast
+model = cams_forecast
 domain = global
 resolution = hourly
 ```
@@ -207,7 +207,7 @@ resolution = hourly
 ### Mandatory fields for global forecast multi-level data
 
 ```ini
-experiments = cams_forecast
+model = cams_forecast
 domain = global
 resolution = 3hourly
 ```
@@ -306,10 +306,10 @@ Providentia assumes the following fixed values when downloading data:
 start_date = 20171201 
 end_date = 20171202
 species = sst
-experiments = cams_forecast
+model = cams_forecast
 domain = global
 resolution = hourly
-interpolated = False
+dl_interpolated = False
 ```
 
 ```python
@@ -331,10 +331,10 @@ request = {
 start_date = 20200601  
 end_date = 20200602
 species = sconcno2
-experiments = cams_forecast
+model = cams_forecast
 domain = global
 resolution = 3hourly
-interpolated = False
+dl_interpolated = False
 ```
 
 ```python
@@ -363,7 +363,7 @@ Only hourly data is available in this dataset. You must set `resolution = hourly
 ### Mandatory fields for regional reanalysis data
 
 ```ini
-experiments = cams_reanalysis_<model>_<stream>
+model = cams_reanalysis_<model>_<stream>
 domain = regional
 resolution = hourly
 ```
@@ -432,10 +432,10 @@ Providentia assumes the following fixed values when downloading data:
 start_date = 20240101
 end_date = 20240201
 species = sconcno2
-experiments = cams_reanalysis_ensemble_interim
+model = cams_reanalysis_ensemble_interim
 domain = regional
 resolution = hourly
-interpolated = False
+dl_interpolated = False
 ```
 
 ```python
@@ -457,10 +457,10 @@ request = {
 start_date = 20200101 
 end_date = 20200301
 species = sconcno2
-experiments = cams_reanalysis_ensemble_validated
+model = cams_reanalysis_ensemble_validated
 domain = regional
 resolution = hourly
-interpolated = False
+dl_interpolated = False
 ```
 
 ```python
@@ -488,7 +488,7 @@ Only 3hourly data is available in this dataset. You must set `resolution = 3hour
 ### Mandatory fields for regional reanalysis data
 
 ```ini
-experiments = cams_reanalysis
+model = cams_reanalysis
 domain = global
 resolution = 3hourly
 ```
@@ -562,10 +562,10 @@ Providentia assumes the following fixed values when downloading data:
 start_date = 20181101
 end_date = 20181130
 species = sst
-experiments = cams_reanalysis
+model = cams_reanalysis
 domain = global
 resolution = 3hourly
-interpolated = False
+dl_interpolated = False
 ```
 
 ```python
@@ -585,10 +585,10 @@ request = {
 start_date = 20181101
 end_date = 20181130
 species = sconcno2
-experiments = cams_reanalysis
+model = cams_reanalysis
 domain = global
 resolution = 3hourly
-interpolated = False
+dl_interpolated = False
 ```
 
 ```python

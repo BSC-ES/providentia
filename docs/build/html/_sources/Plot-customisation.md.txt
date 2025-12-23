@@ -28,7 +28,7 @@ Users can easily add any type of background by putting an image file in the `pro
 
 ### Custom colorbars
 
-Users can define the color and bounds of the colorbar (cmap, vmin and vmax) per species using a dictionary, with the keys being the names of the species inside `basic_stats.yaml` and `experiment_bias_stats.yaml`. An example can be seen in the code below:
+Users can define the color and bounds of the colorbar (cmap, vmin and vmax) per species using a dictionary, with the keys being the names of the species inside `basic_stats.yaml` and `model_bias_stats.yaml`. An example can be seen in the code below:
 
 ```
 "Mean":        {"function": "calculate_mean", 

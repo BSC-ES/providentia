@@ -100,7 +100,7 @@
              
   <section id="library">
 <h1>Library<a class="headerlink" href="#library" title="Link to this heading"></a></h1>
-<p>The library was designed for users to exploit the powerful backend of Providentia, allowing the use of the Providentia functionalities directly in your own scripts.</p>
+<p>The library was designed for users to exploit the powerful backend of Providentia, allowing the use of the Providentia functionalities directly in your own scripts, or within Jupyter notebooks.</p>
 <section id="importing-providentia">
 <h2>Importing Providentia<a class="headerlink" href="#importing-providentia" title="Link to this heading"></a></h2>
 <p>If the script you are running is not inside the Providentia home directory, in order to import from Providentia, then it is necessary to add these lines to your code at the start:</p>
@@ -243,7 +243,7 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stat_calc</span> <span class="o">=</span> <span class="n">provi</span><span class="o">.</span><span class="n">statistic</span><span class="p">(</span><span class="n">stat</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;OBS&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">stat</span></code> is the statistic wished to be calculated, and <code class="docutils literal notranslate"><span class="pre">labela</span></code> is the name of the observations/experiment data (this can be an alias set in the configuration file or the original dataset name). The statistic returned will be one summary value, which can be formulated in differing ways, e.g. taking a median time series across all stations and then calculating the statistic, or calculating the statistic across all stations and then taking the median. This formulation can be set by changing the statistical mode in the configuration file, for which more information can be found <a class="reference internal" href="Statistics.html"><span class="doc std std-doc">here</span></a>.</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">stat</span></code> is the statistic wished to be calculated, and <code class="docutils literal notranslate"><span class="pre">labela</span></code> is the name of the observations/model data (this can be an alias set in the configuration file or the original dataset name). The statistic returned will be one summary value, which can be formulated in differing ways, e.g. taking a median time series across all stations and then calculating the statistic, or calculating the statistic across all stations and then taking the median. This formulation can be set by changing the statistical mode in the configuration file, for which more information can be found <a class="reference internal" href="Statistics.html"><span class="doc std std-doc">here</span></a>.</p>
 <p>If wanting to calculate a bias statistic, then an additional dataset is needed to be compared against, which can be set via the following argument:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">labelb</span><span class="o">=</span><span class="s1">&#39;EMEP&#39;</span>
 </pre></div>

@@ -1,6 +1,6 @@
 # Dashboard
 
-Providentia's dashboard was designed to allow on-the-fly analysis of BSC experiment output, with respect to GHOST processed observational data.
+Providentia's dashboard was designed to allow on-the-fly analysis of BSC model output, with respect to GHOST processed observational data.
 
 ## Interface
 
@@ -21,7 +21,7 @@ Under this section, there are four drop-down menus. The first option that the us
 Next, there are four pop-up menus:
 * **QA** contains the quality assurance flags to filter by.
 * **FLAGS** contain standardised data reporter provided flags to filter by.
-* **EXPS** contains a list of experiments that exist and are related to the variable selected.
+* **MOD** contains a list of models that exist and are related to the variable selected.
 * **MULTI** can be used to [filter your current network-species by the values of other network-species](Multispecies-filtering).
 
 `NOTE: If under the **QA** menu, the checkboxes ‘*Invalid Data Provider Flags – GHOST Decreed*’ or ‘*Invalid Data Provider Flags – Network Decreed*’ are selected, all checkboxes under the Flags menu should be unticked (the default setting). This is because ticking one of these checkboxes sets a pre-selected subset of Flags checkboxes automatically. For this reason also, only one of these QA checkboxes should be ticked at the same time.`
@@ -31,7 +31,7 @@ Additionally, here the user can fill the date range. In the case of there being 
 After having filled all the fields that the user is interested in, then the last step is to click **Read**. If the user makes changes to any of the fields, it is needed to click on **Read** again in order to apply the changes.
 After reading the data, the map appears showing the available stations that correspond to the data selection. The user can select either one station individually (by clicking on it) or multiple ones by drawing a circle around them.
 
-Finally, the Data Selection section contains the option **Colocate**. When selected this means that all observations and experiment data are forced to temporally intersect, and if not (i.e. there exists observations but no experiment data, or vice versa), then these time periods will be set as NaN. After having loaded the data and selected the desired stations, if the user chooses to colocate, there is no need to **Read** again, the changes apply immediately.
+Finally, the Data Selection section contains the option **Colocate**. When selected this means that all observations and model data are forced to temporally intersect, and if not (i.e. there exists observations but no model data, or vice versa), then these time periods will be set as NaN. After having loaded the data and selected the desired stations, if the user chooses to colocate, there is no need to **Read** again, the changes apply immediately.
 
 #### Available networks
 
@@ -41,11 +41,11 @@ The drop-down menu of the available networks shows the names of the networks tha
 
 #### Example
 
-In the following image, we can see the output for Providentia where we compare the experiment cams61_camsra_ph2-eu-000 with actual observations for ozone. We load the observations and experiment data over 2018 and we select *Intersect*, so that the stations within the experiment's domain are automatically selected.
+In the following image, we can see the output for Providentia where we compare the model cams61_camsra_ph2-eu-000 with actual observations for ozone. We load the observations and model data over 2018 and we select *Intersect*, so that the stations within the model's domain are automatically selected.
 
 ![intersect](uploads/intersect.png)
 
-In the figure above we see that the data were loaded and plotted. However, there might some data gaps in the observations or in the experiments. This might result in an inaccurate analysis. By selecting **Colocate**, Providentia will apply the temporal intersection of data points that exist in both the network and experiment datasets. The result of the previous example would be:
+In the figure above we see that the data were loaded and plotted. However, there might some data gaps in the observations or in the models. This might result in an inaccurate analysis. By selecting **Colocate**, Providentia will apply the temporal intersection of data points that exist in both the network and model datasets. The result of the previous example would be:
 
 ![colocate](uploads/colocate.png)
 
@@ -106,7 +106,7 @@ resampled_data = original_data.resample(temporal_resolution, axis=0).mean()
 Under this section there are three options: 
 
 - **All**: It selects data from all the stations that appear on the map.
-- **Intersect**: It selects data from stations that spatially intersect with the experiments grid edges. 
+- **Intersect**: It selects data from stations that spatially intersect with the models grid edges. 
 - **Extent**: It select the data on the current map view.
 
 ### Toolbox
@@ -117,7 +117,7 @@ Under the main option fields, there is a toolbox that gives users several option
 
 In order from left to right, these are:
 
-- **Export button**: To export the data that users used for their evaluation (observations and experiments) in NetCDF or Numpy files and the corresponding configuration file.
+- **Export button**: To export the data that users used for their evaluation (observations and models) in NetCDF or Numpy files and the corresponding configuration file.
 - **Load button**: To load the configuration file from previous evaluation sessions. For instance, those saved using the export button.
 - **World button**: To return to the initial state of the map and the plots before applying any option.
 - **Backward arrow button**: To move to one state back from the current dashboard state.

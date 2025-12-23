@@ -25,13 +25,13 @@ from .writing import export_configuration, export_data_npz, export_netcdf
 class _Mode(str, Enum):
     """
     Defines the interactive tool modes available for the user interface.
-
+    """
+    
     NONE = ""
     PAN = "pan/zoom"
     ZOOM = "zoom rect"
     LASSO = "lasso"
-    """
-    
+
     def __str__(self):
         """
         Returns the string value of the current mode.
