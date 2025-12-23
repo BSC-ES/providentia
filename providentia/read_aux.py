@@ -23,16 +23,45 @@ PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 
 def drop_nans(data):
-    """ Function that return 1D numpy array with NaNs removed. """
+    """
+    Returns a 1D numpy array with all NaN values removed.
+
+    Parameters
+    ----------
+    data : numpy.ndarray or pandas.Series
+        The input data containing potential NaN values.
+
+    Returns
+    -------
+    numpy.ndarray
+        A filtered 1D array containing only valid numerical values.
+    """
     return data[~pd.isnull(data)]
 
 
 def init_shared_vars_read_netcdf_data(data_in_memory, data_in_memory_shape, ghost_data_in_memory, 
                                       ghost_data_in_memory_shape, timestamp_array, qa, flags):
-    """ Function which called before netCDF read function,
-        to initialise each worker process.
-        The purpose of this function is to access shared memory variables.
     """
+    Initialises worker processes by granting access to shared memory variables before parallel NetCDF reading.
+
+    Parameters
+    ----------
+    data_in_memory : multiprocessing.RawArray
+        Shared memory buffer for storing the primary scientific data.
+    data_in_memory_shape : tuple
+        The dimensions of the primary data array.
+    ghost_data_in_memory : multiprocessing.RawArray
+        Shared memory buffer for storing metadata or GHOST-specific processed data.
+    ghost_data_in_memory_shape : tuple
+        The dimensions of the GHOST data array.
+    timestamp_array : multiprocessing.RawArray
+        Shared memory buffer containing the temporal coordinates for the data.
+    qa : multiprocessing.RawArray
+        Shared memory buffer for Quality Assurance scores.
+    flags : multiprocessing.RawArray
+        Shared memory buffer for data quality flags.
+    """
+
     shared_memory_vars['data_in_memory'] = data_in_memory
     shared_memory_vars['data_in_memory_shape'] = data_in_memory_shape
     shared_memory_vars['ghost_data_in_memory'] = ghost_data_in_memory
@@ -43,10 +72,20 @@ def init_shared_vars_read_netcdf_data(data_in_memory, data_in_memory_shape, ghos
 
 
 def read_netcdf_data(tuple_arguments):
-    """ Function that handles reading of observational/model
-        netCDF data also handles filtering of observational data based
-        on selected qa/flag/classification flags. If file does not exist,
-        returns None.
+    """
+    Handles the reading and filtering of observational or model netCDF data.
+
+    Parameters
+    ----------
+    tuple_arguments : tuple
+        A collection of arguments including file paths, station references, species names, 
+        shared memory handles, and quality control settings.
+
+    Returns
+    -------
+    numpy.ndarray or list or None
+        Returns a structured metadata array if reading observations; an empty list if no 
+        stations are found; or None for model data or missing files.
     """
 
     # assign arguments from tuple to variables
@@ -349,9 +388,23 @@ def read_netcdf_data(tuple_arguments):
     if (data_label == observations_data_label) & (not filter_read):
         return file_metadata
 
-def read_netcdf_metadata(tuple_arguments):
 
-    """ Function that handles reading of observational basic metadata from a netCDF"""
+def read_netcdf_metadata(tuple_arguments):
+    """
+    Extracts basic metadata from an observational NetCDF file.
+
+    Parameters
+    ----------
+    tuple_arguments : tuple
+        A collection containing the file path to be read, a boolean indicating if it is a GHOST 
+        format file, and a logger instance for error reporting.
+
+    Returns
+    -------
+    list
+        A list of NumPy arrays or lists containing the extracted metadata for 
+        'station_reference', 'longitude', 'latitude', 'station_name', and 'measurement_altitude'.
+    """
 
     # assign arguments from tuple to variables
     relevant_file, reading_ghost, logger = tuple_arguments
@@ -445,8 +498,18 @@ def read_netcdf_metadata(tuple_arguments):
 
 
 def check_forecast_dimension(tuple_arguments):
-    """ Function that checks if the netCDF file has a forecast day dimension.
-        Returns number of days of forecast if it exists, otherwise returns 0.
+    """
+    Determines if a NetCDF file contains a forecast dimension and returns the number of lead days.
+
+    Parameters
+    ----------
+    tuple_arguments : str
+        The file path to the NetCDF file being inspected.
+
+    Returns
+    -------
+    int
+        The size of the 'forecast_day' dimension, or 0 if the dimension is not present.
     """
 
     # assign arguments from tuple to variables
@@ -468,8 +531,24 @@ def check_forecast_dimension(tuple_arguments):
 
 
 def get_yearmonths_to_read(available_yearmonths, start_date_to_read, end_date_to_read, resolution):
-    """ Function that returns the yearmonths of the files to be read.
-        Filters out yearmonths outside given date range.
+    """
+    Determines which monthly data files fall within a specified date range based on temporal resolution.
+
+    Parameters
+    ----------
+    available_yearmonths : list of str
+        List of available file strings in 'YYYYMM' format.
+    start_date_to_read : str or int
+        The beginning of the requested period in 'YYYYMMDD' format.
+    end_date_to_read : str or int
+        The end of the requested period in 'YYYYMMDD' format.
+    resolution : str
+        The temporal resolution of the data (e.g., 'monthly', 'daily', or 'hourly').
+
+    Returns
+    -------
+    list of str
+        A subset of available_yearmonths representing the files required to cover the date range.
     """
     
     available_yearmonthdays = [int(yearmonth+'01') for yearmonth in available_yearmonths]
@@ -495,12 +574,20 @@ def get_yearmonths_to_read(available_yearmonths, start_date_to_read, end_date_to
 
 
 def get_default_qa(instance, speci):
-    """ Return the default qa flags according to GHOST standards. 
+    """
+    Returns the standard GHOST quality assurance flags based on a species' physical limits.
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
-        :return: QA flags' codes in list
-        :rtype: list
+    Parameters
+    ----------
+    instance : object
+        An instance of the application class containing parameter metadata.
+    speci : str
+        The name of the chemical species or parameter to evaluate.
+
+    Returns
+    -------
+    list
+        A sorted list of integer codes representing the default QA flags.
     """
 
     if instance.parameter_dictionary[speci]['extreme_lower_limit'] < 0.0:
@@ -510,7 +597,19 @@ def get_default_qa(instance, speci):
     
 
 def get_frequency_code(resolution):
-    """ Get frequency code. """
+    """
+    Maps human-readable temporal resolutions to Pandas offset aliases.
+
+    Parameters
+    ----------
+    resolution : str
+        The descriptive name of the temporal resolution (e.g., 'hourly', 'daily').
+
+    Returns
+    -------
+    active_frequency_code : str
+        The corresponding Pandas frequency string used for resampling and date ranges.
+    """
     
     if resolution in ['hourly', 'hourly_instantaneous']:
         active_frequency_code = 'h'
@@ -529,7 +628,21 @@ def get_frequency_code(resolution):
 
    
 def get_chunk_size(active_resolution, chunk_resolution):
-    """Map resolution to number of base steps per chunk."""
+    """
+    Calculates the number of data steps required to fill a specific temporal chunk.
+
+    Parameters
+    ----------
+    active_resolution : str
+        The base temporal resolution of the data (e.g., 'hourly', '3hourly').
+    chunk_resolution : str
+        The target resolution for data partitioning (e.g., 'daily').
+
+    Returns
+    -------
+    int
+        The ratio of the target duration to the base duration.
+    """
 
     # convert resolutions to hours
     hours_dict = {
@@ -546,8 +659,18 @@ def get_chunk_size(active_resolution, chunk_resolution):
 
 
 def check_for_ghost(network_name):
-    """ Check whether the selected network comes from GHOST or not.
-        All non-GHOST networks start with an asterisk at their name.
+    """
+    Determines if a given monitoring network comes from GHOST or not.
+
+    Parameters
+    ----------
+    network_name : str
+        The name of the atmospheric monitoring network to verify.
+
+    Returns
+    -------
+    bool
+        True if the network is a GHOST network, False otherwise.
     """
 
     if '/' in network_name:
@@ -557,14 +680,18 @@ def check_for_ghost(network_name):
 
 
 def get_ghost_observational_tree(instance):
-    """ Create GHOST observational data tree as a nested dictionary,
-        storing a list of start YYYYMM yearmonths per:
-        network / resolution / matrix / speci
+    """
+    Creates a nested dictionary representing the GHOST observational data tree and exports it to JSON.
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
-        :return: GHOST observational tree dictionary
-        :rtype: dict
+    Parameters
+    ----------
+    instance : object
+        An instance of the application class containing GHOST configuration and versioning.
+
+    Returns
+    -------
+    dict
+        A nested dictionary structure: {network: {resolution: {matrix: {species: [YYYYMM, ...]}}}}.
     """
 
     # create dictionary for storing filetree
@@ -627,14 +754,18 @@ def get_ghost_observational_tree(instance):
 
 
 def get_nonghost_observational_tree(instance):
-    """ Fill non-GHOST observational data tree,
-        storing a list of start YYYYMM yearmonths per:
-        network / resolution / matrix / speci
+    """
+    Creates a nested dictionary representing the non-GHOST observational data tree and exports it to JSON.
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
-        :return: non-GHOST observational tree dictionary
-        :rtype: dict
+    Parameters
+    ----------
+    instance : object
+        An instance of the application class containing non-GHOST configuration and directory roots.
+
+    Returns
+    -------
+    dict
+        A nested dictionary structure: {network: {resolution: {matrix: {species: [YYYYMM, ...]}}}}.
     """
 
     # create dictionary for storing filetree
@@ -696,17 +827,17 @@ def get_nonghost_observational_tree(instance):
 
 
 def get_valid_obs_files_in_date_range(instance, start_date, end_date):
-    """ Iterate through observational dictionary tree and return 
-        a dictionary of available data in the selected daterange
+    """
+    Filters the full observational data tree to identify files available within a specific date range.
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
-        :param start_date: start date (e.g. "20201101")
-        :type start_date: str
-        :param end_date: end date (e.g. "20201101")
-        :type end_date: str
-        :return: available observational tree dictionary
-        :rtype: dict
+    Parameters
+    ----------
+    instance : object
+        An instance of the application class containing the full observational data tree.
+    start_date : str
+        The start date in 'YYYYMMDD' format.
+    end_date : str
+        The end date in 'YYYYMMDD' format.
     """
 
     # create dictionary to store available observational data
@@ -759,21 +890,23 @@ def get_valid_obs_files_in_date_range(instance, start_date, end_date):
 
 
 def get_valid_models(instance, start_date, end_date, resolution, networks, species):
-    """ Get valid models for daterange, and selected parameters.
-        Update model pop-up with valid models.
+    """
+    Identifies models within a given date range and chosen networks and species. 
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
-        :param start_date: start date (e.g. "20201101")
-        :type start_date: str
-        :param end_date: end date (e.g. "20201231")
-        :type end_date: str
-        :param resolution: resolution (e.g. "hourly")
-        :type resolution: str
-        :param networks: list of networks
-        :type networks: list
-        :param species: list of species
-        :type species: list 
+    Parameters
+    ----------
+    instance : object
+        An instance of the application class containing directory roots and menu configurations.
+    start_date : str
+        The start date in 'YYYYMMDD' format.
+    end_date : str
+        The end date in 'YYYYMMDD' format.
+    resolution : str
+        The temporal resolution (e.g. 'hourly', 'daily').
+    networks : list of str
+        The monitoring networks to match against model data.
+    species : list of str
+        The chemical species or parameters to match against model data.
     """
 
     # get all different model names (from providentia-interpolation output dir)
@@ -847,10 +980,13 @@ def get_valid_models(instance, start_date, end_date, resolution, networks, speci
         instance.models_menu['models']['map_vars'] = models_to_add
 
 def get_possible_temporal_resolutions():
-    """ Return possible temporal resolutions as a list.
+    """
+    Returns a comprehensive list of all supported temporal resolutions for data processing.
 
-        :return: available temporal resolutions
-        :rtype: list
+    Returns
+    -------
+    list
+        A list of strings representing temporal resolutions from hourly to annual.
     """
 
     # define possible temporal resolutions
@@ -861,10 +997,13 @@ def get_possible_temporal_resolutions():
 
 
 def get_temporal_resolution_order():
-    """ Return temporal resolution order for menus as a dictionary.
+    """
+    Provides a dictionary mapping temporal resolution names to their preferred display order in menus.
 
-        :return: temporal resolution order
-        :rtype: dict
+    Returns
+    -------
+    dict
+        A dictionary where keys are resolution strings and values are integer ranks.
     """
 
     resolution_order_dict = {'hourly': 1, '3hourly': 2, '6hourly': 3, 'hourly_instantaneous': 4,
@@ -875,7 +1014,21 @@ def get_temporal_resolution_order():
 
 
 def get_possible_resampling_resolutions(resolution, daily_forecast=False):
-    """ Get available lower resolutions. """
+    """
+    Identifies permissible lower temporal resolutions for resampling based on the base resolution.
+
+    Parameters
+    ----------
+    resolution : str
+        The current temporal resolution of the data (e.g. 'hourly', 'daily').
+    daily_forecast : bool, optional
+        Flag indicating if the data belongs to a daily forecast cycle (default is False).
+
+    Returns
+    -------
+    list of str
+        A list of target resolutions that are coarser than or equal to the input resolution.
+    """
     
     if daily_forecast:
         if resolution in ['hourly', 'hourly_instantaneous']:
@@ -908,12 +1061,18 @@ def get_possible_resampling_resolutions(resolution, daily_forecast=False):
 
 
 def get_periodic_relevant_temporal_resolutions(resolution):        
-    """ Get relevant temporal resolutions for periodic plots, by selected temporal resolution.
+    """
+    Identifies the appropriate time cycles for periodic analysis based on a base temporal resolution.
 
-        :param resolution: name of selected temporal resolution
-        :type resolution: str
-        :return: relevant temporal resolutions
-        :rtype: list
+    Parameters
+    ----------
+    resolution : str
+        The name of the selected temporal resolution (e.g. 'hourly', 'daily').
+
+    Returns
+    -------
+    relevant_temporal_resolutions : list
+        A list of periodic groupings (e.g. 'hour', 'dayofweek') valid for the input resolution.
     """
 
     if 'hourly' in resolution:
@@ -929,12 +1088,18 @@ def get_periodic_relevant_temporal_resolutions(resolution):
 
 
 def get_periodic_nonrelevant_temporal_resolutions(resolution):        
-    """ Get non-relevant temporal resolutions for periodic plots, by selected temporal resolution.
+    """
+    Identifies time cycles that cannot be analysed based on a base temporal resolution.
 
-        :param resolution: name of selected temporal resolution
-        :type resolution: str
-        :return: non-relevant temporal resolutions
-        :rtype: list
+    Parameters
+    ----------
+    resolution : str
+        The name of the selected temporal resolution (e.g. 'hourly', 'daily').
+
+    Returns
+    -------
+    nonrelevant_temporal_resolutions : list
+        A list of periodic groupings that are scientifically invalid for the input resolution.
     """
 
     if 'hourly' in resolution:
@@ -950,7 +1115,19 @@ def get_periodic_nonrelevant_temporal_resolutions(resolution):
 
 
 def valid_date(date_text):
-    """ Determine if a date string is in the correct format. """
+    """
+    Validates whether a given date string or integer conforms to the 'YYYYMMDD' format.
+
+    Parameters
+    ----------
+    date_text : str or int
+        The date value to be validated.
+
+    Returns
+    -------
+    bool
+        True if the date is valid and correctly formatted, False otherwise.
+    """
 
     try:
         datetime.datetime.strptime(str(date_text), '%Y%m%d')
@@ -960,7 +1137,13 @@ def valid_date(date_text):
 
 
 def generate_file_trees(instance):
-    """ Generate file trees. Force if we want to remove depedency on the machine.
+    """
+    Handles the dynamic generation or loading of observational data catalogues.
+
+    Parameters
+    ----------
+    instance : object
+        An instance of the application class containing configuration flags and versioning.
     """
     
     # get dictionaries of observational GHOST and non-GHOST filetrees, either created dynamically or loaded
@@ -1021,8 +1204,24 @@ def generate_file_trees(instance):
 
 
 def get_valid_metadata(read_instance, variable, valid_station_idxs, networkspeci):
-    """ Get metadata without nans from the data for each timestep
-        If for all timesteps the metadata is nan, set nan as valid metadata
+    """
+    Extracts the first non-NaN metadata values for selected stations across all time steps.
+
+    Parameters
+    ----------
+    read_instance : object
+        An instance of the application class responsible for data reading operations.
+    variable : str
+        The specific metadata field to retrieve (e.g., 'station_name', 'latitude').
+    valid_station_idxs : list of int
+        Indices of the stations to be processed.
+    networkspeci : str
+        A combined string representing the network and species identifier.
+
+    Returns
+    -------
+    valid_metadata : list
+        A list of non-null metadata values, one per station.
     """
 
     stations_metadata = read_instance.canvas_instance.selected_station_metadata[networkspeci][

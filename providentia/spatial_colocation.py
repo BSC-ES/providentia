@@ -42,6 +42,14 @@ class SpatialColocation:
     """
 
     def __init__(self, read_instance):
+        """
+        Initialise the SpatialColocation instance.
+
+        Parameters
+        ----------
+        read_instance : object
+            Instance of the data loading class containing station metadata and configuration settings.
+        """
 
         self.read_instance = read_instance
 
@@ -115,6 +123,9 @@ class SpatialColocation:
             self.by_position()
 
     def by_station_reference(self):
+        """
+        Matches stations across species by comparing unique station reference identifiers and validating coordinates.
+        """
 
         # for GHOST data, remove measurement method str and duplicate station number from station references
         if self.read_instance.reading_ghost:
@@ -155,6 +166,9 @@ class SpatialColocation:
             self.get_non_intersections()
 
     def by_station_name(self):
+        """
+        Matches stations across species by comparing station name strings for remaining non-intersecting indices.
+        """
 
         # only do check if have remaining non-intersecting indices
         if (len(self.intersecting_indices[self.firstnetworkspeci]) != len(self.read_instance.station_references[self.firstnetworkspeci])):
@@ -193,7 +207,10 @@ class SpatialColocation:
                 self.get_non_intersections()
             
     def by_position(self):
-        
+        """
+        Matches remaining stations across species by comparing 3D Cartesian ECEF coordinates within a spatial tolerance.
+        """
+
         # only do check if have remaining non-intersecting indices
         if (len(self.intersecting_indices[self.firstnetworkspeci]) != len(self.read_instance.station_references[self.firstnetworkspeci])):
             
@@ -314,10 +331,8 @@ class SpatialColocation:
             self.get_non_intersections()
 
     def validate_intersections(self):
-
-        """ Double check each station colocation by longitude / latitude position.
-            If any of the the differences in longitude / latitude for a station across the relevant 
-            longitudes / latitudes exceed a certain tolerance, then drop station.
+        """
+        Verifies that co-located stations across all species are within a specified geographic tolerance by comparing their ECEF coordinates.
         """
 
         # only do validation if appropriate variable is True
@@ -354,8 +369,8 @@ class SpatialColocation:
                 self.intersecting_indices[networkspeci] = np.array([inter_ii for stn_ii,inter_ii in enumerate(self.intersecting_indices[networkspeci]) if stn_ii not in stn_inds_to_drop], dtype=np.int32)
 
     def sort_intersecting_indices(self):
-        """ get the order of the first networkspecies in ascending order, and order other networkspecies in the 
-            same order. 
+        """
+        Synchronises the order of all intersecting indices across species based on the ascending order of the primary species.
         """
         
         # sort first networkspecies in ascending order, and order other networkspecies in the same order
@@ -364,9 +379,8 @@ class SpatialColocation:
             self.intersecting_indices[networkspeci] = self.intersecting_indices[networkspeci][sorted_inds]
 
     def get_non_intersections(self):
-
-        """ get the indices of stations where no-intersections have been found per networkspecies, and
-            associated metadata variables.
+        """
+        Identifies unmatched station indices and extracts their metadata for subsequent colocation attempts.
         """
 
         # get the indices of stations where no-intersections have been found per networkspecies
@@ -382,15 +396,8 @@ class SpatialColocation:
             self.non_intersecting_measurement_altitudes = {networkspeci: self.read_instance.station_measurement_altitudes[networkspeci][self.non_intersecting_indices[networkspeci]] for networkspeci in self.read_instance.station_measurement_altitudes}
 
     def resolve_duplicate_spatial_colocation_matches(self):
-
-        """ Method that resolves duplicate indices found during spatial colocation of 2 species.
-
-            In spatial colocation it is neccessary to match each stations geographically within a specific
-            tolerance, for 2 different species. 
-
-            In some cases the stations within the tolerance can match for multiple stations. 
-            In order to resolve this, for each duplicated station, it is set to match with the closest station to it
-            in terms of 3D distance. This is done iteratively until there are no more duplicates.
+        """
+        Resolves ambiguous many-to-many geographic matches by iteratively pairing stations based on minimum 3D Euclidean distance.
         """
 
         # determine which indices of next species are found to match with mutiple first speci coords, and which not

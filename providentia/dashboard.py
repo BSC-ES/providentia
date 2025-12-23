@@ -695,7 +695,7 @@ class Dashboard(QtWidgets.QWidget):
 
         Parameters
         ----------
-        menu_root : QWidget or str
+        menu_root : QWidget
             The root menu object or identifier used to populate the 
             pop-up window content.
         """

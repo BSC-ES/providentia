@@ -23,23 +23,52 @@ from .writing import export_configuration, export_data_npz, export_netcdf
 
 
 class _Mode(str, Enum):
+    """
+    Defines the interactive tool modes available for the user interface.
 
     NONE = ""
     PAN = "pan/zoom"
     ZOOM = "zoom rect"
     LASSO = "lasso"
-
+    """
+    
     def __str__(self):
+        """
+        Returns the string value of the current mode.
+
+        Returns
+        -------
+        str
+            The human-readable name of the mode.
+        """
         return self.value
 
     @property
     def _navigate_mode(self):
+        """
+        Retrieves the navigation internal state name for the backend.
+
+        Returns
+        -------
+        str or None
+            The uppercase name of the mode if active, otherwise None.
+        """
         return self.name if self is not _Mode.NONE else None
 
 class NavigationToolbar(NavigationToolbar2QT):
-    """ Class that updates available buttons on matplotlib toolbar. """
+    """ Class that customises the Matplotlib navigation toolbar with specific buttons and bespoke functionality. """
     
     def __init__(self, read_instance=None, canvas_instance=None):
+        """
+        Initialises the toolbar, defines the toolitems, and sets custom icons.
+        
+        Parameters
+        ----------
+        read_instance : object, optional
+            The source instance containing the data and configuration (default is None).
+        canvas_instance : object, optional
+            The Matplotlib canvas instance to which this toolbar is attached (default is None).
+        """
 
         self.read_instance = read_instance
         self.canvas_instance = canvas_instance
@@ -78,7 +107,9 @@ class NavigationToolbar(NavigationToolbar2QT):
         self._actions['connect_lasso'].setCheckable(True)
 
     def _update_buttons_checked(self):
-        """ sync button checkstates to match active mode """
+        """
+        Synchronises the visual check states of toolbar buttons with the current interaction mode.
+        """
 
         if 'pan' in self._actions:
             self._actions['pan'].setChecked(self.mode == 'pan/zoom')
@@ -88,9 +119,8 @@ class NavigationToolbar(NavigationToolbar2QT):
             self._actions['connect_lasso'].setChecked(self.mode == 'lasso')
 
     def save_data(self):
-        """ Pop window for choosing directory, filename and type
-            for saving data, metadata and configuration.
-            Available filetypes: Numpy file: .npz, netCDF: .nc. 
+        """
+        Triggers a file dialogue to export data or configuration settings to various formats.
         """
 
         filetypes = {'NetCDF': 'nc', 'Numpy file': 'npz', 'Configuration': 'conf'}
@@ -128,8 +158,15 @@ class NavigationToolbar(NavigationToolbar2QT):
                     show_message(self.read_instance, msg)
 
     def check_for_axis_limit_changes(self, previous_state, current_state):
-        """ Method that checks which plot has changed axis limits 
-            and calls harmonise_changed_axis.
+        """
+        Identifies which plot axes have had their limits modified and initiates visual synchronisation.
+
+        Parameters
+        ----------
+        previous_state : dict
+            A dictionary mapping axis objects to their prior (x_limit, y_limit) tuples.
+        current_state : dict
+            A dictionary mapping axis objects to their new (x_limit, y_limit) tuples.
         """
 
         # check which limit changed
@@ -141,8 +178,13 @@ class NavigationToolbar(NavigationToolbar2QT):
                 self.harmonise_changed_axis(axis)
     
     def harmonise_changed_axis(self, axis):
-        """ Method that checks which plot is being restored and applies
-            the harmonise_xy_lims_paradigm function if needed. 
+        """
+        Identifies the context of a modified axis and propagates limit changes to related plots.
+
+        Parameters
+        ----------
+        axis : matplotlib.axes.Axes
+            The specific axis object that has undergone a change in limits.
         """
 
         # iterate through each plot until the one related to the axis is found
@@ -163,7 +205,8 @@ class NavigationToolbar(NavigationToolbar2QT):
                                        self.canvas_instance.plot_characteristics[plot_type], plot_options, relim=True, autoscale=False)
                 
     def world(self):
-        """ Method that sets the world view in the map.
+        """
+        Resets the map view to global coordinates and updates the navigation history.
         """
 
         self.set_history_buttons()
@@ -176,8 +219,8 @@ class NavigationToolbar(NavigationToolbar2QT):
         self.read_instance.map_extent = get_map_extent(self.canvas_instance)
 
     def home(self):
-        """ Method inherited from matplotlib backend_bases home that 
-            restores the original view.
+        """
+        Restores the original view of all plots and synchronises limits across linked axes.
         """
         
         # get all the limits before doing clicking on home
@@ -195,8 +238,8 @@ class NavigationToolbar(NavigationToolbar2QT):
         self.read_instance.map_extent = get_map_extent(self.canvas_instance)
 
     def back(self):
-        """ Method inherited from matplotlib backend_bases back that 
-            moves back up the view lim stack.
+        """
+        Reverts to the previous view in the navigation stack and synchronises all linked axes.
         """
         
         # get all the limits before doing clicking on back
@@ -214,8 +257,8 @@ class NavigationToolbar(NavigationToolbar2QT):
         self.read_instance.map_extent = get_map_extent(self.canvas_instance)
 
     def forward(self):
-        """ Method inherited from matplotlib backend_bases forward that 
-            moves forward in the view lim stack.
+        """
+        Moves to the next view in the navigation stack and synchronises all linked axes.
         """
         
         # get all the limits before doing clicking on forward
@@ -233,8 +276,13 @@ class NavigationToolbar(NavigationToolbar2QT):
         self.read_instance.map_extent = get_map_extent(self.canvas_instance)
 
     def drag_pan(self, event):
-        """ Method inherited from matplotlib backend_bases drag_pan that controls
-            the release in zoom.
+        """
+        Handles the continuous panning of plot axes and synchronises related views in real-time.
+
+        Parameters
+        ----------
+        event : matplotlib.backend_bases.MouseEvent
+            The mouse event triggered by dragging the plot surface.
         """
     
         super().drag_pan(event)
@@ -246,8 +294,13 @@ class NavigationToolbar(NavigationToolbar2QT):
         self.read_instance.map_extent = get_map_extent(self.canvas_instance)
 
     def release_zoom(self, event):
-        """ Method inherited from matplotlib backend_bases release_zoom that 
-            drags in pan/zoom mode.
+        """
+        Finalises the zoom-to-rectangle action and synchronises all linked axes to the new view.
+
+        Parameters
+        ----------
+        event : matplotlib.backend_bases.MouseEvent
+            The mouse release event that defines the final zoom boundary.
         """
 
         super().release_zoom(event)
@@ -259,9 +312,10 @@ class NavigationToolbar(NavigationToolbar2QT):
         self.read_instance.map_extent = get_map_extent(self.canvas_instance)
 
     def save_figure(self):
-        """ Method inherited from matplotlib backend_bases save_figure that controls
-            the image creation.
         """
+        Validates data presence before triggering the standard dialogue to save the current plot as an image.
+        """
+
         if self.read_instance.le_minimum_value.text() == '' and self.read_instance.le_minimum_value.text() == '':
             # control that data was read
             msg = 'The figure could not be created. Read the data first.'
@@ -272,9 +326,8 @@ class NavigationToolbar(NavigationToolbar2QT):
         super().save_figure(self)
 
     def conf_dialogs(self):
-        """ Pop window for selecting configuration file. If file selected, pops an
-            input dialog for the user to select which section wants to load. Calls
-            reload_conf to reset the fields.
+        """
+        Manages the selection and loading of configuration files through sequential user dialogues.
         """
 
         conf_to_load = self.filename_dialog()
@@ -305,7 +358,9 @@ class NavigationToolbar(NavigationToolbar2QT):
             self.read_instance.logger.info(e)
 
     def connect_lasso(self):
-        """ Connect / disconnect map lasso selection. """
+        """
+        Toggles the free-form lasso selection tool on the map for station selection.
+        """
 
         if not self.canvas_instance.figure.canvas.widgetlock.available(self):
             self.set_message("lasso unavailable")
@@ -352,7 +407,14 @@ class NavigationToolbar(NavigationToolbar2QT):
         self._update_buttons_checked()
 
     def filename_dialog(self):
-        """" Open dialog to choose configuration file. """
+        """
+        Opens a file selection dialogue for the user to locate and choose a configuration file.
+
+        Returns
+        -------
+        str or None
+            The absolute path to the selected file, or None if the dialogue was cancelled.
+        """
 
         options =  QtWidgets.QFileDialog.Options()
         options |=  QtWidgets.QFileDialog.DontUseNativeDialog
@@ -362,8 +424,15 @@ class NavigationToolbar(NavigationToolbar2QT):
             return filename
 
     def reload_conf(self, section, fpath):
-        """ Reset previous selections, fills values according to new conf file,
-            reads and filters.
+        """
+        Resets the current session and reinitialises the dashboard with parameters from a specific configuration section.
+
+        Parameters
+        ----------
+        section : str
+            The specific section name within the configuration file to be loaded.
+        fpath : str
+            The file path to the configuration file.
         """
 
         # save current active_dashboard_plots

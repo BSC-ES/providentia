@@ -45,8 +45,17 @@ interp_models = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_m
 class ModelInterpolation(object):
     """ Class which handles interpolation of model data to surface data, both spatially and temporally. """
 
-    def __init__(self,submit_args):
-        
+    def __init__(self, submit_args):
+        """
+        Initialise the ModelInterpolation instance.
+
+        Parameters
+        ----------
+        submit_args : dict
+            Configuration arguments containing model specifications, species information, 
+            and job identifiers required to initialise the interpolation process.
+        """
+
         self.log_file_str = 'STARTING INTERPOLATION\n'
 
         self.log_file_str += '\n'.join(f"{k}: {v}" for k, v in submit_args.items()) + '\n'
@@ -316,10 +325,8 @@ class ModelInterpolation(object):
             create_output_logfile(1, self.log_file_str)
 
     def get_model_information(self):
-        """ Take first valid model file in month and get grid dimension/coordinate information.
-            Put initial object read in a  try/except to handle reading of corrupted files.
-            Iterate through files until have read a valid file.
-            If do not read a valid file, skip month.
+        """
+        Extracts grid dimensions, coordinate metadata, and vertical structure from the first valid model file.
         """
 
         for model_file_ii, model_file in enumerate(self.model_files):
@@ -493,10 +500,10 @@ class ModelInterpolation(object):
             self.mod_speci_units = self.standard_parameter_speci['standard_units']
 
     def create_grid_domain_edge_polygon(self):
-        """ Create grid domain edge polygon from model netCDF file.
-            This is handled differently for regular grids (i.e. following lines of longitude/latitude), 
-            and non-regular grids (e.g. lambert-conformal).
         """
+        Defines the spatial boundary of the model domain as a Shapely polygon.
+        """
+
         # load instance of model file netCDF
         mod_nc_root = Dataset(self.valid_model_file)
 
@@ -639,7 +646,9 @@ class ModelInterpolation(object):
         mod_nc_root.close()
 
     def get_observational_objects(self):
-        """ Get necessary observational objects. """
+        """
+        Parses observational NetCDF files to extract station identifiers, coordinates, and associated metadata.
+        """
 
         # get observational file netCDF root
         obs_nc_root = Dataset(self.obs_file)
@@ -716,7 +725,14 @@ class ModelInterpolation(object):
         obs_nc_root.close()
 
     def get_resampling_direction(self):
-        """ Determine resampling direction. """
+        """
+        Determines the resampling direction by comparing the model input and desired output temporal resolutions.
+
+        Returns
+        -------
+        str or None
+        Returns 'downsampling' if input is finer than output, 'upsampling' if coarser, or None if they match.
+        """
 
         freq_map = {
             "hourly": 1,
@@ -742,7 +758,9 @@ class ModelInterpolation(object):
             return
         
     def get_monthly_model_data(self):
-        """ Read all relevant model data in yearmonth into memory. """
+        """
+        Reads and pre-processes all relevant model files for a specific month, handling resampling and unit conversion.
+        """
 
         # determine resampling direction (upsampling, downsampling or None)
         resampling_direction = self.get_resampling_direction()
@@ -1026,11 +1044,11 @@ class ModelInterpolation(object):
             create_output_logfile(1, self.log_file_str)
         
     def n_nearest_neighbour_inverse_distance_weights(self):
-        """ Calculate N nearest neighbour inverse distance weights (and indices) of model gridcells centres 
-            from an array of geographic observational station coordinates. Both observational and model geographic 
-            longitude/latitude coordinates are first converted to cartesian ECEF (Earth Centred, Earth Fixed) 
-            coordinates, before calculating distances. Weights returned for obervational stations not contained 
-            within model grid extents are all zero.
+        """
+        Calculates inverse distance weights and indices for N-Nearest Neighbour interpolation using ECEF 
+        (Earth Centred, Earth Fixed) cartesian coordinates of model gridecell centres to geographic 
+        observational station coordinates. Weights returned for obervational stations not contained within 
+        model grid extents are all zero.
         """
 
         # for each pair of observational station geographic coordinates, test if station is inside model grid
@@ -1099,8 +1117,8 @@ class ModelInterpolation(object):
         self.inverse_dists[~obs_inside_model_grid,:] = 0.0
 
     def write_netCDF(self):
-        """ Write netCDF, returning interpolated model data to observational surface stations 
-            for yearmonth.
+        """
+        Writes the interpolated model data at observational station locations to a standardised NetCDF4 file.
         """
 
         # set output directory where observational interpolated monthly model netcdf will be saved
@@ -1335,16 +1353,17 @@ class ModelInterpolation(object):
                 create_output_logfile(1, self.log_file_str)
 
 def create_output_logfile(process_code, log_file_str):
-    """ Create a logfile for stating outcome of interpolation job'
-        the filename is prefixed with a code referencing the job outcome.
-        The process codes are:
-        0: Process completed without issue
-        1: Caught error in process
-        2: Uncaught error in process
-
-        :param process_code: interpolation outcome code
-        :type process_code: int
     """
+    Creates a log file indicating the job outcome and terminates the current process.
+
+    Parameters
+    ----------
+    process_code : int
+        The outcome code (0 for success, 1 for caught error, 2 for uncaught error).
+    log_file_str : str
+        The descriptive log message or error traceback to be written to the file.
+    """
+
     output_logfile_dir = (f"{join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs/')}"
     f"{submit_args['prov_mod_code']}/"
     f"{submit_args['original_speci_to_process']}/"
