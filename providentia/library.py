@@ -50,9 +50,19 @@ except NameError:
     jupyter_session = False
 
 class Providentia:
-    """ Class for Providentia Library mode"""
+    """Class for Providentia Library mode"""
 
     def __init__(self, config, **kwargs):
+        """
+        Initialize the library mode environment
+
+        Parameters
+        ----------
+        config : str
+            Path to the configuration file.
+        **kwargs : dict
+            Optional command-line arguments that override default configuration values.
+        """
         
         # set config to self
         self.config = config
@@ -115,7 +125,7 @@ class Providentia:
                             self.network, self.species)
 
     def read(self):
-        """ Wrapper method to read data. """
+        """Wrapper method to read data."""
 
         self.logger.info('Reading data')
 
@@ -123,7 +133,7 @@ class Providentia:
         self.datareader.read_setup(['reset'])
 
     def apply_filter(self):
-        """ method to apply filters to data. """
+        """Method to apply filters to data."""
 
         self.logger.info('Filtering data')
 
@@ -134,20 +144,23 @@ class Providentia:
         get_selected_station_data(read_instance=self, canvas_instance=self, networkspecies=self.networkspecies)
 
     def filter(self, field, limit=None, keep=None, remove=None, lower=None, upper=None):
-        """ Wrapper method to filter data.
+        """
+        Wrapper method to filter data.
 
-        :param field: field to filter by
-        :type field: str
-        :param limit: limit for filtering representativity fields
-        :type limit: str, optional
-        :param keep: data to keep
-        :type keep: str, optional
-        :param remove: data to remove
-        :type remove: str, optional
-        :param lower: lower bound to retain data
-        :type lower: str, optional
-        :param upper: upper bound to retain data
-        :type upper: str, optional
+        Parameters
+        ----------
+        field : str
+            Field to filter by.
+        limit : str, optional
+            Limit for filtering representativity fields.
+        keep : str or list of str, optional
+            Data to keep.
+        remove : str or list of str, optional
+            Data to remove.
+        lower : str, optional
+            Lower bound to retain data.
+        upper : str, optional
+            Upper bound to retain data.
         """
 
         # check have valid conf and have loaded data
@@ -258,10 +271,13 @@ class Providentia:
             show_message(self, msg)
         
     def filter_station(self, station):
-        """ Wrapper method to filter specific station/s.
+        """ 
+        Wrapper method to filter specific station/s.
 
-        :param station: Station reference
-        :type station: str
+        Parameters
+        ----------
+        station : str
+            Station reference
         """
         
         # check have valid conf and have loaded data
@@ -282,10 +298,13 @@ class Providentia:
         self.apply_filter()
 
     def reset(self, initialise=False):
-        """ Wrapper method to reset filter data.
+        """ 
+        Wrapper method to reset filter data.
 
-        :param initialise: Indicates whether to reset data to initial state when class was initialised 
-        :type initialise: boolean, optional
+        Parameters
+        ----------
+        initialise : bool, optional
+            Indicates whether to reset data to initial state when class was initialised 
         """
 
         # check have valid conf and have loaded data
@@ -344,66 +363,70 @@ class Providentia:
              legend=True, set_obs_legend=True, map_extent=None, annotate=False, bias=False, domain=False, 
              hidedata=False, logx=False, logy=False, multispecies=False, regression=False, smooth=False, 
              threshold=False, plot_options=None, save=False, return_plot=False, format=None, width=None, height=None):
-        """ Wrapper method to make a Providentia plot.
+        """ 
+        Wrapper method to make a Providentia plot.
 
-        :param plot: Plot type
-        :type plot: str
-        :param data_labels: Data arrays to plot, defaults to None
-        :type data_labels: list, optional
-        :param labela: Label of first dataset, defaults to ''
-        :type labela: str, optional
-        :param labelb: Label of second dataset (if defined then a bias plot is made), defaults to ''
-        :type labelb: str, optional
-        :param title: Axes title, defaults to None
-        :type title: str, optional
-        :param xlabel: Label on x axes, defaults to None
-        :type xlabel: str, optional
-        :param ylabel: Label on y axes, defaults to None
-        :type ylabel: str, optional
-        :param cb: Indicates if colorbar appears on plot, defaults to True
-        :type cb: bool, optional
-        :param legend: Indicates if legend appears on plot, defaults to True
-        :type legend: bool, optional
-        :param set_obs_legend: Indicates if observations appear on legend, defaults to True
-        :type set_obs_legend: bool, optional
-        :param map_extent: Map extent, defaults to None
-        :type map_extent: list, optional
-        :param annotate: Indicates if there are annotations, defaults to False
-        :type annotate: bool, optional
-        :param bias: Indicates if data is biased, defaults to False
-        :type bias: bool, optional
-        :param domain: Indicates if domain shows in maps, defaults to False
-        :type domain: bool, optional
-        :param hidedata: Indicates if data points are hidden in plot, defaults to False
-        :type hidedata: bool, optional
-        :param logx: Indicates if the scale of the x axis is log, defaults to False
-        :type logx: bool, optional
-        :param logy: Indicates if the scale of the y axis is log, defaults to False
-        :type logy: bool, optional
-        :param multispecies: Indicates if plot has multispecies, defaults to False
-        :type multispecies: bool, optional
-        :param regression: Indicates if scatter plot has regression line/s, defaults to False
-        :type regression: bool, optional
-        :param smooth: Indicates if timeseries has smooth line/s, defaults to False
-        :type smooth: bool, optional
-        :param threshold: Indicates if plot has threshold line/s, defaults to False
-        :type threshold: bool, optional
-        :param plot_options: List with plot options, defaults to None
-        :type plot_options: list, optional
-        :param save: Indicates if you want to save the figure, defaults to False
-        :type save: bool, optional
-        :param return_plot: Indicates if you want to get the axes, defaults to False
-        :type return_plot: bool, optional
-        :param format: Format to overwrite the plots format taken from plot characteristics 
-        :type format: dict, optional
-        :param width: Figure width
-        :type format: int, float, optional
-        :param height: Figure height
-        :type format: int, float, optional
-        :return: matplotlib.axes._axes.Axes
-        :rtype: Plot axes
-        :return: List of statistics (used in statsummary)
-        :rtype: list
+        Parameters
+        ----------
+        plot : str
+            Plot type.
+        data_labels : list of str, optional
+            Data arrays to plot, defaults to None.
+        labela : str, optional
+            Label of first dataset, defaults to ''.
+        labelb : str, optional
+            Label of second dataset (if defined then a bias plot is made), defaults to ''.
+        title : str, optional
+            Axes title, defaults to None.
+        xlabel : str, optional
+            Label on x axes, defaults to None.
+        ylabel : str, optional
+            Label on y axes, defaults to None.
+        cb : bool, optional
+            Indicates if colorbar appears on plot, defaults to True.
+        legend : bool, optional
+            Indicates if legend appears on plot, defaults to True.
+        set_obs_legend : bool, optional
+            Indicates if observations appear on legend, defaults to True.
+        map_extent : list, optional
+            Map extent, defaults to None.
+        annotate : bool or list, optional
+            Indicates if there are annotations or a list of statistics to annotate, defaults to False.
+        bias : bool, optional
+            Indicates if data is biased, defaults to False.
+        domain : bool, optional
+            Indicates if domain shows in maps, defaults to False.
+        hidedata : bool, optional
+            Indicates if data points are hidden in plot, defaults to False.
+        logx : bool, optional
+            Indicates if the scale of the x axis is log, defaults to False.
+        logy : bool, optional
+            Indicates if the scale of the y axis is log, defaults to False.
+        multispecies : bool, optional
+            Indicates if plot has multispecies, defaults to False.
+        regression : bool, optional
+            Indicates if scatter plot has regression line/s, defaults to False.
+        smooth : bool, int, float, optional
+            Indicates if timeseries has smooth line/s or the smoothing window, defaults to False.
+        threshold : bool, optional
+            Indicates if plot has threshold line/s, defaults to False.
+        plot_options : list, optional
+            List with plot options, defaults to None.
+        save : bool or str, optional
+            Indicates if you want to save the figure, defaults to False.
+        return_plot : bool, optional
+            Indicates if you want to get the figure object, defaults to False.
+        format : dict, optional
+            Format to overwrite the plot characteristics, defaults to None.
+        width : int or float, optional
+            Figure width, defaults to None.
+        height : int or float, optional
+            Figure height, defaults to None.
+
+        Returns
+        -------
+        matplotlib.figure.Figure or None
+            Returns the figure object if `return_plot` is True. Otherwise, displays the plot or saves it to file.
         """
 
         # check have valid conf and have loaded data
@@ -1069,18 +1092,26 @@ class Providentia:
             plt.show()
 
     def colourbar(self, fig, plot_ax, stat, speci, plot_type):
-        """ Wrapper method to make colourbar.
+        """
+        Wrapper method to make a colourbar.
 
-        :param fig: Figure
-        :type fig: matplotlib.figure
-        :param plot_ax: Axis
-        :type plot_ax: matplotlib.axes
-        :param stat: Statistic
-        :type stat: str
-        :param speci: Species
-        :type speci: str
-        :param plot_type: Plot type
-        :type plot_type: str
+        Parameters
+        ----------
+        fig : matplotlib.figure.Figure
+            Figure object to which the colourbar will be added.
+        plot_ax : matplotlib.axes.Axes
+            Axis for the main plot.
+        stat : str
+            Statistic to display in the colourbar.
+        speci : str
+            Species for which the colourbar applies.
+        plot_type : str
+            Plot type, used to fetch plot characteristics.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+            Axis object of the created colourbar.
         """
 
         # create cb axis
@@ -1093,16 +1124,22 @@ class Providentia:
         return cb_ax
     
     def legend(self, plot_type, data_labels=None, set_obs=True):
-        """ Wrapper method to make legend.
+        """
+        Wrapper method to make legend.
 
-        :param plot_type: Plot type
-        :type plot_type: str
-        :param data_labels: Data arrays to plot, defaults to None
-        :type data_labels: list, optional
-        :param set_obs: Indicates if observations appear on legend, defaults to True
-        :type set_obs: bool, optional
-        :return: Legend
-        :rtype: dict
+        Parameters
+        ----------
+        plot_type : str
+            Plot type for which the legend will be generated.
+        data_labels : list, optional
+            Data arrays to plot, by default None.
+        set_obs : bool, optional
+            Indicates if observations appear on the legend, by default True.
+
+        Returns
+        -------
+        dict
+            Legend handles for the plot.
         """
         
         if plot_type == 'legend':
@@ -1119,22 +1156,28 @@ class Providentia:
         return legend_handles['plot']
 
     def statistic(self, stat, labela='', labelb='', per_station=False, period=None, chunk=None):
-        """ Wrapper method to calculate statistic/s.
+        """
+        Wrapper method to calculate statistic/s.
 
-        :param stat: Statistic
-        :type stat: str
-        :param labela: Label of first dataset, defaults to ''
-        :type labela: str, optional
-        :param labelb: Label of second dataset (if defined then a bias plot is made), defaults to ''
-        :type labelb: str, optional
-        :param per_station: Indicates if to calculate integrated statistic for all stations, or per station, defaults to False
-        :type per_station: bool, optional
-        :param period: Period to group data into for calculation of statistics. Current options: 'hour', 'dayofweek', 'month' 
-        :type period: str, optional
-        :param chunk: Chunked temporal window to calculate statistics for. Current options: 'daily', 'monthly', 'annual'
-        :type chunk: str, optional
-        :return: Statistic value/s
-        :rtype: np.ndarray
+        Parameters
+        ----------
+        stat : str
+            Statistic to calculate.
+        labela : str, optional
+            Label of first dataset, by default ''.
+        labelb : str, optional
+            Label of second dataset (if defined then a bias statistic is calculated), by default ''.
+        per_station : bool, optional
+            Indicates if the statistic should be calculated per station or integrated for all stations, by default False.
+        period : str, optional
+            Period to group data into for calculation of statistics. Current options: 'hour', 'dayofweek', 'month'.
+        chunk : str, optional
+            Chunked temporal window to calculate statistics for. Current options: 'daily', 'monthly', 'annual'.
+
+        Returns
+        -------
+        np.ndarray
+            Calculated statistic values.
         """
 
         # check have valid conf and have loaded data
@@ -1198,7 +1241,19 @@ class Providentia:
         return stat
 
     def set_config(self, **kwargs):
-        """ Wrapper method to set configuration variables. """
+        """
+        Wrapper method to set configuration variables.
+
+        Parameters
+        ----------
+        **kwargs : dict
+            Optional command-line arguments that override default configuration values.
+
+        Returns
+        -------
+        bool
+            True if configuration is successfully set, False if there is an error.
+        """
 
         # if have forecast active then save current model variable in memory as will want to set it again 
         # after resetting configuration variables, as are not re-reading 
@@ -1335,12 +1390,16 @@ class Providentia:
         return True
 
     def print_config(self, conf=None, config=None):
-        """ Print selected config file to console.
+        """ 
+        Print selected configuration file to the console.
 
-        :param conf: Configuration file name, defaults to None
-        :type conf: str, optional
-        :param config: Configuration file name, defaults to None
-        :type config: str, optional
+        Parameters
+        ----------
+        conf : str, optional
+            Configuration file name, defaults to None.
+        config : str, optional
+            Alternative Configuration file name, defaults to None.
+            If both conf and config are None, the currently loaded configuration file is printed.
         """
 
         # check have valid conf
@@ -1367,18 +1426,28 @@ class Providentia:
                 self.logger.info(f.read())
 
     def __str__(self):
-        """ set active config as __str__."""
+        """
+        Set the active configuration as the string representation.
+
+        Returns
+        -------
+        str
+            Empty string after printing the active configuration to the console.
+        """
 
         self.print_config(conf=self.config)
         return ''
 
     def save(self, fname='', format='nc'):
-        """ Wrapper method to save current data/ metadata in memory.
+        """ 
+        Wrapper method to save current data/ metadata in memory.
 
-        :param fname: File name, defaults to ''
-        :type fname: str, optional
-        :param format: File format, defaults to 'nc'
-        :type format: str, optional
+        Parameters
+        ----------
+        fname : str, optional
+            File name, defaults to ''.
+        format : str, optional
+            File format, defaults to 'nc'.
         """
 
         # check have valid conf and have loaded data
@@ -1413,12 +1482,18 @@ class Providentia:
         self.logger.info('Data saved to {}'.format(fname))
 
     def data(self, format='nc'):
-        """ Wrapper method return data / metadata in specific format.
+        """ 
+        Wrapper method return data / metadata in specific format.
 
-        :param format: File format, defaults to 'nc'
-        :type format: str, optional
-        :return: Data
-        :rtype: numpy.ndarray
+        Parameters
+        ----------
+        format : str, optional
+            File format, defaults to 'nc'.
+
+        Returns
+        -------
+        data : numpy.ndarray or xarray.Dataset
+            Data returned in the requested format.
         """
 
         # check have valid conf and have loaded data
@@ -1463,12 +1538,19 @@ class Providentia:
         return data
 
     def variable(self, var=''):
-        """ Wrapper method to return specific data / metadata variable.
+        """
+        Wrapper method to return a specific data/metadata variable.
 
-        :param var: Variable name, defaults to ''
-        :type var: str, optional
-        :return: Data
-        :rtype: numpy.ndarray
+        Parameters
+        ----------
+        var : str, optional
+            Variable name to read, defaults to ''.
+
+        Returns
+        -------
+        numpy.ndarray
+            Data of the requested variable. Returns None if 
+            variable is undefined or not available.
         """
 
         # check have valid conf and have loaded data
@@ -1500,6 +1582,10 @@ class Providentia:
                 return var_data
 
     def load(self):
+        """
+        Wrapper method to load data into memory, apply initial filtering, 
+        and mark data as initialized.
+        """
 
         # check have valid conf
         valid_config = self.have_valid_config()
@@ -1519,7 +1605,14 @@ class Providentia:
         self.initialised = True
     
     def loaded_data(self):
-        """ Helper method for determining if data has been read"""
+        """
+        Helper method for determining if data has been read
+        
+        Returns
+        -------
+        bool
+            True if data has been loaded, False otherwise.
+        """
 
         if not hasattr(self, 'data_in_memory'):
             self.logger.info('Error: Data has not been loaded. Use the load() method')
@@ -1528,7 +1621,14 @@ class Providentia:
             return True
         
     def have_valid_config(self):
-        """ Helper method for determining if a valid .conf file has been read"""
+        """
+        Helper method for determining if a valid .conf file has been read
+        
+        Returns
+        -------
+        bool
+            True if a valid configuration file has been read, False otherwise.
+        """
 
         if not self.valid_config:
             self.logger.info("Error: A valid configuration file has not been read. Please reinitialise your Providentia object with a valid file: prv.Providentia('filename.conf')")
@@ -1537,7 +1637,14 @@ class Providentia:
             return True
 
     def download(self, **kwargs):
-        """ Wrapper function for initialising Download class"""
+        """
+        Wrapper function for initialising Download class
+        
+        Parameters
+        ----------
+        **kwargs : dict
+            Optional command-line arguments that override default configuration values.
+        """
 
         # check have valid conf
         valid_config = self.have_valid_config()
@@ -1552,7 +1659,14 @@ class Providentia:
         main(**parent_kwargs)
 
     def dashboard(self, **kwargs):
-        """ Wrapper function for initialising Dashboard class"""
+        """ 
+        Wrapper function for initialising Dashboard class        
+        
+        Parameters
+        ----------
+        **kwargs : dict
+            Optional command-line arguments that override default configuration values.
+        """
 
         from .dashboard import main
         
@@ -1562,7 +1676,14 @@ class Providentia:
         main(**parent_kwargs)
 
     def interpolate(self, **kwargs):
-        """ Wrapper function for initialising Interpolation class"""
+        """
+        Wrapper function for initialising Interpolation class        
+        
+        Parameters
+        ----------
+        **kwargs : dict
+            Optional command-line arguments that override default configuration values.
+        """
         
         # check have valid conf
         valid_config = self.have_valid_config()
@@ -1601,7 +1722,14 @@ class Providentia:
         self.provconf.switch_logging()
 
     def report(self, **kwargs):
-        """ Wrapper function for initialising Report class"""
+        """
+        Wrapper function for initialising Report class        
+        
+        Parameters
+        ----------
+        **kwargs : dict
+            Optional command-line arguments that override default configuration values.
+        """
 
         # check have valid conf
         valid_config = self.have_valid_config()

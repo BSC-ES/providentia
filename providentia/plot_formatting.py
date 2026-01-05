@@ -24,16 +24,19 @@ from .warnings_prv import show_message
 Image.MAX_IMAGE_PIXELS = None
 
 def set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type):
-    """ Set equal aspect and limits (useful for scatter plots). 
+    """ 
+    Set equal aspect ratio and axis limits for a plot (useful for scatter plots).
 
-        :param ax: axis to set equal axes
-        :type ax: object
-        :param plot_options: active plot options 
-        :type plot_options: list
-        :param plot_characteristics: Plot characteristics  
-        :type plot_characteristics: dict
-        :param base_plot_type: Plot type, without statistical information
-        :type base_plot_type: str
+    Parameters
+    ----------
+    ax : object
+        Matplotlib axis to set equal axes.
+    plot_options : list
+        Active plot options.
+    plot_characteristics : dict
+        Plot characteristics including optional 'xlim' and 'ylim'.
+    base_plot_type : str
+        Base plot type (without statistical overlays).
     """
 
     # set equal aspect
@@ -83,42 +86,45 @@ def set_equal_axes(ax, plot_options, plot_characteristics, base_plot_type):
         else:
             ax.set_ylim(plot_characteristics["ylim"])
 
-    return None
-
-
 def harmonise_xy_lims_paradigm(read_instance, canvas_instance, relevant_axs, base_plot_type, plot_characteristics, 
                                plot_options, xlim=None, ylim=None, relim=False, autoscale=False, autoscale_x=False, 
                                autoscale_y=False, bias_centre=False, harmonise=True):
-    """ Harmonise xy limits across paradigm of plot type, unless axis limits have been defined.
-    
-        :param read_instance: Instance of class Dashboard or Report
-        :type read_instance: object
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
-        :param relevant_axs: relevant axes
-        :type relevant_axs: list
-        :param base_plot_type: Plot type, without statistical information
-        :type base_plot_type: str
-        :param plot_characteristics: Plot characteristics  
-        :type plot_characteristics: dict
-        :param plot_options: Options to configure plots
-        :type plot_options: list
-        :param xlim: xlimits to set
-        :type xlim: dict
-        :param ylim: ylimits to set
-        :type ylim: dict
-        :param relim: turn on relimiting of axes limits (when updating plotted data on axis)
-        :type relim: boolean
-        :param autoscale: Autoscale the axis view to the data (both x and y axes)
-        :type autoscale: boolean
-        :param autoscale_x: Autoscale the x axis view to the data
-        :type autoscale_x: boolean
-        :param autoscale_y: Autoscale the x axis view to the data
-        :type autoscale_y: boolean
-        :param bias_centre: centre bias plots at 0 on the y axis
-        :type bias_centre: boolean
-        :param harmonise: switch for harmonisation of axes 
-        :type harmonise: boolean
+    """
+    Harmonise x and y axis limits across a set of axes for a given plot type,
+    unless axis limits have been manually defined.
+
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard or Report.
+    canvas_instance : object
+        Instance of class Canvas or Report.
+    relevant_axs : list, dict or object
+        Axes to harmonise limits for. Can be a single axis, a list of axes, 
+        or a dict mapping temporal resolutions to axes.
+    base_plot_type : str
+        Plot type, without statistical overlays (e.g., 'scatter', 'timeseries', 'periodic').
+    plot_characteristics : dict
+        Plot characteristics, including optional 'xlim', 'ylim', 'equal_aspect', 
+        'xtick_alteration', and 'margin_padding'.
+    plot_options : list
+        Active plot options (e.g., ['bias', ...]).
+    xlim : dict or None
+        Optional x-axis limits to set.
+    ylim : dict or None
+        Optional y-axis limits to set.
+    relim : bool, default False
+        If True, recompute axis limits from data before harmonisation.
+    autoscale : bool, default False
+        If True, autoscale both x and y axes to the data.
+    autoscale_x : bool, default False
+        If True, autoscale x-axis to the data.
+    autoscale_y : bool, default False
+        If True, autoscale y-axis to the data.
+    bias_centre : bool, default False
+        If True and 'bias' in plot_options, centre y-axis limits at zero.
+    harmonise : bool, default True
+        If True, harmonise axes across the paradigm.
     """
     
     # initialise arrays to save lower and upper limits in all axes
@@ -309,7 +315,7 @@ def harmonise_xy_lims_paradigm(read_instance, canvas_instance, relevant_axs, bas
                      current_ylim_lower.append(ylim_lower)
                      current_ylim_upper.append(ylim_upper)
 
-                # if next resolution already in current resolutions, or on last axis, then set ylim for relevant axes
+                # if next resolution already in current resolutions or on last axis, then set ylim for relevant axes
                 if (next_temporal_resolution in current_resolutions) or (ax_ii == (len(relevant_axs_active)-1)):
 
                     ylim_min = np.min(current_ylim_lower) 
@@ -454,20 +460,23 @@ def harmonise_xy_lims_paradigm(read_instance, canvas_instance, relevant_axs, bas
 
             # pad the margins
             ax.margins(**plot_characteristics['margin_padding'])
-            
 
 def set_axis_title(read_instance, relevant_axis, title, plot_characteristics):
-    """ Set title of plot axis.
+    """
+    Set the title of a plot axis.
 
-        :param read_instance: Instance of class Dashboard or Report
-        :type read_instance: object
-        :param relevant_axis: Axis to plot on 
-        :type relevant_axis: object
-        :param title: axis title
-        :type title: str
-        :param plot_characteristics: Plot characteristics  
-        :type plot_characteristics: dict
-    """    
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard or Report.
+    relevant_axis : object, list or dict
+        Axis (or axes) to set the title for. Can be a single axis, a list of axes,
+        or a dict mapping temporal resolutions to axes.
+    title : str
+        Title to set on the axis.
+    plot_characteristics : dict
+        Plot characteristics containing formatting options for the axis title.
+    """
 
     # return if title is empty str
     if title == '':
@@ -493,21 +502,24 @@ def set_axis_title(read_instance, relevant_axis, title, plot_characteristics):
     for relevant_axis in axs_to_set_title:
         relevant_axis.set_title(**axis_title_characteristics)
 
-
 def set_axis_label(relevant_axis, label_ax, label, plot_characteristics, 
                    relevant_temporal_resolutions=None):
-    """ Set label of plot axis.
+    """
+    Set the label of a plot axis.
 
-        :param relevant_axis: Axis to plot on 
-        :type relevant_axis: object
-        :param label_ax: which axis to set label of
-        :type label_ax: str
-        :param label: axis label
-        :type label: str
-        :param plot_characteristics: Plot characteristics  
-        :type plot_characteristics: dict
-        :param relevant_temporal_resolutions: list of relevant temporal resolutions  
-        :type relevant_temporal_resolutions: list
+    Parameters
+    ----------
+    relevant_axis : object, list or dict
+        Axis (or axes) to set the label for. Can be a single axis or a dict mapping
+        temporal resolutions to axes.
+    label_ax : str
+        Which axis to set the label for: 'x' or 'y'.
+    label : str
+        Label text to set.
+    plot_characteristics : dict
+        Plot characteristics containing formatting options under 'xlabel' or 'ylabel'.
+    relevant_temporal_resolutions : list, optional
+        List of temporal resolutions to include when setting labels on dict axes.
     """
 
     # return if label is empty str
@@ -542,35 +554,39 @@ def set_axis_label(relevant_axis, label_ax, label, plot_characteristics,
             axis_label_characteristics['ylabel'] = label
             relevant_axis.set_ylabel(**axis_label_characteristics)
 
-
 def format_plot_options(read_instance, canvas_instance, relevant_axs, relevant_data_labels, networkspeci, 
                         base_plot_type, plot_type, plot_options, map_extent=False, chunk_stat=None, 
                         chunk_resolution=None):
-    """ Function that handles formatting of a plot axis,
-        based on given plot options.
+    """ 
+    Function that handles formatting of a plot axis,
+    based on given plot options.
 
-        :param read_instance: Instance of class Dashboard or Report
-        :type read_instance: object
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
-        :param relevant_axs: relevant axes
-        :type relevant_axs: list
-        :param relevant_data_labels: names of plotted data arrays per axis
-        :type relevant_data_labels: list
-        :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
-        :type networkspeci: str
-        :param base_plot_type: Plot type, without statistical information
-        :type base_plot_type: str
-        :param plot_type: plot type
-        :type plot_type: str
-        :param plot_options: Options to configure plots
-        :type plot_options: list
-        :param map_extent: list of map extent bounds [lonmin, lonmax, latmin, latmax]
-        :type map_extent: list
-        :param chunk_stat: Chunk statistic
-        :type chunk_stat: str
-        :param chunk_resolution: Chunk resolution
-        :type chunk_resolution: str
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard or Report containing data and configuration.
+    canvas_instance : object
+        Instance of class Canvas or Report providing plot characteristics and layout.
+    relevant_axs : list, dict or object
+        Axes to apply formatting to. Can be a single axis, a list of axes, 
+        or a dictionary of sub-axes for periodic plots.
+    relevant_data_labels : list
+        Data labels corresponding to plotted data for each axis.
+    networkspeci : str
+        Current networkspeci identifier.
+    base_plot_type : str
+        Base plot type without statistical information.
+    plot_type : str
+        Specific plot type with optional statistical information.
+    plot_options : list
+        List of plot options to apply, such as 'logx', 'logy', 'domain', 'annotate', 
+        'regression', 'smooth', 'threshold'.
+    map_extent : list, optional
+        Spatial bounds for map plots [lon_min, lon_max, lat_min, lat_max].
+    chunk_stat : str, optional
+        Chunk statistic to use for smoothing or other statistical plot enhancements.
+    chunk_resolution : str, optional
+        Chunk resolution (e.g., 'day', 'month') for statistical calculations.
     """
 
     # transform axis dict or str to list
@@ -646,31 +662,35 @@ def format_plot_options(read_instance, canvas_instance, relevant_axs, relevant_d
             threshold(read_instance, canvas_instance, relevant_ax, networkspeci, base_plot_type,
                       canvas_instance.plot_characteristics[plot_type])
             
-            
 def format_axis(read_instance, canvas_instance, ax, base_plot_type, plot_characteristics, col_ii=0, last_valid_row=True, 
                 last_row_on_page=True, map_extent=False, relevant_temporal_resolutions=None):
-    """ Format a plotting axis.
+    """
+    Format a plotting axis.
     
-        :param read_instance: Instance of class Dashboard or Report
-        :type read_instance: object
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
-        :param ax: axis object
-        :type ax: object
-        :param base_plot_type: plot to make, without statistical information
-        :type base_plot_type: str  
-        :param plot_characteristics: plot characteristics
-        :type plot_characteristics: dict
-        :param col_ii: column index (for reports)
-        :type col_ii: int
-        :param last_valid_row: boolean informing if last valid row to plot on (for reports)
-        :type last_valid_row: boolean
-        :param last_row_on_page: boolean informing if last valid row on page (for reports)
-        :type last_row_on_page: boolean
-        :param map_extent: list of map extent bounds [lonmin, lonmax, latmin, latmax]
-        :type map_extent: list
-        :param relevant_temporal_resolutions: list of relevant temporal resolutions
-        :type relevant_temporal_resolutions: list
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard or Report.
+    canvas_instance : object
+        Instance of class Canvas or Report.
+    relevant_axs : list, object or dict
+        Axes to format.
+    relevant_data_labels : list
+        Data labels corresponding to each axis.
+    networkspeci : str
+        Current networkspeci.
+    base_plot_type : str
+        Base plot type without statistical information.
+    plot_type : str
+        Specific plot type.
+    plot_options : list
+        List of plot options to apply.
+    map_extent : list or bool, optional
+        Map extent bounds [lonmin, lonmax, latmin, latmax] for geographic plots.
+    chunk_stat : str, optional
+        Chunk statistic, if relevant.
+    chunk_resolution : str, optional
+        Chunk resolution, if relevant.
     """
 
     # define default argument mutables
@@ -834,14 +854,22 @@ def format_axis(read_instance, canvas_instance, ax, base_plot_type, plot_charact
             ax_to_format.set_yticks(**plot_characteristics['yticks'])
 
 def get_no_margin_lim(ax, lim):
-    """ Get true limits of plot area (with no margins)
+    """
+    Get true limits of a plot area without including axis margins.
 
-        :param ax: axis to get limits
-        :type ax: object
-        :param lim: xlim or ylim
-        :type lim: str
-        :return: lower_lim, upper_lim
-        :rtype: float32, float32
+    Parameters
+    ----------
+    ax : object
+        Matplotlib axis object to get limits from.
+    lim : str
+        'xlim' or 'ylim' specifying which axis to compute.
+
+    Returns
+    -------
+    lower_lim : float
+        Lower limit of the axis without margin.
+    upper_lim : float
+        Upper limit of the axis without margin.
     """
 
     # xlim
@@ -860,18 +888,25 @@ def get_no_margin_lim(ax, lim):
 
     return lower_lim, upper_lim
 
-
 def get_data_lims(ax, lim, plot_options):
-    """ Get x and y limits of a plot axis from plotted data
+    """
+    Get x or y limits of a plot axis based on the data actually plotted.
 
-        :param ax: axis to get limits
-        :type ax: object
-        :param lim: xlim or ylim
-        :type lim: str
-        :param plot_options: Options to configure plots
-        :type plot_options: list
-        return: lower_lim, upper_lim
-        :rtype: float32, float32
+    Parameters
+    ----------
+    ax : object
+        Matplotlib axis object.
+    lim : str
+        'xlim' or 'ylim' specifying which axis to get limits for.
+    plot_options : list
+        Options for the plot.
+
+    Returns
+    -------
+    lower_lim : float
+        Minimum value along the axis.
+    upper_lim : float
+        Maximum value along the axis.
     """
 
     # get min and max values for axis
@@ -901,16 +936,22 @@ def get_data_lims(ax, lim, plot_options):
         upper_lim = np.nanmax(lines)
         return lower_lim, upper_lim
 
-
 def log_validity(ax, log_ax):
-    """ Determine if log operation for a given axes is valid (no values < 0).
-    
-        :param ax: relevant axis
-        :type ax: object
-        :param log_ax: which axis to log
-        :type log_ax: str
-        :return: validity to log axis
-        :rtype: boolean
+    """
+    Determine if a log scale is valid for the given axis 
+    (i.e., no data ≤ 0 on that axis).
+
+    Parameters
+    ----------
+    ax : object
+        Matplotlib axis object.
+    log_ax : str
+        'logx' or 'logy', specifying which axis to check.
+
+    Returns
+    -------
+    bool
+        True if log scale is valid, False otherwise.
     """
 
     if log_ax == 'logx':

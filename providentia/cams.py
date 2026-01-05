@@ -27,12 +27,34 @@ ghost_cams_variables = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'i
 cams_stream = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_stream.yaml')))
 cams_species_units = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_species_units.yaml')))
 
-class Cams:
+class Cams(object):
+    """
+    Class that manages the interaction with the Copernicus Atmosphere Data Store
+    to retrieve CAMS datasets, validate requested models and dates, and
+    convert downloaded NetCDF files into the Providentia-compatible format.
+    """
 
     def __init__(self, download_instance):
+        """
+        Parameters
+        ----------
+        download_instance : providentia.Download
+            Download controller instance. 
+        """
+
         self.download_instance = download_instance
 
     def print_request(self, dataset, request):
+        """
+        Show a formatted representation of a CAMS request dictionary.
+
+        Parameters
+        ----------
+        dataset : str
+            Name of the dataset for which the request is made.
+        request : dict
+            Dictionary containing request parameters.
+        """
         
         self.download_instance.logger.info(f"dataset = '{dataset}'")
         self.download_instance.logger.info('request = {')
@@ -43,6 +65,23 @@ class Cams:
         self.download_instance.logger.info('}\n')
 
     def fetch_cams_dates(self, url, cams_dict):
+        """
+        Extract the minimum and maximum available dates for a CAMS dataset by webscrapping.
+
+        Parameters
+        ----------
+        url : str
+            URL of the CAMS dataset.
+        cams_dict : dict
+            CAMS dataset configuration dictionary.
+
+        Returns
+        -------
+        minstart : datetime.datetime
+            Minimum available date of the dataset.
+        maxend : datetime.datetime
+            Maximum available date of the dataset.
+        """
         
         # send HTTP GET request and get the text
         try:
@@ -75,6 +114,28 @@ class Cams:
         return minstart, maxend
         
     def control_dates(self, url, cams_dict, initial_check=False):
+        """
+        Check that the configured start and end dates are valid,
+        determines the minimum and maximum available dates from the CAMS service,
+        and adjusts the requested period accordingly.
+
+        Parameters
+        ----------
+        url : str
+            CAMS dataset metadata URL used to query date availability.
+        cams_dict : dict
+            Dictionary describing the CAMS dataset configuration.
+        initial_check : bool, optional
+            If True, do not show warnings.
+
+        Returns
+        -------
+        cams_start_date : datetime.datetime or None
+            Start date of the valid CAMS download period.
+        cams_end_date : datetime.datetime or None
+            End date of the valid CAMS download period.
+        """
+
         # check whether end date is bigger than start date, if not, return
         if int(self.download_instance.start_date) >= int(self.download_instance.end_date):
             msg = f'Start date ({self.download_instance.start_date}) exceeds end date ({self.download_instance.end_date}).'
@@ -110,6 +171,36 @@ class Cams:
     # TODO check that message in stream does not get repeated in the loop
     # TODO check if it is plaussible to keep this code as a separate function since there is a continue
     def create_request(self, cams_species, cams_dict, current_cams_date, next_cams_date, level, stream, url, mod_id, initial_check=False):
+        """
+        Build the request required by the Copernicus Atmosphere Data Store API.
+
+        Parameters
+        ----------
+        cams_species : str
+            CAMS variable name to request.
+        cams_dict : dict
+            CAMS dataset configuration dictionary.
+        current_cams_date : datetime.datetime
+            Start date of the request period.
+        next_cams_date : datetime.datetime
+            End date of the request period.
+        level : str
+            Variable level type, 'single' or 'multi'.
+        stream : str or None
+            CAMS data stream, 'validated' or 'interim'.
+        url : str
+            CAMS dataset URL.
+        mod_id : str or None
+            Model identifier for multi-model datasets.
+        initial_check : bool, optional
+            If True, suppress warnings related to unavailable streams.
+
+        Returns
+        -------
+        dict : request
+            Request dictionary.
+        """
+
         # create the request
         request = {"variable" : cams_species}
 
@@ -170,7 +261,16 @@ class Cams:
 
         return request
 
-    def create_cdsapirc(self, cdsapirc_path):      
+    def create_cdsapirc(self, cdsapirc_path):  
+        """
+        Create the `.cdsapirc` configuration file required for the CAMS API.
+        
+        Parameters
+        ----------
+        cdsapirc_path : str
+            Absolute path where the `.cdsapirc` file will be created.
+        """    
+
         # ask the user whether they want to create the file in the home directory
         while True:
             create_file = input(f"\n'.cdsapirc' file not found. Creating it at {cdsapirc_path}. Do you agree? ([y]/n) ").lower()
@@ -188,80 +288,125 @@ class Cams:
             self.download_instance.logger.error("Error: Cannot proceed without '.cdsapirc'. CAMS model data download requires this file.")
             sys.exit(1)
 
-    def get_model(self, cams_dict, u_count, config_modid, dataset, ensemble_options, initial_check=False):
+    def get_model(self, cams_dict, u_count, config_modid, dataset, ensemble_option, initial_check=False):
+        """
+        Determine model ID and stream from CAMS configuration.
+
+        Parameters
+        ----------
+        cams_dict : dict
+            CAMS dataset configuration dictionary.
+        u_count : int
+            Number of underscores in the model identifier defined in the configuration file.
+        config_modid : str
+            Exact model identifier as specified in the configuration file.
+        dataset : str
+            Name of the dataset to which the model belongs.
+        ensemble_option : str
+            Ensemble member specified in the configuration file.
+        initial_check : bool, optional
+            If True, suppress warnings related to unavailable streams.
+
+        Returns
+        -------
+        mod_id : str or None
+            Model identifier extracted from the configuration, None if no model applies.
+        stream : str or None
+            Stream extracted from the configuration, None if no stream applies.
+        error : bool
+            True if the configuration is invalid, False if it is valid.
+        """
+
         # determine model ID or stream
-        mod_id, stream = None, None
+        mod_id, stream, error = None, None, True
         
-        if u_count == 1: # e.g. cams_forecast
-            if 'models' in cams_dict:
-                msg = f"The model '{config_modid}' is missing the model. Please add one (e.g., '{config_modid}_ensemble')."
+        if u_count == 1:
+            # e.g. cams_forecast
+            if "models" in cams_dict:
+                msg = f"The model '{config_modid}' is missing the model. Please add one (e.g. '{config_modid}_ensemble')."
                 show_message(self.download_instance, msg, deactivate=initial_check)
-                return None, None, True
+                return mod_id, stream, error
 
         elif u_count == 2:
-            # extract last element
-            last_element = config_modid.rsplit('_', 1)[1]
+            # e.g. cams_analysis_ensemble
+            last_element = config_modid.rsplit("_", 1)[1]
 
-            if cams_dict['stream'] is True and 'models' in cams_dict: # e.g. cams_reanalysis_ensemble-regional
-                msg = f"The '{dataset}' dataset needs a model and a stream. E.g. 'cams_reanalysis_ensemble_interim')."    
+            if cams_dict.get("stream") and "models" in cams_dict:
+                msg = f"The '{dataset}' dataset needs a model and a stream. Please add one (e.g. 'cams_reanalysis_ensemble_interim')."    
                 show_message(self.download_instance, msg, deactivate=initial_check)
-                return None, None, True
-            elif 'models' in cams_dict: # e.g. cams_analysis_ensemble
-                mod_id = last_element
-                # make sure the model is available in the dataset
-                if mod_id not in cams_dict["models"]:
-                    msg = f"Cannot find the {mod_id} model in the '{dataset}' dataset."    
+                return mod_id, stream, error
+
+            if "models" in cams_dict:
+                if last_element not in cams_dict["models"]:
+                    msg = f"Cannot find the {last_element} model in the '{dataset}' dataset."    
                     show_message(self.download_instance, msg, deactivate=initial_check)
-                    return None, None, True
+                    return mod_id, stream, error
+                mod_id = last_element
             else:
-                # if there are three elements and they
                 msg = f"The '{dataset}' dataset does not admit models or streams."    
                 show_message(self.download_instance, msg, deactivate=initial_check)
-                return None, None, True
-                
+                return mod_id, stream, error
+            
         elif u_count == 3:
-
-            if not (cams_dict['stream'] is True and 'models' in cams_dict): 
-                # if there are three elements and they
+            # e.g. cams_reanalysis_ensemble_interim
+            if not (cams_dict.get("stream") and "models" in cams_dict):
                 msg = f"The '{dataset}' dataset does not admit models and streams, change the model in the configuration file."    
                 show_message(self.download_instance, msg, deactivate=initial_check)
-                return None, None, True
-            
-            # extract the last two elements
-            _, mod_id, stream = config_modid.rsplit('_', 2)
+                return mod_id, stream, error
 
-            # make sure the model is available in the dataset
+            # extract model and stream
+            _, temp_mod_id, temp_stream = config_modid.rsplit("_", 2)
+
             if mod_id not in cams_dict["models"]:
-                msg = f"Cannot find the {mod_id} model in the '{dataset}' dataset."    
+                msg = f"Cannot find the {temp_mod_id} model in the '{dataset}' dataset."    
                 show_message(self.download_instance, msg, deactivate=initial_check)
-                return None, None, True
-            
-            # make sure the stream is valid
-            if stream not in ['validated','interim']:
-                msg = f"'{stream}' is not a valid stream. Availabe streams: validated, interim."    
-                show_message(self.download_instance, msg, deactivate=initial_check)
-                return None, None, True
-            
-            # add reanalysis sufix to the stream
-            stream += '_reanalysis'
+                return mod_id, stream, error
 
-        # get error if it does not get any of the conditions
+            if temp_stream not in ["validated", "interim"]:
+                msg = f"'{temp_stream}' is not a valid stream. Availabe streams: validated, interim."    
+                show_message(self.download_instance, msg, deactivate=initial_check)
+                return mod_id, stream, error
+            
+            mod_id, stream = temp_mod_id, temp_stream
+
+            # add reanalysis suffix
+            stream += "_reanalysis"
+
         else:
             msg = f"The '{config_modid}' format is not valid."    
             show_message(self.download_instance, msg, deactivate=initial_check)
-            return None, None, True
+            return mod_id, stream, error
 
         # only ensemble options allmembers and 000 are valid
-        if ensemble_options not in ['000', 'allmembers']:
+        if ensemble_option not in ["000", "allmembers"]:
             msg = (
-            f"The current ensemble option '{ensemble_options}' is not valid for the CAMS '{dataset}' dataset."
+            f"The current ensemble option '{ensemble_option}' is not valid for the CAMS '{dataset}' dataset."
             f"It must be '000' or 'allmembers'.")            
             show_message(self.download_instance, msg, deactivate=initial_check)
-            return None, None, True
-        
-        return mod_id, stream, False
+            return mod_id, stream, error
 
+        # successful parsing
+        error = False
+        return mod_id, stream, error
+    
     def extract_date(self, input_file, prefix, domain):
+        """
+        Extract the date from a CAMS NetCDF file depending on model type and domain.
+
+        Parameters
+        ----------
+        input_file : netCDF4.Dataset or similar
+            NetCDF dataset object representing the original CAMS file.
+        prefix : str
+            Model type prefix, e.g. 'cams_analysis', 'cams_forecast' or 'cams_reanalysis'.
+        domain : str
+            Domain of the model, either 'regional' or 'global'.
+
+        Returns
+        -------
+        time_str : str
+            Extracted date as a string in 'YYYY-MM-DD' format.
+        """
         
         if prefix in ['cams_analysis','cams_forecast'] and domain == 'regional':
             time = input_file['time'].long_name.split()[-1]
@@ -275,12 +420,37 @@ class Cams:
         elif prefix == 'cams_reanalysis' and domain == 'global':
             time = input_file['valid_time'][0]
             time = datetime.fromtimestamp(int(time))
+        
+        time_str = time.strftime('%Y-%m-%d')
 
-        return time.strftime('%Y-%m-%d')
+        return time_str
 
-    def format_data(self, input_filepath, output_filepath, species, prefix, domain, resolution, final_path, cams_species, url): 
+    def format_data(self, input_filepath, output_filepath, species, prefix, domain, resolution, cams_species, url): 
+        """
+        Reformat a raw CAMS NetCDF file into a standardized
+        Providentia-compatible NetCDF.
 
-        self.download_instance.logger.info(f"Formatting {final_path}") 
+        Parameters
+        ----------
+        input_filepath : str
+            Path to the input CAMS NetCDF file.
+        output_filepath : str
+            Path where the formatted NetCDF file will be written.
+        species : str
+            Providentia species name.
+        prefix : str
+            CAMS dataset prefix (e.g. 'cams_forecast', 'cams_reanalysis').
+        domain : str
+            Spatial domain, 'global' or 'regional'.
+        resolution : str
+            Temporal resolution of the data.
+        cams_species : str
+            CAMS variable name corresponding to the Providentia species.
+        url : str
+            CAMS dataset URL
+        """
+
+        self.download_instance.logger.info(f"Formatting {output_filepath}") 
 
         # get file formatting 
         cams_providentia_map = cams_formatting[prefix][domain]
@@ -376,6 +546,26 @@ class Cams:
         input_file.close()           
 
     def split_nc_file(self, input_file_name, all_dates, cams_dict, temp_dir, prefix, domain, level):
+        """
+        Split a multi-day CAMS NetCDF forecast file into daily files.
+
+        Parameters
+        ----------
+        input_file_name : str
+            Name of the input NetCDF file to split.
+        all_dates : list of datetime.datetime
+            List of dates corresponding to forecast slices.
+        cams_dict : dict
+            CAMS dataset configuration dictionary.
+        temp_dir : str
+            Temporary directory containing the input file and output slices.
+        prefix : str
+            CAMS dataset prefix.
+        domain : str
+            Spatial domain,'global' or 'regional'.
+        level : str
+            Variable level type, 'single' or 'multi'.
+        """
 
         # get file formatting 
         cams_providentia_map = cams_formatting[prefix][domain]
@@ -442,6 +632,31 @@ class Cams:
         input_file.close()   
 
     def download_cams_model(self, model, initial_check, files_to_download=None): 
+        """
+        Download and process CAMS model data. Validates the
+        requested model configuration, checks date availability, builds ADS
+        requests, downloads CAMS NetCDF files and reformats them into
+        Providentia-compatible NetCDF outputs.
+
+        Parameters
+        ----------
+        model : str
+            CAMS model specification string in the form
+            '<dataset>_<model>_<stream>-<domain>-<ensemble>'.
+        initial_check : bool
+            If True, perform validation and file discovery without downloading
+            or formatting data.
+        files_to_download : list of str, optional
+            Subset of files to download, used to restrict downloads to specific
+            dates or files.
+
+        Returns
+        -------
+        initial_check_nc_files : list of str or None
+            List of expected output file paths when 'initial_check' is True.
+            Returns None otherwise.
+        """
+
         if not initial_check:
             # print current model
             self.download_instance.logger.info('\n'+'-'*40)
@@ -666,7 +881,7 @@ class Cams:
                             initial_check_nc_files.append(final_path)
                         else:
                             self.format_data(input_filepath, final_path, species, prefix, 
-                                            domain, resolution, final_path, cams_species, url)
+                                            domain, resolution, cams_species, url)
                         
                         # change the last downloaded file
                         self.download_instance.latest_nc_file_path = "/path/to/file"

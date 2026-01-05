@@ -8,18 +8,20 @@ from .statistics import calculate_statistic, get_z_statistic_info, exceedance_li
 from .warnings_prv import show_message
 from .plot_aux import create_statistical_timeseries
 
-
 def log_axes(relevant_axis, log_ax, plot_characteristics, undo=False):
-    """ Log plot axes.
+    """
+    Log or un-log a plot axis.
 
-        :param relevant_axis: Axis to plot on 
-        :type relevant_axis: object
-        :param log_ax: Axis to log
-        :type log_ax: str
-        :param plot_characteristics: Plot characteristics  
-        :type plot_characteristics: dict
-        :param undo: Indicates if scale needs to be set to linear
-        :type undo: boolean
+    Parameters
+    ----------
+    relevant_axis : object
+        Axis to apply the log scale on.
+    log_ax : str
+        Which axis to log. Options are 'logx' or 'logy'.
+    plot_characteristics : dict
+        Plot characteristics.
+    undo : bool, optional
+        If True, sets the axis scale back to linear. Default is False.
     """
 
     if not undo:
@@ -35,28 +37,30 @@ def log_axes(relevant_axis, log_ax, plot_characteristics, undo=False):
         
         if log_ax == 'logy':
             relevant_axis.set_yscale('linear')
-        
 
 def linear_regression(read_instance, canvas_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
                       plot_characteristics, plot_options):
-    """ Add linear regression to plot.
+    """
+    Add linear regression to plot.
 
-        :param read_instance: Instance of class Dashboard or Report
-        :type read_instance: object
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
-        :param relevant_axis: Axis to plot on 
-        :type relevant_axis: object
-        :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
-        :type networkspeci: str
-        :param data_labels: Data arrays to plot  
-        :type data_labels: list
-        :param base_plot_type: Plot type, without statistical information
-        :type base_plot_type: str
-        :param plot_characteristics: Plot characteristics  
-        :type plot_characteristics: dict
-        :param plot_options: Options to configure plots
-        :type plot_options: list
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard or Report.
+    canvas_instance : object
+        Instance of class Canvas or Report.
+    relevant_axis : object
+        Axis to plot on.
+    networkspeci : str
+        Current networkspeci (e.g. EBAS|sconco3).
+    data_labels : list
+        Data arrays to plot.
+    base_plot_type : str
+        Plot type, without statistical information.
+    plot_characteristics : dict
+        Plot characteristics.
+    plot_options : list
+        Options to configure plots.
     """
 
     # get valid data labels for networkspeci
@@ -96,31 +100,33 @@ def linear_regression(read_instance, canvas_instance, relevant_axis, networkspec
             if read_instance.mode not in ['report', 'library']:
                 canvas_instance.plotting.track_plot_elements(data_label, base_plot_type, 'regression', regression_line, bias=False)
 
-
 def smooth(read_instance, canvas_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
            plot_characteristics, plot_options, chunk_stat=None, chunk_resolution=None):
-    """ Add smooth line to plot.
+    """
+    Add smooth line to plot.
 
-        :param read_instance: Instance of class Dashboard or Report
-        :type read_instance: object
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
-        :param relevant_axis: Axis to plot on 
-        :type relevant_axis: object
-        :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
-        :type networkspeci: str
-        :param data_labels: Data arrays to plot   
-        :type data_labels: list
-        :param base_plot_type: Plot type, without statistical information
-        :type base_plot_type: str
-        :param plot_characteristics: Plot characteristics  
-        :type plot_characteristics: dict
-        :param plot_options: Options to configure plots
-        :type plot_options: list
-        :param chunk_stat: Chunk statistic
-        :type chunk_stat: str
-        :param chunk_resolution: Chunk resolution
-        :type chunk_resolution: str
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard or Report.
+    canvas_instance : object
+        Instance of class Canvas or Report.
+    relevant_axis : object
+        Axis to plot on.
+    networkspeci : str
+        Current networkspeci (e.g. EBAS|sconco3).
+    data_labels : list
+        Data arrays to plot.
+    base_plot_type : str
+        Plot type, without statistical information.
+    plot_characteristics : dict
+        Plot characteristics.
+    plot_options : list
+        Options to configure plots.
+    chunk_stat : str, optional
+        Chunk statistic for timeseries smoothing (default is None).
+    chunk_resolution : str, optional
+        Chunk resolution for timeseries smoothing (default is None).
     """
 
     # get valid data labels for networkspeci
@@ -189,24 +195,27 @@ def smooth(read_instance, canvas_instance, relevant_axis, networkspeci, data_lab
         if read_instance.mode not in ['report', 'library']:
             canvas_instance.plotting.track_plot_elements(data_label, base_plot_type, 'smooth', smooth_line, bias=bias)
 
-
 def threshold(read_instance, canvas_instance, relevant_axis, networkspeci, base_plot_type, 
               plot_characteristics):
-    """ Add threshold line/s to plot.
-
-        :param read_instance: Instance of class Dashboard or Report
-        :type read_instance: object
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
-        :param relevant_axis: Axis to plot on 
-        :type relevant_axis: object
-        :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
-        :type networkspeci: str
-        :param base_plot_type: Plot type, without statistical information
-        :type base_plot_type: str
-        :param plot_characteristics: Plot characteristics  
-        :type plot_characteristics: dict
     """
+    Add threshold line(s) to a plot.
+
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard or Report.
+    canvas_instance : object
+        Instance of class Canvas or Report.
+    relevant_axis : object
+        Axis to plot on.
+    networkspeci : str
+        Current networkspeci (e.g. EBAS|sconco3).
+    base_plot_type : str
+        Plot type, without statistical information.
+    plot_characteristics : dict
+        Plot characteristics.
+    """
+
     # get exceendance value
     threshold = exceedance_lim(read_instance, networkspeci)
 
@@ -224,29 +233,31 @@ def threshold(read_instance, canvas_instance, relevant_axis, networkspeci, base_
     if read_instance.mode not in ['report', 'library']:
         canvas_instance.plotting.track_plot_elements('ALL', base_plot_type, 'threshold', [threshold_line], bias=False)
 
-
 def annotation(read_instance, canvas_instance, relevant_axis, networkspeci, data_labels, base_plot_type, 
                plot_characteristics, plot_options, plot_z_statistic_sign='absolute'):
-    """ Add statistical annotations to plot.
+    """
+    Add statistical annotations to a plot.
 
-        :param read_instance: Instance of class Dashboard or Report
-        :type read_instance: object
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
-        :param relevant_axis: Axis to plot on 
-        :type relevant_axis: object
-        :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
-        :type networkspeci: str
-        :param data_labels: Data arrays to plot 
-        :type data_labels: list
-        :param base_plot_type: Plot type, without statistical information
-        :type base_plot_type: str
-        :param plot_characteristics: Plot characteristics  
-        :type plot_characteristics: dict
-        :param plot_options: Options to configure plots
-        :type plot_options: list
-        :param plot_z_statistic_sign: sign of plotted z statistic (absolute or bias)
-        :type plot_z_statistic_sign: str
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard or Report.
+    canvas_instance : object
+        Instance of class Canvas or Report.
+    relevant_axis : object
+        Axis to plot on.
+    networkspeci : str
+        Current networkspeci (e.g. EBAS|sconco3).
+    data_labels : list
+        Data arrays to plot.
+    base_plot_type : str
+        Plot type, without statistical information.
+    plot_characteristics : dict
+        Plot characteristics.
+    plot_options : list
+        Options to configure plots.
+    plot_z_statistic_sign : str, optional
+        Sign of plotted z statistic, either 'absolute' or 'bias' (default is 'absolute').
     """
 
     # initialise list of strs to annotate
@@ -363,18 +374,20 @@ def annotation(read_instance, canvas_instance, relevant_axis, networkspeci, data
         msg = '{} could not be annotated'.format(base_plot_type)
         show_message(read_instance, msg)
 
-
 def model_domain(canvas_instance, relevant_axis, data_labels, map_extent):
-    """ Plot model domain extents on map
+    """
+    Plot model domain extents on a map.
 
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
-        :param relevant_axis: Axis to plot on 
-        :type relevant_axis: object
-        :param data_labels: Data arrays to plot 
-        :type data_labels: list
-        :param map_extent: list of map extent bounds [lonmin, lonmax, latmin, latmax]
-        :type map_extent: list
+    Parameters
+    ----------
+    canvas_instance : object
+        Instance of class Canvas or Report.
+    relevant_axis : object
+        Axis to plot on.
+    data_labels : list
+        Data arrays to plot.
+    map_extent : list
+        List of map extent bounds [lonmin, lonmax, latmin, latmax].
     """
 
     #get model domain polygons

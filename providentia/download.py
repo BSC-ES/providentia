@@ -32,7 +32,17 @@ mapping_species =  yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'inter
 dl_hpc = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'dl_hpc.yaml')))
 
 class Download(object):
+    """Main class responsible for handling Providentia data downloads."""
+
     def __init__(self, **kwargs):
+        """
+        Initialize Providentia download mode.
+
+        Parameters
+        ----------
+        **kwargs : dict
+            Optional command-line arguments that override default configuration values.
+        """
 
         # update self with command line arguments
         self.commandline_arguments = copy.deepcopy(kwargs)
@@ -115,6 +125,8 @@ class Download(object):
             self.ssh = None
 
     def run(self):
+        """Execute the Providentia download process for all configured sections."""
+        
         for section_ind, section in enumerate(self.sections):
             # update for new section parameters
             self.section = section
@@ -285,7 +297,9 @@ class Download(object):
                 self.ssh.close() 
                 self.sftp.close()
 
-    def connect(self):       
+    def connect(self): 
+        """Establish an SSH connection to a remote BSC machine for downloading data."""
+
         # initialise the paths
         self.ghost_remote_obs_path = data_paths[self.remote_machine]["ghost_root"]
         self.nonghost_remote_obs_path = data_paths[self.remote_machine]["nonghost_root"]
@@ -395,7 +409,22 @@ class Download(object):
                 self.logger.info(f"\nRemote machine credentials saved on {join(PROVIDENTIA_ROOT, '.env')}")
                     
     def select_files_to_download(self, nc_files_to_download):
-        """ Returns the files that are not already downloaded. """
+        """
+        Checks a list of files against the local filesystem and returns
+        the subset of files that are not already downloaded. 
+
+        Parameters
+        ----------
+        nc_files_to_download : list of str
+            A list of file paths intended for download.
+
+        Returns
+        -------
+        not_downloaded_files : list of str
+            A list of file paths that are either not present locally or should be 
+            re-downloaded depending on the `dl_overwrite` attribute.
+        """
+        
         # initialise list of non-downloaded files
         not_downloaded_files = []
         if nc_files_to_download:
@@ -429,6 +458,25 @@ class Download(object):
         return not_downloaded_files
 
     def download_nonghost_network(self, network, initial_check, files_to_download=None):
+        """
+        Download non-GHOST network data from a remote machine via SFTP.
+
+        Parameters
+        ----------
+        network : str
+            Name of the non-GHOST network to download.
+        initial_check : bool
+            If True, only performs a check of available files without downloading.
+            If False, downloads files and displays progress.
+        files_to_download : list of str, optional
+            Specific file paths to download. Only files in this list are considered.
+
+        Returns
+        -------
+        initial_check_nc_files : list of str
+            A list of file paths intended for download.
+        """
+                
         # check if ssh exists and check if still active, connect if not
         if (self.ssh is None) or (self.ssh.get_transport().is_active()):
             self.connect() 
@@ -553,6 +601,25 @@ class Download(object):
             return initial_check_nc_files
         
     def download_ghost_network_sftp(self, network, initial_check, files_to_download=None):
+        """
+        Download GHOST network data from a remote machine via SFTP.
+
+        Parameters
+        ----------
+        network : str
+            Name of the GHOST network to download.
+        initial_check : bool
+            If True, only performs a check of available files without downloading.
+            If False, downloads files and displays progress.
+        files_to_download : list of str, optional
+            Specific file paths to download. Only files in this list are considered.
+
+        Returns
+        -------
+        initial_check_nc_files : list of str
+            A list of file paths intended for download.
+        """
+        
         # check if ssh exists and check if still active, connect if not
         if (self.ssh is None) or (self.ssh.get_transport().is_active()):
             self.connect() 
@@ -707,6 +774,25 @@ class Download(object):
             return initial_check_nc_files
 
     def download_model(self, model, initial_check, files_to_download=None):
+        """
+        Download interpolated model data from a remote machine via SFTP.
+
+        Parameters
+        ----------
+        model : str
+            Name of the model to download.
+        initial_check : bool
+            If True, only performs a check of available files without downloading.
+            If False, downloads files and displays progress.
+        files_to_download : list of str, optional
+            Specific file paths to download. Only files in this list are considered.
+
+        Returns
+        -------
+        initial_check_nc_files : list of str
+            A list of file paths intended for download.
+        """
+         
         # check if ssh exists and check if still active, connect if not
         if (self.ssh is None) or (self.ssh.get_transport().is_active()):
             self.connect()  
@@ -908,6 +994,25 @@ class Download(object):
             return initial_check_nc_files
 
     def download_non_interpolated_model(self, model, initial_check, files_to_download=None):
+        """
+        Download non-interpolated model data from a remote machine via SFTP.
+
+        Parameters
+        ----------
+        model : str
+            Name of the model to download.
+        initial_check : bool
+            If True, only performs a check of available files without downloading.
+            If False, downloads files and displays progress.
+        files_to_download : list of str, optional
+            Specific file paths to download. Only files in this list are considered.
+
+        Returns
+        -------
+        initial_check_nc_files : list of str
+            A list of file paths intended for download.
+        """
+
         # check if ssh exists and check if still active, connect if not
         if (self.ssh is None) or (self.ssh.get_transport().is_active()):
             self.connect()  
@@ -972,7 +1077,7 @@ class Download(object):
                 if model_exists is False:
                     msg += f"There is no data available for the {mod_id} model with the {domain} domain in none of the paths specified in {join('settings', 'interp_models.yaml')} in the remote machine ({self.remote_machine}). "
 
-        # if model was not in the list, or any of the paths were available
+        # if model was not in the list or any of the paths were available
         # or there was no valid path model combination then search in the gpfs directory
         if model_exists is False:
             # get all possible models
@@ -1184,6 +1289,25 @@ class Download(object):
             show_message(self, msg, deactivate=initial_check)
             
     def copy_non_interpolated_model(self, model, initial_check, files_to_download=None):
+        """
+        Copy from esarchive to gpfs interpolated model data from a remote machine via SFTP.
+
+        Parameters
+        ----------
+        model : str
+            Name of the model to download.
+        initial_check : bool
+            If True, only performs a check of available files without downloading.
+            If False, downloads files and displays progress.
+        files_to_download : list of str, optional
+            Specific file paths to download. Only files in this list are considered.
+
+        Returns
+        -------
+        initial_check_nc_files : list of str
+            A list of file paths intended for download.
+        """
+
         if not initial_check:
             # print current model
             self.logger.info('\n'+'-'*40)
@@ -1453,6 +1577,8 @@ class Download(object):
             show_message(self, msg, deactivate=initial_check)
 
     def get_all_networks(self): 
+        """Populate the `self.network` attribute with all the available networks."""
+
         if self.reading_ghost:
             if self.dl_ghost_source == 'bsc':
                 self.network = self.ghost_available_networks
@@ -1464,6 +1590,8 @@ class Download(object):
             self.network = self.nonghost_available_networks
     
     def get_all_models(self):
+        """Populate the `self.experiments` attribute with all the available models."""
+        
         # download all interpolated models
         if self.dl_interpolated is True:
             # check if ssh exists and check if still active, connect if not
@@ -1488,6 +1616,20 @@ class Download(object):
         self.experiments = dict(zip(model_list,model_list))
 
     def get_valid_nc_files_in_date_range(self, nc_files):
+        """
+        Filter NetCDF files by the object's date range.
+
+        Parameters
+        ----------
+        nc_files : list of str
+            List of NetCDF filenames to filter.
+
+        Returns
+        -------
+        valid_nc_files : list of str
+            Subset of `nc_files` whose dates fall within the date range.
+        """
+
         valid_nc_files = []
         for nc_file in sorted(nc_files):
             if ".nc" in nc_file:
@@ -1505,12 +1647,33 @@ class Download(object):
         return valid_nc_files        
 
     def check_time(self, size, file_size):
+        """
+        Monitor download time and abort if a timeout is exceeded.
+
+        Parameters
+        ----------
+        size : int
+            Number of bytes transferred so far.
+        file_size : int
+            Total size of the file being downloaded.
+        """
+         
         if (time.time() - self.ncfile_dl_start_time) > self.timeoutLimit:
             error = 'Download timeout, try later.'
             self.logger.error(error)
             sys.exit(1)
             
     def sighandler(self, *unused):
+        """
+        Handle keyboard interrupts and perform cleanup before exiting.
+
+        Parameters
+        ----------
+        *unused : tuple
+            Positional arguments required by the signal handler interface.
+            These arguments are not used.
+        """
+
         self.logger.info('\nKeyboard Interrupt. Stopping execution.')
         
         # close connection, if it exists
@@ -1545,7 +1708,14 @@ class Download(object):
         sys.exit()
 
 def main(**kwargs):
-    """ Main function when running download function. """
+    """
+    Initialize the download environment and launch the download workflow.
+    
+    Parameters
+    ----------
+    **kwargs
+        Optional command-line arguments that override default configuration values.
+    """
 
     download = Download(**kwargs)
     download.run()

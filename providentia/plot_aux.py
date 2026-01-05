@@ -26,8 +26,18 @@ from .statistics import calculate_statistic, get_z_statistic_sign
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 def get_AERONET_sizedist_bin_radius(species):
-    """ Get AERONET size distribution bin radius for 
-        a given species.
+    """
+    Get AERONET size distribution bin radius for a given species.
+
+    Parameters
+    ----------
+    species : str
+        Name of the species, e.g. 'vconcaerobin1'.
+
+    Returns
+    -------
+    str
+        The radius corresponding to the given species as a string.
     """
 
     radius_per_species = {'vconcaerobin1': '0.05',
@@ -57,8 +67,20 @@ def get_AERONET_sizedist_bin_radius(species):
     return radius_per_species[species] 
 
 def get_multispecies_aliases(networkspecies):
-    """ Map networkspecies to networkspecies aliases.
-        Also get label for alias.   
+    """
+    Map networkspecies to networkspecies aliases. Also get label for alias.
+    
+    Parameters
+    ----------
+    networkspecies : list of str
+        List of networkspecies names to map.
+
+    Returns
+    -------
+    networkspecies_aliases : list of str
+        List of aliases corresponding to each networkspecies.
+    unique_label : str
+        Unique label corresponding to the mapped species.
     """
 
     multispecies_labels =  {'vconcaerobin1': 'Radius [µm]',
@@ -98,12 +120,14 @@ def get_multispecies_aliases(networkspecies):
 
     return networkspecies_aliases, unique_label
 
-
 def temp_axis_dict():
-    """ Return temporal mapping as a dictionary used for the plots.
-
-        :return: Numbering of months/days
-        :rtype: dict
+    """ 
+    Return temporal mapping as a dictionary used for the plots.
+        
+    Returns
+    -------
+    map_dict : dict
+        Numbering of months/days
     """
 
     map_dict = {'short': {'dayofweek': {0: 'M', 1: 'T', 2: 'W', 3: 'T', 4: 'F', 5: 'S', 6: 'S'},
@@ -118,53 +142,73 @@ def temp_axis_dict():
 
     return map_dict
 
-
 def periodic_xticks():
-    """ Return xticks for periodic subplots.
-
-        :return: Dictionary of xticks per temporal resolution
-        :rtype: dict
     """
+    Return xticks for periodic subplots based on temporal resolution.
 
-    return {'hour': np.arange(24, dtype=np.int8), 
+    Returns
+    -------
+    xticks : dict
+        Dictionary of xticks per temporal resolution
+    """
+    
+    xticks = {'hour': np.arange(24, dtype=np.int8), 
             'dayofweek': np.arange(7, dtype=np.int8), 
             'month': np.arange(1, 13, dtype=np.int8)}
 
+    return xticks
+
 
 def periodic_labels():
-    """ Return axes labels for periodic subplots.
+    """
+    Return axes labels for periodic subplots.
 
-        :return: Axes labels
-        :rtype: dict
+    Returns
+    -------
+    axes_labels : dict
+        Axes labels per temporal resolution.
     """
 
-    return {'hour':'H', 'dayofweek':'DoW', 'month':'M'}
+    axes_labels = {'hour':'H', 'dayofweek':'DoW', 'month':'M'}
+
+    return axes_labels
 
 
 def get_land_polygon_resolution(selection):
-    """ Get resolution of land polygons to plot on map.
+    """
+    Get resolution of land polygons to plot on map.
 
-        :param selection: Selected temporal resolution
-        :type resolution: str
-        :return: Selected land polygon resolution
-        :rtype: list
+    Parameters
+    ----------
+    selection : str
+        Selected temporal resolution.
+
+    Returns
+    -------
+    resolution : str
+        Selected land polygon resolution.
     """
     
     land_polygon_resolutions = {'low': '110m','medium': '50m','high': '10m'}
+    resolution = land_polygon_resolutions[selection]
     
-    return land_polygon_resolutions[selection]
-
+    return resolution
 
 def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels_to_add=None, daily_forecast=False):
     """
-    Function that updates plotting parameters (colour, zorder, and grid edges) 
+    Update plotting parameters (colour, zorder, and grid edges) 
     for data labels in a Report or Dashboard instance.
 
-    :param instance: Instance of class Report or Dashboard
-    :type instance: object
-    :param data_labels_to_remove: List of data labels to remove from plotting parameters
-    :param data_labels_to_add: List of data labels to add/update plotting parameters
-    :param daily_forecast: Boolean indicating whether daily forecast adjustments are needed
+    Parameters
+    ----------
+    instance : object
+        Instance of class Report or Dashboard.
+    data_labels_to_remove : list, optional
+        List of data labels to remove from plotting parameters.
+    data_labels_to_add : list, optional
+        List of data labels to add/update plotting parameters.
+    daily_forecast : bool, optional
+        Indicates whether daily forecast adjustments are needed.
     """
 
     # Reset plotting parameters if no labels to add or remove are specified
@@ -266,7 +310,6 @@ def update_plotting_parameters(instance, data_labels_to_remove=None, data_labels
             # Update count of models
             model_ind += 1
 
-
 def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott', xgrid=None):
     """
     A fft-based Gaussian kernel density estimate (KDE)
@@ -275,66 +318,35 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
     Note that this is a different use case than scipy's original
     scipy.stats.kde.gaussian_kde
 
-    IMPLEMENTATION
-    --------------
+    Parameters
+    ----------
+    xin : ndarray, shape (n,)
+        1D array of data samples.
+    gridsize : int, optional
+        Size of the output grid (default is 1024).
+    extents : tuple of float, optional
+        Tuple of (xmin, xmax) specifying the range of the output grid.
+        Defaults to the extent of the input data.
+    weights : ndarray, shape (n,), optional
+        Weights for each sample. If None, all samples are weighted equally.
+    adjust : float, optional
+        Adjustment factor for bandwidth. Bandwidth becomes `bw * adjust`.
+    bw : {'scott', 'silverman'}, optional
+        Method used to calculate bandwidth (default is 'scott').
+    xgrid : ndarray, shape (n,), optional
+        If provided, this grid will be used for KDE evaluation. Overrides `gridsize` and `extents`.
 
-    Performs a gaussian kernel density estimate over a regular grid using a
-    convolution of the gaussian kernel with a histogram of the data.
-
-    It computes the sparse  histogram of the data samples where
-    *x* is a 1-D sequence of the same length. If *weights* is None
-    (default), this is a histogram of the number of occurences of the
-    observations at (x[i]).
-    histogram of the data is a faster implementation than numpy.histogram as it
-    avoids intermediate copies and excessive memory usage!
-
-    This function is typically *several orders of magnitude faster* than
-    scipy.stats.kde.gaussian_kde.  For large (>1e7) numbers of points, it
-    produces an essentially identical result.
-
-    Boundary conditions on the data is corrected by using a symmetric /
-    reflection condition. Hence the limits of the dataset does not affect the
-    pdf estimate.
-
-    INPUTS
-    ------
-
-        xin:  ndarray[ndim=1]
-            The 1D data samples
-
-        gridsize: int
-            A nx integer of the size of the output grid (default: 1024)
-
-        extents: (xmin, xmax) tuple
-            tuple of the extents of output grid (default: extent of input data)
-
-        weights: ndarray[ndim=1]
-            An array of the same shape as x that weights each sample x_i
-            by w_i.  Defaults to an array of ones the same size as x (default: None)
-
-        adjust : float
-            An adjustment factor for the bw. Bandwidth becomes bw * adjust.
-
-        bw: str
-            The method used to calculate the estimator bandwidth. 
-            This can be 'scott' or 'silverman'(default: 'scott')
-
-        xgrid: ndarray(ndim=1)
-            The output grid (if this is provided gridsize and extents are ignored).
-
-    OUTPUTS
+    Returns
     -------
-        grid_points: ndarray[ndim=1]
-            Grid points to sample density estimates
-
-        kde: ndarray[ndim=1]
-            A gridded 1D kernel density estimate of input data samples at grid points
-
+    grid_points : ndarray, shape (gridsize,)
+        Grid points where the KDE is evaluated. Returned only if `xgrid` is None.
+    kde : ndarray, shape (gridsize,)
+        KDE evaluated at `grid_points` or `xgrid`.
     """
-    # Variable check
+    # variable check
     x = np.squeeze(np.asarray(xin))
     
-    # Default extents are the extent of the data
+    # default extents are the extent of the data
     if xgrid is not None:
         xmin, xmax = xgrid.min(), xgrid.max()
         x = x[ (x <= xmax) & (x >= xmin) ]
@@ -356,8 +368,7 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
             error = 'Input weights must be an array of the same size as xin. '
             return error
 
-    # Optimize gridsize ------------------------------------------------------
-    # Make grid and discretize the data and round it to the next power of 2
+    # make grid and discretize the data and round it to the next power of 2
     # to optimize with the fft usage
     # ensure minimum gridsize of 1024 points
     if xgrid is None:
@@ -368,17 +379,17 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
     else:
         nx = len(xgrid)
 
-    # Make the sparse histogram -------------------------------------------
+    # make the sparse histogram
     dx = (xmax - xmin) / (nx - 1)
 
-    # Basically, this is just doing what np.digitize does with one less copy
+    # basically, this is just doing what np.digitize does with one less copy
     xyi = x - xmin
     xyi /= dx
     xyi = np.floor(xyi, xyi)
     xyi = np.vstack((xyi, np.zeros(n, dtype=int)))
 
-    # Next, make a histogram of x
-    # Exploit a sparse coo_matrix avoiding np.histogram due to excessive
+    # next, make a histogram of x
+    # exploit a sparse coo_matrix avoiding np.histogram due to excessive
     # memory usage with many points
     try:
         grid = coo_matrix((weights, xyi), shape=(nx, 1)).toarray()
@@ -386,7 +397,7 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
         error = 'Too many zeros. '
         return error
 
-    # Kernel Preliminary Calculations ---------------------------------------
+    # Kernel Preliminary Calculations 
     std_x = np.std(xyi[0])
 
     # Scaling factor for bandwidth
@@ -395,8 +406,8 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
     elif bw == 'silverman':
         bw_factor =  ((n * 3 / 4.)**(-1. / 5)) * adjust 
 
-    # Make the gaussian kernel ---------------------------------------------
-    # First, determine the bandwidth using defined bandwidth estimator rule
+    # make the gaussian kernel
+    # first, determine the bandwidth using defined bandwidth estimator rule
     kern_nx = int(np.round(bw_factor * 2 * np.pi * std_x))
 
     # If bandwidth is 0, skip plot for current data label
@@ -409,20 +420,18 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
     # Then evaluate the gaussian function on the kernel grid
     kernel = np.reshape(gaussian(kern_nx, bw_factor * std_x), (kern_nx, 1))
 
-    #---- Produce the kernel density estimate --------------------------------
-
-    # Convolve the histogram with the gaussian kernel
+    # convolve the histogram with the gaussian kernel
     # use symmetric padding to correct for data boundaries in the kde
     npad = np.min((nx, 2 * kern_nx))
     grid = np.vstack( [grid[npad: 0: -1], grid, grid[nx: nx - npad: -1]] )
     grid = convolve(grid, kernel, mode='same')[npad: npad + nx]
 
-    # Normalization factor to divide result by so that units are in the same
+    # normalization factor to divide result by so that units are in the same
     # units as scipy.stats.kde.gaussian_kde's output.
     norm_factor = 2 * np.pi * std_x * std_x * bw_factor ** 2
     norm_factor = n * dx * np.sqrt(norm_factor)
 
-    # Normalize the result
+    # normalize the result
     grid /= norm_factor
 
     # return grid points and estimated densities 
@@ -431,16 +440,22 @@ def kde_fft(xin, gridsize=1024, extents=None, weights=None, adjust=1., bw='scott
     else:
         return np.squeeze(grid)
 
-
 def round_decimal_places(x, decimal_places):
-    """ Round x to decimal places
+    """
+    Round a number to a specified number of decimal places.
 
-    :param x: Value
-    :type x: float
-    :param decimal_places: Desired number of decimal places
-    :type decimal_places: int
-    :return: Rounded value
-    :rtype: str
+    Parameters
+    ----------
+    x : float
+        Value to round.
+    decimal_places : int
+        Desired number of decimal places.
+
+    Returns
+    -------
+    str
+        Rounded value as a string. Uses scientific notation if necessary.
+        Returns `'nan'` if input is NaN.
     """
 
     # if cell value is not nan
@@ -458,15 +473,17 @@ def round_decimal_places(x, decimal_places):
     else:
         return 'nan'
 
-
 def merge_cells(table, cells):
     """
-    Merge cells in matplotlib.Table. Reference: https://stackoverflow.com/a/53819765/12684122.
+    Merge cells in a matplotlib Table.
+    Reference: https://stackoverflow.com/a/53819765/12684122
 
-    :param table: Table
-    :type table: matplotlib.Table
-    :param cells: Cells to merge in table coordinates, e.g. [(0,1), (0,0), (0,2)]
-    :type cells: list
+    Parameters
+    ----------
+    table : matplotlib.Table
+        The table object containing the cells.
+    cells : list of tuple
+        List of table coordinates to merge, e.g. [(0, 1), (0, 0), (0, 2)].
     """
 
     cells_array = [np.asarray(c) for c in cells]
@@ -498,16 +515,33 @@ def merge_cells(table, cells):
     for txt in txts[1:]:
         txt.set_visible(False)
 
-
 def get_taylor_diagram_ghelper_info(reference_stddev, plot_characteristics, extend=False):
-    """ Make Taylor diagram plot axis extremes and labels. 
-        
-        :param reference_stddev: Reference standard deviation to set the limits
-        :type reference_stddev: float
-        :param plot_characteristics: Plot characteristics  
-        :type plot_characteristics: dict
-        :param extend: Indicates if plots needs to show negative correlations
-        :type undo: boolean
+    """
+    Compute Taylor diagram axis extremes and labels.
+
+    Parameters
+    ----------
+    reference_stddev : float
+        Reference standard deviation used to set the limits.
+    plot_characteristics : dict
+        Dictionary containing plot characteristics.
+    extend : bool, optional
+        If True, the diagram shows negative correlations; otherwise, only positive correlations are shown (default is False).
+
+    Returns
+    -------
+    tmin : float
+        Minimum angle (radians) for the polar plot.
+    tmax : float
+        Maximum angle (radians) for the polar plot.
+    smin : float
+        Minimum standard deviation for the plot axis.
+    smax : float
+        Maximum standard deviation for the plot axis.
+    gl1 : matplotlib.ticker.FixedLocator
+        Locator for correlation labels.
+    tf1 : matplotlib.ticker.DictFormatter
+        Formatter for correlation labels.
     """
 
     tmin = 0
@@ -538,16 +572,24 @@ def get_taylor_diagram_ghelper_info(reference_stddev, plot_characteristics, exte
 
     return tmin, tmax, smin, smax, gl1, tf1
 
-
 def get_taylor_diagram_ghelper(reference_stddev, plot_characteristics, extend=False):
-    """ Make Taylor diagram plot grid helper. 
+    """
+    Create a Taylor diagram grid helper.
 
-        :param reference_stddev: Reference standard deviation to set the limits
-        :type reference_stddev: float
-        :param plot_characteristics: Plot characteristics  
-        :type plot_characteristics: dict
-        :param extend: Indicates if plots needs to show negative correlations
-        :type undo: boolean
+    Parameters
+    ----------
+    reference_stddev : float
+        Reference standard deviation used to set the axis limits.
+    plot_characteristics : dict
+        Dictionary containing plot characteristics.
+    extend : bool, optional
+        If True, the diagram includes negative correlations, 
+        otherwise, only positive correlations are shown (default is False).
+
+    Returns
+    -------
+    ghelper : mpl_toolkits.axisartist.grid_finder.GridHelperCurveLinear
+        Grid helper object for the Taylor diagram.
     """
 
     # get axis extremes
@@ -562,10 +604,19 @@ def get_taylor_diagram_ghelper(reference_stddev, plot_characteristics, extend=Fa
 
     return ghelper
 
-
 def set_map_extent(canvas_instance, ax, map_extent):
-    """ Set map extent, done set_xlim and set_ylim rather than set_extent 
-        to avoid axis cutting off slightly (https://github.com/SciTools/cartopy/issues/697).
+    """
+    Set map extent, done set_xlim and set_ylim rather than set_extent 
+    to avoid axis cutting off slightly (https://github.com/SciTools/cartopy/issues/697).
+
+    Parameters
+    ----------
+    canvas_instance : object
+        Canvas instance containing the data CRS (`datacrs` attribute).
+    ax : matplotlib.axes._subplots.AxesSubplot
+        Axis on which to set the map extent.
+    map_extent : array-like, shape (4,)
+        Map extent in the form [lon_min, lon_max, lat_min, lat_max].
     """
 
     mlon = np.mean(map_extent[:2])
@@ -577,9 +628,20 @@ def set_map_extent(canvas_instance, ax, map_extent):
     ax.set_xlim(xtrm[:,0].min(), xtrm[:,0].max())
     ax.set_ylim(xtrm[:,1].min(), xtrm[:,1].max())
 
-
 def get_map_extent(canvas_instance):
-    """ Get map extent from xlim and ylim. """ 
+    """
+    Get the map extent from the xlim and ylim of a map axis.
+
+    Parameters
+    ----------
+    canvas_instance : object
+        Canvas instance containing the plot axes (`plot_axes`) and the data CRS (`datacrs`).
+
+    Returns
+    -------
+    map_extent : list of float
+        Map extent in the form [lon_min, lon_max, lat_min, lat_max].
+    """
 
     # get plot extent
     ax = canvas_instance.plot_axes['map']
@@ -635,25 +697,32 @@ def get_map_extent(canvas_instance):
 
     return map_extent
 
-
 def create_statistical_timeseries(read_instance, canvas_instance, chunk_stat, chunk_resolution, 
                                   networkspeci, cut_data_labels, bias):
-    """ Create statistical timeseries data by chunk resolution
+    """
+    Create statistical timeseries data by chunk resolution.
 
-    :param read_instance: Instance of class Dashboard or Report
-    :type read_instance: object
-    :param canvas_instance: Instance of class Canvas or Report
-    :type canvas_instance: object
-    :param chunk_stat: Chunk statistic
-    :type chunk_stat: str
-    :param chunk_resolution: Chunk resolution
-    :type chunk_resolution: str
-    :param networkspeci: Current networkspeci (e.g. EBAS|sconco3) 
-    :type networkspeci: str
-    :param cut_data_labels: Valid data labels
-    :type cut_data_labels: list
-    :return: Dataframe with statistics per day / month / year
-    :rtype: pandas dataframe
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class Dashboard or Report.
+    canvas_instance : object
+        Instance of class Canvas or Report.
+    chunk_stat : str
+        Statistic to calculate for each chunk.
+    chunk_resolution : str
+        Temporal resolution of the chunks.
+    networkspeci : str
+        Current network-species combination.
+    cut_data_labels : list
+        List of valid data labels to include in the calculation.
+    bias : bool
+        Indicates if bias statistics should be calculated.
+
+    Returns
+    -------
+    timeseries_data : pandas.DataFrame
+        DataFrame containing the calculated statistics for each chunk and data label.
     """
     
     z_statistic_sign = get_z_statistic_sign(chunk_stat)
@@ -700,21 +769,34 @@ def create_statistical_timeseries(read_instance, canvas_instance, chunk_stat, ch
     
     return timeseries_data
 
-
 def reorder_pdf_pages(read_instance, input_pdf, output_pdf, summary_multispecies_pages, 
                       station_multispecies_pages, paradigm_break_page, doi_pdf, reports_doi_path_temp):
-    """ Reorder PDF pages so that multispecies plots appear before other plots and DOI pages appear last.
+    """
+    Reorder PDF pages so that multispecies plots appear before other plots and DOI pages appear last.
 
-    :param input_pdf: Path to original PDF
-    :type input_pdf: string
-    :param output_pdf: Path to ordered PDF
-    :type output_pdf: string
-    :param summary_multispecies_pages: Pages that contain summary multispecies plots
-    :type summary_multispecies_pages: list
-    :param station_multispecies_pages: Pages that contain station multispecies plots
-    :type station_multispecies_pages: list
-    :param paradigm_break_page: Page where station plot start
-    :type paradigm_break_page: int
+    Parameters
+    ----------
+    read_instance : object
+        Instance of class containing the PDF report.
+    input_pdf : str
+        Path to the original PDF file.
+    output_pdf : str
+        Path where the reordered PDF will be saved.
+    summary_multispecies_pages : list
+        Pages that contain summary multispecies plots.
+    station_multispecies_pages : list
+        Pages that contain station multispecies plots.
+    paradigm_break_page : int
+        Page index where station plots start.
+    doi_pdf : str or None
+        Path to DOI PDF to append at the end of the reordered PDF or None.
+    reports_doi_path_temp : str
+        Temporary path for the DOI PDF used during processing.
+
+    Returns
+    -------
+    None
+        Writes a reordered PDF file to `output_pdf`.
     """
 
     if (len(read_instance.summary_multispecies_pages) > 0) or (len(read_instance.station_multispecies_pages) > 0):
@@ -766,7 +848,20 @@ def reorder_pdf_pages(read_instance, input_pdf, output_pdf, summary_multispecies
         output_pdf_file.write(outputStream)
 
 def get_hex_code(colour):
-    """ Convert from colour name or RGB decimal to hexadecimal code"""
+    """
+    Convert a colour name or RGB decimal tuple to a hexadecimal colour code.
+
+    Parameters
+    ----------
+    colour : str or tuple
+        Colour input. Can be a string representing a named 
+        colour or a tuple of RGB decimals (each between 0 and 1).
+
+    Returns
+    -------
+    hex_colour : str
+        Hexadecimal colour code.
+    """
     
     # convert from colour name to hex code
     if type(colour) == str:
@@ -779,27 +874,29 @@ def get_hex_code(colour):
 
     return hex_colour
 
-
 def get_fairmode_RV_exceendance(read_instance, speci, RV, exc_threshold, units):
-    """ Convert standard GHOST units of RV and exceedances to actual ones
+    """ 
+    Convert standard GHOST units of RV and exceedances to actual ones
 
     Parameters
     ----------
     read_instance : object
-        Instance of class Dashboard or Report
+        Instance of class Dashboard or Report.
     speci : str
-        Speci to plot
+        Speci to plot.
     RV : float
-        Reference value
+        Reference value.
     exc_threshold : float
-        Exceedance threshold
+        Exceedance threshold.
+    units : str
+        Units of the input RV and exceedance threshold.
 
     Returns
     -------
-    float
-        Reference value in GHOST units
-    float
-        Exceedance threshold in GHOST units
+    RV : float
+        Reference value in GHOST units.
+    exc_threshold : float
+        Exceedance threshold in GHOST units.
     """
 
     # get input and output units

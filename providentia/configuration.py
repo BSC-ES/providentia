@@ -44,6 +44,19 @@ class ProvConfiguration:
     """
 
     def __init__(self, read_instance, **kwargs):
+        """
+        Sets Providentia default variables, overrides them 
+        with command-line arguments and validates parameters. 
+
+        Parameters
+        ----------
+        read_instance : object
+            Stores the instance of the current mode being used, such as
+            'dashboard', 'download', 'report' or 'interpolation'.
+        **kwargs : dict
+            Additional configuration parameters, provided via
+            command-line arguments.
+        """
         
         self.read_instance = read_instance 
         
@@ -79,7 +92,24 @@ class ProvConfiguration:
             self.switch_logging()
 
     def parse_parameter(self, key, value, deactivate_warning=False):
-        """ Parse a parameter. """
+        """
+        Standardizes and transforms Providentia configuration values.
+
+        Parameters
+        ----------
+        key : str
+            Name of the configuration parameter to parse.
+        value : any
+            Value of the parameter to parse.
+        deactivate_warning : bool, optional
+            If True, suppresses user-facing warnings.
+
+        Returns
+        -------
+        parsed_value : any
+            The validated and standardized parameter value, returned as a 
+            string, list, dict or default if unspecified.
+        """
         
         # make sure we don't pass strings instead of booleans for true and false
         if value == 'true':
@@ -687,7 +717,15 @@ class ProvConfiguration:
         return value
 
     def decompose_models(self, deactivate_warning):
-        """ Get model components (model-domain-ensemble-forecast) and fill the class variables with their value."""
+        """
+        Splits each model in `experiments` into components 
+        (model ID, domain, ensemble, forecast) and validates consistency.
+
+        Parameters
+        ----------
+        deactivate_warning : bool
+            If True, suppresses user-facing warnings.
+        """
 
         # get separated model parts list
         split_models = [mod.split("-") for mod in self.read_instance.experiments]
@@ -852,7 +890,7 @@ class ProvConfiguration:
                         for altered_model in altered_models:
                             altered_model_split = altered_model.split('-')
 
-                            # determine if have just modID, or also domain and ensemble
+                            # determine if have just modID or also domain and ensemble
                             mod_id_alt = altered_model_split[0]
                             if len(altered_model_split) == 1:
                                 d_alt = None
@@ -896,7 +934,7 @@ class ProvConfiguration:
             msg = "Model aliases could not be set."
             show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
-        # if models were passed but there is no valid model, show warning, or exit in interpolation case
+        # if models were passed but there is no valid model, show warning or exit in interpolation case
         if (self.read_instance.experiments != []) and (models == {}):
             msg = 'No model data available.'
             if self.read_instance.mode == 'interpolation':
@@ -923,7 +961,7 @@ class ProvConfiguration:
 
         # check if forecast field is set correctly, otherwise throw error 
 
-        # do not allow combined, daily, or day to be selected together 
+        # do not allow combined, daily or day to be selected together 
         if len(self.read_instance.forecast) > 1:  
             combined_flag = False
             daily_flag = False
@@ -936,7 +974,7 @@ class ProvConfiguration:
                 if 'day' in fct:
                     day_flag = True
             if (combined_flag & daily_flag) or (combined_flag & day_flag) or (daily_flag & day_flag):
-                error = "Error: 'combined', 'daily', or 'day options cannot be simultaneously selected for 'forecast' variable."
+                error = "Error: 'combined', 'daily' or 'day options cannot be simultaneously selected for 'forecast' variable."
                 self.read_instance.logger.error(error)
                 sys.exit(1)
 
@@ -944,7 +982,22 @@ class ProvConfiguration:
         self.read_instance.experiments = models
 
     def check_model(self, model, deactivate_warning):
-        """ Check individual model and get list of options. """
+        """
+        Check if a model-domain-ensemble combination exists in the model 
+        root directory and return matching options.
+
+        Parameters
+        ----------
+        model : str
+            Model string in the format 'modelID-domain-ensemble'.
+        deactivate_warning : bool
+            If True, suppresses user-facing warnings.
+
+        Returns
+        -------
+        list of str
+            Available models matching the input specification.
+        """
 
         # split model
         modid, domain, ensemble = model.split('-')
@@ -988,9 +1041,22 @@ class ProvConfiguration:
     
     # TODO use inheritance in the future 
     def check_model_interpolation(self, model, deactivate_warning):     
-        """ Checks if model, domain and ensemble combination works 
-        for interpolation or the download of non-interpolated models
-        Returns if model if valid and the model type (if there is one) """
+        """
+        Verify that a model-domain-ensemble combination is valid for interpolation 
+        or for downloading non-interpolated models.
+
+        Parameters
+        ----------
+        model : str
+            Model string in the format 'modelID-domain-ensemble'.
+        deactivate_warning : bool
+            If True, suppresses user-facing warnings.
+
+        Returns
+        -------
+        list of str
+            List containing the model string if valid or empty if the model cannot be found.
+        """
 
         # get the cams possible datasets
         model_options = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'cams', 'cams_dataset.yaml')))
@@ -1071,7 +1137,23 @@ class ProvConfiguration:
         return [model]
     
     def check_model_download(self, model, deactivate_warning):
-        """ Check individual model and get list of options."""
+        """
+        Verify that a model-domain-ensemble combination is available for download 
+        from the remote machine.
+
+        Parameters
+        ----------
+        model : str
+            Model string in the format 'modelID-domain-ensemble'.
+        deactivate_warning : bool
+            If True, suppresses user-facing warnings.
+
+        Returns
+        -------
+        list of str
+            List of available models matching the input specification. 
+            May be empty if no models are found.
+        """
 
         # split model
         modid, domain, ensemble = model.split('-')
@@ -1113,7 +1195,14 @@ class ProvConfiguration:
         return mod_found        
 
     def check_validity(self, deactivate_warning=False):
-        """ Check validity of set variables after parsing. """
+        """
+        Validate all configuration variables after parsing.
+
+        Parameters
+        ----------
+        deactivate_warning : bool, optional
+            If True, suppresses user-facing warnings.
+        """
 
         # remove aliases and move the value to the destination
         for destination, option_list in self.var_defaults["aliases"].items():
@@ -1564,7 +1653,7 @@ class ProvConfiguration:
                     upper_limit = networkspeci_limit[1]
                     filter_species_fill_value = networkspeci_limit[2]
                     
-                    # modify lower bound to be :, or contain > or >=
+                    # modify lower bound to be :, contain > or >=
                     if ('<' in lower_limit):
                         msg = 'Lower bound ({}) for {} cannot contain < or <=. '.format(lower_limit, networkspeci)
                         lower_limit = '>=' + lower_limit.replace('<', '').replace('=', '')
@@ -1576,7 +1665,7 @@ class ProvConfiguration:
                         msg += 'Setting it to be {}.'.format(lower_limit)
                         show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
-                    # modify upper bound to be :, or contain < or <=
+                    # modify upper bound to be :, contain < or <=
                     if ('>' in upper_limit):
                         msg = 'Upper bound ({}) for {} cannot contain > or >=. '.format(upper_limit, networkspeci)
                         upper_limit = '<=' + upper_limit.replace('>', '').replace('=', '')
@@ -1606,6 +1695,8 @@ class ProvConfiguration:
             self.read_instance.n_cpus = default
 
     def switch_logging(self):
+        """Set up logging for the session, either to a file or to the terminal."""
+        
         # create logger
         self.read_instance.logger = logging.getLogger("")
         self.read_instance.logger.setLevel(logging.INFO) 
@@ -1650,7 +1741,27 @@ class ProvConfiguration:
             logging.getLogger("paramiko").setLevel(logging.WARNING)
 
 def read_conf(self, fpath=None):
-    """ Read configuration files. """
+    """
+    Parse a configuration file and extract sections, subsections and their attributes.
+
+    Parameters
+    ----------
+    fpath : str, optional
+        Path to the configuration file.
+
+    Returns
+    -------
+    res : dict
+        Dictionary mapping each section/subsection to its key-value attributes.
+    all_sections_modified : list of str
+        List of all section and subsection names after modification (e.g. SECTIONA, SECTIONA·Spain).
+    parent_sections : list of str
+        List of of only section names without subsections.
+    subsections_modified : list of str
+        List of all subsection names after modification (e.g. SECTIONA·Spain).
+    filenames : list of str
+        List of report filenames found in the configuration (if any).
+    """
 
     res = {}
     config = {}
@@ -1743,7 +1854,7 @@ def read_conf(self, fpath=None):
                         else:
                             copy = True
                         continue
-                    # start of next section, or commented section
+                    # start of next section or commented section
                     elif (line_strip == all_sections[i+1]) or (line_strip in all_sections_commented):
                         copy = False
                         continue
@@ -1844,7 +1955,20 @@ def read_conf(self, fpath=None):
     return res, all_sections_modified, parent_sections, subsections_modified, filenames
 
 def write_conf(section, subsection, fpath, opts):
-    """ Write configurations on file. """
+    """
+    Write configuration sections and subsections to a file.
+
+    Parameters
+    ----------
+    section : str
+        Name of the main section to write.
+    subsection : str
+        Name of the subsection to write.
+    fpath : str
+        Path to the output configuration file.
+    opts : dict
+        Dictionary containing options for each section and subsection.
+    """
 
     config = configparser.RawConfigParser()
 
@@ -1861,9 +1985,16 @@ def write_conf(section, subsection, fpath, opts):
         config.write(configfile)
 
 def load_conf(self, fpath=None):
-    """ Load existing configurations from file
-        for running Providentia.
     """
+    Load an existing Providentia configuration file and set `read_instance` 
+    attributes using using the `read_conf` function.
+
+    Parameters
+    ----------
+    fpath : str, optional
+        Path to the configuration file. If invalid, the method exits with an error.
+    """
+
     from providentia.configuration import read_conf
 
     if fpath is None:
@@ -1878,8 +2009,19 @@ def load_conf(self, fpath=None):
     self.sub_opts, self.all_sections, self.parent_section_names, self.subsection_names, self.filenames = read_conf(self, fpath)
 
 def split_options(read_instance, conf_string, separator="||"):
-    """ For the options in the configuration that define the keep and remove
-        options. Returns the values in two lists, the keeps and removes.
+    """ 
+    Parse a configuration string to extract "keep" and "remove" options.
+
+    Parameters
+    ----------
+    read_instance : object
+        Stores the instance of the current mode being used, such as
+        'dashboard', 'download', 'report' or 'interpolation'.    
+    conf_string : str
+        A string containing the keep/remove definitions, 
+        e.g. "keep:option1,option2 || remove:option3,option4".
+    separator : str, optional
+        Separator between keep and remove sections (default is "||").
     """
     
     keeps, removes = [], []

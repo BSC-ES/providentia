@@ -10,10 +10,15 @@ logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
 
 class ProvArgumentParser(object):
-    """ Class that handles the command line argument parser. """
+    """Class that handles the initialization of `configargparse.ArgumentParser`."""
 
     def __init__(self):
-        """ Initialise the arguments the parser can handle. """
+        """ 
+        Registers all Providentia command line arguments.
+
+        No parsing or validation is performed here, this method only defines
+        the interface.
+        """
 
         try:
             self.parser = ArgumentParser(description='Main parser for Providentia.')
@@ -274,11 +279,21 @@ class ProvArgumentParser(object):
         except Exception as error:
             log.error('Unhandled exception on Providentia: %s' % error, exc_info=True)
 
-    #-----------------------------------------------------------------------
-    # Parse arguments and preprocess
-    #-----------------------------------------------------------------------
     def parse_args(self, args=None):
-        """ Parse arguments given to an executable :param args:. """
+        """
+        Parse command-line arguments.
+
+        Parameters
+        ----------
+        args : list of str, optional
+            List of command-line arguments to parse. If None, arguments are
+            read from `sys.argv`.
+
+        Returns
+        -------
+        argparse.Namespace, optional
+            Parsed command-line arguments.
+        """      
 
         try:
             return self.parser.parse_args(args)

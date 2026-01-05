@@ -1,6 +1,25 @@
-""" Warning functions """
+""" Warning function """
 
 def show_message(read_instance, msg, from_conf=None, deactivate=False, print=False):
+    """
+    Display or log warning messages and direct to the correct output.
+
+    Parameters
+    ----------
+    read_instance : object
+        Stores the instance of the current mode being used, such as
+        'dashboard', 'download', 'report' or 'interpolation'. 
+    msg : str
+        Warning message to be displayed or logged.
+    from_conf : bool, optional
+        Indicates whether the message originates from a configuration file.
+        If True or None, the message may be shown in the dashboard.
+    deactivate : bool, optional
+        If True, suppresses user-facing warnings.
+    print : bool, optional
+        If True, forces the message to be logged regardless of execution mode.
+    """
+
     # variable used to control when the warnings don't need to be shown
     if deactivate:
         return

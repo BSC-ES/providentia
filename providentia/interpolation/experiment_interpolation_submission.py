@@ -33,9 +33,17 @@ temporal_resolution_map = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings',
 interp_print_variables = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'interpolation_fields.yaml')))
 
 class SubmitInterpolation(object):
-    """ Class that handles the interpolation submission. """
+    """Class that handles the interpolation submission."""
 
     def __init__(self, **kwargs):
+        """
+        Initialize Providentia interpolation mode.
+
+        Parameters
+        ----------
+         **kwargs : dict
+            Optional command-line arguments that override default configuration values.
+        """
 
         # update self with command line arguments
         self.commandline_arguments = copy.deepcopy(kwargs)
@@ -134,7 +142,7 @@ class SubmitInterpolation(object):
         self.current_line = -1
 
     def gather_arguments(self):
-        ''' Gather list of arguments for all unique tasks to process, as defined in the configuration file. '''
+        """Gather list of arguments for all unique tasks to process, as defined in the configuration file."""
 
         # create arguments list
         self.arguments = []
@@ -545,7 +553,7 @@ class SubmitInterpolation(object):
         random.shuffle(self.arguments)     
 
     def create_greasy_arguments_file(self):
-        ''' Create greasy arguments text file storing all different tasks to run by greasy. '''
+        """Create greasy arguments text file storing all different tasks to run by greasy."""
 
         # define list to store chunked argument files (to be submitted using greasy)
         argument_files = []
@@ -648,7 +656,7 @@ class SubmitInterpolation(object):
         arguments_file.close()
 
     def create_slurm_submission_script(self):
-        ''' Write a slurm submission shell script that submits a greasy job. '''
+        """Write a slurm submission shell script that submits a greasy job."""
 
         # create job_fname (unique_ID + 'sh.')
         self.job_fname = self.slurm_job_id+'.sh'
@@ -707,7 +715,7 @@ class SubmitInterpolation(object):
         submit_file.close()
 
     def create_lsf_submission_script(self):
-        """ Write a lsf submission shell script that submits a greasy job. """
+        """Write a lsf submission shell script that submits a greasy job."""
 
         # create job_fname (unique_ID + 'sh.')
         self.job_fname = self.slurm_job_id + '.sh'
@@ -758,6 +766,7 @@ class SubmitInterpolation(object):
         submit_file.close()
 
     def submit_job_greasy(self):
+        """Submit and monitor interpolation jobs using Greasy/SLURM."""
 
         # time start of interpolation jobs
         interpolation_start = time.time()
@@ -914,7 +923,7 @@ class SubmitInterpolation(object):
         self.total_jobs = len(self.commands)
 
         # launch interpolation
-        # if have no swap memory, or have just 1 cpu, run in serial without multiprocessing
+        # if have no swap memory or have just 1 cpu, run in serial without multiprocessing
         if n_cpus == 1:
             for i, cmd in enumerate(self.commands, start=1):
                 self.run_command(cmd)
@@ -959,9 +968,7 @@ class SubmitInterpolation(object):
                 print('THE FOLLOWING INTERPOLATION TASKS DID NOT FINISH: {}'.format(not_finished_tasks))
                 
     def guess_peak_RSS_per_worker(self):
-        """
-        Get conservative estimate of peak RSS per worker in GB.
-        """
+        """Get conservative estimate of peak RSS per worker in GB."""
 
         # define conservative factors for estimation for peak RSS in GB
         array_overhead_factor = 1.5
@@ -1027,31 +1034,28 @@ class SubmitInterpolation(object):
 
     def guess_pool_workers(self):
         """
-        Conservative estimation of multiprocessing pool size
-        based on physical cores and peak per-worker memory.
+        Estimate a safe number of multiprocessing workers for the system.
+
+        Returns
+        -------
+        n_workers : int
+            Estimated number of worker processes that can safely run in parallel
+            Always at least 1.
         """
 
-        # ---------------------------
-        # Static system capacity
-        # ---------------------------
+        # static system capacity
         physical_cores = psutil.cpu_count(logical=False) or 1
         vm = psutil.virtual_memory()
 
-        # ---------------------------
-        # Per-worker estimates
-        # ---------------------------
-        per_worker_mem_gb = self.per_worker_mem_gb  # from guess_memory_per_worker()
+        # per-worker estimates
+        per_worker_mem_gb = self.per_worker_mem_gb 
 
-        # ---------------------------
         # CPU-based limit
-        # ---------------------------
         cpu_capacity_workers = int(physical_cores * self.cpu_fraction_limit)
-        cpu_capacity_workers = min(cpu_capacity_workers, physical_cores)  # cap to actual cores
+        cpu_capacity_workers = min(cpu_capacity_workers, physical_cores)
         cpu_capacity_workers = max(1, cpu_capacity_workers)
 
-        # ---------------------------
-        # Memory-based limit (peak RSS)
-        # ---------------------------
+        # memory-based limit (peak RSS)
         available_mem_gb = vm.available / (1024**3)
         usable_mem_gb = max(0.0, available_mem_gb)
 
@@ -1062,9 +1066,7 @@ class SubmitInterpolation(object):
 
         mem_capacity_workers = max(1, mem_capacity_workers)
 
-        # ---------------------------
-        # Final worker count
-        # ---------------------------
+        # final worker count
         n_workers = min(
             cpu_capacity_workers,
             mem_capacity_workers,
@@ -1077,6 +1079,16 @@ class SubmitInterpolation(object):
         """
         Manage multiprocessing worker submission with hysteresis.
         If system is overloaded it will wait until the system is stable before submitting more jobs.
+
+        Parameters
+        ----------
+        cmd : str
+            Command to execute as the job.
+        check_interval : float, optional
+            Time in seconds between resource checks (default is 1.0).
+        stagger_range : tuple of float, optional
+            Range (min, max) in seconds to randomly stagger job start
+            to avoid simultaneous spikes (default is (0.0, 5.0)).
         """
 
         # set cpu, memory and swap limits 
@@ -1157,7 +1169,14 @@ class SubmitInterpolation(object):
         self.run_command(cmd)
 
     def run_command(self, commands):
-        ''' Function to submit interpolation job.'''
+        """
+        Function to submit interpolation job.
+        
+        Parameters
+        ----------
+        commands : str
+            Command string to be executed for job submission.
+        """
 
         arguments_list = commands.strip().split()
         print('Submitting job with arguments: [{} {} {} {} {}]'.format(arguments_list[3],arguments_list[5],arguments_list[6],arguments_list[7],arguments_list[8]), flush=True)
@@ -1172,6 +1191,15 @@ class SubmitInterpolation(object):
             print(f"Error in submission using the arguments: {result.args[3:-1]}: {error}", flush=True)
 
     def get_all_models(self):
+        """
+        Retrieve all available models.
+
+        Returns
+        -------
+        models_dict : dict
+            A dictionary of models.
+        """
+
         models = []
 
         # from interp_models (remothe machine)
@@ -1190,10 +1218,29 @@ class SubmitInterpolation(object):
                 mod_to_interp_path = join(self.mod_to_interp_root, mod_id)
                 for dom in os.listdir(mod_to_interp_path):
                     models.append(f"{mod_id}-{dom}-{self.default_values['ensemble'][0]}")
+        
+        # create dictionary from list
+        models_dict = dict(zip(models, models))
 
-        return dict(zip(models, models))
+        return models_dict
     
     def get_all_resolutions(self, mod_id, domain):
+        """
+        Retrieve all available resolutions.
+
+        Parameters
+        ----------
+        mod_id : str
+            Identifier of the model.
+        domain : str
+            Domain of the model to retrieve resolutions for.
+
+        Returns
+        -------
+        resolutions : list
+            A list of resolutions.
+        """
+
         resolutions = []
 
         # from interp_models (remothe machine)
@@ -1213,6 +1260,24 @@ class SubmitInterpolation(object):
         return resolutions
     
     def get_all_species(self, mod_id, domain, resolution):
+        """
+        Retrieve all available species.
+
+        Parameters
+        ----------
+        mod_id : str
+            Identifier of the model.
+        domain : str
+            Domain of the model to retrieve species for.
+        resolution : str
+            Resolution of the model to retrieve species for.
+
+        Returns
+        -------
+        species : list
+            A list of species.
+        """
+
         species = []
 
         # from interp_models (remothe machine)
@@ -1232,6 +1297,15 @@ class SubmitInterpolation(object):
         return species
     
     def get_all_networks(self):
+        """
+        Retrieve all available networks.
+
+        Returns
+        -------
+        networks : list
+            A list of networks.
+        """
+
         if self.network_type:
             # exit if the value is neither GHOST or non-GHOST
             network_type = str(self.network_type).lower()
@@ -1266,8 +1340,15 @@ class SubmitInterpolation(object):
 
         return networks
 
-
 def main(**kwargs):
+    """
+    Initialize the interpolation submission environment and launch the job workflow.
+
+    Parameters
+    ----------
+    **kwargs : dict
+        Optional command-line arguments that override default configuration values.
+    """
 
     # initialise SubmitInterpolation object
     SI = SubmitInterpolation(**kwargs)

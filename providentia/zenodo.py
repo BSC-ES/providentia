@@ -17,18 +17,43 @@ PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 zenodo_dois = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'zenodo_dois.yaml')))
 
 class Zenodo:
+    """Class responsible for handling GHOST network data downloads from Zenodo."""
 
     def __init__(self, download_instance):
+        """
+        Initialize the Zenodo download helper with a download instance.
+
+        Parameters
+        ----------
+        download_instance : Download
+            Stores the instance of the 'download' class.
+        """
+ 
         self.download_instance = download_instance
 
-    def fetch_zenodo_networks(self, initial_check=False):
+    def fetch_zenodo_networks(self, deactivate_warning=False):
+        """
+        Retrieve available GHOST network names and download URLs from Zenodo.
+
+        Parameters
+        ----------
+        deactivate_warning : bool, optional
+            If True, suppresses user-facing warnings.
+
+        Returns
+        -------
+        bool
+            True if the available networks were successfully retrieved,
+            False otherwise.
+        """
+
         # get url for the zenodo GHOST repository 
         if self.download_instance.ghost_version not in zenodo_dois:
             msg = (
                 f"Current GHOST version ({self.download_instance.ghost_version}) is not available on Zenodo. "
                 f"Please choose one of the available versions: {tuple(zenodo_dois.keys())}."
             )
-            show_message(self.download_instance, msg, deactivate=initial_check)
+            show_message(self.download_instance, msg, deactivate=deactivate_warning)
             return False
         
         # get the url for the current GHOST version
@@ -49,6 +74,25 @@ class Zenodo:
         return True
 
     def download_ghost_network_zenodo(self, network, initial_check, files_to_download=None):
+        """
+        Download GHOST network data from Zenodo.
+
+        Parameters
+        ----------
+        network : str
+            Name of the GHOST network to download.
+        initial_check : bool
+            If True, only performs a check of available files without downloading.
+            If False, downloads files and displays progress.
+        files_to_download : list of str, optional
+            Specific file paths to download. Only files in this list are considered.
+
+        Returns
+        -------
+        initial_check_nc_files : list of str
+            A list of file paths intended for download.
+        """
+
         if not initial_check:
             # print current_network
             self.download_instance.logger.info('\n'+'-'*40)

@@ -10,13 +10,37 @@ logging.basicConfig(level=logging.WARNING)
 LOG = logging.getLogger(__name__)
 
 class Providentia(object):
-    """ Interface class for Providentia. """
+    """
+    Class that handles parsing command-line arguments, 
+    selecting the appropriate mode.
+    """
 
     def __init__(self, parser):
+        """
+        Initialize the Providentia launcher with a parser.
+
+        Parameters
+        ----------
+        parser : ProvArgumentParser
+            Argument parser instance used to parse command-line inputs.
+        """
+
         self.parser = parser
 
     def getargs(self, args):
-        """ Return arguments to be passed to the different Providentia modes """
+        """
+        Process parsed command-line arguments and return a dictionary of valid values.
+
+        Parameters
+        ----------
+        args : argparse.Namespace
+            Parsed arguments from the command line.
+
+        Returns
+        -------
+        dict or bool
+            Dictionary of valid argument values, or False if no arguments were provided.
+        """
 
         req = vars(args)
         # print help if no args
@@ -28,7 +52,14 @@ class Providentia(object):
         return res
 
     def main(self):
-        """ Main functionality of the tool. """
+        """
+        Execute Providentia based on the mode parsed command-line arguments.
+
+        Returns
+        -------
+        bool
+            The return value of the executed mode's main function.
+        """
         
         try:
             args = self.parser.parse_args()
@@ -54,7 +85,12 @@ class Providentia(object):
             return False
 
 def main():
-    """ Main function. """
+    """
+    Create a Providentia instance with the argument parser 
+    and execute the main workflow.
+    
+    This function is called by the Providentia binary.    
+    """
 
     if Providentia(ProvArgumentParser()).main() is False:
         sys.exit(1)

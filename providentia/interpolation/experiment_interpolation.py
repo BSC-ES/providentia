@@ -43,9 +43,27 @@ PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
 interp_models = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'interp_models.yaml')))
 
 class ModelInterpolation(object):
-    """ Class which handles interpolation of model data to surface data, both spatially and temporally. """
+    """Class which handles interpolation of model data to surface data, both spatially and temporally."""
 
-    def __init__(self,submit_args):
+    def __init__(self, submit_args):
+        """
+        Sets up the interpolation environment by reading submission arguments, 
+        retrieving model and observational files, handling ensemble or forecast 
+        data, applying GHOST standards, and computing forecast information.
+
+        Parameters
+        ----------
+        submit_args : dict
+            Dictionary of job submission parameters, including:
+            - model_temporal_resolution : str
+            - speci_to_process : str
+            - network_to_interpolate_against : str
+            - temporal_resolution_to_output : str
+            - yearmonth : str
+            - original_speci_to_process : str
+            - job_id : str
+            - prov_mod_code : str
+        """
         
         self.log_file_str = 'STARTING INTERPOLATION\n'
 
@@ -316,10 +334,11 @@ class ModelInterpolation(object):
             create_output_logfile(1, self.log_file_str)
 
     def get_model_information(self):
-        """ Take first valid model file in month and get grid dimension/coordinate information.
-            Put initial object read in a  try/except to handle reading of corrupted files.
-            Iterate through files until have read a valid file.
-            If do not read a valid file, skip month.
+        """ 
+        Take first valid model file in month and get grid dimension/coordinate information.
+        Put initial object read in a  try/except to handle reading of corrupted files.
+        Iterate through files until have read a valid file.
+        If do not read a valid file, skip month.
         """
 
         for model_file_ii, model_file in enumerate(self.model_files):
@@ -493,9 +512,10 @@ class ModelInterpolation(object):
             self.mod_speci_units = self.standard_parameter_speci['standard_units']
 
     def create_grid_domain_edge_polygon(self):
-        """ Create grid domain edge polygon from model netCDF file.
-            This is handled differently for regular grids (i.e. following lines of longitude/latitude), 
-            and non-regular grids (e.g. lambert-conformal).
+        """ 
+        Create grid domain edge polygon from model netCDF file.
+        This is handled differently for regular grids (i.e. following lines of longitude/latitude), 
+        and non-regular grids (e.g. lambert-conformal).
         """
         # load instance of model file netCDF
         mod_nc_root = Dataset(self.valid_model_file)
@@ -639,7 +659,7 @@ class ModelInterpolation(object):
         mod_nc_root.close()
 
     def get_observational_objects(self):
-        """ Get necessary observational objects. """
+        """Get necessary observational objects."""
 
         # get observational file netCDF root
         obs_nc_root = Dataset(self.obs_file)
@@ -716,7 +736,16 @@ class ModelInterpolation(object):
         obs_nc_root.close()
 
     def get_resampling_direction(self):
-        """ Determine resampling direction. """
+        """
+        Determine the resampling direction between model input and output temporal resolutions.
+
+        Returns
+        -------
+        str or None
+            'downsampling' if input is finer than output,
+            'upsampling' if input is coarser than output,
+            None if input and output resolutions are equal.
+        """
 
         freq_map = {
             "hourly": 1,
@@ -742,7 +771,7 @@ class ModelInterpolation(object):
             return
         
     def get_monthly_model_data(self):
-        """ Read all relevant model data in yearmonth into memory. """
+        """Read all relevant model data in yearmonth into memory."""
 
         # determine resampling direction (upsampling, downsampling or None)
         resampling_direction = self.get_resampling_direction()
@@ -1026,11 +1055,12 @@ class ModelInterpolation(object):
             create_output_logfile(1, self.log_file_str)
         
     def n_nearest_neighbour_inverse_distance_weights(self):
-        """ Calculate N nearest neighbour inverse distance weights (and indices) of model gridcells centres 
-            from an array of geographic observational station coordinates. Both observational and model geographic 
-            longitude/latitude coordinates are first converted to cartesian ECEF (Earth Centred, Earth Fixed) 
-            coordinates, before calculating distances. Weights returned for obervational stations not contained 
-            within model grid extents are all zero.
+        """ 
+        Calculate N nearest neighbour inverse distance weights (and indices) of model gridcells centres 
+        from an array of geographic observational station coordinates. Both observational and model geographic 
+        longitude/latitude coordinates are first converted to cartesian ECEF (Earth Centred, Earth Fixed) 
+        coordinates, before calculating distances. Weights returned for obervational stations not contained 
+        within model grid extents are all zero.
         """
 
         # for each pair of observational station geographic coordinates, test if station is inside model grid
@@ -1099,8 +1129,9 @@ class ModelInterpolation(object):
         self.inverse_dists[~obs_inside_model_grid,:] = 0.0
 
     def write_netCDF(self):
-        """ Write netCDF, returning interpolated model data to observational surface stations 
-            for yearmonth.
+        """ 
+        Write netCDF, returning interpolated model data to observational surface stations 
+        for yearmonth.
         """
 
         # set output directory where observational interpolated monthly model netcdf will be saved
@@ -1335,16 +1366,21 @@ class ModelInterpolation(object):
                 create_output_logfile(1, self.log_file_str)
 
 def create_output_logfile(process_code, log_file_str):
-    """ Create a logfile for stating outcome of interpolation job'
-        the filename is prefixed with a code referencing the job outcome.
-        The process codes are:
-        0: Process completed without issue
-        1: Caught error in process
-        2: Uncaught error in process
-
-        :param process_code: interpolation outcome code
-        :type process_code: int
     """
+    Create a logfile for stating outcome of interpolation job.
+
+    Parameters
+    ----------
+    process_code : int
+        Code indicating the outcome of the interpolation process:
+        - 0 : Process completed without issue
+        - 1 : Caught error in process
+        - 2 : Uncaught error in process
+
+    log_file_str : str
+        Content to write in the logfile.
+    """
+
     output_logfile_dir = (f"{join(PROVIDENTIA_ROOT, 'logs/interpolation/interpolation_logs/')}"
     f"{submit_args['prov_mod_code']}/"
     f"{submit_args['original_speci_to_process']}/"
