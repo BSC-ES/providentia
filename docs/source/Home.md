@@ -39,7 +39,7 @@ Below you will find the presentation of the last user meetings:
 
 * 23/03/2023: [Presentation](uploads/presentations/20230323_Providentia_User_Meeting.pdf)
 
-## External Sessions
+### External Sessions
 
 Below you will find relevant external webinars or presentations.
 
