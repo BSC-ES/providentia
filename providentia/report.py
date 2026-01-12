@@ -44,6 +44,15 @@ class Report:
     matplotlib.use('Agg')
 
     def __init__(self, **kwargs):
+        """
+        Initialise the Report instance.
+
+        Parameters
+        ----------
+        **kwargs : dict
+            Arbitrary keyword arguments used to configure the report 
+            settings and override default configuration values.
+        """
 
         # update self with command line arguments
         self.commandline_arguments = copy.deepcopy(kwargs)
@@ -278,7 +287,14 @@ class Report:
                     pass
 
     def start_pdf(self, filename):
-        """ Create PDF document where plots will be stored. """
+        """
+        Initialises and builds the PDF document structure, managing plotting paradigms and page ordering.
+
+        Parameters
+        ----------
+        filename : str
+            The name or path for the generated PDF report.
+        """
         
         # get path where reports will be saved
         if '/' in filename:
@@ -547,7 +563,18 @@ class Report:
                           reports_doi_path_temp)
 
     def setup_plot_geometry(self, plotting_paradigm, networkspeci, have_setup_multispecies):
-        """ Setup plotting geometry for summary or station specific plots, per network/species. """
+        """
+        Sets up the Matplotlib figure and axes geometry for either summary or station-specific plots.
+
+        Parameters
+        ----------
+        plotting_paradigm : str
+            The context of the plots, either 'summary' or 'station'.
+        networkspeci : str
+            The combined network and species identifier.
+        have_setup_multispecies : bool
+            Flag indicating if multi-species geometry has already been initialised.
+        """
 
         # depending on plot type set plots to make
         if plotting_paradigm == 'summary':
@@ -809,7 +836,18 @@ class Report:
                 self.n_total_pages += 1
 
     def make_plots_per_subsection(self, summary_plots_to_make, station_plots_to_make, do_plot_geometry_setup=False):
-        """ Function that calls making of all plots per subsection. """
+        """
+        Coordinates the iteration through report subsections, handling data filtering and triggering plot generation.
+
+        Parameters
+        ----------
+        summary_plots_to_make : list
+            List of plot types to be generated at the network-summary level.
+        station_plots_to_make : list
+            List of plot types to be generated for individual stations.
+        do_plot_geometry_setup : bool, optional
+            Flag to determine if Matplotlib figure geometry should be initialised (default is False).
+        """
 
         # create variable to keep track if have setup summary plot geometry yet (done for all subsections at once)
         self.summary_plot_geometry_setup = False
@@ -963,8 +1001,16 @@ class Report:
                             pass
 
     def make_summary_plots(self, networkspeci, summary_plots_to_make):
-        """ Function which makes all of summary plots for a specific subsection/networkspeci. """
+        """
+        Generates all summary-level visualisations for a specific network-species combination within a subsection.
 
+        Parameters
+        ----------
+        networkspeci : str
+            The combined network and species identifier.
+        summary_plots_to_make : list
+            List of plot types to be generated at the network-summary level.
+        """
 
         # setup plotting geometry for summary plots per networkspeci (for all subsections)
         if (not self.summary_plot_geometry_setup) & (self.do_plot_geometry_setup):
@@ -1097,7 +1143,16 @@ class Report:
         self.made_networkspeci_summary_plots = True
 
     def make_station_plots(self, networkspeci, station_plots_to_make):
-        """ Function which makes all of station plots for a specific subsection/networkspeci. """
+        """
+        Generates all station-specific visualisations for a specific network-species combination.
+
+        Parameters
+        ----------
+        networkspeci : str
+            The combined network and species identifier.
+        station_plots_to_make : list
+            List of plot types to be generated for individual measurement stations.
+        """
 
         # setup plotting geometry for station plots per networkspeci (for one subsection)
         if self.do_plot_geometry_setup:
@@ -1274,9 +1329,18 @@ class Report:
         self.made_networkspeci_station_plots = True
     
     def get_plot_type_df(self, base_plot_type):   
-        """ 
-        Function that determines if plot type is one that involves collation of statistics across subsections
-        and networkspecies.
+        """
+        Determines if a plot type requires data collation across subsections and networkspecies.
+
+        Parameters
+        ----------
+        base_plot_type : str
+            The primary identifier for the plot category (e.g. 'table', 'heatmap').
+
+        Returns
+        -------
+        bool
+            True if the plot type is a dataframe-based summary, False otherwise.
         """
 
         if base_plot_type in ['table', 'heatmap', 'statsummary']:
@@ -1287,7 +1351,24 @@ class Report:
         return plot_type_df
 
     def update_stats_tables(self, plotting_paradigm, base_plot_type, plot_type, zstat, networkspeci, plot_options):
-        """ Update statistical tables for plot types that collate data across various networkspecies/subsections. """ 
+        """
+        Update statistical tables for plot types that collate data across various networkspecies/subsections.
+
+        Parameters
+        ----------
+        plotting_paradigm : str
+            The context of the plots, either 'summary' or 'station'.
+        base_plot_type : str
+            The primary identifier for the plot category (e.g. 'table', 'heatmap').
+        plot_type : str
+            The full plot type string including options and statistics.
+        zstat : str
+            The specific statistic to be calculated.
+        networkspeci : str
+            The combined network and species identifier.
+        plot_options : list
+            List of configuration options parsed from the plot type string.
+        """
 
         # set statistics to calculate based on plot type
         if base_plot_type in ['heatmap', 'table']:
@@ -1343,7 +1424,25 @@ class Report:
         return None
 
     def make_plot(self, plotting_paradigm, plot_type, plot_options, networkspeci):
-        """ Function that calls making of any type of plot. """
+        """
+        Directs the generation of specific plot types by coordinating data labels, axes, and plotting functions.
+
+        Parameters
+        ----------
+        plotting_paradigm : str
+            The context of the plots, either 'summary' or 'station'.
+        plot_type : str
+            The full plot type string including options and statistics.
+        plot_options : list
+            List of configuration options parsed from the plot type string.
+        networkspeci : str
+            The combined network and species identifier.
+
+        Returns
+        -------
+        list
+            A list of indices [page_number, page_ind] where plots were successfully created.
+        """
 
         current_plot_ind = 0
 
@@ -1949,7 +2048,29 @@ class Report:
         return plot_indices
 
     def get_relevant_page_axis(self, plotting_paradigm, networkspeci, plot_type, axis_ind):
-        """ Get relevant page and axis for current plot type/subsection/axis index. """
+        """
+        Retrieves the specific page number, page index, and axis handle for a plot.
+
+        Parameters
+        ----------
+        plotting_paradigm : str
+            The context of the plots, either 'summary' or 'station'.
+        networkspeci : str
+            The combined network and species identifier.
+        plot_type : str
+            The full plot type string including options and statistics.
+        axis_ind : int
+            The sequential index of the plot being created for the given type.
+
+        Returns
+        -------
+        int
+            The global page number in the plot dictionary.
+        int
+            The index of the axis on that specific page.
+        matplotlib.axes.Axes
+            The handle to the Matplotlib axis (or dictionary of handles for complex grids).
+        """
 
         # get axes associated with plot type
         if plotting_paradigm == 'summary':
@@ -1968,7 +2089,23 @@ class Report:
         return all_relevant_pages[axis_ind], page_inds[axis_ind], relevant_axes[axis_ind]['handle']
 
     def get_relevant_axs_per_networkspeci_plot_type(self, base_plot_type, relevant_pages):
-        """Get relevant axs per plot type"""
+        """
+        Retrieves all axis handles and associated data labels for a specific plot type across multiple pages.
+
+        Parameters
+        ----------
+        base_plot_type : str
+            The primary identifier for the plot category.
+        relevant_pages : list
+            List of page numbers to search for axes.
+
+        Returns
+        -------
+        relevant_axs : list
+            List of Matplotlib axis handles found on the specified pages.
+        relevant_data_labels : list
+            List of data label sets associated with each retrieved axis.
+        """
        
         relevant_axs = []
         relevant_data_labels = []
@@ -1991,7 +2128,23 @@ class Report:
         return relevant_axs, relevant_data_labels
     
     def get_relevant_axs_per_networkspeci_plot_type_page_ind(self, base_plot_type, plot_indices):
-        """Get relevant axs per plot type and page ind"""
+        """
+        Retrieves specific axis handles and data labels based on provided page and subplot indices.
+
+        Parameters
+        ----------
+        base_plot_type : str
+            The primary identifier for the plot category.
+        plot_indices : list
+            List of nested [page_number, page_ind] pairs identifying specific subplots.
+
+        Returns
+        -------
+        relevant_axs : list
+            List of Matplotlib axis handles corresponding to the requested indices.
+        relevant_data_labels : list
+            List of data label sets associated with each retrieved axis.
+        """
 
         relevant_axs = []
         relevant_data_labels = []
@@ -2007,6 +2160,13 @@ class Report:
         return relevant_axs, relevant_data_labels
 
 def main(**kwargs):
-    """ Main function when running offine reports. """
+    """
+    Main entry point for generating offline reports.
+
+    Parameters
+    ----------
+    **kwargs : dict
+        Configuration arguments and command-line parameters passed to the Report initialiser.
+    """
    
     Report(**kwargs)

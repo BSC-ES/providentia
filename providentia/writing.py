@@ -19,18 +19,27 @@ PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 
 def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
-    """ Function that writes out current data / ghost data / metadata 
-        in memory to .npy file. 
-
-        :prv: Instance of providentia 
-        :type prv: instance of Dashboard / Library
-        :fname: Name of the file to save
-        :type fname: str
-        :input_dialogue: boolean informing whether to open input prompt to ask if to filter data or not
-        :type input_dialogue: boolean
-        :set_in_memory: booolean informing if saved data is set in memory
-        :type set_in_memory: boolean
     """
+    Exports current data, GHOST data, and metadata from memory to a compressed NumPy format.
+
+    Parameters
+    ----------
+    prv : object
+        Instance of the application (Dashboard or Library) containing data and settings.
+    fname : str
+        The filename or path for the saved .npz file.
+    input_dialogue : bool, optional
+        Whether to prompt the user to choose between filtered or raw data export.
+    set_in_memory : bool, optional
+        If True, loads the saved data back into memory and deletes the physical file.
+
+    Returns
+    -------
+    data : NpzFile or bool
+        Returns the loaded NpzFile if set_in_memory is True, False if a dialogue is cancelled, 
+        otherwise True on successful export.
+    """
+    
     # import function from dashboard_elements
     from .dashboard_elements import InputDialog
 
@@ -172,20 +181,29 @@ def export_data_npz(prv, fname, input_dialogue=False, set_in_memory=False):
     return True          
 
 def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=False):
-    """ Write data and metadata to netcdf file. 
-    
-        :prv: Instance of providentia
-        :type prv: instance of Dashboard / Library
-        :fname: Name of the file to save
-        :type fname: str
-        :input_dialogue: boolean informing whether to open input prompt to ask if to filter data or not
-        :type input_dialogue: boolean
-        :set_in_memory: booolean informing if saved data is set in memory
-        :type set_in_memory: boolean
-        :xarray: booolean informing if data is read in xarray format or not
-        :type xarray: boolean
-
     """
+    Exports current data and metadata to a standardised NetCDF4 file with optional filtering and resampling.
+
+    Parameters
+    ----------
+    prv : object
+        Instance of the application (Dashboard or Library) containing data and configuration.
+    fname : str
+        The filename or path for the saved .nc file.
+    input_dialogue : bool, optional
+        Whether to prompt the user to apply metadata/data filters and temporal colocation.
+    set_in_memory : bool, optional
+        If True, loads the saved NetCDF back into memory and deletes the physical file.
+    xarray : bool, optional
+        If True and set_in_memory is True, loads the data using xarray; otherwise uses netCDF4-python.
+
+    Returns
+    -------
+    data : Dataset, xarray.Dataset, or bool
+        Returns the loaded dataset if set_in_memory is True, False if dialogue is cancelled, 
+        otherwise True on success.
+    """
+
     # import function from dashboard_elements
     from .dashboard_elements import InputDialog
 
@@ -527,15 +545,22 @@ def export_netcdf(prv, fname, input_dialogue=False, set_in_memory=False, xarray=
     return True
 
 def export_configuration(prv, cname, separator="||"):
-    """ Create all items to be written in configuration file
-        and send them to write_conf.
+    """
+    Generates and writes a configuration file containing the current application state and user selections.
 
-        :prv: Instance of providentia
-        :type prv: instance of Dashboard / Library
-        :cname: Name for the configuration file
-        :type cname: str
-        :separator: delimiter for keep/remove fields
-        :type separator: str
+    Parameters
+    ----------
+    prv : object
+        Instance of the application (Dashboard or Library) providing current state and settings.
+    cname : str
+        The filename or path for the configuration file to be created.
+    separator : str, optional
+        The delimiter used to separate 'keep' and 'remove' fields in filter strings.
+
+    Returns
+    -------
+    bool
+        Returns True upon successful writing of the configuration file.
     """
     
     # if no data was loaded on dashboard, there won't be any maximum nor minimum value

@@ -18,8 +18,18 @@ from .warnings_prv import show_message
 PROVIDENTIA_ROOT = '/'.join(CURRENT_PATH.split('/')[:-1])
 
 class DataFilter:
+    """ Class for filtering of observational and model data """
 
     def __init__(self, read_instance):
+        """
+        Initialise the DataFilter instance.
+
+        Parameters
+        ----------
+        read_instance : object
+            An instance of the data-reading class containing the data arrays and labels to be filtered.
+        """
+
         self.read_instance = read_instance
 
         # get index of observational data array
@@ -29,7 +39,9 @@ class DataFilter:
         self.filter_all()
 
     def filter_all(self):
-        """ Call methods to start filtering. """
+        """
+        Sequentially executes all data filtering procedures.
+        """
 
         self.reset_data_filter()
         self.filter_by_species()
@@ -47,7 +59,9 @@ class DataFilter:
         self.read_instance.time_index_after_filter = copy.deepcopy(self.read_instance.time_index)
 
     def reset_data_filter(self):
-        """ Resets data arrays to be un-filtered"""
+        """
+        Resets data arrays and temporal indices to their original, unfiltered state.
+        """
 
         # reset data in memory
         self.read_instance.data_in_memory_filtered = copy.deepcopy(self.read_instance.data_in_memory)
@@ -67,11 +81,12 @@ class DataFilter:
             self.read_instance.plotting_params = copy.deepcopy(self.read_instance.original_plotting_params)
 
     def filter_by_species(self):
-        """ Function which filters read species by other species.
-            For N other species a lower and upper limit are set. 
-            Where values for each species are outside of these ranges, or NaN,
-            then impose NaNs upon all read species in memory.
-            Only filter if spatial colocation is True.
+        """
+        Filters read species by other species to filter by.
+        For each other species a lower and upper limit are set. 
+        Where values for each species are outside of these ranges, or NaN,
+        then impose NaNs upon all read species in memory.
+        Only filter if spatial colocation is True.
         """
 
         # filter all read species by set species ranges
@@ -136,7 +151,9 @@ class DataFilter:
                         self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index, inds_to_filter] = filter_species_fill_value      
 
     def filter_data_limits(self):
-        """ Filter out (set to NaN) data which exceed the lower/upper limits. """
+        """ 
+        Filter out data which exceed the lower/upper limits. 
+        """
 
         # iterate through networkspecies  
         for networkspeci in self.read_instance.networkspecies:
@@ -179,7 +196,9 @@ class DataFilter:
             self.read_instance.data_in_memory_filtered[networkspeci][inds_out_of_bounds] = np.nan
 
     def filter_by_period(self):
-        """ Filter data for selected periods (keeping or removing data, as defined). """
+        """ 
+        Filter data for selected periods (keeping or removing data, as defined). 
+        """
 
         # set appropriate data and variable name arrays
         data_array = self.read_instance.ghost_data_in_memory
@@ -289,7 +308,9 @@ class DataFilter:
                         self.read_instance.data_in_memory_filtered[networkspeci][:, inds_to_screen] = np.nan
 
     def filter_by_data_availability(self):
-        """ Function which filters data by selected data availability variables. """
+        """
+        Filters data based on native and dynamically calculated data completeness thresholds.
+        """
 
         # get set variables names representing percentage data availability (native and non-native)
         active_data_availablity_vars = self.read_instance.representativity_menu['rangeboxes']['map_vars']
@@ -383,7 +404,9 @@ class DataFilter:
                             self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,inds_to_screen[:,np.newaxis],period_inds[np.newaxis,:]] = np.nan
 
     def filter_by_metadata(self):
-        """ Filter data by selected metadata. """
+        """
+        Filters data based on categorical and numerical station metadata.
+        """
 
         # iterate through metadata in memory
         for meta_var in self.read_instance.metadata_vars_to_read:
@@ -468,7 +491,19 @@ class DataFilter:
                             self.read_instance.data_in_memory_filtered[networkspeci][:,invalid_nan] = np.nan
 
     def validate_values(self, meta_var):
-        """ Validate that field inserted by user is float. """
+        """
+        Ensures user-provided metadata range boundaries are valid floating-point numbers.
+
+        Parameters
+        ----------
+        meta_var : str
+            The name of the metadata variable to validate.
+
+        Returns
+        -------
+        is_valid : bool
+            Returns True if the metadata values are numeric or non-numeric objects, False otherwise.
+        """
         
         metadata_type = self.read_instance.standard_metadata[meta_var]['metadata_type']
         metadata_data_type = self.read_instance.standard_metadata[meta_var]['data_type']
@@ -492,15 +527,16 @@ class DataFilter:
             return True
 
     def filter_extreme_stations(self):
-        """ Define function which filters out extreme stations based on set statistical limits.
-            There can be multiple limit arguments for a statistic e.g. 'MB': ['<10','>20']
-            There can also be limits per species e.g. 'RMSE': {'sconco3': ['<50.0', '>70.0'], 'sconco':[>100.0]}
-            An absolute statistic can be set to be a bias statistic by adding '_bias' e.g. 
-            'p95_bias': ['<10','>20']
+        """ 
+        Filters out extreme stations based on set statistical thresholds.
+        There can be multiple limit arguments for a statistic e.g. 'MB': ['<10','>20']
+        There can also be limits per species e.g. 'RMSE': {'sconco3': ['<50.0', '>70.0'], 'sconco':[>100.0]}
+        An absolute statistic can be set to be a bias statistic by adding '_bias' e.g. 
+        'p95_bias': ['<10','>20']
 
-            If statistic is an absolute statistic, then only remove stations based on observations.
-            If statistic is a bias statistic, then remove collection of all stations outside limits across all obs-mod
-            comparsions.
+        If statistic is an absolute statistic, then only remove stations based on observations.
+        If statistic is a bias statistic, then remove collection of all stations outside limits across all obs-mod
+        comparsions.
         """
 
         # option to remove extreme stations set?
@@ -611,8 +647,8 @@ class DataFilter:
                                     self.read_instance.data_in_memory_filtered[networkspeci][self.obs_index,invalid_stations,:] = np.nan
                                     
     def apply_calibration_factor(self):
-        """ Apply calibration factor to add or subtract a number to the models, 
-            multiply or divide the model data by a certain value.
+        """
+        Adjusts model data arrays through basic arithmetic operations using user-defined calibration factors.
         """
 
         if self.read_instance.calibration_factor:
@@ -667,26 +703,7 @@ class DataFilter:
 
     def forecast_daily_switch(self):
         """
-        Adjust the in-memory forecast data and model labels to handle 
-        daily or combined forecasts. 
-
-        This function performs several key operations:
-        1. Early exit if neither daily_forecast nor combined_forecast are active.
-        2. Extracts unique base data labels by removing '-daily' and '-combined' suffixes.
-        3. Determines the maximum number of forecast days across all labels 
-        and collects active forecast days.
-        4. Rebuilds the in-memory data array (data_in_memory_filtered) to 
-        combine forecast day data separated as different models to the same dimension.
-        5. Updates the global time index to match the tiled forecast data.
-        6. Updates models, data_labels, and data_labels_raw to include 
-        '-daily' or '-combined' suffixes as appropriate.
-        7. Updates plotting parameters to reflect the new data structure.
-
-        Note:
-            - Observational data and non-forecast data is repeated across all forecast days.
-            - Forecast data is tiled in same dimension corresponding to each forecast day.
-            - The function assumes `read_instance` contains all necessary 
-            attributes (data_labels, data_in_memory_filtered, forecast_indices_per_data_label, etc.).
+        Restructures forecast data by merging separate forecast days into a single dimension and updating metadata.
         """
 
         # Exit early if neither daily_forecast nor combined_forecast are active
@@ -774,10 +791,11 @@ class DataFilter:
         )
 
     def temporally_colocate_data(self):
-        """ Define function which temporally colocates observational and model data.
-            If spatial colocation is active, then data is also temporally colocated across all network / species,
-            otherwise it is done independently per network / species.
-            This in reality means storing the indices for the temporal colocation.
+        """ 
+        Temporally colocate observational and model data.
+        If spatial colocation is active, then data is also temporally colocated across all network / species,
+        otherwise it is done independently per network / species.
+        This in reality means storing the indices for the temporal colocation.
         """
             
         # iterate through network / species  
@@ -828,9 +846,10 @@ class DataFilter:
                 self.read_instance.temporal_colocation_nans[networkspeci] = np.any([obs_all_nan, mods_all_nan], axis=0)
 
     def get_valid_stations(self):
-        """ Get valid station indices before and after all filtering has been performed.
-            These are saved in a dictionary per network/species, per data label. 
-            There is an mirror dictionary saved for the temporally colocated version of the data. 
+        """ 
+        Get valid station indices before and after all filtering has been performed.
+        These are saved in a dictionary per network/species, per data label. 
+        There is an mirror dictionary saved for the temporally colocated version of the data. 
         """
 
         # iterate through networkspecies  

@@ -29,6 +29,21 @@ class PopUpWindow(QtWidgets.QWidget):
     """ Class that generates generalised pop-up window. """
 
     def __init__(self, read_instance, menu_root, menu_levels, full_window_geometry):
+        """
+        Initialise the PopUpWindow instance.
+
+        Parameters
+        ----------
+        read_instance : object
+            Instance of the data reading class.
+        menu_root : dict
+            The root dictionary containing the full menu structure.
+        menu_levels : list
+            The sequence of keys required to navigate to the current menu level.
+        full_window_geometry : list
+            The geometric coordinates and dimensions for the window.
+        """
+
         super(PopUpWindow, self).__init__()
 
         # add input arguments to self
@@ -44,7 +59,9 @@ class PopUpWindow(QtWidgets.QWidget):
         self.generate_window()
 
     def generate_window(self):
-        """ Generate GUI window for current menu level. """
+        """
+        Constructs the graphical user interface for the current menu level by dynamically assembling widgets and layouts.
+        """
 
         # get current menu level keys
         menu_current_keys = list(self.menu_current.keys())
@@ -170,8 +187,18 @@ class PopUpWindow(QtWidgets.QWidget):
         quit_event.triggered.connect(self.closeEvent)
         
     def create_grid(self, menu_types):
-        """ Create grid for each needed checkbox/rangebox/navigation button menu types, that wrap vertically
-            and concatenate them horizontally together.
+        """
+        Constructs and organises scrollable grids for different menu types like checkboxes and rangeboxes.
+
+        Parameters
+        ----------
+        menu_types : list
+            List of menu types (e.g. 'checkboxes', 'rangeboxes') to be rendered as grids.
+
+        Returns
+        -------
+        horizontal_parent : QtWidgets.QHBoxLayout
+            Layout containing the horizontally concatenated grids.
         """
 
         # create horizontal layout to place all menu types within
@@ -620,7 +647,9 @@ class PopUpWindow(QtWidgets.QWidget):
         return horizontal_parent
 
     def open_new_page(self):
-        """ Function to open new page in pop-up window. """
+        """
+        Handles the transition to a sub-menu by instantiating a new PopUpWindow and closing the current one.
+        """
 
         # get selected navigation button text
         selected_navigation_button = self.sender().text()
@@ -638,7 +667,9 @@ class PopUpWindow(QtWidgets.QWidget):
         self.close()
 
     def root_page(self):
-        """ Function that returns pop-up window to root menu level page. """
+        """
+        Resets the pop-up window to the top-level menu by clearing the navigation path.
+        """
 
         # create new pop-up page for root menu level
         self.new_window = PopUpWindow(self.read_instance, self.menu_root, [], self.full_window_geometry)
@@ -650,7 +681,9 @@ class PopUpWindow(QtWidgets.QWidget):
         self.close()
 
     def previous_page(self):
-        """ Function that returns pop-up window to previous menu level page. """
+        """
+        Returns the pop-up window to the immediate parent menu level by removing the last navigation step.
+        """
 
         # create new pop-up page for previous menu level
         self.new_window = PopUpWindow(self.read_instance, self.menu_root, self.menu_levels[:-1], 
@@ -663,7 +696,9 @@ class PopUpWindow(QtWidgets.QWidget):
         self.close()
 
     def select_all(self):
-        """ Function to select all checkboxes. """
+        """
+        Sets the state of all applicable checkboxes within the current menu to checked.
+        """
 
         if 'models' in self.page_memory:
             menu_type = 'models'
@@ -678,7 +713,9 @@ class PopUpWindow(QtWidgets.QWidget):
                     self.page_memory[menu_type][element][checkbox_ii].setCheckState(QtCore.Qt.Checked)
 
     def clear_all(self):
-        """ Function to clear all checkboxes. """
+        """
+        Sets the state of all applicable checkboxes within the current menu to unchecked.
+        """
 
         if 'models' in self.page_memory:
             menu_type = 'models'
@@ -693,7 +730,9 @@ class PopUpWindow(QtWidgets.QWidget):
                     self.page_memory[menu_type][element][checkbox_ii].setCheckState(QtCore.Qt.Unchecked)
 
     def select_all_default(self):
-        """ Function to select all default selected checkboxes. """
+        """
+        Resets checkbox selections to a pre-defined default state specified in the menu configuration.
+        """
 
         # unselect all checkboxes first
         for element in self.page_memory['checkboxes']['ordered_elements']:
@@ -712,7 +751,9 @@ class PopUpWindow(QtWidgets.QWidget):
                 self.page_memory['checkboxes'][element][default_ind].setCheckState(QtCore.Qt.Checked)
 
     def add_multispecies_widgets(self):
-        """ Function to add new line to pop-up window. """
+        """
+        Appends a new row of filtering widgets to the multispecies configuration grid and initialises their connectivity.
+        """
         
         # get widget line
         label_ii = len(self.menu_current['multispecies']['labels'])
@@ -775,7 +816,9 @@ class PopUpWindow(QtWidgets.QWidget):
         self.read_instance.multispecies_initialisation = False
 
     def handle_filter_species_change(self):
-        """ Function to add or remote filter species after clicking on apply button. """
+        """
+        Triggers the addition or removal of species filters based on the state of the row's apply checkbox.
+        """
         
         # get widget line
         event_source = self.sender()
@@ -787,10 +830,13 @@ class PopUpWindow(QtWidgets.QWidget):
             self.update_filter_species(label_ii, add_filter_species=False)
 
     def update_multispecies_fields(self, label_ii):
-        """ Update multispecies fields in tab.
+        """
+        Synchronises the multispecies GUI widgets with the current data state and configuration for a specific row.
 
-            :param label_ii: Corresponding widget line in dashboard
-            :type label_ii: int
+        Parameters
+        ----------
+        label_ii : int
+            Corresponding widget line in dashboard.
         """
 
         # set variable to block interactive handling while updating config bar parameters
@@ -880,7 +926,8 @@ class PopUpWindow(QtWidgets.QWidget):
         self.read_instance.block_config_bar_handling_updates = False
 
     def set_multispecies_previous_fields(self):
-        """ Function to set the same multispecies filtering fields that we previously had upon reopening the tab.
+        """
+        Restores multispecies filtering widget states from saved configuration memory upon reopening the menu.
         """
 
         # set variable to block interactive handling while updating config bar parameters
@@ -905,7 +952,14 @@ class PopUpWindow(QtWidgets.QWidget):
         self.read_instance.block_config_bar_handling_updates = False
 
     def handle_multispecies_params_change(self, changed_param):
-        """ Function which handles interactive updates of multispecies filtering fields. """
+        """
+        Manages interactive updates of multispecies filtering fields by synchronising widget changes with the data instance.
+
+        Parameters
+        ----------
+        changed_param : str
+            The new value from the widget that triggered the change.
+        """
         
         if (changed_param != '') and (not self.read_instance.block_config_bar_handling_updates):
             
@@ -944,15 +998,15 @@ class PopUpWindow(QtWidgets.QWidget):
             self.update_multispecies_fields(label_ii)
 
     def update_filter_species(self, label_ii, add_filter_species=True):
-        """ Function to update filter species after launching the dashboard with a configuration file or 
-            by editing the fields in the multispecies filtering tab in the dashboard. 
+        """
+        Validates and updates the list of active species-based data filters in the shared data instance.
 
-            :param instance: Instance of class Dashboard
-            :type instance: object
-            :param label_ii: Corresponding widget line in dashboard
-            :type label_ii: int
-            :param add_filter_species: boolean to indicate if networkspeci has to be added or removed
-            :type add_filter_species: boolean
+        Parameters
+        ----------
+        label_ii : int
+            Corresponding widget line in dashboard.
+        add_filter_species : bool, optional
+            Indicator to add (True) or remove (False) the filter.
         """
         
         # get selected network, species and bounds
@@ -1047,9 +1101,13 @@ class PopUpWindow(QtWidgets.QWidget):
                 del self.read_instance.qa_per_species[speci]
 
     def handle_model_checked(self, event):
-        """ 
-        Function to handle generation and display of forecast options 
-        in the models tab when an model checkbox is (un)checked.
+        """
+        Manages the visibility and population of forecast-related widgets when a model checkbox is toggled.
+
+        Parameters
+        ----------
+        event : int
+            The check state of the checkbox (standard PyQt5 signal argument).
         """
 
         # Get the source widget that triggered the event (the checkbox)
@@ -1129,8 +1187,13 @@ class PopUpWindow(QtWidgets.QWidget):
 
 
     def forecast_option_checked(self, event):
-        """ Function to handle generation of forecast day options in models tab, when a forecast option is selected.
-            Also deactivates other forecast options when one is selected.
+        """
+        Manages the selection logic for forecast types, enforcing mutual exclusivity and toggling lead-time visibility.
+
+        Parameters
+        ----------
+        event : QModelIndex
+            The index of the data item that was changed.
         """
 
         # get widget line
@@ -1183,7 +1246,14 @@ class PopUpWindow(QtWidgets.QWidget):
         self.page_memory['models']['forecast'][label_ii].model().dataChanged.connect(self.forecast_option_checked)
         
     def closeEvent(self, event):
-        """ Function to get status of current page upon closing of pop-up window. """
+        """
+        Serialises and saves the current state of all GUI widgets back to the configuration model before closing the window.
+
+        Parameters
+        ----------
+        event : QCloseEvent
+            The window close event triggered by the user or system.
+        """
 
         # take everything from page memory dictionary and put it back into menu level object
 

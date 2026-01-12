@@ -1,15 +1,22 @@
 """ Auxiliary interpolation functions """
 
-def get_aeronet_bin_radius_from_bin_variable(binvar):
-    """ Return AERONET bin radius instance from bin variable. AERONET bins are not bins in the classical sense in that 
-        they have a radius min/max, rather they represent an instance on the distribution curve across all sizes.      
-        
-        :param binvar: bin variable
-        :type binvar: str
-        :return: AERONET bin radius
-        :rtype: float
+def get_aeronet_bin_radius_from_bin_variable(binvar):    
     """
-    
+        Returns the specific AERONET particle radius associated with a given bin variable name.
+        AERONET bins are not bins in the classical sense in that they have a radius min/max, 
+        rather they represent an instance on the distribution curve across all sizes.  
+
+        Parameters
+        ----------
+        binvar : str
+            The AERONET bin variable identifier (e.g. 'vconcaerobin1').
+
+        Returns
+        -------
+        float
+            The radius value in micrometres corresponding to the size distribution instance.
+        """
+
     aeronet_bin_variable_to_bin_radius = {'vconcaerobin1': 0.05,       'vconcaerobin2': 0.065604, 
                                           'vconcaerobin3': 0.086077,   'vconcaerobin4': 0.112939, 
                                           'vconcaerobin5': 0.148184,   'vconcaerobin6': 0.194429, 
@@ -25,13 +32,21 @@ def get_aeronet_bin_radius_from_bin_variable(binvar):
     return aeronet_bin_variable_to_bin_radius[binvar]
 
 def get_model_bin_radii(model_name):
-    """ Return model bin edges radii, and bin relative humidity
-        
-        :param model_name: name of model
-        :type model_name: str
-        :return: model bin radii, model bin rh 
-        :rtype: list, list
-    """ 
+    """
+    Returns the particle bin edge radii and bin particle densities for a specified model.
+
+    Parameters
+    ----------
+    model_name : str
+        The name of the model to retrieve bin information for.
+
+    Returns
+    -------
+    r_edges : list or None
+        A list of bin edge radii if the model is recognised; otherwise None.
+    rho_bins : list or None
+        A list of particle densities (kg/m^3) if the model is recognised; otherwise None.
+    """
 
     if 'monarch' in model_name:
         r_edges =[0.1, 0.18, 0.3, 0.6, 1.0, 1.8, 3.0, 6.0, 10.0]
@@ -41,15 +56,27 @@ def get_model_bin_radii(model_name):
         return None, None
 
 def get_aeronet_model_bin(model_name, aeronet_bin_radius):
-    """ Return details of model bin which contains AERONET bin radius instance, and 
-        
-        :param model_name: name of model
-        :type model_name: str
-        :param aeronet_bin_radius: bin radius
-        :type aeronet_bin_radius: float
-        :return: model bin index, bin radius minimum, bin radius maximum, bin relative humidity
-        :rtype: int, float, float, float
-    """ 
+    """
+    Identifies the specific model bin that encompasses a given AERONET bin radius.
+
+    Parameters
+    ----------
+    model_name : str
+        The name of the model to retrieve bin information for.
+    aeronet_bin_radius : float
+        The radius value from the AERONET distribution.
+
+    Returns
+    -------
+    bin_index : int
+        The index of the matching model bin.
+    bin_min : float
+        The minimum radius edge of the identified model bin.
+    bin_max : float
+        The maximum radius edge of the identified model bin.
+    rho_bin : float
+        The particle density (kg/m^3) associated with the identified model bin.
+    """
 
     import numpy as np
 
@@ -65,17 +92,22 @@ def get_aeronet_model_bin(model_name, aeronet_bin_radius):
     return bin_index, r_edges[bin_index], r_edges[bin_index+1], rho_bins[bin_index]
 
 def get_model_to_aeronet_bin_transform_factor(model_name, rmin, rmax):
-    """ Return factor which transforms aerosol size distribution data from model bins 
-        to AERONET's 22 bins format, assuming a constant function.
+    """
+    Calculates the factor to transform aerosol size distributions from model bins to AERONET's 
+    22 bin format, assuming a constant function.
 
-        :param model_name: name of model
-        :type model_name: str
-        :param rmin: minimum bin radius
-        :type rmin: float
-        :param rmax: maximum bin radius
-        :type rmax: float
-        :return: transform factor
-        :rtype: np.float32
+    Parameters
+    ----------
+    model_name : str
+        The name of the model being processed.
+    rmin : float
+        The minimum radius of the specific model bin.
+    rmax : float
+        The maximum radius of the specific model bin.
+
+    Returns
+    -------
+    bin_transform_factor : float
     """
 
     import numpy as np
@@ -87,13 +119,18 @@ def get_model_to_aeronet_bin_transform_factor(model_name, rmin, rmax):
     return bin_transform_factor
 
 def check_for_ghost(network_name):
-    """ Check whether the selected network comes from GHOST or not.
-        All non-GHOST networks start with an asterisk at their name.
+    """
+    Determines whether a selected network is sourced from GHOST or not.
 
-        :param network_name: network name
-        :type network_name: str
-        :return: True or False if network is from GHOST 
-        :rtype: boolean
+    Parameters
+    ----------
+    network_name : str
+        The name of the network to be checked.
+
+    Returns
+    -------
+    bool
+        True if the network is a GHOST network, False otherwise.
     """
 
     if '/' in network_name:
@@ -102,15 +139,15 @@ def check_for_ghost(network_name):
         return True
         
 def check_directory_existence(directory_tree_str, directories_not_to_test=None):
-    """ Iterate through provided directory tree string.
-        First, check if directory exists, if not create it.
-        Second, check if each directory has 770 permissions.
-        Finally, also ensure group owner is bsc32.
+    """
+    Validates, creates, and sets standardised permissions and ownership for a directory hierarchy.
 
-        :param directory_tree_str: directory tree
-        :type directory_tree_str: str
-        :param directories_not_to_test: directories that will not be checked
-        :type directories_not_to_test: str
+    Parameters
+    ----------
+    directory_tree_str : str
+        The full path of the directory tree to be processed.
+    directories_not_to_test : str, optional
+        A prefix of the directory tree that should be excluded from existence and permission checks.
     """
 
     import copy
@@ -159,10 +196,13 @@ def check_directory_existence(directory_tree_str, directories_not_to_test=None):
                 os.system("chgrp bsc32 {}".format(alt_directory_str_to_test))
 
 def set_file_permissions_ownership(file_str):
-    """ Set 770 permissions for a newly written file and also ensure group owner is bsc32.
+    """
+    Sets standardised file permissions and group ownership for a specified file path.
 
-        :param file_str: name of the file to set permissions and owner
-        :type file_str: str
+    Parameters
+    ----------
+    file_str : str
+        The path of the file to be updated with new permissions and ownership.
     """
 
     import os
@@ -181,12 +221,18 @@ def set_file_permissions_ownership(file_str):
     os.system("chgrp bsc32 {}".format(file_str))
 
 def findMiddle(input_len):
-    """ Find middle index/indices of a list.
+    """
+    Determines the middle index or indices for a given length.
 
-        :param input_len: list of coordinates
-        :type input_len: list
-        :return: middle index of list 
-        :rtype: int
+    Parameters
+    ----------
+    input_len : int
+        The total length of the sequence to calculate the middle for.
+
+    Returns
+    -------
+    middle : int or list
+        The middle index as an integer for odd lengths, or a list of two middle indices for even lengths.
     """
 
     middle = float(input_len)/2

@@ -6,10 +6,13 @@ import numpy as np
 import pandas as pd
 
 def init_flags(instance):
-    """ Initialise internal structure to store selected flags.
+    """
+    Initialise the internal dictionary structure and default values for network quality assurance flags.
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
+    Parameters
+    ----------
+    instance : object
+        An object instance to be updated with flag menu configurations.
     """
 
     # do not have object instance already?
@@ -29,10 +32,13 @@ def init_flags(instance):
     
 
 def init_qa(instance):
-    """ Initialise internal structure to store selected qa.
+    """
+    Initialise the internal dictionary structure and default values for GHOST quality assurance flags.
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
+    Parameters
+    ----------
+    instance : object
+        An object instance to be updated with quality assurance menu configurations.
     """
 
     # do not have object instance already?
@@ -59,29 +65,14 @@ def init_qa(instance):
     instance.qa_menu['checkboxes']['map_vars'] = np.sort(list(qa_map_vars))
     
 
-def update_qa(instance):
-
-    # reset fields
-    if instance.selected_network == 'actris/actris':
-        qa_labels = {'Invalid Data Provider Flags - GHOST Decreed': 6, 
-                     'Invalid Data Provider Flags - Network Decreed': 7}
-    else:
-        qa_labels = instance.standard_QA_name_to_QA_code
-
-    qa_key = qa_labels.get
-    qa_map_vars = qa_labels.values()
-    instance.qa_menu['checkboxes']['labels'] = np.array(sorted(qa_labels, 
-                                                               key=qa_key))
-    instance.qa_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
-    instance.qa_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
-    instance.qa_menu['checkboxes']['map_vars'] = np.sort(list(qa_map_vars))
-    
-
 def init_models(instance):
-    """ Initialise internal structure to store selected models.
+    """
+    Initialise the internal dictionary structure and default values for model selection and forecast options.
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
+    Parameters
+    ----------
+    instance : object
+        An object instance to be updated with model menu configurations.
     """
 
     # do not have object instance already?
@@ -101,10 +92,13 @@ def init_models(instance):
 
 
 def init_multispecies(instance):
-    """ Initialise internal structure to store multispecies fields.
+    """
+    Initialise the internal dictionary structure for multispecies filtering fields and range boundaries.
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
+    Parameters
+    ----------
+    instance : object
+        An object instance to be updated with multispecies menu configurations.
     """
 
     # do not have object instance already?
@@ -128,10 +122,13 @@ def init_multispecies(instance):
 
 
 def init_representativity(instance):
-    """ Initialise internal structure to store representativity fields.
+    """
+    Initialise the internal dictionary structure and default values for data representativity percentage fields.
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
+    Parameters
+    ----------
+    instance : object
+        An object instance to be updated with representativity menu configurations.
     """
 
     # do not have object instance already?
@@ -151,10 +148,13 @@ def init_representativity(instance):
 
 
 def init_period(instance):
-    """ Initialise internal structure to store period fields.
+    """
+    Initialise the internal dictionary structure and default values for data period selection fields.
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
+    Parameters
+    ----------
+    instance : object
+        An object instance to be updated with period menu configurations.
     """
 
     # do not have object instance already?
@@ -171,10 +171,13 @@ def init_period(instance):
 
 
 def init_metadata(instance):
-    """ Initialise internal structure to store metadata.
+    """
+    Initialise the internal dictionary structure and nested menus for station metadata.
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
+    Parameters
+    ----------
+    instance : object
+        An object instance to be updated with metadata menu configurations.
     """
 
     # do not have object instance already?
@@ -263,11 +266,40 @@ def init_metadata(instance):
             del instance.metadata_menu[metadata_type][metadata_type_checkbox_var_to_remove]
 
 
-def update_representativity_fields(instance):
-    """ Update the data representativity menu upon read.
+def update_qa(instance):
+    """
+    Update the quality assurance menu labels and mappings.
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
+    Parameters
+    ----------
+    instance : object
+        An object instance to be updated with quality assurance menu configurations.
+    """
+
+    # reset fields
+    if instance.selected_network == 'actris/actris':
+        qa_labels = {'Invalid Data Provider Flags - GHOST Decreed': 6, 
+                     'Invalid Data Provider Flags - Network Decreed': 7}
+    else:
+        qa_labels = instance.standard_QA_name_to_QA_code
+
+    qa_key = qa_labels.get
+    qa_map_vars = qa_labels.values()
+    instance.qa_menu['checkboxes']['labels'] = np.array(sorted(qa_labels, 
+                                                               key=qa_key))
+    instance.qa_menu['checkboxes']['remove_default'] = np.array([], dtype=np.uint8)
+    instance.qa_menu['checkboxes']['remove_selected'] = np.array([], dtype=np.uint8)
+    instance.qa_menu['checkboxes']['map_vars'] = np.sort(list(qa_map_vars))
+
+
+def update_representativity_fields(instance):
+    """
+    Update the data representativity menu labels and values based on the active data resolution and network type.
+
+    Parameters
+    ----------
+    instance : object
+        An object instance to be updated with representativity menu configurations.
     """
 
     # get previously set rangebox labels / values
@@ -312,10 +344,13 @@ def update_representativity_fields(instance):
 
 
 def update_period_fields(instance):
-    """ Update the data period menu upon read.
+    """
+    Update the data period menu labels based on the active temporal resolution.
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
+    Parameters
+    ----------
+    instance : object
+        An object instance to be updated with period menu configurations.
     """
 
     # hourly/3hourly/6hourly temporal resolution?
@@ -358,17 +393,22 @@ def update_period_fields(instance):
 
 
 def update_metadata_fields(instance):
-    """ Update the metadata menu object with metadata associated with newly read data
-        for non-numeric metadata gets all the unique fields per metadata variable,
-        and sets the available fields as such, and for numeric gets the minimum and maximum
-        boundaries of each metadata variable.
-        If previously metadata settings for a field deviate from the default,
-        then if the same field still exists then the settings (i.e. bounds or
-        checkbox selection) are copied across, rather than setting to the default.
-
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
     """
+    Update the metadata menu with unique categorical fields or numeric boundaries 
+    derived from newly read data.
+    
+    Non-numeric metadata gets all the unique fields per metadata variable.
+    Numeric metadata gets the minimum and maximum boundaries per metadata variable.
+    If previously metadata settings for a field deviate from the default,
+    then if the same field still exists then the settings (i.e. bounds or
+    checkbox selection) are copied across, rather than setting to the default.
+
+    Parameters
+    ----------
+    instance : object
+        An object instance to be updated with metadata menu configurations.
+    """
+
 
     # before doing anything check if have all current metadata variables in menu
     # if not, this is either because it is initialised empty, 
@@ -490,11 +530,13 @@ def update_metadata_fields(instance):
 
 
 def multispecies_conf(instance):
-    """ Function used when loading from a configuration file. 
-        Sets defined multispecies filtering variables, rest of variables are set to default. 
+    """
+    Configure multispecies filtering variables and widget states using settings loaded from a configuration file.
 
-        :param instance: Instance of class Dashboard
-        :type instance: object
+    Parameters
+    ----------
+    instance : object
+        An object instance to be updated with multispecies menu configurations.
     """
 
     if hasattr(instance, 'filter_species'):
@@ -529,11 +571,13 @@ def multispecies_conf(instance):
 
 
 def representativity_conf(instance):
-    """ Function used when loading from a configuration file. 
-        Sets defined representativity filter variables, rest of variables are set to default. 
+    """
+    Configure representativity filter variables using settings loaded from a configuration file.
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
+    Parameters
+    ----------
+    instance : object
+        An object instance to be updated with representativity menu configurations.
     """
 
     for i, label in enumerate(instance.representativity_menu['rangeboxes']['map_vars']):
@@ -542,11 +586,13 @@ def representativity_conf(instance):
 
 
 def period_conf(instance):
-    """ Function used when loading from a configuration file. 
-        Sets defined period filter variables, rest of variables are set to default. 
+    """
+    Configure period filter variables and checkbox selections using settings loaded from a configuration file.
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
+    Parameters
+    ----------
+    instance : object
+        An object instance to be updated with period menu configurations.
     """
 
     from .configuration import split_options
@@ -558,11 +604,13 @@ def period_conf(instance):
 
 
 def metadata_conf(instance):
-    """ Function used when loading from a configuration file. 
-        Sets defined metadata filter variables, rest of variables are set to default.
+    """
+    Configure metadata filter ranges and categorical selections using settings loaded from a configuration file.
 
-        :param instance: Instance of class Report or Dashboard
-        :type instance: object
+    Parameters
+    ----------
+    instance : object
+        An object instance to be updated with metadata menu configurations.
     """
 
     from .configuration import split_options

@@ -26,22 +26,25 @@ fairmode_settings = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/fairmod
 
 def get_selected_station_data(read_instance, canvas_instance, networkspecies, 
                               station_index=None, data_range_min=None, data_range_max=None, stddev_max=None):
-    """ Function that takes full data array and cuts it for selected stations, per network / species, per data label.
+    """
+    Subsets the full data array for selected stations and calculates paradigm-specific statistics.
 
-        :param read_instance: Instance of class Dashboard or Report
-        :type read_instance: object
-        :param canvas_instance: Instance of class Canvas or Report
-        :type canvas_instance: object
-        :param networkspecies: List of networkspeci strings
-        :type networkspecies: list
-        :param station_index: Indices of stations to keep per network/species
-        :type station_index: list
-        :param data_range_min: current minimum of data range per networkspecies
-        :type data_range_min: dict
-        :param data_range_max: current maximum of data range per networkspecies
-        :type data_range_max: dict
-        :param stddev_max: current maximum of StdDev per networkspecies
-        :type stddev_max: dict
+    Parameters
+    ----------
+    read_instance : object
+        The source instance containing filtered data in memory.
+    canvas_instance : object
+        The target instance where selected data and metadata will be stored.
+    networkspecies : list
+        List of network/species identifier strings to process.
+    station_index : list, optional
+        Specific indices of stations to retain.
+    data_range_min : dict, optional
+        Current minimum data values per network/species for harmonisation.
+    data_range_max : dict, optional
+        Current maximum data values per network/species for harmonisation.
+    stddev_max : dict, optional
+        Current maximum standard deviation values for harmonisation.
     """
 
     # create new dictionaries to store selected station data and metadata by network / species, per data label
@@ -241,8 +244,25 @@ def get_selected_station_data(read_instance, canvas_instance, networkspecies,
             canvas_instance.selected_station_stddev_max[networkspeci] = np.nanmax(np.nanstd(canvas_instance.selected_station_data[networkspeci]['flat'], axis=-1))
 
 def do_resampling(read_instance, data_array, writing=False):
+    """
+    Handles the temporal resampling of the data array based on the specified resolution.
 
-    """ Function which handles resampling of data """
+    Parameters
+    ----------
+    read_instance : object
+        The instance containing configuration parameters such as resampling resolution and time arrays.
+    data_array : numpy.ndarray
+        The input data array to be resampled, typically with dimensions (labels, stations, time).
+    writing : bool, optional
+        Flag indicating if the function is being called for writing output data (default is False).
+
+    Returns
+    -------
+    numpy.ndarray
+        The resampled data array.
+    pandas.DatetimeIndex, optional
+        The new time index if writing is True.
+    """
 
     # if resampling resolution is None, then do not resample
     if read_instance.resampling_resolution == 'None':
@@ -324,9 +344,28 @@ def do_resampling(read_instance, data_array, writing=False):
 
 def merge_forecast_days(read_instance, networkspeci, data_labels, unique_base_data_labels, data_array):
     """
-    Function which joins different forecast days separated as different models as 1 tiled model.
+    Joins different forecast days separated as different models into a single tiled model sequence.
     Observations and non-forecast models are repeatedly tiled to macth the tiled model shape.
+
+    Parameters
+    ----------
+    read_instance : object
+        The source instance containing forecast configuration and time arrays.
+    networkspeci : str
+        The combined network and species identifier.
+    data_labels : list
+        The list of labels for each slice in the input data array.
+    unique_base_data_labels : list
+        The list of unique model/observation names without forecast suffixes.
+    data_array : numpy.ndarray
+        The input data array to be merged.
+
+    Returns
+    -------
+    numpy.ndarray
+        The updated data array with forecast days merged into a continuous temporal dimension.
     """
+
 
     # get n_labels and n_stations of data array
     n_labels, n_stations, _ = data_array.shape
@@ -361,24 +400,35 @@ def merge_forecast_days(read_instance, networkspeci, data_labels, unique_base_da
     return new_data_in_memory
 
 def boxplot_inner_fences(data):
+    """
+    Using adjusted boxplot methodology, calaculate Tukey inner fences of data, which beyond these limits data are 
+    considered 'possible outliers'. 
 
-    ''' Using adjusted boxplot methodology, calaculate Tukey inner fences of data, which beyond these limits data are 
-        considered 'possible outliers'. 
+    Check is only done when have >= 20 values to ensure have sufficient values to use methodology.
+    Otherwise the minimum nax maximum of the data are returned
 
-        check is only done when have >= 20 values to ensure have sufficient values to use methodology.
-        otherwise the minimum nax maximum of the data are returned
+    Tukey's boxplot is a very popular tool for detection of outliers. It reveals the location, spread and skewness of the data.
+    The definition of the inner fences is such that the expected percentage values which exceed is close to 0.7% for a normal distribution.
+    The method is only recommended to be used if a small number of outliers is presumed (at most 5%), and data is normally distributed.
 
-        Tukey's boxplot is a very popular tool for detection of outliers. It reveals the location, spread and skewness of the data.
-        The definition of the inner fences is such that the expected percentage values which exceed is close to 0.7% for a normal distribution.
-        The method is only recommended to be used if a small number of outliers is presumed (at most 5%), and data is normally distributed.
+    See References here:
+    https://wis.kuleuven.be/stat/robust/papers/2008/adjboxplot-revision.pdf
+    https://www.researchgate.net/publication/277943905_A_Modified_Approach_for_Detection_of_Outliers
+    https://en.wikipedia.org/wiki/Medcouple
+    https://en.wikipedia.org/wiki/Box_plot#Variations
 
-        See References here:
-        https://wis.kuleuven.be/stat/robust/papers/2008/adjboxplot-revision.pdf
-        https://www.researchgate.net/publication/277943905_A_Modified_Approach_for_Detection_of_Outliers
-        https://en.wikipedia.org/wiki/Medcouple
-        https://en.wikipedia.org/wiki/Box_plot#Variations
+    Parameters
+    ----------
+    data : numpy.ndarray
+        The input dataset for which outlier boundaries are to be calculated.
 
-    '''
+    Returns
+    -------
+    lower_inner_fence : float
+        The lower boundary for non-outlying data.
+    upper_inner_fence : float
+        The upper boundary for non-outlying data.
+    """
 
     #if have < 20 points then simply return min/max of data 
     if data.size < 20:
@@ -402,7 +452,25 @@ def boxplot_inner_fences(data):
         return lower_inner_fence, upper_inner_fence
 
 def get_station_inds(read_instance, canvas_instance, networkspeci, station_index):
-    """ Get selected station indices """
+    """
+    Retrieves the indices of stations to be processed based on the current execution mode and context.
+
+    Parameters
+    ----------
+    read_instance : object
+        The source instance containing filtered data and valid station indices.
+    canvas_instance : object
+        The target instance providing context for relative station selection.
+    networkspeci : str
+        The combined network and species identifier.
+    station_index : int, optional
+        A specific station index to override the automated selection.
+
+    Returns
+    -------
+    numpy.ndarray
+        An array of station indices relevant to the current operation.
+    """
         
     if station_index is not None:
         station_inds = np.array([station_index])
@@ -421,13 +489,33 @@ def group_periodic(read_instance, canvas_instance, networkspeci, period_resoluti
                    per_station, statistic_mode, base_zstat, data_array,
                    return_nan_padding_counts=False):
     """
-    Function that groups data into periodic chunks.
+    Groups data into periodic chunks based on temporal resolutions like hour, day of week, or month.
 
-    Input:  (label, station, time)
-    Output: (chunk, label, station, chunk_time)
+    Parameters
+    ----------
+    read_instance : object
+        The source instance containing the time index and configuration.
+    canvas_instance : object
+        The target instance for storing unique period identifiers.
+    period_resolution : str
+        The temporal attribute to group by (e.g. 'hour', 'dayofweek', 'month').
+    per_station : bool
+        Flag indicating if the grouping should maintain individual station dimensions.
+    statistic_mode : str
+        The statistical paradigm being used (e.g. 'Flattened').
+    base_zstat : str
+        The base statistic name, used to determine if flattening is appropriate.
+    data_array : numpy.ndarray
+        The input data array with dimensions (label, station, time).
+    return_nan_padding_counts : bool, optional
+        Whether to return the number of NaN values added for alignment (default is False).
 
-    Periodic grouping is done for hours of the day, days of the week, or months of the year.
-    Applies NaN padding where chunk lengths differ, and tracks padding counts.
+    Returns
+    -------
+    periodic_data : numpy.ndarray
+        The grouped data array with dimensions (chunk, label, station, chunk_time).
+    nan_padding_counts : numpy.ndarray, optional
+        The counts of padded NaNs if return_nan_padding_counts is True.
     """
 
     # ------------------------------------------------------------------
@@ -508,10 +596,37 @@ def group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolutio
                    per_station, statistic_mode, base_zstat, data_array,
                    prev_nan_padding_counts=None, return_nan_padding_counts=False):
     """
-    Function that groups data into temporal chunks.
+    Groups data into temporal chunks, handling both standard and forecast-dimensioned arrays.
 
-    Handles both non-forecast data (3D -> 4D) and forecast data (5D -> 5D).
-    Applies NaN padding where chunk lengths differ, and tracks padding counts.
+    Parameters
+    ----------
+    read_instance : object
+        The source instance containing configuration and frequency settings.
+    canvas_instance : object
+        The target instance for storing the new resampled time index.
+    networkspeci : str
+        The combined network and species identifier.
+    chunk_resolution : str
+        The desired temporal resolution for grouping (e.g. 'monthly', 'annual', 'daily').
+    per_station : bool
+        Flag to determine if station dimensions should remain separate.
+    statistic_mode : str
+        The statistical paradigm (e.g. 'Flattened') used to shape the output.
+    base_zstat : str
+        The base identifier for the statistic being calculated.
+    data_array : numpy.ndarray
+        The input data array, either 3D (non-forecast) or 5D (forecast).
+    prev_nan_padding_counts : numpy.ndarray, optional
+        Existing padding counts from previous grouping operations.
+    return_nan_padding_counts : bool, optional
+        Whether to return the calculated NaN padding counts (default is False).
+
+    Returns
+    -------
+    numpy.ndarray
+        The grouped data array (4D for standard data, 5D for forecast data).
+    numpy.ndarray, optional
+        The padding counts if return_nan_padding_counts is True.
     """
 
     # get existing timeseries data 
@@ -678,15 +793,55 @@ def group_temporal(read_instance, canvas_instance, networkspeci, chunk_resolutio
 
     return grouped_data
 
-
-
 def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, data_labels_a, 
                         data_labels_b, map=False, per_station=False, period=None, chunk_resolution=None, 
                         reduction=True, mask=None, statistic_mode=None, statistic_aggregation=None, 
                         periodic_statistic_mode=None, periodic_statistic_aggregation=None,
                         forecast_type=None):
-    """Function that calculates a statistic for data labels, either absolute or bias, 
-       for different aggregation modes.
+    """
+    Calculates statistical metrics for absolute values or model biases across various aggregation modes.
+
+    Parameters
+    ----------
+    read_instance : object
+        The source instance containing filtered datasets and configuration.
+    canvas_instance : object
+        The target instance providing selected station data and metadata.
+    networkspeci : str
+        The network and species identifier.
+    zstats : str or list
+        The list of statistics to calculate (e.g., 'mean', 'bias', 'r').
+    data_labels_a : str or list
+        Primary data labels (usually observations or first model).
+    data_labels_b : str or list
+        Secondary data labels (usually model experiments for bias calculations).
+    map : bool, optional
+        If True, returns statistics formatted for spatial mapping.
+    per_station : bool, optional
+        If True, maintains the spatial dimension of the calculated statistics.
+    period : str, optional
+        Grouping resolution for periodic statistics (e.g., 'hour').
+    chunk_resolution : str, optional
+        Resolution for temporal chunking (e.g., 'daily').
+    reduction : bool, optional
+        Whether to aggregate the resulting array across the final dimension (default is True).
+    mask : numpy.ndarray, optional
+        Boolean mask to apply to the input data before calculation.
+    statistic_mode : str, optional
+        The statistical paradigm (e.g., 'Spatial|Temporal').
+    statistic_aggregation : str, optional
+        The method for temporal/spatial reduction (e.g., 'mean', 'median').
+    periodic_statistic_mode : str, optional
+        Method for periodic aggregation ('Cycle' or 'Independent').
+    periodic_statistic_aggregation : str, optional
+        Aggregation method for periodic groups.
+    forecast_type : str, optional
+        Identifier for forecast-specific handling (e.g., 'daily').
+
+    Returns
+    -------
+    dict or numpy.ndarray
+        A dictionary of calculated statistics if multiple are requested, otherwise a single array.
     """
 
     # if statistic mode is None, then take the global one
@@ -1148,12 +1303,20 @@ def calculate_statistic(read_instance, canvas_instance, networkspeci, zstats, da
     return stats_calc
 
 def get_axes_vminmax(axs):
-    """ Function that get minimum and maximum of plotted data across relevant axes.
+    """
+    Retrieves the minimum and maximum data values plotted across a list of Matplotlib axes.
 
-        :param axs: list of relevant axes
-        :type axs: list
-        :return: minimum plotted value, maximum plotted value
-        :rtype: np.float32, np.float32
+    Parameters
+    ----------
+    axs : list
+        A list of Matplotlib axis handles to inspect.
+
+    Returns
+    -------
+    plotted_min : np.float32
+        The minimum value found across all collections in the provided axes.
+    plotted_max : np.float32
+        The maximum value found across all collections in the provided axes.
     """
 
     # get axes plotted vmin/vmax
@@ -1177,24 +1340,40 @@ def get_axes_vminmax(axs):
 
 def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, plot_characteristics, speci, 
                               only_label=False):
-    """ Function that generates neccessary detail to crate colourbar.
+    """
+    Determines colourbar parameters including limits, labels, and colourmaps for a specific statistic.
 
-        :param read_instance: Instance of class Dashboard or Report
-        :type read_instance: object
-        :param zstat: Statistic
-        :type zstat: str
-        :param plotted_min: minimum plotted value
-        :type plotted_min: np.float32
-        :param plotted_max: maximum plotted value
-        :type plotted_max: np.float32
-        :param plot_characteristics: dictionary of plot characteristics
-        :type plot_characteristics: dict
-        :param speci: speci to plot
-        :type speci: str
-        :param only_label: boolean if only to return label
-        :type only_label: boolean
-        :return: cbar min, cbar max, cbar label, cbar cmap
-        :rtype: np.float32, np.float32, str, str
+    Parameters
+    ----------
+    read_instance : object
+        The source instance containing configuration and measurement units.
+    zstat : str
+        The statistic identifier used to fetch specific metadata.
+    plotted_min : np.float32
+        The minimum data value currently present in the plot.
+    plotted_max : np.float32
+        The maximum data value currently present in the plot.
+    plot_characteristics : dict
+        A dictionary containing default plotting parameters from configuration files.
+    speci : str
+        The species name, used for species-specific overrides.
+    only_label : bool, optional
+        If True, only the generated label string is returned (default is False).
+
+    Returns
+    -------
+    z_vmin : np.float32
+        The lower limit for the colourbar.
+    z_vmax : np.float32
+        The upper limit for the colourbar.
+    z_label : str
+        The formatted label including units and statistic type.
+    z_colourmap : str
+        The name of the Matplotlib colourmap to apply.
+    n_discrete : int or None
+        The number of discrete colour levels, if applicable.
+    n_ticks : int
+        The number of ticks to display on the colourbar.
     """
 
     # get zstat information
@@ -1408,20 +1587,23 @@ def generate_colourbar_detail(read_instance, zstat, plotted_min, plotted_max, pl
     return z_vmin, z_vmax, z_label, z_colourmap, n_discrete, n_ticks
 
 def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, speci):
-    """ Function that generates colourbar.
+    """
+    Renders the colourbar on the specified axes and updates plot collection limits.
 
-        :param read_instance: Instance of class Dashboard or Report
-        :type read_instance: object
-        :param axs: list of relevant axes
-        :type axs: list
-        :param cb_axs: list of relevant colourbar axes
-        :type cb_axs: list
-        :param zstat: Statistic
-        :type zstat: str    
-        :param plot_characteristics: dictionary of plot characteristics
-        :type plot_characteristics: dict
-        :param speci: speci to plot
-        :type speci: str
+    Parameters
+    ----------
+    read_instance : object
+        The source instance containing global configuration and species metadata.
+    axs : list
+        List of plot axes whose data limits and colourmaps need updating.
+    cb_axs : list
+        List of axes where the colourbar should be drawn.
+    zstat : str
+        The statistic identifier used to determine colourbar styling.
+    plot_characteristics : dict
+        Configuration dictionary defining orientation, labels, and tick parameters.
+    speci : str
+        The species identifier for species-specific scaling.
     """
 
     # get plotted vmin and vmax over relevant axes
@@ -1492,14 +1674,20 @@ def generate_colourbar(read_instance, axs, cb_axs, zstat, plot_characteristics, 
                 collection.set_cmap(cmap=cmap)
 
 def get_z_statistic_comboboxes(base_zstat, bias=False):
-    """ Function that gets appropriate zstat name for selected zstatistic comboboxes.
+    """
+    Retrieves the formatted statistic name from combobox selection.
 
-        :param base_zstat: Statistic
-        :type base_zstat: str   
-        :param second_data_label: name if secondary data label (if exists)
-        :type second_data_label: str
-        :return: zstat name
-        :rtype: str
+    Parameters
+    ----------
+    base_zstat : str
+        The primary name of the statistic.
+    bias : bool, optional
+        Flag indicating if the statistic refers to a model bias (default is False).
+
+    Returns
+    -------
+    zstat : str
+        The formatted string identifier for the statistic.
     """
     
     # get zstat sign 
@@ -1517,12 +1705,18 @@ def get_z_statistic_comboboxes(base_zstat, bias=False):
     return zstat
 
 def get_z_statistic_type(zstat):
-    """ Function that checks if the z statistic is basic or modbias statistic.
-    
-        :param zstat: Statistic
-        :type zstat: str   
-        :return: zstat type
-        :rtype: str
+    """
+    Determines if a statistic is categorised as a basic metric or a model bias metric.
+
+    Parameters
+    ----------
+    zstat : str
+        The identifier of the statistic to check.
+
+    Returns
+    -------
+    str
+        The category of the statistic ('basic' or 'modbias').
     """
 
     # check if the chosen statistic is a basic statistic
@@ -1533,14 +1727,20 @@ def get_z_statistic_type(zstat):
         return 'modbias'
 
 def get_z_statistic_sign(zstat, zstat_type=None):
-    """ Function that checks if the z statistic is an absolute or bias statistic.
+    """
+    Determines whether a statistic represents an absolute value or a comparative bias.
 
-        :param zstat: Statistic
-        :type zstat: str   
-        :param zstat_type: type of statistic
-        :type zstat_type: str   
-        :return: zstat sign
-        :rtype: str
+    Parameters
+    ----------
+    zstat : str
+        The identifier of the statistic to check.
+    zstat_type : str, optional
+        The category of the statistic ('basic' or 'modbias'). If None, it is determined internally.
+
+    Returns
+    -------
+    str
+        The sign of the statistic ('absolute' or 'bias').
     """
     
     if zstat_type is None:
@@ -1554,16 +1754,28 @@ def get_z_statistic_sign(zstat, zstat_type=None):
         return 'absolute'
 
 def get_z_statistic_info(plot_type=None, zstat=None):
-    """ Get z statistic name, type (basic or modbias), sign (absolute or bias), 
-        base name (dropping '_bias' suffix) and period (if any)  
-        from plot_type (or known zstat name).
-    
-        :param plot_type: plot type
-        :type plot_type: str
-        :param zstat: Statistic
-        :type plot_type: str
-        :return zstat name, base zstat name, zstat type, zstat sign, zstat period
-        :rtype: str, str, str, str, str
+    """
+    Parses statistic information including type, sign, base name, and period from a statistic or plot string.
+
+    Parameters
+    ----------
+    plot_type : str, optional
+        The high-level plot identifier string (e.g., 'map-mean_bias').
+    zstat : str, optional
+        The specific statistic identifier.
+
+    Returns
+    -------
+    zstat : str
+        The full statistic name.
+    base_zstat : str
+        The statistic name stripped of suffixes and periods.
+    z_statistic_type : str
+        The category of statistic ('basic' or 'modbias').
+    z_statistic_sign : str
+        The mathematical intent ('absolute' or 'bias').
+    z_statistic_period : str
+        The temporal grouping attribute (e.g., 'hour', 'month'), if applicable.
     """
 
     # have plot_type? Therefore need to extract zstat from plot_type name (if available)
@@ -1610,14 +1822,22 @@ def get_z_statistic_info(plot_type=None, zstat=None):
     return zstat, base_zstat, z_statistic_type, z_statistic_sign, z_statistic_period
     
 def aggregation(data_array, statistic_aggregation, axis=0):
-    """ Aggregate data across a the specific axis using a given statistic
-    
-        :param data_array: array of data
-        :type data_array: numpy.ndarray
-        :param statistic_aggregation: name of aggregation statistic
-        :type statistic_aggregation: str
-        :param axis: axis to aggregate across
-        :type axis: int
+    """
+    Aggregates data across a specific axis using a chosen statistical method.
+
+    Parameters
+    ----------
+    data_array : numpy.ndarray
+        The input array of data to be aggregated.
+    statistic_aggregation : str
+        The name of the aggregation statistic (e.g. 'Mean', 'Median', or percentiles like 'p95').
+    axis : int, optional
+        The axis across which the aggregation is performed (default is 0).
+
+    Returns
+    -------
+    numpy.ndarray
+        The aggregated data array with the specified axis reduced.
     """
 
     if statistic_aggregation in ['Median', '']:
@@ -1637,15 +1857,20 @@ def aggregation(data_array, statistic_aggregation, axis=0):
     return aggregated_data
 
 def exceedance_lim(read_instance, networkspeci):
-    """ Return the exceedance limit depending on the species input. 
-        If species doesn't have a reported limit, returns np.nan.
+    """
+    Retrieves the regulatory exceedance limit for a specific network-species combination.
 
-        Try to get limit for specific networkspeci first, and then species.
+    Parameters
+    ----------
+    read_instance : object
+        The source instance containing metadata such as measurement units and GHOST version.
+    networkspeci : str
+        The combined network and species identifier (e.g. 'EBAS|sconco3').
 
-        :param networkspeci: Current networkspeci (e.g. EBAS|sconco3)
-        :type networkspeci: str
-        :return: value of exceedance limit
-        :rtype: int
+    Returns
+    -------
+    float
+        The converted exceedance limit value, or np.nan if no limit is defined.
     """
 
     # get speci
@@ -1675,9 +1900,29 @@ def exceedance_lim(read_instance, networkspeci):
 
     return limit
 
-
 def get_fairmode_data(read_instance, canvas_instance, networkspeci, data_labels):
-    
+    """
+    Prepares and filters dataset for FAIRMODE benchmarking by applying specific data quality criteria.
+
+    Parameters
+    ----------
+    read_instance : object
+        The source instance containing filtered data, resolution settings, and metadata.
+    canvas_instance : object
+        The target instance providing selected station indices and labels.
+    networkspeci : str
+        The combined network and species identifier.
+    data_labels : list
+        The list of labels for the data being processed.
+
+    Returns
+    -------
+    data_array : numpy.ndarray
+        The processed data array filtered by FAIRMODE representativity and coverage criteria.
+    valid_station_idxs : numpy.ndarray
+        A boolean mask indicating which stations met the FAIRMODE representativity threshold.
+    """
+
     # get coverage
     speci = networkspeci.split('|')[1]
     coverage = fairmode_settings[speci]['coverage']

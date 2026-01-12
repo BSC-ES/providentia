@@ -11,101 +11,123 @@ import numpy as np
 import pandas as pd
     
 class UnitConverter:
-    ''' Python class that converts units (specifically tailored for conversions of components in the field of 
-        Atmospheric Composition). 
+    """
+    Python class that converts units (specifically tailored for conversions of components in the field of 
+    Atmospheric Composition). 
 
-        Accepts mixture of SI base/derived/equivalent units and non-SI units as input/output arguments, and
-        can handle complex formatted input/output units (i.e. without spaces, spaced, including '/' or 'per' terms).
+    Accepts mixture of SI base/derived/equivalent units and non-SI units as input/output arguments, and
+    can handle complex formatted input/output units (i.e. without spaces, spaced, including '/' or 'per' terms).
 
-        Converts units between same quantities (i.e. length --> length, cm --> m), 
-        and converts between different quantities (i.e. mass concentration --> mole fraction, mg/m3 --> ppbv), 
-        when given the correct input parameters, and have a set conversion formula.
+    Converts units between same quantities (i.e. length --> length, cm --> m), 
+    and converts between different quantities (i.e. mass concentration --> mole fraction, mg/m3 --> ppbv), 
+    when given the correct input parameters, and have a set conversion formula.
 
-        Takes the following input arguments:
+    Takes the following input arguments:
 
-        1. input_units -- string of input units for same quantity conversion, or a dictionary of input quantities and units 
-        for converting between quantities. Quantity names should be given with underscore joins when more than 1 word. 
-        e.g. 'kg m-2 s-1'
-        e.g. {'molar_mass':'g mol-1', 'mole_fraction':'nmol mol-1'}
+    1. input_units -- string of input units for same quantity conversion, or a dictionary of input quantities and units 
+    for converting between quantities. Quantity names should be given with underscore joins when more than 1 word. 
+    e.g. 'kg m-2 s-1'
+    e.g. {'molar_mass':'g mol-1', 'mole_fraction':'nmol mol-1'}
 
-        2. output_units -- string of output units
-        e.g. 'kg kg-1'
+    2. output_units -- string of output units
+    e.g. 'kg kg-1'
 
-        3. input_value -- input value for same quantity conversion, or a dictionary of input quantities and values 
-        for converting between quantities. Quantity names should be given with underscore joins when more than 1 word.
-        e.g. 28.0
-        e.g. {'temperature':273.15, 'pressure':1013.25} 
+    3. input_value -- input value for same quantity conversion, or a dictionary of input quantities and values 
+    for converting between quantities. Quantity names should be given with underscore joins when more than 1 word.
+    e.g. 28.0
+    e.g. {'temperature':273.15, 'pressure':1013.25} 
 
-        4. precision **OPTIONAL -- precision of converted output / conversion factor (fixed number of decimal places).
-        e.g. precision=2
+    4. precision **OPTIONAL -- precision of converted output / conversion factor (fixed number of decimal places).
+    e.g. precision=2
 
-        5. species **OPTIONAL -- species (in chemical notation), needed when converting units associated with an 
-        element or molecule (e.g. ppmv N). Can pass pass molecular charges for ions when needed (e.g. NO3- or SO4--).  
-        e.g. species='O3'
-        e.g. species='SO4--'
-        
-        6. valence **OPTIONAL -- valence of species, needed when converting some units associated with ions (e.g. eq l-1).
-        e.g. valence=1
+    5. species **OPTIONAL -- species (in chemical notation), needed when converting units associated with an 
+    element or molecule (e.g. ppmv N). Can pass pass molecular charges for ions when needed (e.g. NO3- or SO4--).  
+    e.g. species='O3'
+    e.g. species='SO4--'
+    
+    6. valence **OPTIONAL -- valence of species, needed when converting some units associated with ions (e.g. eq l-1).
+    e.g. valence=1
 
-        7. input_quantity **OPTIONAL -- input quantity, needed when wanting to return conversion_factor for conversions
-        with more than 1 input variable, and for cases where multiple quantities can be represented by the same units.
-        The quantity refers to the input variable for which a conversion factor to the output units is wanted.
-        e.g. input_quantity='mass_concentration'
+    7. input_quantity **OPTIONAL -- input quantity, needed when wanting to return conversion_factor for conversions
+    with more than 1 input variable, and for cases where multiple quantities can be represented by the same units.
+    The quantity refers to the input variable for which a conversion factor to the output units is wanted.
+    e.g. input_quantity='mass_concentration'
 
-        8. output_quantity **OPTIONAL -- output quantity, needed for cases where multiple quantities can be represented 
-        by the same units.
-        e.g. output_quantity='momentum'
+    8. output_quantity **OPTIONAL -- output quantity, needed for cases where multiple quantities can be represented 
+    by the same units.
+    e.g. output_quantity='momentum'
 
-        ----------------------------------------------------------------------------------------
-        
-        How to use class
+    ----------------------------------------------------------------------------------------
+    
+    How to use class
 
-        -----------------------------------------------------
-        Same quantity unit conversion (e.g. m3 --> dm3)
+    -----------------------------------------------------
+    Same quantity unit conversion (e.g. m3 --> dm3)
 
-        1. Define input variables 
-        input_units = 'm3'
-        output units = 'dm3'
-        input_value = 1.0
+    1. Define input variables 
+    input_units = 'm3'
+    output units = 'dm3'
+    input_value = 1.0
 
-        2. Do conversion
-        conv_obj = unit_converter.UnitConverter(input_units, output_units, input_value)
+    2. Do conversion
+    conv_obj = unit_converter.UnitConverter(input_units, output_units, input_value)
 
-        -----------------------------------------------------
-        Different unit quantity conversion (e.g. ug m-3 --> ppbv)
+    -----------------------------------------------------
+    Different unit quantity conversion (e.g. ug m-3 --> ppbv)
 
-        1. Define input variables 
-        input_units = {'temperature':'K', 'pressure':'hPa', 'molar_mass':'g mol-1', 'mass_concentration':'ug m-3'}
-        output_units = 'ppbv'
-        input_values = {'temperature':273.0, 'pressure':1013.0, 'molar_mass':48.0, 'mass_concentration':10.0}
+    1. Define input variables 
+    input_units = {'temperature':'K', 'pressure':'hPa', 'molar_mass':'g mol-1', 'mass_concentration':'ug m-3'}
+    output_units = 'ppbv'
+    input_values = {'temperature':273.0, 'pressure':1013.0, 'molar_mass':48.0, 'mass_concentration':10.0}
 
-        2. Do conversion
-        conv_obj = unit_converter.UnitConverter(input_units, output_units, input_values, 
-                                                input_quantity='mass_concentration')
+    2. Do conversion
+    conv_obj = unit_converter.UnitConverter(input_units, output_units, input_values, 
+                                            input_quantity='mass_concentration')
 
-        ----------------------------------------------------------------------------------------
-        Output Class Attributes
+    ----------------------------------------------------------------------------------------
+    Output Class Attributes
 
-        conv_obj.converted_value                   --> Converted output value 
-        conv_obj.conversion_factor                 --> Conversion factor to get from input value to output value (Note this is not valid for the temperature quantity conversions)
-        conv_obj.input_cleaned_units               --> Cleaned version of input units 
-        conv_obj.output_cleaned_units              --> Cleaned version of output units 
-        conv_obj.input_reference_units             --> Input units as reference units (equivalent SI base units for given quantity)
-        conv_obj.input_reference_simplified_units  --> Input units as simplified reference units (equivalent SI base units for given quantity)   
-        conv_obj.output_reference_units            --> Output units as reference units (equivalent SI base units for given quantity)
-        conv_obj.output_reference_simplified_units --> Output units as simplified reference units (equivalent SI base units for given quantity)
-        conv_obj.input_standard_units              --> Input units as standard units (standardised form of units)
-        conv_obj.input_standard_simplified_units   --> Input units as simplified standard units (standardised form of units)
-        conv_obj.output_standard_units             --> Output units as standard units (standardised form of units)
-        conv_obj.output_standard_simplified_units  --> Output units as simplified standard units (standardised form of units)
-        conv_obj.input_quantity                    --> Quantity of input units 
-        conv_obj.input_quantities                  --> Quantities of input units 
-        conv_obj.output_quantity                   --> Quantity of output units
-
-    '''
+    conv_obj.converted_value                   --> Converted output value 
+    conv_obj.conversion_factor                 --> Conversion factor to get from input value to output value (Note this is not valid for the temperature quantity conversions)
+    conv_obj.input_cleaned_units               --> Cleaned version of input units 
+    conv_obj.output_cleaned_units              --> Cleaned version of output units 
+    conv_obj.input_reference_units             --> Input units as reference units (equivalent SI base units for given quantity)
+    conv_obj.input_reference_simplified_units  --> Input units as simplified reference units (equivalent SI base units for given quantity)   
+    conv_obj.output_reference_units            --> Output units as reference units (equivalent SI base units for given quantity)
+    conv_obj.output_reference_simplified_units --> Output units as simplified reference units (equivalent SI base units for given quantity)
+    conv_obj.input_standard_units              --> Input units as standard units (standardised form of units)
+    conv_obj.input_standard_simplified_units   --> Input units as simplified standard units (standardised form of units)
+    conv_obj.output_standard_units             --> Output units as standard units (standardised form of units)
+    conv_obj.output_standard_simplified_units  --> Output units as simplified standard units (standardised form of units)
+    conv_obj.input_quantity                    --> Quantity of input units 
+    conv_obj.input_quantities                  --> Quantities of input units 
+    conv_obj.output_quantity                   --> Quantity of output units
+    """
 
     def __init__(self, input_units, output_units, input_value, precision=-999, species='', valence=np.nan,
                  input_quantity='', output_quantity=''):
+        """
+        Initialises the UnitConverter and executes the conversion logic based on provided units and values.
+        
+        Parameters
+        ----------
+        input_units : str or dict
+            Input units string or dictionary of quantities and units for inter-quantity conversion.
+        output_units : str
+            Desired output units string.
+        input_value : float or dict
+            Input value or dictionary of values corresponding to input quantities.
+        precision : int, optional
+            Fixed number of decimal places for the result.
+        species : str, optional
+            Chemical species (e.g., 'O3') for mass-to-mole conversions.
+        valence : int, optional
+            Ion valence for equivalent unit conversions.
+        input_quantity : str, optional
+            Specific quantity being converted when multiple interpretations exist.
+        output_quantity : str, optional
+            Specific target quantity when multiple interpretations exist.
+        """
         
         # set input units to self 
         if isinstance(input_units, dict):
@@ -143,7 +165,9 @@ class UnitConverter:
         self.do_conversion()
     
     def do_conversion(self):
-        ''' Main conversion module. '''
+        """
+        Executes the unit conversion logic, branching between scaling within the same quantity or calculating between different quantities.
+        """
 
         # get prefix_standard names
         standard_prefix_names = []
@@ -276,7 +300,9 @@ class UnitConverter:
                 pass
             
     def check_quantity_agreement(self):
-        ''' Check if input quantity is same as output quantity. '''
+        """
+        Verifies that the input and output units represent the same physical quantity before proceeding with scaling.
+        """
 
         #print('cleaned units are: {} --> {}'.format(self.input_cleaned_units,self.output_cleaned_units))
         #print('reference units are: {} --> {}'.format(self.input_reference_units,self.output_reference_units))
@@ -291,7 +317,9 @@ class UnitConverter:
             sys.exit("Input and output quantities do not agree: '{}', '{}'. Check input and output units.".format(self.input_quantity, self.output_quantity))
             
     def check_conversion_validity(self):
-        ''' Check if have everything configured to convert from input to output quantities. '''
+        """
+        Validates that the input dictionaries are the same length and retrieves the appropriate formula for inter-quantity conversion.
+        """
     
         # check if input unit/value dicts have the same length
         if len(list(self.input_units.keys())) != len(list(self.input_value.keys())):
@@ -308,7 +336,9 @@ class UnitConverter:
         self.formula = self.get_conversion_formula()
              
     def get_quantity_representation(self, units, units_simplified, unit_type, unit_quantity):
-        ''' Get quantity represented by given reference units. '''
+        """
+        Identifies the physical quantity name associated with a set of reference units by checking SI base and derived definitions.
+        """
 
         # set list for storing valid quantities
         valid_quantities = []
@@ -357,10 +387,20 @@ class UnitConverter:
             return units_simplified
 
     def get_conversion_formula(self, formula_type='standard'):
-        ''' Get necessary conversion formula. 
-            This can either be the formula to calculate the output quantity (standard), 
-            or the formula to get the conversion factor between an input and output quantity (conversion_factor).
-        '''
+        """ 
+        Retrieves the appropriate mathematical formula for either standard output calculation or conversion factor derivation.
+
+        Parameters
+        ----------
+        formula_type : str
+            Type of formula to retrieve; either 'standard' to get the formula to obtain the output quantity, 
+            or 'conversion_factor' to get the formula to obtain the conversion factor
+
+        Returns
+        -------
+        formula : str
+            The string representation of the mathematical formula to be evaluated.
+        """
 
         # is the conversion formula standard (i.e. formula to get just the output quantity)
         if formula_type == 'standard':                   
@@ -415,7 +455,9 @@ class UnitConverter:
                 sys.exit("Do not have correct input quantities to calculate conversion factor between input quantity: '{}' and output quantity: '{}'.".format(self.user_input_quantity, self.output_quantity))
              
     def correct_temperature(self, input_value, input_standard_unit, output_standard_unit):
-        ''' If output quantity is solely a temperature, shift scales if required. '''
+        """
+        Adjusts temperature values by applying both multiplicative scaling and additive offsets for different thermometric scales.
+        """
 
         # kelvin --> kelvin
         if ('K' in input_standard_unit) & ('K' in output_standard_unit):
@@ -484,11 +526,16 @@ class UnitConverter:
         return
     
     def standardise_unit_form(self, units, unit_type):
-        ''' Return standardised units:
-            -- cleaned units (cleaned up version of text input)
-            -- reference units (equivalent SI base units for given quantity)
-            -- standard units (input units in standardised form) 
-        '''
+        """
+        Decomposes and standardises raw unit strings into cleaned, reference SI, and formatted standard forms while calculating scaling factors.
+
+        Parameters
+        ----------
+        units : str
+            The raw unit string to be processed (e.g., 'ug/m3' or 'kg m-2 s-1').
+        unit_type : str
+            Indicator of whether the units are 'input' or 'output'.
+        """
 
         # strip all leading/trailing white spaces from string
         units = units.strip()
@@ -883,7 +930,19 @@ class UnitConverter:
         return 
         
     def simplify_units(self, units):
-        ''' Simplify reference and standard units. '''
+        """
+        Reduces complex unit strings by summing exponents for identical base units and removing terms with zero exponents.
+
+        Parameters
+        ----------
+        units : str
+            The unit string to be simplified, containing space-separated terms with or without exponents.
+
+        Returns
+        -------
+        simplified : str
+            The simplified unit string maintaining the original order of first appearance.
+        """
 
         exponents = {}
         order = []  # first occurrence order
@@ -912,7 +971,11 @@ class UnitConverter:
         return simplified
 
     def load_dictionaries(self):
-        ''' Define all key dictionaries needed for unit conversion. '''
+        """
+        Defines dictionaries for SI prefixes, SI base quantities, SI derived quantities, non-SI quantities, constants, 
+        and conversion formulae to support unit parsing and conversion.
+        """
+
 
         # dictionary of standard prefixes with associated multiplying factors
         self.standard_prefixes = {
@@ -1536,7 +1599,19 @@ class UnitConverter:
         }
 
 def get_molecular_mass(molecule):
-    ''' Get molecular mass of a specific molecule in kg mol-1. '''
+    """
+    Calculate the molecular mass of a chemical compound in kg mol-1.
+
+    Parameters
+    ----------
+    molecule : str
+        The chemical formula of the molecule to be processed.
+
+    Returns
+    -------
+    float
+        The total molecular mass in kilograms per mole, or NaN if the input is empty.
+    """
 
     # if molecule is empty string then return molecular mass as np.NaN
     if molecule == '':
@@ -1574,7 +1649,21 @@ def get_molecular_mass(molecule):
     return compoundweight
 
 def get_N_atoms(molecule, element):
-    ''' Get integer number of atoms of a desired element in a molecule. '''
+    """
+    Determine the integer count of a specific element within a chemical formula.
+
+    Parameters
+    ----------
+    molecule : str
+        The chemical formula of the molecule to be analysed.
+    element : str
+        The chemical symbol of the element to count.
+
+    Returns
+    -------
+    int or float
+        The number of atoms of the specified element, or NaN if the input is invalid or missing.
+    """
 
     # if molecule or element is empty string then return number of atoms as np.NaN
     if (molecule == '') or (element == ''):
@@ -1590,7 +1679,19 @@ def get_N_atoms(molecule, element):
     return int(n_atoms_element)
 
 def get_valence(molecule):
-    ''' Get valence of a desired molecule. '''
+    """
+    Retrieve the chemical valence or absolute charge for a specific molecule.
+
+    Parameters
+    ----------
+    molecule : str
+        The chemical formula or ion symbol to be looked up.
+
+    Returns
+    -------
+    int or float
+        The valence value associated with the molecule, or NaN if not found.
+    """
 
     # if molecule is empty string then return valence as np.NaN
     if molecule == '':

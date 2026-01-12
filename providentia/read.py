@@ -25,19 +25,32 @@ from .warnings_prv import show_message
 
 
 class DataReader:
+    """ Class for reading data into memory """
 
     def __init__(self, read_instance):
+        """
+        Initialise the DataReader instance.
+
+        Parameters
+        ----------
+        read_instance : object
+            An object instance to be updated with data reading configurations and state.
+        """
+
         self.read_instance = read_instance
         
     def read_setup(self, operations, models_to_remove=None, models_to_read=None):
-        """ Setup structures for read of new observational/model data and then perform read.
+        """
+        Setup structures for read of new observational/model data and then perform read.
 
-            :param operations: list of instructions on how to adjust data structures
-            :type operation: list
-            :param models_to_remove: list of models to remove from arrays
-            :type models_to_remove: list
-            :param models_to_read: list of models to add to arrays
-            :type models_to_read: list
+        Parameters
+        ----------
+        operations : list
+            A list of instructions on how to adjust data structures (e.g., 'reset', 'read_left', 'cut_right').
+        models_to_remove : list, optional
+            A list of models to remove from arrays.
+        models_to_read : list, optional
+            A list of models to add to arrays.
         """
 
         # changing time dimension ?
@@ -611,12 +624,10 @@ class DataReader:
         self.read_instance.logger.info("")
 
     def read_basic_metadata(self):     
-        """ Get basic unique metadata across networkspecies wanting to read
-            The basic fields are: station_reference, station_name, longitude, latitude, measurement_altitude, 
-            station_classification and area_classification
-
-            If have multiple species, then spatially colocate across species 
-            to get matching stations across stations.
+        """
+        Extracts unique basic station metadata and handles spatial colocation across multiple networkspecies (if set) in parallel.
+        The basic metadata fields are: station_reference, station_name, longitude, latitude, measurement_altitude, 
+        station_classification and area_classification.
         """
 
         # define dictionaries for storing basic metadata across all species to read
@@ -803,8 +814,19 @@ class DataReader:
 
 
     def check_forecast(self, yearmonths_to_read=None, data_labels=None, data_labels_raw=None, networkspecies=None):
-        """ For model data, check if there is a forecast dimension in the data files,
-            and if so, determine which forecast days to read for each data label (per networkspeci).
+        """
+        Identifies the available forecast days for model data by inspecting NetCDF dimensions.
+
+        Parameters
+        ----------
+        yearmonths_to_read : list, optional
+            Target months to check; if None, it is calculated from the current instance date range.
+        data_labels : list, optional
+            Display labels for the data; defaults to instance data labels.
+        data_labels_raw : list, optional
+            Raw identifiers for the data; defaults to instance raw data labels.
+        networkspecies : list, optional
+            List of networkspecies pairs; defaults to instance networkspecies.
         """
 
         # set data labels if not defined
@@ -914,13 +936,31 @@ class DataReader:
                                 selected_data_labels=None, selected_data_labels_raw=None, 
                                 networkspecies=None, init=False):
         """
-        Updates forecast-related indices, labels, and model configurations based on
-        the current forecast settings and selected data labels.
+        Updates forecast-related indices, labels, and model configurations based on current settings and selections.
 
-        Returns:
-            new_data_labels (list): Updated list of data labels.
-            new_data_labels_raw (list): Updated list of raw data labels.
-            new_models (dict): Mapping of data_label_raw → data_label for updated models.
+        Parameters
+        ----------
+        data_labels : list, optional
+            Display labels for the data; defaults to instance data labels.
+        data_labels_raw : list, optional
+            Raw identifiers for the data; defaults to instance raw data labels.
+        selected_data_labels : list, optional
+            Subset of display labels currently selected; defaults to all data labels.
+        selected_data_labels_raw : list, optional
+            Subset of raw identifiers currently selected; defaults to all raw labels.
+        networkspecies : list, optional
+            List of networkspecies pairs; defaults to instance networkspecies.
+        init : bool, optional
+            Flag indicating if this is an initialisation call to reset menu structures.
+
+        Returns
+        -------
+        new_data_labels : list
+            Updated list of data labels including generated forecast suffixes.
+        new_data_labels_raw : list
+            Updated list of raw data labels including generated forecast suffixes.
+        new_models : dict
+            Mapping of updated raw data labels to their display counterparts.
         """
 
         # set data labels if not defined
@@ -1121,7 +1161,20 @@ class DataReader:
 
     def update_forecast_menu(self, networkspeci, data_label, new_data_label, n_forecast_days, wanted_forecast_day):
         """
-        Updates the forecast menu options for a given dataset and forecast configuration.
+        Update the forecast menu options and selection states for the dashboard interface.
+
+        Parameters
+        ----------
+        networkspeci : str
+            The specific networkspecies string being processed.
+        data_label : str
+            The original display label of the model dataset.
+        new_data_label : str
+            The newly generated label containing the forecast suffix.
+        n_forecast_days : int
+            Total number of forecast days available in the dataset.
+        wanted_forecast_day : str or int
+            The specific forecast day or type requested (e.g., 'combined', 'daily', or an integer).
         """
 
         # Only proceed if are in dashboard mode
@@ -1194,11 +1247,15 @@ class DataReader:
 
 
     def read_data(self, yearmonths_to_read, data_labels):
-        """ Function that handles reading of observational/model data.
-        #    :param yearmonths_to_read: list of yearmonths to read
-        #    :type yearmonths_to_read: list
-        #    :param data_labels: Data arrays to plot
-        #    :type data_labels: list
+        """
+        Manages the parallel reading of observational and model NetCDF data into shared memory arrays.
+
+        Parameters
+        ----------
+        yearmonths_to_read : list
+            List of year-month strings (YYYYMM) identifying the files to be read.
+        data_labels : list
+            List of data labels representing the datasets to be loaded into memory.
         """
 
         # create arrays to share across processes (for parallel multiprocessing use)
