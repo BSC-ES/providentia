@@ -1,14 +1,14 @@
 # Representativity filters
 
-One major limitation associated with observations is the amount of gaps often found between measurements.
+One major limitation associated with observations is the amount of gaps often found between measurements. If these observations are directly compared with model data, this would impose a significant bias upon the comparison. Filtering by representativity filters provides a way to control the temporal robustness of the observations for evaluation. 
 
-If these observations are directly compared with model data, this would impose a significant bias upon the comparison.   
+Providentia has multiple such filters. By default these are not activated (i.e. set at 0). 
 
-The representativity filters provides one way to control the temporal robustness of the observations for evaluation. 
+## Full Period Representativity Filters
+
+# Periodic Representativity Filters
 
 Providentia has two types of representativity filters. The first is the `representativity_percent` which is used to set the minimum % of representativity needed for a station's measurements to be valid in a specific time period (i.e. daily, monthly, etc.). If for instance we wanted to check the representativity of hourly station data each day, we would use the `daily_representativity_percent` filter. If we set this at 50%, this would mean any daily periods where there are <50% of observations missing, would be set to be NaN. By default, this is always set at 0%.
-
-The second type of representativity filter is the `max_gap_percent`. This is used to set the **maximum** permitted gap allowed for a station's measurements in a specific time period. For example if we wanted to check the max gap of hourly station data each day, we would use the `daily_max_gap_percent` filter. If we set this at 50%, this would mean any daily periods where there is a continuous gap of >50%, would be set to be NaN.
 
 If wanting to apply filters to the entire time period in memory, rather than shorter windows, this can be done using the `all_representativity_percent` and `all_max_gap_percent` filters.
 Any stations which are completely NaN after filtering are removed from the map.

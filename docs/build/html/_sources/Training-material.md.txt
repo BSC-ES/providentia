@@ -1,11 +1,11 @@
-## Training Material
+# Training Material
 
-On this page you fill find up to date traning material for Providentia. Training material is divided into 2 categories.
+On this page you fill find up to date training material for Providentia. Training material is divided into 2 categories.
 
 1. Training sessions - for providing an extensive overview of all Providentia functionalities.
 2. User Meetings - for informing on specific new features of each new release.
 
-### Training sessions
+## Training sessions
 
 Below you will find the recorded videos and presentations of the last training sessions:
 
@@ -19,7 +19,7 @@ Below you will find the recorded videos and presentations of the last training s
 
 * 24/03/2021: [Presentation](uploads/presentations/20220422_Providentia_Training_Session.pdf) and [video](https://www.youtube.com/watch?v=Pu_kXjHM1nw)
 
-### User meetings
+## User meetings
 
 Below you will find the recorded videos and presentations of the last user meetings:
 
