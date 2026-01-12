@@ -5,7 +5,7 @@
 ### Dene Bowdalo
 ![Dene Bowdalo](uploads/dene_bowdalo.jpeg)
 
-**Recognised Researcher**  
+**Established Researcher**  
 [LinkedIn](https://www.linkedin.com/in/denebowdalo/) | [Email](mailto:dene.bowdalo@bsc.es)
 
 ### Alba Vilanova Cortezón
