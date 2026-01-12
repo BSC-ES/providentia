@@ -63,6 +63,7 @@ It is **mandatory** to define sections to launch Providentia. Their names must b
 | start_date | ✓ | Comparison start date in YYYYMMDD format (e.g. `20170101`). |
 | end_date | ✓ | Comparison end date in YYYYMMDD format (e.g. `20180601`). |
 | model | ✗ | ID of model. The model IDs can be mapped to different names by adding a list of alternative names after the model IDs (e.g. `mod1, mod2 (altmod1, altmod2)`). After interpolation model IDs will consist of 3 separate strings [ID-domain-ensemble]. The domain and ensemble  |
+| model_resolution | ✗ | Model resolution if different from observations | 
 | domain | ✗ | Domain of the model. Can be multiple. |
 | ensemble | ✗ | Ensemble member number or ensemble statistic of the model. defaults to all members available. Can be multiple. |  
 | temporal_colocation | ✗ | Boolean variable to set if you want to temporally colocate the observation and model data. |
@@ -94,7 +95,12 @@ It is **mandatory** to define sections to launch Providentia. Their names must b
 | interp_model_downsampling | ✗ | Sets how downsampling of the model resolution to the observational resolution should be handled. Options: `mean`, `median`.|
 | interp_model_upsampling | ✗ | Sets how upsampling of the model resolution to the observational resolution should be handled. `fill` linearly fills between measurements, and `gaps` sets NaN values for times that the model does not have.|
 | interp_multiprocessing | ✗ | Boolean variable to set if you wish to use multiprocessing instead of greasy to interpolate on HPC machines. |
-  
+| network_type | ✗ | Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the `*` wildcard.  | 
+| dl_overwrite    | ✗ | Indicates whether previously downloaded files should be overwritten. | _There are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)?_ | 
+| dl_ghost_source  | ✗ | Determines where GHOST observations are downloaded from. |
+| dl_interpolated  | ✗ | Specifies whether the interpolated versions of the model output should be downloaded. |  
+| dl_mode | ✗ | Selects what to download when both observations and model output are present in the configuration file. | 
+
 Defining a list of models is optional since the user might only want to check the observation data.
 
 In the reports, a report will be created per section. In the dashboard and using Providentia as a library, you will only be able to load one section or subsection at a time.

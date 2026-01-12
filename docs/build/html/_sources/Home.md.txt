@@ -7,9 +7,9 @@
 
 Providentia can be used in a variety of ways:
 
-* [Interpolation](Interpolation), to interpolate the experiments to the observations networks of your interest. 
-* [Dashboard](Dashboard), designed to allow on-the-fly analysis of BSC experiment output.
-* [Report](Report), designed to obtain complete reports and carry out in-depth analysis of BSC experiment output.
+* [Interpolation](Interpolation), to interpolate the models to the observations networks of your interest. 
+* [Dashboard](Dashboard), designed to allow on-the-fly analysis of BSC model output.
+* [Report](Report), designed to obtain complete reports and carry out in-depth analysis of BSC model output.
 * {ref}`Download <default-download>`, to download data from esarchive and Zenodo into your local directories.
 * [Library](Library), allowing use of the Providentia backend functions, and use within your own scripts.
 
@@ -38,6 +38,12 @@ Below you will find the presentation of the last user meetings:
 * 03/08/2023: [Presentation](uploads/presentations/20230803_Providentia_User_Meeting.pdf) and [video](https://www.youtube.com/watch?v=2cJbp772pu0)
 
 * 23/03/2023: [Presentation](uploads/presentations/20230323_Providentia_User_Meeting.pdf)
+
+## External Sessions
+
+Below you will find relevant external webinars or presentations.
+
+* 05/06/2025: [Presentation](uploads/presentations/20250605_Providentia_ACTRIS_DC_Workshop.pdf)
 
 ## Contact persons
 

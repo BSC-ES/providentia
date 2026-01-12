@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
@@ -5,19 +7,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>providentia.library &mdash; Providentia 2.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=7ae09063" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=4d935f96"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=4d935f96"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -50,7 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Evolution.html">Evolution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../FAQ.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../Meet-the-team.html">Meet the team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Meet-the-team.html">Meet the Team</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
 </ul>
 
@@ -79,24 +77,21 @@
            <div itemprop="articleBody">
              
   <h1>Source code for providentia.library</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot; Class to create library session&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot; Class for Providentia library mode &quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.gridspec</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gridspec</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.projections</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolarAxes</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">mpl_toolkits.axisartist.floating_axes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fa</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">providentia.auxiliar</span><span class="w"> </span><span class="kn">import</span> <span class="n">CURRENT_PATH</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">expand_plot_characteristics</span><span class="p">,</span> <span class="n">Tee</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.configuration</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_conf</span>
@@ -112,7 +107,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.read</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataReader</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.read_aux</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">generate_file_trees</span><span class="p">,</span> <span class="n">get_possible_resampling_resolutions</span><span class="p">,</span> 
                        <span class="n">get_periodic_nonrelevant_temporal_resolutions</span><span class="p">,</span> <span class="n">get_periodic_relevant_temporal_resolutions</span><span class="p">,</span> 
-                       <span class="n">get_valid_experiments</span><span class="p">,</span> <span class="n">get_valid_obs_files_in_date_range</span><span class="p">)</span>
+                       <span class="n">get_valid_models</span><span class="p">,</span> <span class="n">get_valid_obs_files_in_date_range</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.statistics</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">calculate_statistic</span><span class="p">,</span> <span class="n">generate_colourbar</span><span class="p">,</span> <span class="n">generate_colourbar_detail</span><span class="p">,</span> 
                          <span class="n">get_fairmode_data</span><span class="p">,</span> <span class="n">get_selected_station_data</span><span class="p">,</span> <span class="n">get_z_statistic_info</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.warnings_prv</span><span class="w"> </span><span class="kn">import</span> <span class="n">show_message</span>
@@ -136,9 +131,19 @@
 <div class="viewcode-block" id="Providentia">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Providentia</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Class for Providentia Library mode&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for Providentia Library mode&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the library mode environment</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        config : str</span>
+<span class="sd">            Path to the configuration file.</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Optional command-line arguments that override default configuration values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="c1"># set config to self</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
@@ -154,7 +159,7 @@
 
         <span class="c1"># load statistical yamls</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">basic_stats</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/basic_stats.yaml&#39;</span><span class="p">)))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">expbias_stats</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/experiment_bias_stats.yaml&#39;</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modbias_stats</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/model_bias_stats.yaml&#39;</span><span class="p">)))</span>
 
         <span class="c1"># load representativity information</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">representativity_info</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/internal/representativity.yaml&#39;</span><span class="p">)))</span>
@@ -162,8 +167,46 @@
         <span class="c1"># set configuration variables, as well as any other defined variables</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_config</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
 
+        <span class="c1"># generate file trees if needed</span>
+        <span class="n">generate_file_trees</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        
+        <span class="c1"># initialise DataReader class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datareader</span> <span class="o">=</span> <span class="n">DataReader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># check for self defined plot characteristics file</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tests</span><span class="p">:</span>
+            <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;tests&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;library&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics_filename</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics_filename</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/plot_characteristics.yaml&#39;</span><span class="p">)</span>
+        <span class="n">plot_characteristics</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics_filename</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics_templates</span> <span class="o">=</span> <span class="n">expand_plot_characteristics</span><span class="p">(</span><span class="n">plot_characteristics</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+
+        <span class="c1"># initialise Plotting class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotting</span> <span class="o">=</span> <span class="n">Plotting</span><span class="p">(</span><span class="n">read_instance</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">canvas_instance</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c1"># add general plot characteristics to self</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics_templates</span><span class="p">[</span><span class="s1">&#39;general&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+        <span class="c1"># set some key configuration variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">periodic_relevant_temporal_resolutions</span> <span class="o">=</span> <span class="n">get_periodic_relevant_temporal_resolutions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">periodic_nonrelevant_temporal_resolutions</span> <span class="o">=</span> <span class="n">get_periodic_nonrelevant_temporal_resolutions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">observations_data_label</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_labels_raw</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">observations_data_label</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">|</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">network</span><span class="p">,</span><span class="n">speci</span><span class="p">)</span> <span class="k">for</span> <span class="n">network</span><span class="p">,</span> <span class="n">speci</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)]</span>
+
+        <span class="c1"># get valid observations in date range</span>
+        <span class="n">get_valid_obs_files_in_date_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_date</span><span class="p">)</span>
+
+        <span class="c1"># update available models for selected fields</span>
+        <span class="n">get_valid_models</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to read data. &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrapper method to read data.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Reading data&#39;</span><span class="p">)</span>
 
@@ -173,7 +216,7 @@
 <div class="viewcode-block" id="Providentia.apply_filter">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.apply_filter">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">apply_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; method to apply filters to data. &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to apply filters to data.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Filtering data&#39;</span><span class="p">)</span>
 
@@ -185,20 +228,23 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">remove</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to filter data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper method to filter data.</span>
 
-<span class="sd">        :param field: field to filter by</span>
-<span class="sd">        :type field: str</span>
-<span class="sd">        :param limit: limit for filtering representativity fields</span>
-<span class="sd">        :type limit: str, optional</span>
-<span class="sd">        :param keep: data to keep</span>
-<span class="sd">        :type keep: str, optional</span>
-<span class="sd">        :param remove: data to remove</span>
-<span class="sd">        :type remove: str, optional</span>
-<span class="sd">        :param lower: lower bound to retain data</span>
-<span class="sd">        :type lower: str, optional</span>
-<span class="sd">        :param upper: upper bound to retain data</span>
-<span class="sd">        :type upper: str, optional</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        field : str</span>
+<span class="sd">            Field to filter by.</span>
+<span class="sd">        limit : str, optional</span>
+<span class="sd">            Limit for filtering representativity fields.</span>
+<span class="sd">        keep : str or list of str, optional</span>
+<span class="sd">            Data to keep.</span>
+<span class="sd">        remove : str or list of str, optional</span>
+<span class="sd">            Data to remove.</span>
+<span class="sd">        lower : str, optional</span>
+<span class="sd">            Lower bound to retain data.</span>
+<span class="sd">        upper : str, optional</span>
+<span class="sd">            Upper bound to retain data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># check have valid conf and have loaded data</span>
@@ -311,10 +357,13 @@
 <div class="viewcode-block" id="Providentia.filter_station">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.filter_station">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">filter_station</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">station</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to filter specific station/s.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Wrapper method to filter specific station/s.</span>
 
-<span class="sd">        :param station: Station reference</span>
-<span class="sd">        :type station: str</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        station : str</span>
+<span class="sd">            Station reference</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="c1"># check have valid conf and have loaded data</span>
@@ -338,10 +387,13 @@
 <div class="viewcode-block" id="Providentia.reset">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.reset">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initialise</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to reset filter data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Wrapper method to reset filter data.</span>
 
-<span class="sd">        :param initialise: Indicates whether to reset data to initial state when class was initialised </span>
-<span class="sd">        :type initialise: boolean, optional</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        initialise : bool, optional</span>
+<span class="sd">            Indicates whether to reset data to initial state when class was initialised </span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># check have valid conf and have loaded data</span>
@@ -403,66 +455,70 @@
              <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">set_obs_legend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">map_extent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">annotate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
              <span class="n">hidedata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logx</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">multispecies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">regression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">smooth</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
              <span class="n">threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to make a Providentia plot.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Wrapper method to make a Providentia plot.</span>
 
-<span class="sd">        :param plot: Plot type</span>
-<span class="sd">        :type plot: str</span>
-<span class="sd">        :param data_labels: Data arrays to plot, defaults to None</span>
-<span class="sd">        :type data_labels: list, optional</span>
-<span class="sd">        :param labela: Label of first dataset, defaults to &#39;&#39;</span>
-<span class="sd">        :type labela: str, optional</span>
-<span class="sd">        :param labelb: Label of second dataset (if defined then a bias plot is made), defaults to &#39;&#39;</span>
-<span class="sd">        :type labelb: str, optional</span>
-<span class="sd">        :param title: Axes title, defaults to None</span>
-<span class="sd">        :type title: str, optional</span>
-<span class="sd">        :param xlabel: Label on x axes, defaults to None</span>
-<span class="sd">        :type xlabel: str, optional</span>
-<span class="sd">        :param ylabel: Label on y axes, defaults to None</span>
-<span class="sd">        :type ylabel: str, optional</span>
-<span class="sd">        :param cb: Indicates if colorbar appears on plot, defaults to True</span>
-<span class="sd">        :type cb: bool, optional</span>
-<span class="sd">        :param legend: Indicates if legend appears on plot, defaults to True</span>
-<span class="sd">        :type legend: bool, optional</span>
-<span class="sd">        :param set_obs_legend: Indicates if observations appear on legend, defaults to True</span>
-<span class="sd">        :type set_obs_legend: bool, optional</span>
-<span class="sd">        :param map_extent: Map extent, defaults to None</span>
-<span class="sd">        :type map_extent: list, optional</span>
-<span class="sd">        :param annotate: Indicates if there are annotations, defaults to False</span>
-<span class="sd">        :type annotate: bool, optional</span>
-<span class="sd">        :param bias: Indicates if data is biased, defaults to False</span>
-<span class="sd">        :type bias: bool, optional</span>
-<span class="sd">        :param domain: Indicates if domain shows in maps, defaults to False</span>
-<span class="sd">        :type domain: bool, optional</span>
-<span class="sd">        :param hidedata: Indicates if data points are hidden in plot, defaults to False</span>
-<span class="sd">        :type hidedata: bool, optional</span>
-<span class="sd">        :param logx: Indicates if the scale of the x axis is log, defaults to False</span>
-<span class="sd">        :type logx: bool, optional</span>
-<span class="sd">        :param logy: Indicates if the scale of the y axis is log, defaults to False</span>
-<span class="sd">        :type logy: bool, optional</span>
-<span class="sd">        :param multispecies: Indicates if plot has multispecies, defaults to False</span>
-<span class="sd">        :type multispecies: bool, optional</span>
-<span class="sd">        :param regression: Indicates if scatter plot has regression line/s, defaults to False</span>
-<span class="sd">        :type regression: bool, optional</span>
-<span class="sd">        :param smooth: Indicates if timeseries has smooth line/s, defaults to False</span>
-<span class="sd">        :type smooth: bool, optional</span>
-<span class="sd">        :param threshold: Indicates if plot has threshold line/s, defaults to False</span>
-<span class="sd">        :type threshold: bool, optional</span>
-<span class="sd">        :param plot_options: List with plot options, defaults to None</span>
-<span class="sd">        :type plot_options: list, optional</span>
-<span class="sd">        :param save: Indicates if you want to save the figure, defaults to False</span>
-<span class="sd">        :type save: bool, optional</span>
-<span class="sd">        :param return_plot: Indicates if you want to get the axes, defaults to False</span>
-<span class="sd">        :type return_plot: bool, optional</span>
-<span class="sd">        :param format: Format to overwrite the plots format taken from plot characteristics </span>
-<span class="sd">        :type format: dict, optional</span>
-<span class="sd">        :param width: Figure width</span>
-<span class="sd">        :type format: int, float, optional</span>
-<span class="sd">        :param height: Figure height</span>
-<span class="sd">        :type format: int, float, optional</span>
-<span class="sd">        :return: matplotlib.axes._axes.Axes</span>
-<span class="sd">        :rtype: Plot axes</span>
-<span class="sd">        :return: List of statistics (used in statsummary)</span>
-<span class="sd">        :rtype: list</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        plot : str</span>
+<span class="sd">            Plot type.</span>
+<span class="sd">        data_labels : list of str, optional</span>
+<span class="sd">            Data arrays to plot, defaults to None.</span>
+<span class="sd">        labela : str, optional</span>
+<span class="sd">            Label of first dataset, defaults to &#39;&#39;.</span>
+<span class="sd">        labelb : str, optional</span>
+<span class="sd">            Label of second dataset (if defined then a bias plot is made), defaults to &#39;&#39;.</span>
+<span class="sd">        title : str, optional</span>
+<span class="sd">            Axes title, defaults to None.</span>
+<span class="sd">        xlabel : str, optional</span>
+<span class="sd">            Label on x axes, defaults to None.</span>
+<span class="sd">        ylabel : str, optional</span>
+<span class="sd">            Label on y axes, defaults to None.</span>
+<span class="sd">        cb : bool, optional</span>
+<span class="sd">            Indicates if colorbar appears on plot, defaults to True.</span>
+<span class="sd">        legend : bool, optional</span>
+<span class="sd">            Indicates if legend appears on plot, defaults to True.</span>
+<span class="sd">        set_obs_legend : bool, optional</span>
+<span class="sd">            Indicates if observations appear on legend, defaults to True.</span>
+<span class="sd">        map_extent : list, optional</span>
+<span class="sd">            Map extent, defaults to None.</span>
+<span class="sd">        annotate : bool or list, optional</span>
+<span class="sd">            Indicates if there are annotations or a list of statistics to annotate, defaults to False.</span>
+<span class="sd">        bias : bool, optional</span>
+<span class="sd">            Indicates if data is biased, defaults to False.</span>
+<span class="sd">        domain : bool, optional</span>
+<span class="sd">            Indicates if domain shows in maps, defaults to False.</span>
+<span class="sd">        hidedata : bool, optional</span>
+<span class="sd">            Indicates if data points are hidden in plot, defaults to False.</span>
+<span class="sd">        logx : bool, optional</span>
+<span class="sd">            Indicates if the scale of the x axis is log, defaults to False.</span>
+<span class="sd">        logy : bool, optional</span>
+<span class="sd">            Indicates if the scale of the y axis is log, defaults to False.</span>
+<span class="sd">        multispecies : bool, optional</span>
+<span class="sd">            Indicates if plot has multispecies, defaults to False.</span>
+<span class="sd">        regression : bool, optional</span>
+<span class="sd">            Indicates if scatter plot has regression line/s, defaults to False.</span>
+<span class="sd">        smooth : bool, int, float, optional</span>
+<span class="sd">            Indicates if timeseries has smooth line/s or the smoothing window, defaults to False.</span>
+<span class="sd">        threshold : bool, optional</span>
+<span class="sd">            Indicates if plot has threshold line/s, defaults to False.</span>
+<span class="sd">        plot_options : list, optional</span>
+<span class="sd">            List with plot options, defaults to None.</span>
+<span class="sd">        save : bool or str, optional</span>
+<span class="sd">            Indicates if you want to save the figure, defaults to False.</span>
+<span class="sd">        return_plot : bool, optional</span>
+<span class="sd">            Indicates if you want to get the figure object, defaults to False.</span>
+<span class="sd">        format : dict, optional</span>
+<span class="sd">            Format to overwrite the plot characteristics, defaults to None.</span>
+<span class="sd">        width : int or float, optional</span>
+<span class="sd">            Figure width, defaults to None.</span>
+<span class="sd">        height : int or float, optional</span>
+<span class="sd">            Figure height, defaults to None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        matplotlib.figure.Figure or None</span>
+<span class="sd">            Returns the figure object if `return_plot` is True. Otherwise, displays the plot or saves it to file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># check have valid conf and have loaded data</span>
@@ -626,6 +682,18 @@
             <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
             <span class="k">return</span>
         
+        <span class="c1"># do not make periodic plot if stat is MDA8</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;periodic&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">base_zstat</span> <span class="o">==</span> <span class="s1">&#39;MDA8&#39;</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Cannot make </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2"> because MDA8 statistic is not available for periodic plots. Not making plot.&quot;</span>
+            <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="c1"># do not make statsummary plot if stat is MDA8, and are making periodic statistic</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;statsummary&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">base_zstat</span> <span class="o">==</span> <span class="s1">&#39;MDA8&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">z_statistic_period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Cannot make </span><span class="si">{</span><span class="n">plot_type</span><span class="si">}</span><span class="s2"> because MDA8 statistic is not available for periodic statistics. Not making plot.&quot;</span>
+            <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="k">return</span>
+
         <span class="k">if</span> <span class="n">base_plot_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;fairmode-target&#39;</span><span class="p">,</span><span class="s1">&#39;fairmode-statsummary&#39;</span><span class="p">]:</span>
             <span class="c1"># warning for fairmode plots if species aren&#39;t PM2.5, PM10, NO2 or O3</span>
             <span class="k">if</span> <span class="n">speci</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;sconco3&#39;</span><span class="p">,</span> <span class="s1">&#39;sconcno2&#39;</span><span class="p">,</span> <span class="s1">&#39;pm10&#39;</span><span class="p">,</span> <span class="s1">&#39;pm2p5&#39;</span><span class="p">]:</span>
@@ -785,7 +853,7 @@
             
             <span class="c1"># get stats to plot</span>
             <span class="k">if</span> <span class="s1">&#39;bias&#39;</span> <span class="ow">in</span> <span class="n">plot_options</span><span class="p">:</span>
-                <span class="n">stats_to_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s1">&#39;experiment_bias&#39;</span><span class="p">]</span>
+                <span class="n">stats_to_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s1">&#39;model_bias&#39;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">stats_to_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics</span><span class="p">[</span><span class="n">plot_type</span><span class="p">][</span><span class="s1">&#39;basic&#39;</span><span class="p">]</span>
 
@@ -812,8 +880,8 @@
                             <span class="n">zstat</span><span class="p">,</span> <span class="n">base_zstat</span><span class="p">,</span> <span class="n">z_statistic_type</span><span class="p">,</span> <span class="n">z_statistic_sign</span><span class="p">,</span> <span class="n">z_statistic_period</span> <span class="o">=</span> <span class="n">get_z_statistic_info</span><span class="p">(</span><span class="n">zstat</span><span class="o">=</span><span class="n">stp</span><span class="p">)</span>
                             <span class="c1"># calculate statistic</span>
                             <span class="k">if</span> <span class="n">dl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_station_data_labels</span><span class="p">[</span><span class="n">ns</span><span class="p">]:</span>
-                                <span class="c1"># if relevant stat is expbias stat, then ensure temporal colocation is active</span>
-                                <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;statsummary&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">stp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">expbias_stats</span><span class="p">)</span> <span class="ow">and</span> <span class="p">((</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)):</span>
+                                <span class="c1"># if relevant stat is modbias stat, then ensure temporal colocation is active</span>
+                                <span class="k">if</span> <span class="p">(</span><span class="n">base_plot_type</span> <span class="o">==</span> <span class="s1">&#39;statsummary&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">stp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modbias_stats</span><span class="p">)</span> <span class="ow">and</span> <span class="p">((</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)):</span>
                                     <span class="n">stats_per_data_label</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
                                 <span class="c1"># otherwise calculate statistic</span>
                                 <span class="k">else</span><span class="p">:</span>
@@ -978,8 +1046,8 @@
                     <span class="n">ylabel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basic_stats</span><span class="p">[</span><span class="n">base_zstat</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
                     <span class="n">ylabel_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basic_stats</span><span class="p">[</span><span class="n">base_zstat</span><span class="p">][</span><span class="s1">&#39;units&#39;</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">ylabel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expbias_stats</span><span class="p">[</span><span class="n">base_zstat</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
-                    <span class="n">ylabel_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expbias_stats</span><span class="p">[</span><span class="n">base_zstat</span><span class="p">][</span><span class="s1">&#39;units&#39;</span><span class="p">]</span>
+                    <span class="n">ylabel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modbias_stats</span><span class="p">[</span><span class="n">base_zstat</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
+                    <span class="n">ylabel_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modbias_stats</span><span class="p">[</span><span class="n">base_zstat</span><span class="p">][</span><span class="s1">&#39;units&#39;</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">ylabel_units</span> <span class="o">==</span> <span class="s1">&#39;[measurement_units]&#39;</span><span class="p">:</span>
                     <span class="n">ylabel_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurement_units</span><span class="p">[</span><span class="n">speci</span><span class="p">]</span> 
                 <span class="k">if</span> <span class="n">ylabel_units</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
@@ -1119,18 +1187,26 @@
 <div class="viewcode-block" id="Providentia.colourbar">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.colourbar">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">colourbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">plot_ax</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">speci</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to make colourbar.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper method to make a colourbar.</span>
 
-<span class="sd">        :param fig: Figure</span>
-<span class="sd">        :type fig: matplotlib.figure</span>
-<span class="sd">        :param plot_ax: Axis</span>
-<span class="sd">        :type plot_ax: matplotlib.axes</span>
-<span class="sd">        :param stat: Statistic</span>
-<span class="sd">        :type stat: str</span>
-<span class="sd">        :param speci: Species</span>
-<span class="sd">        :type speci: str</span>
-<span class="sd">        :param plot_type: Plot type</span>
-<span class="sd">        :type plot_type: str</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fig : matplotlib.figure.Figure</span>
+<span class="sd">            Figure object to which the colourbar will be added.</span>
+<span class="sd">        plot_ax : matplotlib.axes.Axes</span>
+<span class="sd">            Axis for the main plot.</span>
+<span class="sd">        stat : str</span>
+<span class="sd">            Statistic to display in the colourbar.</span>
+<span class="sd">        speci : str</span>
+<span class="sd">            Species for which the colourbar applies.</span>
+<span class="sd">        plot_type : str</span>
+<span class="sd">            Plot type, used to fetch plot characteristics.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        matplotlib.axes.Axes</span>
+<span class="sd">            Axis object of the created colourbar.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># create cb axis</span>
@@ -1146,16 +1222,22 @@
 <div class="viewcode-block" id="Providentia.legend">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.legend">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">legend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">,</span> <span class="n">data_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">set_obs</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to make legend.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper method to make legend.</span>
 
-<span class="sd">        :param plot_type: Plot type</span>
-<span class="sd">        :type plot_type: str</span>
-<span class="sd">        :param data_labels: Data arrays to plot, defaults to None</span>
-<span class="sd">        :type data_labels: list, optional</span>
-<span class="sd">        :param set_obs: Indicates if observations appear on legend, defaults to True</span>
-<span class="sd">        :type set_obs: bool, optional</span>
-<span class="sd">        :return: Legend</span>
-<span class="sd">        :rtype: dict</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        plot_type : str</span>
+<span class="sd">            Plot type for which the legend will be generated.</span>
+<span class="sd">        data_labels : list, optional</span>
+<span class="sd">            Data arrays to plot, by default None.</span>
+<span class="sd">        set_obs : bool, optional</span>
+<span class="sd">            Indicates if observations appear on the legend, by default True.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            Legend handles for the plot.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="k">if</span> <span class="n">plot_type</span> <span class="o">==</span> <span class="s1">&#39;legend&#39;</span><span class="p">:</span>
@@ -1175,22 +1257,28 @@
 <div class="viewcode-block" id="Providentia.statistic">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.statistic">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">statistic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stat</span><span class="p">,</span> <span class="n">labela</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">labelb</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">per_station</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chunk</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to calculate statistic/s.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper method to calculate statistic/s.</span>
 
-<span class="sd">        :param stat: Statistic</span>
-<span class="sd">        :type stat: str</span>
-<span class="sd">        :param labela: Label of first dataset, defaults to &#39;&#39;</span>
-<span class="sd">        :type labela: str, optional</span>
-<span class="sd">        :param labelb: Label of second dataset (if defined then a bias plot is made), defaults to &#39;&#39;</span>
-<span class="sd">        :type labelb: str, optional</span>
-<span class="sd">        :param per_station: Indicates if to calculate integrated statistic for all stations, or per station, defaults to False</span>
-<span class="sd">        :type per_station: bool, optional</span>
-<span class="sd">        :param period: Period to group data into for calculation of statistics. Current options: &#39;hour&#39;, &#39;dayofweek&#39;, &#39;month&#39; </span>
-<span class="sd">        :type period: str, optional</span>
-<span class="sd">        :param chunk: Chunked temporal window to calculate statistics for. Current options: &#39;daily&#39;, &#39;monthly&#39;, &#39;annual&#39;</span>
-<span class="sd">        :type chunk: str, optional</span>
-<span class="sd">        :return: Statistic value/s</span>
-<span class="sd">        :rtype: np.ndarray</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        stat : str</span>
+<span class="sd">            Statistic to calculate.</span>
+<span class="sd">        labela : str, optional</span>
+<span class="sd">            Label of first dataset, by default &#39;&#39;.</span>
+<span class="sd">        labelb : str, optional</span>
+<span class="sd">            Label of second dataset (if defined then a bias statistic is calculated), by default &#39;&#39;.</span>
+<span class="sd">        per_station : bool, optional</span>
+<span class="sd">            Indicates if the statistic should be calculated per station or integrated for all stations, by default False.</span>
+<span class="sd">        period : str, optional</span>
+<span class="sd">            Period to group data into for calculation of statistics. Current options: &#39;hour&#39;, &#39;dayofweek&#39;, &#39;month&#39;.</span>
+<span class="sd">        chunk : str, optional</span>
+<span class="sd">            Chunked temporal window to calculate statistics for. Current options: &#39;daily&#39;, &#39;monthly&#39;, &#39;annual&#39;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Calculated statistic values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># check have valid conf and have loaded data</span>
@@ -1214,8 +1302,8 @@
         <span class="c1"># get zstat information </span>
         <span class="n">zstat</span><span class="p">,</span> <span class="n">base_zstat</span><span class="p">,</span> <span class="n">z_statistic_type</span><span class="p">,</span> <span class="n">z_statistic_sign</span><span class="p">,</span> <span class="n">z_statistic_period</span> <span class="o">=</span> <span class="n">get_z_statistic_info</span><span class="p">(</span><span class="n">zstat</span><span class="o">=</span><span class="n">stat</span><span class="p">)</span> 
 
-        <span class="c1"># combine basic and expbias stats dicts together</span>
-        <span class="n">stats_dict</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">basic_stats</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">expbias_stats</span><span class="p">}</span>
+        <span class="c1"># combine basic and modbias stats dicts together</span>
+        <span class="n">stats_dict</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">basic_stats</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">modbias_stats</span><span class="p">}</span>
 
         <span class="c1"># check desired statistic is defined in stats dict</span>
         <span class="k">if</span> <span class="n">base_zstat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">stats_dict</span><span class="p">:</span>
@@ -1230,8 +1318,8 @@
             <span class="k">return</span>
 
         <span class="c1"># if calculating bias stat but temporal_colocation is not active, then throw error</span>
-        <span class="k">elif</span> <span class="p">(</span><span class="n">z_statistic_type</span> <span class="o">==</span> <span class="s1">&#39;expbias&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span><span class="p">):</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;To calculate the experiment bias stat </span><span class="si">{</span><span class="n">zstat</span><span class="si">}</span><span class="s1">, temporal_colocation must be set to True. Cannot calculate statistic.&#39;</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">z_statistic_type</span> <span class="o">==</span> <span class="s1">&#39;modbias&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">temporal_colocation</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;To calculate the model bias stat </span><span class="si">{</span><span class="n">zstat</span><span class="si">}</span><span class="s1">, temporal_colocation must be set to True. Cannot calculate statistic.&#39;</span>
             <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
             <span class="k">return</span>
 
@@ -1255,14 +1343,26 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">set_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to set configuration variables. &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper method to set configuration variables.</span>
 
-        <span class="c1"># if have forecast active then save current experiment variable in memory as will want to set it again </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Optional command-line arguments that override default configuration values.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if configuration is successfully set, False if there is an error.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># if have forecast active then save current model variable in memory as will want to set it again </span>
         <span class="c1"># after resetting configuration variables, as are not re-reading </span>
-        <span class="n">forecast_experiments</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">forecast_models</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;forecast&#39;</span><span class="p">):</span> 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forecast</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">forecast_experiments</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="p">)</span>
+                <span class="n">forecast_models</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="p">)</span>
             
         <span class="c1"># initialise default configuration variables</span>
         <span class="c1"># modified by passed arguments, if given</span>
@@ -1328,7 +1428,7 @@
             <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
                 <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">provconf</span><span class="o">.</span><span class="n">parse_parameter</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
 
-        <span class="c1"># parse subsection</span>
+        <span class="c1"># parse subsection (if not already parsed from section)</span>
         <span class="c1"># if subsection name is provided, try and use that</span>
         <span class="c1"># otherwise take first defined subsection name</span>
         <span class="c1"># if have no subsections, section is set as subsection name</span>
@@ -1338,8 +1438,14 @@
                             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">section</span> <span class="o">==</span> <span class="n">subsection_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;·&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">subsections_reduced</span> <span class="o">=</span> <span class="p">[</span><span class="n">subsection_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;·&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">subsection_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsections</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;subsection&#39;</span><span class="p">):</span> 
-            <span class="c1"># check that subsection actually exists</span>
+        <span class="c1">#give warning if have previously defined subsection in section name, but it is defined again </span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;subsection&#39;</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="s1">&#39;·&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">section</span><span class="p">):</span> 
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Defined subsection </span><span class="si">{}</span><span class="s2"> is not taken into account as it is already passed in section </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subsection</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">section</span><span class="p">)</span>
+            <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+        <span class="c1"># check that subsection actually exists if defined</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;subsection&#39;</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="s1">&#39;·&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">section</span><span class="p">):</span> 
+            
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsections</span><span class="p">:</span>
                 <span class="n">have_subsection</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsections_reduced</span><span class="p">:</span>
@@ -1351,6 +1457,7 @@
                 <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Defined subsection </span><span class="si">{}</span><span class="s2"> does not exist in configuration file.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subsection</span><span class="p">)</span>
                 <span class="n">show_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
 
+        <span class="c1"># reduce multiple subsections to first one if none defined</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subsections</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">have_subsection</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">subsection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -1370,7 +1477,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">subsection_opts</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">section_opts</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixed_section_vars</span> <span class="k">else</span> <span class="n">val</span><span class="p">)</span> 
                                     <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsection_opts</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
             
-            <span class="c1"># update subsection variables</span>
+            <span class="c1"># update subsection variables (if not overwritten by kwargs)</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsection_opts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
                     <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">provconf</span><span class="o">.</span><span class="n">parse_parameter</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
@@ -1378,21 +1485,25 @@
         <span class="c1"># now all variables have been parsed, check validity of those, throwing errors where necessary</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">provconf</span><span class="o">.</span><span class="n">check_validity</span><span class="p">()</span>
 
-        <span class="c1"># overwrite experiments variable if forecast active</span>
-        <span class="k">if</span> <span class="n">forecast_experiments</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span> <span class="o">=</span> <span class="n">forecast_experiments</span>
+        <span class="c1"># overwrite models variable if forecast active</span>
+        <span class="k">if</span> <span class="n">forecast_models</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">experiments</span> <span class="o">=</span> <span class="n">forecast_models</span>
 
         <span class="k">return</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="Providentia.print_config">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.print_config">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">print_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conf</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Print selected config file to console.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Print selected configuration file to the console.</span>
 
-<span class="sd">        :param conf: Configuration file name, defaults to None</span>
-<span class="sd">        :type conf: str, optional</span>
-<span class="sd">        :param config: Configuration file name, defaults to None</span>
-<span class="sd">        :type config: str, optional</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        conf : str, optional</span>
+<span class="sd">            Configuration file name, defaults to None.</span>
+<span class="sd">        config : str, optional</span>
+<span class="sd">            Alternative Configuration file name, defaults to None.</span>
+<span class="sd">            If both conf and config are None, the currently loaded configuration file is printed.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># check have valid conf</span>
@@ -1420,7 +1531,14 @@
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; set active config as __str__.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the active configuration as the string representation.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Empty string after printing the active configuration to the console.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">print_config</span><span class="p">(</span><span class="n">conf</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
         <span class="k">return</span> <span class="s1">&#39;&#39;</span>
@@ -1428,12 +1546,15 @@
 <div class="viewcode-block" id="Providentia.save">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.save">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;nc&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to save current data/ metadata in memory.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Wrapper method to save current data/ metadata in memory.</span>
 
-<span class="sd">        :param fname: File name, defaults to &#39;&#39;</span>
-<span class="sd">        :type fname: str, optional</span>
-<span class="sd">        :param format: File format, defaults to &#39;nc&#39;</span>
-<span class="sd">        :type format: str, optional</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fname : str, optional</span>
+<span class="sd">            File name, defaults to &#39;&#39;.</span>
+<span class="sd">        format : str, optional</span>
+<span class="sd">            File format, defaults to &#39;nc&#39;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># check have valid conf and have loaded data</span>
@@ -1471,12 +1592,18 @@
 <div class="viewcode-block" id="Providentia.data">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;nc&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method return data / metadata in specific format.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Wrapper method return data / metadata in specific format.</span>
 
-<span class="sd">        :param format: File format, defaults to &#39;nc&#39;</span>
-<span class="sd">        :type format: str, optional</span>
-<span class="sd">        :return: Data</span>
-<span class="sd">        :rtype: numpy.ndarray</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        format : str, optional</span>
+<span class="sd">            File format, defaults to &#39;nc&#39;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        data : numpy.ndarray or xarray.Dataset</span>
+<span class="sd">            Data returned in the requested format.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># check have valid conf and have loaded data</span>
@@ -1524,12 +1651,19 @@
 <div class="viewcode-block" id="Providentia.variable">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.variable">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper method to return specific data / metadata variable.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper method to return a specific data/metadata variable.</span>
 
-<span class="sd">        :param var: Variable name, defaults to &#39;&#39;</span>
-<span class="sd">        :type var: str, optional</span>
-<span class="sd">        :return: Data</span>
-<span class="sd">        :rtype: numpy.ndarray</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        var : str, optional</span>
+<span class="sd">            Variable name to read, defaults to &#39;&#39;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        numpy.ndarray</span>
+<span class="sd">            Data of the requested variable. Returns None if </span>
+<span class="sd">            variable is undefined or not available.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># check have valid conf and have loaded data</span>
@@ -1564,48 +1698,15 @@
 <div class="viewcode-block" id="Providentia.load">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.load">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper method to load data into memory, apply initial filtering, </span>
+<span class="sd">        and mark data as initialized.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># check have valid conf</span>
         <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
             <span class="k">return</span>
-
-        <span class="c1"># generate file trees if needed</span>
-        <span class="n">generate_file_trees</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        
-        <span class="c1"># initialise DataReader class</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">datareader</span> <span class="o">=</span> <span class="n">DataReader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
-        <span class="c1"># check for self defined plot characteristics file</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tests</span><span class="p">:</span>
-            <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;tests&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;library&#39;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics_filename</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics_filename</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">PROVIDENTIA_ROOT</span><span class="p">,</span> <span class="s1">&#39;settings/plot_characteristics.yaml&#39;</span><span class="p">)</span>
-        <span class="n">plot_characteristics</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics_filename</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics_templates</span> <span class="o">=</span> <span class="n">expand_plot_characteristics</span><span class="p">(</span><span class="n">plot_characteristics</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
-
-        <span class="c1"># initialise Plotting class</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">plotting</span> <span class="o">=</span> <span class="n">Plotting</span><span class="p">(</span><span class="n">read_instance</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">canvas_instance</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
-
-        <span class="c1"># add general plot characteristics to self</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_characteristics_templates</span><span class="p">[</span><span class="s1">&#39;general&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
-
-        <span class="c1"># set some key configuration variables</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">periodic_relevant_temporal_resolutions</span> <span class="o">=</span> <span class="n">get_periodic_relevant_temporal_resolutions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">periodic_nonrelevant_temporal_resolutions</span> <span class="o">=</span> <span class="n">get_periodic_nonrelevant_temporal_resolutions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_labels</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">observations_data_label</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_labels_raw</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">observations_data_label</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiments</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">networkspecies</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">|</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">network</span><span class="p">,</span><span class="n">speci</span><span class="p">)</span> <span class="k">for</span> <span class="n">network</span><span class="p">,</span> <span class="n">speci</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)]</span>
-
-        <span class="c1"># get valid observations in date range</span>
-        <span class="n">get_valid_obs_files_in_date_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_date</span><span class="p">)</span>
-
-        <span class="c1"># update available experiments for selected fields</span>
-        <span class="n">get_valid_experiments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)</span>
 
         <span class="c1"># read data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  
@@ -1623,7 +1724,14 @@
 <div class="viewcode-block" id="Providentia.loaded_data">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.loaded_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">loaded_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Helper method for determining if data has been read&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper method for determining if data has been read</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if data has been loaded, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;data_in_memory&#39;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Error: Data has not been loaded. Use the load() method&#39;</span><span class="p">)</span>
@@ -1635,7 +1743,14 @@
 <div class="viewcode-block" id="Providentia.have_valid_config">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.have_valid_config">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">have_valid_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Helper method for determining if a valid .conf file has been read&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper method for determining if a valid .conf file has been read</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            True if a valid configuration file has been read, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_config</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Error: A valid configuration file has not been read. Please reinitialise your Providentia object with a valid file: prv.Providentia(&#39;filename.conf&#39;)&quot;</span><span class="p">)</span>
@@ -1647,26 +1762,39 @@
 <div class="viewcode-block" id="Providentia.download">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.download">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper function for initialising Download class&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper function for initialising Download class</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Optional command-line arguments that override default configuration values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># check have valid conf</span>
         <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
             <span class="k">return</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">.download</span><span class="w"> </span><span class="kn">import</span> <span class="n">Download</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.download</span><span class="w"> </span><span class="kn">import</span> <span class="n">main</span>
 
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;download&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">parent_kwargs</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span> 
         <span class="n">parent_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">download</span> <span class="o">=</span> <span class="n">Download</span><span class="p">(</span><span class="o">**</span><span class="n">parent_kwargs</span><span class="p">)</span>
-        <span class="n">download</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="o">**</span><span class="n">parent_kwargs</span><span class="p">)</span></div>
+        <span class="n">main</span><span class="p">(</span><span class="o">**</span><span class="n">parent_kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Providentia.dashboard">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.dashboard">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">dashboard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper function for initialising Dashboard class&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Wrapper function for initialising Dashboard class        </span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Optional command-line arguments that override default configuration values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="kn">from</span><span class="w"> </span><span class="nn">.dashboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">main</span>
         
@@ -1679,7 +1807,14 @@
 <div class="viewcode-block" id="Providentia.interpolate">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.interpolate">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">interpolate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper function for initialising Interpolation class&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper function for initialising Interpolation class        </span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Optional command-line arguments that override default configuration values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="c1"># check have valid conf</span>
         <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
@@ -1721,19 +1856,26 @@
 <div class="viewcode-block" id="Providentia.report">
 <a class="viewcode-back" href="../../Reference.html#providentia.library.Providentia.report">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot; Wrapper function for initialising Report class&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Wrapper function for initialising Report class        </span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Optional command-line arguments that override default configuration values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># check have valid conf</span>
         <span class="n">valid_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">have_valid_config</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_config</span><span class="p">:</span>
             <span class="k">return</span>
 
-        <span class="kn">from</span><span class="w"> </span><span class="nn">.report</span><span class="w"> </span><span class="kn">import</span> <span class="n">Report</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.report</span><span class="w"> </span><span class="kn">import</span> <span class="n">main</span>
         
         <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;report&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">parent_kwargs</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span> 
         <span class="n">parent_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">Report</span><span class="p">(</span><span class="o">**</span><span class="n">parent_kwargs</span><span class="p">)</span></div>
+        <span class="n">main</span><span class="p">(</span><span class="o">**</span><span class="n">parent_kwargs</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

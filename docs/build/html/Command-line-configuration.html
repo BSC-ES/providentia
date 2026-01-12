@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -6,19 +8,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Command line configuration &mdash; Providentia 2.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=4d935f96"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4d935f96"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -65,7 +63,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Evolution.html">Evolution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the Team</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
 </ul>
 
@@ -192,35 +190,35 @@
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p>network</p></td>
-<td><p>Network you want to load observations from. Can be multiple (e.g. <code class="docutils literal notranslate"><span class="pre">CAPMoN,</span> <span class="pre">EBAS</span></code>). Adding a wild card (*) is going to expand to certain variables (vconc* → vconc1, vconc2, etc.).</p></td>
-<td><p>EBAS</p></td>
+<td><p>Network you want to load observations from. Can be multiple (e.g. <code class="docutils literal notranslate"><span class="pre">CAPMoN,</span> <span class="pre">EBAS</span></code>). Adding a wild card (*) is going to expand to certain variables (vconcaerobin* → vconcaerobin1, vconcaerobin2, etc.).</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p>species</p></td>
 <td><p>Species to load. Can be multiple (e.g. <code class="docutils literal notranslate"><span class="pre">sconco3,</span> <span class="pre">sconcno2</span></code>).</p></td>
-<td><p>sconco3</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p>resolution</p></td>
 <td><p>Temporal resolution of the observations you want to load (e.g. <code class="docutils literal notranslate"><span class="pre">3hourly</span></code>).</p></td>
-<td><p>hourly</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p>start_date</p></td>
 <td><p>Comparison start date in YYYYMMDD format (e.g. <code class="docutils literal notranslate"><span class="pre">20170101</span></code>).</p></td>
-<td><p>20180101</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p>end_date</p></td>
 <td><p>Comparison end date in YYYYMMDD format (e.g. <code class="docutils literal notranslate"><span class="pre">20180601</span></code>).</p></td>
-<td><p>20190101</p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p>experiments</p></td>
-<td><p>ID of interpolated experiment using providentia-interpolation. The experiment IDs can be mapped to different names by adding a list of alternative names after the experiment IDs (e.g. <code class="docutils literal notranslate"><span class="pre">exp1,</span> <span class="pre">exp2</span> <span class="pre">(altexp1,</span> <span class="pre">altexp2)</span></code>).</p></td>
+<tr class="row-even"><td><p>model</p></td>
+<td><p>ID of interpolated model output using providentia-interpolation. The model IDs can be mapped to different names by adding a list of alternative names after the model IDs (e.g. <code class="docutils literal notranslate"><span class="pre">mod1,</span> <span class="pre">mod2</span> <span class="pre">(altmod1,</span> <span class="pre">altmod2)</span></code>).</p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p>temporal_colocation</p></td>
-<td><p>Boolean variable to set if you want to temporally colocate the observation and experiment data.</p></td>
+<td><p>Boolean variable to set if you want to temporally colocate the observation and model data.</p></td>
 <td><p>False</p></td>
 </tr>
 <tr class="row-even"><td><p>spatial_colocation</p></td>
-<td><p>Boolean variable to set if you want to spatially colocate the observation and experiment data across multiple species.</p></td>
+<td><p>Boolean variable to set if you want to spatially colocate the observation and model data across multiple species.</p></td>
 <td><p>True</p></td>
 </tr>
 <tr class="row-odd"><td><p>filter_species</p></td>

@@ -559,12 +559,12 @@ class SubmitInterpolation(object):
         argument_files = []
 
         # get the CPU chunk size -- set initially as miniumum number of arguments per file 
-        N_arguments_per_file_minimum = copy.deepcopy(int(self.interp_chunk_size))
-        N_arguments_per_file = copy.deepcopy(int(self.interp_chunk_size))
+        n_arguments_per_file_minimum = copy.deepcopy(int(self.interp_chunk_size))
+        n_arguments_per_file = copy.deepcopy(int(self.interp_chunk_size))
         
         # divide the number of arguments by the CPU chunk size, to determine how many argument files will be needed to 
         # submit all jobs
-        N_submit_files = int(np.ceil(len(self.arguments)/int(self.interp_chunk_size)))
+        n_submit_files = int(np.ceil(len(self.arguments)/int(self.interp_chunk_size)))
         
         # set argument remainder as 0 initially
         argument_remainder = 0
@@ -573,29 +573,29 @@ class SubmitInterpolation(object):
         # files that can be processed simultaneously)
         # then add adjust minimum N arguments per file appropriately (i.e. split extra arguments across the maximum 
         # number of argument files evenly)        
-        if N_submit_files > int(self.interp_job_array_limit):
+        if n_submit_files > int(self.interp_job_array_limit):
             # update the minimum number of arguments per file
-            N_arguments_per_file_minimum = int(np.floor(len(self.arguments)/int(self.interp_job_array_limit)))
-            N_arguments_per_file = copy.deepcopy(N_arguments_per_file_minimum)
+            n_arguments_per_file_minimum = int(np.floor(len(self.arguments)/int(self.interp_job_array_limit)))
+            n_arguments_per_file = copy.deepcopy(n_arguments_per_file_minimum)
 
             # if the number of extra arguments does not divide equally between all files get the remainder
             argument_remainder = int(len(self.arguments)%int(self.interp_job_array_limit))
             
-            # if have argument remainder then update N_arguments_per_file variable to be 1 greater than minimum for 
+            # if have argument remainder then update n_arguments_per_file variable to be 1 greater than minimum for 
             # first file written (and for all files thereafter until  remainder is accounted for)
             if argument_remainder > 0:
-                N_arguments_per_file = N_arguments_per_file_minimum + 1
+                n_arguments_per_file = n_arguments_per_file_minimum + 1
                 # subtract 1 from the argument remainder
                 argument_remainder -= 1
             
             # set N submit files as N of job array limit
-            N_submit_files = copy.deepcopy(int(self.interp_job_array_limit))
+            n_submit_files = copy.deepcopy(int(self.interp_job_array_limit))
 
         # create file which will store a list of all chunked argument filenames
         greasy_file = open('{}/{}.grz'.format(self.arguments_dir, self.slurm_job_id), 'w')
         
         # create all chunked argument filenames
-        for ii in range(N_submit_files):
+        for ii in range(n_submit_files):
             argument_fname = '{}/{}_{}.txt'.format(self.arguments_dir,self.slurm_job_id,ii)
             argument_files.append(argument_fname)
             greasy_file.write('{}\n'.format(argument_fname))
@@ -630,7 +630,7 @@ class SubmitInterpolation(object):
     
             # if have written sufficient arguments to file (and not currently processing last argument)
             # then close current file and open another
-            if (n_lines_written == N_arguments_per_file) & (arguments_ii < (len(self.arguments)-1)):
+            if (n_lines_written == n_arguments_per_file) & (arguments_ii < (len(self.arguments)-1)):
                 # reset n lines written
                 n_lines_written = 0
                 
@@ -642,12 +642,12 @@ class SubmitInterpolation(object):
                 
                 # if have argument remainder, write an extra argument to the next file
                 if argument_remainder > 0:
-                    N_arguments_per_file = N_arguments_per_file_minimum + 1
+                    n_arguments_per_file = n_arguments_per_file_minimum + 1
                     # subtract 1 from the argument remainder
                     argument_remainder -= 1
                 # otherwise N arguments to write to next file should be minimum
                 else:
-                    N_arguments_per_file = copy.deepcopy(N_arguments_per_file_minimum)
+                    n_arguments_per_file = copy.deepcopy(n_arguments_per_file_minimum)
                 
                 # open new arguments file
                 arguments_file = open(argument_files[file_ii], 'w')
@@ -1106,7 +1106,6 @@ class SubmitInterpolation(object):
         paused = False
         max_pause_seconds = 120
         pause_start = None
-
 
         # while loop to trap jobs while there is an overload
         while True:

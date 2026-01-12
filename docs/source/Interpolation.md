@@ -2,13 +2,13 @@
 
 This mode allows users to spatially interpolate model output against available observational stations to be viewable in **Providentia**. 
 
-The Interpolation mode allows to interpolate models against **GHOST** and **non-GHOST** observations.
+Interpolation consists of spatially interpolating gridded model outputs to observational station locations using a nearest-neighbour approach.
 
-Contained in: `/gpfs/projects/bsc32/AC_cache/recon/exp_interp/` exists an archive of previously interpolated model output, depending on the version. If the model you want to analyse is not there, or if you have re-run the model, add new variables etc. then this guide will aid you in interpolating the model output.
+The Interpolation mode allows to interpolate models against **GHOST** and **non-GHOST** observations.
 
 ## Starting an Interpolation
 
-To start an interpolation,  you need to add either --interp, --interpolate, or --interpolation as a launch option along with the **mandatory** configuration file in the command line. This will initiate the interpolation process.
+To start an interpolation, you need to add either --interp, --interpolate, or --interpolation as a launch option along with the **mandatory** configuration file in the command line. This will initiate the interpolation process.
 
 ```
 ./bin/providentia --interp --config='/path/to/file/example.conf'
@@ -18,16 +18,70 @@ To start an interpolation,  you need to add either --interp, --interpolate, or -
 ```         
 ```
 ./bin/providentia --interpolation --config='/path/to/file/example.conf'
-```         
+```     
+
+In terms of performance, we recommend running Providentia Interpolation in MareNostrum5.
+
+## Execution details
+
+### BSC HPC users
+
 Upon submission, a first job named `PRV` will start the submission process which will make a job called `PRVI` appear in the SLURM queue, shortly afterwards a job array named `PRVI_$SLURMJOBID` (containing the jobs for all the defined variable combinations) will be submitted.
 
 When all jobs have been completed (or there is a failure) the `PRVI` job will exit the queue.
 
-In terms of performance, we recommend running Providentia Interpolation in MareNostrum5.
+### Local users
 
-## Checking output  
+For local execution, the interpolation runs in the background using multiprocessing.
+Be aware that this can be demanding on the computer, so ensure your machine has sufficient resources before running.
 
-The code that runs the interpolation is found under the `logs/interpolation` folder. All the logs will be created there too.
+### Interpolation configuration fields
+
+During the interpolation step, only a specific set of configuration fields is used. All required fields must be provided, otherwise, the process will fail at startup.
+
+| Variable | Description | Required | Default |
+|--------|------------|----------|---------|
+| `ghost_version` | GHOST version used when a GHOST network is selected | No | Latest |
+| `start_date` | Start date of interpolation (`YYYYMM`) | Yes | — |
+| `end_date` | End date of interpolation (`YYYYMM`) | Yes | — |
+| `model`, `models`, `experiments`, `experiment` | Model ID(s) to be interpolated | Yes | — |
+| `domain` | Domain of the model, can be indicated in the model field (e.g. `regional`, `global`) | No | — |
+| `ensemble` | Ensemble of the model, can be indicated in the model field (e.g. `000`, `001`) | No | — |
+| `species` | Species to load (e.g. `sconco3`, `pm10`) | Yes | — |
+| `network`, `observation`, `framework` | Observation network to use (e.g. `EBAS`, `EEA_AQ_eReporting`) | Yes | — |
+| `network_type` | Network type when wildcards are used (`GHOST`, non-GHOST or both) | No | Both |
+| `resolution` | Observation data resolution (e.g. `hourly`, `daily`) | Yes | — |
+| `model_resolution` | Model resolution if different from observations | No | Same as `resolution` |
+| `forecast` | Forecast time range to interpolate | No | All |
+| `interp_spinup_timesteps` | Number of initial timesteps skipped for model spin-up | No | `0` |
+| `interp_model_downsampling` | Statistic used to downsample model data (`mean`, `median`) | No | `mean` |
+| `interp_model_upsampling` | Method used to upsample model data (`fill`, `gaps`) | No | `fill` |
+| `interp_n_neighbours` | Number of nearest neighbours used for interpolation | No | `4` |
+| `interp_reverse_vertical_orientation` | Reverse vertical order of model levels | No | `false` |
+| `interp_chunk_size` | Minimum number of jobs per interpolation chunk | No | `16` |
+| `interp_job_array_limit` | Maximum number of chunks in the job array | No | `100` |
+| `interp_multiprocessing` | Use multiprocessing instead of Greasy on HPC systems | No | `false` |
+| `mod_root` | Root directory for interpolated model data, overwrites `data_paths.yaml` | No | From `data_paths.yaml` |
+| `ghost_root` | Root directory for GHOST observations, overwrites `data_paths.yaml` | No | From `data_paths.yaml` |
+| `nonghost_root` | Root directory for non-GHOST observations, overwrites `data_paths.yaml` | No | From `data_paths.yaml` |
+| `mod_to_interp_root` | Root directory for non-interpolated model data, overwrites `data_paths.yaml` | No | From `data_paths.yaml` |
+
+#### Using wildcards
+
+You can use the `*` wildcard in the following fields to automatically select all available values:
+
+- `network`, `observation`, `framework` 
+- `model`, `models`, `experiments`, `experiment`  
+- `species`  
+- `resolution`  
+- `start_date`
+- `end_date`  
+
+**Note:** Using wildcards may result in large numbers of interpolations, so use with caution.
+
+## Logs
+
+Every time an interpolation is done, logs are saved in the `logs/interpolation` folder.
 
 To check the status/output of an interpolation job, the following log files are created on submission in different directories:
 
@@ -47,21 +101,47 @@ To check the status/output of an interpolation job, the following log files are 
 
    These logs give information about individual interpolations and how long it took to do them.
    
-    Found in the `logs/interpolation/interpolation_logs` folder, for each individual interpolation, new directories are created with the structure `{model}/{species}/{network}/{resolution}`. Inside these directories, logs for each month are stored as `{YYYYMM}_{exit_code}.out`. If successful, the exit code will be 0.
+   Found in the `logs/interpolation/interpolation_logs` folder, for each individual interpolation, new directories are created with the structure `{model}/{species}/{network}/{resolution}`. Inside these directories, logs for each month are stored as `{YYYYMM}_{exit_code}.out`. If successful, the exit code will be 0.
 
- 
-If the interpolation is succesful, the resulted interpolated files are stored under the directory : `/gpfs/projects/bsc32/AC_cache/recon/exp_interp/` followed by the latest version of GHOST used by the interpolation.
+## Input data
+
+### Observation data
+
+Observation network data is read from the directories defined in `settings/data_paths.yaml`, with `ghost_root` for GHOST observations and `nonghost_root` for non-GHOST observations.
+
+If no network can be located under `ghost_root` or `nonghost_root`, the interpolation will fail during submission.
+
+### Model data
+
+Providentia locates model data differently depending on whether it is run locally or on BSC HPC systems.
+
+For local and HPC executions, model data is firstly located using the paths defined in `settings/data_paths.yaml`.  
+By default, models are expected to be found under the `mod_to_interp_root` directory defined in that file.
+
+If no model can be located under `mod_to_interp_root`, the interpolation will fail during submission.
+
+### Model data (HPC-specific)
+
+On BSC HPC systems, some models are stored in fixed locations that cannot be easily moved.  
+For this reason, in addition to `settings/data_paths.yaml`, HPC users can define model locations in `settings/interp_models.yaml`.
+
+When running an interpolation on HPC, Providentia searches for model data in the following order:
+
+1. `mod_to_interp_root` defined in `data_paths.yaml`
+2. Paths defined in `interp_models.yaml`
+3. If the model is not found, the interpolation fails during submission
 
 (define-models)=
-## Define models
+#### Defining models in `interp_models.yaml`
 
-All the models that are runned in the interpolation need to be defined in `/settings/interp_models.yaml`.
+The `settings/interp_models.yaml` file contains a dictionary of default relevant models grouped by type, which contains the list of model names and their possible storage paths.
 
-This file contains a dictionary of default relevant models grouped by type, in where you find the list of names of the models and the list of possible paths for them. 
+If a model is located in one of the predefined paths (for example `/esarchive/exp/monarch/`), it only needs to be added to the corresponding model list.
 
-If you have a new model to interpolate and it is located on one of the examples paths such as `/esarchive/exp/monarch/`, you only need to add it to its list of models.
-
-If the model is not located in one of the predefined paths, you will need to add the **model type**, the **model name**, and the **model storage directory** from root (excluding the model name). For example:
+If the model is stored elsewhere, you must define:
+- The **model type**
+- The **model name**
+- The **model storage directory**, excluding the model name
 
 ```
 "example_model_type": {
@@ -74,6 +154,8 @@ If the model is not located in one of the predefined paths, you will need to add
 
 You can find this exact template at the end of the `interp_models.yaml` file.
 
+##### Model directory structure
+
 When adding a new model to a directory, if you want it to be read from Providentia, the subdirectories inside the model storage directory must follow this structure: `{model_name}/{domain}/{resolution}/{species}`. For example: `cams61_monarch_ph3/eu/hourly/sconco3`.
 
 There can be multiple paths to the same model, and you can add them to the list of paths. The order is important: the first path that works on the machine will be used.
@@ -85,14 +167,29 @@ There's normally two location types of model data:
 
 If you are using a machine that allows both types of paths, it is recommended to list your `gpfs` paths first. This is because when reading data from the `esarchive`, a major limitation on the read time is the transfer speed between the 2 machines, reading directly from the `gpfs`  directory circumvents this therefore.
 
+## Output data
+
+Interpolated model data is written to the directory defined by `mod_root` in `settings/data_paths.yaml`.  
+The default value of this path depends on the execution environment.
+
+- **BSC HPC users**:  
+  `/gpfs/projects/bsc32/AC_cache/recon/exp_interp/`
+
+- **Local users**:  
+  `~/data/providentia/mod`
+
+This can be changed by updating `mod_root` or editing `settings/data_paths.yaml`.
+
 ## Additional considerations
+
+### Mapping species
 
 When checking if an model is stored in a location with the corresponding domain, resolution, and species, consider that the species might not always be listed under the same name.
 
-The file `internal/mapping_species.yaml` contains a dictionary mapping original species names to their alternative names. 
+The file `settings/internal/mapping_species.yaml` contains a dictionary mapping original species names to their alternative names. 
 
 Note that the mapping species file is only used when the species name from the configuration file is not found in the expected location, meaning Povidentia first looks for the species written in the configuration file. If it is not found, it then searches for the corresponding mapped species in `mapping_species.yaml`.
 
-## Different resolutions between model and observations
+### Different resolutions between model and observations
 
 When the resolutions are different the model data downsamples to the observations resolution. For instance, if we have 3 hourly model data and daily observations, the model data will be resampled to daily. For this to happen, we need to set the resolution in our configuration file as the obervations frequency.

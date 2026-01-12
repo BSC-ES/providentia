@@ -39,6 +39,12 @@ Below you will find the presentation of the last user meetings:
 
 * 23/03/2023: [Presentation](uploads/presentations/20230323_Providentia_User_Meeting.pdf)
 
+## External Sessions
+
+Below you will find relevant external webinars or presentations.
+
+* 05/06/2025: [Presentation](uploads/presentations/20250605_Providentia_ACTRIS_DC_Workshop.pdf)
+
 ## Contact persons
 
 Code developed by [Barcelona Supercomputing Centre](https://www.bsc.es/) (BSC-CNS).

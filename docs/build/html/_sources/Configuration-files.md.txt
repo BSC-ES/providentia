@@ -13,7 +13,7 @@ species = sconco3
 resolution = hourly
 start_date = 20180101
 end_date = 20180601
-experiments = cams61_chimere_ph2-eu-000, cams61_monarch_ph2-eu-000
+model = cams61_chimere_ph2-eu-000, cams61_monarch_ph2-eu-000
 temporal_colocation = True
 spatial_colocation = True
 report_type = standard
@@ -32,7 +32,7 @@ species = sconco3
 resolution = hourly
 start_date = 20180101
 end_date = 20180601
-experiments = cams61_chimere_ph2-eu-000, cams61_monarch_ph2-eu-000
+model = cams61_chimere_ph2-eu-000, cams61_monarch_ph2-eu-000
 temporal_colocation = True
 spatial_colocation = True
 report_type = standard
@@ -57,16 +57,17 @@ It is **mandatory** to define sections to launch Providentia. Their names must b
 
 | Parameter | Mandatory | Description |
 | ------ | ------ | ------ |
-| network | ✓ | Network you want to load observations from. Can be multiple (e.g. `CAPMoN, EBAS`). Adding a wild card (\*) is going to expand to certain variables (vconc* → vconc1, vconc2, etc.). |
+| network | ✓ | Network you want to load observations from. Can be multiple (e.g. `CAPMoN, EBAS`). Adding a wild card (\*) is going to expand to certain variables (vconcaerobin* → vconcaerobin1, vconcaerobin2, etc.). |
 | species | ✓ | Species to load. Can be multiple (e.g. `sconco3, sconcno2`). |
 | resolution | ✓ | Temporal resolution of the observations you want to load (e.g. `3hourly`). |
 | start_date | ✓ | Comparison start date in YYYYMMDD format (e.g. `20170101`). |
 | end_date | ✓ | Comparison end date in YYYYMMDD format (e.g. `20180601`). |
-| experiments | ✗ | ID of experiment. The experiment IDs can be mapped to different names by adding a list of alternative names after the experiment IDs (e.g. `exp1, exp2 (altexp1, altexp2)`). After interpolation experiment IDs will consist of 3 separate strings [ID-domain-ensemble]. The domain and ensemble  |
-| domain | ✗ | Domain of the experiment. Can be multiple. |
-| ensemble | ✗ | Ensemble member number or ensemble statistic of the experiment. defaults to all members available. Can be multiple. |  
-| temporal_colocation | ✗ | Boolean variable to set if you want to temporally colocate the observation and experiment data. |
-| spatial_colocation | ✗ | Boolean variable to set if you want to spatially colocate the observation and experiment data across multiple species. |
+| model | ✗ | ID of model. The model IDs can be mapped to different names by adding a list of alternative names after the model IDs (e.g. `mod1, mod2 (altmod1, altmod2)`). After interpolation model IDs will consist of 3 separate strings [ID-domain-ensemble]. The domain and ensemble  |
+| model_resolution | ✗ | Model resolution if different from observations | 
+| domain | ✗ | Domain of the model. Can be multiple. |
+| ensemble | ✗ | Ensemble member number or ensemble statistic of the model. defaults to all members available. Can be multiple. |  
+| temporal_colocation | ✗ | Boolean variable to set if you want to temporally colocate the observation and model data. |
+| spatial_colocation | ✗ | Boolean variable to set if you want to spatially colocate the observation and model data across multiple species. |
 | statistic_mode | ✗ | Statistic mode: Temporal&#124;Spatial (default), Spatial&#124;Temporal or Flattened. |
 | statistic_aggregation | ✗ | Aggregation statistic, e.g. Median. |
 | timeseries_statistic_aggregation | ✗ | Timeseries aggregation statistic, e.g. Median. |
@@ -89,19 +90,24 @@ It is **mandatory** to define sections to launch Providentia. Their names must b
 | remove_extreme_stations | ✗ | Type of extreme stations removal, from the options given in `remove_extreme_stations.yaml`. |
 | resampling_resolution | ✗ | Resolution you want to resample your data to. Options: `hourly`, `3hourly`, `6hourly`, `daily`, `monthly`, `annual`.|
 | forecast | ✗ | Controls how forecast data is handled. Valid options are `dayN` (e.g. `day1`) or `daily`. If this field is not empty in the interpolation, all forecast data will be processed.|
-| interp_n_neighbours | ✗ | The number of nearest neighbours to use in the interpolation of experiment output to observational stations. If not set, this defaults to `4`.|
+| interp_n_neighbours | ✗ | The number of nearest neighbours to use in the interpolation of model output to observational stations. If not set, this defaults to `4`.|
 | interp_spinup_timesteps | ✗ | Needs to be a number|
-| interp_experiment_downsampling | ✗ | mean or median|
-| interp_experiment_upsampling | ✗ | fill or gaps|
-| interp_multiprocessing | ✗ | Use multiprocessing instead of greasy to interpolate in HPC machines. |
-  
-Defining a list of experiments is optional since the user might only want to check the observations data.
+| interp_model_downsampling | ✗ | Sets how downsampling of the model resolution to the observational resolution should be handled. Options: `mean`, `median`.|
+| interp_model_upsampling | ✗ | Sets how upsampling of the model resolution to the observational resolution should be handled. `fill` linearly fills between measurements, and `gaps` sets NaN values for times that the model does not have.|
+| interp_multiprocessing | ✗ | Boolean variable to set if you wish to use multiprocessing instead of greasy to interpolate on HPC machines. |
+| network_type | ✗ | Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the `*` wildcard.  | 
+| dl_overwrite    | ✗ | Indicates whether previously downloaded files should be overwritten. | _There are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)?_ | 
+| dl_ghost_source  | ✗ | Determines where GHOST observations are downloaded from. |
+| dl_interpolated  | ✗ | Specifies whether the interpolated versions of the model output should be downloaded. |  
+| dl_mode | ✗ | Selects what to download when both observations and model output are present in the configuration file. | 
+
+Defining a list of models is optional since the user might only want to check the observation data.
 
 In the reports, a report will be created per section. In the dashboard and using Providentia as a library, you will only be able to load one section or subsection at a time.
 
 #### Use of non-GHOST networks
 
-Providentia can be used both with GHOST and non-GHOST netCDF files. Users should add the path to their network in `settings/init_prov.yaml`. In the configuration file, you can refer to non-GHOST files like:
+Providentia can be used both with GHOST and non-GHOST netCDF files. Users should add the path to their network in `settings/available_inputs.yaml`. In the configuration file, you can refer to non-GHOST files like:
 
 ```
 network = port_barcelona/port-barcelona
@@ -147,16 +153,16 @@ The QA window contains contains a menu where you can select the quality assuranc
 
 ##### Select a new set of QA flags
 
-The field's name is simply QA. Then, you can assign to that field the new set of flags you want to select. You can define the flags either by their codes:
+The field's name is simply `qa`. Then, you can assign to that field the new set of flags you want to select. You can define the flags either by their codes:
 
 ```
-QA = 0,1,2,3
+qa = 0,1,2,3
 ```
 
 or by using their full names:
 
 ```
-QA = Missing Measurement, Infinite Value, Negative Measurement, Zero Measurement
+qa = Missing Measurement, Infinite Value, Negative Measurement, Zero Measurement
 ```
 
 ##### Remove them all
@@ -164,7 +170,7 @@ QA = Missing Measurement, Infinite Value, Negative Measurement, Zero Measurement
 If you do not want to apply any QA filter, then you should define the field and leave it empty. Not defining it does not mean that there will be no QA selected. Therefore, if you want zero QA flags, then you should write the field as in the example below:
 
 ```
-QA = 
+qa = 
 ```
 
 All the options to set the QA flags can be found in [Data flags and QA names and codes](Data-flags-and-QA-names-and-codes).
@@ -280,7 +286,7 @@ upper_bound = 1000, 2000, 3000
 
 #### Calibration factor
 
-The calibration factor can be used to modify the data of your experiments. To use it, users need to set the `calibration_factor` in the configuration file, as in:
+The calibration factor can be used to modify the data of your models. To use it, users need to set the `calibration_factor` in the configuration file, as in:
 
 - To add:
 ```
@@ -299,12 +305,12 @@ calibration_factor = *10
 calibration_factor = /10
 ```
 
-The calibration factor could also be defined for diferent experiments in this way:
+The calibration factor could also be defined for diferent models in this way:
 ```
 calibration_factor = a54s-regional-000 (*0.62), a4xf-regional-000 (*0.51)
 ```
 
-Using diferent species, we would need to add the factors to the list of each experiment:
+Using diferent species, we would need to add the factors to the list of each model:
 ```
 network = EEA_AQ_eReporting
 species = pm2p5, pm10

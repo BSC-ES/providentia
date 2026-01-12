@@ -1,14 +1,14 @@
-(default-download)=
-# General
+# Download
 
-Now it is possible to download data from the HPC machines at BSC and Zenodo directly into your local machine via the download mode. With this, you won't need to spend time waiting for a job to be allocated for you and the tool interactive features will run smoothly as there will be no x11 forwarding.
+Providentia's download mode retrieves modeled and observational data from BSC systems and external sources (CAMS, Zenodo, ACTRIS) for local use.
 
-To download data you just need to add `--download` or `--dl` to your command:
+## Get started
+
+To start downloading data, simply add `--download` or `--dl` to your command:
 
 ```
 ./bin/providentia --config='/path/to/file/example.conf' --download
 ```
-OR
 
 ```
 ./bin/providentia --config='/path/to/file/example.conf' --dl
@@ -16,87 +16,75 @@ OR
 
 This will get the data that needs to be downloaded from your configuration file and save it into the directories specified in `settings/data_paths.yaml` for `local`.
 
-The download mode fetches all the content specified in your configuration file across all sections, similar to how it functions in the reports.
-
+The download mode fetches all the content specified in your configuration file across all sections.
 
 ## Types of downloads
-There are currently four types of downloads available:
 
-1. **Download of network from HPC Machines:**
-   - Downloads ghost and non-ghost networks from the storage5 machine (or mn5 if storage5 is down).
-   - Saves them within the `ghost_root` and `nonghost_root` paths specified in `settings/data_paths.yaml`.
-   - **How to get this type of download:** Answer `y` to the _Do you want to download from BSC remote machine?_ question or change the `BSC_DL_CHOICE` value to `y`.
+Providentia supports four types of downloads. For detailed instructions, please visit the respective pages:  
 
-2. **Download of network from Zenodo:**
-   - Downloads networks from the [GHOST Zenodo webpage](https://zenodo.org/records/10637450).
-   - No need for a BSC HPC machine account, as the download is from the internet.
-   - To download a network, use the network name exactly as it appears in the zip file. For example, use `EBAS-COLOSSAL_tursk` instead of `EBAS`.
-   - **How to get this type of download:** Answer `n` to the _Do you want to download from BSC remote machine?_ question or change the `BSC_DL_CHOICE` value to `n`.
+1. **Download from HPC Machines**  
+   - How to get this type of download:  
+     - For GHOST networks, answer `y` to the prompt:  
+       _Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo)_  
+       or set `dl_ghost_source` to `bsc`.  
+     - For non-GHOST networks and interpolated/non-interpolated model data, no special action is required.
+     - Reference: [BSC download page](BSC-download) 
 
-3. **Download of interpolated Experiments:**
-   - Downloads interpolated experiments from the storage5 machine (or mn5 if storage5 is down).
-   - Saves them in the `exp_root` paths specified in `settings/data_paths.yaml`.
-   - **How to get this type of download:** Set the `interpolated` field in the configuration file to `True` or don't even set it since that is the default.
+2. **Download of network from Zenodo**  
+   - Downloads GHOST networks from the [GHOST Zenodo webpage](https://zenodo.org/records/10637450).  
+   - How to get this type of download: answer `n` to the HPC prompt: _Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo)_ or set `dl_ghost_source` to `zenodo`.
+   - Reference: [Zenodo download page](Zenodo-download)  
 
-4. **Download of non-interpolated Experiments:**
-   - For local downloads:
-       - Downloads non-interpolated experiments from the storage5 machine (or mn5 if storage5 is down).
-       - The preferred path is specified in `interp_experiments.yaml`. If the experiment is not listed or no path or experiment domain is found, the system will look in the `exp_to_interp_root` path specified in `settings/data_paths.yaml`.
-   - For HPC downloads:
-       - In this case, the download (more accurately, the copy) will transfer non-interpolated experiments from esarchive to the gpfs folder found in `exp_to_interp_root` in the `settings/data_paths.yaml` file.
-       - It only copies from the paths that are specified in `interp_experiments.yaml`. 
-   - **How to get this type of download:** Set the `interpolated` field in the configuration file to `False`.
+3. **Download of network from ACTRIS (Thredds)**  
+   - Downloads observational networks from [ACTRIS Thredds](https://thredds.nilu.no/thredds/catalog.html).  
+   - How to get this type of download: put `actris/actris` in the `network` field in your configuration.
+   - Reference: [ACTRIS download page](ACTRIS-download)  
 
-*To know how to define an experiment in `interp_experiments.yaml`, please visit {ref}`this page <define-experiments>`.
+4. **Download of non-interpolated model data from the Atmosphere Data Store (ADS)**  
+   - Downloads model outputs from the [Atmosphere Data Store](https://ads.atmosphere.copernicus.eu/datasets).  
+   - How to get this type of download: specify the model as `cams_analysis`, `cams_forecast` or `cams_reanalysis` in your configuration, and set `dl_interpolated` to `False`.
+   - Reference: [CAMS download page](CAMS-download)  
 
-## Where to download from
+### Download configuration fields
 
-As for today download mode is available:
-- **In local** for all 4 modes:
-    1. Download of Network from HPC Machines.
-    2. Download of Network from Zenodo.
-    3. Download of Interpolated Experiments.
-    4. Download of Non-interpolated Experiment (download from esarchive or gpfs to local).
-- **In storage5/nord4** for:
-    1. Download of Non-interpolated Experiment (copy from esarchive to gpfs).
+Only the following configuration fields are used during download. All required fields must be provided.
 
-## Download requirements summary
+| Variable        | Description                              | Required | Default |
+|-----------------|------------------------------------------|----------|---------|
+| `ghost_version`         | GHOST version used when a GHOST network is selected | No | Latest |
+| `network`, `observation`, `framework` | Observation network to use               | Yes      | —       |
+| `model`, `models`, `experiments`, `experiment` |  Model ID(s) to be interpolated           | No       | —       |
+| `domain` | Domain of the model, can be indicated in the model field (e.g. `regional`, `global`) | No | — |
+| `ensemble` | Ensemble of the model, can be indicated in the model field (e.g. `000`, `001`) | No | — |
+| `species`         | Species to load (e.g. `sconco3`, `pm10`)| Yes      | —       |
+| `resolution`      | Observation data resolution (e.g. `hourly`, `daily`) | Yes | —       |
+| `model_resolution` | Model resolution if different from observations | No | Same as `resolution` |
+| `start_date`      | Start date of download (`YYYYMM`)   | Yes      | —       |
+| `end_date`        | End date of download (`YYYYMM`)     | Yes      | —       |
+| `filter_species`  | Optional filter to select specific species | No     | —       |
 
-The table below summarizes the basic requirements to download data from BSC:
 
-| Download Type                  | Available from Local | Available from HPC Machines | Need to have a BSC account to an HPC machine |
-|--------------------------------|----------------------|-----------------------------|---------------------------------------------|
-| Network from HPC Machines      | ✓                    | ✗                           | ✓                                           |
-| Network from Zenodo            | ✓                    | ✗                           | ✗                                           |
-| Interpolated Experiment        | ✓                    | ✗                           | ✓                                           |
-| Non-interpolated Experiment    | ✓                    | ✓                           | ✓                                           |
+## Automatization of the download
 
-## Fields
+In order to add the download to your scripts or if you just want to make it without the user input, here are all the variables you need to have
 
-Fields work a bit different in this mode, as only the parameters below will be used, some of them without being mandatory:
+| Variable  | Description    | Original Question | Expected Values |
+|--------------------|----------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| `dl_overwrite`     | Indicates whether previously downloaded files should be overwritten. | _There are some files that were already downloaded in a previous download, do you want to overwrite them ([y]/n)?_ | `True` (overwrite existing files) or `False` (keep existing files)   |
+| `dl_ghost_source`  | Determines where GHOST observations are downloaded from. | _Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo) ([y]/n)_ | `bsc` (download from BSC remote machine) or `zenodo` (retrieve from Zenodo)  |
+| `dl_interpolated`  | Specifies whether the interpolated versions of the model output should be downloaded. | _Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded) ([y]/n)_ | `True` (download interpolated) or `False` (download non-interpolated)                                |
+| `dl_mode` | Selects what to download when both observations and model output are present in the configuration file. | _Which type of data do you want to download? Observational, modelled or both? ([both]/obs/mod)_      | `obs` (download observations), `mod` (download models) or `both` (download both) |
+| `network_type` | Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the `*` wildcard.  | _Do you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n)_   | `ghost` (use all GHOST networks) or `non-ghost` (use all non-GHOST networks)                |
 
-| Parameter       | Mandatory in Download Mode | Mandatory in Other Modes |
-| --------------- | -------------------------- | ------------------------ |
-| network         | ✓                           | ✓                        |
-| species         | ✗                           | ✓                        |
-| resolution      | ✗                           | ✓                       |
-| start_date      | ✓                           | ✓                        |
-| end_date        | ✓                           | ✓                        |
-| experiments     | ✗                           | ✗                        |
-| filter_species  | ✗                           | ✗                        |
+#### Using wildcards
 
-Other important changes from the other modes are:
+You can use the `*` wildcard in the following fields to automatically select all available values:
 
-1. **Wildcard (*) keyword:** If you want to download all available networks or experiments, simply use the wildcard `*` in the `networks` or `experiments` field. Be careful with this.
-2. **Default keyword:** The keyword `default` functions the same as leaving the field empty, meaning it will retrieve all possible values for that parameter.
+- `network`, `observation`, `framework` 
+- `model`, `models`, `experiments`, `experiment`  
+- `species`  
+- `resolution`  
+- `start_date`
+- `end_date`  
 
-## .env file
-
-An `.env` file will appear in the Providentia root directory when using the download mode. It is designed to store specific user preferences.
-
-   - **BSC_DL_CHOICE:** (values: y/n) This setting controls where GHOST network data will be downloaded from. If set to `n`, the data will be downloaded from the [Zenodo](https://zenodo.org/records/10637450) webpage. If set to `y`, it will download from the remote machine `transfer1.bsc.es` by default.
-   - **PRV_USER:** This setting specifies the username used to connect to the remote machines. It can be any valid username, e.g.:bsc000000.
-   - **PRV_PWD:** This setting allows you to save the password needed for connecting to remote machines. If you have properly generated a SSH key, there will be no need to input a password.
-   - **OVERWRITE:** (values: y/n) This setting determines whether to automatically overwrite (`y`) or not overwrite (`n`) any existing files in your local directories.
-
-These values can be changed directly on the `.env` file and also be updated by Providentia during the next run.
+**Note:** Using wildcards may result in large downloads, so use with caution.
