@@ -1,78 +1,65 @@
-{
-    "local": {
-        "ghost_root": "~/data/providentia/obs/ghost", 
-        "nonghost_root": "~/data/providentia/obs/nonghost", 
-        "mod_root": "~/data/providentia/mod",
-        "mod_to_interp_root": "~/data/providentia/mod_to_interp"
-    },
+local:
+  ghost_root: ~/data/providentia/obs/ghost
+  mod_root: ~/data/providentia/mod
+  mod_to_interp_root: ~/data/providentia/mod_to_interp
+  nonghost_root: ~/data/providentia/obs/nonghost
 
-    "mn5": {
-        "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
-        "nonghost_root": "/gpfs/projects/bsc32/AC_cache/obs/nonghost",
-        "mod_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp",
-        "mod_to_interp_root": "/gpfs/projects/bsc32/AC_cache/exp"
-    },
-    
-    "storage5": {
-        "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
-        "nonghost_root": "/gpfs/archive/bsc32/esarchive/obs",
-        "mod_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp",
-        "mod_to_interp_root": "/gpfs/projects/bsc32/AC_cache/exp"
-    },
+mn5:
+  ghost_root: /gpfs/projects/bsc32/AC_cache/obs/ghost
+  mod_root: /gpfs/projects/bsc32/AC_cache/recon/exp_interp
+  mod_to_interp_root: /gpfs/projects/bsc32/AC_cache/exp
+  nonghost_root: /gpfs/projects/bsc32/AC_cache/obs/nonghost
 
-    "nord3v2": {
-        "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
-        "nonghost_root": "/esarchive/obs",
-        "mod_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp",
-        "mod_to_interp_root": "/gpfs/projects/bsc32/AC_cache/exp"
-    },
+storage5:
+  ghost_root: /gpfs/projects/bsc32/AC_cache/obs/ghost
+  mod_root: /gpfs/projects/bsc32/AC_cache/recon/exp_interp
+  mod_to_interp_root: /gpfs/projects/bsc32/AC_cache/exp
+  nonghost_root: /gpfs/archive/bsc32/esarchive/obs
 
-    "nord4": {
-        "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
-        "nonghost_root": "/esarchive/obs",
-        "mod_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp",
-        "mod_to_interp_root": "/gpfs/projects/bsc32/AC_cache/exp"
-    },
+nord3v2:
+  ghost_root: /gpfs/projects/bsc32/AC_cache/obs/ghost
+  mod_root: /gpfs/projects/bsc32/AC_cache/recon/exp_interp
+  mod_to_interp_root: /gpfs/projects/bsc32/AC_cache/exp
+  nonghost_root: /esarchive/obs
 
-    "amd": {
-        "ghost_root": "/gpfs/projects/bsc32/AC_cache/obs/ghost",
-        "nonghost_root": "/gpfs/projects/bsc32/AC_cache/obs/nonghost",
-        "mod_root": "/gpfs/projects/bsc32/AC_cache/recon/exp_interp",
-        "mod_to_interp_root": ""
-    },
+nord4:
+  ghost_root: /gpfs/projects/bsc32/AC_cache/obs/ghost
+  mod_root: /gpfs/projects/bsc32/AC_cache/recon/exp_interp
+  mod_to_interp_root: /gpfs/projects/bsc32/AC_cache/exp
+  nonghost_root: /esarchive/obs
 
-    "hub": {
-        "ghost_root": "/esarchive/obs/ghost",
-        "nonghost_root": "/esarchive/obs",
-        "mod_root": "/esarchive/recon/prov_interp",
-        "mod_to_interp_root": ""
-    },
+amd:
+  ghost_root: /gpfs/projects/bsc32/AC_cache/obs/ghost
+  mod_root: /gpfs/projects/bsc32/AC_cache/recon/exp_interp
+  mod_to_interp_root: ""
+  nonghost_root: /gpfs/projects/bsc32/AC_cache/obs/nonghost
 
-    "workstation": {
-        "ghost_root": "/esarchive/obs/ghost",
-        "nonghost_root": "/esarchive/obs",
-        "mod_root": "/esarchive/recon/prov_interp",
-        "mod_to_interp_root": ""
-    },
+hub:
+  ghost_root: /esarchive/obs/ghost
+  mod_root: /esarchive/recon/prov_interp
+  mod_to_interp_root: ""
+  nonghost_root: /esarchive/obs
 
-    "dust": {
-        "ghost_root": "/esarchive/obs/ghost",
-        "nonghost_root": "/esarchive/obs",
-        "mod_root": "/esarchive/recon/prov_interp",
-        "mod_to_interp_root": ""
-    },
-    
-    "oper": {
-        "ghost_root": "/esarchive/obs/ghost", 
-        "nonghost_root": "/esarchive/obs", 
-        "mod_root": "/esarchive/recon/prov_interp",
-        "mod_to_interp_root": ""
-    },
+workstation:
+  ghost_root: /esarchive/obs/ghost
+  mod_root: /esarchive/recon/prov_interp
+  mod_to_interp_root: ""
+  nonghost_root: /esarchive/obs
 
-    "github": {
-        "ghost_root": "tests/data/obs/ghost", 
-        "nonghost_root": "tests/data/obs/nonghost", 
-        "mod_root": "tests/data/exp",
-        "mod_to_interp_root": ""
-    },
-}
+dust:
+  ghost_root: /esarchive/obs/ghost
+  mod_root: /esarchive/recon/prov_interp
+  mod_to_interp_root: ""
+  nonghost_root: /esarchive/obs
+
+oper:
+  ghost_root: /esarchive/obs/ghost
+  mod_root: /esarchive/recon/prov_interp
+  mod_to_interp_root: ""
+  nonghost_root: /esarchive/obs
+
+github:
+  ghost_root: tests/data/obs/ghost
+  mod_root: tests/data/exp
+  mod_to_interp_root: ""
+  nonghost_root: tests/data/obs/nonghost

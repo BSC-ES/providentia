@@ -34,8 +34,6 @@ from .read_aux import (check_for_ghost, get_default_qa, generate_file_trees,
 from .toolbar import NavigationToolbar
 from .warnings_prv import show_message
 
-#
-
 # set font DPI for uniform dashboard appearance across systems
 os.environ["QT_FONT_DPI"] = "96"
 # enable high DPI pixmaps

@@ -11,7 +11,9 @@ However, there are some parameters that can only be set through the command line
 | report, reports, offline | Start [reports](Report). | |
 | download, dl | Start [downloads](Download). | |
 | interpolation, interp, interpolate | Start [interpolations](Interpolation). | |
-| notebook, nb, jupyter | Start a [notebook](Library) session. | |
+| notebook, nb, jupyter | Open a Jupyter notebook to [use Providentia as a library](Launching-notebooks). | |
+| clean | Removes log files. | |
+| debug | Start [debug mode](Running-the-tool-on-debug). | |
 | cores | Number of cores. | 12 |
 | time | Requested time. | 02:00:00 |
 | jobname | Job name. | PRV |
@@ -19,10 +21,7 @@ However, there are some parameters that can only be set through the command line
 | mem | Memory. | 20Gb |
 | constraint | Memory constraint. | medmem (to use nodes with 64GB of memory) |
 | version, V | Print version of Providentia. | |
-| clean | Removes log files. | |
 | logfile | Redirects output to a file. More info in the [wiki page](Redirecting-output-to-a-file). | |
-| debug | Start [debug mode](Running-the-tool-on-debug). | |
-| notebook | Open a Jupyter notebook to [use Providentia as a library](Launching-notebooks). | |
 | conf, config | Configuration file path. | |
 | config_dir | Path to all configuration files. | |
 | section | Section within configuration file. | |
