@@ -14,10 +14,23 @@ release = '3.0.0'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["myst_parser", "sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc", "sphinx_rtd_theme"]
+extensions = ["myst_parser", "sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc", "sphinx_rtd_theme","sphinx.ext.mathjax"]
+mathjax_path = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
 templates_path = ['_templates']
 exclude_patterns = []
 myst_heading_anchors = 2
+
+# Treat .md files as MyST Markdown
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
+
+# Enable math parsing in MyST
+myst_enable_extensions = [
+    "dollarmath",   # for $$ ... $$ support
+    "amsmath",      # for \begin{aligned} ... \end{aligned}
+]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
