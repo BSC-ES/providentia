@@ -1,0 +1,423 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interpolation &mdash; Providentia 2.4.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4d935f96"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Dashboard" href="Dashboard.html" />
+    <link rel="prev" title="Modes" href="Modes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="Modes.html">Modes</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Interpolation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#starting-an-interpolation">Starting an Interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#execution-details">Execution details</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#local-users">Local users</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bsc-hpc-users">BSC HPC users</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#interpolation-configuration-fields">Interpolation configuration fields</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#interpolation-considerations">Interpolation considerations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#logs">Logs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#input-data">Input data</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#observation-data">Observation data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#model-data">Model data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#model-data-hpc-specific">Model data (HPC-specific)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#output-data">Output data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Report.html">Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Download-mode.html">Download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Library-mode.html">Library</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Topics-in-depth.html">Topics in depth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Evolution.html">Evolution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the Team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="Modes.html">Modes</a></li>
+      <li class="breadcrumb-item active">Interpolation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Interpolation.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="interpolation">
+<h1>Interpolation<a class="headerlink" href="#interpolation" title="Link to this heading"></a></h1>
+<p>This mode allows users to spatially interpolate model output against available observational stations to be viewable in <strong>Providentia</strong>.</p>
+<p>Interpolation consists of spatially interpolating gridded model outputs to observational station locations using a nearest-neighbour approach.</p>
+<p>The Interpolation mode allows to interpolate models against <strong>GHOST</strong> and <strong>non-GHOST</strong> observations.</p>
+<section id="starting-an-interpolation">
+<h2>Starting an Interpolation<a class="headerlink" href="#starting-an-interpolation" title="Link to this heading"></a></h2>
+<p>To start an interpolation, you need to add either <code class="docutils literal notranslate"><span class="pre">--interp</span></code>, <code class="docutils literal notranslate"><span class="pre">--interpolate</span></code>, or <code class="docutils literal notranslate"><span class="pre">--interpolation</span></code> as a launch option along with the <strong>mandatory</strong> configuration file on the command line. This will initiate the interpolation process.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">interp</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">interpolate</span>  <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">interpolation</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span>
+</pre></div>
+</div>
+<p>In terms of performance, we recommend running Providentia Interpolation in MareNostrum5.</p>
+</section>
+<section id="execution-details">
+<h2>Execution details<a class="headerlink" href="#execution-details" title="Link to this heading"></a></h2>
+<section id="local-users">
+<h3>Local users<a class="headerlink" href="#local-users" title="Link to this heading"></a></h3>
+<p>For local execution, the interpolation runs in the background using multiprocessing.
+Be aware that this can be demanding on the computer, so ensure your machine has sufficient resources before running.</p>
+</section>
+<section id="bsc-hpc-users">
+<h3>BSC HPC users<a class="headerlink" href="#bsc-hpc-users" title="Link to this heading"></a></h3>
+<p>Upon submission, a first job named <code class="docutils literal notranslate"><span class="pre">PRV</span></code> will start the submission process which will make a job called <code class="docutils literal notranslate"><span class="pre">PRVI</span></code> appear in the SLURM queue, shortly afterwards a job array named <code class="docutils literal notranslate"><span class="pre">PRVI_$SLURMJOBID</span></code> (containing the jobs for all the defined variable combinations) will be submitted.</p>
+<p>When all jobs have been completed (or there is a failure) the <code class="docutils literal notranslate"><span class="pre">PRVI</span></code> job will exit the queue.</p>
+</section>
+<section id="interpolation-configuration-fields">
+<h3>Interpolation configuration fields<a class="headerlink" href="#interpolation-configuration-fields" title="Link to this heading"></a></h3>
+<p>During the interpolation step, only a specific set of configuration fields is used. All required fields must be provided, otherwise, the process will fail at startup.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Required</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ghost_version</span></code></p></td>
+<td><p>GHOST version used when a GHOST network is selected</p></td>
+<td><p>No</p></td>
+<td><p>Latest</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">start_date</span></code></p></td>
+<td><p>Start date of interpolation (<code class="docutils literal notranslate"><span class="pre">YYYYMM</span></code>)</p></td>
+<td><p>Yes</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">end_date</span></code></p></td>
+<td><p>End date of interpolation (<code class="docutils literal notranslate"><span class="pre">YYYYMM</span></code>)</p></td>
+<td><p>Yes</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">models</span></code>, <code class="docutils literal notranslate"><span class="pre">experiments</span></code>, <code class="docutils literal notranslate"><span class="pre">experiment</span></code></p></td>
+<td><p>Model ID(s) to be interpolated</p></td>
+<td><p>Yes</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">domain</span></code></p></td>
+<td><p>Domain of the model, can be indicated in the model field (e.g. <code class="docutils literal notranslate"><span class="pre">regional</span></code>, <code class="docutils literal notranslate"><span class="pre">global</span></code>)</p></td>
+<td><p>No</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ensemble</span></code></p></td>
+<td><p>Ensemble of the model, can be indicated in the model field (e.g. <code class="docutils literal notranslate"><span class="pre">000</span></code>, <code class="docutils literal notranslate"><span class="pre">001</span></code>)</p></td>
+<td><p>No</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">species</span></code></p></td>
+<td><p>Species to load (e.g. <code class="docutils literal notranslate"><span class="pre">sconco3</span></code>, <code class="docutils literal notranslate"><span class="pre">pm10</span></code>)</p></td>
+<td><p>Yes</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">network</span></code>, <code class="docutils literal notranslate"><span class="pre">observation</span></code>, <code class="docutils literal notranslate"><span class="pre">framework</span></code></p></td>
+<td><p>Observation network to use (e.g. <code class="docutils literal notranslate"><span class="pre">EBAS</span></code>, <code class="docutils literal notranslate"><span class="pre">EEA_AQ_eReporting</span></code>)</p></td>
+<td><p>Yes</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">network_type</span></code></p></td>
+<td><p>Network type when wildcards are used (<code class="docutils literal notranslate"><span class="pre">GHOST</span></code>, non-GHOST or both)</p></td>
+<td><p>No</p></td>
+<td><p>Both</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">resolution</span></code></p></td>
+<td><p>Observation data resolution (e.g. <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>)</p></td>
+<td><p>Yes</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">model_resolution</span></code></p></td>
+<td><p>Model resolution if different from observations</p></td>
+<td><p>No</p></td>
+<td><p>Same as <code class="docutils literal notranslate"><span class="pre">resolution</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">forecast</span></code></p></td>
+<td><p>Forecast time range to interpolate</p></td>
+<td><p>No</p></td>
+<td><p>All</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_spinup_timesteps</span></code></p></td>
+<td><p>Number of initial timesteps skipped for model spin-up</p></td>
+<td><p>No</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interp_model_downsampling</span></code></p></td>
+<td><p>Statistic used to downsample model data (<code class="docutils literal notranslate"><span class="pre">mean</span></code>, <code class="docutils literal notranslate"><span class="pre">median</span></code>)</p></td>
+<td><p>No</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mean</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_model_upsampling</span></code></p></td>
+<td><p>Method used to upsample model data (<code class="docutils literal notranslate"><span class="pre">fill</span></code>, <code class="docutils literal notranslate"><span class="pre">gaps</span></code>)</p></td>
+<td><p>No</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fill</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interp_n_neighbours</span></code></p></td>
+<td><p>Number of nearest neighbours used for interpolation</p></td>
+<td><p>No</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">4</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_reverse_vertical_orientation</span></code></p></td>
+<td><p>Reverse vertical order of model levels</p></td>
+<td><p>No</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interp_chunk_size</span></code></p></td>
+<td><p>Minimum number of jobs per interpolation chunk</p></td>
+<td><p>No</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">16</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_job_array_limit</span></code></p></td>
+<td><p>Maximum number of chunks in the job array</p></td>
+<td><p>No</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">100</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interp_multiprocessing</span></code></p></td>
+<td><p>Use multiprocessing instead of Greasy on HPC systems</p></td>
+<td><p>No</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mod_root</span></code></p></td>
+<td><p>Root directory for interpolated model data, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
+<td><p>No</p></td>
+<td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ghost_root</span></code></p></td>
+<td><p>Root directory for GHOST observations, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
+<td><p>No</p></td>
+<td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code></p></td>
+<td><p>Root directory for non-GHOST observations, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
+<td><p>No</p></td>
+<td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code></p></td>
+<td><p>Root directory for non-interpolated model data, overwrites <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
+<td><p>No</p></td>
+<td><p>From <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="interpolation-considerations">
+<h3>Interpolation considerations<a class="headerlink" href="#interpolation-considerations" title="Link to this heading"></a></h3>
+<p>Providentia is highly flexible when handling interpolation between model and observational data, for example in mapping species, adjusting for different temporal resolutions and using wildcards to select multiple values at once.</p>
+<section id="mapping-species">
+<h4>Mapping species<a class="headerlink" href="#mapping-species" title="Link to this heading"></a></h4>
+<p>When checking if an model is stored in a location with the corresponding domain, resolution, and species, consider that the species might not always be listed under the same name.</p>
+<p>The file <code class="docutils literal notranslate"><span class="pre">settings/internal/mapping_species.yaml</span></code> contains a dictionary mapping original species names to their alternative names.</p>
+<p>Note that the mapping species file is only used when the species name from the configuration file is not found in the expected location, meaning Povidentia first looks for the species written in the configuration file. If it is not found, it then searches for the corresponding mapped species in <code class="docutils literal notranslate"><span class="pre">mapping_species.yaml</span></code>.</p>
+</section>
+<section id="different-resolutions-between-model-and-observations">
+<h4>Different resolutions between model and observations<a class="headerlink" href="#different-resolutions-between-model-and-observations" title="Link to this heading"></a></h4>
+<p>By default Providentia will only look to do interpolations for matching temporal resolutions between the model and observations, however Providentia can be adjusted to change this operation. Model data can be downsampled to the observational resolution by using the interp_model_downsampling field, or can be upsampled by using the interp_model_upsampling field.</p>
+</section>
+<section id="using-wildcards">
+<h4>Using wildcards<a class="headerlink" href="#using-wildcards" title="Link to this heading"></a></h4>
+<p>You can use the <code class="docutils literal notranslate"><span class="pre">*</span></code> wildcard in the following fields to automatically select all available values:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">network</span></code>, <code class="docutils literal notranslate"><span class="pre">observation</span></code>, <code class="docutils literal notranslate"><span class="pre">framework</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">models</span></code>, <code class="docutils literal notranslate"><span class="pre">experiments</span></code>, <code class="docutils literal notranslate"><span class="pre">experiment</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">species</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">resolution</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">start_date</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">end_date</span></code></p></li>
+</ul>
+<p><strong>Note:</strong> Using wildcards may result in large numbers of interpolations, so use with caution.</p>
+</section>
+</section>
+</section>
+<section id="logs">
+<h2>Logs<a class="headerlink" href="#logs" title="Link to this heading"></a></h2>
+<p>Every time an interpolation is done, logs are saved in the <code class="docutils literal notranslate"><span class="pre">logs/interpolation</span></code> folder.</p>
+<p>To check the status/output of an interpolation job, the following log files are created on submission in different directories:</p>
+<ul>
+<li><p class="rubric" id="management-logs">Management logs</p>
+<p>These logs provide an overview of the interpolation process. Most errors will appear here.</p>
+<p>Located in the <code class="docutils literal notranslate"><span class="pre">logs/interpolation/management_logs</span></code> folder, look for an <code class="docutils literal notranslate"><span class="pre">$SLURMJOBID.out</span></code> file.</p>
+</li>
+<li><p class="rubric" id="submission-logs">Submission logs</p>
+<p>These logs contain information about the Slurm and Greasy submissions to the HPC machines.</p>
+<p>Found in the <code class="docutils literal notranslate"><span class="pre">logs/interpolation/submission_logs</span></code> folder, search for an <code class="docutils literal notranslate"><span class="pre">$SLURMJOBID.out</span></code> file.</p>
+</li>
+<li><p class="rubric" id="interpolation-logs">Interpolation logs</p>
+<p>These logs give information about individual interpolations and how long it took to do them.</p>
+<p>Found in the <code class="docutils literal notranslate"><span class="pre">logs/interpolation/interpolation_logs</span></code> folder, for each individual interpolation, new directories are created with the structure <code class="docutils literal notranslate"><span class="pre">{model}/{species}/{network}/{resolution}</span></code>. Inside these directories, logs for each month are stored as <code class="docutils literal notranslate"><span class="pre">{YYYYMM}_{exit_code}.out</span></code>. If successful, the exit code will be 0.</p>
+</li>
+</ul>
+</section>
+<section id="input-data">
+<h2>Input data<a class="headerlink" href="#input-data" title="Link to this heading"></a></h2>
+<section id="observation-data">
+<h3>Observation data<a class="headerlink" href="#observation-data" title="Link to this heading"></a></h3>
+<p>Observation network data is read from the directories defined in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>, with <code class="docutils literal notranslate"><span class="pre">ghost_root</span></code> for GHOST observations and <code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code> for non-GHOST observations.</p>
+<p>If no network can be located under <code class="docutils literal notranslate"><span class="pre">ghost_root</span></code> or <code class="docutils literal notranslate"><span class="pre">nonghost_root</span></code>, the interpolation will fail during submission.</p>
+</section>
+<section id="model-data">
+<h3>Model data<a class="headerlink" href="#model-data" title="Link to this heading"></a></h3>
+<p>Providentia locates model data differently depending on whether it is run locally or on BSC HPC systems.</p>
+<p>For local and HPC executions, model data is firstly located using the paths defined in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.<br />
+By default, models are expected to be found under the <code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code> directory defined in that file.</p>
+<p>If no model can be located under <code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code>, the interpolation will fail during submission.</p>
+</section>
+<section id="model-data-hpc-specific">
+<h3>Model data (HPC-specific)<a class="headerlink" href="#model-data-hpc-specific" title="Link to this heading"></a></h3>
+<p>On BSC HPC systems, some models are stored in fixed locations that cannot be easily moved.<br />
+For this reason, in addition to <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>, HPC users can define model locations in <code class="docutils literal notranslate"><span class="pre">settings/interp_models.yaml</span></code>.</p>
+<p>When running an interpolation on HPC, Providentia searches for model data in the following order:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mod_to_interp_root</span></code> defined in <code class="docutils literal notranslate"><span class="pre">data_paths.yaml</span></code></p></li>
+<li><p>Paths defined in <code class="docutils literal notranslate"><span class="pre">interp_models.yaml</span></code></p></li>
+<li><p>If the model is not found, the interpolation fails during submission</p></li>
+</ol>
+<section id="defining-models-in-interp-models-yaml">
+<span id="define-models"></span><h4>Defining models in <code class="docutils literal notranslate"><span class="pre">interp_models.yaml</span></code><a class="headerlink" href="#defining-models-in-interp-models-yaml" title="Link to this heading"></a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">settings/interp_models.yaml</span></code> file contains a dictionary of default relevant models grouped by type, which contains the list of model names and their possible storage paths.</p>
+<p>If a model is located in one of the predefined paths (for example <code class="docutils literal notranslate"><span class="pre">/esarchive/exp/monarch/</span></code>), it only needs to be added to the corresponding model list.</p>
+<p>If the model is stored elsewhere, you must define:</p>
+<ul class="simple">
+<li><p>The <strong>model type</strong></p></li>
+<li><p>The <strong>model name</strong></p></li>
+<li><p>The <strong>model storage directory</strong>, excluding the model name</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;example_model_type&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;models&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;example_model_name&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;paths&quot;</span><span class="p">:</span> <span class="p">[</span> 
+            <span class="s2">&quot;/example/model/path&quot;</span>
+        <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>You can find this exact template at the end of the <code class="docutils literal notranslate"><span class="pre">interp_models.yaml</span></code> file.</p>
+<section id="model-directory-structure">
+<h5>Model directory structure<a class="headerlink" href="#model-directory-structure" title="Link to this heading"></a></h5>
+<p>When adding a new model to a directory, if you want it to be read from Providentia, the subdirectories inside the model storage directory must follow this structure: <code class="docutils literal notranslate"><span class="pre">{model_name}/{domain}/{resolution}/{species}</span></code>. For example: <code class="docutils literal notranslate"><span class="pre">cams61_monarch_ph3/eu/hourly/sconco3</span></code>.</p>
+<p>There can be multiple paths to the same model, and you can add them to the list of paths. The order is important: the first path that works on the machine will be used.</p>
+<p>There’s normally two location types of model data:</p>
+<ul class="simple">
+<li><p><strong>gpfs</strong>: Accessible by the <em><strong>MareNostrum5/Nord4</strong></em> machines.</p></li>
+<li><p><strong>esarchive</strong>: Accessible by the <em><strong>Nord4</strong></em> machine.</p></li>
+</ul>
+<p>If you are using a machine that allows both types of paths, it is recommended to list your <code class="docutils literal notranslate"><span class="pre">gpfs</span></code> paths first. This is because when reading data from the <code class="docutils literal notranslate"><span class="pre">esarchive</span></code>, a major limitation on the read time is the transfer speed between the 2 machines, reading directly from the <code class="docutils literal notranslate"><span class="pre">gpfs</span></code>  directory circumvents this therefore.</p>
+</section>
+</section>
+</section>
+</section>
+<section id="output-data">
+<h2>Output data<a class="headerlink" href="#output-data" title="Link to this heading"></a></h2>
+<p>Interpolated model data is written to the directory defined by <code class="docutils literal notranslate"><span class="pre">mod_root</span></code> in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.<br />
+The default value of this path depends on the execution environment.</p>
+<ul class="simple">
+<li><p><strong>BSC HPC users</strong>:<br />
+<code class="docutils literal notranslate"><span class="pre">/gpfs/projects/bsc32/AC_cache/recon/exp_interp/</span></code></p></li>
+<li><p><strong>Local users</strong>:<br />
+<code class="docutils literal notranslate"><span class="pre">~/data/providentia/mod</span></code></p></li>
+</ul>
+<p>This can be changed by updating <code class="docutils literal notranslate"><span class="pre">mod_root</span></code> or editing <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Modes.html" class="btn btn-neutral float-left" title="Modes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Dashboard.html" class="btn btn-neutral float-right" title="Dashboard" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2025, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
