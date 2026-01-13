@@ -7,9 +7,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Providentia'
-copyright = '2019-2025, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa'
-author = 'Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa'
-release = '2.4.0'
+copyright = '2019-2026, Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi'
+author = 'Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi'
+release = '3.0.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

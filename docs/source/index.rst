@@ -10,7 +10,9 @@ Contents
    Modes.rst
    Topics-in-depth.rst
    Other-topics.rst
-   Evolution.md
    FAQ.md
+   Training-material.md
+   Presentations.md
    Meet-the-team.md
+   History.md
    Tips-and-tricks-for-developers.md

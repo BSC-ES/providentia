@@ -8,7 +8,7 @@ This [presentation](uploads/presentations/Providentia_History.pdf) gives an over
 
 Providentia when first conceived first only had a dashboard, the follow graphics show how that dashboard has changed over the years: 
 
-### Version 3.0.0 (2025)
+### Version 3.0.0 (2026)
 
 ![PRV_2025](uploads/PRV_2025.png)
 

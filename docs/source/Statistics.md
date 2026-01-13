@@ -578,7 +578,6 @@ m &= \text{model data} \\
 \end{aligned}
 $$
 
-
 ### FAC2
 
 Computes the percentage of model values that lie within a factor of two of the corresponding observations.

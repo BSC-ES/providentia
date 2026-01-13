@@ -47,7 +47,7 @@ Then the Providentia library can be safely imported as a module:
 import providentia as prv
 ```
 
-Please see the [library](library) page for a full description of the features of the providentia module.
+Please see the [library](Library) page for a full description of the features of the providentia module.
 
 ## Embedding plots
 
