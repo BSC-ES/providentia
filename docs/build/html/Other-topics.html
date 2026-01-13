@@ -1,22 +1,24 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Other topics &mdash; Providentia 2.4.0 documentation</title>
+  <title>Other topics &mdash; Providentia 3.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=4d935f96"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -51,7 +53,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Other topics</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="Running-on-HPC.html">Running on HPC</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Command-line-configuration.html">Command line configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Data-flags-and-QA-names-and-codes.html">Data flags and QA names and codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Data-flags-and-QA-names-and-codes.html">QA flags</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Representativity-filters.html">Representativity filters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Representativity-filters.html#periodic-representativity-filters">Periodic Representativity Filters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Saved-file-formats.html">Saved file formats</a></li>
@@ -62,9 +64,11 @@
 <li class="toctree-l2"><a class="reference internal" href="ADS.html">Account setup in Atmosphere Data Store</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Evolution.html">Evolution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training Material</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the Team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
 </ul>
 
@@ -97,19 +101,20 @@
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Running-on-HPC.html">Running on HPC</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Connection-setup.html">Connection setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Connection-setup.html">Remote HPC connection setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Mounting-filesystems.html">Mounting filesystems</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Running-the-tool-on-debug.html">Running the tool on debug</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Launching-notebooks.html">Launching notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Launching-notebooks.html">Notebooks</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Command-line-configuration.html">Command line configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="Command-line-configuration.html#use-cases">Use cases</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Data-flags-and-QA-names-and-codes.html">Data flags and QA names and codes</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="Data-flags-and-QA-names-and-codes.html#qa-flags-ghost-checks">QA flags (GHOST checks)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Data-flags-and-QA-names-and-codes.html#data-flags-given-by-data-provider">Data flags (given by data provider)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Data-flags-and-QA-names-and-codes.html">QA flags</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Data-flags-and-QA-names-and-codes.html#modifying-flags-qa">Modifying flags / qa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Data-flags-and-QA-names-and-codes.html#flags-names-and-codes">flags: Names and Codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Data-flags-and-QA-names-and-codes.html#qa-names-and-codes">qa: Names and Codes</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Representativity-filters.html">Representativity filters</a><ul>
@@ -159,7 +164,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2025, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa.</p>
+    <p>&#169; Copyright 2019-2026, Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

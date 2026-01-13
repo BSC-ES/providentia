@@ -45,8 +45,6 @@ Francesco is the team leader of the Data and Diagnostics Team inside Computation
 
 ### Amalia Vradi
 
-![Amalia Vradi](uploads/amalia_vradi.jpeg)
-
 **Research Engineer**  
 
 Amalia is a former BSC employee. She was the first dedicated Providentia developer, who had the unenviable task of refactoring the Providentia code when it was just starting out.

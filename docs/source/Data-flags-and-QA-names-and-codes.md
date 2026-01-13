@@ -1,94 +1,25 @@
-# Data flags and QA names and codes
+# QA flags
 
-Below you will find two tables that contain the name and numerical values of flags that can be used to screen measurements for different conditions when using Providentia:
+There are two sets of QA flag fields available in Providentia for filtering data when using GHOST or ACTRIS data.
 
-* QA flags relate to GHOST performed quality control checks.
-* Data flags relate to standardised flags taken from the data provider.
+* **flags** - flags that relate to standardised data flags taken from the data provider.
+* **qa** - flags that relate to GHOST performed quality control checks.
 
-This information can be used in the configuration files, using either the names of the flags you want to user or their codes.
+This [publication](https://doi.org/10.5194/essd-16-4417-2024 ) gives a definition for each of the **flags** and **qa** fields.
 
-## QA flags (GHOST checks)
+For ACTRIS data, there is a special case where only a small subset of **qa** fields are available (those which pertain to a collection of flags).
 
-| QA flag name | Code | Default |
-| ---      |  ---  | --- |
-| Missing Measurement | 0 | ✓ |
-| Infinite Value | 1 | ✓ |
-| Negative Measurement | 2 | ✓ |
-| Zero Measurement | 3 |  |
-| Not Maximum Data Quality Level | 4 | |
-| Preliminary Data | 5 | |
-| Invalid Data Provider Flags - GHOST Decreed | 6 | ✓ |
-| Invalid Data Provider Flags - Network Decreed | 7 | |
-| No Valid Data to Average | 8 | ✓ |
-| Duplicate Station | 9 | ✓ |
-| Methodology Not Mapped | 10 | |
-| Assumed Primary Sampling | 11 | |
-| Assumed Sample Preparation | 12 | |
-| Assumed Measurement Methodology | 13 | |
-| Unknown Primary Sampling Type | 14 | |
-| Unknown Primary Sampling Instrument | 15 | |
-| Unknown Sample Preparation Type | 16 | |
-| Unknown Sample Preparation Technique | 17 | |
-| Unknown Measurement Method | 18 | |
-| Unknown Measuring Instrument | 19 | |
-| Erroneous Primary Sampling | 20 | ✓ |
-| Erroneous Sample Preparation | 21 | ✓ |
-| Erroneous Measurement Methodology | 22 | ✓ |
-| Invalid QA Measurement Methodology | 23 |
-| Sample Gas Volume - Network Standard | 30 |
-| Sample Gas Volume - Unknown | 31 |
-| Unit Conversion - Network Standard Sample Gas Volume Assumption | 32 | |
-| Unit Conversion - Educated Guess Sample Gas Volume Assumption | 33 | |
-| Station Position Doubt - DEM Decreed | 40 | |
-| Station Position Doubt - Manually Decreed | 41 | |
-| Local Precipitation | 50 | |
-| Local Extreme Weather | 51 | |
-| Local Atmospheric Obscuration | 52 | |
-| Local Contamination | 53 | |
-| Local Exceptional Event | 54 | |
-| Non-Integer Local Timezone (relative to UTC) | 60 | |
-| Below Documented Lower Limit of Detection | 70 | |
-| Below Reported Lower Limit of Detection | 71 | |
-| Below Preferential Lower Limit of Detection | 72 | ✓ |
-| Above Documented Upper Limit of Detection | 73 | |
-| Above Reported Upper Limit of Detection | 74 | |
-| Above Preferential Upper Limit of Detection | 75 | ✓ |
-| Insufficient Measurement Resolution - Documented | 80 | |
-| Insufficient Measurement Resolution - Reported | 81 | |
-| Insufficient Measurement Resolution - Preferential | 82 | ✓ |
-| Insufficient Measurement Resolution - Empirical | 83 | ✓ |
-| Persistent Recurring Values - 5/6 | 90 | |
-| Persistent Recurring Values - 9/12 | 91 | |
-| Persistent Recurring Values - 16/24 | 92 | |
-| Monthly Fractional Unique Values <= 1% | 100 | |
-| Monthly Fractional Unique Values <= 5% | 101 | |
-| Monthly Fractional Unique Values <= 10% | 102 | |
-| Monthly Fractional Unique Values <= 30% | 103 | |
-| Monthly Fractional Unique Values <= 50% | 104 | |
-| Monthly Fractional Unique Values <= 70% | 105 | |
-| Monthly Fractional Unique Values <= 90% | 106 | |
-| Data Outlier - Exceeds Scientifically Decreed Lower/Upper Limit | 110 | ✓ |
-| Data Outlier - Monthly Median Exceeds Scientifically Decreed Upper Limit | 111 | ✓ |
-| Data Outlier - Network Decreed | 112 | ✓ |
-| Data Outlier - Manually Decreed | 113 | ✓ |
-| Possible Data Outlier - Monthly Adjusted Boxplot | 114 | |
-| Probable Data Outlier - Monthly Adjusted Boxplot | 115 | ✓ |
-| Monthly Distribution Consistency - Zone 1 | 120 | |
-| Monthly Distribution Consistency - Zone 2 | 121 | |
-| Monthly Distribution Consistency - Zone 3 | 122 | |
-| Monthly Distribution Consistency - Zone 4 | 123 | |
-| Monthly Distribution Consistency - Zone 5 | 124 | |
-| Monthly Distribution Consistency - Zone 6 | 125 | |
-| Monthly Distribution Consistency - Zone 7 | 126 | |
-| Monthly Distribution Consistency - Zone 8 | 127 | |
-| Monthly Distribution Consistency - Zone 9 | 128 | |
-| Monthly Distribution Consistency - Zone 10 | 129 | | |
-| Monthly Distribution Consistency - Unclassified | 130 | |
-| Systematic Inconsistent Monthly Distributions - 2/3 Months >= Zone 6 | 131 | |
-| Systematic Inconsistent Monthly Distributions - 4/6 Months >= Zone 6 | 132 | ✓ |
-| Systematic Inconsistent Monthly Distributions - 8/12 Months >= Zone 6 | 133 | ✓ |
+## Modifying flags / qa
 
-## Data flags (given by data provider)
+A selection of **qa** fields are set by default, but no **flags** fields are set by default (as there are two **qa** fields which apply default collections of **flags**). This however can be modified in a number of ways. 
+
+When using the dashboard by clicking on the **FLAGS** or **QA** buttons, pop-up menus will appear giving the option to interactively select fields.
+
+The fields can also be set in the configuration files, using either the names of the flags you want to apply, or their numerical codes (defined below). The fields can wither be set explicitely, e.g. ```qa = 0, 1, 2```, or a selection of fields to add or subtract from the defaults can be selected, e.g.```add_qa = 3, 10```, or ```subtract_qa = 3, 10```. The respective fields for the **flags** are: ```flags```, ```add_flags```, and ```subtract_flags```.
+
+Below you will find two tables that contain the names and numerical values of all **flags** and **qa** fields for the latest version of GHOST, together with the default fields.
+
+## flags: Names and Codes
 
 | Data flag name | Code | Default |
 | ---      |  ---  | --- |
@@ -134,6 +65,7 @@ This information can be used in the configuration files, using either the names 
 |Power Failure | 54 |
 |Sample Diluted for Analysis | 55 |
 |Unmeasured Key Meteorological Parameter | 56 |
+|Sample Not Analysed | 57 |
 |Operational Maintenance - Unspecified | 60 |
 |Calibration | 61 |
 |Accuracy Check | 62 |
@@ -277,3 +209,89 @@ This information can be used in the configuration files, using either the names 
 |Terrorist Act | 225 |
 |Visibility Distance Unlimited | 230 |
 |Ceiling Height Unlimited | 231 |
+|AERONET: L2 AOD | 240 |
+|AERONET: L2 WITHOUT AOD | 241 |
+
+## qa: Names and Codes
+
+| QA flag name | Code | Default |
+| ---      |  ---  | --- |
+| Missing Measurement | 0 | ✓ |
+| Infinite Value | 1 | ✓ |
+| Negative Measurement | 2 | ✓ |
+| Zero Measurement | 3 |  |
+| Not Maximum Data Quality Level | 4 | |
+| Preliminary Data | 5 | |
+| Invalid Data Provider Flags - GHOST Decreed | 6 | ✓ |
+| Invalid Data Provider Flags - Network Decreed | 7 | |
+| No Valid Data to Average | 8 | ✓ |
+| Methodology Not Mapped | 10 | |
+| Assumed Primary Sampling | 11 | |
+| Assumed Sample Preparation | 12 | |
+| Assumed Measurement Methodology | 13 | |
+| Unknown Primary Sampling Type | 14 | |
+| Unknown Primary Sampling Instrument | 15 | |
+| Unknown Sample Preparation Type | 16 | |
+| Unknown Sample Preparation Technique | 17 | |
+| Unknown Measurement Method | 18 | |
+| Unknown Measuring Instrument | 19 | |
+| Erroneous Primary Sampling | 20 | ✓ |
+| Erroneous Sample Preparation | 21 | ✓ |
+| Erroneous Measurement Methodology | 22 | ✓ |
+| Invalid QA Measurement Methodology | 23 |
+| Corrected Parameter | 24 | |
+| Sample Gas Volume - Network Standard | 30 |
+| Sample Gas Volume - Unknown | 31 |
+| Unit Conversion - Network Standard Sample Gas Volume Assumption | 32 | |
+| Unit Conversion - Educated Guess Sample Gas Volume Assumption | 33 | |
+| Station Position Doubt - DEM Decreed | 40 | |
+| Station Position Doubt - Manually Decreed | 41 | |
+| Data Product | 45 | |
+| Insufficient Data to Calculate Data Product | 46 | |
+| Local Precipitation | 50 | |
+| Local Extreme Weather | 51 | |
+| Local Atmospheric Obscuration | 52 | |
+| Local Contamination | 53 | |
+| Local Exceptional Event | 54 | |
+| Non-Integer Local Timezone (relative to UTC) | 60 | |
+| Timezone Doubt | 61 | |
+| Below Documented Lower Limit of Detection | 70 | |
+| Below Reported Lower Limit of Detection | 71 | |
+| Below Preferential Lower Limit of Detection | 72 | ✓ |
+| Above Documented Upper Limit of Detection | 73 | |
+| Above Reported Upper Limit of Detection | 74 | |
+| Above Preferential Upper Limit of Detection | 75 | ✓ |
+| Insufficient Measurement Resolution - Documented | 80 | |
+| Insufficient Measurement Resolution - Reported | 81 | |
+| Insufficient Measurement Resolution - Preferential | 82 | ✓ |
+| Insufficient Measurement Resolution - Empirical | 83 | ✓ |
+| Persistent Recurring Values - 5/6 | 90 | |
+| Persistent Recurring Values - 9/12 | 91 | |
+| Persistent Recurring Values - 16/24 | 92 | |
+| Monthly Fractional Unique Values <= 1% | 100 | |
+| Monthly Fractional Unique Values <= 5% | 101 | |
+| Monthly Fractional Unique Values <= 10% | 102 | |
+| Monthly Fractional Unique Values <= 30% | 103 | |
+| Monthly Fractional Unique Values <= 50% | 104 | |
+| Monthly Fractional Unique Values <= 70% | 105 | |
+| Monthly Fractional Unique Values <= 90% | 106 | |
+| Data Outlier - Exceeds Scientifically Decreed Lower/Upper Limit | 110 | ✓ |
+| Data Outlier - Monthly Median Exceeds Scientifically Decreed Upper Limit | 111 | ✓ |
+| Data Outlier - Network Decreed | 112 | ✓ |
+| Data Outlier - Manually Decreed | 113 | ✓ |
+| Possible Data Outlier - Monthly Adjusted Boxplot | 114 | |
+| Probable Data Outlier - Monthly Adjusted Boxplot | 115 | ✓ |
+| Monthly Distribution Consistency - Zone 1 | 120 | |
+| Monthly Distribution Consistency - Zone 2 | 121 | |
+| Monthly Distribution Consistency - Zone 3 | 122 | |
+| Monthly Distribution Consistency - Zone 4 | 123 | |
+| Monthly Distribution Consistency - Zone 5 | 124 | |
+| Monthly Distribution Consistency - Zone 6 | 125 | |
+| Monthly Distribution Consistency - Zone 7 | 126 | |
+| Monthly Distribution Consistency - Zone 8 | 127 | |
+| Monthly Distribution Consistency - Zone 9 | 128 | |
+| Monthly Distribution Consistency - Zone 10 | 129 | | |
+| Monthly Distribution Consistency - Unclassified | 130 | |
+| Systematic Inconsistent Monthly Distributions - 2/3 Months >= Zone 6 | 131 | |
+| Systematic Inconsistent Monthly Distributions - 4/6 Months >= Zone 6 | 132 | ✓ |
+| Systematic Inconsistent Monthly Distributions - 8/12 Months >= Zone 6 | 133 | ✓ |

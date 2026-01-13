@@ -1,4 +1,4 @@
-# Download
+# Overview
 
 Providentia's download mode retrieves modeled and observational data from BSC systems and external sources (CAMS, Zenodo, ACTRIS) for local use.
 
@@ -76,7 +76,7 @@ In order to add the download to your scripts or if you just want to make it with
 | `dl_mode` | Selects what to download when both observations and model output are present in the configuration file. | _Which type of data do you want to download? Observational, modelled or both? ([both]/obs/mod)_      | `obs` (download observations), `mod` (download models) or `both` (download both) |
 | `network_type` | Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the `*` wildcard.  | _Do you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n)_   | `ghost` (use all GHOST networks) or `non-ghost` (use all non-GHOST networks)                |
 
-#### Using wildcards
+### Using wildcards
 
 You can use the `*` wildcard in the following fields to automatically select all available values:
 

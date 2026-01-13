@@ -2,7 +2,7 @@
 
 Multispecies filtering refers to the ability to filter the currently selected species by the values of another species, which can be given by the current network or by an external one.
 
-In the reports created to study the dust in the atmosphere it is common practice to filter the optical depth by the Angstrom exponent to know which values are associated with dust. For instance, we can use the values of the Angstrom exponent above 0.6 to filter the AOD.
+In the reports created to study the dust in the atmosphere it is a common practice to filter the optical depth by the Angstrom exponent to know which values are associated with dust. For instance, we can use the values of the Angstrom exponent above 0.6 to filter the AOD.
 
 If we take a look at the timeseries for one station, we can see what this actually means:
 
@@ -25,7 +25,7 @@ would be in the dashboard:
 
 ![multi](uploads/multi.png)
 
-`NOTE: Spatial colocation must be turned on in order to apply multispecies filtering. In the dashboard, it is active by default.`
+`NOTE: Spatial colocation must be activated in order to apply multispecies filtering. It is activated by default.`
 
 It also possible to apply more than one filter at the same time, e.g.:
 

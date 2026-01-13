@@ -1,22 +1,24 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reference &mdash; Providentia 2.4.0 documentation</title>
+  <title>Reference &mdash; Providentia 3.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=4d935f96"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -53,19 +55,18 @@
 <li class="toctree-l2"><a class="reference internal" href="Download-mode.html">Download</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="Library-mode.html">Library</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="Library.html">Library</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Reference</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#providentia.library.Providentia"><code class="docutils literal notranslate"><span class="pre">Providentia</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Reference</a></li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Topics-in-depth.html">Topics in depth</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Evolution.html">Evolution</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training Material</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the Team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
 </ul>
 
@@ -95,359 +96,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-providentia.library">
-<span id="reference"></span><h1>Reference<a class="headerlink" href="#module-providentia.library" title="Link to this heading"></a></h1>
-<p>Class for Providentia library mode</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="providentia.library.Providentia">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">providentia.library.</span></span><span class="sig-name descname"><span class="pre">Providentia</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Class for Providentia Library mode</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.apply_filter">
-<span class="sig-name descname"><span class="pre">apply_filter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.apply_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.apply_filter" title="Link to this definition"></a></dt>
-<dd><p>Method to apply filters to data.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.colourbar">
-<span class="sig-name descname"><span class="pre">colourbar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speci</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.colourbar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.colourbar" title="Link to this definition"></a></dt>
-<dd><p>Wrapper method to make a colourbar.</p>
-<section id="parameters">
-<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>fig<span class="classifier">matplotlib.figure.Figure</span></dt><dd><p>Figure object to which the colourbar will be added.</p>
-</dd>
-<dt>plot_ax<span class="classifier">matplotlib.axes.Axes</span></dt><dd><p>Axis for the main plot.</p>
-</dd>
-<dt>stat<span class="classifier">str</span></dt><dd><p>Statistic to display in the colourbar.</p>
-</dd>
-<dt>speci<span class="classifier">str</span></dt><dd><p>Species for which the colourbar applies.</p>
-</dd>
-<dt>plot_type<span class="classifier">str</span></dt><dd><p>Plot type, used to fetch plot characteristics.</p>
-</dd>
-</dl>
-</section>
-<section id="returns">
-<h2>Returns<a class="headerlink" href="#returns" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>matplotlib.axes.Axes</dt><dd><p>Axis object of the created colourbar.</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.dashboard">
-<span class="sig-name descname"><span class="pre">dashboard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.dashboard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.dashboard" title="Link to this definition"></a></dt>
-<dd><p>Wrapper function for initialising Dashboard class</p>
-<section id="id1">
-<h2>Parameters<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt><a href="#id2"><span class="problematic" id="id3">**</span></a>kwargs<span class="classifier">dict</span></dt><dd><p>Optional command-line arguments that override default configuration values.</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.data">
-<span class="sig-name descname"><span class="pre">data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nc'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.data" title="Link to this definition"></a></dt>
-<dd><p>Wrapper method return data / metadata in specific format.</p>
-<section id="id4">
-<h2>Parameters<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>format<span class="classifier">str, optional</span></dt><dd><p>File format, defaults to ‘nc’.</p>
-</dd>
-</dl>
-</section>
-<section id="id5">
-<h2>Returns<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>data<span class="classifier">numpy.ndarray or xarray.Dataset</span></dt><dd><p>Data returned in the requested format.</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.download">
-<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.download"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.download" title="Link to this definition"></a></dt>
-<dd><p>Wrapper function for initialising Download class</p>
-<section id="id6">
-<h2>Parameters<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt><a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs<span class="classifier">dict</span></dt><dd><p>Optional command-line arguments that override default configuration values.</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.filter_station">
-<span class="sig-name descname"><span class="pre">filter_station</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">station</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.filter_station"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.filter_station" title="Link to this definition"></a></dt>
-<dd><p>Wrapper method to filter specific station/s.</p>
-<section id="id9">
-<h2>Parameters<a class="headerlink" href="#id9" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>station<span class="classifier">str</span></dt><dd><p>Station reference</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.have_valid_config">
-<span class="sig-name descname"><span class="pre">have_valid_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.have_valid_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.have_valid_config" title="Link to this definition"></a></dt>
-<dd><p>Helper method for determining if a valid .conf file has been read</p>
-<section id="id10">
-<h2>Returns<a class="headerlink" href="#id10" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>bool</dt><dd><p>True if a valid configuration file has been read, False otherwise.</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.interpolate">
-<span class="sig-name descname"><span class="pre">interpolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.interpolate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.interpolate" title="Link to this definition"></a></dt>
-<dd><p>Wrapper function for initialising Interpolation class</p>
-<section id="id11">
-<h2>Parameters<a class="headerlink" href="#id11" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt><a href="#id12"><span class="problematic" id="id13">**</span></a>kwargs<span class="classifier">dict</span></dt><dd><p>Optional command-line arguments that override default configuration values.</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.legend">
-<span class="sig-name descname"><span class="pre">legend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_obs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.legend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.legend" title="Link to this definition"></a></dt>
-<dd><p>Wrapper method to make legend.</p>
-<section id="id14">
-<h2>Parameters<a class="headerlink" href="#id14" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>plot_type<span class="classifier">str</span></dt><dd><p>Plot type for which the legend will be generated.</p>
-</dd>
-<dt>data_labels<span class="classifier">list, optional</span></dt><dd><p>Data arrays to plot, by default None.</p>
-</dd>
-<dt>set_obs<span class="classifier">bool, optional</span></dt><dd><p>Indicates if observations appear on the legend, by default True.</p>
-</dd>
-</dl>
-</section>
-<section id="id15">
-<h2>Returns<a class="headerlink" href="#id15" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>dict</dt><dd><p>Legend handles for the plot.</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.load">
-<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.load" title="Link to this definition"></a></dt>
-<dd><p>Wrapper method to load data into memory, apply initial filtering, 
-and mark data as initialized.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.loaded_data">
-<span class="sig-name descname"><span class="pre">loaded_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.loaded_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.loaded_data" title="Link to this definition"></a></dt>
-<dd><p>Helper method for determining if data has been read</p>
-<section id="id16">
-<h2>Returns<a class="headerlink" href="#id16" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>bool</dt><dd><p>True if data has been loaded, False otherwise.</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labela</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_obs_legend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_extent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidedata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multispecies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smooth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.plot" title="Link to this definition"></a></dt>
-<dd><p>Wrapper method to make a Providentia plot.</p>
-<section id="id17">
-<h2>Parameters<a class="headerlink" href="#id17" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>plot<span class="classifier">str</span></dt><dd><p>Plot type.</p>
-</dd>
-<dt>data_labels<span class="classifier">list of str, optional</span></dt><dd><p>Data arrays to plot, defaults to None.</p>
-</dd>
-<dt>labela<span class="classifier">str, optional</span></dt><dd><p>Label of first dataset, defaults to ‘’.</p>
-</dd>
-<dt>labelb<span class="classifier">str, optional</span></dt><dd><p>Label of second dataset (if defined then a bias plot is made), defaults to ‘’.</p>
-</dd>
-<dt>title<span class="classifier">str, optional</span></dt><dd><p>Axes title, defaults to None.</p>
-</dd>
-<dt>xlabel<span class="classifier">str, optional</span></dt><dd><p>Label on x axes, defaults to None.</p>
-</dd>
-<dt>ylabel<span class="classifier">str, optional</span></dt><dd><p>Label on y axes, defaults to None.</p>
-</dd>
-<dt>cb<span class="classifier">bool, optional</span></dt><dd><p>Indicates if colorbar appears on plot, defaults to True.</p>
-</dd>
-<dt>legend<span class="classifier">bool, optional</span></dt><dd><p>Indicates if legend appears on plot, defaults to True.</p>
-</dd>
-<dt>set_obs_legend<span class="classifier">bool, optional</span></dt><dd><p>Indicates if observations appear on legend, defaults to True.</p>
-</dd>
-<dt>map_extent<span class="classifier">list, optional</span></dt><dd><p>Map extent, defaults to None.</p>
-</dd>
-<dt>annotate<span class="classifier">bool or list, optional</span></dt><dd><p>Indicates if there are annotations or a list of statistics to annotate, defaults to False.</p>
-</dd>
-<dt>bias<span class="classifier">bool, optional</span></dt><dd><p>Indicates if data is biased, defaults to False.</p>
-</dd>
-<dt>domain<span class="classifier">bool, optional</span></dt><dd><p>Indicates if domain shows in maps, defaults to False.</p>
-</dd>
-<dt>hidedata<span class="classifier">bool, optional</span></dt><dd><p>Indicates if data points are hidden in plot, defaults to False.</p>
-</dd>
-<dt>logx<span class="classifier">bool, optional</span></dt><dd><p>Indicates if the scale of the x axis is log, defaults to False.</p>
-</dd>
-<dt>logy<span class="classifier">bool, optional</span></dt><dd><p>Indicates if the scale of the y axis is log, defaults to False.</p>
-</dd>
-<dt>multispecies<span class="classifier">bool, optional</span></dt><dd><p>Indicates if plot has multispecies, defaults to False.</p>
-</dd>
-<dt>regression<span class="classifier">bool, optional</span></dt><dd><p>Indicates if scatter plot has regression line/s, defaults to False.</p>
-</dd>
-<dt>smooth<span class="classifier">bool, int, float, optional</span></dt><dd><p>Indicates if timeseries has smooth line/s or the smoothing window, defaults to False.</p>
-</dd>
-<dt>threshold<span class="classifier">bool, optional</span></dt><dd><p>Indicates if plot has threshold line/s, defaults to False.</p>
-</dd>
-<dt>plot_options<span class="classifier">list, optional</span></dt><dd><p>List with plot options, defaults to None.</p>
-</dd>
-<dt>save<span class="classifier">bool or str, optional</span></dt><dd><p>Indicates if you want to save the figure, defaults to False.</p>
-</dd>
-<dt>return_plot<span class="classifier">bool, optional</span></dt><dd><p>Indicates if you want to get the figure object, defaults to False.</p>
-</dd>
-<dt>format<span class="classifier">dict, optional</span></dt><dd><p>Format to overwrite the plot characteristics, defaults to None.</p>
-</dd>
-<dt>width<span class="classifier">int or float, optional</span></dt><dd><p>Figure width, defaults to None.</p>
-</dd>
-<dt>height<span class="classifier">int or float, optional</span></dt><dd><p>Figure height, defaults to None.</p>
-</dd>
-</dl>
-</section>
-<section id="id18">
-<h2>Returns<a class="headerlink" href="#id18" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>matplotlib.figure.Figure or None</dt><dd><p>Returns the figure object if <cite>return_plot</cite> is True. Otherwise, displays the plot or saves it to file.</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.print_config">
-<span class="sig-name descname"><span class="pre">print_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.print_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.print_config" title="Link to this definition"></a></dt>
-<dd><p>Print selected configuration file to the console.</p>
-<section id="id19">
-<h2>Parameters<a class="headerlink" href="#id19" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>conf<span class="classifier">str, optional</span></dt><dd><p>Configuration file name, defaults to None.</p>
-</dd>
-<dt>config<span class="classifier">str, optional</span></dt><dd><p>Alternative Configuration file name, defaults to None.
-If both conf and config are None, the currently loaded configuration file is printed.</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.report">
-<span class="sig-name descname"><span class="pre">report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.report" title="Link to this definition"></a></dt>
-<dd><p>Wrapper function for initialising Report class</p>
-<section id="id20">
-<h2>Parameters<a class="headerlink" href="#id20" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt><a href="#id21"><span class="problematic" id="id22">**</span></a>kwargs<span class="classifier">dict</span></dt><dd><p>Optional command-line arguments that override default configuration values.</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initialise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.reset" title="Link to this definition"></a></dt>
-<dd><p>Wrapper method to reset filter data.</p>
-<section id="id23">
-<h2>Parameters<a class="headerlink" href="#id23" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>initialise<span class="classifier">bool, optional</span></dt><dd><p>Indicates whether to reset data to initial state when class was initialised</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nc'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.save" title="Link to this definition"></a></dt>
-<dd><p>Wrapper method to save current data/ metadata in memory.</p>
-<section id="id24">
-<h2>Parameters<a class="headerlink" href="#id24" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>fname<span class="classifier">str, optional</span></dt><dd><p>File name, defaults to ‘’.</p>
-</dd>
-<dt>format<span class="classifier">str, optional</span></dt><dd><p>File format, defaults to ‘nc’.</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.statistic">
-<span class="sig-name descname"><span class="pre">statistic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labela</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_station</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.statistic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.statistic" title="Link to this definition"></a></dt>
-<dd><p>Wrapper method to calculate statistic/s.</p>
-<section id="id25">
-<h2>Parameters<a class="headerlink" href="#id25" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>stat<span class="classifier">str</span></dt><dd><p>Statistic to calculate.</p>
-</dd>
-<dt>labela<span class="classifier">str, optional</span></dt><dd><p>Label of first dataset, by default ‘’.</p>
-</dd>
-<dt>labelb<span class="classifier">str, optional</span></dt><dd><p>Label of second dataset (if defined then a bias statistic is calculated), by default ‘’.</p>
-</dd>
-<dt>per_station<span class="classifier">bool, optional</span></dt><dd><p>Indicates if the statistic should be calculated per station or integrated for all stations, by default False.</p>
-</dd>
-<dt>period<span class="classifier">str, optional</span></dt><dd><p>Period to group data into for calculation of statistics. Current options: ‘hour’, ‘dayofweek’, ‘month’.</p>
-</dd>
-<dt>chunk<span class="classifier">str, optional</span></dt><dd><p>Chunked temporal window to calculate statistics for. Current options: ‘daily’, ‘monthly’, ‘annual’.</p>
-</dd>
-</dl>
-</section>
-<section id="id26">
-<h2>Returns<a class="headerlink" href="#id26" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>np.ndarray</dt><dd><p>Calculated statistic values.</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="providentia.library.Providentia.variable">
-<span class="sig-name descname"><span class="pre">variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/providentia/library.html#Providentia.variable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#providentia.library.Providentia.variable" title="Link to this definition"></a></dt>
-<dd><p>Wrapper method to return a specific data/metadata variable.</p>
-<section id="id27">
-<h2>Parameters<a class="headerlink" href="#id27" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>var<span class="classifier">str, optional</span></dt><dd><p>Variable name to read, defaults to ‘’.</p>
-</dd>
-</dl>
-</section>
-<section id="id28">
-<h2>Returns<a class="headerlink" href="#id28" title="Link to this heading"></a></h2>
-<dl class="simple">
-<dt>numpy.ndarray</dt><dd><p>Data of the requested variable. Returns None if 
-variable is undefined or not available.</p>
-</dd>
-</dl>
-</section>
-</dd></dl>
-
-</dd></dl>
-
+  <section id="reference">
+<h1>Reference<a class="headerlink" href="#reference" title="Link to this heading"></a></h1>
 </section>
 
 
@@ -461,7 +111,7 @@ variable is undefined or not available.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2019-2025, Dene Bowdalo, Amalia Vradi, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa.</p>
+    <p>&#169; Copyright 2019-2026, Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
