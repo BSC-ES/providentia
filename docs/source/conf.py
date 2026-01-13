@@ -15,6 +15,7 @@ release = '3.0.0'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = ["myst_parser", "sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx.ext.autodoc", "sphinx_rtd_theme","sphinx.ext.mathjax"]
+mathjax_path = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
 templates_path = ['_templates']
 exclude_patterns = []
 myst_heading_anchors = 2
