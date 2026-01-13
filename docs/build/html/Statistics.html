@@ -19,6 +19,8 @@
         <script src="_static/documentation_options.js?v=acc74ff5"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -86,14 +88,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#r-pearson-correlation-coefficient-r2-coefficient-of-determination">r (Pearson Correlation Coefficient), r2 (Coefficient of Determination)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#coe-coefficient-of-efficiency">COE (Coefficient of Efficiency)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#fac2">FAC2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ioa-index-of-agreement">IOA (Index of Agreement)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#upa-unpaired-peak-accuracy">UPA (Unpaired Peak Accuracy)</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#mathrm-fac2">$$
-\mathrm{FAC2}</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#ioa-index-of-agreement">IOA (Index of Agreement)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#upa-unpaired-peak-accuracy">UPA (Unpaired Peak Accuracy)</a></li>
 </ul>
 </li>
 </ul>
@@ -132,7 +130,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="statistics">
+  <section class="tex2jax_ignore mathjax_ignore" id="statistics">
 <h1>Statistics<a class="headerlink" href="#statistics" title="Link to this heading"></a></h1>
 <section id="statistical-modes">
 <h2>Statistical modes<a class="headerlink" href="#statistical-modes" title="Link to this heading"></a></h2>
@@ -198,222 +196,249 @@
 <section id="mean">
 <h3>Mean<a class="headerlink" href="#mean" title="Link to this heading"></a></h3>
 <p>Computes the arithmetic mean of the data.</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 \mu = \frac{1}{n} \sum_{i=1}^{n} x_i
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-\mu &amp;= \text{arithmetic mean} \
-x &amp;= \text{data} \
+\mu &amp;= \text{arithmetic mean} \\
+x &amp;= \text{data} \\
 n &amp;= \text{number of values in the data set}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="median">
 <h3>Median<a class="headerlink" href="#median" title="Link to this heading"></a></h3>
 <p>Computes the median (middle value) of the data.</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \tilde{x} =
 \begin{cases}
-x_{\frac{n+1}{2}}, &amp; \text{if } n \text{ is odd} \
+x_{\frac{n+1}{2}}, &amp; \text{if } n \text{ is odd} \\
 \frac{1}{2}\left(x_{\frac{n}{2}} + x_{\frac{n}{2}+1}\right), &amp; \text{if } n \text{ is even}
 \end{cases}
 ,
-$$</p>
+\end{split}\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-\tilde{x} &amp;= \text{median of the data} \
-x &amp;= \text{data} \
+\tilde{x} &amp;= \text{median of the data} \\
+x &amp;= \text{data} \\
 n &amp;= \text{number of values in the data set}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="min">
 <h3>Min<a class="headerlink" href="#min" title="Link to this heading"></a></h3>
 <p>Computes the minimum value of the data.</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 x_{\min} = \min(x)
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-x_{\min} &amp;= \text{minimum value of the data} \
+x_{\min} &amp;= \text{minimum value of the data} \\
 x &amp;= \text{data}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="max">
 <h3>Max<a class="headerlink" href="#max" title="Link to this heading"></a></h3>
 <p>Computes the maximum value of the data.</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 x_{\max} = \max(x)
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-x_{\max} &amp;= \text{maximum value of the data} \
+x_{\max} &amp;= \text{maximum value of the data} \\
 x &amp;= \text{data}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="p1-p5-p10-p25-p75-p90-p95-p99">
 <h3>p1, p5, p10, p25, p75, p90, p95, p99<a class="headerlink" href="#p1-p5-p10-p25-p75-p90-p95-p99" title="Link to this heading"></a></h3>
 <p>Computes the value corresponding to a given percentile of the data.</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 f_p = \frac{p}{100} \cdot (n - 1) + 1
 ,
-$$</p>
-<p>$$
+\]</div>
+<div class="math notranslate nohighlight">
+\[
 k = \operatorname*{round}(f_p)
 ,
-$$</p>
-<p>$$
+\]</div>
+<div class="math notranslate nohighlight">
+\[
 x_p = x_{k}
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-x_p &amp;= \text{percentile value at percentile } p \
-k &amp;= \text{nearest integer index in the data set} \
-f_p &amp;= \text{fractional index corresponding to percentile } p \
-x &amp;= \text{data} \
-p &amp;= \text{percentile (0–100)} \
+x_p &amp;= \text{percentile value at percentile } p \\
+k &amp;= \text{nearest integer index in the data set} \\
+f_p &amp;= \text{fractional index corresponding to percentile } p \\
+x &amp;= \text{data} \\
+p &amp;= \text{percentile (0--100)} \\
 n &amp;= \text{number of values in the data set}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="stddev-standard-deviation">
 <h3>StdDev (Standard Deviation)<a class="headerlink" href="#stddev-standard-deviation" title="Link to this heading"></a></h3>
 <p>Computes the standard deviation of the data.</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 \sigma = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (x_i - \mu)^2}
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-\sigma &amp;= \text{standard deviation of the data} \
-x &amp;= \text{data} \
-\mu &amp;= \text{mean of the data} \
+\sigma &amp;= \text{standard deviation of the data} \\
+x &amp;= \text{data} \\
+\mu &amp;= \text{mean of the data} \\
 n &amp;= \text{number of values in the data set}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="var-variance">
 <h3>Var (Variance)<a class="headerlink" href="#var-variance" title="Link to this heading"></a></h3>
 <p>Computes the variance of the data.</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 \sigma^2 = \frac{1}{n} \sum_{i=1}^{n} (x_i - \mu)^2
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-\sigma^2 &amp;= \text{variance of the data} \
-x &amp;= \text{data} \
-\mu &amp;= \text{mean of the data} \
+\sigma^2 &amp;= \text{variance of the data} \\
+x &amp;= \text{data} \\
+\mu &amp;= \text{mean of the data} \\
 n &amp;= \text{number of values in the data set}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="ndata">
 <h3>NData<a class="headerlink" href="#ndata" title="Link to this heading"></a></h3>
 <p>Computes the total number of non-missing values in the data.</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 n_{\text{valid}} = \sum_{i=1}^{n} \mathbf{1}(x_i \neq \mathrm{NaN})
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-n_{\text{valid}} &amp;= \text{number of non-missing values} \
-x &amp;= \text{data} \
+n_{\text{valid}} &amp;= \text{number of non-missing values} \\
+x &amp;= \text{data} \\
 n &amp;= \text{number of values in the data set}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="data">
 <h3>Data%<a class="headerlink" href="#data" title="Link to this heading"></a></h3>
 <p>Computes the fraction of non-missing values in the data, expressed as a percentage.</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 n_{\text{valid}} = \sum_{i=1}^{n} \mathbf{1}(x_i \neq \mathrm{NaN})
 ,
-$$</p>
-<p>$$
-n_{\text{valid%}} = \frac{n_{\text{valid}}}{n} \cdot 100
+\]</div>
+<div class="math notranslate nohighlight">
+\[
+n_{\text{valid\%}} = \frac{n_{\text{valid}}}{n} \cdot 100
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-n_{\text{valid%}} &amp;= \text{data availability fraction (percent)} \
-n_{\text{valid}} &amp;= \text{number of non-missing values} \
-x &amp;= \text{data} \
+n_{\text{valid\%}} &amp;= \text{data availability fraction (percent)} \\
+n_{\text{valid}} &amp;= \text{number of non-missing values} \\
+x &amp;= \text{data} \\
 n &amp;= \text{number of values in the data set}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="nstations-number-of-stations">
 <h3>NStations (Number of Stations)<a class="headerlink" href="#nstations-number-of-stations" title="Link to this heading"></a></h3>
 <p>Computes the number of stations with valid (non-missing) data values.</p>
-<p>$$
-N_{\text{stations}} = \sum_{s=1}^{S} \mathbb{I}!\left( \sum x_s &gt; 0 \right)
+<div class="math notranslate nohighlight">
+\[
+N_{\text{stations}} = \sum_{s=1}^{S} \mathbb{I}\!\left( \sum x_s &gt; 0 \right)
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-N_{\text{stations}} &amp;= \text{number of stations with valid data} \
-x &amp;= \text{data} \
-S &amp;= \text{total number of stations} \
+N_{\text{stations}} &amp;= \text{number of stations with valid data} \\
+x &amp;= \text{data} \\
+S &amp;= \text{total number of stations} \\
 \mathbb{I}(\cdot) &amp;= \text{indicator function (1 if condition is true, 0 otherwise)}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="exceedances">
 <h3>Exceedances<a class="headerlink" href="#exceedances" title="Link to this heading"></a></h3>
 <p>Computes the number of data points exceeding a specified threshold.</p>
-<p>$$
-N_{\text{exceed}} = \sum_{i=1}^{n} \mathbf{1}_{{x_i &gt; \text{threshold}}}
+<div class="math notranslate nohighlight">
+\[
+N_{\text{exceed}} = \sum_{i=1}^{n} \mathbf{1}_{\{x_i &gt; \text{threshold}\}}
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-N_{\text{exceed}} &amp;= \text{number of exceedances above the threshold} \
-x &amp;= \text{data} \
-n &amp;= \text{number of values in the data set} \
-\text{threshold} &amp;= \text{value used to define an exceedance} \
-\mathbf{1}_{{x_i &gt; \text{threshold}}} &amp;=
+N_{\text{exceed}} &amp;= \text{number of exceedances above the threshold} \\
+x &amp;= \text{data} \\
+n &amp;= \text{number of values in the data set} \\
+\text{threshold} &amp;= \text{value used to define an exceedance} \\
+\mathbf{1}_{\{x_i &gt; \text{threshold}\}} &amp;= 
 \begin{cases}
-1, &amp; \text{if } x_i &gt; \text{threshold} \
+1, &amp; \text{if } x_i &gt; \text{threshold} \\
 0, &amp; \text{otherwise}
 \end{cases}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="mda8-daily-maximum-8-hour-average">
 <h3>MDA8 (Daily Maximum 8 Hour Average)<a class="headerlink" href="#mda8-daily-maximum-8-hour-average" title="Link to this heading"></a></h3>
 <p>Computes the maximum 8-hour rolling average of the data for each day.</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 \text{MDA8} = \max \Biggl( \frac{1}{8} \sum_{i=t}^{t+7} x_i \Biggr), \quad t = 1, 2, \dots, 17
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-\text{MDA8} &amp;= \text{daily maximum 8-hour average} \
-x &amp;= \text{data (hourly values)} \
-t &amp;= \text{starting hour index of the 8-hour window (1 to 17)} \
+\text{MDA8} &amp;= \text{daily maximum 8-hour average} \\
+x &amp;= \text{data (hourly values)} \\
+t &amp;= \text{starting hour index of the 8-hour window (1 to 17)} \\
 \sum_{i=t}^{t+7} x_i / 8 &amp;= \text{mean over each 8-hour window}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 </section>
 <section id="model-bias-statistics">
@@ -421,150 +446,168 @@ $$</p>
 <section id="mb-mean-bias-nmb-normalised-mean-bias">
 <h3>MB (Mean Bias), NMB (Normalised Mean Bias)<a class="headerlink" href="#mb-mean-bias-nmb-normalised-mean-bias" title="Link to this heading"></a></h3>
 <p>Computes the average difference between model and observations, with a normalised option expressed as a percentage.</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 \text{MB} = \frac{1}{n} \sum_{i=1}^{n} (m_i - o_i)
 ,
-$$</p>
-<p>$$
+\]</div>
+<div class="math notranslate nohighlight">
+\[
 \text{NMB} = \frac{\frac{1}{n} \sum_{i=1}^{n} (m_i - o_i)}{\mu_o} \cdot 100
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-\text{MB} &amp;= \text{mean bias} \
-\text{NMB} &amp;= \text{normalised mean bias (percent)} \
-o &amp;= \text{observational data} \
-m &amp;= \text{model data} \
-\mu_o &amp;= \text{mean of the observational data} \
+\text{MB} &amp;= \text{mean bias} \\
+\text{NMB} &amp;= \text{normalised mean bias (percent)} \\
+o &amp;= \text{observational data} \\
+m &amp;= \text{model data} \\
+\mu_o &amp;= \text{mean of the observational data} \\
 n &amp;= \text{number of paired values}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="mnb-mean-normalised-bias">
 <h3>MNB (Mean Normalised Bias)<a class="headerlink" href="#mnb-mean-normalised-bias" title="Link to this heading"></a></h3>
 <p>Computes the mean bias between model and observations, normalised by the observed value, expressed as a percentage.</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 \text{MNB} = \frac{1}{n} \sum_{i=1}^{n} \frac{m_i - o_i}{o_i} \cdot 100
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-\text{MNB} &amp;= \text{mean normalised bias (percent)} \
-o &amp;= \text{observational data} \
-m &amp;= \text{model data} \
+\text{MNB} &amp;= \text{mean normalised bias (percent)} \\
+o &amp;= \text{observational data} \\
+m &amp;= \text{model data} \\
 n &amp;= \text{number of paired values}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="mfb-mean-fractional-bias">
 <h3>MFB (Mean Fractional Bias)<a class="headerlink" href="#mfb-mean-fractional-bias" title="Link to this heading"></a></h3>
 <p>Computes the average fractional difference between model and observations, expressed as a percentage. Equally weights positive and negative biases and does not treat observations as the absolute “true” value.</p>
 <p>Otherwise known as fractional bias (FB), or modified normalised mean bias (MNMB).</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 \text{MFB} = \frac{1}{n} \sum_{i=1}^{n} \frac{m_i - o_i}{\frac{m_i + o_i}{2}} \cdot 100
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-\text{MFB} &amp;= \text{mean fractional bias (percent)} \
-o &amp;= \text{observational data} \
-m &amp;= \text{model data} \
+\text{MFB} &amp;= \text{mean fractional bias (percent)} \\
+o &amp;= \text{observational data} \\
+m &amp;= \text{model data} \\
 n &amp;= \text{number of paired values}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="me-mean-error-nme-normalised-mean-error">
 <h3>ME (Mean Error), NME (Normalised Mean Error)<a class="headerlink" href="#me-mean-error-nme-normalised-mean-error" title="Link to this heading"></a></h3>
 <p>Computes the average absolute difference between model and observations. Always positive, highlighting biases that may cancel out in MB. Has a normalised option expressed as a percentage (NME).</p>
 <p>ME is otherwise known as mean gross error (MGE), mean absolute error (MAE), or mean absolute gross error (MAGE). NME is otherwise known as normalised mean gross error (NMGE), or normalised mean absolute error (NMAE).</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 \text{ME} = \frac{1}{n} \sum_{i=1}^{n} |m_i - o_i|
 ,
-$$</p>
-<p>$$
+\]</div>
+<div class="math notranslate nohighlight">
+\[
 \text{NME} = \frac{\frac{1}{n} \sum_{i=1}^{n} |m_i - o_i|}{\mu_o} \cdot 100
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-\text{ME} &amp;= \text{mean error} \
-\text{NME} &amp;= \text{normalised mean error (percent)} \
-o &amp;= \text{observational data} \
-m &amp;= \text{model data} \
-\mu_o &amp;= \text{mean of the observational data} \
+\text{ME} &amp;= \text{mean error} \\
+\text{NME} &amp;= \text{normalised mean error (percent)} \\
+o &amp;= \text{observational data} \\
+m &amp;= \text{model data} \\
+\mu_o &amp;= \text{mean of the observational data} \\
 n &amp;= \text{number of paired values}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="mne-mean-normalised-error">
 <h3>MNE (Mean Normalised Error)<a class="headerlink" href="#mne-mean-normalised-error" title="Link to this heading"></a></h3>
 <p>Computes the mean absolute difference between model and observations, normalised by the observed value, expressed as a percentage. Always positive.</p>
 <p>Otherwise known as mean normalised absolute error (MNAE).</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 \text{MNE} = \frac{1}{n} \sum_{i=1}^{n} \frac{|m_i - o_i|}{o_i} \cdot 100
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-\text{MNE} &amp;= \text{mean normalised error (percent)} \
-o &amp;= \text{observational data} \
-m &amp;= \text{model data} \
+\text{MNE} &amp;= \text{mean normalised error (percent)} \\
+o &amp;= \text{observational data} \\
+m &amp;= \text{model data} \\
 n &amp;= \text{number of paired values}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="mfe-mean-fractional-error">
 <h3>MFE (Mean Fractional Error)<a class="headerlink" href="#mfe-mean-fractional-error" title="Link to this heading"></a></h3>
 <p>Computes the mean absolute fractional difference between model and observations, expressed as a percentage. Always positive.</p>
 <p>Otherwise known as fractional error (FE), fractional gross error (FGE), or mean absolute fractional bias (MAFB).</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 \text{MFE} = \frac{1}{n} \sum_{i=1}^{n} \frac{|m_i - o_i|}{\frac{m_i + o_i}{2}} \cdot 100
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-\text{MFE} &amp;= \text{mean fractional error (percent)} \
-o &amp;= \text{observational data} \
-m &amp;= \text{model data} \
+\text{MFE} &amp;= \text{mean fractional error (percent)} \\
+o &amp;= \text{observational data} \\
+m &amp;= \text{model data} \\
 n &amp;= \text{number of paired values}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="rmse-root-mean-squared-error-nrmse-normalised-root-mean-squared-error">
 <h3>RMSE (Root Mean Squared Error), NRMSE (Normalised Root Mean Squared Error)<a class="headerlink" href="#rmse-root-mean-squared-error-nrmse-normalised-root-mean-squared-error" title="Link to this heading"></a></h3>
 <p>Computes the square root of the mean squared difference between model and observations, with a normalised option expressed as a percentage.</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 \text{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (m_i - o_i)^2}
 ,
-$$</p>
-<p>$$
+\]</div>
+<div class="math notranslate nohighlight">
+\[
 \text{NRMSE} = \frac{\sqrt{\frac{1}{n} \sum_{i=1}^{n} (m_i - o_i)^2}}{\mu_o} \cdot 100
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-\text{RMSE} &amp;= \text{root mean squared error} \
-\text{NRMSE} &amp;= \text{normalised root mean squared error (percent)} \
-o &amp;= \text{observational data} \
-m &amp;= \text{model data} \
-\mu_o &amp;= \text{mean of the observational data} \
+\text{RMSE} &amp;= \text{root mean squared error} \\
+\text{NRMSE} &amp;= \text{normalised root mean squared error (percent)} \\
+o &amp;= \text{observational data} \\
+m &amp;= \text{model data} \\
+\mu_o &amp;= \text{mean of the observational data} \\
 n &amp;= \text{number of paired values}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="r-pearson-correlation-coefficient-r2-coefficient-of-determination">
 <h3>r (Pearson Correlation Coefficient), r2 (Coefficient of Determination)<a class="headerlink" href="#r-pearson-correlation-coefficient-r2-coefficient-of-determination" title="Link to this heading"></a></h3>
 <p>Computes the linear relationship between observations and model predictions, and the proportion of variance explained.</p>
 <p>For <strong>r</strong>, ranges between -1 and +1, with 0 implying no correlation, and -1 or +1 implying an exact linear relationship, either positive (observations and model increase together) or negative (as observations increase, model decreases).</p>
 <p>For <strong>r2</strong>, ranges between 0 and +1, with 0 implying no correlation, and +1 implying an exact linear relationship.</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 r = \frac{1}{n} \sum_{i=1}^{n}
 \left(
 \frac{o_i - \mu_o}{\sigma_o}
@@ -573,106 +616,115 @@ r = \frac{1}{n} \sum_{i=1}^{n}
 \frac{m_i - \mu_m}{\sigma_m}
 \right)
 ,
-$$</p>
-<p>$$
+\]</div>
+<div class="math notranslate nohighlight">
+\[
 R^2 = r^2
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-r &amp;= \text{Pearson correlation coefficient} \
-R^2 &amp;= \text{coefficient of determination} \
-o &amp;= \text{observational data} \
-m &amp;= \text{model data} \
-\mu_o &amp;= \text{mean of the observational data} \
-\mu_m &amp;= \text{mean of the model data} \
-\sigma_o &amp;= \text{standard deviation of the observational data} \
-\sigma_m &amp;= \text{standard deviation of the model data} \
+r &amp;= \text{Pearson correlation coefficient} \\
+R^2 &amp;= \text{coefficient of determination} \\
+o &amp;= \text{observational data} \\
+m &amp;= \text{model data} \\
+\mu_o &amp;= \text{mean of the observational data} \\
+\mu_m &amp;= \text{mean of the model data} \\
+\sigma_o &amp;= \text{standard deviation of the observational data} \\
+\sigma_m &amp;= \text{standard deviation of the model data} \\
 n &amp;= \text{number of paired values}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="coe-coefficient-of-efficiency">
 <h3>COE (Coefficient of Efficiency)<a class="headerlink" href="#coe-coefficient-of-efficiency" title="Link to this heading"></a></h3>
 <p>Measures the model’s predictive skill relative to the mean of the observations. Ranges from -∞ to 1, where 1 indicates a perfect match, 0 indicates no improvement over the mean, and negative values indicate worse performance than the mean.</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 \text{COE} = 1 - \frac{\sum |m_i - o_i|}{\sum |o_i - \mu_o|}
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-\text{COE} &amp;= \text{coefficient of efficiency} \
-o &amp;= \text{observational data} \
-m &amp;= \text{model data} \
+\text{COE} &amp;= \text{coefficient of efficiency} \\
+o &amp;= \text{observational data} \\
+m &amp;= \text{model data} \\
 \mu_o &amp;= \text{mean of the observational data}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="fac2">
 <h3>FAC2<a class="headerlink" href="#fac2" title="Link to this heading"></a></h3>
 <p>Computes the percentage of model values that lie within a factor of two of the corresponding observations.</p>
-</section>
-</section>
-</section>
-<section id="mathrm-fac2">
-<h1>$$
-\mathrm{FAC2}<a class="headerlink" href="#mathrm-fac2" title="Link to this heading"></a></h1>
-<p>\frac{100}{n}
+<div class="math notranslate nohighlight">
+\[
+\mathrm{FAC2}
+=
+\frac{100}{n}
 \sum_{i=1}^{n}
 \mathbf{1}
 \left(
 0.5 \le \frac{m_i}{o_i} \le 2.0
 \right)
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-\mathrm{FAC2} &amp;= \text{fraction of values within a factor of two (percent)} \
-o &amp;= \text{observational data} \
-m &amp;= \text{model data} \
-n &amp;= \text{number of paired values} \
+\mathrm{FAC2} &amp;= \text{fraction of values within a factor of two (percent)} \\
+o &amp;= \text{observational data} \\
+m &amp;= \text{model data} \\
+n &amp;= \text{number of paired values} \\
 \mathbf{1}(\cdot) &amp;= \text{indicator function (1 if condition is true, 0 otherwise)}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
+</section>
 <section id="ioa-index-of-agreement">
-<h2>IOA (Index of Agreement)<a class="headerlink" href="#ioa-index-of-agreement" title="Link to this heading"></a></h2>
+<h3>IOA (Index of Agreement)<a class="headerlink" href="#ioa-index-of-agreement" title="Link to this heading"></a></h3>
 <p>Quantifies the degree to which model predictions approach observed values, ranging from -1 to +1. Values near +1 indicate better model performance.</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \text{IOA} =
-\begin{cases}
-1 - \dfrac{\sum |m_i - o_i|}{2 \sum |o_i - \mu_o|}, &amp; \text{if } \sum |m_i - o_i| \le 2 \sum |o_i - \mu_o| \[2mm]
+\begin{cases} 
+1 - \dfrac{\sum |m_i - o_i|}{2 \sum |o_i - \mu_o|}, &amp; \text{if } \sum |m_i - o_i| \le 2 \sum |o_i - \mu_o| \\[2mm]
 \dfrac{2 \sum |o_i - \mu_o|}{\sum |m_i - o_i|} - 1, &amp; \text{otherwise}
 \end{cases}
 ,
-$$</p>
+\end{split}\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-\text{IOA} &amp;= \text{Index of Agreement} \
-o &amp;= \text{observational data} \
-m &amp;= \text{model data} \
+\text{IOA} &amp;= \text{Index of Agreement} \\
+o &amp;= \text{observational data} \\
+m &amp;= \text{model data} \\
 \mu_o &amp;= \text{mean of the observational data}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
 </section>
 <section id="upa-unpaired-peak-accuracy">
-<h2>UPA (Unpaired Peak Accuracy)<a class="headerlink" href="#upa-unpaired-peak-accuracy" title="Link to this heading"></a></h2>
+<h3>UPA (Unpaired Peak Accuracy)<a class="headerlink" href="#upa-unpaired-peak-accuracy" title="Link to this heading"></a></h3>
 <p>Computes the relative difference between the maximum model value and maximum observed value, expressed as a percentage.</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[
 \text{UPA} = \frac{\max(m) - \max(o)}{\max(o)} \cdot 100
 ,
-$$</p>
+\]</div>
 <p>where:</p>
-<p>$$
+<div class="math notranslate nohighlight">
+\[\begin{split}
 \begin{aligned}
-\text{UPA} &amp;= \text{unpaired peak accuracy (percent)} \
-o &amp;= \text{observational data} \
+\text{UPA} &amp;= \text{unpaired peak accuracy (percent)} \\
+o &amp;= \text{observational data} \\
 m &amp;= \text{model data}
 \end{aligned}
-$$</p>
+\end{split}\]</div>
+</section>
 </section>
 </section>
 

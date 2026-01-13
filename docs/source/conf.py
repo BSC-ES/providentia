@@ -19,6 +19,18 @@ templates_path = ['_templates']
 exclude_patterns = []
 myst_heading_anchors = 2
 
+# Treat .md files as MyST Markdown
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
+
+# Enable math parsing in MyST
+myst_enable_extensions = [
+    "dollarmath",   # for $$ ... $$ support
+    "amsmath",      # for \begin{aligned} ... \end{aligned}
+]
+
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 

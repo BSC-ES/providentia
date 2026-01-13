@@ -108,7 +108,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="representativity-filters">
+  <section class="tex2jax_ignore mathjax_ignore" id="representativity-filters">
 <h1>Representativity filters<a class="headerlink" href="#representativity-filters" title="Link to this heading"></a></h1>
 <p>One major limitation associated with observations is the amount of gaps often found between measurements. If these observations are directly compared with model data, this would impose a significant bias upon the comparison. Filtering by representativity filters provides a way to control the temporal robustness of the observations for evaluation.</p>
 <p>Providentia has multiple such filters. By default these are not activated (i.e. set at 0).</p>
@@ -116,7 +116,7 @@
 <h2>Full Period Representativity Filters<a class="headerlink" href="#full-period-representativity-filters" title="Link to this heading"></a></h2>
 </section>
 </section>
-<section id="periodic-representativity-filters">
+<section class="tex2jax_ignore mathjax_ignore" id="periodic-representativity-filters">
 <h1>Periodic Representativity Filters<a class="headerlink" href="#periodic-representativity-filters" title="Link to this heading"></a></h1>
 <p>Providentia has two types of representativity filters. The first is the <code class="docutils literal notranslate"><span class="pre">representativity_percent</span></code> which is used to set the minimum % of representativity needed for a station’s measurements to be valid in a specific time period (i.e. daily, monthly, etc.). If for instance we wanted to check the representativity of hourly station data each day, we would use the <code class="docutils literal notranslate"><span class="pre">daily_representativity_percent</span></code> filter. If we set this at 50%, this would mean any daily periods where there are &lt;50% of observations missing, would be set to be NaN. By default, this is always set at 0%.</p>
 <p>If wanting to apply filters to the entire time period in memory, rather than shorter windows, this can be done using the <code class="docutils literal notranslate"><span class="pre">all_representativity_percent</span></code> and <code class="docutils literal notranslate"><span class="pre">all_max_gap_percent</span></code> filters.
