@@ -1,6 +1,6 @@
 # Configuration fields
 
-Configuration fields determine how Providentia behaves during a run using a configuration file. Below is a full list of all available parameters organized by mode.
+Configuration fields determine how Providentia behaves during a run using a configuration file. Below is a full list of all available parameters organised by mode.
 
 These fields can also be set via command line arguments, for more details, see the [Command line configuration page](Command-line-configuration).
 
@@ -22,9 +22,9 @@ Some of these fields are required depending on the mode. If a parameter required
 | forecast | Optional | Controls how forecast data is handled. Valid options are `dayN` (e.g. `day1`) or `daily`. If this field is not empty in the interpolation, all forecast data will be processed.|
 | filter_species | Optional | Filter read species by other species data within a data range. The first value set is the lower bound to filter by, and the second value the upper bound. Place a sign before each bound value to inform if the filter should be inclusive or exclusive of the bound, e.g. `<` or `<=`. If not wishing to set either the lower or upper bounds, a `:` can be used. Optionally, a fill value can also be given as a third value to impose what the filtered data is set to, by default this is `NaN`. Multiple filters can be  set together separated by a comma (e.g. `network1:species1 (>lowerlim, <=upperlim, fillvalue), network2:species2 (:, <upperlim)`). |
 
-## Analysis and visualization modes (Dashboard, Report, Library)
+## Analysis and visualisation modes (Dashboard, Report, Library)
 
-Apart from the common parameters, these are the fields used by all analysis and visualization modes ([Dashboard](Dashboard), [Report](Report), [Library](Library)). All parameters in this section are optional.
+Apart from the common parameters, these are the fields used by all analysis and visualisation modes ([Dashboard](Dashboard), [Report](Report), [Library](Library)). All parameters in this section are optional.
 
 | Parameter | Description |
 | ------ | ------ |

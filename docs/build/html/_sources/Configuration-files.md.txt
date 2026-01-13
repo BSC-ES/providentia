@@ -61,7 +61,7 @@ In the reports, a report will be created per section. In the dashboard and using
 
 Each section includes multiple fields that dictate the behavior of Providentia.
 
-For a full list of available fields and their descriptions, please refer to the [Configuration Fields Page](Configuration-fields).
+For a full list of available fields and their descriptions, please refer to the [Configuration fields page](Configuration-fields).
 
 ### Subsections
 

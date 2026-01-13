@@ -2,13 +2,13 @@
 
 Command-line configuration allows users to quickly override default or configuration file values at runtime without modifying the configuration files.
 
-All parameters that are allowed in the configuration file can also be passed via the command line. For a full list, please visit the [Configuration Fields Page](Configuration-fields).
+All parameters that are allowed in the configuration file can also be passed via the command line. For a full list, please visit the [Configuration fields page](Configuration-fields).
 
 However, there are some parameters that can only be set through the command line. These are:
 
 | Parameter | Description | Default |
 | ------ | ------ | ------ |
-| report, reports, offline | Start [reports](Report). | |
+| report, reports, offline | Start [reports](Report). | - |
 | download, dl | Start [downloads](Download). | |
 | interpolation, interp, interpolate | Start [interpolations](Interpolation). | |
 | notebook, nb, jupyter | Open a Jupyter notebook to [use Providentia as a library](Launching-notebooks). | |
