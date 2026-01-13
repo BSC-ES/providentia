@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QA flags &mdash; Providentia 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Representativity filters" href="Representativity-filters.html" />
+    <link rel="prev" title="Command line configuration" href="Command-line-configuration.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modes.html">Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Topics-in-depth.html">Topics in depth</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="Other-topics.html">Other topics</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Running-on-HPC.html">Running on HPC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Command-line-configuration.html">Command line configuration</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">QA flags</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#modifying-flags-qa">Modifying flags / qa</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flags-names-and-codes">flags: Names and Codes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qa-names-and-codes">qa: Names and Codes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Representativity-filters.html">Representativity filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Representativity-filters.html#periodic-representativity-filters">Periodic Representativity Filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Saved-file-formats.html">Saved file formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Create-your-own-data-network.html">Create your own data network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Colocation.html">Colocation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Multispecies-filtering.html">Multispecies filtering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Redirecting-output-to-a-file.html">Redirecting output to a file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ADS.html">Account setup in Atmosphere Data Store</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training Material</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the Team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="Other-topics.html">Other topics</a></li>
+      <li class="breadcrumb-item active">QA flags</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Data-flags-and-QA-names-and-codes.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qa-flags">
+<h1>QA flags<a class="headerlink" href="#qa-flags" title="Link to this heading"></a></h1>
+<p>There are two sets of QA flag fields available in Providentia for filtering data when using GHOST or ACTRIS data.</p>
+<ul class="simple">
+<li><p><strong>flags</strong> - flags that relate to standardised data flags taken from the data provider.</p></li>
+<li><p><strong>qa</strong> - flags that relate to GHOST performed quality control checks.</p></li>
+</ul>
+<p>This <a class="reference external" href="https://doi.org/10.5194/essd-16-4417-2024">publication</a> gives a definition for each of the <strong>flags</strong> and <strong>qa</strong> fields.</p>
+<p>For ACTRIS data, there is a special case where only a small subset of <strong>qa</strong> fields are available (those which pertain to a collection of flags).</p>
+<section id="modifying-flags-qa">
+<h2>Modifying flags / qa<a class="headerlink" href="#modifying-flags-qa" title="Link to this heading"></a></h2>
+<p>A selection of <strong>qa</strong> fields are set by default, but no <strong>flags</strong> fields are set by default (as there are two <strong>qa</strong> fields which apply default collections of <strong>flags</strong>). This however can be modified in a number of ways.</p>
+<p>When using the dashboard by clicking on the <strong>FLAGS</strong> or <strong>QA</strong> buttons, pop-up menus will appear giving the option to interactively select fields.</p>
+<p>The fields can also be set in the configuration files, using either the names of the flags you want to apply, or their numerical codes (defined below). The fields can wither be set explicitely, e.g. <code class="docutils literal notranslate"><span class="pre">qa</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">2</span></code>, or a selection of fields to add or subtract from the defaults can be selected, e.g.<code class="docutils literal notranslate"><span class="pre">add_qa</span> <span class="pre">=</span> <span class="pre">3,</span> <span class="pre">10</span></code>, or <code class="docutils literal notranslate"><span class="pre">subtract_qa</span> <span class="pre">=</span> <span class="pre">3,</span> <span class="pre">10</span></code>. The respective fields for the <strong>flags</strong> are: <code class="docutils literal notranslate"><span class="pre">flags</span></code>, <code class="docutils literal notranslate"><span class="pre">add_flags</span></code>, and <code class="docutils literal notranslate"><span class="pre">subtract_flags</span></code>.</p>
+<p>Below you will find two tables that contain the names and numerical values of all <strong>flags</strong> and <strong>qa</strong> fields for the latest version of GHOST, together with the default fields.</p>
+</section>
+<section id="flags-names-and-codes">
+<h2>flags: Names and Codes<a class="headerlink" href="#flags-names-and-codes" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Data flag name</p></th>
+<th class="head"><p>Code</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Valid Data</p></td>
+<td><p>0</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Preliminary Data</p></td>
+<td><p>1</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Missing Data</p></td>
+<td><p>2</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Invalid Data - Unspecified</p></td>
+<td><p>3</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Un-Flagged Data</p></td>
+<td><p>4</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Estimated Data - Unspecified</p></td>
+<td><p>10</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Estimated Data - Measured Negative Value</p></td>
+<td><p>11</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Estimated Data - No Value Detected</p></td>
+<td><p>12</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Estimated Data - Value Below Detection Limit</p></td>
+<td><p>13</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Estimated Data - Value Above Detection Limit</p></td>
+<td><p>14</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Estimated Data - Value Substituted from Secondary Monitor</p></td>
+<td><p>15</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Estimated Data - Multiple Parameters Aggregated</p></td>
+<td><p>16</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Extreme/Irregular Data - Unspecified</p></td>
+<td><p>20</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Data Does Not Meet Internal Network Quality Control Criteria</p></td>
+<td><p>21</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>High Variability of Data</p></td>
+<td><p>22</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Irregular Data Manually Screened and Accepted</p></td>
+<td><p>23</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Irregular Data Manually Screened and Rejected</p></td>
+<td><p>24</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Negative Value</p></td>
+<td><p>25</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>No Value Detected</p></td>
+<td><p>26</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Reconstructed/Recalculated Data</p></td>
+<td><p>27</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Value Close to Detection Limit</p></td>
+<td><p>28</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Value Below Acceptable Range</p></td>
+<td><p>29</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Value Above Acceptable Range</p></td>
+<td><p>30</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Value Below Detection Limit</p></td>
+<td><p>31</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Value Above Detection Limit</p></td>
+<td><p>32</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Measurement Issue - Unspecified</p></td>
+<td><p>40</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Chemical Issue</p></td>
+<td><p>41</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Erroneous Sampling Operation</p></td>
+<td><p>42</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Extreme Internal Instrument Meteorological Conditions</p></td>
+<td><p>43</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Extreme Ambient Laboratory Meteorological Conditions</p></td>
+<td><p>44</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Extreme External Meteorological Conditions</p></td>
+<td><p>45</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Extreme Sample Transport Conditions</p></td>
+<td><p>46</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Invalid Flow Rate</p></td>
+<td><p>47</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Human Error</p></td>
+<td><p>48</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Matrix Effect</p></td>
+<td><p>49</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Mechanical Issue/Non-Operational Equipment</p></td>
+<td><p>50</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>No Technician</p></td>
+<td><p>51</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Operational Maintenance Check Issue</p></td>
+<td><p>52</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Physical Issue With Filter</p></td>
+<td><p>53</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Power Failure</p></td>
+<td><p>54</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Sample Diluted for Analysis</p></td>
+<td><p>55</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Unmeasured Key Meteorological Parameter</p></td>
+<td><p>56</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Sample Not Analysed</p></td>
+<td><p>57</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Operational Maintenance - Unspecified</p></td>
+<td><p>60</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Calibration</p></td>
+<td><p>61</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Accuracy Check</p></td>
+<td><p>62</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Blank Check</p></td>
+<td><p>63</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Detection Limits Check</p></td>
+<td><p>64</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Precision Check</p></td>
+<td><p>65</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Retention Time Check</p></td>
+<td><p>66</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Span Check</p></td>
+<td><p>67</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Zero Check</p></td>
+<td><p>68</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Instrumental Inspection</p></td>
+<td><p>69</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Instrumental Repair</p></td>
+<td><p>70</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Quality Control Audit</p></td>
+<td><p>71</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Data Formatting/Processing Issue</p></td>
+<td><p>80</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Corrected Data Formatting/Processing Issue</p></td>
+<td><p>81</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Aggregation/Representation Issue - Unspecified</p></td>
+<td><p>90</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Data Window Completeness &lt; 90%</p></td>
+<td><p>91</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Data Window Completeness &lt; 75%</p></td>
+<td><p>92</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Data Window Completeness &lt; 66%</p></td>
+<td><p>93</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Data Window Completeness &lt; 50%</p></td>
+<td><p>94</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Data Window Completeness &lt; 25%</p></td>
+<td><p>95</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>&gt;= 75% of Measurements in Window Below Detection Limit</p></td>
+<td><p>96</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>&gt;= 50% of Measurements in Window Below Detection Limit</p></td>
+<td><p>97</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>No Significant Weather</p></td>
+<td><p>100</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Precipitation - Unspecified Intensity</p></td>
+<td><p>101</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Precipitation - Light</p></td>
+<td><p>102</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Precipitation - Moderate</p></td>
+<td><p>103</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Precipitation - Heavy</p></td>
+<td><p>104</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Drizzle - Unspecified Intensity</p></td>
+<td><p>105</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Drizzle - Light</p></td>
+<td><p>106</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Drizzle - Moderate</p></td>
+<td><p>107</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Drizzle - Heavy</p></td>
+<td><p>108</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Freezing Drizzle - Unspecified Intensity</p></td>
+<td><p>109</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Freezing Drizzle - Light</p></td>
+<td><p>110</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Freezing Drizzle - Moderate</p></td>
+<td><p>111</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Freezing Drizzle - Heavy</p></td>
+<td><p>112</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Rain - Unspecified Intensity</p></td>
+<td><p>113</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Rain - Light</p></td>
+<td><p>114</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Rain - Moderate</p></td>
+<td><p>115</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Rain - Heavy</p></td>
+<td><p>116</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Rain Shower/s - Unspecified Intensity</p></td>
+<td><p>117</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Rain Shower/s - Light</p></td>
+<td><p>118</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Rain Shower/s - Moderate</p></td>
+<td><p>119</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Rain Shower/s - Heavy</p></td>
+<td><p>120</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Freezing Rain - Unspecified Intensity</p></td>
+<td><p>121</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Freezing Rain - Light</p></td>
+<td><p>122</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Freezing Rain - Moderate</p></td>
+<td><p>123</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Freezing Rain - Heavy</p></td>
+<td><p>124</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Freezing Rain Shower/s - Unspecified Intensity</p></td>
+<td><p>125</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Freezing Rain Shower/s - Light</p></td>
+<td><p>126</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Freezing Rain Shower/s - Moderate</p></td>
+<td><p>127</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Freezing Rain Shower/s - Heavy</p></td>
+<td><p>128</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Snow - Unspecified Intensity</p></td>
+<td><p>129</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Snow - Light</p></td>
+<td><p>130</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Snow - Moderate</p></td>
+<td><p>131</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Snow - Heavy</p></td>
+<td><p>132</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Snow Shower/s - Unspecified Intensity</p></td>
+<td><p>133</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Snow Shower/s - Light</p></td>
+<td><p>134</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Snow Shower/s - Moderate</p></td>
+<td><p>135</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Snow Shower/s - Heavy</p></td>
+<td><p>136</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Hail - Unspecified Intensity</p></td>
+<td><p>137</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Hail - Light</p></td>
+<td><p>138</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Hail - Moderate</p></td>
+<td><p>139</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Hail - Heavy</p></td>
+<td><p>140</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Hail Shower/s - Unspecified Intensity</p></td>
+<td><p>141</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Hail Shower/s - Light</p></td>
+<td><p>142</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Hail Shower/s - Moderate</p></td>
+<td><p>143</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Hail Shower/s - Heavy</p></td>
+<td><p>144</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Ice Pellets - Unspecified Intensity</p></td>
+<td><p>145</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Ice Pellets - Light</p></td>
+<td><p>146</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Ice Pellets - Moderate</p></td>
+<td><p>147</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Ice Pellets - Heavy</p></td>
+<td><p>148</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Ice Pellets Shower/s - Unspecified Intensity</p></td>
+<td><p>149</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Ice Pellets Shower/s - Light</p></td>
+<td><p>150</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Ice Pellets Shower/s - Moderate</p></td>
+<td><p>151</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Ice Pellets Shower/s - Heavy</p></td>
+<td><p>152</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Snow Pellets - Unspecified Intensity</p></td>
+<td><p>153</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Snow Pellets - Light</p></td>
+<td><p>154</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Snow Pellets - Moderate</p></td>
+<td><p>155</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Snow Pellets - Heavy</p></td>
+<td><p>156</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Snow Pellets Shower/s - Unspecified Intensity</p></td>
+<td><p>157</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Snow Pellets Shower/s - Light</p></td>
+<td><p>158</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Snow Pellets Shower/s - Moderate</p></td>
+<td><p>159</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Snow Pellets Shower/s - Heavy</p></td>
+<td><p>160</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Snow Grains - Unspecified Intensity</p></td>
+<td><p>161</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Snow Grains - Light</p></td>
+<td><p>162</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Snow Grains - Moderate</p></td>
+<td><p>163</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Snow Grains - Heavy</p></td>
+<td><p>164</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Diamond Dust - Unspecified Intensity</p></td>
+<td><p>165</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Diamond Dust - Light</p></td>
+<td><p>166</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Diamond Dust - Moderate</p></td>
+<td><p>167</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Diamond Dust - Heavy</p></td>
+<td><p>168</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Glaze</p></td>
+<td><p>169</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Rime</p></td>
+<td><p>170</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Thunderstorm</p></td>
+<td><p>171</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Funnel Cloud/s</p></td>
+<td><p>172</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Squalls</p></td>
+<td><p>173</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Tropical Cyclone (Cyclone/Hurricane/Typhoon)</p></td>
+<td><p>174</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Duststorm</p></td>
+<td><p>175</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Sandstorm</p></td>
+<td><p>176</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Dust/Sand Whirls</p></td>
+<td><p>177</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>High Winds</p></td>
+<td><p>178</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>No Atmospheric Obscuration</p></td>
+<td><p>180</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Atmospheric Obscuration - Unknown</p></td>
+<td><p>181</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Dust</p></td>
+<td><p>182</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Blowing Dust</p></td>
+<td><p>183</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Drifting Dust</p></td>
+<td><p>184</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Sand</p></td>
+<td><p>185</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Blowing Sand</p></td>
+<td><p>186</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Drifting Sand</p></td>
+<td><p>187</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Blowing Snow</p></td>
+<td><p>188</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Drifting Snow</p></td>
+<td><p>189</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Fog</p></td>
+<td><p>190</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Freezing Fog</p></td>
+<td><p>191</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Ground Fog</p></td>
+<td><p>192</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Ice Fog</p></td>
+<td><p>193</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Haze</p></td>
+<td><p>194</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Mist</p></td>
+<td><p>195</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Sea Spray</p></td>
+<td><p>196</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Smoke</p></td>
+<td><p>197</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Volcanic Ash</p></td>
+<td><p>198</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>No Local Contamination</p></td>
+<td><p>199</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Local Contamination - Unspecified</p></td>
+<td><p>200</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Agricultural Contamination</p></td>
+<td><p>201</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Bird-Dropping Contamination</p></td>
+<td><p>202</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Construction Contamination</p></td>
+<td><p>203</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Industrial Contamination</p></td>
+<td><p>204</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Insect Contamination</p></td>
+<td><p>205</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Internal Laboratory/Instrument Contamination</p></td>
+<td><p>206</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Pollen/Leaf Contamination</p></td>
+<td><p>207</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Traffic Contamination</p></td>
+<td><p>208</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Exceptional Event - Unspecified</p></td>
+<td><p>210</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Seismic Activity</p></td>
+<td><p>211</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Stratospheric Ozone Intrusion</p></td>
+<td><p>212</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Volcanic Eruptions</p></td>
+<td><p>213</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Wildfire</p></td>
+<td><p>214</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Chemical Spill/Industrial Accident</p></td>
+<td><p>220</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Cleanup After a Major Disaster</p></td>
+<td><p>221</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Demolition</p></td>
+<td><p>222</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Fireworks</p></td>
+<td><p>223</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Infrequent Large Gathering</p></td>
+<td><p>224</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Terrorist Act</p></td>
+<td><p>225</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Visibility Distance Unlimited</p></td>
+<td><p>230</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Ceiling Height Unlimited</p></td>
+<td><p>231</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>AERONET: L2 AOD</p></td>
+<td><p>240</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>AERONET: L2 WITHOUT AOD</p></td>
+<td><p>241</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="qa-names-and-codes">
+<h2>qa: Names and Codes<a class="headerlink" href="#qa-names-and-codes" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>QA flag name</p></th>
+<th class="head"><p>Code</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Missing Measurement</p></td>
+<td><p>0</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>Infinite Value</p></td>
+<td><p>1</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p>Negative Measurement</p></td>
+<td><p>2</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>Zero Measurement</p></td>
+<td><p>3</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Not Maximum Data Quality Level</p></td>
+<td><p>4</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Preliminary Data</p></td>
+<td><p>5</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Invalid Data Provider Flags - GHOST Decreed</p></td>
+<td><p>6</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>Invalid Data Provider Flags - Network Decreed</p></td>
+<td><p>7</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>No Valid Data to Average</p></td>
+<td><p>8</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>Methodology Not Mapped</p></td>
+<td><p>10</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Assumed Primary Sampling</p></td>
+<td><p>11</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Assumed Sample Preparation</p></td>
+<td><p>12</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Assumed Measurement Methodology</p></td>
+<td><p>13</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Unknown Primary Sampling Type</p></td>
+<td><p>14</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Unknown Primary Sampling Instrument</p></td>
+<td><p>15</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Unknown Sample Preparation Type</p></td>
+<td><p>16</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Unknown Sample Preparation Technique</p></td>
+<td><p>17</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Unknown Measurement Method</p></td>
+<td><p>18</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Unknown Measuring Instrument</p></td>
+<td><p>19</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Erroneous Primary Sampling</p></td>
+<td><p>20</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p>Erroneous Sample Preparation</p></td>
+<td><p>21</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>Erroneous Measurement Methodology</p></td>
+<td><p>22</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p>Invalid QA Measurement Methodology</p></td>
+<td><p>23</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Corrected Parameter</p></td>
+<td><p>24</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Sample Gas Volume - Network Standard</p></td>
+<td><p>30</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Sample Gas Volume - Unknown</p></td>
+<td><p>31</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Unit Conversion - Network Standard Sample Gas Volume Assumption</p></td>
+<td><p>32</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Unit Conversion - Educated Guess Sample Gas Volume Assumption</p></td>
+<td><p>33</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Station Position Doubt - DEM Decreed</p></td>
+<td><p>40</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Station Position Doubt - Manually Decreed</p></td>
+<td><p>41</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Data Product</p></td>
+<td><p>45</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Insufficient Data to Calculate Data Product</p></td>
+<td><p>46</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Local Precipitation</p></td>
+<td><p>50</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Local Extreme Weather</p></td>
+<td><p>51</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Local Atmospheric Obscuration</p></td>
+<td><p>52</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Local Contamination</p></td>
+<td><p>53</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Local Exceptional Event</p></td>
+<td><p>54</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Non-Integer Local Timezone (relative to UTC)</p></td>
+<td><p>60</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Timezone Doubt</p></td>
+<td><p>61</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Below Documented Lower Limit of Detection</p></td>
+<td><p>70</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Below Reported Lower Limit of Detection</p></td>
+<td><p>71</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Below Preferential Lower Limit of Detection</p></td>
+<td><p>72</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p>Above Documented Upper Limit of Detection</p></td>
+<td><p>73</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Above Reported Upper Limit of Detection</p></td>
+<td><p>74</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Above Preferential Upper Limit of Detection</p></td>
+<td><p>75</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>Insufficient Measurement Resolution - Documented</p></td>
+<td><p>80</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Insufficient Measurement Resolution - Reported</p></td>
+<td><p>81</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Insufficient Measurement Resolution - Preferential</p></td>
+<td><p>82</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p>Insufficient Measurement Resolution - Empirical</p></td>
+<td><p>83</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>Persistent Recurring Values - 5/6</p></td>
+<td><p>90</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Persistent Recurring Values - 9/12</p></td>
+<td><p>91</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Persistent Recurring Values - 16/24</p></td>
+<td><p>92</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Monthly Fractional Unique Values &lt;= 1%</p></td>
+<td><p>100</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Monthly Fractional Unique Values &lt;= 5%</p></td>
+<td><p>101</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Monthly Fractional Unique Values &lt;= 10%</p></td>
+<td><p>102</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Monthly Fractional Unique Values &lt;= 30%</p></td>
+<td><p>103</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Monthly Fractional Unique Values &lt;= 50%</p></td>
+<td><p>104</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Monthly Fractional Unique Values &lt;= 70%</p></td>
+<td><p>105</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Monthly Fractional Unique Values &lt;= 90%</p></td>
+<td><p>106</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Data Outlier - Exceeds Scientifically Decreed Lower/Upper Limit</p></td>
+<td><p>110</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p>Data Outlier - Monthly Median Exceeds Scientifically Decreed Upper Limit</p></td>
+<td><p>111</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>Data Outlier - Network Decreed</p></td>
+<td><p>112</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p>Data Outlier - Manually Decreed</p></td>
+<td><p>113</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>Possible Data Outlier - Monthly Adjusted Boxplot</p></td>
+<td><p>114</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Probable Data Outlier - Monthly Adjusted Boxplot</p></td>
+<td><p>115</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>Monthly Distribution Consistency - Zone 1</p></td>
+<td><p>120</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Monthly Distribution Consistency - Zone 2</p></td>
+<td><p>121</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Monthly Distribution Consistency - Zone 3</p></td>
+<td><p>122</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Monthly Distribution Consistency - Zone 4</p></td>
+<td><p>123</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Monthly Distribution Consistency - Zone 5</p></td>
+<td><p>124</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Monthly Distribution Consistency - Zone 6</p></td>
+<td><p>125</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Monthly Distribution Consistency - Zone 7</p></td>
+<td><p>126</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Monthly Distribution Consistency - Zone 8</p></td>
+<td><p>127</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Monthly Distribution Consistency - Zone 9</p></td>
+<td><p>128</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Monthly Distribution Consistency - Zone 10</p></td>
+<td><p>129</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Monthly Distribution Consistency - Unclassified</p></td>
+<td><p>130</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>Systematic Inconsistent Monthly Distributions - 2/3 Months &gt;= Zone 6</p></td>
+<td><p>131</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>Systematic Inconsistent Monthly Distributions - 4/6 Months &gt;= Zone 6</p></td>
+<td><p>132</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p>Systematic Inconsistent Monthly Distributions - 8/12 Months &gt;= Zone 6</p></td>
+<td><p>133</p></td>
+<td><p>✓</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Command-line-configuration.html" class="btn btn-neutral float-left" title="Command line configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Representativity-filters.html" class="btn btn-neutral float-right" title="Representativity filters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2026, Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
