@@ -2,57 +2,42 @@
 
 ![providentia](uploads/providentia.png)
 
+## Overview
 
-## Description
+Providentia is an evaluation software package developed at the Barcelona Supercomputing Center for the in-depth analysis of in-situ surface observations and colocated model output, tailored specifically for the atmospheric science community.
 
-Providentia can be used in a variety of ways:
+Providentia has a variety of use modes:
 
 * [Interpolation](Interpolation), to interpolate the models to the observations networks of your interest. 
 * [Dashboard](Dashboard), designed to allow on-the-fly analysis of BSC model output.
 * [Report](Report), designed to obtain complete reports and carry out in-depth analysis of BSC model output.
-* {ref}`Download <default-download>`, to download data from esarchive and Zenodo into your local directories.
-* [Library](Library), allowing use of the Providentia backend functions, and use within your own scripts.
+* [Download](Download), to download data from esarchive and Zenodo into your local directories.
+* [Library](Library), allowing use of the Providentia backend functions, and use within your own scripts. It is also possible to run Providentia in [Jupyter Notebooks](Launching-notebooks). 
 
-### Training sessions
+## Getting Started
 
-Below you will find the recorded videos of the last training sessions, as well as the presentations:
+If you are just starting with Providentia please see our handy starting guide: [Getting Started](Getting-started)
 
-* 18/02/2025: [Presentation](uploads/presentations/20250218_Providentia_Training_Session.pdf) and [video](https://www.youtube.com/watch?v=5PUX9KfaI0w)
+If you wish to see the videos and presentations of all previous Providentia training sessions please see here: [Training](Training-material)
 
-* 16/10/2023: [Presentation](uploads/presentations/20231016_Providentia_Training_Session.pdf) and [video](https://youtu.be/G-L2VohxSz8?si=8qrMDHvhmP6i-QTX)
+If you wish to see all scientific and technical presentations releated to Providentia please see here: [Presentations](Presentations)
 
-* 29/09/2022: [Presentation](uploads/presentations/20220929_Providentia_Training_Session.pdf) and [video](https://youtu.be/jijPmbvCYgo)
+We also have a number of tutorial notebooks that outline Providentia's features. Please see the `tutorials` subdirectory to find these.
 
-* 22/09/2022: [Presentation](uploads/presentations/20220922_Providentia_Training_Session.pdf) and [video](https://youtu.be/Mz6KFAvEtKA)
+The full contents of the Providentia readthedocs documentation can be found here: [Table of Contents](https://providentia.readthedocs.io/en/latest/)
 
-* 24/03/2021: [Presentation](uploads/presentations/20220422_Providentia_Training_Session.pdf) and [video](https://www.youtube.com/watch?v=Pu_kXjHM1nw)
+## Bugs / New Features
 
-### User meetings
+If you encounter a bug while using Providentia, and would like to report it to the Providentia development team please follow these steps:
 
-Below you will find the presentation of the last user meetings:
+1. Go to the Providentia GitHub repo issues page: https://github.com/BSC-ES/providentia/issues
+2. Click on the 'New Issue' button.
+3. Select 'Bug report' and fill in the template for fully detailing the bug. 
 
-* 28/08/2024: [Presentation](uploads/presentations/20240828_Providentia_User_Meeting.pdf) and [video](https://www.youtube.com/watch?v=TCgAFlwRYZk)
+If you wish to request a new feature follow the same steps, except for step 3 select 'Blank Issue', and fully detail the new feature you would like. 
 
-* 07/02/2024: [Presentation](uploads/presentations/20240207_Providentia_User_Meeting.pdf) and [video](https://www.youtube.com/watch?v=sQrILt4udOU)
+## Developers
 
-* 03/08/2023: [Presentation](uploads/presentations/20230803_Providentia_User_Meeting.pdf) and [video](https://www.youtube.com/watch?v=2cJbp772pu0)
+Providentia is developed at the [Barcelona Supercomputing Centre](https://www.bsc.es/) (BSC-CNS).
 
-* 23/03/2023: [Presentation](uploads/presentations/20230323_Providentia_User_Meeting.pdf)
-
-### External Sessions
-
-Below you will find relevant external webinars or presentations.
-
-* 05/06/2025: [Presentation](uploads/presentations/20250605_Providentia_ACTRIS_DC_Workshop.pdf)
-
-## Contact persons
-
-Code developed by [Barcelona Supercomputing Centre](https://www.bsc.es/) (BSC-CNS).
-
-Developers:
-
-* [Dene Bowdalo](https://www.bsc.es/bowdalo-dene) (dene.bowdalo@bsc.es) - Active
-* [Alba Vilanova](https://www.bsc.es/vilanova-cortezon-alba) (alba.vilanova@bsc.es) - Active
-* [Paula Serrano](https://www.bsc.es/serrano-sierra-paula)(paula.serrano@bsc.es) - Active
-* Amalia Vradi (amalia.vradi@bsc.es)
-* [Francesco Benincasa](https://www.bsc.es/benincasa-francesco) (francesco.benincasa@bsc.es)
+See here for more information on the developers: [Meet the team](Meet-the-team)
