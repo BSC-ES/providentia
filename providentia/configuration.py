@@ -1270,8 +1270,15 @@ class ProvConfiguration:
                         fields.keys() - set(self.read_instance.fields_per_section[section_field_name])
                 else:
                     self.read_instance.fields_per_section[field_name] = set(fields.keys())
+
+            # get aliases list
+            aliases = []
+            for alias_list in self.var_defaults["aliases"].values():
+                aliases += alias_list
+            
+            # remove init.yaml values from invalid fields
             self.read_instance.non_default_fields_per_section = {
-                field_name:fields-set(self.var_defaults) 
+                field_name:fields- set(self.var_defaults) - set(aliases)
                 for field_name, fields in self.read_instance.fields_per_section.items()}
         
         # assign defaults

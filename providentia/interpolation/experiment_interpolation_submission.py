@@ -126,7 +126,7 @@ class SubmitInterpolation(object):
                 print(f"{arg}: {getattr(self, arg)}")
             else:
                 print(f"{arg}:")
-                for mod, alias in getattr(self, arg).items():
+                for mod, alias in getattr(self, "experiments").items():
                     if self.alias_flag:
                         print(f" - {mod} ({alias})")
                     else:
