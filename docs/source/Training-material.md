@@ -1,4 +1,4 @@
-# Training Material
+# Training material
 
 On this page you will find up to date training material for Providentia. Training material is divided into two categories.
 

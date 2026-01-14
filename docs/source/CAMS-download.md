@@ -4,7 +4,7 @@ Providentia's download mode supports downloading model output data provided by *
 
 [https://ads.atmosphere.copernicus.eu/datasets](https://ads.atmosphere.copernicus.eu/datasets)
 
-An ECMWF account is required to download the files. For a tutorial on how to create and set up your account, see the [Account Setup and Access Configuration](#ADS) section.
+An ECMWF account is required to download the files. For a tutorial on how to create and set up your account, see the [Account setup in Atmosphere Data Store](#ADS) section.
 
 ## Available CAMS datasets
 

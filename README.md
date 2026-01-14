@@ -15,11 +15,11 @@ Use the following command to get a copy of the repository:
 git clone https://github.com/BSC-ES/providentia.git
 ```
 
-# Getting Started
+# Getting started
 
 For getting started using Providentia, please follow the guide on [Read the docs](https://providentia.readthedocs.io/en/latest/).
 
-# Bugs / New Features
+# Bugs / New features
 
 If you encounter a bug or would like to request a new feature in Providentia, you an open a new issue here: https://github.com/BSC-ES/providentia/issues 
 

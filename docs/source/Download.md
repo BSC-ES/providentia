@@ -2,7 +2,7 @@
 
 Providentia's download mode retrieves modeled and observational data from BSC systems and external sources (CAMS, Zenodo, ACTRIS) for local use.
 
-## Get started
+## Getting started
 
 To start downloading data, simply add `--download` or `--dl` to your command:
 

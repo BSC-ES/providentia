@@ -2,7 +2,7 @@
 
 Command-line configuration allows users to quickly override default or configuration file values at runtime without modifying the configuration files.
 
-All parameters that are allowed in the configuration file can also be passed via the command line. For a full list, please visit the [Configuration Fields Page](Configuration-fields).
+All parameters that are allowed in the configuration file can also be passed via the command line. For a full list, please visit the [Configuration fields page](Configuration-fields).
 
 However, there are some parameters that can only be set through the command line. These are:
 
@@ -21,7 +21,7 @@ However, there are some parameters that can only be set through the command line
 | mem | Memory. | 20Gb |
 | constraint | Memory constraint. | medmem (to use nodes with 64GB of memory) |
 | version, V | Print version of Providentia. | |
-| logfile | Redirects output to a file. More info in the [wiki page](Redirecting-output-to-a-file). | |
+| logfile | Redirects output to a file. More info in the [Redirecting output to a file page](Redirecting-output-to-a-file). | |
 | conf, config | Configuration file path. | |
 | config_dir | Path to all configuration files. | |
 | section | Section within configuration file. | |

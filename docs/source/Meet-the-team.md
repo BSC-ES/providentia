@@ -1,6 +1,6 @@
-# Meet the Team
+# Meet the team
 
-## Current Team
+## Current team
 
 ### Dene Bowdalo
 ![Dene Bowdalo](uploads/dene_bowdalo.jpeg)
@@ -31,7 +31,7 @@ Paula is a member of the Data and Diagnostics Team inside Computational Earth Sc
 
 [LinkedIn](https://linkedin.com/in/paula-serrano-sierra/) | [Email](mailto:paula.serrano@bsc.es)
 
-## Former Team Members
+## Former team members
 
 ### Francesco Benincasa
 

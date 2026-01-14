@@ -14,7 +14,7 @@ Providentia has a variety of use modes:
 * [Download](Download), to download data from esarchive and Zenodo into your local directories.
 * [Library](Library), allowing use of the Providentia backend functions, and use within your own scripts. It is also possible to run Providentia in [Jupyter Notebooks](Launching-notebooks). 
 
-## Getting Started
+## Getting started
 
 If you are just starting with Providentia please see our handy starting guide: [Getting Started](Getting-started)
 
@@ -26,7 +26,7 @@ We also have a number of tutorial notebooks that outline Providentia's features.
 
 The full contents of the Providentia readthedocs documentation can be found here: [Table of Contents](https://providentia.readthedocs.io/en/latest/)
 
-## Bugs / New Features
+## Bugs / New features
 
 If you encounter a bug while using Providentia, and would like to report it to the Providentia development team please follow these steps:
 

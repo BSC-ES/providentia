@@ -61,7 +61,7 @@ In the reports, a report will be created per section. In the dashboard and using
 
 Each section includes multiple fields that dictate the behavior of Providentia.
 
-For a full list of available fields and their descriptions, please refer to the [Configuration Fields Page](Configuration-fields).
+For a full list of available fields and their descriptions, please refer to the [Configuration fields page](Configuration-fields).
 
 ### Subsections
 
@@ -93,7 +93,7 @@ If you do not know which names can be used to filter the metadata, you should us
 
 In the basic overview, we include the minimum necessary fields that every configuration files should have, and how they should be written. Here, we will have a look to the fields that are included under the other options (QA, filters, META, etc.)
 
-All the QA and flags have an associated name and number to them. Their number can be found in the wiki page [Data flags and QA names and codes](Data-flags-and-QA-names-and-codes).
+All the QA and flags have an associated name and number to them. Their number can be found in the wiki page [Data flags and QA](Data-flags-and-QA).
 
 #### QA
 
@@ -123,7 +123,7 @@ If you do not want to apply any QA filter, then you should define the field and 
 qa = 
 ```
 
-All the options to set the QA flags can be found in [Data flags and QA names and codes](Data-flags-and-QA-names-and-codes).
+All the options to set the QA flags can be found in [Data flags and QA](Data-flags-and-QA).
 
 #### Flags
 
@@ -142,7 +142,7 @@ or:
 flags = 1
 ```
 
-All the options to set the data flags can be found in [Data flags and QA names and codes](Data-flags-and-QA-names-and-codes).
+All the options to set the data flags can be found in [Data flags and QA](Data-flags-and-QA).
 
 #### Representativity bounds
 

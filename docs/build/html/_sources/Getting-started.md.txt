@@ -123,6 +123,10 @@ As observed, datasets must be saved per month, independently of their temporal r
 
 If you are running Providentia on HPC, you will already see that there are options to choose from in the menu on the top. The data is being read from the paths specified in `settings/data_paths.yaml`.
 
+## Statistics
+
+Before explaining how to use each mode, it is important to note that statistics are computed in numerous ways, depending on the user’s needs. A thorough explanation can be found in the [Statistics](Statistics) section.
+
 ## Launching the dashboard
 
 As explained, you can launch the dashboard by simply running:
@@ -137,7 +141,9 @@ If you want to define which data is loaded in advance, you can use a configurati
 ./bin/providentia --config='/path/to/file/example.conf'
 ```
 
-If you have multiple sections or subsections, a pop-up window will immediately appear where you can choose the section or subsection of interest. After that, the graphical window of Providentia will appear and you can begin using the tool. 
+If you have multiple sections or subsections, a pop-up window will immediately appear where you can choose the section or subsection of interest. After that, the graphical window of Providentia will appear and you can begin using the tool.
+
+An initial set of plots will be displayed, including the timeseries, distribution, statistics summary, and periodic plots. To take full advantage of Providentia, you can explore the wide range of plotting options described in [Plot types and options](Plot-types-and-options). We also recommend reading the [Plot customisation](Plot-customisation) section.
 
 More details can be found in the [dashboard section](Dashboard).
 

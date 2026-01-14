@@ -1,4 +1,4 @@
-# QA flags
+# Data flags and QA
 
 There are two sets of QA flag fields available in Providentia for filtering data when using GHOST or ACTRIS data.
 
@@ -8,16 +8,6 @@ There are two sets of QA flag fields available in Providentia for filtering data
 This [publication](https://doi.org/10.5194/essd-16-4417-2024 ) gives a definition for each of the **flags** and **qa** fields.
 
 For ACTRIS data, there is a special case where only a small subset of **qa** fields are available (those which pertain to a collection of flags).
-
-## Modifying flags / qa
-
-A selection of **qa** fields are set by default, but no **flags** fields are set by default (as there are two **qa** fields which apply default collections of **flags**). This however can be modified in a number of ways. 
-
-When using the dashboard by clicking on the **FLAGS** or **QA** buttons, pop-up menus will appear giving the option to interactively select fields.
-
-The fields can also be set in the configuration files, using either the names of the flags you want to apply, or their numerical codes (defined below). The fields can wither be set explicitely, e.g. ```qa = 0, 1, 2```, or a selection of fields to add or subtract from the defaults can be selected, e.g.```add_qa = 3, 10```, or ```subtract_qa = 3, 10```. The respective fields for the **flags** are: ```flags```, ```add_flags```, and ```subtract_flags```.
-
-Below you will find two tables that contain the names and numerical values of all **flags** and **qa** fields for the latest version of GHOST, together with the default fields.
 
 ## flags: Names and Codes
 
@@ -295,3 +285,13 @@ Below you will find two tables that contain the names and numerical values of al
 | Systematic Inconsistent Monthly Distributions - 2/3 Months >= Zone 6 | 131 | |
 | Systematic Inconsistent Monthly Distributions - 4/6 Months >= Zone 6 | 132 | ✓ |
 | Systematic Inconsistent Monthly Distributions - 8/12 Months >= Zone 6 | 133 | ✓ |
+
+## Modifying flags / qa
+
+A selection of **qa** fields are set by default, but no **flags** fields are set by default (as there are two **qa** fields which apply default collections of **flags**). This however can be modified in a number of ways. 
+
+When using the dashboard by clicking on the **FLAGS** or **QA** buttons, pop-up menus will appear giving the option to interactively select fields.
+
+The fields can also be set in the configuration files, using either the names of the flags you want to apply, or their numerical codes (defined below). The fields can wither be set explicitely, e.g. ```qa = 0, 1, 2```, or a selection of fields to add or subtract from the defaults can be selected, e.g.```add_qa = 3, 10```, or ```subtract_qa = 3, 10```. The respective fields for the **flags** are: ```flags```, ```add_flags```, and ```subtract_flags```.
+
+Below you will find two tables that contain the names and numerical values of all **flags** and **qa** fields for the latest version of GHOST, together with the default fields.

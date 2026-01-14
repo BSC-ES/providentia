@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QA flags &mdash; Providentia 3.0.0 documentation</title>
+  <title>Data flags and QA &mdash; Providentia 3.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -22,8 +22,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Representativity filters" href="Representativity-filters.html" />
-    <link rel="prev" title="Command line configuration" href="Command-line-configuration.html" /> 
+    <link rel="next" title="Redirecting output to a file" href="Redirecting-output-to-a-file.html" />
+    <link rel="prev" title="Representativity filters" href="Representativity-filters.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -51,28 +51,27 @@
 <li class="toctree-l1"><a class="reference internal" href="Modes.html">Modes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Topics-in-depth.html">Topics in depth</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="Other-topics.html">Other topics</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Running-on-HPC.html">Running on HPC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ADS.html">Account setup in Atmosphere Data Store</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Command-line-configuration.html">Command line configuration</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">QA flags</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#modifying-flags-qa">Modifying flags / qa</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Create-your-own-data-network.html">Create your own data network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Multispecies-filtering.html">Multispecies filtering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Representativity-filters.html">Representativity filters</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Data flags and QA</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#flags-names-and-codes">flags: Names and Codes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#qa-names-and-codes">qa: Names and Codes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#modifying-flags-qa">Modifying flags / qa</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="Representativity-filters.html">Representativity filters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Representativity-filters.html#periodic-representativity-filters">Periodic Representativity Filters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Saved-file-formats.html">Saved file formats</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Create-your-own-data-network.html">Create your own data network</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Colocation.html">Colocation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Multispecies-filtering.html">Multispecies filtering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Redirecting-output-to-a-file.html">Redirecting output to a file</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ADS.html">Account setup in Atmosphere Data Store</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Topics-on-HPC.html">Topics on HPC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Saved-file-formats.html">Saved file formats</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training Material</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training material</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the Team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
 <li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
 </ul>
@@ -92,9 +91,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="Other-topics.html">Other topics</a></li>
-      <li class="breadcrumb-item active">QA flags</li>
+      <li class="breadcrumb-item active">Data flags and QA</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/Data-flags-and-QA-names-and-codes.md.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/Data-flags-and-QA.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -102,8 +101,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section class="tex2jax_ignore mathjax_ignore" id="qa-flags">
-<h1>QA flags<a class="headerlink" href="#qa-flags" title="Link to this heading"></a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="data-flags-and-qa">
+<h1>Data flags and QA<a class="headerlink" href="#data-flags-and-qa" title="Link to this heading"></a></h1>
 <p>There are two sets of QA flag fields available in Providentia for filtering data when using GHOST or ACTRIS data.</p>
 <ul class="simple">
 <li><p><strong>flags</strong> - flags that relate to standardised data flags taken from the data provider.</p></li>
@@ -111,13 +110,6 @@
 </ul>
 <p>This <a class="reference external" href="https://doi.org/10.5194/essd-16-4417-2024">publication</a> gives a definition for each of the <strong>flags</strong> and <strong>qa</strong> fields.</p>
 <p>For ACTRIS data, there is a special case where only a small subset of <strong>qa</strong> fields are available (those which pertain to a collection of flags).</p>
-<section id="modifying-flags-qa">
-<h2>Modifying flags / qa<a class="headerlink" href="#modifying-flags-qa" title="Link to this heading"></a></h2>
-<p>A selection of <strong>qa</strong> fields are set by default, but no <strong>flags</strong> fields are set by default (as there are two <strong>qa</strong> fields which apply default collections of <strong>flags</strong>). This however can be modified in a number of ways.</p>
-<p>When using the dashboard by clicking on the <strong>FLAGS</strong> or <strong>QA</strong> buttons, pop-up menus will appear giving the option to interactively select fields.</p>
-<p>The fields can also be set in the configuration files, using either the names of the flags you want to apply, or their numerical codes (defined below). The fields can wither be set explicitely, e.g. <code class="docutils literal notranslate"><span class="pre">qa</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">2</span></code>, or a selection of fields to add or subtract from the defaults can be selected, e.g.<code class="docutils literal notranslate"><span class="pre">add_qa</span> <span class="pre">=</span> <span class="pre">3,</span> <span class="pre">10</span></code>, or <code class="docutils literal notranslate"><span class="pre">subtract_qa</span> <span class="pre">=</span> <span class="pre">3,</span> <span class="pre">10</span></code>. The respective fields for the <strong>flags</strong> are: <code class="docutils literal notranslate"><span class="pre">flags</span></code>, <code class="docutils literal notranslate"><span class="pre">add_flags</span></code>, and <code class="docutils literal notranslate"><span class="pre">subtract_flags</span></code>.</p>
-<p>Below you will find two tables that contain the names and numerical values of all <strong>flags</strong> and <strong>qa</strong> fields for the latest version of GHOST, together with the default fields.</p>
-</section>
 <section id="flags-names-and-codes">
 <h2>flags: Names and Codes<a class="headerlink" href="#flags-names-and-codes" title="Link to this heading"></a></h2>
 <table class="docutils align-default">
@@ -1212,14 +1204,21 @@
 </tbody>
 </table>
 </section>
+<section id="modifying-flags-qa">
+<h2>Modifying flags / qa<a class="headerlink" href="#modifying-flags-qa" title="Link to this heading"></a></h2>
+<p>A selection of <strong>qa</strong> fields are set by default, but no <strong>flags</strong> fields are set by default (as there are two <strong>qa</strong> fields which apply default collections of <strong>flags</strong>). This however can be modified in a number of ways.</p>
+<p>When using the dashboard by clicking on the <strong>FLAGS</strong> or <strong>QA</strong> buttons, pop-up menus will appear giving the option to interactively select fields.</p>
+<p>The fields can also be set in the configuration files, using either the names of the flags you want to apply, or their numerical codes (defined below). The fields can wither be set explicitely, e.g. <code class="docutils literal notranslate"><span class="pre">qa</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">2</span></code>, or a selection of fields to add or subtract from the defaults can be selected, e.g.<code class="docutils literal notranslate"><span class="pre">add_qa</span> <span class="pre">=</span> <span class="pre">3,</span> <span class="pre">10</span></code>, or <code class="docutils literal notranslate"><span class="pre">subtract_qa</span> <span class="pre">=</span> <span class="pre">3,</span> <span class="pre">10</span></code>. The respective fields for the <strong>flags</strong> are: <code class="docutils literal notranslate"><span class="pre">flags</span></code>, <code class="docutils literal notranslate"><span class="pre">add_flags</span></code>, and <code class="docutils literal notranslate"><span class="pre">subtract_flags</span></code>.</p>
+<p>Below you will find two tables that contain the names and numerical values of all <strong>flags</strong> and <strong>qa</strong> fields for the latest version of GHOST, together with the default fields.</p>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Command-line-configuration.html" class="btn btn-neutral float-left" title="Command line configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Representativity-filters.html" class="btn btn-neutral float-right" title="Representativity filters" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Representativity-filters.html" class="btn btn-neutral float-left" title="Representativity filters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Redirecting-output-to-a-file.html" class="btn btn-neutral float-right" title="Redirecting output to a file" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
