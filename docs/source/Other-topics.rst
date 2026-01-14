@@ -7,8 +7,8 @@ Other topics
 
    Running-on-HPC.rst
    Command-line-configuration.md
-   Data-flags-and-QA-names-and-codes.md
-   Representativity-filters.md
+   QA.md
+   Representativity-filtering.md
    Saved-file-formats.md
    Create-your-own-data-network.md
    Colocation.md

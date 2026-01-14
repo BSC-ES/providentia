@@ -1,25 +1,50 @@
-# QA flags
+# QA filtering
 
-There are two sets of QA flag fields available in Providentia for filtering data when using GHOST or ACTRIS data.
+Observations of atmospheric species are taken by scientists in the real-world where issues with instruments, meteorology, or even human error can mean observations are subject to significant biases, which left alone could impose significant biases for evaluations with model data. Fortunately when this occurs observations are typically flagged so they can be screened out.
+
+There are two sets of QA flags available in Providentia for filtering observations when using GHOST or ACTRIS data.
 
 * **flags** - flags that relate to standardised data flags taken from the data provider.
 * **qa** - flags that relate to GHOST performed quality control checks.
 
-This [publication](https://doi.org/10.5194/essd-16-4417-2024 ) gives a definition for each of the **flags** and **qa** fields.
+This GHOST [publication](https://doi.org/10.5194/essd-16-4417-2024) gives a definition for each of the **flags** and **qa** fields.
 
 For ACTRIS data, there is a special case where only a small subset of **qa** fields are available (those which pertain to a collection of flags).
 
 ## Modifying flags / qa
 
-A selection of **qa** fields are set by default, but no **flags** fields are set by default (as there are two **qa** fields which apply default collections of **flags**). This however can be modified in a number of ways. 
+A selection of **qa** fields are set in Providentia by default, but no **flags** fields are set by default (as there are two **qa** fields which apply default collections of **flags**). This however can be modified in a number of ways. 
 
-When using the dashboard by clicking on the **FLAGS** or **QA** buttons, pop-up menus will appear giving the option to interactively select fields.
+When using the dashboard by clicking on the **FLAGS** or **QA** buttons on the menu bar, pop-up menus will appear giving the option to interactively select fields.
 
-The fields can also be set in the configuration files, using either the names of the flags you want to apply, or their numerical codes (defined below). The fields can wither be set explicitely, e.g. ```qa = 0, 1, 2```, or a selection of fields to add or subtract from the defaults can be selected, e.g.```add_qa = 3, 10```, or ```subtract_qa = 3, 10```. The respective fields for the **flags** are: ```flags```, ```add_flags```, and ```subtract_flags```.
+The variables can also be set in the configuration files, using either the names of the flags you want to apply, or their numerical codes (defined below). 
 
-Below you will find two tables that contain the names and numerical values of all **flags** and **qa** fields for the latest version of GHOST, together with the default fields.
+The variables can be set explicitely (using codes or names), for example:
+```
+flags = 0, 1, 2
+qa = 0, 1, 2
+flags = Valid Data, Preliminary Data, Missing Data
+qa = Missing Measurement, Infinite Value, Negative Measurement
+```
 
-## flags: Names and Codes
+It can also be set to add or subtract from the default fields, for example:
+```
+add_qa = 3, 10
+subtract_qa = 3, 10
+add_flags = 3, 10
+subtract_flags = 3, 10
+``` 
+
+If wanting to not apply any **flags** / **qa**, then the variable is simply left blank as follows:
+
+```
+qa =
+flags =  
+```
+
+Below you will find two tables that contain the names and numerical values of all **flags** and **qa** fields for the latest version of GHOST, together with the default fields in Providentia.
+
+## flags: names and codes
 
 | Data flag name | Code | Default |
 | ---      |  ---  | --- |
@@ -212,7 +237,7 @@ Below you will find two tables that contain the names and numerical values of al
 |AERONET: L2 AOD | 240 |
 |AERONET: L2 WITHOUT AOD | 241 |
 
-## qa: Names and Codes
+## qa: names and codes
 
 | QA flag name | Code | Default |
 | ---      |  ---  | --- |
