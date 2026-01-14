@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Representativity filters &mdash; Providentia 3.0.0 documentation</title>
+  <title>Representativity filtering &mdash; Providentia 3.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -22,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Saved file formats" href="Saved-file-formats.html" />
+    <link rel="next" title="Redirecting output to a file" href="Redirecting-output-to-a-file.html" />
     <link rel="prev" title="QA filtering" href="QA-filtering.html" /> 
 </head>
 
@@ -49,14 +49,17 @@
 <li class="toctree-l1"><a class="reference internal" href="Home.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Modes.html">Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Topics-in-depth.html">Topics in depth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="Other-topics.html">Other topics</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Running-on-HPC.html">Running on HPC</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Command-line-configuration.html">Command line configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ADS.html">Account setup in Atmosphere Data Store</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Create-your-own-data-network.html">Create your own data network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Multispecies-filtering.html">Multispecies filtering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="QA-filtering.html">QA filtering</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Representativity filters</a><ul>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Representativity filtering</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#native-vs-averaged-filters">Native vs averaged filters</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#available-filters">Available filters</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#hourly-hourly-instantaneous">hourly, hourly_instantaneous</a></li>
@@ -66,18 +69,15 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="Saved-file-formats.html">Saved file formats</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Create-your-own-data-network.html">Create your own data network</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Colocation.html">Colocation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Multispecies-filtering.html">Multispecies filtering</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Redirecting-output-to-a-file.html">Redirecting output to a file</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ADS.html">Account setup in Atmosphere Data Store</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Topics-on-HPC.html">Topics on HPC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Saved-file-formats.html">Saved file formats</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training Material</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training material</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the Team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
 <li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
 </ul>
@@ -97,7 +97,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="Other-topics.html">Other topics</a></li>
-      <li class="breadcrumb-item active">Representativity filters</li>
+      <li class="breadcrumb-item active">Representativity filtering</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/Representativity-filtering.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -107,8 +107,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section class="tex2jax_ignore mathjax_ignore" id="representativity-filters">
-<h1>Representativity filters<a class="headerlink" href="#representativity-filters" title="Link to this heading"></a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="representativity-filtering">
+<h1>Representativity filtering<a class="headerlink" href="#representativity-filtering" title="Link to this heading"></a></h1>
 <p>One major limitation associated with observations is the amount of gaps often found between measurements. If these observations are directly compared with typically complete model data, this would impose a significant bias upon the comparison. Filtering by representativity filters provides a way to control the temporal robustness of the observations for evaluation.</p>
 <p>Providentia has multiple such filters. By default these are <strong>NOT</strong> activated (i.e. set at 0).</p>
 <section id="native-vs-averaged-filters">
@@ -158,7 +158,7 @@ Any stations which are completely NaN after filtering are removed from the map.<
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="QA-filtering.html" class="btn btn-neutral float-left" title="QA filtering" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Saved-file-formats.html" class="btn btn-neutral float-right" title="Saved file formats" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Redirecting-output-to-a-file.html" class="btn btn-neutral float-right" title="Redirecting output to a file" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

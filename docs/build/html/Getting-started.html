@@ -54,6 +54,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#directory-tree-and-filename-conventions">Directory tree and filename conventions</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#statistics">Statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#launching-the-dashboard">Launching the dashboard</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#generating-a-report">Generating a report</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-providentia-backend-functions">Using Providentia backend functions</a></li>
@@ -61,14 +62,16 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Modes.html">Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Topics-in-depth.html">Topics in depth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training Material</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training material</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the Team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
 <li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
 </ul>
@@ -100,7 +103,7 @@
   <section class="tex2jax_ignore mathjax_ignore" id="getting-started">
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h1>
 <p>If you have access to the HPC machines at Barcelona Supercomputing Center (BSC), the first thing you need to decide is whether you want to use Providentia on a supercomputer (MN5 or Nord4) or on your local computer (Linux or Mac).</p>
-<p>We recommend working on local machines to everyone, including the users at BSC, because the interactive features of the dashboard are faster and you do not need to wait in queue to get resources and use the software. The only disadvantage is that the data (models and observations) stored on HPC cannot be accessed directly and need to be downloaded onto your local machine using the <a class="reference internal" href="Download.html"><span class="doc std std-doc">download</span></a> mode in advance. If you do not want to download the data and instead you prefer to use an HPC machine for your analysis, we recommend reading the Wiki section <a class="reference internal" href="Connection-setup.html"><span class="doc std std-doc">Connection setup</span></a>.</p>
+<p>We recommend working on local machines to everyone, including the users at BSC, because the interactive features of the dashboard are faster and you do not need to wait in queue to get resources and use the software. The only disadvantage is that the data (models and observations) stored on HPC cannot be accessed directly and need to be downloaded onto your local machine using the <a class="reference internal" href="Download.html"><span class="doc std std-doc">download</span></a> mode in advance. If you do not want to download the data and instead you prefer to use an HPC machine for your analysis, we recommend reading the Wiki section <a class="reference internal" href="Topics-on-HPC.html#connection-setup"><span class="std std-ref">Connection setup</span></a>.</p>
 <p>If you do not have access to the machines, you won’t be able to use the download mode to get model data (only observations from limited sources, i.e. Zenodo for GHOST and NILU Thredds for ACTRIS). If you want to use your own data, consider checking the tutorial <a class="reference external" href="https://github.com/BSC-ES/providentia/blob/master/tutorials/2.%20Formatting%20model%20data.ipynb">2. Formatting model data</a> and reading the section <a class="reference internal" href="Create-your-own-data-network.html"><span class="doc std std-doc">Create your own data network</span></a> to process and create netCDF files that Providentia can read.</p>
 <section id="cloning-the-project">
 <h2>Cloning the project<a class="headerlink" href="#cloning-the-project" title="Link to this heading"></a></h2>
@@ -211,6 +214,10 @@
 <p>If you are running Providentia on HPC, you will already see that there are options to choose from in the menu on the top. The data is being read from the paths specified in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p>
 </section>
 </section>
+<section id="statistics">
+<h2>Statistics<a class="headerlink" href="#statistics" title="Link to this heading"></a></h2>
+<p>Before explaining how to use each mode, it is important to note that statistics are computed in numerous ways, depending on the user’s needs. A thorough explanation can be found in the <a class="reference internal" href="Statistics.html"><span class="doc std std-doc">Statistics</span></a> section.</p>
+</section>
 <section id="launching-the-dashboard">
 <h2>Launching the dashboard<a class="headerlink" href="#launching-the-dashboard" title="Link to this heading"></a></h2>
 <p>As explained, you can launch the dashboard by simply running:</p>
@@ -222,6 +229,7 @@
 </pre></div>
 </div>
 <p>If you have multiple sections or subsections, a pop-up window will immediately appear where you can choose the section or subsection of interest. After that, the graphical window of Providentia will appear and you can begin using the tool.</p>
+<p>An initial set of plots will be displayed, including the timeseries, distribution, statistics summary, and periodic plots. To take full advantage of Providentia, you can explore the wide range of plotting options described in <a class="reference internal" href="Plot-types-and-options.html"><span class="doc std std-doc">Plot types and options</span></a>. We also recommend reading the <a class="reference internal" href="Plot-customisation.html"><span class="doc std std-doc">Plot customisation</span></a> section.</p>
 <p>More details can be found in the <a class="reference internal" href="Dashboard.html"><span class="doc std std-doc">dashboard section</span></a>.</p>
 </section>
 <section id="generating-a-report">

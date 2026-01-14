@@ -6,8 +6,6 @@ Other topics
    :maxdepth: 2
 
    ADS.md
-   Colocation.md
-   Command-line-configuration.md
    Create-your-own-data-network.md
    Multispecies-filtering.md
    QA-filtering.md

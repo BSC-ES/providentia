@@ -22,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="BSC HPC Machines" href="BSC-download.html" />
+    <link rel="next" title="BSC HPC machines" href="BSC-download.html" />
     <link rel="prev" title="Report" href="Report.html" /> 
 </head>
 
@@ -54,12 +54,13 @@
 <li class="toctree-l2"><a class="reference internal" href="Report.html">Report</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Download</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#get-started">Get started</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#getting-started">Getting started</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#types-of-downloads">Types of downloads</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#automatisation-of-the-download">Automatisation of the download</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#automation-of-the-download">Automation of the download</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#using-wildcards">Using wildcards</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="BSC-download.html">BSC HPC Machines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="BSC-download.html">BSC HPC machines</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Zenodo-download.html">Zenodo</a></li>
 <li class="toctree-l3"><a class="reference internal" href="CAMS-download.html">CAMS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="ACTRIS-download.html">ACTRIS</a></li>
@@ -68,14 +69,16 @@
 <li class="toctree-l2"><a class="reference internal" href="Library-mode.html">Library</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Topics-in-depth.html">Topics in depth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training Material</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training material</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the Team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
 <li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
 </ul>
@@ -110,8 +113,8 @@
 <section class="tex2jax_ignore mathjax_ignore" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
 <p>Providentia’s download mode retrieves modeled and observational data from BSC systems and external sources (CAMS, Zenodo, ACTRIS) for local use.</p>
-<section id="get-started">
-<h3>Get started<a class="headerlink" href="#get-started" title="Link to this heading"></a></h3>
+<section id="getting-started">
+<h3>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h3>
 <p>To start downloading data, simply add <code class="docutils literal notranslate"><span class="pre">--download</span></code> or <code class="docutils literal notranslate"><span class="pre">--dl</span></code> to your command:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="nb">bin</span><span class="o">/</span><span class="n">providentia</span> <span class="o">--</span><span class="n">config</span><span class="o">=</span><span class="s1">&#39;/path/to/file/example.conf&#39;</span> <span class="o">--</span><span class="n">download</span>
 </pre></div>
@@ -126,38 +129,39 @@
 <h3>Types of downloads<a class="headerlink" href="#types-of-downloads" title="Link to this heading"></a></h3>
 <p>Providentia supports four types of downloads. For detailed instructions, please visit the respective pages:</p>
 <ol class="arabic simple">
-<li><p><strong>Download from HPC Machines</strong></p>
+<li><p><strong>Download from BSC HPC Machines</strong></p>
 <ul class="simple">
+<li><p>Downloads GHOST and non-GHOST data and model outputs from BSC HPC machines. You must have a BSC account to access this feature.</p></li>
 <li><p>How to get this type of download:</p>
 <ul>
 <li><p>For GHOST networks, answer <code class="docutils literal notranslate"><span class="pre">y</span></code> to the prompt:
 <em>Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo)</em>
 or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_source</span></code> to <code class="docutils literal notranslate"><span class="pre">bsc</span></code>.</p></li>
 <li><p>For non-GHOST networks and interpolated/non-interpolated model data, no special action is required.</p></li>
-<li><p>Reference: <a class="reference internal" href="BSC-download.html"><span class="doc std std-doc">BSC download page</span></a></p></li>
 </ul>
 </li>
+<li><p>To see more information, check the <a class="reference internal" href="BSC-download.html"><span class="doc std std-doc">BSC download page</span></a>.</p></li>
 </ul>
 </li>
 <li><p><strong>Download of network from Zenodo</strong></p>
 <ul class="simple">
 <li><p>Downloads GHOST networks from the <a class="reference external" href="https://zenodo.org/records/10637450">GHOST Zenodo webpage</a>.</p></li>
 <li><p>How to get this type of download: answer <code class="docutils literal notranslate"><span class="pre">n</span></code> to the HPC prompt: <em>Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo)</em> or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_source</span></code> to <code class="docutils literal notranslate"><span class="pre">zenodo</span></code>.</p></li>
-<li><p>Reference: <a class="reference internal" href="Zenodo-download.html"><span class="doc std std-doc">Zenodo download page</span></a></p></li>
+<li><p>To see more information, check the <a class="reference internal" href="Zenodo-download.html"><span class="doc std std-doc">Zenodo download page</span></a>.</p></li>
 </ul>
 </li>
 <li><p><strong>Download of network from ACTRIS (Thredds)</strong></p>
 <ul class="simple">
 <li><p>Downloads observational networks from <a class="reference external" href="https://thredds.nilu.no/thredds/catalog.html">ACTRIS Thredds</a>.</p></li>
 <li><p>How to get this type of download: put <code class="docutils literal notranslate"><span class="pre">actris/actris</span></code> in the <code class="docutils literal notranslate"><span class="pre">network</span></code> field in your configuration.</p></li>
-<li><p>Reference: <a class="reference internal" href="ACTRIS-download.html"><span class="doc std std-doc">ACTRIS download page</span></a></p></li>
+<li><p>To see more information, check the <a class="reference internal" href="ACTRIS-download.html"><span class="doc std std-doc">ACTRIS download page</span></a>.</p></li>
 </ul>
 </li>
 <li><p><strong>Download of non-interpolated model data from the Atmosphere Data Store (ADS)</strong></p>
 <ul class="simple">
 <li><p>Downloads model outputs from the <a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets">Atmosphere Data Store</a>.</p></li>
 <li><p>How to get this type of download: specify the model as <code class="docutils literal notranslate"><span class="pre">cams_analysis</span></code>, <code class="docutils literal notranslate"><span class="pre">cams_forecast</span></code> or <code class="docutils literal notranslate"><span class="pre">cams_reanalysis</span></code> in your configuration, and set <code class="docutils literal notranslate"><span class="pre">dl_interpolated</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
-<li><p>Reference: <a class="reference internal" href="CAMS-download.html"><span class="doc std std-doc">CAMS download page</span></a></p></li>
+<li><p>To see more information, check the <a class="reference internal" href="CAMS-download.html"><span class="doc std std-doc">CAMS download page</span></a>.</p></li>
 </ul>
 </li>
 </ol>
@@ -232,8 +236,8 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 </table>
 </section>
 </section>
-<section id="automatisation-of-the-download">
-<h3>Automatisation of the download<a class="headerlink" href="#automatisation-of-the-download" title="Link to this heading"></a></h3>
+<section id="automation-of-the-download">
+<h3>Automation of the download<a class="headerlink" href="#automation-of-the-download" title="Link to this heading"></a></h3>
 <p>In order to add the download to your scripts or if you just want to make it without the user input, here are all the variables you need to have</p>
 <table class="docutils align-default">
 <thead>
@@ -271,8 +275,9 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 </tr>
 </tbody>
 </table>
+</section>
 <section id="using-wildcards">
-<h4>Using wildcards<a class="headerlink" href="#using-wildcards" title="Link to this heading"></a></h4>
+<h3>Using wildcards<a class="headerlink" href="#using-wildcards" title="Link to this heading"></a></h3>
 <p>You can use the <code class="docutils literal notranslate"><span class="pre">*</span></code> wildcard in the following fields to automatically select all available values:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">network</span></code>, <code class="docutils literal notranslate"><span class="pre">observation</span></code>, <code class="docutils literal notranslate"><span class="pre">framework</span></code></p></li>
@@ -285,14 +290,13 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 <p><strong>Note:</strong> Using wildcards may result in large downloads, so use with caution.</p>
 </section>
 </section>
-</section>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="BSC-download.html">BSC HPC Machines</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="BSC-download.html#supported-hpc-login-nodes">Supported HPC Login Nodes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="BSC-download.html#download-of-networks-from-hpc-machines">Download of Networks from HPC Machines</a></li>
-<li class="toctree-l2"><a class="reference internal" href="BSC-download.html#download-of-interpolated-models">Download of Interpolated Models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="BSC-download.html#download-of-non-interpolated-models">Download of Non-Interpolated Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="BSC-download.html">BSC HPC machines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="BSC-download.html#supported-hpc-login-nodes">Supported HPC login nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BSC-download.html#download-of-networks-from-hpc-machines">Download of networks from HPC machines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BSC-download.html#download-of-interpolated-models">Download of interpolated models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="BSC-download.html#download-of-non-interpolated-models">Download of non-interpolated models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="BSC-download.html#env-file">.env file</a></li>
 </ul>
 </li>
@@ -329,7 +333,7 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Report.html" class="btn btn-neutral float-left" title="Report" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="BSC-download.html" class="btn btn-neutral float-right" title="BSC HPC Machines" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="BSC-download.html" class="btn btn-neutral float-right" title="BSC HPC machines" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
