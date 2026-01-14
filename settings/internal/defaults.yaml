@@ -43,6 +43,11 @@ report:
 
 library:
   <<: *base_defaults
+  active_dashboard_plots:
+    - timeseries
+    - statsummary
+    - distribution
+    - periodic
 
 interpolation:
   network:
