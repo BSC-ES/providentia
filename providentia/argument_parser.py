@@ -37,6 +37,11 @@ class ProvArgumentParser(object):
                                      default=False,
                                      action='store_true',
                                      help="run Providentia report mode")
+            self.parser.add_argument("--dashboard",
+                                     dest="dashboard",
+                                     default=True,
+                                     action='store_true',
+                                     help="run Providentia dashboard")
             self.parser.add_argument('-V', '--version', action='version',
                                      version=providentia.__version__,
                                      help="returns Providentia version number and exit")
