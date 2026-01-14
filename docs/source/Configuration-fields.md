@@ -65,6 +65,19 @@ These parameters are used only in the [Report mode](Report). All of them are opt
 | harmonise_stations | Boolean variable to set if you wish to harmonise axes limits across stations for stations report. |
 | harmonise_summary | Boolean variable to set if you wish to harmonise axes limits across subsections for summary report. |
 
+If the number of networks and species are **both** multiple but not equal, Providentia will throw the error `Error: The number of "network" and "species" fields is not the same.` and the user will be required to clearly specify which networks and species they want. For example, this would not be accepted:
+
+```
+network = EBAS, EEA_AQ_eReporting
+species = sconco3, sconcno2, sconcso2
+```
+
+But this would:
+```
+network = EBAS, EBAS, EBAS, EEA_AQ_eReporting, EEA_AQ_eReporting, EEA_AQ_eReporting
+species = sconco3, sconcno2, sconcso2, sconco3, sconcno2, sconcso2
+```
+
 ## Interpolation 
 
 These parameters are used only in the [Interpolation mode](Interpolation). All of them are optional.
