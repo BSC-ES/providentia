@@ -8,6 +8,8 @@ Contents
    Home.md
    Getting-started.md
    Modes.rst
+   Colocation.md
+   Filtering.md
    Topics-in-depth.rst
    Other-topics.rst
    FAQ.md

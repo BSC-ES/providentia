@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -8,20 +6,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Representativity filters &mdash; Providentia 3.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=acc74ff5"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Saved file formats" href="Saved-file-formats.html" />
-    <link rel="prev" title="QA flags" href="Data-flags-and-QA-names-and-codes.html" /> 
+    <link rel="prev" title="QA filtering" href="QA-filtering.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,17 +49,16 @@
 <li class="toctree-l1"><a class="reference internal" href="Home.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Modes.html">Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Topics-in-depth.html">Topics in depth</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="Other-topics.html">Other topics</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Running-on-HPC.html">Running on HPC</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Command-line-configuration.html">Command line configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Data-flags-and-QA-names-and-codes.html">QA flags</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QA-filtering.html">QA filtering</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Representativity filters</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#full-period-representativity-filters">Full Period Representativity Filters</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#periodic-representativity-filters">Periodic Representativity Filters</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#defaults">Defaults</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#native-vs-averaged-filters">Native vs averaged filters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#available-filters">Available filters</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#hourly-hourly-instantaneous">hourly, hourly_instantaneous</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#hourly-6hourly-3hourly-instantaneous-6hourly-instantaneous-daily">3hourly, 6hourly, 3hourly_instantaneous, 6hourly_instantaneous, daily</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#monthly">monthly</a></li>
@@ -98,7 +99,7 @@
           <li class="breadcrumb-item"><a href="Other-topics.html">Other topics</a></li>
       <li class="breadcrumb-item active">Representativity filters</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/Representativity-filters.md.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/Representativity-filtering.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -108,22 +109,20 @@
              
   <section class="tex2jax_ignore mathjax_ignore" id="representativity-filters">
 <h1>Representativity filters<a class="headerlink" href="#representativity-filters" title="Link to this heading"></a></h1>
-<p>One major limitation associated with observations is the amount of gaps often found between measurements. If these observations are directly compared with model data, this would impose a significant bias upon the comparison. Filtering by representativity filters provides a way to control the temporal robustness of the observations for evaluation.</p>
-<p>Providentia has multiple such filters. By default these are not activated (i.e. set at 0).</p>
-<section id="full-period-representativity-filters">
-<h2>Full Period Representativity Filters<a class="headerlink" href="#full-period-representativity-filters" title="Link to this heading"></a></h2>
-</section>
-</section>
-<section class="tex2jax_ignore mathjax_ignore" id="periodic-representativity-filters">
-<h1>Periodic Representativity Filters<a class="headerlink" href="#periodic-representativity-filters" title="Link to this heading"></a></h1>
-<p>Providentia has two types of representativity filters. The first is the <code class="docutils literal notranslate"><span class="pre">representativity_percent</span></code> which is used to set the minimum % of representativity needed for a station’s measurements to be valid in a specific time period (i.e. daily, monthly, etc.). If for instance we wanted to check the representativity of hourly station data each day, we would use the <code class="docutils literal notranslate"><span class="pre">daily_representativity_percent</span></code> filter. If we set this at 50%, this would mean any daily periods where there are &lt;50% of observations missing, would be set to be NaN. By default, this is always set at 0%.</p>
+<p>One major limitation associated with observations is the amount of gaps often found between measurements. If these observations are directly compared with typically complete model data, this would impose a significant bias upon the comparison. Filtering by representativity filters provides a way to control the temporal robustness of the observations for evaluation.</p>
+<p>Providentia has multiple such filters. By default these are <strong>NOT</strong> activated (i.e. set at 0).</p>
+<section id="native-vs-averaged-filters">
+<h2>Native vs averaged filters<a class="headerlink" href="#native-vs-averaged-filters" title="Link to this heading"></a></h2>
+<p>Providentia has two types of representativity filters, those which calculate the representativity percent across the native resolution (which can be variable), and those which calculate it at the average resolution, e.g. the resolution being used in Providentia such as hourly, 3hourly etc. The native filters are only available when using GJOST data, and are differentiated between, with the native representativity variables all containing the <code class="docutils literal notranslate"><span class="pre">native</span></code> string.</p>
+<p>The first is the <code class="docutils literal notranslate"><span class="pre">representativity_percent</span></code> which is used to set the minimum % of representativity needed for a station’s measurements to be valid in a specific time period (i.e. daily, monthly, etc.). If for instance we wanted to check the representativity of hourly station data each day, we would use the <code class="docutils literal notranslate"><span class="pre">daily_representativity_percent</span></code> filter. If we set this at 50%, this would mean any daily periods where there are &lt;50% of observations missing, would be set to be NaN. By default, this is always set at 0%.</p>
 <p>If wanting to apply filters to the entire time period in memory, rather than shorter windows, this can be done using the <code class="docutils literal notranslate"><span class="pre">all_representativity_percent</span></code> and <code class="docutils literal notranslate"><span class="pre">all_max_gap_percent</span></code> filters.
 Any stations which are completely NaN after filtering are removed from the map.</p>
 <p>Whatever the current temporal <code class="docutils literal notranslate"><span class="pre">resolution</span></code> is of the current data in memory, the standard representativity filters will be available for all coarser resolutions, e.g. for hourly resolution data, the standard filters will be available for <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">monthly</span></code> and <code class="docutils literal notranslate"><span class="pre">all</span></code> resolutions.</p>
 <p>When using GHOST data there are some extra filters available which can be used to assess the representativity of the native resolution data, rather than solely the AC standard averaged temporal resolutions. For example if measurements are natively measured every 10 minutes and these are then averaged to hourly resolution, then the representativity checks will assess the representativity of this native data within the desired time period. When GHOST data is used there is therefore native versions of the standard filters. Additionally because of the nature of using native data, there are additional filters at the current resolution in use, e.g. for hourly data: <code class="docutils literal notranslate"><span class="pre">hourly_native_representativity_percent</span></code>. These filters can be distinguished from the standard forms by the occurrence of the native word within the filter name.</p>
-<section id="defaults">
-<h2>Defaults<a class="headerlink" href="#defaults" title="Link to this heading"></a></h2>
-<p>The default representativity filters set in Providentia (when using GHOST data), per temporal <code class="docutils literal notranslate"><span class="pre">resolution</span></code> are as follows:</p>
+</section>
+<section id="available-filters">
+<h2>Available filters<a class="headerlink" href="#available-filters" title="Link to this heading"></a></h2>
+<p>The available representativity filters in Providentia (when using GHOST data), per temporal resolution are as follows:</p>
 <section id="hourly-hourly-instantaneous">
 <h3>hourly, hourly_instantaneous<a class="headerlink" href="#hourly-hourly-instantaneous" title="Link to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hourly_native_representativity_percent</span> <span class="o">=</span> <span class="mi">0</span>
@@ -158,7 +157,7 @@ Any stations which are completely NaN after filtering are removed from the map.<
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Data-flags-and-QA-names-and-codes.html" class="btn btn-neutral float-left" title="QA flags" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="QA-filtering.html" class="btn btn-neutral float-left" title="QA filtering" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="Saved-file-formats.html" class="btn btn-neutral float-right" title="Saved file formats" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

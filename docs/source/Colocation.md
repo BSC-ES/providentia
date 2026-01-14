@@ -12,7 +12,7 @@ The following sections explain how both these colcoation types can be applied in
 
 Temporal colocation is used to temporally pair observations and model data, with any missing measurements in either the observational or model array, imposing missing measurements on the respective other. 
 
-When temporal colocation is active, you will have access to more plot types (scatter, taylor, fairmode-target, and fairmode-statsummary), and model bias statistics can also be used (e.g. r), see [here](Statistics#available-statistical-metrics) for more information about available statistics.
+When temporal colocation is active, you will have access to more plot types (scatter, taylor, fairmode-target, and fairmode-statsummary), and model bias statistics can also be used (e.g. r), see [here](Statistics.md#available-statistical-metrics) for more information about available statistics.
 
 Temporal colocation can be set in the configuration file by setting a boolean as follows, be default it is **True**:
 

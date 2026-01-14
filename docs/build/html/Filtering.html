@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Filtering &mdash; Providentia 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Topics in depth" href="Topics-in-depth.html" />
+    <link rel="prev" title="Colocation" href="Colocation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modes.html">Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Filtering</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dashboard-filtering">Dashboard filtering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#metadata">Metadata</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#numerical-metadata">Numerical metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#text-metadata">Text metadata</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#qa-flags">QA flags</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#representativity">Representativity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#periods">Periods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bounds">Bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#calibration-factor">Calibration factor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Topics-in-depth.html">Topics in depth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training Material</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the Team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Filtering</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Filtering.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="filtering">
+<h1>Filtering<a class="headerlink" href="#filtering" title="Link to this heading"></a></h1>
+<p>In Providentia there are substantial number of options when it comes to filtering data. Here we go through each of these one by one, and explain how they can be applied through the dashboard, or via configuration file.</p>
+<section id="dashboard-filtering">
+<h2>Dashboard filtering<a class="headerlink" href="#dashboard-filtering" title="Link to this heading"></a></h2>
+<p>ALL of the filters explained in the following sections can be selected on the dashboard menu bar, either in the <strong>Data Selection</strong> section, or in the <strong>Filters</strong> section.</p>
+<p>A general important rule to remember is when things are modified in the <strong>Data Selection</strong> section, then data must be re-read using the <strong>READ</strong> button for the filters to be applied.</p>
+<p>When things are modified in the <strong>Filters</strong> section, then the <strong>FILTER</strong> button must be clicked to apply the filters. These filters can then be removed (back to defaults) by clicking the <strong>RESET</strong> button.</p>
+</section>
+<section id="metadata">
+<h2>Metadata<a class="headerlink" href="#metadata" title="Link to this heading"></a></h2>
+<p>The most common type of data filtering is by metadata, e.g. for country, longitude, altitude etc.</p>
+<p>Metadata can either by numerical or text and the method for filtering for these slightly varies, as described in the following sections. There will be substantially more metadata fields available when using GHOST data compared to not.</p>
+<p>One common question is what metadata available variables exist for the loaded data that can be filtered by. These can be seen empirically by looking through the sub-menus under the <strong>META</strong> button on the dashboard, with all available variables are organised into 5 categories: <code class="docutils literal notranslate"><span class="pre">station</span> <span class="pre">position</span></code>, <code class="docutils literal notranslate"><span class="pre">station</span> <span class="pre">classifications</span></code>, <code class="docutils literal notranslate"><span class="pre">station</span> <span class="pre">miscellaneous</span></code>, <code class="docutils literal notranslate"><span class="pre">globally</span> <span class="pre">gridded</span> <span class="pre">classifications</span></code>, and <code class="docutils literal notranslate"><span class="pre">measurement</span> <span class="pre">process</span> <span class="pre">information</span></code>. These are also defined for GHOST data in this <a class="reference external" href="https://doi.org/10.5194/essd-16-4417-2024">publication</a>.</p>
+<p>The subsequent question is what fields are available for each metadata variable, specifically for text metadata. The best solution for this is to empirically check by opening the dashboard and navigating to the variable you are interested in and viewing the available fields.</p>
+<section id="numerical-metadata">
+<h3>Numerical metadata<a class="headerlink" href="#numerical-metadata" title="Link to this heading"></a></h3>
+<p>Numerical metadata is filtered by setting a lower and upper bound of values to retain, for example only keeping stations with latitudes greater or equal to 30°N, but less or equal to 72°N:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">latitude</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">72</span>
+</pre></div>
+</div>
+<p>By default on the dashboard, the variables will display the full available range for the variable, e.g. minimum and maximum latitude.</p>
+</section>
+<section id="text-metadata">
+<h3>Text metadata<a class="headerlink" href="#text-metadata" title="Link to this heading"></a></h3>
+<p>Text metadata is filtered by either setting to <strong>keep</strong> or <strong>remove</strong> specific fields for a variable, for example keeping Spanish and French stations, or removing just UK stations:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">country</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Spain</span><span class="p">,</span> <span class="n">France</span>
+<span class="n">country</span> <span class="o">=</span> <span class="n">remove</span><span class="p">:</span> <span class="n">United</span> <span class="n">Kingdom</span>
+</pre></div>
+</div>
+<p>On the dashboard all available fields for a variable will be displayed with associated keep and remove checkboxes per field. Simply check the fields you wish you keep or remove.</p>
+</section>
+</section>
+<section id="qa-flags">
+<h2>QA flags<a class="headerlink" href="#qa-flags" title="Link to this heading"></a></h2>
+<p>Observations of atmospheric species are taken by scientists in the real-world where issues with instruments, meteorology, or even human error can mean observations are subject to significant biases, which left alone could impose significant biases for evaluations with model data. Fortunately when this occurs observations are typically flagged so they can be screened out.</p>
+<p>There are two sets of QA flags available in Providentia for filtering observations when using GHOST or ACTRIS data.</p>
+<ul class="simple">
+<li><p><strong>flags</strong> - flags that relate to standardised data flags taken from the data provider.</p></li>
+<li><p><strong>qa</strong> - flags that relate to GHOST performed quality control checks.</p></li>
+</ul>
+<p>These variables can be set explicitely (using codes or names), for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">flags</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
+<span class="n">flags</span> <span class="o">=</span> <span class="n">Valid</span> <span class="n">Data</span><span class="p">,</span> <span class="n">Preliminary</span> <span class="n">Data</span><span class="p">,</span> <span class="n">Missing</span> <span class="n">Data</span>
+<span class="n">qa</span> <span class="o">=</span> <span class="n">Missing</span> <span class="n">Measurement</span><span class="p">,</span> <span class="n">Infinite</span> <span class="n">Value</span><span class="p">,</span> <span class="n">Negative</span> <span class="n">Measurement</span>
+<span class="n">flags</span> <span class="o">=</span> 
+<span class="n">qa</span> <span class="o">=</span> 
+</pre></div>
+</div>
+<p>Leaving the variables blank means they will be not applied at all. It can also be set to add or subtract from the default fields, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">add_qa</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span>
+<span class="n">subtract_qa</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span>
+<span class="n">add_flags</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span>
+<span class="n">subtract_flags</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span>
+</pre></div>
+</div>
+<p>When using the dashboard by clicking on the <strong>FLAGS</strong> or <strong>QA</strong> buttons on the menu bar, pop-up menus will appear giving the option to interactively select fields.</p>
+<p>See <a class="reference internal" href="QA-filtering.html"><span class="doc std std-doc">here</span></a> for more in-depth information on filtering by QA or data flags, as well as full definitions of all available flags that can be filtered by.</p>
+</section>
+<section id="representativity">
+<h2>Representativity<a class="headerlink" href="#representativity" title="Link to this heading"></a></h2>
+<p>One major limitation associated with observations is the amount of gaps often found between measurements. If these observations are directly compared with typically complete model data, this would impose a significant bias upon the comparison. Filtering by representativity filters provides a way to control the temporal robustness of the observations for evaluation.</p>
+<p>Providentia has multiple such filters. By default these are <strong>NOT</strong> activated (i.e. set at 0).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hourly_native_representativity_percent</span> <span class="o">=</span> <span class="mi">20</span>
+</pre></div>
+</div>
+<p>On the dashboard the representativity variables can be modified via the <strong>% REP</strong> button on the menu bar.</p>
+<p>See <a class="reference internal" href="Representativity-filtering.html"><span class="doc std std-doc">here</span></a> for more in-depth information on filtering by representativity.</p>
+</section>
+<section id="periods">
+<h2>Periods<a class="headerlink" href="#periods" title="Link to this heading"></a></h2>
+<p>It is often desired to select certain periods over a time range, for example just daytime data, or data in the summer. Providentia gives an easy way to filter in such a way using the <code class="docutils literal notranslate"><span class="pre">period</span></code> variable when using GHOST data.</p>
+<p>The available period fields that that can be selected are: <code class="docutils literal notranslate"><span class="pre">Daytime</span></code>, <code class="docutils literal notranslate"><span class="pre">Nighttime</span></code>, <code class="docutils literal notranslate"><span class="pre">Weekday</span></code>, <code class="docutils literal notranslate"><span class="pre">Weekend</span></code>, <code class="docutils literal notranslate"><span class="pre">Spring</span></code>, <code class="docutils literal notranslate"><span class="pre">Summer</span></code>, <code class="docutils literal notranslate"><span class="pre">Autumn</span></code>, <code class="docutils literal notranslate"><span class="pre">Winter</span></code>.The availability of some of these fields is contingent on the temporal resolution that is active, for example <strong>Daytime</strong> data cannot be selected for monthly data.</p>
+<p>When wanting to apply these via configuration file the syntax is the same as the text metadata filtering with a small caveat, that you can both keep and remove fields at the same time by using a <strong>double pipe “||”</strong> between the keep and remove definitions to distinguish between them, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">period</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Winter</span>
+<span class="n">period</span> <span class="o">=</span> <span class="n">remove</span><span class="p">:</span> <span class="n">Daytime</span>
+<span class="n">period</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Spring</span><span class="p">,</span> <span class="n">Summer</span> <span class="o">||</span> <span class="n">remove</span><span class="p">:</span> <span class="n">Weekday</span>
+</pre></div>
+</div>
+<p>On the dashboard the period fields to keep or remove can be accessed via the <strong>PERIOD</strong> button on the menu bar.</p>
+</section>
+<section id="bounds">
+<h2>Bounds<a class="headerlink" href="#bounds" title="Link to this heading"></a></h2>
+<p>Often it is desired to remove values which exceed certain extreme bounds, as it is known that data should appear at such extremes. These bounds will be by default active in Providentia, with extreme bounds associated with a given species taken from definitions in GHOST.</p>
+<p>These bounds can also be modified in the configuration file as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">lower_bound</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">upper_bound</span> <span class="o">=</span> <span class="mi">1000</span>
+</pre></div>
+</div>
+<p>Additionally in the case of multiple species, then multiple bounds can be given for the number of species that exist, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">species</span> <span class="o">=</span> <span class="n">sconco3</span><span class="p">,</span> <span class="n">pm2p5</span><span class="p">,</span> <span class="n">pm10</span>
+<span class="n">lower_bound</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span>
+<span class="n">upper_bound</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">,</span> <span class="mi">3000</span>
+</pre></div>
+</div>
+<p>On the dashboard these bounds can be set through the lower and upper bounds rangeboxes on the menu bar.</p>
+</section>
+<section id="calibration-factor">
+<h2>Calibration factor<a class="headerlink" href="#calibration-factor" title="Link to this heading"></a></h2>
+<p>Which not explicitely filtering per se, a commonly used feature to correct for model biases is by way of a calibration factor. This is used when a model has a known bias and you want to correct for it.</p>
+<p>It is defined simply as a factor that is applied to model data. It can be set via <code class="docutils literal notranslate"><span class="pre">calibration_factor</span></code> in the configuration file, in the following ways:</p>
+<ul class="simple">
+<li><p>To add:</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">calibration_factor</span> <span class="o">=</span> <span class="o">+</span><span class="mi">10</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>To subtract:</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">calibration_factor</span> <span class="o">=</span> <span class="o">-</span><span class="mi">10</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>To multiply:</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">calibration_factor</span> <span class="o">=</span> <span class="o">*</span><span class="mi">10</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>To divide:</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">calibration_factor</span> <span class="o">=</span> <span class="o">/</span><span class="mi">10</span>
+</pre></div>
+</div>
+<p>The calibration factor can also be defined independently for diferent models:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">calibration_factor</span> <span class="o">=</span> <span class="n">a54s</span><span class="o">-</span><span class="n">regional</span><span class="o">-</span><span class="mi">000</span> <span class="p">(</span><span class="o">*</span><span class="mf">0.62</span><span class="p">),</span> <span class="n">a4xf</span><span class="o">-</span><span class="n">regional</span><span class="o">-</span><span class="mi">000</span> <span class="p">(</span><span class="o">*</span><span class="mf">0.51</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It can also be defined independently for different species:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">EEA_AQ_eReporting</span>
+<span class="n">species</span> <span class="o">=</span> <span class="n">pm2p5</span><span class="p">,</span> <span class="n">pm10</span>
+<span class="n">calibration_factor</span> <span class="o">=</span> <span class="n">a54s</span><span class="o">-</span><span class="n">regional</span><span class="o">-</span><span class="mi">000</span> <span class="p">(</span><span class="o">*</span><span class="mf">0.62</span><span class="p">,</span> <span class="o">*</span><span class="mf">0.4</span><span class="p">),</span> <span class="n">a4xf</span><span class="o">-</span><span class="n">regional</span><span class="o">-</span><span class="mi">000</span> <span class="p">(</span><span class="o">*</span><span class="mf">0.52</span><span class="p">,</span> <span class="o">*</span><span class="mf">0.9</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>On the dashboard there is no current way to interactively set the calibration factor, so data must be loaded by configuration file first if wanting to apply this.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Colocation.html" class="btn btn-neutral float-left" title="Colocation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Topics-in-depth.html" class="btn btn-neutral float-right" title="Topics in depth" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2026, Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
