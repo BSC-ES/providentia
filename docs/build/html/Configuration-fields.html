@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuration fields &mdash; Providentia 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Plot types and options" href="Plot-types-and-options.html" />
+    <link rel="prev" title="Configuration files" href="Configuration-files.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modes.html">Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="Topics-in-depth.html">Topics in depth</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Configuration-files.html">Configuration files</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Configuration fields</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#common-parameters">Common parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analysis-and-visualization-modes-dashboard-report-library">Analysis and visualization modes (Dashboard, Report, Library)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dashboard">Dashboard</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#report">Report</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interpolation">Interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download">Download</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Plot-types-and-options.html">Plot types and options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Plot-customisation.html">Plot customisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training Material</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the Team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="Topics-in-depth.html">Topics in depth</a></li>
+      <li class="breadcrumb-item active">Configuration fields</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Configuration-fields.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="configuration-fields">
+<h1>Configuration fields<a class="headerlink" href="#configuration-fields" title="Link to this heading"></a></h1>
+<p>Configuration fields determine how Providentia behaves during a run using a configuration file. Below is a full list of all available parameters organized by mode.</p>
+<p>These fields can also be set via command line arguments, for more details, see the <a class="reference internal" href="Command-line-configuration.html"><span class="doc std std-doc">Command line configuration page</span></a>.</p>
+<section id="common-parameters">
+<h2>Common parameters<a class="headerlink" href="#common-parameters" title="Link to this heading"></a></h2>
+<p>Some of these fields are required depending on the mode. If a parameter required by a given mode is missing, Providentia will fail.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Required in</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>network</p></td>
+<td><p>Dashboard, Report, Interpolation</p></td>
+<td><p>Network you want to load observations from. Can be multiple (e.g. <code class="docutils literal notranslate"><span class="pre">CAPMoN,</span> <span class="pre">EBAS</span></code>). Adding a wild card (*) is going to expand to certain variables (vconcaerobin* → vconcaerobin1, vconcaerobin2, etc.).</p></td>
+</tr>
+<tr class="row-odd"><td><p>species</p></td>
+<td><p>All modes</p></td>
+<td><p>Species to load. Can be multiple (e.g. <code class="docutils literal notranslate"><span class="pre">sconco3,</span> <span class="pre">sconcno2</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p>resolution</p></td>
+<td><p>All modes</p></td>
+<td><p>Temporal resolution of the observations you want to load (e.g. <code class="docutils literal notranslate"><span class="pre">3hourly</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p>start_date</p></td>
+<td><p>All modes</p></td>
+<td><p>Comparison start date in YYYYMMDD format (e.g. <code class="docutils literal notranslate"><span class="pre">20170101</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p>end_date</p></td>
+<td><p>All modes</p></td>
+<td><p>Comparison end date in YYYYMMDD format (e.g. <code class="docutils literal notranslate"><span class="pre">20180601</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p>model</p></td>
+<td><p>Dashboard, Report, Interpolation</p></td>
+<td><p>ID of model. The model IDs can be mapped to different names by adding a list of alternative names after the model IDs (e.g. <code class="docutils literal notranslate"><span class="pre">mod1,</span> <span class="pre">mod2</span> <span class="pre">(altmod1,</span> <span class="pre">altmod2)</span></code>). After interpolation model IDs will consist of 3 separate strings [ID-domain-ensemble]. The domain and ensemble</p></td>
+</tr>
+<tr class="row-even"><td><p>model_resolution</p></td>
+<td><p>Optional</p></td>
+<td><p>Model resolution if different from observations</p></td>
+</tr>
+<tr class="row-odd"><td><p>domain</p></td>
+<td><p>Optional</p></td>
+<td><p>Domain of the model. Can be multiple.</p></td>
+</tr>
+<tr class="row-even"><td><p>ensemble</p></td>
+<td><p>Optional</p></td>
+<td><p>Ensemble member number or ensemble statistic of the model. defaults to all members available. Can be multiple.</p></td>
+</tr>
+<tr class="row-odd"><td><p>forecast</p></td>
+<td><p>Optional</p></td>
+<td><p>Controls how forecast data is handled. Valid options are <code class="docutils literal notranslate"><span class="pre">dayN</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">day1</span></code>) or <code class="docutils literal notranslate"><span class="pre">daily</span></code>. If this field is not empty in the interpolation, all forecast data will be processed.</p></td>
+</tr>
+<tr class="row-even"><td><p>filter_species</p></td>
+<td><p>Optional</p></td>
+<td><p>Filter read species by other species data within a data range. The first value set is the lower bound to filter by, and the second value the upper bound. Place a sign before each bound value to inform if the filter should be inclusive or exclusive of the bound, e.g. <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;=</span></code>. If not wishing to set either the lower or upper bounds, a <code class="docutils literal notranslate"><span class="pre">:</span></code> can be used. Optionally, a fill value can also be given as a third value to impose what the filtered data is set to, by default this is <code class="docutils literal notranslate"><span class="pre">NaN</span></code>. Multiple filters can be  set together separated by a comma (e.g. <code class="docutils literal notranslate"><span class="pre">network1:species1</span> <span class="pre">(&gt;lowerlim,</span> <span class="pre">&lt;=upperlim,</span> <span class="pre">fillvalue),</span> <span class="pre">network2:species2</span> <span class="pre">(:,</span> <span class="pre">&lt;upperlim)</span></code>).</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="analysis-and-visualization-modes-dashboard-report-library">
+<h2>Analysis and visualization modes (Dashboard, Report, Library)<a class="headerlink" href="#analysis-and-visualization-modes-dashboard-report-library" title="Link to this heading"></a></h2>
+<p>Apart from the common parameters, these are the fields used by all analysis and visualization modes (<a class="reference internal" href="Dashboard.html"><span class="doc std std-doc">Dashboard</span></a>, <a class="reference internal" href="Report.html"><span class="doc std std-doc">Report</span></a>, <a class="reference internal" href="Library.html"><span class="doc std std-doc">Library</span></a>). All parameters in this section are optional.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>statistic_mode</p></td>
+<td><p>Statistic mode: Temporal|Spatial (default), Spatial|Temporal or Flattened.</p></td>
+</tr>
+<tr class="row-odd"><td><p>statistic_aggregation</p></td>
+<td><p>Aggregation statistic, e.g. Median.</p></td>
+</tr>
+<tr class="row-even"><td><p>timeseries_statistic_aggregation</p></td>
+<td><p>Timeseries aggregation statistic, e.g. Median.</p></td>
+</tr>
+<tr class="row-odd"><td><p>periodic_statistic_mode</p></td>
+<td><p>Periodic statistic mode: Independent (default), Cycle.</p></td>
+</tr>
+<tr class="row-even"><td><p>periodic_statistic_aggregation</p></td>
+<td><p>Periodic aggregation statistic, e.g. Mean (default).</p></td>
+</tr>
+<tr class="row-odd"><td><p>temporal_colocation</p></td>
+<td><p>Boolean variable to set if you want to temporally colocate the observation and model data.</p></td>
+</tr>
+<tr class="row-even"><td><p>spatial_colocation</p></td>
+<td><p>Boolean variable to set if you want to spatially colocate the observation and model data across multiple species.</p></td>
+</tr>
+<tr class="row-odd"><td><p>plot_characteristics_filename</p></td>
+<td><p>The path to the file containing the plot characteristics.</p></td>
+</tr>
+<tr class="row-even"><td><p>observations_data_label</p></td>
+<td><p>Alias for observational data</p></td>
+</tr>
+<tr class="row-odd"><td><p>lower_bound</p></td>
+<td><p>Filter out data lower than this set limit. If multiple species are being read then this can either be one value, setting the same limit across species, or multiple values per species (e.g. <code class="docutils literal notranslate"><span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p>upper_bound</p></td>
+<td><p>Filter out data above this set limit. If multiple species are being read then this can either be one value, setting the same limit across species, or multiple values per species (e.g. <code class="docutils literal notranslate"><span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p>map_extent</p></td>
+<td><p>Set the map plot extents with the syntax: minimum longitude, maximum longitude, minimum latitude, maximum latitude.</p></td>
+</tr>
+<tr class="row-even"><td><p>remove_extreme_stations</p></td>
+<td><p>Type of extreme stations removal, from the options given in <code class="docutils literal notranslate"><span class="pre">remove_extreme_stations.yaml</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>resampling_resolution</p></td>
+<td><p>Resolution you want to resample your data to. Options: <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">3hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">6hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">monthly</span></code>, <code class="docutils literal notranslate"><span class="pre">annual</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="dashboard">
+<h2>Dashboard<a class="headerlink" href="#dashboard" title="Link to this heading"></a></h2>
+<p>This parameter is used only in the <a class="reference internal" href="Dashboard.html"><span class="doc std std-doc">Dashboard mode</span></a>. It is optional.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>active_dashboard_plots</p></td>
+<td><p>Plots that will be active in the dashboard once it is launched (e.g. <code class="docutils literal notranslate"><span class="pre">timeseries,</span> <span class="pre">periodic-violin,</span> <span class="pre">scatter,</span> <span class="pre">distribution</span></code>).</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="report">
+<h2>Report<a class="headerlink" href="#report" title="Link to this heading"></a></h2>
+<p>These parameters are used only in the <a class="reference internal" href="Report.html"><span class="doc std std-doc">Report mode</span></a>. All of them are optional.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>report_type</p></td>
+<td><p>Type of report to generate that defines which plots the report will contain, from the options given in <code class="docutils literal notranslate"><span class="pre">report_plots.yaml</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>report_summary</p></td>
+<td><p>Boolean variable to set if you wish to make specific plots for each station in subsection.</p></td>
+</tr>
+<tr class="row-even"><td><p>report_stations</p></td>
+<td><p>Boolean variable to set if you wish to make summary plots across station subsection.</p></td>
+</tr>
+<tr class="row-odd"><td><p>report_title</p></td>
+<td><p>The header in the first page of the report (as in the PDF).</p></td>
+</tr>
+<tr class="row-even"><td><p>report_filename</p></td>
+<td><p>The filename of the report or the path to create the report (as in the PDF).</p></td>
+</tr>
+<tr class="row-odd"><td><p>harmonise_stations</p></td>
+<td><p>Boolean variable to set if you wish to harmonise axes limits across stations for stations report.</p></td>
+</tr>
+<tr class="row-even"><td><p>harmonise_summary</p></td>
+<td><p>Boolean variable to set if you wish to harmonise axes limits across subsections for summary report.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="interpolation">
+<h2>Interpolation<a class="headerlink" href="#interpolation" title="Link to this heading"></a></h2>
+<p>These parameters are used only in the <a class="reference internal" href="Interpolation.html"><span class="doc std std-doc">Interpolation mode</span></a>. All of them are optional.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>interp_n_neighbours</p></td>
+<td><p>The number of nearest neighbours to use in the interpolation of model output to observational stations. If not set, this defaults to <code class="docutils literal notranslate"><span class="pre">4</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>interp_spinup_timesteps</p></td>
+<td><p>Needs to be a number</p></td>
+</tr>
+<tr class="row-even"><td><p>interp_model_downsampling</p></td>
+<td><p>Sets how downsampling of the model resolution to the observational resolution should be handled. Options: <code class="docutils literal notranslate"><span class="pre">mean</span></code>, <code class="docutils literal notranslate"><span class="pre">median</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>interp_model_upsampling</p></td>
+<td><p>Sets how upsampling of the model resolution to the observational resolution should be handled. <code class="docutils literal notranslate"><span class="pre">fill</span></code> linearly fills between measurements, and <code class="docutils literal notranslate"><span class="pre">gaps</span></code> sets NaN values for times that the model does not have.</p></td>
+</tr>
+<tr class="row-even"><td><p>interp_multiprocessing</p></td>
+<td><p>Boolean variable to set if you wish to use multiprocessing instead of greasy to interpolate on HPC machines.</p></td>
+</tr>
+<tr class="row-odd"><td><p>network_type</p></td>
+<td><p>Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the <code class="docutils literal notranslate"><span class="pre">*</span></code> wildcard.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="download">
+<h2>Download<a class="headerlink" href="#download" title="Link to this heading"></a></h2>
+<p>These parameters are used only in the <a class="reference internal" href="Download.html"><span class="doc std std-doc">Download mode</span></a>. All of them are optional.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>dl_overwrite</p></td>
+<td><p>Indicates whether previously downloaded files should be overwritten.</p></td>
+</tr>
+<tr class="row-odd"><td><p>dl_ghost_source</p></td>
+<td><p>Determines where GHOST observations are downloaded from.</p></td>
+</tr>
+<tr class="row-even"><td><p>dl_interpolated</p></td>
+<td><p>Specifies whether the interpolated versions of the model output should be downloaded.</p></td>
+</tr>
+<tr class="row-odd"><td><p>dl_mode</p></td>
+<td><p>Selects what to download when both observations and model output are present in the configuration file.</p></td>
+</tr>
+<tr class="row-even"><td><p>network_type</p></td>
+<td><p>Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the <code class="docutils literal notranslate"><span class="pre">*</span></code> wildcard.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Configuration-files.html" class="btn btn-neutral float-left" title="Configuration files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Plot-types-and-options.html" class="btn btn-neutral float-right" title="Plot types and options" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2026, Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

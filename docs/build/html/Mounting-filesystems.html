@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mounting filesystems &mdash; Providentia 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Running the tool on debug" href="Running-the-tool-on-debug.html" />
+    <link rel="prev" title="Remote HPC connection setup" href="Connection-setup.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Modes.html">Modes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Topics-in-depth.html">Topics in depth</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="Other-topics.html">Other topics</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="Running-on-HPC.html">Running on HPC</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Connection-setup.html">Remote HPC connection setup</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Mounting filesystems</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mounting-esarchive">Mounting esarchive</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Running-the-tool-on-debug.html">Running the tool on debug</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Launching-notebooks.html">Notebooks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Command-line-configuration.html">Command line configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QA-filtering.html">QA filtering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Representativity-filtering.html">Representativity filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Saved-file-formats.html">Saved file formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Create-your-own-data-network.html">Create your own data network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Colocation.html">Colocation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Multispecies-filtering.html">Multispecies filtering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Redirecting-output-to-a-file.html">Redirecting output to a file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ADS.html">Account setup in Atmosphere Data Store</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training Material</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the Team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="Other-topics.html">Other topics</a></li>
+          <li class="breadcrumb-item"><a href="Running-on-HPC.html">Running on HPC</a></li>
+      <li class="breadcrumb-item active">Mounting filesystems</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Mounting-filesystems.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="mounting-filesystems">
+<h1>Mounting filesystems<a class="headerlink" href="#mounting-filesystems" title="Link to this heading"></a></h1>
+<p>It is possible to mount filesystems, such as esarchive from MN5, on your personal computer. This can then be used to load observations/models that are stored remotely on these filesystems while using Providentia on your local machine. The Providentia data paths should be updated to point to the local mounted directory in <code class="docutils literal notranslate"><span class="pre">settings/data_paths.yaml</span></code>.</p>
+<p>How this is done varies by operating system. In this section you will find information on how to mount esarchive, you can use this as inspiration for other filesystems.</p>
+<section id="mounting-esarchive">
+<h2>Mounting esarchive<a class="headerlink" href="#mounting-esarchive" title="Link to this heading"></a></h2>
+<section id="linux">
+<h3>Linux<a class="headerlink" href="#linux" title="Link to this heading"></a></h3>
+<p>On the Linux the esarchive can be setup permanently.</p>
+<p>Firstly, create a local directory where you want the esarchive to be mounted, e.g. <code class="docutils literal notranslate"><span class="pre">/localdir/tomount/esarchive</span></code>.</p>
+<p>Next, add the following line to the <code class="docutils literal notranslate"><span class="pre">/etc/fstab</span></code> file (changing your BSC username and local directory):</p>
+<p><code class="docutils literal notranslate"><span class="pre">sshfs#bscXXXXXX&#64;dt01.bsc.es:/gpfs/archive/bsc32/esarchive</span> <span class="pre">/localdir/tomount/esarchive</span> <span class="pre">fuse</span> <span class="pre">defaults,allow_other,reconnect,ro</span> <span class="pre">0</span> <span class="pre">0</span></code></p>
+<p>Install sshfs if it is not in your computer yet:</p>
+<p><code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">sshfs</span></code></p>
+<p>The esarchive can finally be mounted by:</p>
+<p><code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">mount</span> <span class="pre">-av</span> </code></p>
+<p>To unmount the esarchive, the following command can be used:</p>
+<p><code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">umount</span> <span class="pre">/localdir/tomount/esarchive</span></code></p>
+</section>
+<section id="mac">
+<h3>Mac<a class="headerlink" href="#mac" title="Link to this heading"></a></h3>
+<p>On Mac, the mounting cannot be setup permanently, but will stay open while the terminal session is active. Before trying to setup the connection you must install FUSE and SSHFS, please follow the instructions here: https://earth.bsc.es/wiki/doku.php?id=computing:addesarchive&amp;s[]=sshfs.</p>
+<p>After that is done, create a local directory where you want the esarchive to be mounted, e.g. <code class="docutils literal notranslate"><span class="pre">/localdir/tomount/esarchive</span></code>.</p>
+<p>Then run the following command (changing your BSC username and local directory):</p>
+<p><code class="docutils literal notranslate"><span class="pre">sshfs</span> <span class="pre">bscXXXXXX&#64;dt01.bsc.es:/gpfs/archive/bsc32/esarchive</span> <span class="pre">/localdir/tomount/esarchive</span> <span class="pre">-o</span> <span class="pre">volname=esarchive,defer_permissions,allow_other,IdentityFile=$HOME/.ssh/id_rsa,reconnect,ro</span></code></p>
+<p>To unmount the esarchive, the following command can be used:</p>
+<p><code class="docutils literal notranslate"><span class="pre">diskutil</span> <span class="pre">umount</span> <span class="pre">force</span> <span class="pre">/localdir/tomount/esarchive</span></code></p>
+</section>
+<section id="windows">
+<h3>Windows<a class="headerlink" href="#windows" title="Link to this heading"></a></h3>
+<p>As present, the esarchive cannot be mounted on Windows machines.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Connection-setup.html" class="btn btn-neutral float-left" title="Remote HPC connection setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Running-the-tool-on-debug.html" class="btn btn-neutral float-right" title="Running the tool on debug" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2026, Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

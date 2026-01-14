@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CAMS &mdash; Providentia 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ACTRIS" href="ACTRIS-download.html" />
+    <link rel="prev" title="Zenodo" href="Zenodo-download.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Providentia
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Home.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="Modes.html">Modes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Interpolation.html">Interpolation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Dashboard.html">Dashboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Report.html">Report</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="Download-mode.html">Download</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Download-mode.html#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="BSC-download.html">BSC HPC Machines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Zenodo-download.html">Zenodo</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">CAMS</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#available-cams-datasets">Available CAMS datasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#how-to-enable-atmosphere-data-store-download">How to enable Atmosphere Data Store download</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cams-european-air-quality-forecasts">1. CAMS European Air Quality Forecasts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cams-global-atmospheric-composition-forecasts">2. CAMS Global Atmospheric Composition Forecasts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cams-european-air-quality-reanalyses">3. CAMS European Air Quality Reanalyses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cams-global-reanalysis-eac4">4. CAMS Global Reanalysis (EAC4)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cams-ghost-species-mapping">CAMS-GHOST species mapping</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="ACTRIS-download.html">ACTRIS</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Library-mode.html">Library</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Topics-in-depth.html">Topics in depth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training Material</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the Team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Providentia</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="Modes.html">Modes</a></li>
+          <li class="breadcrumb-item"><a href="Download-mode.html">Download</a></li>
+      <li class="breadcrumb-item active">CAMS</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/CAMS-download.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="cams">
+<h1>CAMS<a class="headerlink" href="#cams" title="Link to this heading"></a></h1>
+<p>Providentia’s download mode supports downloading model output data provided by <strong>CAMS</strong> from the <strong>Atmosphere Data Store</strong>:</p>
+<p><a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets">https://ads.atmosphere.copernicus.eu/datasets</a></p>
+<p>An ECMWF account is required to download the files. For a tutorial on how to create and set up your account, see the <a class="reference internal" href="ADS.html"><span class="doc std std-doc">Account Setup and Access Configuration</span></a> section.</p>
+<section id="available-cams-datasets">
+<h2>Available CAMS datasets<a class="headerlink" href="#available-cams-datasets" title="Link to this heading"></a></h2>
+<p>Currently, four CAMS datasets are available for download:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#cams-european-air-quality-forecasts"><strong>CAMS European Air Quality Forecasts</strong></a></p></li>
+<li><p><a class="reference internal" href="#cams-global-atmospheric-composition-forecasts"><strong>CAMS Global Atmospheric Composition Forecasts</strong></a></p></li>
+<li><p><a class="reference internal" href="#cams-european-air-quality-reanalyses"><strong>CAMS European Air Quality Reanalyses</strong></a></p></li>
+<li><p><a class="reference internal" href="#cams-global-reanalysis-eac4"><strong>CAMS Global Reanalysis (EAC4)</strong></a></p></li>
+</ol>
+</section>
+<section id="how-to-enable-atmosphere-data-store-download">
+<span id="how-to-enable-ads-download"></span><h2>How to enable Atmosphere Data Store download<a class="headerlink" href="#how-to-enable-atmosphere-data-store-download" title="Link to this heading"></a></h2>
+<p>To download CAMS data from the Atmosphere Data Store, include one of the following model names along with the domain. For details about available models, streams, and specific resolutions, see the corresponding sections below:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cams_analysis_&lt;model&gt;-regional</span></code> — <a class="reference internal" href="#cams-european-air-quality-forecasts">CAMS European Air Quality Forecasts</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cams_forecast_&lt;model&gt;-regional</span></code> — <a class="reference internal" href="#cams-european-air-quality-forecasts">CAMS European Air Quality Forecasts</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cams_forecast-global</span></code> — <a class="reference internal" href="#cams-global-atmospheric-composition-forecasts">CAMS Global Atmospheric Composition Forecasts</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cams_reanalysis_&lt;model&gt;_&lt;stream&gt;-regional</span></code> — <a class="reference internal" href="#cams-european-air-quality-reanalyses">CAMS European Air Quality Reanalyses</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cams_reanalysis-global</span></code> — <a class="reference internal" href="#cams-global-reanalysis-eac4">CAMS Global Reanalysis (EAC4)</a></p></li>
+</ul>
+<p>Once you have selected the dataset and specified the model and domain, make sure to set:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
+<p>or</p>
+<p>Answer <code class="docutils literal notranslate"><span class="pre">n</span></code> to the prompt:</p>
+<p><em>“Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded) ([y]/n)”</em></p>
+</section>
+<section id="cams-european-air-quality-forecasts">
+<h2>1. CAMS European Air Quality Forecasts<a class="headerlink" href="#cams-european-air-quality-forecasts" title="Link to this heading"></a></h2>
+<p><a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets/cams-europe-air-quality-forecasts?tab=overview">Dataset Link</a></p>
+<p>Using this dataset you can either download:</p>
+<ul class="simple">
+<li><p><strong>Regional Analysis data</strong>, or</p></li>
+<li><p><strong>Regional Forecast data</strong></p></li>
+</ul>
+<p>This dataset contains multi-level data.</p>
+<p>Only hourly data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> in your configuration file; otherwise, the download will not work.</p>
+<section id="mandatory-fields-for-regional-analysis-data">
+<h3>Mandatory fields for regional analysis data<a class="headerlink" href="#mandatory-fields-for-regional-analysis-data" title="Link to this heading"></a></h3>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_analysis_&lt;model&gt;</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
+</pre></div>
+</div>
+</section>
+<section id="mandatory-fields-for-regional-forecast-data">
+<h3>Mandatory fields for regional forecast data<a class="headerlink" href="#mandatory-fields-for-regional-forecast-data" title="Link to this heading"></a></h3>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast_&lt;model&gt;</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
+</pre></div>
+</div>
+<blockquote>
+<div><p>Replace <code class="docutils literal notranslate"><span class="pre">&lt;model&gt;</span></code> with one of the available model names listed below.</p>
+</div></blockquote>
+</section>
+<section id="available-models">
+<h3>Available models<a class="headerlink" href="#available-models" title="Link to this heading"></a></h3>
+<p>Use the following model names (same as in the API):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ensemble</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chimere</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dehm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">emep</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">euradim</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gemaq</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lotos</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">match</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">minni</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mocage</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">monarch</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">silam</span></code></p></li>
+</ul>
+</section>
+<section id="available-variables-species">
+<h3>Available variables (Species)<a class="headerlink" href="#available-variables-species" title="Link to this heading"></a></h3>
+<p>These are the available species:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pm10</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm10du</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm10so4ss</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm2p5</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm2p5ec</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm2p5nh4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm2p5no3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm2p5so4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcco</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcglyox</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconchcho</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcnh3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcnmvoc</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconco3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcso2</span></code></p></li>
+</ul>
+<blockquote>
+<div><p>Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the <a class="reference internal" href="#cams-ghost-species-mapping">CAMS-GHOST species mapping</a> section.</p>
+</div></blockquote>
+</section>
+<section id="assumptions">
+<h3>Assumptions<a class="headerlink" href="#assumptions" title="Link to this heading"></a></h3>
+<p>Providentia assumes the following fixed values when downloading data:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">=</span> <span class="pre">00:00-23:00</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">leadtime_hour</span> <span class="pre">=</span> <span class="pre">0-96</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">level</span> <span class="pre">=</span> <span class="pre">0</span></code></p></li>
+</ul>
+<blockquote>
+<div><p>All available data in this dataset is multi-level, but Providentia retrieves only the ground level.</p>
+</div></blockquote>
+</section>
+<section id="example-configuration-files-and-corresponding-api-requests">
+<h3>Example configuration files and corresponding API requests<a class="headerlink" href="#example-configuration-files-and-corresponding-api-requests" title="Link to this heading"></a></h3>
+<section id="example-1-cams-regional-analysis-dehm-model-sconcno2">
+<h4>Example 1: CAMS Regional Analysis (DEHM Model, sconcno2)<a class="headerlink" href="#example-1-cams-regional-analysis-dehm-model-sconcno2" title="Link to this heading"></a></h4>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_analysis_dehm-regional]</span><span class="w"> </span>
+<span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20250701</span><span class="w"> </span>
+<span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20250702</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sconcno2</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_analysis_dehm</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-europe-air-quality-forecasts&#39;</span>
+<span class="n">request</span> <span class="o">=</span> <span class="p">{</span>
+<span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;nitrogen_dioxide&#39;</span><span class="p">,</span>
+<span class="s1">&#39;leadtime_hour&#39;</span> <span class="p">:</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span>
+<span class="s1">&#39;type&#39;</span> <span class="p">:</span> <span class="s1">&#39;analysis&#39;</span><span class="p">,</span>
+<span class="s1">&#39;date&#39;</span> <span class="p">:</span> <span class="s1">&#39;2025-07-01/2025-07-01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;model&#39;</span> <span class="p">:</span> <span class="s1">&#39;dehm&#39;</span><span class="p">,</span>
+<span class="s1">&#39;level&#39;</span> <span class="p">:</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span>
+<span class="s1">&#39;time&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;01:00&#39;</span><span class="p">,</span> <span class="s1">&#39;02:00&#39;</span><span class="p">,</span> <span class="s1">&#39;03:00&#39;</span><span class="p">,</span> <span class="s1">&#39;04:00&#39;</span><span class="p">,</span> <span class="s1">&#39;05:00&#39;</span><span class="p">,</span> <span class="s1">&#39;06:00&#39;</span><span class="p">,</span> <span class="s1">&#39;07:00&#39;</span><span class="p">,</span> <span class="s1">&#39;08:00&#39;</span><span class="p">,</span> <span class="s1">&#39;09:00&#39;</span><span class="p">,</span> <span class="s1">&#39;10:00&#39;</span><span class="p">,</span> <span class="s1">&#39;11:00&#39;</span><span class="p">,</span> <span class="s1">&#39;12:00&#39;</span><span class="p">,</span> <span class="s1">&#39;13:00&#39;</span><span class="p">,</span> <span class="s1">&#39;14:00&#39;</span><span class="p">,</span> <span class="s1">&#39;15:00&#39;</span><span class="p">,</span> <span class="s1">&#39;16:00&#39;</span><span class="p">,</span> <span class="s1">&#39;17:00&#39;</span><span class="p">,</span> <span class="s1">&#39;18:00&#39;</span><span class="p">,</span> <span class="s1">&#39;19:00&#39;</span><span class="p">,</span> <span class="s1">&#39;20:00&#39;</span><span class="p">,</span> <span class="s1">&#39;21:00&#39;</span><span class="p">,</span> <span class="s1">&#39;22:00&#39;</span><span class="p">,</span> <span class="s1">&#39;23:00&#39;</span><span class="p">],</span>
+<span class="s1">&#39;data_format&#39;</span> <span class="p">:</span> <span class="s1">&#39;netcdf_zip&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="example-2-cams-regional-forecast-ensemble-model-sconcno2">
+<h4>Example 2: CAMS Regional Forecast (Ensemble Model, sconcno2)<a class="headerlink" href="#example-2-cams-regional-forecast-ensemble-model-sconcno2" title="Link to this heading"></a></h4>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_forecast_ensemble-regional]</span>
+<span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20250701</span>
+<span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20250702</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sconcno2</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast_ensemble</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-europe-air-quality-forecasts&#39;</span>
+<span class="n">request</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;variable&#39;</span><span class="p">:</span> <span class="s1">&#39;nitrogen_dioxide&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;leadtime_hour&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">,</span> <span class="s1">&#39;4&#39;</span><span class="p">,</span> <span class="s1">&#39;5&#39;</span><span class="p">,</span> <span class="s1">&#39;6&#39;</span><span class="p">,</span> <span class="s1">&#39;7&#39;</span><span class="p">,</span> <span class="s1">&#39;8&#39;</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">,</span> <span class="s1">&#39;10&#39;</span><span class="p">,</span> <span class="s1">&#39;11&#39;</span><span class="p">,</span> <span class="s1">&#39;12&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;13&#39;</span><span class="p">,</span> <span class="s1">&#39;14&#39;</span><span class="p">,</span> <span class="s1">&#39;15&#39;</span><span class="p">,</span> <span class="s1">&#39;16&#39;</span><span class="p">,</span> <span class="s1">&#39;17&#39;</span><span class="p">,</span> <span class="s1">&#39;18&#39;</span><span class="p">,</span> <span class="s1">&#39;19&#39;</span><span class="p">,</span> <span class="s1">&#39;20&#39;</span><span class="p">,</span> <span class="s1">&#39;21&#39;</span><span class="p">,</span> <span class="s1">&#39;22&#39;</span><span class="p">,</span> <span class="s1">&#39;23&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;24&#39;</span><span class="p">,</span> <span class="s1">&#39;25&#39;</span><span class="p">,</span> <span class="s1">&#39;26&#39;</span><span class="p">,</span> <span class="s1">&#39;27&#39;</span><span class="p">,</span> <span class="s1">&#39;28&#39;</span><span class="p">,</span> <span class="s1">&#39;29&#39;</span><span class="p">,</span> <span class="s1">&#39;30&#39;</span><span class="p">,</span> <span class="s1">&#39;31&#39;</span><span class="p">,</span> <span class="s1">&#39;32&#39;</span><span class="p">,</span> <span class="s1">&#39;33&#39;</span><span class="p">,</span> <span class="s1">&#39;34&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;35&#39;</span><span class="p">,</span> <span class="s1">&#39;36&#39;</span><span class="p">,</span> <span class="s1">&#39;37&#39;</span><span class="p">,</span> <span class="s1">&#39;38&#39;</span><span class="p">,</span> <span class="s1">&#39;39&#39;</span><span class="p">,</span> <span class="s1">&#39;40&#39;</span><span class="p">,</span> <span class="s1">&#39;41&#39;</span><span class="p">,</span> <span class="s1">&#39;42&#39;</span><span class="p">,</span> <span class="s1">&#39;43&#39;</span><span class="p">,</span> <span class="s1">&#39;44&#39;</span><span class="p">,</span> <span class="s1">&#39;45&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;46&#39;</span><span class="p">,</span> <span class="s1">&#39;47&#39;</span><span class="p">,</span> <span class="s1">&#39;48&#39;</span><span class="p">,</span> <span class="s1">&#39;49&#39;</span><span class="p">,</span> <span class="s1">&#39;50&#39;</span><span class="p">,</span> <span class="s1">&#39;51&#39;</span><span class="p">,</span> <span class="s1">&#39;52&#39;</span><span class="p">,</span> <span class="s1">&#39;53&#39;</span><span class="p">,</span> <span class="s1">&#39;54&#39;</span><span class="p">,</span> <span class="s1">&#39;55&#39;</span><span class="p">,</span> <span class="s1">&#39;56&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;57&#39;</span><span class="p">,</span> <span class="s1">&#39;58&#39;</span><span class="p">,</span> <span class="s1">&#39;59&#39;</span><span class="p">,</span> <span class="s1">&#39;60&#39;</span><span class="p">,</span> <span class="s1">&#39;61&#39;</span><span class="p">,</span> <span class="s1">&#39;62&#39;</span><span class="p">,</span> <span class="s1">&#39;63&#39;</span><span class="p">,</span> <span class="s1">&#39;64&#39;</span><span class="p">,</span> <span class="s1">&#39;65&#39;</span><span class="p">,</span> <span class="s1">&#39;66&#39;</span><span class="p">,</span> <span class="s1">&#39;67&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;68&#39;</span><span class="p">,</span> <span class="s1">&#39;69&#39;</span><span class="p">,</span> <span class="s1">&#39;70&#39;</span><span class="p">,</span> <span class="s1">&#39;71&#39;</span><span class="p">,</span> <span class="s1">&#39;72&#39;</span><span class="p">,</span> <span class="s1">&#39;73&#39;</span><span class="p">,</span> <span class="s1">&#39;74&#39;</span><span class="p">,</span> <span class="s1">&#39;75&#39;</span><span class="p">,</span> <span class="s1">&#39;76&#39;</span><span class="p">,</span> <span class="s1">&#39;77&#39;</span><span class="p">,</span> <span class="s1">&#39;78&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;79&#39;</span><span class="p">,</span> <span class="s1">&#39;80&#39;</span><span class="p">,</span> <span class="s1">&#39;81&#39;</span><span class="p">,</span> <span class="s1">&#39;82&#39;</span><span class="p">,</span> <span class="s1">&#39;83&#39;</span><span class="p">,</span> <span class="s1">&#39;84&#39;</span><span class="p">,</span> <span class="s1">&#39;85&#39;</span><span class="p">,</span> <span class="s1">&#39;86&#39;</span><span class="p">,</span> <span class="s1">&#39;87&#39;</span><span class="p">,</span> <span class="s1">&#39;88&#39;</span><span class="p">,</span> <span class="s1">&#39;89&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;90&#39;</span><span class="p">,</span> <span class="s1">&#39;91&#39;</span><span class="p">,</span> <span class="s1">&#39;92&#39;</span><span class="p">,</span> <span class="s1">&#39;93&#39;</span><span class="p">,</span> <span class="s1">&#39;94&#39;</span><span class="p">,</span> <span class="s1">&#39;95&#39;</span><span class="p">,</span> <span class="s1">&#39;96&#39;</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;forecast&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="s1">&#39;2025-07-01/2025-07-01&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="s1">&#39;ensemble&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;00:00&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;data_format&#39;</span><span class="p">:</span> <span class="s1">&#39;netcdf_zip&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="cams-global-atmospheric-composition-forecasts">
+<h2>2. CAMS Global Atmospheric Composition Forecasts<a class="headerlink" href="#cams-global-atmospheric-composition-forecasts" title="Link to this heading"></a></h2>
+<p><a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets/cams-global-atmospheric-composition-forecasts?tab=overview">Dataset Link</a></p>
+<p>Using this dataset you can download <strong>Global Forecast data</strong>.</p>
+<p>This dataset contains both single-level and multi-level data.</p>
+<p>hourly and 3hourly data is available in this dataset. In your configuration file, you must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> or <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">3hourly</span></code>, depending on whether the data is single-level or multi-level. Otherwise, the download will fail.</p>
+<section id="mandatory-fields-for-global-forecast-single-level-data">
+<h3>Mandatory fields for global forecast single-level data<a class="headerlink" href="#mandatory-fields-for-global-forecast-single-level-data" title="Link to this heading"></a></h3>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
+</pre></div>
+</div>
+</section>
+<section id="mandatory-fields-for-global-forecast-multi-level-data">
+<h3>Mandatory fields for global forecast multi-level data<a class="headerlink" href="#mandatory-fields-for-global-forecast-multi-level-data" title="Link to this heading"></a></h3>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3hourly</span>
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h3>Available variables (Species)<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>Whether the data is single or multi depends on the selected species. These are the available species:</p>
+<section id="single-level">
+<h4>Single-level:<a class="headerlink" href="#single-level" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">absod1020aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">absod440aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">absod550aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">acprec</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">asy1020aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">asy440aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cldbot</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">od1020aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">od380aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">od440aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">od500aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">od500aerofine</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">od550aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">od550du</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm10</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm2p5</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pshltr</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rh2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sca1020aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sca440aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sca550aero</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">si</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">slp</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sst</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">t2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">td2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vdist</span></code></p></li>
+</ul>
+</section>
+<section id="multi-level">
+<h4>Multi-level:<a class="headerlink" href="#multi-level" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cfracmax</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lbsco532</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcc2h4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcc2h6</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcc3h6</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcc3h8</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcch4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcco</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcetoh</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcglyox</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconchcho</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconchcl</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconchf</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconchno3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcisop</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcmsa</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcnh3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcnh4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconco3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcpan</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcpb</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcso2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcso4</span></code></p></li>
+</ul>
+<blockquote>
+<div><p>Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the <a class="reference internal" href="#cams-ghost-species-mapping">CAMS-GHOST species mapping</a> section.</p>
+</div></blockquote>
+</section>
+</section>
+<section id="id2">
+<h3>Assumptions<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<p>Providentia assumes the following fixed values when downloading data:</p>
+<section id="for-single-level-data">
+<h4>For single-level data:<a class="headerlink" href="#for-single-level-data" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">=</span> <span class="pre">00:00</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">leadtime_hour</span> <span class="pre">=</span> <span class="pre">0-120</span></code> (for every hour)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">=</span> <span class="pre">forecast</span></code></p></li>
+</ul>
+</section>
+<section id="for-multi-level-data">
+<h4>For multi-level data:<a class="headerlink" href="#for-multi-level-data" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">=</span> <span class="pre">00:00</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">leadtime_hour</span> <span class="pre">=</span> <span class="pre">0-120</span></code> (for every three hours)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">=</span> <span class="pre">forecast</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model_level</span> <span class="pre">=</span> <span class="pre">60</span></code> (up to and including 2019-07-09) <code class="docutils literal notranslate"><span class="pre">137</span></code> (for data after 2019-07-09, when the levels increased)</p></li>
+</ul>
+<blockquote>
+<div><p>For the multi-level data in this dataset, Providentia retrieves only the ground level.</p>
+</div></blockquote>
+</section>
+</section>
+<section id="id3">
+<h3>Example configuration files and corresponding API requests<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<section id="example-1-cams-global-forecast-sst-single-level-hourly">
+<h4>Example 1: CAMS Global Forecast (sst, Single-level, hourly)<a class="headerlink" href="#example-1-cams-global-forecast-sst-single-level-hourly" title="Link to this heading"></a></h4>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_forecast-global-hourly]</span>
+<span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20171201</span><span class="w"> </span>
+<span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20171202</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sst</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-global-atmospheric-composition-forecasts&#39;</span>
+<span class="n">request</span> <span class="o">=</span> <span class="p">{</span>
+<span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;sea_surface_temperature&#39;</span><span class="p">,</span>
+<span class="s1">&#39;leadtime_hour&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">,</span> <span class="s1">&#39;4&#39;</span><span class="p">,</span> <span class="s1">&#39;5&#39;</span><span class="p">,</span> <span class="s1">&#39;6&#39;</span><span class="p">,</span> <span class="s1">&#39;7&#39;</span><span class="p">,</span> <span class="s1">&#39;8&#39;</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">,</span> <span class="s1">&#39;10&#39;</span><span class="p">,</span> <span class="s1">&#39;11&#39;</span><span class="p">,</span> <span class="s1">&#39;12&#39;</span><span class="p">,</span> <span class="s1">&#39;13&#39;</span><span class="p">,</span> <span class="s1">&#39;14&#39;</span><span class="p">,</span> <span class="s1">&#39;15&#39;</span><span class="p">,</span> <span class="s1">&#39;16&#39;</span><span class="p">,</span> <span class="s1">&#39;17&#39;</span><span class="p">,</span> <span class="s1">&#39;18&#39;</span><span class="p">,</span> <span class="s1">&#39;19&#39;</span><span class="p">,</span> <span class="s1">&#39;20&#39;</span><span class="p">,</span> <span class="s1">&#39;21&#39;</span><span class="p">,</span> <span class="s1">&#39;22&#39;</span><span class="p">,</span> <span class="s1">&#39;23&#39;</span><span class="p">,</span> <span class="s1">&#39;24&#39;</span><span class="p">,</span> <span class="s1">&#39;25&#39;</span><span class="p">,</span> <span class="s1">&#39;26&#39;</span><span class="p">,</span> <span class="s1">&#39;27&#39;</span><span class="p">,</span> <span class="s1">&#39;28&#39;</span><span class="p">,</span> <span class="s1">&#39;29&#39;</span><span class="p">,</span> <span class="s1">&#39;30&#39;</span><span class="p">,</span> <span class="s1">&#39;31&#39;</span><span class="p">,</span> <span class="s1">&#39;32&#39;</span><span class="p">,</span> <span class="s1">&#39;33&#39;</span><span class="p">,</span> <span class="s1">&#39;34&#39;</span><span class="p">,</span> <span class="s1">&#39;35&#39;</span><span class="p">,</span> <span class="s1">&#39;36&#39;</span><span class="p">,</span> <span class="s1">&#39;37&#39;</span><span class="p">,</span> <span class="s1">&#39;38&#39;</span><span class="p">,</span> <span class="s1">&#39;39&#39;</span><span class="p">,</span> <span class="s1">&#39;40&#39;</span><span class="p">,</span> <span class="s1">&#39;41&#39;</span><span class="p">,</span> <span class="s1">&#39;42&#39;</span><span class="p">,</span> <span class="s1">&#39;43&#39;</span><span class="p">,</span> <span class="s1">&#39;44&#39;</span><span class="p">,</span> <span class="s1">&#39;45&#39;</span><span class="p">,</span> <span class="s1">&#39;46&#39;</span><span class="p">,</span> <span class="s1">&#39;47&#39;</span><span class="p">,</span> <span class="s1">&#39;48&#39;</span><span class="p">,</span> <span class="s1">&#39;49&#39;</span><span class="p">,</span> <span class="s1">&#39;50&#39;</span><span class="p">,</span> <span class="s1">&#39;51&#39;</span><span class="p">,</span> <span class="s1">&#39;52&#39;</span><span class="p">,</span> <span class="s1">&#39;53&#39;</span><span class="p">,</span> <span class="s1">&#39;54&#39;</span><span class="p">,</span> <span class="s1">&#39;55&#39;</span><span class="p">,</span> <span class="s1">&#39;56&#39;</span><span class="p">,</span> <span class="s1">&#39;57&#39;</span><span class="p">,</span> <span class="s1">&#39;58&#39;</span><span class="p">,</span> <span class="s1">&#39;59&#39;</span><span class="p">,</span> <span class="s1">&#39;60&#39;</span><span class="p">,</span> <span class="s1">&#39;61&#39;</span><span class="p">,</span> <span class="s1">&#39;62&#39;</span><span class="p">,</span> <span class="s1">&#39;63&#39;</span><span class="p">,</span> <span class="s1">&#39;64&#39;</span><span class="p">,</span> <span class="s1">&#39;65&#39;</span><span class="p">,</span> <span class="s1">&#39;66&#39;</span><span class="p">,</span> <span class="s1">&#39;67&#39;</span><span class="p">,</span> <span class="s1">&#39;68&#39;</span><span class="p">,</span> <span class="s1">&#39;69&#39;</span><span class="p">,</span> <span class="s1">&#39;70&#39;</span><span class="p">,</span> <span class="s1">&#39;71&#39;</span><span class="p">,</span> <span class="s1">&#39;72&#39;</span><span class="p">,</span> <span class="s1">&#39;73&#39;</span><span class="p">,</span> <span class="s1">&#39;74&#39;</span><span class="p">,</span> <span class="s1">&#39;75&#39;</span><span class="p">,</span> <span class="s1">&#39;76&#39;</span><span class="p">,</span> <span class="s1">&#39;77&#39;</span><span class="p">,</span> <span class="s1">&#39;78&#39;</span><span class="p">,</span> <span class="s1">&#39;79&#39;</span><span class="p">,</span> <span class="s1">&#39;80&#39;</span><span class="p">,</span> <span class="s1">&#39;81&#39;</span><span class="p">,</span> <span class="s1">&#39;82&#39;</span><span class="p">,</span> <span class="s1">&#39;83&#39;</span><span class="p">,</span> <span class="s1">&#39;84&#39;</span><span class="p">,</span> <span class="s1">&#39;85&#39;</span><span class="p">,</span> <span class="s1">&#39;86&#39;</span><span class="p">,</span> <span class="s1">&#39;87&#39;</span><span class="p">,</span> <span class="s1">&#39;88&#39;</span><span class="p">,</span> <span class="s1">&#39;89&#39;</span><span class="p">,</span> <span class="s1">&#39;90&#39;</span><span class="p">,</span> <span class="s1">&#39;91&#39;</span><span class="p">,</span> <span class="s1">&#39;92&#39;</span><span class="p">,</span> <span class="s1">&#39;93&#39;</span><span class="p">,</span> <span class="s1">&#39;94&#39;</span><span class="p">,</span> <span class="s1">&#39;95&#39;</span><span class="p">,</span> <span class="s1">&#39;96&#39;</span><span class="p">,</span> <span class="s1">&#39;97&#39;</span><span class="p">,</span> <span class="s1">&#39;98&#39;</span><span class="p">,</span> <span class="s1">&#39;99&#39;</span><span class="p">,</span> <span class="s1">&#39;100&#39;</span><span class="p">,</span> <span class="s1">&#39;101&#39;</span><span class="p">,</span> <span class="s1">&#39;102&#39;</span><span class="p">,</span> <span class="s1">&#39;103&#39;</span><span class="p">,</span> <span class="s1">&#39;104&#39;</span><span class="p">,</span> <span class="s1">&#39;105&#39;</span><span class="p">,</span> <span class="s1">&#39;106&#39;</span><span class="p">,</span> <span class="s1">&#39;107&#39;</span><span class="p">,</span> <span class="s1">&#39;108&#39;</span><span class="p">,</span> <span class="s1">&#39;109&#39;</span><span class="p">,</span> <span class="s1">&#39;110&#39;</span><span class="p">,</span> <span class="s1">&#39;111&#39;</span><span class="p">,</span> <span class="s1">&#39;112&#39;</span><span class="p">,</span> <span class="s1">&#39;113&#39;</span><span class="p">,</span> <span class="s1">&#39;114&#39;</span><span class="p">,</span> <span class="s1">&#39;115&#39;</span><span class="p">,</span> <span class="s1">&#39;116&#39;</span><span class="p">,</span> <span class="s1">&#39;117&#39;</span><span class="p">,</span> <span class="s1">&#39;118&#39;</span><span class="p">,</span> <span class="s1">&#39;119&#39;</span><span class="p">,</span> <span class="s1">&#39;120&#39;</span><span class="p">],</span>
+<span class="s1">&#39;type&#39;</span> <span class="p">:</span> <span class="s1">&#39;forecast&#39;</span><span class="p">,</span>
+<span class="s1">&#39;date&#39;</span> <span class="p">:</span> <span class="s1">&#39;2017-12-01/2017-12-01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;time&#39;</span> <span class="p">:</span> <span class="s1">&#39;00:00&#39;</span><span class="p">,</span>
+<span class="s1">&#39;data_format&#39;</span> <span class="p">:</span> <span class="s1">&#39;netcdf_zip&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="example-2-cams-global-forecast-sconcno2-multi-level-3hourly">
+<h4>Example 2: CAMS Global Forecast (sconcno2, Multi-level, 3hourly)<a class="headerlink" href="#example-2-cams-global-forecast-sconcno2-multi-level-3hourly" title="Link to this heading"></a></h4>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_forecast-global-3hourly]</span>
+<span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20200601</span><span class="w">  </span>
+<span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20200602</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sconcno2</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_forecast</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3hourly</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-global-atmospheric-composition-forecasts&#39;</span>
+<span class="n">request</span> <span class="o">=</span> <span class="p">{</span>
+<span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;nitrogen_dioxide&#39;</span><span class="p">,</span>
+<span class="s1">&#39;leadtime_hour&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">,</span> <span class="s1">&#39;6&#39;</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">,</span> <span class="s1">&#39;12&#39;</span><span class="p">,</span> <span class="s1">&#39;15&#39;</span><span class="p">,</span> <span class="s1">&#39;18&#39;</span><span class="p">,</span> <span class="s1">&#39;21&#39;</span><span class="p">,</span> <span class="s1">&#39;24&#39;</span><span class="p">,</span> <span class="s1">&#39;27&#39;</span><span class="p">,</span> <span class="s1">&#39;30&#39;</span><span class="p">,</span> <span class="s1">&#39;33&#39;</span><span class="p">,</span> <span class="s1">&#39;36&#39;</span><span class="p">,</span> <span class="s1">&#39;39&#39;</span><span class="p">,</span> <span class="s1">&#39;42&#39;</span><span class="p">,</span> <span class="s1">&#39;45&#39;</span><span class="p">,</span> <span class="s1">&#39;48&#39;</span><span class="p">,</span> <span class="s1">&#39;51&#39;</span><span class="p">,</span> <span class="s1">&#39;54&#39;</span><span class="p">,</span> <span class="s1">&#39;57&#39;</span><span class="p">,</span> <span class="s1">&#39;60&#39;</span><span class="p">,</span> <span class="s1">&#39;63&#39;</span><span class="p">,</span> <span class="s1">&#39;66&#39;</span><span class="p">,</span> <span class="s1">&#39;69&#39;</span><span class="p">,</span> <span class="s1">&#39;72&#39;</span><span class="p">,</span> <span class="s1">&#39;75&#39;</span><span class="p">,</span> <span class="s1">&#39;78&#39;</span><span class="p">,</span> <span class="s1">&#39;81&#39;</span><span class="p">,</span> <span class="s1">&#39;84&#39;</span><span class="p">,</span> <span class="s1">&#39;87&#39;</span><span class="p">,</span> <span class="s1">&#39;90&#39;</span><span class="p">,</span> <span class="s1">&#39;93&#39;</span><span class="p">,</span> <span class="s1">&#39;96&#39;</span><span class="p">,</span> <span class="s1">&#39;99&#39;</span><span class="p">,</span> <span class="s1">&#39;102&#39;</span><span class="p">,</span> <span class="s1">&#39;105&#39;</span><span class="p">,</span> <span class="s1">&#39;108&#39;</span><span class="p">,</span> <span class="s1">&#39;111&#39;</span><span class="p">,</span> <span class="s1">&#39;114&#39;</span><span class="p">,</span> <span class="s1">&#39;117&#39;</span><span class="p">,</span> <span class="s1">&#39;120&#39;</span><span class="p">],</span>
+<span class="s1">&#39;type&#39;</span> <span class="p">:</span> <span class="s1">&#39;forecast&#39;</span><span class="p">,</span>
+<span class="s1">&#39;date&#39;</span> <span class="p">:</span> <span class="s1">&#39;2020-06-01/2020-06-01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;model_level&#39;</span> <span class="p">:</span> <span class="s1">&#39;137&#39;</span><span class="p">,</span>
+<span class="s1">&#39;time&#39;</span> <span class="p">:</span> <span class="s1">&#39;00:00&#39;</span><span class="p">,</span>
+<span class="s1">&#39;data_format&#39;</span> <span class="p">:</span> <span class="s1">&#39;netcdf_zip&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="cams-european-air-quality-reanalyses">
+<h2>3. CAMS European Air Quality Reanalyses<a class="headerlink" href="#cams-european-air-quality-reanalyses" title="Link to this heading"></a></h2>
+<p><a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets/cams-europe-air-quality-reanalyses?tab=overview">Dataset Link</a></p>
+<p>Using this dataset you can download <strong>Regional Reanalysis data</strong>.</p>
+<p>This dataset contains multi-level data.</p>
+<p>Only hourly data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">hourly</span></code> in your configuration file; otherwise, the download will not work.</p>
+<section id="mandatory-fields-for-regional-reanalysis-data">
+<h3>Mandatory fields for regional reanalysis data<a class="headerlink" href="#mandatory-fields-for-regional-reanalysis-data" title="Link to this heading"></a></h3>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis_&lt;model&gt;_&lt;stream&gt;</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
+</pre></div>
+</div>
+<blockquote>
+<div><p>Replace <code class="docutils literal notranslate"><span class="pre">&lt;model&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;stream&gt;</span></code> with one of the available model names and streams listed below.</p>
+</div></blockquote>
+</section>
+<section id="id4">
+<h3>Available models<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<p>Use the following model names (same as in the API):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ensemble</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chimere</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">emep</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lotos</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">match</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">minni</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mocage</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">monarch</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">silam</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">euradim</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dehm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">gemaq</span></code></p></li>
+</ul>
+</section>
+<section id="available-streams">
+<h3>Available streams<a class="headerlink" href="#available-streams" title="Link to this heading"></a></h3>
+<p>There is two available streams for the regional reanalysis dataset:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">validated</span></code> available for the period <strong>2014–2021 (inclusive)</strong></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">interim</span></code> available for the period <strong>2021–2024 (inclusive)</strong></p></li>
+</ul>
+</section>
+<section id="id5">
+<h3>Available variables (Species)<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<p>These are the available species:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pm10</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm10du</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm10so4ss</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm2p5</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pm2p5ec</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcco</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcglyox</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconchcho</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcnh3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcnmvoc</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconco3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcso2</span></code></p></li>
+</ul>
+<blockquote>
+<div><p>Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the <a class="reference internal" href="#cams-ghost-species-mapping">CAMS-GHOST species mapping</a> section.</p>
+</div></blockquote>
+</section>
+<section id="id6">
+<h3>Assumptions<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<p>Providentia assumes the following fixed values when downloading data:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">level</span> <span class="pre">=</span> <span class="pre">0</span></code></p></li>
+</ul>
+<blockquote>
+<div><p>All available data in this dataset is multi-level, but Providentia retrieves only the ground level.</p>
+</div></blockquote>
+</section>
+<section id="id7">
+<h3>Example configuration files and corresponding API requests<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<section id="example-1-cams-regional-reanalysis-ensemble-model-sconcno2-interim-reanalysis">
+<h4>Example 1: CAMS Regional Reanalysis (Ensemble Model, sconcno2, Interim Reanalysis)<a class="headerlink" href="#example-1-cams-regional-reanalysis-ensemble-model-sconcno2-interim-reanalysis" title="Link to this heading"></a></h4>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_reanalysis_ensemble_interim-regional]</span>
+<span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20240101</span>
+<span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20240201</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sconcno2</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis_ensemble_interim</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-europe-air-quality-reanalyses&#39;</span>
+<span class="n">request</span> <span class="o">=</span> <span class="p">{</span>
+<span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;nitrogen_dioxide&#39;</span><span class="p">,</span>
+<span class="s1">&#39;year&#39;</span> <span class="p">:</span> <span class="s1">&#39;2024&#39;</span><span class="p">,</span>
+<span class="s1">&#39;month&#39;</span> <span class="p">:</span> <span class="s1">&#39;01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;type&#39;</span> <span class="p">:</span> <span class="s1">&#39;interim_reanalysis&#39;</span><span class="p">,</span>
+<span class="s1">&#39;model&#39;</span> <span class="p">:</span> <span class="s1">&#39;ensemble&#39;</span><span class="p">,</span>
+<span class="s1">&#39;level&#39;</span> <span class="p">:</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="example-2-cams-regional-reanalysis-ensemble-model-sconcno2-validated-reanalysis">
+<h4>Example 2: CAMS Regional Reanalysis (Ensemble Model, sconcno2, Validated Reanalysis)<a class="headerlink" href="#example-2-cams-regional-reanalysis-ensemble-model-sconcno2-validated-reanalysis" title="Link to this heading"></a></h4>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_reanalysis_ensemble_validated-regional]</span><span class="w"> </span>
+<span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20200101</span><span class="w"> </span>
+<span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20200301</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sconcno2</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis_ensemble_validated</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">regional</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">hourly</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-europe-air-quality-reanalyses&#39;</span>
+<span class="n">request</span> <span class="o">=</span> <span class="p">{</span>
+<span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;nitrogen_dioxide&#39;</span><span class="p">,</span>
+<span class="s1">&#39;year&#39;</span> <span class="p">:</span> <span class="s1">&#39;2020&#39;</span><span class="p">,</span>
+<span class="s1">&#39;month&#39;</span> <span class="p">:</span> <span class="s1">&#39;01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;type&#39;</span> <span class="p">:</span> <span class="s1">&#39;validated_reanalysis&#39;</span><span class="p">,</span>
+<span class="s1">&#39;model&#39;</span> <span class="p">:</span> <span class="s1">&#39;ensemble&#39;</span><span class="p">,</span>
+<span class="s1">&#39;level&#39;</span> <span class="p">:</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="cams-global-reanalysis-eac4">
+<h2>4. CAMS Global Reanalysis (EAC4)<a class="headerlink" href="#cams-global-reanalysis-eac4" title="Link to this heading"></a></h2>
+<p><a class="reference external" href="https://ads.atmosphere.copernicus.eu/datasets/cams-global-reanalysis-eac4?tab=overview">Dataset Link</a></p>
+<p>Using this dataset you can download <strong>Global Reanalysis data</strong>.</p>
+<p>This dataset contains both single-level and multi-level data.</p>
+<p>Only 3hourly data is available in this dataset. You must set <code class="docutils literal notranslate"><span class="pre">resolution</span> <span class="pre">=</span> <span class="pre">3hourly</span></code> in your configuration file; otherwise, the download will not work.</p>
+<section id="id8">
+<h3>Mandatory fields for regional reanalysis data<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3hourly</span>
+</pre></div>
+</div>
+</section>
+<section id="id9">
+<h3>Available variables (Species)<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<p>Whether the data is single or multi depends on the selected species. These are the available species:</p>
+<section id="id10">
+<h4>Single-level:<a class="headerlink" href="#id10" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">2m_dewpoint_temperature</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2m_temperature</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dust_aerosol_optical_depth_550nm</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mean_sea_level_pressure</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">particulate_matter_10um</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">particulate_matter_1um</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">particulate_matter_2.5um</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">relative_humidity</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sea_surface_temperature</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">snow_depth</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">surface_pressure</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">total_aerosol_optical_depth_550nm</span></code></p></li>
+</ul>
+</section>
+<section id="id11">
+<h4>Multi-level:<a class="headerlink" href="#id11" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cfracmax</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcc2h4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcc2h6</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcc3h6</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcc3h8</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcco</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcetoh</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconchcho</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconchno3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcisop</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcmsa</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcnh3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcnh4</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcno3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconco3</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcpan</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcpb</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcso2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sconcso4</span></code></p></li>
+</ul>
+<blockquote>
+<div><p>Providentia can only read species in GHOST format. If you want to know the mapping from CAMS variables to GHOST species, please refer to the <a class="reference internal" href="#cams-ghost-species-mapping">CAMS-GHOST species mapping</a> section.</p>
+</div></blockquote>
+</section>
+</section>
+<section id="id12">
+<h3>Assumptions<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
+<p>Providentia assumes the following fixed values when downloading data:</p>
+<section id="id13">
+<h4>For single-level data:<a class="headerlink" href="#id13" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">=</span> <span class="pre">00:00-21:00</span></code> (for every three hours)</p></li>
+</ul>
+</section>
+<section id="id14">
+<h4>For multi-level data:<a class="headerlink" href="#id14" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">=</span> <span class="pre">00:00-21:00</span></code> (for every three hours)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model_level</span> <span class="pre">=</span> <span class="pre">60</span></code></p></li>
+</ul>
+<blockquote>
+<div><p>For the multi-level data in this dataset, Providentia retrieves only the ground level.</p>
+</div></blockquote>
+</section>
+</section>
+<section id="id15">
+<h3>Example configuration files and corresponding API requests<a class="headerlink" href="#id15" title="Link to this heading"></a></h3>
+<section id="example-1-cams-global-reanalysis-sst-single-level">
+<h4>Example 1: CAMS Global Reanalysis (sst, Single-level)<a class="headerlink" href="#example-1-cams-global-reanalysis-sst-single-level" title="Link to this heading"></a></h4>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_reanalysis-global-single]</span>
+<span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20181101</span>
+<span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20181130</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sst</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3hourly</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-global-reanalysis-eac4&#39;</span>
+<span class="n">request</span> <span class="o">=</span> <span class="p">{</span>
+<span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;sea_surface_temperature&#39;</span><span class="p">,</span>
+<span class="s1">&#39;date&#39;</span> <span class="p">:</span> <span class="s1">&#39;2018-11-01/2018-11-29&#39;</span><span class="p">,</span>
+<span class="s1">&#39;time&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;03:00&#39;</span><span class="p">,</span> <span class="s1">&#39;06:00&#39;</span><span class="p">,</span> <span class="s1">&#39;09:00&#39;</span><span class="p">,</span> <span class="s1">&#39;12:00&#39;</span><span class="p">,</span> <span class="s1">&#39;15:00&#39;</span><span class="p">,</span> <span class="s1">&#39;18:00&#39;</span><span class="p">,</span> <span class="s1">&#39;21:00&#39;</span><span class="p">],</span>
+<span class="s1">&#39;data_format&#39;</span> <span class="p">:</span> <span class="s1">&#39;netcdf_zip&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="example-2-cams-global-reanalysis-sconcno2-multi-level">
+<h4>Example 2: CAMS Global Reanalysis (sconcno2, Multi-level)<a class="headerlink" href="#example-2-cams-global-reanalysis-sconcno2-multi-level" title="Link to this heading"></a></h4>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[cams_reanalysis-global-multi]</span>
+<span class="na">start_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20181101</span>
+<span class="na">end_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">20181130</span>
+<span class="na">species</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">sconcno2</span>
+<span class="na">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">cams_reanalysis</span>
+<span class="na">domain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">global</span>
+<span class="na">resolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">3hourly</span>
+<span class="na">dl_interpolated</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">False</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="s1">&#39;cams-global-reanalysis-eac4&#39;</span>
+<span class="n">request</span> <span class="o">=</span> <span class="p">{</span>
+<span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;nitrogen_dioxide&#39;</span><span class="p">,</span>
+<span class="s1">&#39;date&#39;</span> <span class="p">:</span> <span class="s1">&#39;2018-11-01/2018-11-29&#39;</span><span class="p">,</span>
+<span class="s1">&#39;model_level&#39;</span> <span class="p">:</span> <span class="s1">&#39;60&#39;</span><span class="p">,</span>
+<span class="s1">&#39;time&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;00:00&#39;</span><span class="p">,</span> <span class="s1">&#39;03:00&#39;</span><span class="p">,</span> <span class="s1">&#39;06:00&#39;</span><span class="p">,</span> <span class="s1">&#39;09:00&#39;</span><span class="p">,</span> <span class="s1">&#39;12:00&#39;</span><span class="p">,</span> <span class="s1">&#39;15:00&#39;</span><span class="p">,</span> <span class="s1">&#39;18:00&#39;</span><span class="p">,</span> <span class="s1">&#39;21:00&#39;</span><span class="p">],</span>
+<span class="s1">&#39;data_format&#39;</span> <span class="p">:</span> <span class="s1">&#39;netcdf_zip&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="cams-ghost-species-mapping">
+<h2>CAMS-GHOST species mapping<a class="headerlink" href="#cams-ghost-species-mapping" title="Link to this heading"></a></h2>
+<p>Here is the mapping between CAMS variables and GHOST species names:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2</span><span class="n">m_dewpoint_temperature</span><span class="p">:</span> <span class="n">td2</span>
+<span class="mi">2</span><span class="n">m_temperature</span><span class="p">:</span> <span class="n">t2</span>
+<span class="n">ammonia</span><span class="p">:</span> <span class="n">sconcnh3</span>
+<span class="n">ammonium</span><span class="p">:</span> <span class="n">sconcnh4</span>
+<span class="n">asymmetry_factor_1020nm</span><span class="p">:</span> <span class="n">asy1020aero</span>
+<span class="n">asymmetry_factor_440nm</span><span class="p">:</span> <span class="n">asy440aero</span>
+<span class="n">attenuated_backscatter_due_to_aerosol_532nm_from_ground</span><span class="p">:</span> <span class="n">lbsco532</span>
+<span class="n">carbon_monoxide</span><span class="p">:</span> <span class="n">sconcco</span>
+<span class="n">cloud_base_height</span><span class="p">:</span> <span class="n">cldbot</span>
+<span class="n">dust</span><span class="p">:</span> <span class="n">pm10du</span>
+<span class="n">dust_aerosol_optical_depth_550nm</span><span class="p">:</span> <span class="n">od550du</span>
+<span class="n">ethane</span><span class="p">:</span> <span class="n">sconcc2h6</span>
+<span class="n">ethanol</span><span class="p">:</span> <span class="n">sconcetoh</span>
+<span class="n">ethene</span><span class="p">:</span> <span class="n">sconcc2h4</span>
+<span class="n">formaldehyde</span><span class="p">:</span> <span class="n">sconchcho</span>
+<span class="n">fraction_of_cloud_cover</span><span class="p">:</span> <span class="n">cfracmax</span>
+<span class="n">glyoxal</span><span class="p">:</span> <span class="n">sconcglyox</span>
+<span class="n">hydrogen_chloride</span><span class="p">:</span> <span class="n">sconchcl</span>
+<span class="n">hydrogen_fluoride</span><span class="p">:</span> <span class="n">sconchf</span>
+<span class="n">isoprene</span><span class="p">:</span> <span class="n">sconcisop</span>
+<span class="n">lead</span><span class="p">:</span> <span class="n">sconcpb</span>
+<span class="n">mean_sea_level_pressure</span><span class="p">:</span> <span class="n">slp</span>
+<span class="n">methane</span><span class="p">:</span> <span class="n">sconcch4</span>
+<span class="n">methane_sulfonic_acid</span><span class="p">:</span> <span class="n">sconcmsa</span>
+<span class="n">nitrate</span><span class="p">:</span> <span class="n">sconcno3</span>
+<span class="n">nitric_acid</span><span class="p">:</span> <span class="n">sconchno3</span>
+<span class="n">nitrogen_dioxide</span><span class="p">:</span> <span class="n">sconcno2</span>
+<span class="n">nitrogen_monoxide</span><span class="p">:</span> <span class="n">sconcno</span>
+<span class="n">non_methane_vocs</span><span class="p">:</span> <span class="n">sconcnmvoc</span>
+<span class="n">ozone</span><span class="p">:</span> <span class="n">sconco3</span>
+<span class="n">particulate_matter_10um</span><span class="p">:</span> <span class="n">pm10</span>
+<span class="n">particulate_matter_1um</span><span class="p">:</span> <span class="n">pm1</span>
+<span class="n">particulate_matter_2</span><span class="mf">.5</span><span class="n">um</span><span class="p">:</span> <span class="n">pm2p5</span>
+<span class="n">peroxyacetyl_nitrate</span><span class="p">:</span> <span class="n">sconcpan</span>
+<span class="n">pm10_sea_salt_dry</span><span class="p">:</span> <span class="n">pm10so4ss</span>
+<span class="n">pm2</span><span class="mf">.5</span><span class="n">_ammonium</span><span class="p">:</span> <span class="n">pm2p5nh4</span>
+<span class="n">pm2</span><span class="mf">.5</span><span class="n">_nitrate</span><span class="p">:</span> <span class="n">pm2p5no3</span>
+<span class="n">pm2</span><span class="mf">.5</span><span class="n">_sulphate</span><span class="p">:</span> <span class="n">pm2p5so4</span>
+<span class="n">propane</span><span class="p">:</span> <span class="n">sconcc3h8</span>
+<span class="n">propene</span><span class="p">:</span> <span class="n">sconcc3h6</span>
+<span class="n">relative_humidity</span><span class="p">:</span> <span class="n">rh2</span>
+<span class="n">sea_surface_temperature</span><span class="p">:</span> <span class="n">sst</span>
+<span class="n">single_scattering_albedo_1020nm</span><span class="p">:</span> <span class="n">sca1020aero</span>
+<span class="n">single_scattering_albedo_440nm</span><span class="p">:</span> <span class="n">sca440aero</span>
+<span class="n">single_scattering_albedo_550nm</span><span class="p">:</span> <span class="n">sca550aero</span>
+<span class="n">snow_depth</span><span class="p">:</span> <span class="n">si</span>
+<span class="n">sulphate_aerosol_mixing_ratio</span><span class="p">:</span> <span class="n">sconcso4</span>
+<span class="n">sulphur_dioxide</span><span class="p">:</span> <span class="n">sconcso2</span>
+<span class="n">surface_pressure</span><span class="p">:</span> <span class="n">pshltr</span>
+<span class="n">total_absorption_aerosol_optical_depth_1020nm</span><span class="p">:</span> <span class="n">absod1020aero</span>
+<span class="n">total_absorption_aerosol_optical_depth_440nm</span><span class="p">:</span> <span class="n">absod440aero</span>
+<span class="n">total_absorption_aerosol_optical_depth_550nm</span><span class="p">:</span> <span class="n">absod550aero</span>
+<span class="n">total_aerosol_optical_depth_1020nm</span><span class="p">:</span> <span class="n">od1020aero</span>
+<span class="n">total_aerosol_optical_depth_380nm</span><span class="p">:</span> <span class="n">od380aero</span>
+<span class="n">total_aerosol_optical_depth_440nm</span><span class="p">:</span> <span class="n">od440aero</span>
+<span class="n">total_aerosol_optical_depth_500nm</span><span class="p">:</span> <span class="n">od500aero</span>
+<span class="n">total_aerosol_optical_depth_550nm</span><span class="p">:</span> <span class="n">od550aero</span>
+<span class="n">total_elementary_carbon</span><span class="p">:</span> <span class="n">pm2p5ec</span>
+<span class="n">total_fine_mode_aerosol_optical_depth_500nm</span><span class="p">:</span> <span class="n">od500aerofine</span>
+<span class="n">total_precipitation</span><span class="p">:</span> <span class="n">acprec</span>
+<span class="n">visibility</span><span class="p">:</span> <span class="n">vdist</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Zenodo-download.html" class="btn btn-neutral float-left" title="Zenodo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ACTRIS-download.html" class="btn btn-neutral float-right" title="ACTRIS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2026, Dene Bowdalo, Alba Vilanova Cortezón, Paula Serrano Sierra, Francesco Benincasa, Amalia Vradi.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
