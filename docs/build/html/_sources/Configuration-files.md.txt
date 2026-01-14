@@ -57,9 +57,9 @@ It is **mandatory** to define sections to launch Providentia. Their names must b
 
 A section can be though of containing all the general information needed for an analysis, e.g. `species`, `network`, `start_date`, `end_date` etc.
 
-For a full list of available fields and their descriptions that can be set per section, please refer to the [Configuration Fields](Configuration-fields) page.
+For a full list of available fields and their descriptions per section, please refer to the [Configuration Fields](Configuration-fields) page.
 
-In the reports, a report will be created per section. In the dashboard and using Providentia as a library, you will only be able to load one section or subsection at a time.
+In the reports, one report is generated per section.In the dashboard and when using Providentia as a library, you will only be able to load one section or subsection at a time.
 
 ## Subsections
 
