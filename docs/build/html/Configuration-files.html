@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -8,15 +6,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Configuration files &mdash; Providentia 3.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=acc74ff5"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -62,6 +64,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Forecast.html">Forecast</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
@@ -139,54 +142,47 @@
     <span class="p">[[</span><span class="n">Barcelona</span><span class="p">]]</span>
     <span class="n">latitude</span> <span class="o">=</span> <span class="mf">39.8</span><span class="p">,</span> <span class="mf">41.8</span>
     <span class="n">longitude</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.5</span>
-    <span class="n">period</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Spring</span><span class="p">,</span> <span class="n">Daytime</span>
 
     <span class="p">[[</span><span class="n">Madrid</span><span class="p">]]</span>
     <span class="n">latitude</span> <span class="o">=</span> <span class="mf">39.57</span><span class="p">,</span> <span class="mf">42.2</span>
     <span class="n">longitude</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.57</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.42</span>
-    <span class="n">area_classification</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">rural</span> <span class="o">||</span> <span class="n">remove</span><span class="p">:</span> <span class="n">urban</span><span class="o">-</span><span class="n">suburban</span>
 </pre></div>
 </div>
 </section>
 <section id="sections">
 <h2>Sections<a class="headerlink" href="#sections" title="Link to this heading"></a></h2>
 <p>It is <strong>mandatory</strong> to define sections to launch Providentia. Their names must be wrapped in brackets (<code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">]</span></code>) and cannot include interpuncts (<code class="docutils literal notranslate"><span class="pre">·</span></code>).</p>
-<p>A section can be though of containing all the general information needed for an analysis, e.g. <code class="docutils literal notranslate"><span class="pre">species</span></code>, <code class="docutils literal notranslate"><span class="pre">network</span></code>, <code class="docutils literal notranslate"><span class="pre">start_date</span></code>, <code class="docutils literal notranslate"><span class="pre">end_date</span></code> etc.</p>
-<p>For a full list of available fields and their descriptions per section, please refer to the <a class="reference internal" href="Configuration-fields.html"><span class="doc std std-doc">Configuration Fields</span></a> page.</p>
-<p>In the reports, one report is generated per section.In the dashboard and when using Providentia as a library, you will only be able to load one section or subsection at a time.</p>
+<p>A section can be thought of containing all the general information needed for an analysis, e.g. <code class="docutils literal notranslate"><span class="pre">species</span></code>, <code class="docutils literal notranslate"><span class="pre">network</span></code>, <code class="docutils literal notranslate"><span class="pre">start_date</span></code>, <code class="docutils literal notranslate"><span class="pre">end_date</span></code> etc.</p>
+<p>For a list of available fields and their descriptions that can be set per section, please refer to the <a class="reference internal" href="Configuration-fields.html"><span class="doc std std-doc">configuration fields</span></a> page. The field names in the configuration files are case-insensitive, meaning that if you use capitals or lower-case (providing that the spelling is correct), then the field will be read properly.</p>
+<p>On top of this, numerous <a class="reference internal" href="Filtering.html"><span class="doc std std-doc">filter fields</span></a> can be also be set to filter data in a variety ways.</p>
 </section>
 <section id="subsections">
 <h2>Subsections<a class="headerlink" href="#subsections" title="Link to this heading"></a></h2>
 <p>After defining the sections, the user can optionally create subsections and set specific information for each one. In order to do this, it is important to wrap the subsection names in double brackets (<code class="docutils literal notranslate"><span class="pre">[[</span> <span class="pre">]]</span></code>).</p>
 <p>These subsections <strong>MUST</strong> be located under the sections, and can be thought of as subsets that we want to compare in the analsysis, e.g. different regions, different QA methods etc.</p>
-<p>Above we define two subsections as examples of different areas that we want to compare, Barcelona and Madrid. For these separate subsections, it is necessary to define the latitude and longitude which describe the area in order to delimit the analysis to the desired area. In the example, we used the following parameters for Madrid:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[[</span><span class="n">Madrid</span><span class="p">]]</span>
+<p>Above we defined two subsections as examples of different regions that we want to compare, <strong>Barcelona</strong> and <strong>Madrid</strong>. We select data just in those regions by keeping data within a certain longitude and latitude range, as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[[</span><span class="n">Barcelona</span><span class="p">]]</span>
+<span class="n">latitude</span> <span class="o">=</span> <span class="mf">39.8</span><span class="p">,</span> <span class="mf">41.8</span>
+<span class="n">longitude</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.5</span>
+
+<span class="p">[[</span><span class="n">Madrid</span><span class="p">]]</span>
 <span class="n">latitude</span> <span class="o">=</span> <span class="mf">39.57</span><span class="p">,</span> <span class="mf">42.2</span>
 <span class="n">longitude</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.57</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.42</span>
 </pre></div>
 </div>
-<p>We can also get the data for all the stations in a country, in this case Spain, by writing:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[[</span><span class="n">Spain</span><span class="p">]]</span>
-<span class="n">country</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Spain</span>
-</pre></div>
-</div>
-<p>Additionally, we can apply metadata filters. In the subsection for Madrid, we constrained the stations according to the <code class="docutils literal notranslate"><span class="pre">area_classification</span></code> criteria:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">area_classification</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">rural</span> <span class="o">||</span> <span class="n">remove</span><span class="p">:</span> <span class="n">urban</span><span class="o">-</span><span class="n">suburban</span>
-</pre></div>
-</div>
-<p>If you do not know which names can be used to filter the metadata, you should use the dashboard to select the fields, export the configuration <a class="reference internal" href="Dashboard.html#exporting-configuration-files-and-data"><span class="std std-ref">exporting feature</span></a> and copy the fields that you want from there.</p>
-<p><code class="docutils literal notranslate"><span class="pre">NOTE:</span> <span class="pre">The</span> <span class="pre">field</span> <span class="pre">names</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">configuration</span> <span class="pre">files</span> <span class="pre">are</span> <span class="pre">case-insensitive,</span> <span class="pre">meaning</span> <span class="pre">that</span> <span class="pre">if</span> <span class="pre">you</span> <span class="pre">use</span> <span class="pre">capitals</span> <span class="pre">or</span> <span class="pre">small-cases</span> <span class="pre">(providing</span> <span class="pre">that</span> <span class="pre">the</span> <span class="pre">spelling</span> <span class="pre">is</span> <span class="pre">correct),</span> <span class="pre">then</span> <span class="pre">the</span> <span class="pre">field</span> <span class="pre">will</span> <span class="pre">be</span> <span class="pre">read</span> <span class="pre">properly.</span></code></p>
+<p>There are a wide number of <a class="reference internal" href="Filtering.html"><span class="doc std std-doc">filter fields</span></a> that can be used to filter data. If any variables are repeated between sections and subsections, the subsection variable will overwrite the information set in the section.</p>
+<p>The specific functionality of the sections and subsections differs between the different modes. For the reports, a report will be created per section, and then individual plots for each plot type will be made for each subsection, in each report. For the dashboard and when using Providentia as a library, you will only be able to load one section or subsection at a time.</p>
 </section>
 <section id="colocation">
 <h2>Colocation<a class="headerlink" href="#colocation" title="Link to this heading"></a></h2>
 <p>When performing evaluations of model data with observations, it is of high importance to ensure you are comparing apples with apples, rather than apples with oranges.</p>
 <p>One way that evaluations can often be biased is due to gapped observations being compared with non-gapped model data. This can be resolved by ensuring both observational and model data is equally temporally gapped, called <strong>temporal colocation</strong>.</p>
 <p>When loading multiple species, the number of available stations per species will most likely be different, therefore unless this is controlled for, this will lead to biases when comparing statistics across species. This can be resolved by ensuring only stations which are available for all species are retained, called <strong>spatial colocation</strong>.</p>
-<p>Please see the <a class="reference internal" href="Colocation.html"><span class="doc std std-doc">Colocation</span></a> page for more information on how to apply these.</p>
+<p>Please see the <a class="reference internal" href="Colocation.html"><span class="doc std std-doc">colocation</span></a> page for more information on how to apply these.</p>
 </section>
 <section id="filtering">
 <h2>Filtering<a class="headerlink" href="#filtering" title="Link to this heading"></a></h2>
-<p>In both subsections and subsections, there are a vast number of options that can be applied to filter data from the configuration file, based on metadata, lower/upper bounds, representativity, QA etc. Please see the <a class="reference internal" href="Filtering.html"><span class="doc std std-doc">Filtering</span></a> page for the full guide on how to do so.</p>
+<p>In both subsections and subsections, there are a vast number of options that can be applied to filter data from the configuration file, based on metadata, lower/upper bounds, representativity, QA etc. Please see the <a class="reference internal" href="Filtering.html"><span class="doc std std-doc">filtering</span></a> page for the full guide on how to do so.</p>
 </section>
 </section>
 
