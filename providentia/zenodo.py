@@ -71,6 +71,14 @@ class Zenodo:
                 zip_network = line.split("/")[-1][:-5]
                 self.ghost_available_networks[zip_network] = zip_file_url
         
+        if self.ghost_available_networks == {}:
+            msg = (
+                "GHOST networks could not be retrieved from Zenodo at this time. "
+                "This may be a temporary issue. Please execute the command again."
+            )
+            show_message(self.download_instance, msg, deactivate=deactivate_warning)
+            return False
+
         return True
 
     def download_ghost_network_zenodo(self, network, initial_check, files_to_download=None):
@@ -136,8 +144,8 @@ class Zenodo:
             # warning if network + species + resolution combination is gets no matching results
             if not res_spec_dir_tail:
                 print_spec = f'{",".join(self.download_instance.species)} species' if self.download_instance.species else ""
-                print_res = f'at {",".join(self.download_instance.resolution)} resolutions' if self.download_instance.resolution else ""
-                msg = f"There is no data available in Zenodo for {network} network for {print_spec} species at {print_res} resolution"
+                print_res = f'at {",".join(self.download_instance.resolution)} resolution(s)' if self.download_instance.resolution else ""
+                msg = f"There is no data available in Zenodo for {network} network for {print_spec} {print_res}"
                 show_message(self.download_instance, msg, deactivate=initial_check)
 
             # check if there's any possible combination with user's network, resolution and species

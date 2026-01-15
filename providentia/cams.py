@@ -1,6 +1,6 @@
 """ Class for downloading and formatting CAMS data """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 import re
 import shutil
@@ -108,8 +108,8 @@ class Cams(object):
             match = re.search(r'"interval":\[\["(.*?)","(.*?)"\]\]', r)
 
             # get the date value
-            minstart = datetime.strptime(match.group(1), "%Y-%m-%dT%H:%M:%SZ")
-            maxend = datetime.strptime(match.group(2), "%Y-%m-%dT%H:%M:%SZ")
+            minstart = datetime.strptime(match.group(1), "%Y-%m-%dT%H:%M:%S%z")
+            maxend = datetime.strptime(match.group(2), "%Y-%m-%dT%H:%M:%S%z")
 
         return minstart, maxend
         
@@ -151,6 +151,12 @@ class Cams(object):
 
         # download N days ahead for forecast
         cams_start_date = cams_start_date - timedelta(days=cams_dict['lookahead_days'])
+        
+        # normalize all to UTC
+        min_start_date = min_start_date.astimezone(timezone.utc) if min_start_date.tzinfo else min_start_date.replace(tzinfo=timezone.utc)
+        max_end_date = max_end_date.astimezone(timezone.utc) if max_end_date.tzinfo else max_end_date.replace(tzinfo=timezone.utc)
+        cams_start_date = cams_start_date.astimezone(timezone.utc) if cams_start_date.tzinfo else cams_start_date.replace(tzinfo=timezone.utc)
+        cams_end_date = cams_end_date.astimezone(timezone.utc) if cams_end_date.tzinfo else cams_end_date.replace(tzinfo=timezone.utc)
 
         # if the minimum date is over the end date
         if min_start_date > cams_end_date or max_end_date < cams_start_date:
@@ -357,7 +363,7 @@ class Cams(object):
             # extract model and stream
             _, temp_mod_id, temp_stream = config_modid.rsplit("_", 2)
 
-            if mod_id not in cams_dict["models"]:
+            if temp_mod_id not in cams_dict["models"]:
                 msg = f"Cannot find the {temp_mod_id} model in the '{dataset}' dataset."    
                 show_message(self.download_instance, msg, deactivate=initial_check)
                 return mod_id, stream, error
@@ -380,7 +386,7 @@ class Cams(object):
         # only ensemble options allmembers and 000 are valid
         if ensemble_option not in ["000", "allmembers"]:
             msg = (
-            f"The current ensemble option '{ensemble_option}' is not valid for the CAMS '{dataset}' dataset."
+            f"The current ensemble option '{ensemble_option}' is not valid for the CAMS '{dataset}' dataset. "
             f"It must be '000' or 'allmembers'.")            
             show_message(self.download_instance, msg, deactivate=initial_check)
             return mod_id, stream, error
@@ -682,7 +688,7 @@ class Cams(object):
         if domain not in cams_options[prefix]:
             possible_domains = "', '".join(cams_options[prefix])
             msg = (
-            f"The current domain '{domain}' is not valid for the CAMS dataset."
+            f"The current domain '{domain}' is not valid for the CAMS dataset. "
             f"It must be '{possible_domains}'.")            
             show_message(self.download_instance, msg, deactivate=initial_check)
             return
@@ -695,14 +701,14 @@ class Cams(object):
         url = cams_dict['url']
         
         # make the necessary checks to the model
-        mod_id, stream, invalid_model = self.get_model(cams_dict, u_count, config_modid, dataset, ensemble_options)
+        mod_id, stream, invalid_model = self.get_model(cams_dict, u_count, config_modid, dataset, ensemble_options, initial_check)
     
         # stop download if the model format is not correct
         if invalid_model:
             return
     
         # make the necessary checks to the dates
-        cams_start_date, cams_end_date = self.control_dates(url, cams_dict)
+        cams_start_date, cams_end_date = self.control_dates(url, cams_dict, initial_check)
 
         # stop download if the dates are not correct
         if cams_start_date is None and cams_end_date is None:
@@ -736,8 +742,11 @@ class Cams(object):
             # get the species' level
             level = 'multi' if cams_species in cams_variables_level[url]['multi'] else 'single'
 
+            # get model resolution
+            resolution_list = self.download_instance.model_resolution if self.download_instance.model_resolution else self.download_instance.resolution
+
             # iterate through the resolutions
-            for resolution in self.download_instance.resolution:
+            for resolution in resolution_list:
                 # get the resolution for the cams dataset
                 correct_resolution = cams_dict["resolution"][level] if type(cams_dict["resolution"]) == dict else cams_dict["resolution"]
                 

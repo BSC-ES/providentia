@@ -1,5 +1,4 @@
 base_defaults: &base_defaults
-  network:
   species:
   resolution:
   start_date:
@@ -17,6 +16,7 @@ base_defaults: &base_defaults
 
 dashboard:
   <<: *base_defaults
+  network:
   active_dashboard_plots:
     - timeseries
     - statsummary
@@ -40,6 +40,7 @@ dashboard_empty:
 
 report:
   <<: *base_defaults
+  network:
 
 library:
   <<: *base_defaults
