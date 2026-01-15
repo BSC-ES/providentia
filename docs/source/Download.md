@@ -2,7 +2,7 @@
 
 Providentia's download mode retrieves modeled and observational data from BSC systems and external sources (CAMS, Zenodo, ACTRIS) for local use.
 
-## Get started
+## Getting started
 
 To start downloading data, simply add `--download` or `--dl` to your command:
 
@@ -22,28 +22,29 @@ The download mode fetches all the content specified in your configuration file a
 
 Providentia supports four types of downloads. For detailed instructions, please visit the respective pages:  
 
-1. **Download from HPC Machines**  
+1. **Download from BSC HPC Machines** 
+   - Downloads GHOST and non-GHOST data and model outputs from BSC HPC machines. You must have a BSC account to access this feature.
    - How to get this type of download:  
      - For GHOST networks, answer `y` to the prompt:  
        _Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo)_  
        or set `dl_ghost_source` to `bsc`.  
      - For non-GHOST networks and interpolated/non-interpolated model data, no special action is required.
-     - Reference: [BSC download page](BSC-download) 
+   - To see more information, check the [BSC download page](BSC-download).
 
 2. **Download of network from Zenodo**  
    - Downloads GHOST networks from the [GHOST Zenodo webpage](https://zenodo.org/records/10637450).  
    - How to get this type of download: answer `n` to the HPC prompt: _Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo)_ or set `dl_ghost_source` to `zenodo`.
-   - Reference: [Zenodo download page](Zenodo-download)  
+   - To see more information, check the [Zenodo download page](Zenodo-download).
 
 3. **Download of network from ACTRIS (Thredds)**  
    - Downloads observational networks from [ACTRIS Thredds](https://thredds.nilu.no/thredds/catalog.html).  
    - How to get this type of download: put `actris/actris` in the `network` field in your configuration.
-   - Reference: [ACTRIS download page](ACTRIS-download)  
+   - To see more information, check the [ACTRIS download page](ACTRIS-download).
 
 4. **Download of non-interpolated model data from the Atmosphere Data Store (ADS)**  
    - Downloads model outputs from the [Atmosphere Data Store](https://ads.atmosphere.copernicus.eu/datasets).  
    - How to get this type of download: specify the model as `cams_analysis`, `cams_forecast` or `cams_reanalysis` in your configuration, and set `dl_interpolated` to `False`.
-   - Reference: [CAMS download page](CAMS-download)  
+   - To see more information, check the [CAMS download page](CAMS-download).
 
 ### Download configuration fields
 
@@ -64,7 +65,7 @@ Only the following configuration fields are used during download. All required f
 | `filter_species`  | Optional filter to select specific species | No     | —       |
 
 
-## Automatisation of the download
+## Automation of the download
 
 In order to add the download to your scripts or if you just want to make it without the user input, here are all the variables you need to have
 
@@ -76,7 +77,7 @@ In order to add the download to your scripts or if you just want to make it with
 | `dl_mode` | Selects what to download when both observations and model output are present in the configuration file. | _Which type of data do you want to download? Observational, modelled or both? ([both]/obs/mod)_      | `obs` (download observations), `mod` (download models) or `both` (download both) |
 | `network_type` | Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the `*` wildcard.  | _Do you want to download all the GHOST networks? (Otherwise all the non-GHOST networks will be downloaded) ([y]/n)_   | `ghost` (use all GHOST networks) or `non-ghost` (use all non-GHOST networks)                |
 
-### Using wildcards
+## Using wildcards
 
 You can use the `*` wildcard in the following fields to automatically select all available values:
 

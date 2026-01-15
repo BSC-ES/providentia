@@ -63,13 +63,21 @@ class Providentia(object):
         
         try:
             args = self.parser.parse_args()
+
+            # disable dashboard if other mode is active
+            if args.download or args.interpolation or args.report:
+                args.dashboard = False
+
             LOG.info(args)
+
+            # convert arguments into execution parameters
             res = self.getargs(args)
             if res is False:
                 return res
 
             LOG.info(res)
 
+            # select execution mode
             if args.report:
                 from .report import main
             elif args.interpolation:
@@ -78,6 +86,8 @@ class Providentia(object):
                 from .download import main
             else:
                 from .dashboard import main
+
+            # execute the selected mode
             main(**res)
 
         except Exception as err:

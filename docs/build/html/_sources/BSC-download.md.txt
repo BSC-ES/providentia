@@ -1,10 +1,10 @@
-# BSC HPC Machines
+# BSC HPC machines
 
 Providentia's download mode supports downloading **GHOST** and **non-GHOST** observational data, as well as model outputs, directly from BSC HPC systems. 
 
 In order to do this type of download, a BSC HPC account is required.
 
-## Supported HPC Login Nodes
+## Supported HPC login nodes
 
 Providentia can download GHOST and non-GHOST networks from the BSC HPC environment using available login nodes. By default, it connects to `storage5` (or `mn5` if `storage5` is unavailable).  
 
@@ -18,7 +18,7 @@ The login nodes used are defined in `settings/dl_hpc.yaml`:
 
 Downloads will attempt the nodes in the order listed. If the primary node is unavailable, the system automatically tries the next one in the list.
 
-## Download of Networks from HPC Machines
+## Download of networks from HPC machines
 
 The network is essential to generate a report, as it provides access to the real observational data. At BSC, a large number of observational datasets are already stored on `gpfs`.
 
@@ -33,7 +33,7 @@ The network is essential to generate a report, as it provides access to the real
   _"Do you want to download observational data from the BSC remote machine? (Otherwise, GHOST observational data will be retrieved from Zenodo)"_  
   or set `dl_ghost_source = bsc` in your configuration.
 
-## Download of Interpolated Models
+## Download of interpolated models
 
 An interpolated model consists of model output that have already been spatially interpolated to the observations. These models are ready to be used in modes such as report and dashboard. Most interpolated model data is stored on `gpfs`.
 
@@ -48,9 +48,9 @@ An interpolated model consists of model output that have already been spatially 
   _"Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded)"_  
   or set `dl_interpolated = True` in your configuration.
 
-## Download of Non-Interpolated Models
+## Download of non-interpolated models
 
-### Local Non-Interpolated Downloads
+### Local non-interpolated downloads
 
 Non-interpolated model data refers to model outputs that are ready to be interpolated against a network using interpolation mode. Most non-interpolated datasets are stored in `esarchive`, although some may already exist in `gpfs`.
 
@@ -66,7 +66,7 @@ Non-interpolated model data refers to model outputs that are ready to be interpo
   _"Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded)"_  
   or set `dl_interpolated = False` in your configuration.
 
-### HPC Non-Interpolated Downloads
+### HPC non-interpolated downloads
 In some cases, model data exists in `esarchive`, but not all HPC machines have direct access to it. When interpolation needs to be performed on a machine without `esarchive` access, the model data must first be copied from `esarchive` to `gpfs`.
 
 **Download source paths:**

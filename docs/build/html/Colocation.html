@@ -20,8 +20,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Multispecies filtering" href="Multispecies-filtering.html" />
-    <link rel="prev" title="Create your own data network" href="Create-your-own-data-network.html" /> 
+    <link rel="next" title="Filtering" href="Filtering.html" />
+    <link rel="prev" title="Command line configuration" href="Command-line-configuration.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,29 +47,20 @@
 <li class="toctree-l1"><a class="reference internal" href="Home.html">Home</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Modes.html">Modes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Topics-in-depth.html">Topics in depth</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="Other-topics.html">Other topics</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="Running-on-HPC.html">Running on HPC</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Command-line-configuration.html">Command line configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Data-flags-and-QA-names-and-codes.html">QA flags</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Representativity-filters.html">Representativity filters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Representativity-filters.html#periodic-representativity-filters">Periodic Representativity Filters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Saved-file-formats.html">Saved file formats</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Create-your-own-data-network.html">Create your own data network</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Colocation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#temporal-colocation">Temporal colocation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#spatial-colocation">Spatial colocation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Colocation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#temporal-colocation">Temporal colocation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spatial-colocation">Spatial colocation</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="Multispecies-filtering.html">Multispecies filtering</a></li>
-<li class="toctree-l2"><a class="reference internal" href="Redirecting-output-to-a-file.html">Redirecting output to a file</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ADS.html">Account setup in Atmosphere Data Store</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training Material</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training material</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the Team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
 <li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
 </ul>
@@ -88,7 +79,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="Other-topics.html">Other topics</a></li>
       <li class="breadcrumb-item active">Colocation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/Colocation.md.txt" rel="nofollow"> View page source</a>
@@ -101,11 +91,14 @@
              
   <section class="tex2jax_ignore mathjax_ignore" id="colocation">
 <h1>Colocation<a class="headerlink" href="#colocation" title="Link to this heading"></a></h1>
-<p>There are two types of colocations that can be used in Providentia: <strong>temporal colocation</strong> and <strong>spatial colocation</strong>.</p>
+<p>When performing evaluations of model data with observations, it is of high importance to ensure you are comparing apples with apples, rather than apples with oranges.</p>
+<p>One way that evaluations can often be biased is due to gapped observations being compared with non-gapped model data. This can be resolved by ensuring both observational and model data is equally temporally gapped, called <strong>temporal colocation</strong>.</p>
+<p>When loading multiple species, the number of available stations per species will most likely be different, therefore unless this is controlled for, this will lead to biases when comparing statistics across species. This can be resolved by ensuring only stations which are available for all species are retained, called <strong>spatial colocation</strong>.</p>
+<p>The following sections explain how both these colcoation types can be applied in Providentia.</p>
 <section id="temporal-colocation">
 <h2>Temporal colocation<a class="headerlink" href="#temporal-colocation" title="Link to this heading"></a></h2>
-<p>Temporal colocation is used to temporally pair observations and model data, with any missing measurements in either the observational or model array imposing missing measurements</p>
-<p>When the colocation is active, the user has access to more plot types (scatter, taylor, fairmode-target, and fairmode-statsummary), and model bias statistics can be used (e.g. r).</p>
+<p>Temporal colocation is used to temporally pair observations and model data, with any missing measurements in either the observational or model array, imposing missing measurements on the respective other.</p>
+<p>When temporal colocation is active, you will have access to more plot types (scatter, taylor, fairmode-target, and fairmode-statsummary), and model bias statistics can also be used (e.g. r), see <a class="reference internal" href="Statistics.html#available-statistical-metrics"><span class="std std-ref">here</span></a> for more information about available statistics.</p>
 <p>Temporal colocation can be set in the configuration file by setting a boolean as follows, be default it is <strong>True</strong>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">temporal_colocation</span> <span class="o">=</span> <span class="kc">False</span>
 </pre></div>
@@ -118,13 +111,13 @@
 </section>
 <section id="spatial-colocation">
 <h2>Spatial colocation<a class="headerlink" href="#spatial-colocation" title="Link to this heading"></a></h2>
-<p>When loading more than one species we may want to ensure that the stations that we have in our network/s measure all the species that we have selected. To do this, we need to activate spatial colocation.</p>
+<p>When loading more than one species we may want to ensure that the stations  measure all the species that we have selected. To do this, we need to activate spatial colocation.</p>
 <p>After activating spatial colocation, any stations that do not contain</p>
 <p>Spatial colocation can be set in the configuration file by setting a boolean as follows, be default it is <strong>True</strong>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">spatial_colocation</span> <span class="o">=</span> <span class="kc">False</span>
 </pre></div>
 </div>
-<p>On the dashboard, only 1 species is allows to be loaded at the same time, so in theory it should not be possible to use. However there is a workaround using <strong>filter_species</strong>. If we filter the current loaded species with one or multiple filter species,</p>
+<p>On the dashboard, only 1 species is allowed to be loaded at once, so in theory it should not be possible to use. However there is a workaround using <strong>filter_species</strong>. If we filter the current loaded species with one or multiple filter species. This trick can be used by loading a configuration file with filter_species**</p>
 <p><strong>Without spatial colocation:</strong></p>
 <p><img alt="No spatial colocation" src="_images/no_spatial_colocation.png" /></p>
 <p><strong>With spatial colocation:</strong></p>
@@ -136,8 +129,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Create-your-own-data-network.html" class="btn btn-neutral float-left" title="Create your own data network" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Multispecies-filtering.html" class="btn btn-neutral float-right" title="Multispecies filtering" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Command-line-configuration.html" class="btn btn-neutral float-left" title="Command line configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Filtering.html" class="btn btn-neutral float-right" title="Filtering" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

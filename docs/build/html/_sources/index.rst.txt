@@ -8,7 +8,11 @@ Contents
    Home.md
    Getting-started.md
    Modes.rst
-   Topics-in-depth.rst
+   Configuration.rst
+   Colocation.md
+   Filtering.md
+   Plotting.rst
+   Statistics.md
    Other-topics.rst
    FAQ.md
    Training-material.md

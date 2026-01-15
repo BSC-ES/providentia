@@ -1,6 +1,6 @@
-# Library
+# Overview
 
-The library was designed for users to exploit the powerful backend of Providentia, allowing the use of the Providentia functionalities directly in your own scripts, or within Jupyter notebooks.
+The library was designed for users to exploit the powerful backend of Providentia, allowing the use of the Providentia functionalities directly in your own scripts, or within [Jupyter notebooks](Notebooks).
 
 ## Importing Providentia
 

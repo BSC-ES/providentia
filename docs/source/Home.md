@@ -12,25 +12,25 @@ Providentia has a variety of use modes:
 * [Dashboard](Dashboard), designed to allow on-the-fly analysis of BSC model output.
 * [Report](Report), designed to obtain complete reports and carry out in-depth analysis of BSC model output.
 * [Download](Download), to download data from esarchive and Zenodo into your local directories.
-* [Library](Library), allowing use of the Providentia backend functions, and use within your own scripts. It is also possible to run Providentia in [Jupyter Notebooks](Launching-notebooks). 
+* [Library](Library), allowing use of the Providentia backend functions, and use within your own scripts. It is also possible to run Providentia in [Jupyter notebooks](Notebooks).
 
-## Getting Started
+## Getting started
 
-If you are just starting with Providentia please see our handy starting guide: [Getting Started](Getting-started)
+If you are just starting with Providentia please see our handy starting guide: [Getting started](Getting-started)
 
 If you wish to see the videos and presentations of all previous Providentia training sessions please see here: [Training](Training-material)
 
 If you wish to see all scientific and technical presentations releated to Providentia please see here: [Presentations](Presentations)
 
-We also have a number of tutorial notebooks that outline Providentia's features. Please see the `tutorials` subdirectory to find these.
+We also have a number of tutorial notebooks that outline Providentia's features. Please see the [tutorials](https://github.com/BSC-ES/providentia/tree/master/tutorials) subdirectory to find these.
 
 The full contents of the Providentia readthedocs documentation can be found here: [Table of Contents](https://providentia.readthedocs.io/en/latest/)
 
-## Bugs / New Features
+## Bugs / New features
 
 If you encounter a bug while using Providentia, and would like to report it to the Providentia development team please follow these steps:
 
-1. Go to the Providentia GitHub repo issues page: https://github.com/BSC-ES/providentia/issues
+1. Go to the Providentia GitHub repo [issues page](https://github.com/BSC-ES/providentia/issues).
 2. Click on the 'New Issue' button.
 3. Select 'Bug report' and fill in the template for fully detailing the bug. 
 

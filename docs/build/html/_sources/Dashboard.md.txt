@@ -22,7 +22,7 @@ Next, there are four pop-up menus:
 * **QA** contains the quality assurance flags to filter by.
 * **FLAGS** contain standardised data reporter provided flags to filter by.
 * **MOD** contains a list of models that exist and are related to the variable selected.
-* **MULTI** can be used to [filter your current network-species by the values of other network-species](Multispecies-filtering).
+* **MULTI** can be used to filter your current network-species by the values of other network-species, as explained in [Multispecies filtering](Multispecies-filtering).
 
 `NOTE: If under the **QA** menu, the checkboxes ‘*Invalid Data Provider Flags – GHOST Decreed*’ or ‘*Invalid Data Provider Flags – Network Decreed*’ are selected, all checkboxes under the Flags menu should be unticked (the default setting). This is because ticking one of these checkboxes sets a pre-selected subset of Flags checkboxes automatically. For this reason also, only one of these QA checkboxes should be ticked at the same time.`
 

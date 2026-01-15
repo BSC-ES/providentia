@@ -5,13 +5,11 @@ Other topics
 .. toctree::
    :maxdepth: 2
 
-   Running-on-HPC.rst
-   Command-line-configuration.md
-   Data-flags-and-QA-names-and-codes.md
-   Representativity-filters.md
-   Saved-file-formats.md
-   Create-your-own-data-network.md
-   Colocation.md
-   Multispecies-filtering.md
-   Redirecting-output-to-a-file.md
    ADS.md
+   Create-your-own-data-network.md
+   Multispecies-filtering.md
+   QA-filtering.md
+   Representativity-filtering.md
+   Redirecting-output-to-a-file.md
+   Topics-on-HPC.md
+   Saved-file-formats.md

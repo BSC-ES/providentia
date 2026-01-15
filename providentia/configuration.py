@@ -67,8 +67,20 @@ class ProvConfiguration:
         self.var_defaults.update(modifiable_var_defaults)
 
         # set mode
-        mode = list(set(modes)&set(kwargs))
-        self.read_instance.mode = mode[0] if mode else 'dashboard'
+        active_modes = list(set(modes)&set(kwargs))
+        
+        # choose the mode that is not the library one if multiple modes are active
+        if len(active_modes) == 1:
+            self.read_instance.mode = active_modes[0]
+        else:
+            non_library = [m for m in active_modes if m not in "library"]
+
+            if len(non_library) != 1:
+                error = f"Error: More than one non-interactive mode is active: {', '.join(non_library)}"
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+
+            self.read_instance.mode = non_library[0]
 
         # if variable is given by command line, set that value, otherwise set as default value
         for k, val in self.var_defaults.items():

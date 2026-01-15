@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BSC HPC Machines &mdash; Providentia 3.0.0 documentation</title>
+  <title>BSC HPC machines &mdash; Providentia 3.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
@@ -52,11 +52,11 @@
 <li class="toctree-l2"><a class="reference internal" href="Report.html">Report</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="Download-mode.html">Download</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="Download-mode.html#overview">Overview</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">BSC HPC Machines</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#supported-hpc-login-nodes">Supported HPC Login Nodes</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#download-of-networks-from-hpc-machines">Download of Networks from HPC Machines</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#download-of-interpolated-models">Download of Interpolated Models</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#download-of-non-interpolated-models">Download of Non-Interpolated Models</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">BSC HPC machines</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#supported-hpc-login-nodes">Supported HPC login nodes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#download-of-networks-from-hpc-machines">Download of networks from HPC machines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#download-of-interpolated-models">Download of interpolated models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#download-of-non-interpolated-models">Download of non-interpolated models</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#env-file">.env file</a></li>
 </ul>
 </li>
@@ -68,12 +68,16 @@
 <li class="toctree-l2"><a class="reference internal" href="Library-mode.html">Library</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="Topics-in-depth.html">Topics in depth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training Material</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Training-material.html">Training material</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Presentations.html">Presentations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the Team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Meet-the-team.html">Meet the team</a></li>
 <li class="toctree-l1"><a class="reference internal" href="History.html">History of Providentia</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Tips-and-tricks-for-developers.html">Tips and tricks for developers</a></li>
 </ul>
@@ -94,7 +98,7 @@
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="Modes.html">Modes</a></li>
           <li class="breadcrumb-item"><a href="Download-mode.html">Download</a></li>
-      <li class="breadcrumb-item active">BSC HPC Machines</li>
+      <li class="breadcrumb-item active">BSC HPC machines</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/BSC-download.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -105,11 +109,11 @@
            <div itemprop="articleBody">
              
   <section class="tex2jax_ignore mathjax_ignore" id="bsc-hpc-machines">
-<h1>BSC HPC Machines<a class="headerlink" href="#bsc-hpc-machines" title="Link to this heading"></a></h1>
+<h1>BSC HPC machines<a class="headerlink" href="#bsc-hpc-machines" title="Link to this heading"></a></h1>
 <p>Providentia’s download mode supports downloading <strong>GHOST</strong> and <strong>non-GHOST</strong> observational data, as well as model outputs, directly from BSC HPC systems.</p>
 <p>In order to do this type of download, a BSC HPC account is required.</p>
 <section id="supported-hpc-login-nodes">
-<h2>Supported HPC Login Nodes<a class="headerlink" href="#supported-hpc-login-nodes" title="Link to this heading"></a></h2>
+<h2>Supported HPC login nodes<a class="headerlink" href="#supported-hpc-login-nodes" title="Link to this heading"></a></h2>
 <p>Providentia can download GHOST and non-GHOST networks from the BSC HPC environment using available login nodes. By default, it connects to <code class="docutils literal notranslate"><span class="pre">storage5</span></code> (or <code class="docutils literal notranslate"><span class="pre">mn5</span></code> if <code class="docutils literal notranslate"><span class="pre">storage5</span></code> is unavailable).</p>
 <p>The login nodes used are defined in <code class="docutils literal notranslate"><span class="pre">settings/dl_hpc.yaml</span></code>:</p>
 <ul class="simple">
@@ -122,7 +126,7 @@
 <p>Downloads will attempt the nodes in the order listed. If the primary node is unavailable, the system automatically tries the next one in the list.</p>
 </section>
 <section id="download-of-networks-from-hpc-machines">
-<h2>Download of Networks from HPC Machines<a class="headerlink" href="#download-of-networks-from-hpc-machines" title="Link to this heading"></a></h2>
+<h2>Download of networks from HPC machines<a class="headerlink" href="#download-of-networks-from-hpc-machines" title="Link to this heading"></a></h2>
 <p>The network is essential to generate a report, as it provides access to the real observational data. At BSC, a large number of observational datasets are already stored on <code class="docutils literal notranslate"><span class="pre">gpfs</span></code>.</p>
 <p><strong>Download source paths:</strong></p>
 <ul class="simple">
@@ -139,7 +143,7 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_ghost_sou
 </ul>
 </section>
 <section id="download-of-interpolated-models">
-<h2>Download of Interpolated Models<a class="headerlink" href="#download-of-interpolated-models" title="Link to this heading"></a></h2>
+<h2>Download of interpolated models<a class="headerlink" href="#download-of-interpolated-models" title="Link to this heading"></a></h2>
 <p>An interpolated model consists of model output that have already been spatially interpolated to the observations. These models are ready to be used in modes such as report and dashboard. Most interpolated model data is stored on <code class="docutils literal notranslate"><span class="pre">gpfs</span></code>.</p>
 <p><strong>Download source paths:</strong></p>
 <ul class="simple">
@@ -156,9 +160,9 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_interpola
 </ul>
 </section>
 <section id="download-of-non-interpolated-models">
-<h2>Download of Non-Interpolated Models<a class="headerlink" href="#download-of-non-interpolated-models" title="Link to this heading"></a></h2>
+<h2>Download of non-interpolated models<a class="headerlink" href="#download-of-non-interpolated-models" title="Link to this heading"></a></h2>
 <section id="local-non-interpolated-downloads">
-<h3>Local Non-Interpolated Downloads<a class="headerlink" href="#local-non-interpolated-downloads" title="Link to this heading"></a></h3>
+<h3>Local non-interpolated downloads<a class="headerlink" href="#local-non-interpolated-downloads" title="Link to this heading"></a></h3>
 <p>Non-interpolated model data refers to model outputs that are ready to be interpolated against a network using interpolation mode. Most non-interpolated datasets are stored in <code class="docutils literal notranslate"><span class="pre">esarchive</span></code>, although some may already exist in <code class="docutils literal notranslate"><span class="pre">gpfs</span></code>.</p>
 <p><strong>Download source paths:</strong></p>
 <ul class="simple">
@@ -176,7 +180,7 @@ or set <code class="docutils literal notranslate"><span class="pre">dl_interpola
 </ul>
 </section>
 <section id="hpc-non-interpolated-downloads">
-<h3>HPC Non-Interpolated Downloads<a class="headerlink" href="#hpc-non-interpolated-downloads" title="Link to this heading"></a></h3>
+<h3>HPC non-interpolated downloads<a class="headerlink" href="#hpc-non-interpolated-downloads" title="Link to this heading"></a></h3>
 <p>In some cases, model data exists in <code class="docutils literal notranslate"><span class="pre">esarchive</span></code>, but not all HPC machines have direct access to it. When interpolation needs to be performed on a machine without <code class="docutils literal notranslate"><span class="pre">esarchive</span></code> access, the model data must first be copied from <code class="docutils literal notranslate"><span class="pre">esarchive</span></code> to <code class="docutils literal notranslate"><span class="pre">gpfs</span></code>.</p>
 <p><strong>Download source paths:</strong></p>
 <ul class="simple">
