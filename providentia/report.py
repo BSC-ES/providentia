@@ -50,6 +50,9 @@ class Report:
             Arbitrary keyword arguments used to configure the report 
             settings and override default configuration values.
         """
+        
+        # update self with command line arguments
+        self.commandline_arguments = copy.deepcopy(kwargs)
 
         # make sure that we are not using Qt5 backend with matplotlib
         matplotlib.use('Agg')
