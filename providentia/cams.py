@@ -801,6 +801,9 @@ class Cams(object):
                             date_str = os.path.basename(file).split('_')[1].split('.')[0]
                             date = datetime.strptime(date_str, date_format)
 
+                            # normalize date to UTC
+                            date = date.astimezone(timezone.utc) if date.tzinfo else date.replace(tzinfo=timezone.utc)
+
                             # break if any file is in the date range
                             if cams_dict['forecast']:
                                 in_range = current_cams_date <= date <= next_cams_date
