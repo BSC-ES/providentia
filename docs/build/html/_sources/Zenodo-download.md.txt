@@ -17,7 +17,7 @@ _"Do you want to download from the BSC remote machine? (Otherwise, GHOST data wi
 
 ## Available networks
 
-To download a network, use the **network name exactly as it appears** in the list on the page (scroll down to see). For example, use `EBAS-COLOSSAL_tursk` instead of `EBAS`.
+To download a network, choose one of the networks from the options per data version below.
 
 ### Version 1.5
 
@@ -25,39 +25,39 @@ These are the available networks for version **1.5**:
 
 * `AERONET_v3_lev1.5`
 * `AERONET_v3_lev2.0`
-* `CANADA_NAPS_axyat`
-* `CAPMoN_psowf`
-* `CHILE_SINCA_bwqcn`
-* `EBAS-ACTRIS_oyktp`
-* `EBAS-AMAP_hcxwm`
-* `EBAS-CAMP_daczg`
-* `EBAS-COLOSSAL_tursk`
-* `EBAS-EMEP_fwqeu`
-* `EBAS-EUCAARI_sbqsj`
-* `EBAS-EUSAAR_qbebc`
-* `EBAS-HELCOM_xpkzk`
-* `EBAS-HTAP_nsqlu`
-* `EBAS-IMPACTS_qfpkj`
-* `EBAS-Independent_eomfc`
-* `EBAS-NILU_sbtfa`
-* `EBAS-NOAA_ESRL_fysrl`
-* `EBAS-NOAA_GGGRN_zdvuh`
-* `EBAS-OECD_seque`
-* `EBAS-UK_DECC_ftlwa`
-* `EBAS-WMO_WDCA_orhrv`
-* `EBAS-WMO_WDCRG_iwicw`
+* `CANADA_NAPS`
+* `CAPMoN`
+* `CHILE_SINCA`
+* `EBAS-ACTRIS`
+* `EBAS-AMAP`
+* `EBAS-CAMP`
+* `EBAS-COLOSSAL`
+* `EBAS-EMEP`
+* `EBAS-EUCAARI`
+* `EBAS-EUSAAR`
+* `EBAS-HELCOM`
+* `EBAS-HTAP`
+* `EBAS-IMPACTS`
+* `EBAS-Independent`
+* `EBAS-NILU`
+* `EBAS-NOAA_ESRL`
+* `EBAS-NOAA_GGGRN`
+* `EBAS-OECD`
+* `EBAS-UK_DECC`
+* `EBAS-WMO_WDCA`
+* `EBAS-WMO_WDCRG`
 * `EEA_AIRBASE`
 * `EEA_AQ_eReporting`
 * `GHOST-PUBLIC`
-* `MEXICO_CDMX_bqrai`
-* `MITECO_ntvht`
-* `UK_AIR_orbad`
+* `MEXICO_CDMX`
+* `MITECO`
+* `UK_AIR`
 * `US_EPA_AQS`
-* `US_EPA_AirNow_DOS_scrbc`
-* `US_EPA_CASTNET_yokyk`
-* `US_NADP_AMNet_vgtld`
-* `US_NADP_AMoN_hvyow`
-* `WMO_WDCGG_pwshf`
+* `US_EPA_AirNow_DOS`
+* `US_EPA_CASTNET`
+* `US_NADP_AMNet`
+* `US_NADP_AMoN`
+* `WMO_WDCGG`
 
 ### Version 1.5.1
 
