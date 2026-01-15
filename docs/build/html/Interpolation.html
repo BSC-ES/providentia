@@ -75,6 +75,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Forecast.html">Forecast</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
@@ -113,7 +114,7 @@
              
   <section class="tex2jax_ignore mathjax_ignore" id="interpolation">
 <h1>Interpolation<a class="headerlink" href="#interpolation" title="Link to this heading"></a></h1>
-<p>This mode allows users to spatially interpolate model output against available observational stations to be viewable in <strong>Providentia</strong>.</p>
+<p>This mode allows users to spatially interpolate model output against available observational stations, allowing it to be subsequently evaluated in <strong>Providentia</strong>.</p>
 <p>Interpolation consists of spatially interpolating gridded model outputs to observational station locations using a nearest-neighbour approach.</p>
 <p>The Interpolation mode allows to interpolate models against <strong>GHOST</strong> and <strong>non-GHOST</strong> observations.</p>
 <section id="starting-an-interpolation">
@@ -210,7 +211,7 @@ Be aware that this can be demanding on the computer, so ensure your machine has 
 <td><p>Same as <code class="docutils literal notranslate"><span class="pre">resolution</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">forecast</span></code></p></td>
-<td><p>Forecast time range to interpolate</p></td>
+<td><p>Controls how forecast data is handled. This variable must be set to a valid value when performing interpolation for forecast data to be interpolated (<code class="docutils literal notranslate"><span class="pre">day</span></code>,<code class="docutils literal notranslate"><span class="pre">daily</span></code>,<code class="docutils literal notranslate"><span class="pre">combined</span></code>,<code class="docutils literal notranslate"><span class="pre">dayN</span></code>,<code class="docutils literal notranslate"><span class="pre">dailyN</span></code>,<code class="docutils literal notranslate"><span class="pre">combinedN</span></code>)</p></td>
 <td><p>No</p></td>
 <td><p>All</p></td>
 </tr>
@@ -220,12 +221,12 @@ Be aware that this can be demanding on the computer, so ensure your machine has 
 <td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interp_model_downsampling</span></code></p></td>
-<td><p>Statistic used to downsample model data (<code class="docutils literal notranslate"><span class="pre">mean</span></code>, <code class="docutils literal notranslate"><span class="pre">median</span></code>)</p></td>
+<td><p>Statistic for the downsampling of the model resolution to the observational resolution (<code class="docutils literal notranslate"><span class="pre">mean</span></code>, <code class="docutils literal notranslate"><span class="pre">median</span></code>)</p></td>
 <td><p>No</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">mean</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">interp_model_upsampling</span></code></p></td>
-<td><p>Method used to upsample model data (<code class="docutils literal notranslate"><span class="pre">fill</span></code>, <code class="docutils literal notranslate"><span class="pre">gaps</span></code>)</p></td>
+<td><p>Method for the upsampling of the model resolution to the observational resolution (<code class="docutils literal notranslate"><span class="pre">fill</span></code>, <code class="docutils literal notranslate"><span class="pre">gaps</span></code>)</p></td>
 <td><p>No</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">fill</span></code></p></td>
 </tr>
@@ -286,9 +287,25 @@ Be aware that this can be demanding on the computer, so ensure your machine has 
 <p>The file <code class="docutils literal notranslate"><span class="pre">settings/internal/mapping_species.yaml</span></code> contains a dictionary mapping original species names to their alternative names.</p>
 <p>Note that the mapping species file is only used when the species name from the configuration file is not found in the expected location, meaning Povidentia first looks for the species written in the configuration file. If it is not found, it then searches for the corresponding mapped species in <code class="docutils literal notranslate"><span class="pre">mapping_species.yaml</span></code>.</p>
 </section>
-<section id="different-resolutions-between-model-and-observations">
-<h4>Different resolutions between model and observations<a class="headerlink" href="#different-resolutions-between-model-and-observations" title="Link to this heading"></a></h4>
-<p>By default Providentia will only look to do interpolations for matching temporal resolutions between the model and observations, however Providentia can be adjusted to change this operation. Model data can be downsampled to the observational resolution by using the interp_model_downsampling field, or can be upsampled by using the interp_model_upsampling field.</p>
+<section id="different-temporal-resolutions-between-observations-and-model">
+<h4>Different temporal resolutions between observations and model<a class="headerlink" href="#different-temporal-resolutions-between-observations-and-model" title="Link to this heading"></a></h4>
+<p>When you have observational and model data with different temporal resolutions, Providentia is very adaptable to try and ensure that an interpolation takes place.</p>
+<p>For each temporal resolution you are wishing to interpolate to, Providentia will go through a series of steps:</p>
+<ol class="arabic simple">
+<li><p>It will first check to see if you both observations and model data at that resolution. If there are no observations at the resolution, the interpolation will not be performed.</p></li>
+<li><p>If there are observations but no model data, Providentia will next check if there is model data at a finer resolution available. If there is, it will then downsample the model data to the coarser resolution of the observations.</p></li>
+<li><p>If there is no finer model data available, it will next check if there is model data at a coarser resolution available. If there is, it will then upsample the model data to the finer resolution of the observations.</p></li>
+<li><p>If there is no finer or coarser model data available, the interpolation will not be performed.</p></li>
+</ol>
+<p>The downsampling or upsampling of the model data that Providentia performs can be controlled via a few variables.</p>
+<p>The statistic for the downsampling of model data to a coarser observational resolution can be set via the <code class="docutils literal notranslate"><span class="pre">interp_model_downsampling</span></code> variable. The valid options are: <code class="docutils literal notranslate"><span class="pre">mean</span></code> and <code class="docutils literal notranslate"><span class="pre">median</span></code>, with the default being <code class="docutils literal notranslate"><span class="pre">mean</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">interp_model_downsampling</span> <span class="o">=</span> <span class="n">mean</span>
+</pre></div>
+</div>
+<p>The method for the upsampling of model data to a finer observational resolution can be set via the <code class="docutils literal notranslate"><span class="pre">interp_model_upsampling</span></code> variable. The valid options are: <code class="docutils literal notranslate"><span class="pre">fill</span></code> and <code class="docutils literal notranslate"><span class="pre">gaps</span></code>, with the default being <code class="docutils literal notranslate"><span class="pre">fill</span></code>. <code class="docutils literal notranslate"><span class="pre">fill</span></code> linearly fills between measurements, and <code class="docutils literal notranslate"><span class="pre">gaps</span></code> sets NaN values for times that the model does not have.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">interp_model_upsampling</span> <span class="o">=</span> <span class="n">fill</span>
+</pre></div>
+</div>
 </section>
 <section id="using-wildcards">
 <h4>Using wildcards<a class="headerlink" href="#using-wildcards" title="Link to this heading"></a></h4>

@@ -49,14 +49,21 @@
 <li class="toctree-l1 current"><a class="reference internal" href="Modes.html">Modes</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Interpolation.html">Interpolation</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Dashboard</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#interface">Interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#menu-bar">Menu bar</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#data-selection">Data Selection</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#filters">Filters</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#statistics">Statistics</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#colocation">Colocation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#resampling">Resampling</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#site-selection">Site Selection</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#toolbox">Toolbox</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#toolbar">Toolbar</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plot-interactivity">Plot interactivity</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#selecting-stations">Selecting stations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#changing-plots">Changing plots</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#plot-settings">Plot settings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#legend">Legend</a></li>
 </ul>
 </li>
 </ul>
@@ -69,6 +76,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Forecast.html">Forecast</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
@@ -107,134 +115,145 @@
              
   <section class="tex2jax_ignore mathjax_ignore" id="dashboard">
 <h1>Dashboard<a class="headerlink" href="#dashboard" title="Link to this heading"></a></h1>
-<p>Providentia’s dashboard was designed to allow on-the-fly analysis of BSC model output, with respect to GHOST processed observational data.</p>
-<section id="interface">
-<h2>Interface<a class="headerlink" href="#interface" title="Link to this heading"></a></h2>
-<p>There are several available options to perform the analysis. The header of the window contains the fields that the user can fill, which is separated into 6 sections:</p>
-<ul class="simple">
-<li><p>Data Selection</p></li>
-<li><p>Filters</p></li>
-<li><p>Statistics</p></li>
-<li><p>Colocation</p></li>
-<li><p>Resampling</p></li>
-<li><p>Site Selection</p></li>
-</ul>
+<p>Providentia’s dashboard was designed to allow for interactive quick-look visualisations of observations and colocated model output.</p>
 <p><img alt="providentia" src="_images/providentia.png" /></p>
+<section id="menu-bar">
+<h2>Menu bar<a class="headerlink" href="#menu-bar" title="Link to this heading"></a></h2>
+<p><img alt="providentia" src="_images/dashboard_menu.png" /></p>
+<p>After launching the dashboard you will see at the top of the window a menu bar with multiple drop-down menus and buttons that can be selected.</p>
+<p>The main options can de separated into 6 distinct sections:</p>
+<ul class="simple">
+<li><p><strong>Data Selection</strong></p></li>
+<li><p><strong>Filters</strong></p></li>
+<li><p><strong>Statistics</strong></p></li>
+<li><p><strong>Colocation</strong></p></li>
+<li><p><strong>Resampling</strong></p></li>
+<li><p><strong>Site Selection</strong></p></li>
+</ul>
 <section id="data-selection">
 <h3>Data Selection<a class="headerlink" href="#data-selection" title="Link to this heading"></a></h3>
-<p>Under this section, there are four drop-down menus. The first option that the user should fill is the data provider (e.g., EIONET, EBAS, etc.). Then, the further three menus will show the available options that correspond to the selected provider and refer to specific variables and data frequency (hourly, daily, monthly, etc.).</p>
+<p><img alt="providentia" src="_images/dashboard_dataselection.png" /></p>
+<p>Under this section, to the furthest left there are four drop-down menus and two rangeboxes. The rangeboxes will contain a default start date and end date (in the format YYYYMMDD). Change these if you wish to analyse a different time period.</p>
+<p>Once the time period had been updated the drop-down menus will update to show the available observational data providers (network), temporal resolutions, matrix (type of observations), and species. Select the desired fields from each menu.</p>
 <p>Next, there are four pop-up menus:</p>
 <ul class="simple">
-<li><p><strong>QA</strong> contains the quality assurance flags to filter by.</p></li>
-<li><p><strong>FLAGS</strong> contain standardised data reporter provided flags to filter by.</p></li>
-<li><p><strong>MOD</strong> contains a list of models that exist and are related to the variable selected.</p></li>
+<li><p><strong>QA</strong> contains the GHOST quality assurance flags to filter observations by, as explained in <a class="reference internal" href="QA-filtering.html"><span class="std std-doc">QA</span></a>.</p></li>
+<li><p><strong>FLAGS</strong> contain standardised data reporter provided flags to filter observations by, as explained in <a class="reference internal" href="QA-filtering.html"><span class="std std-doc">Flags</span></a>.</p></li>
+<li><p><strong>MODS</strong> contains a list of models that are available to load for the current data selection.</p></li>
 <li><p><strong>MULTI</strong> can be used to filter your current network-species by the values of other network-species, as explained in <a class="reference internal" href="Multispecies-filtering.html"><span class="doc std std-doc">Multispecies filtering</span></a>.</p></li>
 </ul>
-<p><code class="docutils literal notranslate"><span class="pre">NOTE:</span> <span class="pre">If</span> <span class="pre">under</span> <span class="pre">the</span> <span class="pre">**QA**</span> <span class="pre">menu,</span> <span class="pre">the</span> <span class="pre">checkboxes</span> <span class="pre">‘*Invalid</span> <span class="pre">Data</span> <span class="pre">Provider</span> <span class="pre">Flags</span> <span class="pre">–</span> <span class="pre">GHOST</span> <span class="pre">Decreed*’</span> <span class="pre">or</span> <span class="pre">‘*Invalid</span> <span class="pre">Data</span> <span class="pre">Provider</span> <span class="pre">Flags</span> <span class="pre">–</span> <span class="pre">Network</span> <span class="pre">Decreed*’</span> <span class="pre">are</span> <span class="pre">selected,</span> <span class="pre">all</span> <span class="pre">checkboxes</span> <span class="pre">under</span> <span class="pre">the</span> <span class="pre">Flags</span> <span class="pre">menu</span> <span class="pre">should</span> <span class="pre">be</span> <span class="pre">unticked</span> <span class="pre">(the</span> <span class="pre">default</span> <span class="pre">setting).</span> <span class="pre">This</span> <span class="pre">is</span> <span class="pre">because</span> <span class="pre">ticking</span> <span class="pre">one</span> <span class="pre">of</span> <span class="pre">these</span> <span class="pre">checkboxes</span> <span class="pre">sets</span> <span class="pre">a</span> <span class="pre">pre-selected</span> <span class="pre">subset</span> <span class="pre">of</span> <span class="pre">Flags</span> <span class="pre">checkboxes</span> <span class="pre">automatically.</span> <span class="pre">For</span> <span class="pre">this</span> <span class="pre">reason</span> <span class="pre">also,</span> <span class="pre">only</span> <span class="pre">one</span> <span class="pre">of</span> <span class="pre">these</span> <span class="pre">QA</span> <span class="pre">checkboxes</span> <span class="pre">should</span> <span class="pre">be</span> <span class="pre">ticked</span> <span class="pre">at</span> <span class="pre">the</span> <span class="pre">same</span> <span class="pre">time.</span></code></p>
-<p>Additionally, here the user can fill the date range. In the case of there being no available data for the requested dates, there will be no data loaded.</p>
-<p>After having filled all the fields that the user is interested in, then the last step is to click <strong>Read</strong>. If the user makes changes to any of the fields, it is needed to click on <strong>Read</strong> again in order to apply the changes.
-After reading the data, the map appears showing the available stations that correspond to the data selection. The user can select either one station individually (by clicking on it) or multiple ones by drawing a circle around them.</p>
-<p>Finally, the Data Selection section contains the option <strong>Colocate</strong>. When selected this means that all observations and model data are forced to temporally intersect, and if not (i.e. there exists observations but no model data, or vice versa), then these time periods will be set as NaN. After having loaded the data and selected the desired stations, if the user chooses to colocate, there is no need to <strong>Read</strong> again, the changes apply immediately.</p>
-<section id="available-networks">
-<h4>Available networks<a class="headerlink" href="#available-networks" title="Link to this heading"></a></h4>
-<p>The drop-down menu of the available networks shows the names of the networks that have available data for the selected date range.</p>
-<p><code class="docutils literal notranslate"><span class="pre">NOTE:</span> <span class="pre">The</span> <span class="pre">networks'</span> <span class="pre">data</span> <span class="pre">that</span> <span class="pre">are</span> <span class="pre">stored</span> <span class="pre">in</span> <span class="pre">/esarchive</span> <span class="pre">are</span> <span class="pre">**not**</span> <span class="pre">accessible</span> <span class="pre">from</span> <span class="pre">MareNostrum</span> <span class="pre">5.</span> <span class="pre">If</span> <span class="pre">you</span> <span class="pre">want</span> <span class="pre">to</span> <span class="pre">use</span> <span class="pre">these</span> <span class="pre">data,</span> <span class="pre">then</span> <span class="pre">you</span> <span class="pre">should</span> <span class="pre">run</span> <span class="pre">Providentia</span> <span class="pre">from</span> <span class="pre">**Nord4**.</span></code></p>
-</section>
-<section id="example">
-<h4>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h4>
-<p>In the following image, we can see the output for Providentia where we compare the model cams61_camsra_ph2-eu-000 with actual observations for ozone. We load the observations and model data over 2018 and we select <em>Intersect</em>, so that the stations within the model’s domain are automatically selected.</p>
-<p><img alt="intersect" src="_images/intersect.png" /></p>
-<p>In the figure above we see that the data were loaded and plotted. However, there might some data gaps in the observations or in the models. This might result in an inaccurate analysis. By selecting <strong>Colocate</strong>, Providentia will apply the temporal intersection of data points that exist in both the network and model datasets. The result of the previous example would be:</p>
-<p><img alt="colocate" src="_images/colocate.png" /></p>
-</section>
+<p>After having set all the fields that the user wants, then the last step is to click the <strong>READ</strong> button. After reading the data, a map plot appears showing the available stations that correspond to the data selection.</p>
+<p>If the user makes changes to any of the fields in this section, it is needed to reclick on <strong>READ</strong> in order to apply the changes.</p>
 </section>
 <section id="filters">
 <h3>Filters<a class="headerlink" href="#filters" title="Link to this heading"></a></h3>
+<p><img alt="providentia" src="_images/dashboard_filters.png" /></p>
+<p>The filters section provides a variety of options to filter data or stations. A detailed review of all the filter options available in Providentia can be found here: <a class="reference internal" href="Filtering.html"><span class="doc std std-doc">Filtering</span></a>.</p>
+<p>After having selected or modified any filters in this section, simply click the <strong>FILTER</strong> button to apply the filters, or the <strong>RESET</strong> button to undo any filters back to the defaults.</p>
 <section id="bounds">
 <h4>Bounds<a class="headerlink" href="#bounds" title="Link to this heading"></a></h4>
-<p>Any data that is above/below these limits will be set as NaN. These are automatically assigned per variable. However, the user can modify them if needed.</p>
-<p><code class="docutils literal notranslate"><span class="pre">NOTE:</span> <span class="pre">In</span> <span class="pre">Data</span> <span class="pre">Selection</span> <span class="pre">→</span> <span class="pre">QA</span> <span class="pre">if</span> <span class="pre">the</span> <span class="pre">user</span> <span class="pre">selects</span> <span class="pre">the</span> <span class="pre">option</span> <span class="pre">of</span> <span class="pre">*Extreme</span> <span class="pre">Data*,</span> <span class="pre">then</span> <span class="pre">the</span> <span class="pre">extremes</span> <span class="pre">values</span> <span class="pre">will</span> <span class="pre">be</span> <span class="pre">filtered</span> <span class="pre">out</span> <span class="pre">either</span> <span class="pre">way.</span></code></p>
+<p>Often it is desired to remove values which exceed certain extreme bounds, as it is known that data should appear at such extremes. These bounds will be by default set on the dashboard, taken from definitions per species in GHOST. These can be revised up or down as the user sees fit.</p>
 <section id="rep">
 <h5>% REP<a class="headerlink" href="#rep" title="Link to this heading"></a></h5>
-<p><img alt="representativity" src="_images/representativity-2.png" /></p>
-<p>This option refers to the minimum acceptable percentages of data across the data that is not NaN. All stations which do not meet this minimum requirement will be screened out.</p>
+<p><img alt="representativity" src="_images/representativity.png" /></p>
+<p>One major limitation often associated with observations is the amount of gaps between measurements. If these observations are directly compared with typically complete model data, this would impose a significant bias upon the comparison. Filtering by representativity filters provides a way to control the temporal robustness of the observations for evaluation. Providentia has multiple such filters available in the pop-up menu opened via the <strong>% REP</strong> button.</p>
+<p>See here for more information about representativity filters: <a class="reference internal" href="Filtering.html#representativity"><span class="std std-ref">Representativity filtering</span></a></p>
 </section>
 <section id="period">
 <h5>PERIOD<a class="headerlink" href="#period" title="Link to this heading"></a></h5>
 <p><img alt="period" src="_images/period.png" /></p>
-<p>The pop-up menu of <strong>Period</strong> allows the user to select data periods by either using the options <em>keep</em> (<strong>K</strong>) or <em>remove</em> (<strong>R</strong>). If a user wishes, for example, to keep only the data that correspond to Daytime, then he/she can select to keep option under the <em>K</em> column, close the window and click <strong>FILTER</strong>.</p>
+<p>The <strong>PERIOD</strong> button opens a pop-up menu that allows for the selection or removal of specific data periods, for example keep daytime data, or remove summertime data.</p>
+<p>See here for more detailed information: <a class="reference internal" href="Filtering.html#periods"><span class="std std-ref">Period filtering</span></a></p>
 </section>
 <section id="meta">
 <h5>META<a class="headerlink" href="#meta" title="Link to this heading"></a></h5>
 <p><img alt="meta" src="_images/meta.png" /></p>
-<p>The pop-up menu of <strong>Meta</strong> contains a number of metadata types for the user to filter by. As there are many options, there have been separated into five categories.</p>
-<p>Each category provides a plethora of options. The user can filter by latitude, longitude, altitude. Or filter by area classification (rural, urban, etc), land use, emission source, etc. The options are numerous, explore!</p>
-</section>
-<section id="reset">
-<h5>RESET<a class="headerlink" href="#reset" title="Link to this heading"></a></h5>
-<p>The <em>RESET</em> button will set all the fields under the <em>Filters</em> section back to their initial values and it will unfilter the loaded data.</p>
-</section>
-<section id="filter">
-<h5>FILTER<a class="headerlink" href="#filter" title="Link to this heading"></a></h5>
-<p>The <em>FILTER</em> button will set all the selected fields under the <em>Filters</em> section and the loaded data will be filtered.</p>
+<p>The <strong>META</strong> button opens a pop-up menu allows the user to filter stations on the map by a variety of metadata variables. See here for more detailed information: <a class="reference internal" href="Filtering.html#filtering-metadata"><span class="std std-ref">Metadata filtering</span></a></p>
 </section>
 </section>
 </section>
 <section id="statistics">
 <h3>Statistics<a class="headerlink" href="#statistics" title="Link to this heading"></a></h3>
-<p>This section provides ways to spatially visualise specific statistical information across all loaded stations. You can read more details about how the statistics are calculated in <a class="reference internal" href="Statistics.html"><span class="doc std std-doc">Statistics</span></a>.</p>
+<p><img alt="providentia" src="_images/dashboard_statistics.png" /></p>
+<p>The <strong>Statistics</strong> section allows for control of how statistics are calculated across the dashboard.</p>
+<p>The <strong>Mode</strong> drop-down menu allows for the statistical mode to be selected, fundamentally altering the calculation of statistics</p>
+<p>The <strong>Aggregation</strong> drop-down menu controls how data is aggregated across stations when more than one station is selected.</p>
+<p>You can read more details about how the statistics are calculated in <a class="reference internal" href="Statistics.html"><span class="doc std std-doc">Statistics</span></a>.</p>
 </section>
 <section id="colocation">
 <h3>Colocation<a class="headerlink" href="#colocation" title="Link to this heading"></a></h3>
-<p>It is possible to activate and deactivate the temporal colocation from the dashboard by using this checkbox. More details can be found in <a class="reference internal" href="Colocation.html"><span class="doc std std-doc">Colocation</span></a>.</p>
+<p><img alt="providentia" src="_images/dashboard_colocation.png" /></p>
+<p>When performing evaluations of model data with observations, it is of high importance to ensure you are comparing apples with apples, rather than apples with oranges.</p>
+<p>One way that evaluations can often be biased is due to gapped observations being compared with non-gapped model data. This can be resolved by ensuring both observational and model data is equally temporally gapped, called <strong>temporal colocation</strong></p>
+<p>Temporal colocation is used to temporally pair observations and model data, with any missing measurements in either the observational or model array, imposing missing measurements on the other.</p>
+<p>When temporal colocation is active, you will have access to more plot types (scatter, taylor, fairmode-target, and fairmode-statsummary). See here for more information about <a class="reference internal" href="Plot-types-and-options.html"><span class="doc std std-doc">plot types</span></a>. Additionally model bias statistics will also be available when temporal colocation is active (e.g. r). See here for more information about <a class="reference internal" href="Statistics.html#available-statistics"><span class="std std-ref">available statistics</span></a>.</p>
 </section>
 <section id="resampling">
 <h3>Resampling<a class="headerlink" href="#resampling" title="Link to this heading"></a></h3>
-<p>It it possible to reduce the number of points by resampling our data to a specific temporal resolution. wWhat this does a simple average using the <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.resample.html">xarray function resample</a> followed by the mean:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">resampled_data</span> <span class="o">=</span> <span class="n">original_data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">temporal_resolution</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-</pre></div>
-</div>
+<p><img alt="providentia" src="_images/dashboard_resampling.png" /></p>
+<p>The resampling section allows the plotted data to be resampled to a coarser temporal resolution (by the mean), e.g. hourly to daily, by clicking on a resolution from the drop-down menu. When a resolution is selected, it updates the plots and statistics across the dashboard.</p>
 </section>
 <section id="site-selection">
 <h3>Site Selection<a class="headerlink" href="#site-selection" title="Link to this heading"></a></h3>
-<p>Under this section there are three options:</p>
+<p><img alt="providentia" src="_images/dashboard_siteselection.png" /></p>
+<p>This section gives three options for selecting multiple stations on the map:</p>
 <ul class="simple">
-<li><p><strong>All</strong>: It selects data from all the stations that appear on the map.</p></li>
-<li><p><strong>Intersect</strong>: It selects data from stations that spatially intersect with the models grid edges.</p></li>
-<li><p><strong>Extent</strong>: It select the data on the current map view.</p></li>
+<li><p><strong>All</strong>: Selects all the stations that appear on the map.</p></li>
+<li><p><strong>Intersect</strong>: Selects stations that spatially intersect with all model domains that are currently active.</p></li>
+<li><p><strong>Extent</strong>: Selects stations that are within the boundaries of the map currently plotted on screen.</p></li>
 </ul>
 </section>
-<section id="toolbox">
-<h3>Toolbox<a class="headerlink" href="#toolbox" title="Link to this heading"></a></h3>
-<p>Under the main option fields, there is a toolbox that gives users several options.</p>
-<p><img alt="toolbox" src="_images/toolbox.png" /></p>
+</section>
+<section id="toolbar">
+<h2>Toolbar<a class="headerlink" href="#toolbar" title="Link to this heading"></a></h2>
+<p>Directly under the menu bar, there is a toolbar that gives several useful options:</p>
+<p><img alt="providentia" src="_images/dashboard_toolbar.png" /></p>
 <p>In order from left to right, these are:</p>
 <ul class="simple">
-<li><p><strong>Export button</strong>: To export the data that users used for their evaluation (observations and models) in NetCDF or Numpy files and the corresponding configuration file.</p></li>
-<li><p><strong>Load button</strong>: To load the configuration file from previous evaluation sessions. For instance, those saved using the export button.</p></li>
-<li><p><strong>World button</strong>: To return to the initial state of the map and the plots before applying any option.</p></li>
-<li><p><strong>Backward arrow button</strong>: To move to one state back from the current dashboard state.</p></li>
-<li><p><strong>Forward arrow button</strong>: To move to one state forward from the current dashboard state.</p></li>
-<li><p><strong>Zoom to rectangle button</strong>: To zoom in an area in the map or the plots. Users can also scroll with the mouse wheel to do this progressively in the map.</p></li>
-<li><p><strong>Pan button</strong>: To move around the map and the plots.</p></li>
-<li><p><strong>Figure button</strong>: To save a screenshot of the current map view and plots.</p></li>
+<li><p><strong>Export</strong>: Exports the active state of the dashboard. This can be done to save the loaded data (both observations and model data) directly as a NetCDF or Numpy file, or to save the current state as a configuration file. For more information about exported data see <a class="reference internal" href="Saved-file-formats.html"><span class="doc std std-doc">Saved file formats</span></a>.</p></li>
+<li><p><strong>Load</strong>: This can be used to load a configuration file from a previous evaluation session. For instance, those saved using the export button. If there is more than one section or subsection, users will be asked to choose which one they want to load.</p></li>
+<li><p><strong>World view</strong>: Sets the map to the entire world view.</p></li>
+<li><p><strong>Original state</strong>: Returns all plots to their initial states.</p></li>
+<li><p><strong>Undo</strong>: Undos a plot action, i.e. undos a zoom on a plot</p></li>
+<li><p><strong>Redo</strong>: Redos a plot action, i.e. redos a zoom on a plot</p></li>
+<li><p><strong>Zoom</strong>: To zoom in on area, on any plot. Users can also scroll with the mouse wheel to do this progressively while on the map.</p></li>
+<li><p><strong>Pan</strong>: To pan around on any plot.</p></li>
+<li><p><strong>Lasso</strong>: When this is toggled on, by holding down the left mouse button over the map a lasso will appear allowing multiple stations within a closed lasso to be selected. Remember to un-toggle this to go back to normal station selection.</p></li>
+<li><p><strong>Save</strong>: To save a screenshot of all current plots.</p></li>
 </ul>
-<section id="exporting-configuration-files-and-data">
-<span id="id1"></span><h4>Exporting configuration files and data<a class="headerlink" href="#exporting-configuration-files-and-data" title="Link to this heading"></a></h4>
-<p>If you click on the export button, a pop-up window will appear to ask you where you want to store your output. From this window you can select what export format you want to use.</p>
-<ul class="simple">
-<li><p>In the case that you want to export data, then you can export them either in a <strong>NetCDF</strong> (.*nc) file format, or as a <strong>Numpy file</strong> (.*npz). For more information around the exported data, go to the wiki page <a class="reference internal" href="Saved-file-formats.html"><span class="doc std std-doc">Saved file formats</span></a></p></li>
-<li><p>In the case that you want to export only the configuration, then you need to select <strong>Configuration</strong>.</p></li>
-</ul>
-<p><img alt="Export conf" src="_images/export-conf.jpg" /></p>
 </section>
-<section id="loading-a-configuration-file">
-<span id="id2"></span><h4>Loading a configuration file<a class="headerlink" href="#loading-a-configuration-file" title="Link to this heading"></a></h4>
-<p>Providentia has the option to load a configuration file that you have either written from scratch, or that you had exported during a past evaluation.</p>
-<p>Loading a configuration file means that the tool will reset the options you have at that moment, and use the configuration with the new variables and filters.</p>
-<p>If there is more than one section or subsection, users will be asked to choose which one they want to load.</p>
-<p><img alt="Load conf" src="_images/load-conf.jpg" /></p>
+<section id="plot-interactivity">
+<h2>Plot interactivity<a class="headerlink" href="#plot-interactivity" title="Link to this heading"></a></h2>
+<section id="selecting-stations">
+<h3>Selecting stations<a class="headerlink" href="#selecting-stations" title="Link to this heading"></a></h3>
+<p><img alt="providentia" src="_images/dashboard_stationselection.png" /></p>
+<p>Once data has been loaded on the dashboard, by left clicking on a station the map, multiple plots will appear showing data for that station.</p>
+<p>Multiple stations can also be selected at once. This can by doing by using the <strong>site selection</strong> menu options, or by using the toolbar <strong>lasso</strong>, or a third way is to right click on a station while another is selected. By right clicking on an already selected station, it will be unselected.</p>
+<p>When multiple stations are selected, data on the plots will reflect an aggregation across all selected stations (controlled via the information set in the <strong>Statistics</strong> section on the menu bar).</p>
 </section>
+<section id="changing-plots">
+<h3>Changing plots<a class="headerlink" href="#changing-plots" title="Link to this heading"></a></h3>
+<p><img alt="providentia" src="_images/dashboard_plotselection.png" /></p>
+<p>When at least one station is selected on the map, four other plots will be visible.</p>
+<p>Each plot (except the map) can be switched to a different plot, by clicking the drop-down menu in the top left of each plot. A plot can also be deactivated entirely by clicking <strong>None</strong>.</p>
+<p>See here for more information about all available <a class="reference internal" href="Plot-types-and-options.html"><span class="doc std std-doc">plot types</span></a>, and see here for more information about <a class="reference internal" href="Plot-customisation.html"><span class="doc std std-doc">plot customisation</span></a>.</p>
+</section>
+<section id="plot-settings">
+<h3>Plot settings<a class="headerlink" href="#plot-settings" title="Link to this heading"></a></h3>
+<p>Each plot will be accompanied with two buttons in the top right corner of the plot.</p>
+<p>The first icon is a save button which allows individual plots to be saved as a figure.</p>
+<p><img alt="providentia" src="_images/dashboard_plotmod.png" /></p>
+<p>The second is a burger menu icon, which after clicking reveals a plot settings menu, where multiple options to interactively customise the plot are revealed (e.g. point size, or smoothing for the timeseries).</p>
+<p><img alt="providentia" src="_images/dashboard_plotoptions.png" /></p>
+<p>At the bottom of the settings window is a drop-down menu for plot options, where by selecting one or more of these options you can dramatically alter the plot in some way.</p>
+<p>One major plot option to note is <strong>bias</strong>. By selecting <strong>bias</strong> what is plotted is the result of the model - observations (i.e. bias). On the map, rather than selecting <strong>bias</strong> as a plot option, it can be obtained by selecting a secondary dataset. The bias will be calculated by the two active datasets.</p>
+<p>On some plots, the plotted statistic can also be altered though the settings menu, e.g. <strong>periodic</strong>.</p>
+<p>See here for more information about all available <a class="reference internal" href="Plot-types-and-options.html"><span class="doc std std-doc">plot options</span></a>.</p>
+</section>
+<section id="legend">
+<h3>Legend<a class="headerlink" href="#legend" title="Link to this heading"></a></h3>
+<p><img alt="providentia" src="_images/dashboard_legend.png" /></p>
+<p>The legend in the upper right of the dashboard displays which data is currently loaded on the dashboard (observations and model names). The legend is interactive, so by clicking on any data type, the respective data for that type will be hidden, or shown, on all plots.</p>
 </section>
 </section>
 </section>

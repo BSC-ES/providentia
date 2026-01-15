@@ -19,7 +19,7 @@ Some of these fields are required depending on the mode. If a parameter required
 | model_resolution | Optional | Model resolution if different from observations | 
 | domain | Optional | Domain of the model. Can be multiple. |
 | ensemble | Optional | Ensemble member number or ensemble statistic of the model. defaults to all members available. Can be multiple. |  
-| forecast | Optional | Controls how forecast data is handled. Valid options are `dayN` (e.g. `day1`) or `daily`. If this field is not empty in the interpolation, all forecast data will be processed.|
+| forecast | Optional | Controls how forecast data is handled. Can be multiple (e.g. `day`, `daily`, `combined`). If wanting to limit to specific forecast days, then add the forecast day to the option, (e.g. `day1`, `daily2`, `combined3`). Different options cannot be mixed however (i.e. `day` options cannot be set with `daily` or `combined` options). This variable must be set to a valid value when performing interpolation for forecast data to be interpolated.|
 | filter_species | Optional | Filter read species by other species data within a data range. The first value set is the lower bound to filter by, and the second value the upper bound. Place a sign before each bound value to inform if the filter should be inclusive or exclusive of the bound, e.g. `<` or `<=`. If not wishing to set either the lower or upper bounds, a `:` can be used. Optionally, a fill value can also be given as a third value to impose what the filtered data is set to, by default this is `NaN`. Multiple filters can be  set together separated by a comma (e.g. `network1:species1 (>lowerlim, <=upperlim, fillvalue), network2:species2 (:, <upperlim)`). |
 
 ## Analysis and visualisation modes (Dashboard, Report, Library)
@@ -85,9 +85,9 @@ These parameters are used only in the [Interpolation mode](Interpolation). All o
 | Parameter | Description |
 | ------ | ------ |
 | interp_n_neighbours | The number of nearest neighbours to use in the interpolation of model output to observational stations. If not set, this defaults to `4`.|
-| interp_spinup_timesteps | Needs to be a number|
-| interp_model_downsampling | Sets how downsampling of the model resolution to the observational resolution should be handled. Options: `mean`, `median`.|
-| interp_model_upsampling | Sets how upsampling of the model resolution to the observational resolution should be handled. `fill` linearly fills between measurements, and `gaps` sets NaN values for times that the model does not have.|
+| interp_spinup_timesteps | Number of initial timesteps skipped for model spin-up. If not set, this defaults to `0`.|
+| interp_model_downsampling | Sets the statistic for the downsampling of the model resolution to the observational resolution. Options: `mean`, `median`.|
+| interp_model_upsampling | Sets the method for the upsampling of the model resolution to the observational resolution. `fill` linearly fills between measurements, and `gaps` sets NaN values for times that the model does not have.|
 | interp_multiprocessing | Boolean variable to set if you wish to use multiprocessing instead of greasy to interpolate on HPC machines. |
 | network_type | Determines whether to use all GHOST or all non-GHOST networks when the observation field uses the `*` wildcard.  | 
 

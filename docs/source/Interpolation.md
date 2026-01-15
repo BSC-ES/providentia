@@ -1,6 +1,6 @@
 # Interpolation
 
-This mode allows users to spatially interpolate model output against available observational stations to be viewable in **Providentia**. 
+This mode allows users to spatially interpolate model output against available observational stations, allowing it to be subsequently evaluated in **Providentia**. 
 
 Interpolation consists of spatially interpolating gridded model outputs to observational station locations using a nearest-neighbour approach.
 
@@ -53,10 +53,10 @@ During the interpolation step, only a specific set of configuration fields is us
 | `network_type` | Network type when wildcards are used (`GHOST`, non-GHOST or both) | No | Both |
 | `resolution` | Observation data resolution (e.g. `hourly`, `daily`) | Yes | — |
 | `model_resolution` | Model resolution if different from observations | No | Same as `resolution` |
-| `forecast` | Forecast time range to interpolate | No | All |
+| `forecast` | Controls how forecast data is handled. This variable must be set to a valid value when performing interpolation for forecast data to be interpolated (`day`,`daily`,`combined`,`dayN`,`dailyN`,`combinedN`) | No | All |
 | `interp_spinup_timesteps` | Number of initial timesteps skipped for model spin-up | No | `0` |
-| `interp_model_downsampling` | Statistic used to downsample model data (`mean`, `median`) | No | `mean` |
-| `interp_model_upsampling` | Method used to upsample model data (`fill`, `gaps`) | No | `fill` |
+| `interp_model_downsampling` | Statistic for the downsampling of the model resolution to the observational resolution (`mean`, `median`) | No | `mean` |
+| `interp_model_upsampling` | Method for the upsampling of the model resolution to the observational resolution (`fill`, `gaps`) | No | `fill` |
 | `interp_n_neighbours` | Number of nearest neighbours used for interpolation | No | `4` |
 | `interp_reverse_vertical_orientation` | Reverse vertical order of model levels | No | `false` |
 | `interp_chunk_size` | Minimum number of jobs per interpolation chunk | No | `16` |
@@ -79,9 +79,29 @@ The file `settings/internal/mapping_species.yaml` contains a dictionary mapping 
 
 Note that the mapping species file is only used when the species name from the configuration file is not found in the expected location, meaning Povidentia first looks for the species written in the configuration file. If it is not found, it then searches for the corresponding mapped species in `mapping_species.yaml`.
 
-#### Different resolutions between model and observations
+#### Different temporal resolutions between observations and model
 
-By default Providentia will only look to do interpolations for matching temporal resolutions between the model and observations, however Providentia can be adjusted to change this operation. Model data can be downsampled to the observational resolution by using the interp_model_downsampling field, or can be upsampled by using the interp_model_upsampling field.
+When you have observational and model data with different temporal resolutions, Providentia is very adaptable to try and ensure that an interpolation takes place.
+
+For each temporal resolution you are wishing to interpolate to, Providentia will go through a series of steps:
+1. It will first check to see if you both observations and model data at that resolution. If there are no observations at the resolution, the interpolation will not be performed.
+2. If there are observations but no model data, Providentia will next check if there is model data at a finer resolution available. If there is, it will then downsample the model data to the coarser resolution of the observations. 
+3. If there is no finer model data available, it will next check if there is model data at a coarser resolution available. If there is, it will then upsample the model data to the finer resolution of the observations.
+4. If there is no finer or coarser model data available, the interpolation will not be performed.
+
+The downsampling or upsampling of the model data that Providentia performs can be controlled via a few variables.
+
+The statistic for the downsampling of model data to a coarser observational resolution can be set via the `interp_model_downsampling` variable. The valid options are: `mean` and `median`, with the default being `mean`.
+
+```
+interp_model_downsampling = mean
+```
+
+The method for the upsampling of model data to a finer observational resolution can be set via the `interp_model_upsampling` variable. The valid options are: `fill` and `gaps`, with the default being `fill`. `fill` linearly fills between measurements, and `gaps` sets NaN values for times that the model does not have.
+
+```
+interp_model_upsampling = fill
+```
 
 #### Using wildcards
 

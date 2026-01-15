@@ -11,6 +11,7 @@ Contents
    Configuration.rst
    Colocation.md
    Filtering.md
+   Forecast.md
    Plotting.rst
    Statistics.md
    Other-topics.rst

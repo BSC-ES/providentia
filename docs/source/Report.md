@@ -1,6 +1,6 @@
 # Report
 
-Providentia's report mode was designed to be able to generate complete reports and carry out in-depth analysis of BSC model output, with respect to observational data.
+Providentia's report mode was designed to be able to generate complete PDF reports, allowing in-depth analysis of model output, with respect to observational data.
 
 ## Plot types and options
 
