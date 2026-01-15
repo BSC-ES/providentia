@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -8,15 +6,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Home &mdash; Providentia 3.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=acc74ff5"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -56,6 +58,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Forecast.html">Forecast</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
@@ -99,20 +102,20 @@
 <p>Providentia is an evaluation software package developed at the Barcelona Supercomputing Center for the in-depth analysis of in-situ surface observations and colocated model output, tailored specifically for the atmospheric science community.</p>
 <p>Providentia has a variety of use modes:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="Interpolation.html"><span class="doc std std-doc">Interpolation</span></a>, to interpolate the models to the observations networks of your interest.</p></li>
-<li><p><a class="reference internal" href="Dashboard.html"><span class="doc std std-doc">Dashboard</span></a>, designed to allow on-the-fly analysis of BSC model output.</p></li>
-<li><p><a class="reference internal" href="Report.html"><span class="doc std std-doc">Report</span></a>, designed to obtain complete reports and carry out in-depth analysis of BSC model output.</p></li>
-<li><p><a class="reference internal" href="Download.html"><span class="doc std std-doc">Download</span></a>, to download data from esarchive and Zenodo into your local directories.</p></li>
-<li><p><a class="reference internal" href="Library.html"><span class="doc std std-doc">Library</span></a>, allowing use of the Providentia backend functions, and use within your own scripts. It is also possible to run Providentia in <a class="reference internal" href="Notebooks.html"><span class="doc std std-doc">Jupyter notebooks</span></a>.</p></li>
+<li><p><a class="reference internal" href="Interpolation.html"><span class="doc std std-doc">Interpolation</span></a>, to spatially colocate model output with observational stations</p></li>
+<li><p><a class="reference internal" href="Dashboard.html"><span class="doc std std-doc">Dashboard</span></a>, for interactive quick-look visualisations</p></li>
+<li><p><a class="reference internal" href="Report.html"><span class="doc std std-doc">Report</span></a>, for more exhaustive evaluations, generating PDF reports</p></li>
+<li><p><a class="reference internal" href="Download.html"><span class="doc std std-doc">Download</span></a>, to automatically retrieve and format observational and model datasets</p></li>
+<li><p><a class="reference internal" href="Library.html"><span class="doc std std-doc">Library</span></a>, for use of Providentia’s backend functions in personal scripts or <a class="reference internal" href="Notebooks.html"><span class="doc std std-doc">Jupyter notebooks</span></a></p></li>
 </ul>
 </section>
 <section id="getting-started">
 <h2>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
 <p>If you are just starting with Providentia please see our handy starting guide: <a class="reference internal" href="Getting-started.html"><span class="doc std std-doc">Getting started</span></a></p>
-<p>If you wish to see the videos and presentations of all previous Providentia training sessions please see here: <a class="reference internal" href="Training-material.html"><span class="doc std std-doc">Training</span></a></p>
-<p>If you wish to see all scientific and technical presentations releated to Providentia please see here: <a class="reference internal" href="Presentations.html"><span class="doc std std-doc">Presentations</span></a></p>
 <p>We also have a number of tutorial notebooks that outline Providentia’s features. Please see the <a class="reference external" href="https://github.com/BSC-ES/providentia/tree/master/tutorials">tutorials</a> subdirectory to find these.</p>
-<p>The full contents of the Providentia readthedocs documentation can be found here: <a class="reference external" href="https://providentia.readthedocs.io/en/latest/">Table of Contents</a></p>
+<p>If you wish to see the videos and presentations of all previous Providentia training sessions, please see here: <a class="reference internal" href="Training-material.html"><span class="doc std std-doc">Training</span></a></p>
+<p>If you wish to see all scientific and technical presentations releated to Providentia, please see here: <a class="reference internal" href="Presentations.html"><span class="doc std std-doc">Presentations</span></a></p>
+<p>The full contents of the Providentia ReadtheDocs documentation can be found here: <a class="reference external" href="https://providentia.readthedocs.io/en/latest/">Table of Contents</a></p>
 </section>
 <section id="bugs-new-features">
 <h2>Bugs / New features<a class="headerlink" href="#bugs-new-features" title="Link to this heading"></a></h2>

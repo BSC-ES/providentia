@@ -60,4 +60,4 @@ This is a magic function that allows for the rendering of figures directly in th
 
 ## Tutorials
 
-We have a number of tutorial notebooks that can be used to learn about Providentia features, these can all be found in the `tutorials` subdirectory. 
+We have a number of tutorial notebooks that can be used to learn about Providentia's features, these can all be found in the [tutorials](https://github.com/BSC-ES/providentia/tree/master/tutorials) subdirectory. 

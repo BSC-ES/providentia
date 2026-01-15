@@ -70,6 +70,7 @@ periodic_statistic_aggregation = Median
 
 On the dashboard, in the plot options of the statsummary plot, the periodic statistic mode and aggregation can be selected via the dropdown menus. Additionally, periodic statistics can be added to the statsummary plot also via the dropdown menus.
 
+(available_statistics)= 
 ## Available statistical metrics
 
 Providentia statistical metrics come in two categories: **basic** and **model bias**. 

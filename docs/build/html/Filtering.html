@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -8,19 +6,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Filtering &mdash; Providentia 3.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=acc74ff5"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Plotting" href="Plotting.html" />
+    <link rel="next" title="Forecast" href="Forecast.html" />
     <link rel="prev" title="Colocation" href="Colocation.html" /> 
 </head>
 
@@ -57,12 +59,18 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#qa-flags">QA flags</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#representativity">Representativity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multispecies-filtering">Multispecies filtering</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#representativity">Representativity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#native-vs-averaged-filters">Native vs averaged filters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#available-filters">Available filters</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#periods">Periods</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#bounds">Bounds</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#calibration-factor">Calibration factor</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="Forecast.html">Forecast</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
@@ -108,18 +116,18 @@
 <p>When things are modified in the <strong>Filters</strong> section, then the <strong>FILTER</strong> button must be clicked to apply the filters. These filters can then be removed (back to defaults) by clicking the <strong>RESET</strong> button.</p>
 </section>
 <section id="metadata">
-<h2>Metadata<a class="headerlink" href="#metadata" title="Link to this heading"></a></h2>
+<span id="filtering-metadata"></span><h2>Metadata<a class="headerlink" href="#metadata" title="Link to this heading"></a></h2>
 <p>The most common type of data filtering is by metadata, e.g. for country, longitude, altitude etc.</p>
-<p>Metadata can either by numerical or text and the method for filtering for these slightly varies, as described in the following sections. There will be substantially more metadata fields available when using GHOST data compared to not.</p>
+<p>Metadata can either by numerical or text and the method for filtering for these slightly varies, as will be described. There will be substantially more metadata fields available when using GHOST data compared to when not.</p>
 <p>One common question is what metadata available variables exist for the loaded data that can be filtered by. These can be seen empirically by looking through the sub-menus under the <strong>META</strong> button on the dashboard, with all available variables are organised into 5 categories: <code class="docutils literal notranslate"><span class="pre">station</span> <span class="pre">position</span></code>, <code class="docutils literal notranslate"><span class="pre">station</span> <span class="pre">classifications</span></code>, <code class="docutils literal notranslate"><span class="pre">station</span> <span class="pre">miscellaneous</span></code>, <code class="docutils literal notranslate"><span class="pre">globally</span> <span class="pre">gridded</span> <span class="pre">classifications</span></code>, and <code class="docutils literal notranslate"><span class="pre">measurement</span> <span class="pre">process</span> <span class="pre">information</span></code>. These are also defined for GHOST data in this <a class="reference external" href="https://doi.org/10.5194/essd-16-4417-2024">publication</a>.</p>
-<p>The subsequent question is what fields are available for each metadata variable, specifically for text metadata. The best solution for this is to empirically check by opening the dashboard and navigating to the variable you are interested in and viewing the available fields.</p>
+<p>The subsequent question is what fields are then available for each metadata variable, specifically for text metadata. The best solution for this is to empirically check by opening the dashboard and navigating to the variable you are interested in and viewing the available fields.</p>
 <section id="numerical-metadata">
 <h3>Numerical metadata<a class="headerlink" href="#numerical-metadata" title="Link to this heading"></a></h3>
 <p>Numerical metadata is filtered by setting a lower and upper bound of values to retain, for example only keeping stations with latitudes greater or equal to 30°N, but less or equal to 72°N:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">latitude</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">72</span>
 </pre></div>
 </div>
-<p>By default on the dashboard, the variables will display the full available range for the variable, e.g. minimum and maximum latitude.</p>
+<p>By default on the dashboard metadata menu, the variables will display the full available range for the variable, e.g. minimum and maximum latitude.</p>
 </section>
 <section id="text-metadata">
 <h3>Text metadata<a class="headerlink" href="#text-metadata" title="Link to this heading"></a></h3>
@@ -128,7 +136,7 @@
 <span class="n">country</span> <span class="o">=</span> <span class="n">remove</span><span class="p">:</span> <span class="n">United</span> <span class="n">Kingdom</span>
 </pre></div>
 </div>
-<p>On the dashboard all available fields for a variable will be displayed with associated keep and remove checkboxes per field. Simply check the fields you wish you keep or remove.</p>
+<p>On the dashboard metadata menu all available fields for a variable will be displayed, with associated keep (K) and remove (R) checkboxes per field. Simply check the fields you wish you keep or remove for that variable.</p>
 </section>
 </section>
 <section id="qa-flags">
@@ -148,7 +156,8 @@
 <span class="n">qa</span> <span class="o">=</span> 
 </pre></div>
 </div>
-<p>Leaving the variables blank means they will be not applied at all. It can also be set to add or subtract from the default fields, for example:</p>
+<p>Leaving the variables blank means they will be not applied at all.</p>
+<p>It can also be set to add or subtract from the default fields, for example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">add_qa</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span>
 <span class="n">subtract_qa</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span>
 <span class="n">add_flags</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span>
@@ -158,20 +167,56 @@
 <p>When using the dashboard by clicking on the <strong>FLAGS</strong> or <strong>QA</strong> buttons on the menu bar, pop-up menus will appear giving the option to interactively select fields.</p>
 <p>See <a class="reference internal" href="QA-filtering.html"><span class="doc std std-doc">here</span></a> for more in-depth information on filtering by QA or data flags, as well as full definitions of all available flags that can be filtered by.</p>
 </section>
-<section id="representativity">
-<h2>Representativity<a class="headerlink" href="#representativity" title="Link to this heading"></a></h2>
-<p>One major limitation associated with observations is the amount of gaps often found between measurements. If these observations are directly compared with typically complete model data, this would impose a significant bias upon the comparison. Filtering by representativity filters provides a way to control the temporal robustness of the observations for evaluation.</p>
-<p>Providentia has multiple such filters. By default these are <strong>NOT</strong> activated (i.e. set at 0).</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hourly_native_representativity_percent</span> <span class="o">=</span> <span class="mi">20</span>
+<section id="multispecies-filtering">
+<h2>Multispecies filtering<a class="headerlink" href="#multispecies-filtering" title="Link to this heading"></a></h2>
+<p>Multispecies filtering refers to the ability to filter loaded species data by the values of another species. For example, when performing investigations of dust in the atmosphere it is a common practice to filter the AOD by the Angstrom exponent, to isolate values associated with dust.</p>
+<p>Multispecies filtering can be set in the configuration files using the <code class="docutils literal notranslate"><span class="pre">filter_species</span></code> variable, where we define the network and species to filter by, the lower range to filter associated data by, the upper range to filter associated data by, and the value to set associated data to (default is nan). If you want to leave one of the filter ranges open-ended, then use a colon (:). Spatial colocation must be active in order to apply multispecies filtering (it is active by default).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">All</span><span class="p">]</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">AERONET_v3_lev1</span><span class="mf">.5</span>
+<span class="n">species</span> <span class="o">=</span> <span class="n">od550aero</span>
+<span class="n">filter_species</span> <span class="o">=</span> <span class="n">AERONET_v3_lev1</span><span class="mf">.5</span><span class="p">:</span><span class="n">ae440</span><span class="o">-</span><span class="mi">870</span><span class="n">aero</span> <span class="p">(</span><span class="o">&gt;</span><span class="mf">0.6</span><span class="p">,</span> <span class="p">:,</span> <span class="n">nan</span><span class="p">)</span>
+<span class="n">spatial_colocation</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 </div>
-<p>On the dashboard the representativity variables can be modified via the <strong>% REP</strong> button on the menu bar.</p>
-<p>See <a class="reference internal" href="Representativity-filtering.html"><span class="doc std std-doc">here</span></a> for more in-depth information on filtering by representativity.</p>
+<p>On the dashboard this can be replicated under the <strong>MULTI</strong> button on the menu bar. The apply (A) checkbox must be checked to apply the filter, and then data re-read by hitting the <strong>READ</strong> button on the main menu bar.</p>
+<p>See <a class="reference internal" href="Multispecies-filtering.html"><span class="doc std std-doc">here</span></a> for more in-depth information on multspecies filtering.</p>
+</section>
+<section id="representativity">
+<span id="id1"></span><h2>Representativity<a class="headerlink" href="#representativity" title="Link to this heading"></a></h2>
+<p>One major limitation often associated with observations is the amount of gaps between measurements. If these observations are directly compared with typically complete model data, this would impose a significant bias upon the comparison. Filtering by representativity filters provides a way to control the temporal robustness of the observations for evaluation.</p>
+<p>Providentia has multiple such filters available.</p>
+<section id="native-vs-averaged-filters">
+<h3>Native vs averaged filters<a class="headerlink" href="#native-vs-averaged-filters" title="Link to this heading"></a></h3>
+<p>Providentia has two types of representativity filters, those which calculate the representativity percent of observations at the <strong>native</strong> measured resolution (which can be variable), and those which calculate it at an <strong>averaged</strong> resolution, i.e. the data resolution being used in Providentia such as hourly, 3hourly etc.</p>
+<p>The <strong>native</strong> filters are only available when using GHOST data, and will always return a lower value than the <strong>averaged</strong> ones, as an hourly period with just 30 minutes being represented with measurements would be classed as being 100% represented in the average sense, whereas it would be 50% in the native sense.</p>
+</section>
+<section id="available-filters">
+<h3>Available filters<a class="headerlink" href="#available-filters" title="Link to this heading"></a></h3>
+<p>For both <strong>native</strong> and <strong>averaged</strong> filters, it is possible to filter by the representativity across different periods. For example, data for each day with representativity less than a certain amount can be screened out (i.e. set as nan).</p>
+<p>The periods that representativity can be filtered by are: <strong>hour</strong>, <strong>day</strong>, <strong>month</strong>, and <strong>year</strong>. The hourly case only applies for <strong>native</strong> data (when the data resolution is hourly).</p>
+<p>There is an additional filter for the <strong>averaged</strong> case, where the representativity of data across across the entire time range can be filtered by, thus removing entire stations when the representativity is less than a certain percent. This is set by the <code class="docutils literal notranslate"><span class="pre">all_representativity_percent</span></code> variable in the configuration file, and the <code class="docutils literal notranslate"><span class="pre">All</span></code> line under the <strong>% REP</strong> button on the dashboard.</p>
+<p>The <strong>native</strong> and <strong>averaged</strong> representativity filters can be set in the configuration file as follows, with the difference in the naming convention being that the native fields contain the <code class="docutils literal notranslate"><span class="pre">native</span></code> string. By default all fields are set to be 0% (i.e. the filters are not active).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Native representativity filters</span>
+<span class="n">hourly_native_representativity_percent</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">daily_native_representativity_percent</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">monthly_native_representativity_percent</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">annual_native_representativity_percent</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="c1"># Averaged representativity filters</span>
+<span class="n">daily_representativity_percent</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">monthly_representativity_percent</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">annual_representativity_percent</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">all_representativity_percent</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>As you change the temporal resolution of the data to be coarser, some of these fields will become unavailable. For example when using monthly data, you can not filter by daily representativity.</p>
+<p>On the dashboard the filters can be set under the <strong>% REP</strong> button on the menu bar.</p>
+</section>
 </section>
 <section id="periods">
-<h2>Periods<a class="headerlink" href="#periods" title="Link to this heading"></a></h2>
-<p>It is often desired to select certain periods over a time range, for example just daytime data, or data in the summer. Providentia gives an easy way to filter in such a way using the <code class="docutils literal notranslate"><span class="pre">period</span></code> variable when using GHOST data.</p>
-<p>The available period fields that that can be selected are: <code class="docutils literal notranslate"><span class="pre">Daytime</span></code>, <code class="docutils literal notranslate"><span class="pre">Nighttime</span></code>, <code class="docutils literal notranslate"><span class="pre">Weekday</span></code>, <code class="docutils literal notranslate"><span class="pre">Weekend</span></code>, <code class="docutils literal notranslate"><span class="pre">Spring</span></code>, <code class="docutils literal notranslate"><span class="pre">Summer</span></code>, <code class="docutils literal notranslate"><span class="pre">Autumn</span></code>, <code class="docutils literal notranslate"><span class="pre">Winter</span></code>.The availability of some of these fields is contingent on the temporal resolution that is active, for example <strong>Daytime</strong> data cannot be selected for monthly data.</p>
+<span id="id2"></span><h2>Periods<a class="headerlink" href="#periods" title="Link to this heading"></a></h2>
+<p>It is often desired to select or remove certain periods over a time range, for example just keep daytime data, or remove summertime data. Providentia gives an easy way to filter in such a way using the <code class="docutils literal notranslate"><span class="pre">period</span></code> variable when using GHOST data.</p>
+<p>The available period fields that that can be selected are: <code class="docutils literal notranslate"><span class="pre">Daytime</span></code>, <code class="docutils literal notranslate"><span class="pre">Nighttime</span></code>, <code class="docutils literal notranslate"><span class="pre">Weekday</span></code>, <code class="docutils literal notranslate"><span class="pre">Weekend</span></code>, <code class="docutils literal notranslate"><span class="pre">Spring</span></code>, <code class="docutils literal notranslate"><span class="pre">Summer</span></code>, <code class="docutils literal notranslate"><span class="pre">Autumn</span></code>, <code class="docutils literal notranslate"><span class="pre">Winter</span></code>. The availability of some of these fields is contingent on the active temporal resolution of data, for example <strong>Daytime</strong> values cannot be selected when monthly data is loaded.</p>
 <p>When wanting to apply these via configuration file the syntax is the same as the text metadata filtering with a small caveat, that you can both keep and remove fields at the same time by using a <strong>double pipe “||”</strong> between the keep and remove definitions to distinguish between them, for example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">period</span> <span class="o">=</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Winter</span>
 <span class="n">period</span> <span class="o">=</span> <span class="n">remove</span><span class="p">:</span> <span class="n">Daytime</span>
@@ -188,7 +233,7 @@
 <span class="n">upper_bound</span> <span class="o">=</span> <span class="mi">1000</span>
 </pre></div>
 </div>
-<p>Additionally in the case of multiple species, then multiple bounds can be given for the number of species that exist, for example:</p>
+<p>Additionally in the case of multiple species, then multiple bounds can be given for the number of species that are loaded, for example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">species</span> <span class="o">=</span> <span class="n">sconco3</span><span class="p">,</span> <span class="n">pm2p5</span><span class="p">,</span> <span class="n">pm10</span>
 <span class="n">lower_bound</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span>
 <span class="n">upper_bound</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">,</span> <span class="mi">3000</span>
@@ -198,7 +243,7 @@
 </section>
 <section id="calibration-factor">
 <h2>Calibration factor<a class="headerlink" href="#calibration-factor" title="Link to this heading"></a></h2>
-<p>Which not explicitely filtering per se, a commonly used feature to correct for model biases is by way of a calibration factor. This is used when a model has a known bias and you want to correct for it.</p>
+<p>While not explicitely filtering per se, a commonly used feature to correct for model biases is by way of a calibration factor. This is used when a model has a known bias and you want to correct for it.</p>
 <p>It is defined simply as a factor that is applied to model data. It can be set via <code class="docutils literal notranslate"><span class="pre">calibration_factor</span></code> in the configuration file, in the following ways:</p>
 <ul class="simple">
 <li><p>To add:</p></li>
@@ -243,7 +288,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Colocation.html" class="btn btn-neutral float-left" title="Colocation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Plotting.html" class="btn btn-neutral float-right" title="Plotting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Forecast.html" class="btn btn-neutral float-right" title="Forecast" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

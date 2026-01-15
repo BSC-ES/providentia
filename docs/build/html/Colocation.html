@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -8,15 +6,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Colocation &mdash; Providentia 3.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=acc74ff5"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -54,6 +56,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Forecast.html">Forecast</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
@@ -97,8 +100,8 @@
 <p>The following sections explain how both these colcoation types can be applied in Providentia.</p>
 <section id="temporal-colocation">
 <h2>Temporal colocation<a class="headerlink" href="#temporal-colocation" title="Link to this heading"></a></h2>
-<p>Temporal colocation is used to temporally pair observations and model data, with any missing measurements in either the observational or model array, imposing missing measurements on the respective other.</p>
-<p>When temporal colocation is active, you will have access to more plot types (scatter, taylor, fairmode-target, and fairmode-statsummary), and model bias statistics can also be used (e.g. r), see <a class="reference internal" href="Statistics.html#available-statistical-metrics"><span class="std std-ref">here</span></a> for more information about available statistics.</p>
+<p>Temporal colocation is used to temporally pair observations and model data, with any missing measurements in either the observational or model array, imposing missing measurements on the other.</p>
+<p>When temporal colocation is active, you will have access to more plot types (scatter, taylor, fairmode-target, and fairmode-statsummary). See <a class="reference internal" href="Plot-types-and-options.html"><span class="doc std std-doc">here</span></a> for more information about plot types. Additionally model bias statistics will also be available (e.g. r). See <a class="reference internal" href="Statistics.html#available-statistics"><span class="std std-ref">here</span></a> for more information about available statistics.</p>
 <p>Temporal colocation can be set in the configuration file by setting a boolean as follows, be default it is <strong>True</strong>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">temporal_colocation</span> <span class="o">=</span> <span class="kc">False</span>
 </pre></div>
@@ -111,13 +114,20 @@
 </section>
 <section id="spatial-colocation">
 <h2>Spatial colocation<a class="headerlink" href="#spatial-colocation" title="Link to this heading"></a></h2>
-<p>When loading more than one species we may want to ensure that the stations  measure all the species that we have selected. To do this, we need to activate spatial colocation.</p>
-<p>After activating spatial colocation, any stations that do not contain</p>
+<p>When loading more than one species you may want to ensure that the available stations measure data for all species that are to be loaded. To do this, we need to activate spatial colocation.</p>
+<p>After activating spatial colocation, any stations that do not have valid data for any of the loaded species are dropped.</p>
 <p>Spatial colocation can be set in the configuration file by setting a boolean as follows, be default it is <strong>True</strong>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">spatial_colocation</span> <span class="o">=</span> <span class="kc">False</span>
 </pre></div>
 </div>
-<p>On the dashboard, only 1 species is allowed to be loaded at once, so in theory it should not be possible to use. However there is a workaround using <strong>filter_species</strong>. If we filter the current loaded species with one or multiple filter species. This trick can be used by loading a configuration file with filter_species**</p>
+<p>On the dashboard, only one species is allowed to be loaded at once, so in theory it should not be possible to use spatial colocation. However there is a workaround using <strong>filter_species</strong> if loading the dashboard from a configuration file, or set under the <strong>MULTI</strong> button on the menu bar if not. If we filter the one loaded species with one or multiple filter species as follows, not filtering by any data range, then the resultant stations will be same as when loading multiple species with spatial colocation active:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="n">EBAS</span>
+<span class="n">species</span> <span class="o">=</span> <span class="n">sconco3</span>
+<span class="n">filter_species</span> <span class="o">=</span> <span class="n">EBAS</span><span class="p">:</span><span class="n">sconcno2</span> <span class="p">(:,</span> <span class="p">:,</span> <span class="n">nan</span><span class="p">)</span>
+<span class="n">spatial_colocation</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="Multispecies-filtering.html"><span class="doc std std-doc">here</span></a> for more information on multispecies filtering. <code class="docutils literal notranslate"><span class="pre">spatial_colocation</span></code> must also be set to be <strong>True</strong> for this to work.</p>
 <p><strong>Without spatial colocation:</strong></p>
 <p><img alt="No spatial colocation" src="_images/no_spatial_colocation.png" /></p>
 <p><strong>With spatial colocation:</strong></p>
