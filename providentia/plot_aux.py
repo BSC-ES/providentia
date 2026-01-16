@@ -13,7 +13,6 @@ import mpl_toolkits.axisartist.grid_finder as gf
 from netCDF4 import Dataset
 import numpy as np
 import pandas as pd
-from pypdf import PdfReader, PdfWriter
 from scipy.signal import convolve
 from scipy.signal.windows import gaussian
 from scipy.sparse import coo_matrix
@@ -768,84 +767,6 @@ def create_statistical_timeseries(read_instance, canvas_instance, chunk_stat, ch
             timeseries_data.loc[chunk_date, data_label] = np.float32(stats_calc[chunk_date_idx,label_idx])
     
     return timeseries_data
-
-def reorder_pdf_pages(read_instance, input_pdf, output_pdf, summary_multispecies_pages, 
-                      station_multispecies_pages, paradigm_break_page, doi_pdf, reports_doi_path_temp):
-    """
-    Reorder PDF pages so that multispecies plots appear before other plots and DOI pages appear last.
-
-    Parameters
-    ----------
-    read_instance : object
-        Instance of class containing the PDF report.
-    input_pdf : str
-        Path to the original PDF file.
-    output_pdf : str
-        Path where the reordered PDF will be saved.
-    summary_multispecies_pages : list
-        Pages that contain summary multispecies plots.
-    station_multispecies_pages : list
-        Pages that contain station multispecies plots.
-    paradigm_break_page : int
-        Page index where station plots start.
-    doi_pdf : str or None
-        Path to DOI PDF to append at the end of the reordered PDF or None.
-    reports_doi_path_temp : str
-        Temporary path for the DOI PDF used during processing.
-
-    Returns
-    -------
-    None
-        Writes a reordered PDF file to `output_pdf`.
-    """
-
-    if (len(read_instance.summary_multispecies_pages) > 0) or (len(read_instance.station_multispecies_pages) > 0):
-        read_instance.logger.info('\nReordering pages')
-
-    # Get pages
-    summary_multispecies_pages = np.array(summary_multispecies_pages)
-    station_multispecies_pages = np.array(station_multispecies_pages)
-
-    # Get original order
-    input_pdf_file = PdfReader(open(input_pdf, "rb"))
-    all_pages = np.arange(len(input_pdf_file.pages))
-
-    # Initialise page order
-    page_order = copy.deepcopy(all_pages)
-
-    # Move summary pages after page 0 (cover)
-    if len(summary_multispecies_pages) > 0:
-        summary_multispecies_pages = np.concatenate((np.array([0]), summary_multispecies_pages))
-        summary_other_plots_pages = all_pages[~np.isin(all_pages, summary_multispecies_pages)]
-        page_order = np.concatenate((
-            summary_multispecies_pages, 
-            summary_other_plots_pages)).tolist()
-    
-    # Move station pages after paradigm break page (when we start to see station plots)
-    if len(station_multispecies_pages) > 0:
-        station_pages = all_pages[paradigm_break_page:]
-        station_other_plots_pages = station_pages[~np.isin(station_pages, station_multispecies_pages)]
-        page_order = np.concatenate((
-            page_order[:paradigm_break_page], 
-            station_multispecies_pages, 
-            station_other_plots_pages)).tolist()
-
-    # Reorder pages
-    output_pdf_file = PdfWriter()
-    for page_number in page_order:
-        output_pdf_file.add_page(input_pdf_file.pages[int(page_number)])
-
-    # Add DOI pages at the end
-    if doi_pdf is not None:
-        input_doi_pdf = PdfReader(open(reports_doi_path_temp, "rb"))
-        for page_number in range(len(input_doi_pdf.pages)):
-            output_pdf_file.add_page(input_doi_pdf.pages[page_number])
-        os.system("rm {}".format(reports_doi_path_temp))
-     
-    # Write the rearranged pages to a new PDF file
-    read_instance.logger.info(f'Writing {output_pdf}')
-    with open(output_pdf, "wb") as outputStream:
-        output_pdf_file.write(outputStream)
 
 def get_hex_code(colour):
     """

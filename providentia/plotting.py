@@ -625,75 +625,103 @@ class Plotting:
             fig_width, fig_height = bg_img[0] / dpi, bg_img[1] / dpi
         
             # Get DOI per station
-            for networkspeci in self.read_instance.networkspecies:
-                # DOI pages can only be created for ACTRIS
-                if networkspeci.split('|')[0] != 'actris/actris':
-                    continue
-                reference_data = self.canvas_instance.selected_station_metadata[networkspeci]['station_reference']
-                doi_data = self.canvas_instance.selected_station_metadata[networkspeci]['doi']
-                visible_items = []
-                extra_rows = 0
-                for station_reference, station_doi in zip(reference_data, doi_data):
-                    # Show DOIs only if station reference is consistent across time
-                    unique_station_references = list(np.unique(station_reference[~pd.isna(station_reference)]))
-                    if len(unique_station_references) > 1:
-                        error = f'Error: Station references change with time ({unique_station_references}), cannot create page with DOIs.'
-                        self.read_instance.logger.error(error)
-                        return None
-                    # Get DOIs per station reference
-                    unique_station_dois = list(np.unique(station_doi[~pd.isna(station_doi)]))
-                    if len(unique_station_dois) > 1:
-                        extra_rows += len(unique_station_dois) -1
-                    visible_items.append((unique_station_references, unique_station_dois))
+            for subsection in self.canvas_instance.station_reference_data:
+                for networkspeci in self.read_instance.networkspecies:
+                    # DOI pages can only be created for ACTRIS
+                    if networkspeci.split('|')[0] != 'actris/actris':
+                        continue
 
-                # If there are extra rows, chunk size needs to be lower to see all DOIs in a page
-                if extra_rows > 2:
-                    msg = f'Warning: Some stations have multiple DOIs, lower chunk size in plot_characteristics.yaml (current: {chunk_size}).'
-                    self.read_instance.logger.info(msg)
+                    reference_data = self.canvas_instance.station_reference_data[subsection][networkspeci]
+                    doi_data = self.canvas_instance.station_doi_data[subsection][networkspeci]
 
-                # Create a page for every 30 stations 
-                num_pages = math.ceil(len(visible_items) / chunk_size)
-                for page_idx in range(num_pages):
-                    y = plot_characteristics['y_end']
-                    fig = plt.figure(figsize=(fig_width, fig_height), dpi=dpi)
-                    ax = fig.add_axes([0, 0, 1, 1])
-                    ax.axis('off')
-
-                    # Page title
-                    fig.text(y=y, s=f"List of DOIs - {networkspeci} - Page {page_idx+1} / {num_pages}", 
-                             fontweight='bold', **plot_characteristics['keys'])
-                    y -= title_spacing
-
-                    # Slice visible_items for this page
-                    start = page_idx * chunk_size
-                    end = start + chunk_size
-                    page_items = visible_items[start:end]
+                    visible_items = []
+                    extra_rows = 0
                     
-                    # Show station (key) and DOI data (value)
-                    for stations, dois in page_items:
-                        # Save starting y of this block
-                        block_y = y
+                    for station_reference, station_doi in zip(reference_data, doi_data):
+                        # Show DOIs only if station reference is consistent across time
+                        unique_station_references = list(
+                            np.unique(station_reference)
+                        )
+                        if len(unique_station_references) > 1:
+                            error = (
+                                f'Error: Station references change with time '
+                                f'({unique_station_references}), cannot create DOI page.'
+                            )
+                            self.read_instance.logger.error(error)
+                            return None
 
-                        # Write stations
-                        y = block_y
-                        for i, station in enumerate(stations):
-                            fig.text(y=y, s=station, **plot_characteristics['keys'])
-                            if i < len(stations) - 1:
-                                y -= spacing
+                        # Get DOIs per station reference
+                        unique_station_dois = list(
+                            np.unique(station_doi)
+                        )
+                        if len(unique_station_dois) > 1:
+                            extra_rows += len(unique_station_dois) - 1
 
-                        # Write DOIs
-                        y = block_y
-                        for j, doi in enumerate(dois):
-                            fig.text(y=y, s=doi, **plot_characteristics['values'])
-                            if j < len(dois) - 1:
-                                y -= spacing
-
-                        # After finishing block, lower y once
-                        y = min(y, block_y) - spacing
+                        visible_items.append(
+                            (unique_station_references, unique_station_dois)
+                        )
                     
-                    # Save page to PDF
-                    pdf.savefig(fig)
-                    plt.close(fig)
+                    # If there are extra rows, chunk size needs to be lower to see all DOIs in a page
+                    if extra_rows > 2:
+                        msg = (
+                            f'Warning: Some stations have multiple DOIs, '
+                            f'lower chunk size in plot_characteristics.yaml '
+                            f'(current: {chunk_size}).'
+                        )
+                        self.read_instance.logger.info(msg)
+
+                    # Create a page for every 30 stations 
+                    num_pages = math.ceil(len(visible_items) / chunk_size)
+
+                    for page_idx in range(num_pages):
+                        y = plot_characteristics['y_end']
+                        fig = plt.figure(figsize=(fig_width, fig_height), dpi=dpi)
+                        ax = fig.add_axes([0, 0, 1, 1])
+                        ax.axis('off')
+
+                        # Page title
+                        fig.text(
+                            y=y,
+                            s=(
+                                f"List of DOIs - {subsection} - {networkspeci} "
+                                f"(Page {page_idx+1}/{num_pages})"
+                            ),
+                            fontweight='bold',
+                            **plot_characteristics['keys']
+                        )
+                        y -= title_spacing
+
+                        # Slice visible_items for this page
+                        start = page_idx * chunk_size
+                        end = start + chunk_size
+                        page_items = visible_items[start:end]
+
+                        # Show station (key) and DOI data (value)
+                        for stations, dois in page_items:
+                            
+                            # Save starting height of this block
+                            block_y = y
+
+                            # Write stations
+                            y = block_y
+                            for i, station in enumerate(stations):
+                                fig.text(y=y, s=station, **plot_characteristics['keys'])
+                                if i < len(stations) - 1:
+                                    y -= spacing
+
+                            # Write DOIs
+                            y = block_y
+                            for j, doi in enumerate(dois):
+                                fig.text(y=y, s=doi, **plot_characteristics['values'])
+                                if j < len(dois) - 1:
+                                    y -= spacing
+
+                            # After finishing block, lower height once
+                            y = min(y, block_y) - spacing
+
+                        # Save page to PDF
+                        pdf.savefig(fig)
+                        plt.close(fig)
 
         return pdf
 

@@ -12,8 +12,9 @@ import mpl_toolkits.axisartist.floating_axes as fa
 import numpy as np
 from packaging.version import Version
 import pandas as pd
-from pypdf import PdfReader
+from pypdf import PdfReader, PdfWriter
 import yaml
+import re
 
 from providentia.auxiliar import CURRENT_PATH, join, expand_plot_characteristics
 from .configuration import load_conf
@@ -23,7 +24,7 @@ from .fields_menus import (init_representativity, init_period, init_metadata,
                            representativity_conf, period_conf, metadata_conf)
 from .filter import DataFilter
 from .plotting import Plotting
-from .plot_aux import get_taylor_diagram_ghelper, set_map_extent, reorder_pdf_pages
+from .plot_aux import get_taylor_diagram_ghelper, set_map_extent
 from .plot_formatting import format_plot_options, format_axis, harmonise_xy_lims_paradigm, set_axis_label, set_axis_title
 from .read import DataReader
 from .read_aux import (generate_file_trees, get_possible_resampling_resolutions, 
@@ -558,9 +559,9 @@ class Report:
             pdf_file = PdfReader(open(reports_path, "rb"))
             self.paradigm_break_page = len(pdf_file.pages)
         
-        reorder_pdf_pages(self, reports_path, reports_path, self.summary_multispecies_pages, 
-                          self.station_multispecies_pages, self.paradigm_break_page, doi_pdf, 
-                          reports_doi_path_temp)
+        self.reorder_pdf_pages(reports_path, reports_path, self.summary_multispecies_pages, 
+                               self.station_multispecies_pages, self.paradigm_break_page, doi_pdf, 
+                               reports_doi_path_temp)
 
     def setup_plot_geometry(self, plotting_paradigm, networkspeci, have_setup_multispecies):
         """
@@ -857,6 +858,10 @@ class Report:
         self.stats_summary = {}
         self.stats_station = {}
 
+        # define dictionary to store station references and dois per subsection
+        self.station_reference_data = {}
+        self.station_doi_data = {}
+
         # iterate through subsections
         for subsection_ind, subsection in enumerate(self.subsections):
             
@@ -868,6 +873,12 @@ class Report:
                 self.stats_summary[self.subsection] = {}
             if self.subsection not in self.stats_station:
                 self.stats_station[self.subsection] = {}
+
+            # create nested dictionary to store DOI information across all subsections
+            if self.subsection not in self.station_reference_data:
+                self.station_reference_data[self.subsection] = {}
+            if self.subsection not in self.station_doi_data:
+                self.station_doi_data[self.subsection] = {}
 
             # initialise forecast models as None
             forecast_models = None
@@ -1000,6 +1011,112 @@ class Report:
                         except:
                             pass
 
+    def reorder_pdf_pages(self, input_pdf, output_pdf, summary_multispecies_pages, 
+                          station_multispecies_pages, paradigm_break_page, doi_pdf, reports_doi_path_temp):
+        """
+        Reorder PDF pages so that multispecies plots appear before other plots and DOI pages appear last.
+
+        Parameters
+        ----------
+        read_instance : object
+            Instance of class containing the PDF report.
+        input_pdf : str
+            Path to the original PDF file.
+        output_pdf : str
+            Path where the reordered PDF will be saved.
+        summary_multispecies_pages : list
+            Pages that contain summary multispecies plots.
+        station_multispecies_pages : list
+            Pages that contain station multispecies plots.
+        paradigm_break_page : int
+            Page index where station plots start.
+        doi_pdf : str or None
+            Path to DOI PDF to append at the end of the reordered PDF or None.
+        reports_doi_path_temp : str
+            Temporary path for the DOI PDF used during processing.
+
+        Returns
+        -------
+        None
+            Writes a reordered PDF file to `output_pdf`.
+        """
+
+        if (len(self.summary_multispecies_pages) > 0) or (len(self.station_multispecies_pages) > 0):
+            self.logger.info('\nReordering pages')
+
+        # Get pages
+        summary_multispecies_pages = np.array(summary_multispecies_pages)
+        station_multispecies_pages = np.array(station_multispecies_pages)
+
+        # Get original order
+        input_pdf_file = PdfReader(open(input_pdf, "rb"))
+        all_pages = np.arange(len(input_pdf_file.pages))
+
+        # Initialise page order
+        page_order = copy.deepcopy(all_pages)
+
+        # Move summary pages after page 0 (cover)
+        if len(summary_multispecies_pages) > 0:
+            summary_multispecies_pages = np.concatenate((np.array([0]), summary_multispecies_pages))
+            summary_other_plots_pages = all_pages[~np.isin(all_pages, summary_multispecies_pages)]
+            page_order = np.concatenate((
+                summary_multispecies_pages, 
+                summary_other_plots_pages)).tolist()
+        
+        # Move station pages after paradigm break page (when we start to see station plots)
+        if len(station_multispecies_pages) > 0:
+            station_pages = all_pages[paradigm_break_page:]
+            station_other_plots_pages = station_pages[~np.isin(station_pages, station_multispecies_pages)]
+            page_order = np.concatenate((
+                page_order[:paradigm_break_page], 
+                station_multispecies_pages, 
+                station_other_plots_pages)).tolist()
+
+        # Reorder pages
+        output_pdf_file = PdfWriter()
+        for page_number in page_order:
+            output_pdf_file.add_page(input_pdf_file.pages[int(page_number)])
+
+        # Add DOI pages at the end
+        if doi_pdf is not None and os.path.exists(reports_doi_path_temp):
+            input_doi_pdf = PdfReader(open(reports_doi_path_temp, "rb"))
+            for page_number in range(len(input_doi_pdf.pages)):
+                output_pdf_file.add_page(input_doi_pdf.pages[page_number])
+            os.system("rm {}".format(reports_doi_path_temp))
+        
+        # Write the rearranged pages to a new PDF file
+        self.logger.info(f'Writing {output_pdf}')
+        with open(output_pdf, "wb") as outputStream:
+            output_pdf_file.write(outputStream)
+
+    def get_dois_from_station_reference(self, station_reference, networkspeci):
+        """
+        Get DOIs from station references. Only used for ACTRIS network downloads.
+
+        Parameters
+        ----------
+        station_reference : str
+            Current station reference
+        networkspeci : str
+            The combined network and species identifier.
+
+        Returns
+        -------
+        list
+            List of DOIs per month
+        """
+
+        current_station_dois = []
+        for month_metadata in self.selected_station_metadata[networkspeci]:
+            for metadata_vars in month_metadata:
+                if metadata_vars[0] != self.current_station_reference:
+                    continue
+                for var in metadata_vars:
+                    if isinstance(var, str) and re.compile(r'^https?://doi\.org/').match(var):
+                        current_station_dois.append(var)
+
+        return current_station_dois
+                
     def make_summary_plots(self, networkspeci, summary_plots_to_make):
         """
         Generates all summary-level visualisations for a specific network-species combination within a subsection.
@@ -1035,6 +1152,10 @@ class Report:
         if networkspeci not in self.stats_summary[self.subsection]:
             self.stats_summary[self.subsection][networkspeci] = {}
 
+        # initialise the reference and DOI data for ACTRIS
+        self.station_reference_data[self.subsection][networkspeci] = []
+        self.station_doi_data[self.subsection][networkspeci] = []
+
         # get selected station data across all networkspecies for current section (if have not yet)
         if not self.made_networkspeci_summary_plots:
             
@@ -1056,7 +1177,15 @@ class Report:
             have_nodata = True
         else:
             have_nodata = False
-  
+
+        # for actris, store current station reference and doi per month
+        if networkspeci.split('|')[0] == 'actris/actris' and not have_nodata:
+            for relevant_station_ind in self.relevant_station_inds:
+                self.current_station_reference = self.station_references[networkspeci][relevant_station_ind]
+                self.station_reference_data[self.subsection][networkspeci].append(self.current_station_reference)
+                current_station_dois = self.get_dois_from_station_reference(self.current_station_reference, networkspeci)
+                self.station_doi_data[self.subsection][networkspeci].append(current_station_dois)
+            
         # iterate through plots to make
         for plot_type in summary_plots_to_make:
 
@@ -1180,6 +1309,10 @@ class Report:
         # initialise station ind as -1
         self.station_ind = -1
 
+        # initialise or reset (if report_summary is True) the reference and DOI data for ACTRIS
+        self.station_reference_data[self.subsection][networkspeci] = []
+        self.station_doi_data[self.subsection][networkspeci] = []
+
         # iterate through stations
         for i, relevant_station_ind in enumerate(self.relevant_station_inds):
             
@@ -1212,6 +1345,12 @@ class Report:
             if self.selected_station_stddev_max[networkspeci] > self.stddev_max_station[networkspeci]:
                 self.stddev_max_station[networkspeci] = copy.deepcopy(self.selected_station_stddev_max[networkspeci])
 
+            # for actris, store current station reference and doi per month
+            if networkspeci.split('|')[0] == 'actris/actris' and not have_nodata:
+                self.station_reference_data[self.subsection][networkspeci].append(self.current_station_reference)
+                current_station_dois = self.get_dois_from_station_reference(self.current_station_reference, networkspeci)
+                self.station_doi_data[self.subsection][networkspeci].append(current_station_dois)
+            
             # iterate through plots to make
             for plot_type in station_plots_to_make:
                 
