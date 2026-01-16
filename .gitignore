@@ -17,6 +17,5 @@ notebook.out
 dist
 providentia/.ipynb_checkpoints
 tutorials/.ipynb_checkpoints
-tutorials/data/csic
-tutorials/data/port_barcelona
+tutorials/data/output/**/*.nc
 tutorials/data/.ipynb_checkpoints
