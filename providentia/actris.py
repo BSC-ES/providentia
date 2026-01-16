@@ -1327,18 +1327,18 @@ class Actris:
             # if file exists
             else:
                 # ask if user wants to update file information from NILU Thredds
-                if self.download_instance.origin_update_choice not in ['y','n']:
-                    while self.download_instance.origin_update_choice not in ['y','n']:
-                        self.download_instance.origin_update_choice = input(f"\nFile containing information of the files available in Thredds for {var} ({info_path}) already exists. Do you want to update it (y/n)? ").lower() 
+                if self.download_instance.origin_update_choice not in ['y','n', '']:
+                    while self.download_instance.origin_update_choice not in ['y','n', '']:
+                        self.download_instance.origin_update_choice = input(f"\nFile containing information of the files available in Thredds for {var} ({info_path}) already exists. Do you want to update it (y/[n])? ").lower() 
                     # ask if user wants to remember the decision
                     remind_txt = None
-                    while remind_txt not in ['y','n']:
-                        remind_txt = input("\nDo you want to remember your decision for future downloads (y/n)? ").lower() 
+                    while remind_txt not in ['y','n', '']:
+                        remind_txt = input("\nDo you want to remember your decision for future downloads ([y]/n)? ").lower() 
                     # save the decision
-                    if remind_txt == 'y':
+                    if remind_txt in ['y', '']:
                         with open(join(PROVIDENTIA_ROOT, ".env"),"a") as f:
                             f.write(f"ORIGIN_UPDATE={self.download_instance.origin_update_choice}\n")
-                if self.download_instance.origin_update_choice == 'n':
+                if self.download_instance.origin_update_choice in ['n', '']:
                     # get files information
                     files_info = yaml.safe_load(open(join(CURRENT_PATH, info_path)))
                     files_info = {k: v for k, v in files_info.items() if k.strip() and v}
