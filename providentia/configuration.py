@@ -953,7 +953,7 @@ class ProvConfiguration:
                 error = "Error: " + msg
                 self.read_instance.logger.error(error)
                 sys.exit(1)
-            else:
+            elif self.read_instance.mode != 'library':
                 show_message(self.read_instance, msg, from_conf=self.read_instance.from_conf, deactivate=deactivate_warning)
 
         # if there is no domain set in configuration file, set it with values derived from model field and defaults (if not empty list)
