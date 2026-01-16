@@ -4,7 +4,7 @@ Currently, it is possible to export three different types of files: configuratio
 
 ## .conf file format (Providentia)
 
-Users can download their configurations (.conf) and use the corresponding files to launch Providentia again. You can use your configuration files in the dashboard, report, interpolation and download modes through the command line or make use of the load button {ref}`in the dashboard <loading-a-configuration-file>`.
+Users can download their configurations (.conf) and use the corresponding files to launch Providentia again. You can use your configuration files in the dashboard, report, interpolation and download modes through the command line or make use of the load button.
 
 ## Numeric file formats
 

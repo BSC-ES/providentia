@@ -1,16 +1,16 @@
 # Multispecies filtering
 
-Multispecies filtering refers to the ability to filter the currently selected species by the values of another species, which can be given by the current network or by an external one.
+Multispecies filtering refers to the ability to filter loaded species data by the values of another species.
 
-In the reports created to study the dust in the atmosphere it is a common practice to filter the optical depth by the Angstrom exponent to know which values are associated with dust. For instance, we can use the values of the Angstrom exponent above 0.6 to filter the AOD.
+For example, when performing investigations of dust in the atmosphere it is a common practice to filter the AOD by the Angstrom exponent, to isolate values associated with dust. For instance, we can set the AOD to be nan when the Angstrom exponent is above 0.6, removing all non-dust AOD.
 
 If we take a look at the timeseries for one station, we can see what this actually means:
 
 ![multispecies-filtering](uploads/multispecies-filtering.jpg)
 
-It can be observed that there are less data points for the AOD after the filtering is applied and the removal of those happens when the Angstrom exponent is higher than 0.6.
+It can be observed that there are less data points for AOD after the filtering is applied, with the removal of the data points happening when the Angstrom exponent is above 0.6.
 
-This can easily be done by using the `MULTI` menu in the dashboard or by defining the `filter_species` variable in our configuration files. The equivalent of this in the reports:
+Multispecies filtering can be set in the configuration files using the `filter_species` variable, where we define the network and species to filter by, the lower range to filter associated data by, the upper range to filter associated data by, and the value to set associated data to (default is nan). If you want to leave one of the filter ranges open-ended, then use a colon (:). Spatial colocation must be active in order to apply multispecies filtering (it is active by default).
 
 ```
 [All]
@@ -18,23 +18,17 @@ network = AERONET_v3_lev1.5
 species = od550aero
 filter_species = AERONET_v3_lev1.5:ae440-870aero (>0.6, :, nan)
 spatial_colocation = True
-...
 ```
 
-would be in the dashboard:
+On the dashboard this can be replicated under the **MULTI** button on the menu bar. The apply (A) checkbox must be checked to apply the filter, and then data re-read by hitting the **READ** button on the main menu bar.
 
 ![multi](uploads/multi.png)
 
-`NOTE: Spatial colocation must be activated in order to apply multispecies filtering. It is activated by default.`
-
-It also possible to apply more than one filter at the same time, e.g.:
+It is also possible to filter data by more than one species at a time, for example:
 
 ```
 network = nasa-aeronet/directsun_v3-lev15
 species = od550aero
 filter_species = nasa-aeronet/directsun_v3-lev15:ae440-870aero (>0.75, <=1.2, nan), nasa-aeronet/directsun_v3-lev15:ae440-870aero (>1.2, :, 0)
 spatial_colocation = True
-...
 ```
-
-In this case, we would be converting the data of AOD above 1.2 to 0, and removing the data between 0.75 and 1.2.

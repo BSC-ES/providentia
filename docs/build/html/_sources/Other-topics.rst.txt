@@ -9,7 +9,6 @@ Other topics
    Create-your-own-data-network.md
    Multispecies-filtering.md
    QA-filtering.md
-   Representativity-filtering.md
    Redirecting-output-to-a-file.md
    Topics-on-HPC.md
    Saved-file-formats.md

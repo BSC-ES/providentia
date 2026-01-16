@@ -41,9 +41,6 @@ fairmode_settings = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/fairmod
 class Report:
     """ Class to create Providentia reports. """
 
-    # make sure that we are not using Qt5 backend with matplotlib
-    matplotlib.use('Agg')
-
     def __init__(self, **kwargs):
         """
         Initialise the Report instance.
@@ -54,9 +51,12 @@ class Report:
             Arbitrary keyword arguments used to configure the report 
             settings and override default configuration values.
         """
-
+        
         # update self with command line arguments
         self.commandline_arguments = copy.deepcopy(kwargs)
+
+        # make sure that we are not using Qt5 backend with matplotlib
+        matplotlib.use('Agg')
 
         # load statistical yamls
         self.basic_stats = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings/basic_stats.yaml')))

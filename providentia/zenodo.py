@@ -1,5 +1,6 @@
 """ Class for downloading and formatting data from Zenodo """
 
+import copy
 import os
 import shutil
 import tarfile
@@ -60,7 +61,7 @@ class Zenodo:
         url = zenodo_dois[self.download_instance.ghost_version]
 
         # initialize dictionary to store possible networks
-        self.ghost_available_networks = {} 
+        self.fetched_networks = {} 
 
         response = requests.get(url)
         
@@ -69,8 +70,16 @@ class Zenodo:
             if '<link rel="alternate" type="application/zip" href=' in line:
                 zip_file_url = line.split('href="')[-1][:-1]
                 zip_network = line.split("/")[-1][:-5]
-                self.ghost_available_networks[zip_network] = zip_file_url
-        
+                self.fetched_networks[zip_network] = zip_file_url
+
+        if self.fetched_networks == {}:
+            msg = (
+                "GHOST networks could not be retrieved from Zenodo at this time. "
+                "This may be a temporary issue. Please execute the command again."
+            )
+            show_message(self.download_instance, msg, deactivate=deactivate_warning)
+            return False
+
         return True
 
     def download_ghost_network_zenodo(self, network, initial_check, files_to_download=None):
@@ -99,18 +108,30 @@ class Zenodo:
             self.download_instance.logger.info(f"\nDownloading GHOST {network} network data from Zenodo...")
 
         # if first time reading a GHOST network, get current zips urls in zenodo page
-        if not hasattr(self,"ghost_available_networks"): 
+        if not hasattr(self,"fetched_networks"): 
             if not self.fetch_zenodo_networks(initial_check):
                 return
+            
+        # get cleaned networks
+        all_networks = copy.deepcopy(self.download_instance.ghost_available_networks)
+        all_networks.remove('EBAS')
+            
+        # get networks without zenodo artifact
+        self.available_networks = {}
+        for clean_network in all_networks:
+            for fetched_network, url in self.fetched_networks.items():
+                if clean_network in fetched_network and clean_network != fetched_network:
+                    fetched_network = '_'.join(fetched_network.split('_')[:-1])
+                    self.available_networks[fetched_network] = url
 
         # if not valid network, next
-        if network not in self.ghost_available_networks:
+        if network not in self.available_networks:
             msg = f"There is no data available in Zenodo for {network} network for the current GHOST version ({self.download_instance.ghost_version})."
             show_message(self.download_instance, msg, deactivate=initial_check)
             return
 
         # get url to download the zip file for the current network
-        zip_file_urls = self.ghost_available_networks[network]
+        zip_file_urls = self.available_networks[network]
 
         # get resolution and/or species combinations
         # network
@@ -136,8 +157,8 @@ class Zenodo:
             # warning if network + species + resolution combination is gets no matching results
             if not res_spec_dir_tail:
                 print_spec = f'{",".join(self.download_instance.species)} species' if self.download_instance.species else ""
-                print_res = f'at {",".join(self.download_instance.resolution)} resolutions' if self.download_instance.resolution else ""
-                msg = f"There is no data available in Zenodo for {network} network for {print_spec} species at {print_res} resolution"
+                print_res = f'at {",".join(self.download_instance.resolution)} resolution(s)' if self.download_instance.resolution else ""
+                msg = f"There is no data available in Zenodo for {network} network for {print_spec} {print_res}"
                 show_message(self.download_instance, msg, deactivate=initial_check)
 
             # check if there's any possible combination with user's network, resolution and species

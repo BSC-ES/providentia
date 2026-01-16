@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -8,15 +6,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Configuration fields &mdash; Providentia 3.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=7ae09063" />
 
   
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=acc74ff5"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -63,6 +65,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Colocation.html">Colocation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Filtering.html">Filtering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Forecast.html">Forecast</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Statistics.html">Statistics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Other-topics.html">Other topics</a></li>
@@ -152,7 +155,7 @@
 </tr>
 <tr class="row-odd"><td><p>forecast</p></td>
 <td><p>Optional</p></td>
-<td><p>Controls how forecast data is handled. Valid options are <code class="docutils literal notranslate"><span class="pre">dayN</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">day1</span></code>) or <code class="docutils literal notranslate"><span class="pre">daily</span></code>. If this field is not empty in the interpolation, all forecast data will be processed.</p></td>
+<td><p>Controls how forecast data is handled. Can be multiple (e.g. <code class="docutils literal notranslate"><span class="pre">day</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">combined</span></code>). If wanting to limit to specific forecast days, then add the forecast day to the option, (e.g. <code class="docutils literal notranslate"><span class="pre">day1</span></code>, <code class="docutils literal notranslate"><span class="pre">daily2</span></code>, <code class="docutils literal notranslate"><span class="pre">combined3</span></code>). Different options cannot be mixed however (i.e. <code class="docutils literal notranslate"><span class="pre">day</span></code> options cannot be set with <code class="docutils literal notranslate"><span class="pre">daily</span></code> or <code class="docutils literal notranslate"><span class="pre">combined</span></code> options). This variable must be set to a valid value when performing interpolation for forecast data to be interpolated.</p></td>
 </tr>
 <tr class="row-even"><td><p>filter_species</p></td>
 <td><p>Optional</p></td>
@@ -290,13 +293,13 @@
 <td><p>The number of nearest neighbours to use in the interpolation of model output to observational stations. If not set, this defaults to <code class="docutils literal notranslate"><span class="pre">4</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p>interp_spinup_timesteps</p></td>
-<td><p>Needs to be a number</p></td>
+<td><p>Number of initial timesteps skipped for model spin-up. If not set, this defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></td>
 </tr>
 <tr class="row-even"><td><p>interp_model_downsampling</p></td>
-<td><p>Sets how downsampling of the model resolution to the observational resolution should be handled. Options: <code class="docutils literal notranslate"><span class="pre">mean</span></code>, <code class="docutils literal notranslate"><span class="pre">median</span></code>.</p></td>
+<td><p>Sets the statistic for the downsampling of the model resolution to the observational resolution. Options: <code class="docutils literal notranslate"><span class="pre">mean</span></code>, <code class="docutils literal notranslate"><span class="pre">median</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p>interp_model_upsampling</p></td>
-<td><p>Sets how upsampling of the model resolution to the observational resolution should be handled. <code class="docutils literal notranslate"><span class="pre">fill</span></code> linearly fills between measurements, and <code class="docutils literal notranslate"><span class="pre">gaps</span></code> sets NaN values for times that the model does not have.</p></td>
+<td><p>Sets the method for the upsampling of the model resolution to the observational resolution. <code class="docutils literal notranslate"><span class="pre">fill</span></code> linearly fills between measurements, and <code class="docutils literal notranslate"><span class="pre">gaps</span></code> sets NaN values for times that the model does not have.</p></td>
 </tr>
 <tr class="row-even"><td><p>interp_multiprocessing</p></td>
 <td><p>Boolean variable to set if you wish to use multiprocessing instead of greasy to interpolate on HPC machines.</p></td>

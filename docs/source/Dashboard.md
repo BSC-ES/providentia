@@ -1,148 +1,179 @@
 # Dashboard
 
-Providentia's dashboard was designed to allow on-the-fly analysis of BSC model output, with respect to GHOST processed observational data.
-
-## Interface
-
-There are several available options to perform the analysis. The header of the window contains the fields that the user can fill, which is separated into 6 sections: 
-
-- Data Selection
-- Filters
-- Statistics
-- Colocation
-- Resampling
-- Site Selection
+Providentia's dashboard was designed to allow for interactive quick-look visualisations of observations and colocated model output.
 
 ![providentia](uploads/providentia.png)
 
+## Menu bar
+
+![providentia](uploads/dashboard_menu.png)
+
+After launching the dashboard you will see at the top of the window a menu bar with multiple drop-down menus and buttons that can be selected.
+
+The main options can de separated into 6 distinct sections: 
+
+- **Data Selection**
+- **Filters**
+- **Statistics**
+- **Colocation**
+- **Resampling**
+- **Site Selection**
+
 ### Data Selection
-Under this section, there are four drop-down menus. The first option that the user should fill is the data provider (e.g., EIONET, EBAS, etc.). Then, the further three menus will show the available options that correspond to the selected provider and refer to specific variables and data frequency (hourly, daily, monthly, etc.).
+
+![providentia](uploads/dashboard_dataselection.png)
+
+Under this section, to the furthest left there are four drop-down menus and two rangeboxes. The rangeboxes will contain a default start date and end date (in the format YYYYMMDD). Change these if you wish to analyse a different time period. 
+
+Once the time period had been updated the drop-down menus will update to show the available observational data providers (network), temporal resolutions, matrix (type of observations), and species. Select the desired fields from each menu.
 
 Next, there are four pop-up menus:
-* **QA** contains the quality assurance flags to filter by.
-* **FLAGS** contain standardised data reporter provided flags to filter by.
-* **MOD** contains a list of models that exist and are related to the variable selected.
+* **QA** contains the GHOST quality assurance flags to filter observations by, as explained in [QA](QA-filtering.md).
+* **FLAGS** contain standardised data reporter provided flags to filter observations by, as explained in [Flags](QA-filtering.md).
+* **MODS** contains a list of models that are available to load for the current data selection.
 * **MULTI** can be used to filter your current network-species by the values of other network-species, as explained in [Multispecies filtering](Multispecies-filtering).
 
-`NOTE: If under the **QA** menu, the checkboxes ‘*Invalid Data Provider Flags – GHOST Decreed*’ or ‘*Invalid Data Provider Flags – Network Decreed*’ are selected, all checkboxes under the Flags menu should be unticked (the default setting). This is because ticking one of these checkboxes sets a pre-selected subset of Flags checkboxes automatically. For this reason also, only one of these QA checkboxes should be ticked at the same time.`
+After having set all the fields that the user wants, then the last step is to click the **READ** button. After reading the data, a map plot appears showing the available stations that correspond to the data selection. 
 
-Additionally, here the user can fill the date range. In the case of there being no available data for the requested dates, there will be no data loaded.
-
-After having filled all the fields that the user is interested in, then the last step is to click **Read**. If the user makes changes to any of the fields, it is needed to click on **Read** again in order to apply the changes.
-After reading the data, the map appears showing the available stations that correspond to the data selection. The user can select either one station individually (by clicking on it) or multiple ones by drawing a circle around them.
-
-Finally, the Data Selection section contains the option **Colocate**. When selected this means that all observations and model data are forced to temporally intersect, and if not (i.e. there exists observations but no model data, or vice versa), then these time periods will be set as NaN. After having loaded the data and selected the desired stations, if the user chooses to colocate, there is no need to **Read** again, the changes apply immediately.
-
-#### Available networks
-
-The drop-down menu of the available networks shows the names of the networks that have available data for the selected date range.
-
-`NOTE: The networks' data that are stored in /esarchive are **not** accessible from MareNostrum 5. If you want to use these data, then you should run Providentia from **Nord4**.`
-
-#### Example
-
-In the following image, we can see the output for Providentia where we compare the model cams61_camsra_ph2-eu-000 with actual observations for ozone. We load the observations and model data over 2018 and we select *Intersect*, so that the stations within the model's domain are automatically selected.
-
-![intersect](uploads/intersect.png)
-
-In the figure above we see that the data were loaded and plotted. However, there might some data gaps in the observations or in the models. This might result in an inaccurate analysis. By selecting **Colocate**, Providentia will apply the temporal intersection of data points that exist in both the network and model datasets. The result of the previous example would be:
-
-![colocate](uploads/colocate.png)
+If the user makes changes to any of the fields in this section, it is needed to reclick on **READ** in order to apply the changes.
 
 ### Filters
 
+![providentia](uploads/dashboard_filters.png)
+
+The filters section provides a variety of options to filter data or stations. A detailed review of all the filter options available in Providentia can be found here: [Filtering](Filtering).
+
+After having selected or modified any filters in this section, simply click the **FILTER** button to apply the filters, or the **RESET** button to undo any filters back to the defaults. 
+
 #### Bounds
 
-Any data that is above/below these limits will be set as NaN. These are automatically assigned per variable. However, the user can modify them if needed.
-
-`NOTE: In Data Selection → QA if the user selects the option of *Extreme Data*, then the extremes values will be filtered out either way.`
+Often it is desired to remove values which exceed certain extreme bounds, as it is known that data should appear at such extremes. These bounds will be by default set on the dashboard, taken from definitions per species in GHOST. These can be revised up or down as the user sees fit.
 
 ##### % REP
 
-![representativity](uploads/representativity-2.png)
+![representativity](uploads/representativity.png)
 
-This option refers to the minimum acceptable percentages of data across the data that is not NaN. All stations which do not meet this minimum requirement will be screened out.
+One major limitation often associated with observations is the amount of gaps between measurements. If these observations are directly compared with typically complete model data, this would impose a significant bias upon the comparison. Filtering by representativity filters provides a way to control the temporal robustness of the observations for evaluation. Providentia has multiple such filters available in the pop-up menu opened via the **% REP** button.
+
+See here for more information about representativity filters: [Representativity filtering](representativity)
 
 ##### PERIOD
 
 ![period](uploads/period.png)
 
-The pop-up menu of **Period** allows the user to select data periods by either using the options *keep* (**K**) or *remove* (**R**). If a user wishes, for example, to keep only the data that correspond to Daytime, then he/she can select to keep option under the *K* column, close the window and click **FILTER**. 
+The **PERIOD** button opens a pop-up menu that allows for the selection or removal of specific data periods, for example keep daytime data, or remove summertime data.
+
+See here for more detailed information: [Period filtering](periods)
 
 ##### META
 
 ![meta](uploads/meta.png)
 
-The pop-up menu of **Meta** contains a number of metadata types for the user to filter by. As there are many options, there have been separated into five categories.
-
-Each category provides a plethora of options. The user can filter by latitude, longitude, altitude. Or filter by area classification (rural, urban, etc), land use, emission source, etc. The options are numerous, explore! 
-
-##### RESET
-
-The *RESET* button will set all the fields under the *Filters* section back to their initial values and it will unfilter the loaded data. 
-
-##### FILTER
-
-The *FILTER* button will set all the selected fields under the *Filters* section and the loaded data will be filtered. 
+The **META** button opens a pop-up menu allows the user to filter stations on the map by a variety of metadata variables. See here for more detailed information: [Metadata filtering](filtering_metadata)
 
 ### Statistics
 
-This section provides ways to spatially visualise specific statistical information across all loaded stations. You can read more details about how the statistics are calculated in [Statistics](Statistics).
+![providentia](uploads/dashboard_statistics.png)
+
+The **Statistics** section allows for control of how statistics are calculated across the dashboard.
+
+The **Mode** drop-down menu allows for the statistical mode to be selected, fundamentally altering the calculation of statistics 
+
+The **Aggregation** drop-down menu controls how data is aggregated across stations when more than one station is selected.
+
+You can read more details about how the statistics are calculated in [Statistics](Statistics).
 
 ### Colocation
 
-It is possible to activate and deactivate the temporal colocation from the dashboard by using this checkbox. More details can be found in [Colocation](Colocation).
+![providentia](uploads/dashboard_colocation.png)
+
+When performing evaluations of model data with observations, it is of high importance to ensure you are comparing apples with apples, rather than apples with oranges.
+
+One way that evaluations can often be biased is due to gapped observations being compared with non-gapped model data. This can be resolved by ensuring both observational and model data is equally temporally gapped, called **temporal colocation**
+
+Temporal colocation is used to temporally pair observations and model data, with any missing measurements in either the observational or model array, imposing missing measurements on the other. 
+
+When temporal colocation is active, you will have access to more plot types (scatter, taylor, fairmode-target, and fairmode-statsummary). See here for more information about [plot types](Plot-types-and-options). Additionally model bias statistics will also be available when temporal colocation is active (e.g. r). See here for more information about [available statistics](available_statistics).
 
 ### Resampling
 
-It it possible to reduce the number of points by resampling our data to a specific temporal resolution. wWhat this does a simple average using the [xarray function resample](https://docs.xarray.dev/en/stable/generated/xarray.Dataset.resample.html) followed by the mean:
+![providentia](uploads/dashboard_resampling.png)
 
-```
-resampled_data = original_data.resample(temporal_resolution, axis=0).mean()
-```
+The resampling section allows the plotted data to be resampled to a coarser temporal resolution (by the mean), e.g. hourly to daily, by clicking on a resolution from the drop-down menu. When a resolution is selected, it updates the plots and statistics across the dashboard.
 
 ### Site Selection
 
-Under this section there are three options: 
+![providentia](uploads/dashboard_siteselection.png)
 
-- **All**: It selects data from all the stations that appear on the map.
-- **Intersect**: It selects data from stations that spatially intersect with the models grid edges. 
-- **Extent**: It select the data on the current map view.
+This section gives three options for selecting multiple stations on the map:
 
-### Toolbox
+- **All**: Selects all the stations that appear on the map.
+- **Intersect**: Selects stations that spatially intersect with all model domains that are currently active.
+- **Extent**: Selects stations that are within the boundaries of the map currently plotted on screen. 
 
-Under the main option fields, there is a toolbox that gives users several options.
+## Toolbar
 
-![toolbox](uploads/toolbox.png)
+Directly under the menu bar, there is a toolbar that gives several useful options: 
+
+![providentia](uploads/dashboard_toolbar.png)
 
 In order from left to right, these are:
 
-- **Export button**: To export the data that users used for their evaluation (observations and models) in NetCDF or Numpy files and the corresponding configuration file.
-- **Load button**: To load the configuration file from previous evaluation sessions. For instance, those saved using the export button.
-- **World button**: To return to the initial state of the map and the plots before applying any option.
-- **Backward arrow button**: To move to one state back from the current dashboard state.
-- **Forward arrow button**: To move to one state forward from the current dashboard state.
-- **Zoom to rectangle button**: To zoom in an area in the map or the plots. Users can also scroll with the mouse wheel to do this progressively in the map.
-- **Pan button**: To move around the map and the plots.
-- **Figure button**: To save a screenshot of the current map view and plots.
+- **Export**: Exports the active state of the dashboard. This can be done to save the loaded data (both observations and model data) directly as a NetCDF or Numpy file, or to save the current state as a configuration file. For more information about exported data see [Saved file formats](Saved-file-formats).
+- **Load**: This can be used to load a configuration file from a previous evaluation session. For instance, those saved using the export button. If there is more than one section or subsection, users will be asked to choose which one they want to load.
+- **World view**: Sets the map to the entire world view.
+- **Original state**: Returns all plots to their initial states.
+- **Undo**: Undos a plot action, i.e. undos a zoom on a plot
+- **Redo**: Redos a plot action, i.e. redos a zoom on a plot
+- **Zoom**: To zoom in on area, on any plot. Users can also scroll with the mouse wheel to do this progressively while on the map.
+- **Pan**: To pan around on any plot.
+- **Lasso**: When this is toggled on, by holding down the left mouse button over the map a lasso will appear allowing multiple stations within a closed lasso to be selected. Remember to un-toggle this to go back to normal station selection.
+- **Save**: To save a screenshot of all current plots.
 
-(exporting-configuration-files-and-data)=
-#### Exporting configuration files and data
+## Plot interactivity
 
-If you click on the export button, a pop-up window will appear to ask you where you want to store your output. From this window you can select what export format you want to use.
- 
-- In the case that you want to export data, then you can export them either in a **NetCDF** (.*nc) file format, or as a **Numpy file** (.*npz). For more information around the exported data, go to the wiki page [Saved file formats](Saved-file-formats)
-- In the case that you want to export only the configuration, then you need to select **Configuration**.
+### Selecting stations
 
-![Export conf](uploads/export-conf.jpg)
+![providentia](uploads/dashboard_stationselection.png)
 
-(loading-a-configuration-file)=
-#### Loading a configuration file
+Once data has been loaded on the dashboard, by left clicking on a station the map, multiple plots will appear showing data for that station.
 
-Providentia has the option to load a configuration file that you have either written from scratch, or that you had exported during a past evaluation. 
+Multiple stations can also be selected at once. This can by doing by using the **site selection** menu options, or by using the toolbar **lasso**, or a third way is to right click on a station while another is selected. By right clicking on an already selected station, it will be unselected.
 
-Loading a configuration file means that the tool will reset the options you have at that moment, and use the configuration with the new variables and filters.
+When multiple stations are selected, data on the plots will reflect an aggregation across all selected stations (controlled via the information set in the **Statistics** section on the menu bar).
 
-If there is more than one section or subsection, users will be asked to choose which one they want to load.
+### Changing plots
 
-![Load conf](uploads/load-conf.jpg)
+![providentia](uploads/dashboard_plotselection.png)
+
+When at least one station is selected on the map, four other plots will be visible.
+
+Each plot (except the map) can be switched to a different plot, by clicking the drop-down menu in the top left of each plot. A plot can also be deactivated entirely by clicking **None**.
+
+See here for more information about all available [plot types](Plot-types-and-options), and see here for more information about [plot customisation](Plot-customisation).
+
+### Plot settings
+
+Each plot will be accompanied with two buttons in the top right corner of the plot.
+
+The first icon is a save button which allows individual plots to be saved as a figure. 
+
+![providentia](uploads/dashboard_plotmod.png)
+
+The second is a burger menu icon, which after clicking reveals a plot settings menu, where multiple options to interactively customise the plot are revealed (e.g. point size, or smoothing for the timeseries).
+
+![providentia](uploads/dashboard_plotoptions.png)
+
+At the bottom of the settings window is a drop-down menu for plot options, where by selecting one or more of these options you can dramatically alter the plot in some way. 
+
+One major plot option to note is **bias**. By selecting **bias** what is plotted is the result of the model - observations (i.e. bias). On the map, rather than selecting **bias** as a plot option, it can be obtained by selecting a secondary dataset. The bias will be calculated by the two active datasets.
+
+On some plots, the plotted statistic can also be altered though the settings menu, e.g. **periodic**.
+
+See here for more information about all available [plot options](Plot-types-and-options).
+
+### Legend
+
+![providentia](uploads/dashboard_legend.png)
+
+The legend in the upper right of the dashboard displays which data is currently loaded on the dashboard (observations and model names). The legend is interactive, so by clicking on any data type, the respective data for that type will be hidden, or shown, on all plots.
