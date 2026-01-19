@@ -18,4 +18,5 @@ dist
 providentia/.ipynb_checkpoints
 tutorials/.ipynb_checkpoints
 tutorials/data/output/**/*.nc
+tutorials/data/source/cams/**/*.nc
 tutorials/data/.ipynb_checkpoints

@@ -884,9 +884,7 @@ class Actris:
         # get metadata from DOI in API if possible
         doi = ds.attrs['doi']
         metadata = self.get_metadata(doi)
-        if len(metadata) == 0:
-            local_warnings += f"Metadata cannot be read from DOI {doi} in API, reading from attributes..."
-        else:
+        if len(metadata) != 0:
             facility_metadata = metadata[0]['md_data_identification']['facility']
             specific_metadata = metadata[0]['md_actris_specific']
             contact_metadata = metadata[0]['md_metadata']['contact'][0]
