@@ -85,7 +85,11 @@ class Providentia:
 
         # set configuration variables, as well as any other defined variables
         self.valid_config = self.set_config(**self.kwargs)
-        
+
+        # generate file trees if needed
+        # when downloading new networks the filetrees need to be updated or the data won't be loaded
+        generate_file_trees(self)
+
         # initialise DataReader class
         self.datareader = DataReader(self)
 
@@ -114,6 +118,13 @@ class Providentia:
         self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
         self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
 
+        # get valid observations in date range
+        get_valid_obs_files_in_date_range(self, self.start_date, self.end_date)
+
+        # update available models for selected fields
+        get_valid_models(self, self.start_date, self.end_date, self.resolution,
+                         self.network, self.species)
+        
     def read(self):
         """Wrapper method to read data."""
 
@@ -1581,17 +1592,6 @@ class Providentia:
         valid_config = self.have_valid_config()
         if not valid_config:
             return
-
-        # generate file trees if needed
-        # when downloading new networks the filetrees need to be updated or the data won't be loaded
-        generate_file_trees(self)
-
-        # get valid observations in date range
-        get_valid_obs_files_in_date_range(self, self.start_date, self.end_date)
-
-        # update available models for selected fields
-        get_valid_models(self, self.start_date, self.end_date, self.resolution,
-                         self.network, self.species)
         
         # read data
         self.read()  
