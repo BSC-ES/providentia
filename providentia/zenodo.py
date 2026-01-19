@@ -1,8 +1,8 @@
 """ Class for downloading and formatting data from Zenodo """
 
-import copy
 import os
 import shutil
+import sys
 import tarfile
 
 from remotezip import RemoteZip
@@ -14,8 +14,7 @@ from providentia.auxiliar import CURRENT_PATH, join
 from .warnings_prv import show_message
 
 PROVIDENTIA_ROOT = os.path.dirname(CURRENT_PATH)
-
-zenodo_dois = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'zenodo_dois.yaml')))
+zenodo_dois = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'zenodo', 'zenodo_dois.yaml')))
 
 class Zenodo:
     """Class responsible for handling GHOST network data downloads from Zenodo."""
@@ -29,8 +28,18 @@ class Zenodo:
         download_instance : Download
             Stores the instance of the 'download' class.
         """
- 
+        
         self.download_instance = download_instance
+
+        # get url for the zenodo GHOST repository 
+        if self.download_instance.ghost_version not in zenodo_dois:
+            error = (f"Current GHOST version ({self.download_instance.ghost_version}) is not available on Zenodo. "
+                    f"Please choose one of the available versions: {tuple(zenodo_dois.keys())}.")            
+            self.logger.error(error)
+            sys.exit(1)
+
+        # load zenodo artifact mapping
+        self.artifact_mapping = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'zenodo', f'zenodo_{self.download_instance.ghost_version}.yaml')))
 
     def fetch_zenodo_networks(self, deactivate_warning=False):
         """
@@ -47,15 +56,6 @@ class Zenodo:
             True if the available networks were successfully retrieved,
             False otherwise.
         """
-
-        # get url for the zenodo GHOST repository 
-        if self.download_instance.ghost_version not in zenodo_dois:
-            msg = (
-                f"Current GHOST version ({self.download_instance.ghost_version}) is not available on Zenodo. "
-                f"Please choose one of the available versions: {tuple(zenodo_dois.keys())}."
-            )
-            show_message(self.download_instance, msg, deactivate=deactivate_warning)
-            return False
         
         # get the url for the current GHOST version
         url = zenodo_dois[self.download_instance.ghost_version]
@@ -111,18 +111,13 @@ class Zenodo:
         if not hasattr(self,"fetched_networks"): 
             if not self.fetch_zenodo_networks(initial_check):
                 return
-            
-        # get cleaned networks
-        all_networks = copy.deepcopy(self.download_instance.ghost_available_networks)
-        all_networks.remove('EBAS')
-            
-        # get networks without zenodo artifact
-        self.available_networks = {}
-        for clean_network in all_networks:
-            for fetched_network, url in self.fetched_networks.items():
-                if clean_network in fetched_network and clean_network != fetched_network:
-                    fetched_network = '_'.join(fetched_network.split('_')[:-1])
-                    self.available_networks[fetched_network] = url
+        
+        # obtain artifact and clean network lists
+        self.available_networks_artifact = list(self.artifact_mapping.values())
+        self.available_networks = list(self.artifact_mapping.keys())     
+
+        # get the GHOST artifact value for the corresponding network
+        artifact_network = self.artifact_mapping[network]
 
         # if not valid network, next
         if network not in self.available_networks:
@@ -131,7 +126,7 @@ class Zenodo:
             return
 
         # get url to download the zip file for the current network
-        zip_file_urls = self.available_networks[network]
+        zip_file_urls = self.fetched_networks[artifact_network]
 
         # get resolution and/or species combinations
         # network

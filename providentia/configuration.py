@@ -265,10 +265,10 @@ class ProvConfiguration:
             from GHOST_standards import standard_QA_name_to_QA_code
             from GHOST_standards import standard_networks
             from GHOST_standards import standard_temporal_resolutions
-            from GHOST_standards import EBAS_network_priorities
             
             # get GHOST networks
-            self.read_instance.ghost_available_networks = list(standard_networks.keys()) + EBAS_network_priorities
+            self.read_instance.ghost_available_networks = list(standard_networks.keys())
+            self.read_instance.ghost_available_networks.append('CPCB')
 
             # get GHOST resolutions
             self.read_instance.ghost_available_resolutions = [resolution_dict['temporal_resolution_path'] for resolution_dict in standard_temporal_resolutions.values()]
