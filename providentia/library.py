@@ -1250,7 +1250,8 @@ class Providentia:
         forecast_models = None
         if hasattr(self, 'forecast'): 
             if len(self.forecast) != 0:
-                forecast_models = copy.deepcopy(self.experiments)
+                if self.experiments:
+                    forecast_models = copy.deepcopy(self.experiments)
             
         # initialise default configuration variables
         # modified by passed arguments, if given
@@ -1591,6 +1592,12 @@ class Providentia:
         # update available models for selected fields
         get_valid_models(self, self.start_date, self.end_date, self.resolution,
                             self.network, self.species)
+        
+        # reset configuration variables in case new data has been downloaded
+        self.valid_config = self.set_config(**self.kwargs)
+        self.data_labels = [self.observations_data_label] + list(self.experiments.values())
+        self.data_labels_raw = [self.observations_data_label] + list(self.experiments.keys())
+        self.networkspecies = ['{}|{}'.format(network,speci) for network, speci in zip(self.network, self.species)]
             
         # read data
         self.read()  
