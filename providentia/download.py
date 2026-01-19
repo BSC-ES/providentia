@@ -19,7 +19,7 @@ from .actris import Actris
 from .cams import (Cams, cams_options)
 from providentia.auxiliar import CURRENT_PATH, join
 from .configuration import ProvConfiguration, load_conf
-from .read_aux import check_for_ghost
+from .read_aux import check_for_ghost, generate_file_trees
 from .warnings_prv import show_message
 from .zenodo import Zenodo
 
@@ -300,6 +300,9 @@ class Download(object):
             if self.ssh is not None:
                 self.ssh.close() 
                 self.sftp.close()
+
+        # update filetrees
+        generate_file_trees(self)
 
     def connect(self): 
         """Establish an SSH connection to a remote BSC machine for downloading data."""
