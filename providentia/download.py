@@ -201,6 +201,10 @@ class Download(object):
 
                         # initialise the Zenodo object if user chose a Zenodo download
                         if self.dl_ghost_source == 'zenodo':
+                            # warn the user about Zenodo download speed
+                            msg = "Downloading from Zenodo can take a little time, please be patient."
+                            show_message(self, msg)
+                            
                             self.zenodo = Zenodo(self)        
 
                     # get all networks if wildcard is passed
