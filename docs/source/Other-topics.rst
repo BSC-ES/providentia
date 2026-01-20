@@ -7,6 +7,7 @@ Other topics
 
    ADS.md
    Create-your-own-data-network.md
+   Available-species.md
    Multispecies-filtering.md
    QA-filtering.md
    Redirecting-output-to-a-file.md
