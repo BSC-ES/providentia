@@ -52,7 +52,7 @@ Only the following configuration fields are used during download. All required f
 
 | Variable        | Description                              | Required | Default |
 |-----------------|------------------------------------------|----------|---------|
-| `ghost_version`         | GHOST version used when a GHOST network is selected | No | Latest |
+| `ghost_version`         | GHOST version used when a GHOST network is selected | No | 1.5 |
 | `network`, `observation`, `framework` | Observation network to use               | Yes      | —       |
 | `model`, `models`, `experiments`, `experiment` |  Model ID(s) to be interpolated           | No       | —       |
 | `domain` | Domain of the model, can be indicated in the model field (e.g. `regional`, `global`) | No | — |

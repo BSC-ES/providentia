@@ -42,7 +42,7 @@ During the interpolation step, only a specific set of configuration fields is us
 
 | Variable | Description | Required | Default |
 |--------|------------|----------|---------|
-| `ghost_version` | GHOST version used when a GHOST network is selected | No | Latest |
+| `ghost_version` | GHOST version used when a GHOST network is selected | No | 1.5 |
 | `start_date` | Start date of interpolation (`YYYYMM`) | Yes | — |
 | `end_date` | End date of interpolation (`YYYYMM`) | Yes | — |
 | `model`, `models`, `experiments`, `experiment` | Model ID(s) to be interpolated | Yes | — |
