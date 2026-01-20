@@ -36,7 +36,7 @@ or
 
 Answer `n` to the prompt:
 
-_"Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded) ([y]/n)"_
+_"Model data was detected in the configuration file. Do you want to download the interpolated version? (Otherwise, the non-interpolated model data will be downloaded)"_
 
 ## 1. CAMS European Air Quality Forecasts
 
