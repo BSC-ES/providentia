@@ -49,12 +49,6 @@ class Zenodo:
         ----------
         deactivate_warning : bool, optional
             If True, suppresses user-facing warnings.
-
-        Returns
-        -------
-        bool
-            True if the available networks were successfully retrieved,
-            False otherwise.
         """
         
         # get the url for the current GHOST version
@@ -73,14 +67,12 @@ class Zenodo:
                 self.fetched_networks[zip_network] = zip_file_url
 
         if self.fetched_networks == {}:
-            msg = (
-                "GHOST networks could not be retrieved from Zenodo at this time. "
-                "This may be a temporary issue. Please execute the command again."
+            error = (
+                "Error: Unable to retrieve GHOST networks from Zenodo this time. "
+                "This may be a temporary issue. Please try running Providentia again later."
             )
-            show_message(self.download_instance, msg, deactivate=deactivate_warning)
-            return False
-
-        return True
+            self.download_instance.logger.error(error)
+            sys.exit(1)
 
     def download_ghost_network_zenodo(self, network, initial_check, files_to_download=None):
         """
@@ -108,9 +100,8 @@ class Zenodo:
             self.download_instance.logger.info(f"\nDownloading GHOST {network} network data from Zenodo...")
 
         # if first time reading a GHOST network, get current zips urls in zenodo page
-        if not hasattr(self,"fetched_networks"): 
-            if not self.fetch_zenodo_networks(initial_check):
-                return
+        if not hasattr(self, "fetched_networks"): 
+            self.fetch_zenodo_networks()
         
         # obtain artifact and clean network lists
         self.available_networks_artifact = list(self.artifact_mapping.values())
