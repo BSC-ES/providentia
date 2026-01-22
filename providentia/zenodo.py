@@ -3,12 +3,13 @@
 import os
 import shutil
 import sys
-import tarfile
+import time
 
-from remotezip import RemoteZip
 import requests
+import tarfile
 from tqdm import tqdm
 import yaml 
+from zipfile import ZipFile
 
 from providentia.auxiliar import CURRENT_PATH, join
 from .warnings_prv import show_message
@@ -33,46 +34,131 @@ class Zenodo:
 
         # get url for the zenodo GHOST repository 
         if self.download_instance.ghost_version not in zenodo_dois:
-            error = (f"Current GHOST version ({self.download_instance.ghost_version}) is not available on Zenodo. "
+            error = (f"Error: Current GHOST version ({self.download_instance.ghost_version}) is not available on Zenodo. "
                     f"Please choose one of the available versions: {tuple(zenodo_dois.keys())}.")            
-            self.logger.error(error)
+            self.download_instance.logger.error(error)
             sys.exit(1)
 
         # load zenodo artifact mapping
         self.artifact_mapping = yaml.safe_load(open(join(PROVIDENTIA_ROOT, 'settings', 'internal', 'zenodo', f'zenodo_{self.download_instance.ghost_version}.yaml')))
 
-    def fetch_zenodo_networks(self, deactivate_warning=False):
+        # create session
+        self.session = requests.Session()
+        self.session.headers.update({
+            "User-Agent": "Providentia/3.0 (contact: paula.serrano@bsc.es)",
+            "Accept": "application/json",
+        })
+
+    def get_zip(self):
         """
-        Retrieve available GHOST network names and download URLs from Zenodo.
+        Perform a HTTP GET request against the Zenodo REST API.
+
+        The response content is read in chunks using 
+        `Response.iter_content`, which is useful for large files.
+
+        Returns
+        -------
+        requests.Response
+            HTTP response object for the request.
+        """
+
+        # initialize retry and timing controls
+        retries = 0
+        min_interval = 0.2
+        last_request = 0
+
+        # keep trying until request succeeds or fails definitively
+        while True:
+            # respect the minimum interval between requests
+            delta = time.time() - last_request
+            if delta < min_interval:
+                time.sleep(min_interval - delta)
+
+            # send GET request with streaming enabled
+            resp = self.session.get(self.url, stream=True, timeout=30)
+            last_request = time.time()
+
+            # if request succeeds, return the response
+            if resp.status_code == 200:
+                return resp
+            
+            # if server asks us to wait, retry after sleeping
+            if resp.status_code in (429, 502, 503) and retries < 3:
+                retries += 1
+                time.sleep(2 ** retries)
+                continue
+            
+            # for other errors, print response content and raise exception
+            print(f"Error {resp.status_code}: {resp.text}")
+            resp.raise_for_status() 
+
+    def download_zip(self, network, artifact_network):
+        """
+        Download the ZIP file from Zenodo in chunks and a 
+        tqdm progress bar shows the download progress.
 
         Parameters
         ----------
-        deactivate_warning : bool, optional
-            If True, suppresses user-facing warnings.
+        network : str
+            Name of the network to download.
+        artifact_network : str
+            Name of the network to download with the Zenodo artifact.
+
+        Returns
+        -------
+        zip_path : str
+            Absolute path to the zip file.
+        """
+
+        # get the record id for the current GHOST version
+        record_id = zenodo_dois[self.download_instance.ghost_version]  
+
+        # get url to download the zip file for the current network
+        self.url = f"https://zenodo.org/api/records/{record_id}/files/{artifact_network}.zip/content"
+
+        # get path were zip file is going to get downloaded
+        zip_path = f"{self.temp_dir}/{network}.zip"
+
+        # open streaming GET request to the file
+        with self.get_zip() as r:
+            # extract total file size from headers for progress bar
+            total = int(r.headers.get("Content-Length", 0))
+
+            # create the folder if it does not exist
+            os.makedirs(os.path.dirname(zip_path), exist_ok=True)
+
+            # open the file and create the tqdm object
+            with open(zip_path, "wb") as f, tqdm(
+                total=total, unit="B", desc=f"    Downloading {network}.zip", unit_scale=True) as pbar:
+                # write the file content in chunks (64 KB each)
+                for chunk in r.iter_content(chunk_size=65536):
+                    if chunk:
+                        f.write(chunk)
+                        pbar.update(len(chunk))
+
+        return zip_path
+
+    def extract_zip(self, network, zip_path):
+        """
+        Extract the contents of a ZIP archive into a temporary directory.
+
+        Parameters
+        ----------
+        network : str
+            Name of the network to download.
+        zip_path : str
+            Absolute path to the zip file.
         """
         
-        # get the url for the current GHOST version
-        url = zenodo_dois[self.download_instance.ghost_version]
+        # create directory where the contents of the zip file will go to
+        extracted_zip_path = f"{self.temp_dir}/{network}"
 
-        # initialize dictionary to store possible networks
-        self.fetched_networks = {} 
+        # open the ZIP file
+        with ZipFile(zip_path, "r") as zipf:            
+            zipf.extractall(extracted_zip_path)
 
-        response = requests.get(url)
-        
-        # fill network dictionary with its corresponding zip url
-        for line in response.text.split(">"):
-            if '<link rel="alternate" type="application/zip" href=' in line:
-                zip_file_url = line.split('href="')[-1][:-1]
-                zip_network = line.split("/")[-1][:-5]
-                self.fetched_networks[zip_network] = zip_file_url
-
-        if self.fetched_networks == {}:
-            error = (
-                "Error: Unable to retrieve GHOST networks from Zenodo this time. "
-                "This may be a temporary issue. Please try running Providentia again later."
-            )
-            self.download_instance.logger.error(error)
-            sys.exit(1)
+    def extract_tar(self):
+        pass
 
     def download_ghost_network_zenodo(self, network, initial_check, files_to_download=None):
         """
@@ -98,26 +184,28 @@ class Zenodo:
             # print current_network
             self.download_instance.logger.info('\n'+'-'*40)
             self.download_instance.logger.info(f"\nDownloading GHOST {network} network data from Zenodo...")
-
-        # if first time reading a GHOST network, get current zips urls in zenodo page
-        if not hasattr(self, "fetched_networks"): 
-            self.fetch_zenodo_networks()
         
-        # obtain artifact and clean network lists
-        self.available_networks_artifact = list(self.artifact_mapping.values())
-        self.available_networks = list(self.artifact_mapping.keys())     
-
-        # get the GHOST artifact value for the corresponding network
-        artifact_network = self.artifact_mapping[network]
-
-        # if not valid network, next
-        if network not in self.available_networks:
-            msg = f"There is no data available in Zenodo for {network} network for the current GHOST version ({self.download_instance.ghost_version})."
+        # exit if network is not uploaded
+        if network not in self.artifact_mapping.keys():
+            msg = f"Network '{network}' is not available for GHOST version {self.download_instance.ghost_version} on Zenodo."
             show_message(self.download_instance, msg, deactivate=initial_check)
             return
 
-        # get url to download the zip file for the current network
-        zip_file_urls = self.fetched_networks[artifact_network]
+        # get the GHOST artifact value for the corresponding network
+        artifact_network = self.artifact_mapping[network]    
+
+        # create temporal dir to store the zip file and its tar components
+        self.temp_dir = os.path.join(self.download_instance.ghost_root, ".temp")
+        os.makedirs(self.temp_dir, exist_ok=True)
+
+        # download zip on the temporal directory
+        zip_path = self.download_zip(network, artifact_network)
+
+        # extract zip on the temporal directory
+        self.extract_zip(network, zip_path)
+
+        # extract tar on the temporal directory
+        self.extract_tar()
 
         # get resolution and/or species combinations
         # network
@@ -135,7 +223,7 @@ class Zenodo:
 
         # get all the species tar files which fulfill the combination condition
         res_spec_dir_tail = []
-        with RemoteZip(zip_file_urls) as zip:
+        with RemoteZip(zip_file_url) as zip:
             for combi in res_spec_combinations:
                 res_spec_dir_tail += list(filter(lambda x: combi in x, zip.namelist()))
             res_spec_dir_tail = list(filter(lambda x: x[-7:] == '.tar.xz', res_spec_dir_tail))
@@ -166,15 +254,15 @@ class Zenodo:
                         self.download_instance.logger.info(f"\n  - {local_dir}")
 
                     # create temporal dir to store the middle tar file with its directories
-                    temp_dir = join(self.download_instance.ghost_root,'.temp')
-                    if not os.path.exists(temp_dir):
-                        os.mkdir(temp_dir)
+                    self.temp_dir = join(self.download_instance.ghost_root,'.temp')
+                    if not os.path.exists(self.temp_dir):
+                        os.mkdir(self.temp_dir)
 
-                    zip.extract(remote_dir_tail,temp_dir)
+                    zip.extract(remote_dir_tail,self.temp_dir)
                     
                     # get path and the name of the directory of the tar file
                     tar_path = join(self.download_instance.ghost_root, network, str(self.download_instance.ghost_version), *remote_dir_tail.split("/")[1:])
-                    temp_path = join(temp_dir,remote_dir_tail)
+                    temp_path = join(self.temp_dir,remote_dir_tail)
 
                     # extract nc file from tar file
                     with tarfile.open(temp_path) as tar_file:
