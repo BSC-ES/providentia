@@ -117,7 +117,7 @@ class Zenodo:
         self.url = f"https://zenodo.org/api/records/{record_id}/files/{artifact_network}.zip/content"
 
         # get path were zip file is going to get downloaded
-        zip_path = f"{self.temp_dir}/{network}.zip"
+        zip_path = join(self.temp_dir, f"{network}.zip")
 
         # open streaming GET request to the file
         with self.get_zip() as r:
@@ -150,12 +150,9 @@ class Zenodo:
             Absolute path to the zip file.
         """
         
-        # create directory where the contents of the zip file will go to
-        extracted_zip_path = f"{self.temp_dir}/{network}"
-
         # open the ZIP file
         with ZipFile(zip_path, "r") as zipf:            
-            zipf.extractall(extracted_zip_path)
+            zipf.extractall(self.temp_dir)
 
     def extract_tar(self):
         pass
