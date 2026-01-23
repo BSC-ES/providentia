@@ -1,0 +1,38 @@
+{
+  "EBAS-COLOSSAL": {
+    "daily": {
+      "pm2p5oc": [
+        "pm2p5oc_201801.nc",
+        "pm2p5oc_201802.nc",
+        "pm2p5oc_201803.nc"
+      ],
+      "pm2p5c": [
+        "pm2p5c_201801.nc",
+        "pm2p5c_201802.nc",
+        "pm2p5c_201803.nc"
+      ],
+      "pm2p5ec": [
+        "pm2p5ec_201801.nc",
+        "pm2p5ec_201802.nc",
+        "pm2p5ec_201803.nc"
+      ]
+    },
+    "monthly": {
+      "pm2p5oc": [
+        "pm2p5oc_201801.nc",
+        "pm2p5oc_201802.nc",
+        "pm2p5oc_201803.nc"
+      ],
+      "pm2p5c": [
+        "pm2p5c_201801.nc",
+        "pm2p5c_201802.nc",
+        "pm2p5c_201803.nc"
+      ],
+      "pm2p5ec": [
+        "pm2p5ec_201801.nc",
+        "pm2p5ec_201802.nc",
+        "pm2p5ec_201803.nc"
+      ]
+    }
+  }
+}
