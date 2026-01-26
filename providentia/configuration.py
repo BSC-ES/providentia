@@ -1419,6 +1419,13 @@ class ProvConfiguration:
                 self.read_instance.logger.error(error)
                 sys.exit(1)
 
+        # check end date is bigger than start date
+        if self.read_instance.start_date != '*' and self.read_instance.end_date != '*':
+            if self.read_instance.start_date >= self.read_instance.end_date:
+                error = f'Error: Start date ({self.read_instance.start_date}) exceeds end date ({self.read_instance.end_date}).'
+                self.read_instance.logger.error(error)
+                sys.exit(1)
+
         # create empty directories for the observations and models
         if MACHINE == "local":
             for path in [self.read_instance.nonghost_root, self.read_instance.ghost_root, self.read_instance.mod_root, self.read_instance.mod_to_interp_root]:
