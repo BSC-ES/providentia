@@ -12,7 +12,17 @@ Currently, two versions of GHOST uploaded on Zenodo are available for download:
 - **[1.5.1](https://zenodo.org/records/15075961)**
    
 ## How to enable Zenodo download
-Answer `n` to the prompt:  
+
+Make sure to set:
+
+```ini
+dl_ghost_source = zenodo
+```
+
+or
+
+Answer `n` to the prompt: 
+
 _"Do you want to download from the BSC remote machine? (Otherwise, GHOST data will be retrieved from Zenodo)"_
 
 ## Available networks

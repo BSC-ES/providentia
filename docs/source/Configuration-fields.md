@@ -11,7 +11,7 @@ Some of these fields are required depending on the mode. If a parameter required
 | Parameter | Required in | Description |
 | ------ | ------ | ------ |
 | network | Dashboard, Report, Interpolation | Network you want to load observations from. Can be multiple (e.g. `CAPMoN, EBAS`). Adding a wild card (\*) is going to expand to certain variables (vconcaerobin* → vconcaerobin1, vconcaerobin2, etc.). |
-| species | All modes | Species to load. Can be multiple (e.g. `sconco3, sconcno2`). |
+| species | All modes | Species to load. Can be multiple (e.g. `sconco3, sconcno2`). Dictated by GHOST. See the [Available Species](Available-species) page for options. |
 | resolution | All modes | Temporal resolution of the observations you want to load (e.g. `3hourly`). |
 | start_date | All modes | Comparison start date in YYYYMMDD format (e.g. `20170101`). |
 | end_date | All modes | Comparison end date in YYYYMMDD format (e.g. `20180601`). |

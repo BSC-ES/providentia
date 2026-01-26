@@ -11,8 +11,8 @@ Providentia has a variety of use modes:
 * [Interpolation](Interpolation), to spatially colocate model output with observational stations
 * [Dashboard](Dashboard), for interactive quick-look visualisations 
 * [Report](Report), for more exhaustive evaluations, generating PDF reports
-* [Download](Download), to automatically retrieve and format observational and model datasets
-* [Library](Library), for use of Providentia's backend functions in personal scripts or [Jupyter notebooks](Notebooks)
+* [Download](Download-mode), to automatically retrieve and format observational and model datasets
+* [Library](Library-mode), for use of Providentia's backend functions in personal scripts or [Jupyter notebooks](Notebooks)
 
 ## Getting started
 
