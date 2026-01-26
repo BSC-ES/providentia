@@ -917,7 +917,7 @@ class ModelInterpolation(object):
                     failed_files += 1
                     continue
 
-                # for forceast data, get valid indices of file time per forecast day
+                # for forecast data, get valid indices of file time per forecast day
                 if self.forecast:
 
                     # get indices of file time within each forecast day (excluding spinup timsesteps)
