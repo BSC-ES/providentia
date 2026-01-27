@@ -136,12 +136,6 @@ class Cams(object):
             End date of the valid CAMS download period.
         """
 
-        # check whether end date is bigger than start date, if not, return
-        if int(self.download_instance.start_date) >= int(self.download_instance.end_date):
-            msg = f'Start date ({self.download_instance.start_date}) exceeds end date ({self.download_instance.end_date}).'
-            show_message(self.download_instance, msg, print=True)
-            return None, None
-
         # get minimum and maximum possible dates
         min_start_date, max_end_date = self.fetch_cams_dates(url, cams_dict)
         
